@@ -32,7 +32,7 @@ const MyDogs: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DogList dogs={females} />
+              <DogList dogsList={females} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -46,7 +46,7 @@ const MyDogs: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DogList dogs={males} />
+              <DogList dogsList={males} />
             </CardContent>
           </Card>
         </TabsContent>

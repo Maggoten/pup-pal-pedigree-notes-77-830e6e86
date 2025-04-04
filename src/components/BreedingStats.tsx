@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Paw, Heart, CalendarCheck, Users } from 'lucide-react';
+import { Dog, Heart, CalendarCheck, Users } from 'lucide-react';
 import { useDogs } from '@/context/DogsContext';
 
 const BreedingStats = () => {
@@ -28,7 +28,7 @@ const BreedingStats = () => {
     {
       title: "Total Dogs",
       value: totalDogs,
-      icon: Paw,
+      icon: Dog,
       color: "text-primary"
     },
     {
