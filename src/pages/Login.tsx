@@ -1,37 +1,12 @@
+
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-import { Dog, UserPlus, LogIn } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Checkbox } from '@/components/ui/checkbox';
-
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-const registrationSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  agreeToTerms: z.boolean().refine(val => val === true, {
-    message: "You must agree to the terms and conditions"
-  })
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
-type RegistrationFormValues = z.infer<typeof registrationSchema>;
+import AuthTabs from '@/components/auth/AuthTabs';
+import PaymentForm from '@/components/auth/PaymentForm';
+import { LoginFormValues } from '@/components/auth/LoginForm';
+import { RegistrationFormValues } from '@/components/auth/RegistrationForm';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -39,26 +14,6 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
-
-  const loginForm = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
-  const registrationForm = useForm<RegistrationFormValues>({
-    resolver: zodResolver(registrationSchema),
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      address: '',
-      email: '',
-      password: '',
-      agreeToTerms: false,
-    },
-  });
 
   const handleLogin = async (values: LoginFormValues) => {
     setIsLoading(true);
@@ -116,240 +71,17 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       {!showPayment ? (
-        <Card className="w-full max-w-md shadow-lg">
-          <CardHeader className="space-y-1 text-center">
-            <div className="flex justify-center mb-2">
-              <Dog className="h-12 w-12 text-primary" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-foreground">Breeding Journey</CardTitle>
-            <CardDescription>
-              Your companion for dog breeding management
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent>
-            <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="login">
-                <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
-                    <FormField
-                      control={loginForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input placeholder="your@email.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={loginForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <Button 
-                      className="w-full" 
-                      type="submit" 
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Logging in..." : "Login"}
-                      <LogIn className="ml-2 h-4 w-4" />
-                    </Button>
-                  </form>
-                </Form>
-              </TabsContent>
-              
-              <TabsContent value="register">
-                <Form {...registrationForm}>
-                  <form onSubmit={registrationForm.handleSubmit(handleRegistration)} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={registrationForm.control}
-                        name="firstName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>First Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="John" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={registrationForm.control}
-                        name="lastName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Last Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Doe" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <FormField
-                      control={registrationForm.control}
-                      name="address"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Address</FormLabel>
-                          <FormControl>
-                            <Input placeholder="123 Main St, City" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={registrationForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input placeholder="your@email.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={registrationForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={registrationForm.control}
-                      name="agreeToTerms"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-secondary/50">
-                          <FormControl>
-                            <input
-                              type="checkbox"
-                              checked={field.value}
-                              onChange={field.onChange}
-                              className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Accept terms and conditions</FormLabel>
-                            <FormDescription>
-                              By creating an account, you agree to our Terms of Service and Privacy Policy. 
-                              Your membership will be charged $2.99 monthly. 
-                              You can end your subscription at any time.
-                            </FormDescription>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <Button 
-                      className="w-full" 
-                      type="submit"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Processing..." : "Continue to Payment"}
-                      <UserPlus className="ml-2 h-4 w-4" />
-                    </Button>
-                  </form>
-                </Form>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+        <AuthTabs 
+          onLogin={handleLogin}
+          onRegister={handleRegistration}
+          isLoading={isLoading}
+        />
       ) : (
-        <Card className="w-full max-w-md shadow-lg">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold">Payment Information</CardTitle>
-            <CardDescription>
-              Complete your subscription - $2.99/month
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="cardNumber">Card Number</Label>
-                <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="expiry">Expiration Date</Label>
-                  <Input id="expiry" placeholder="MM/YY" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cvc">CVC</Label>
-                  <Input id="cvc" placeholder="123" type="password" />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="nameOnCard">Name on Card</Label>
-                <Input id="nameOnCard" placeholder="John Doe" />
-              </div>
-              
-              <div className="rounded-md bg-secondary p-4 text-sm">
-                <p className="font-medium">Subscription Summary:</p>
-                <p>Monthly Membership: $2.99</p>
-                <p>Your card will be charged monthly until you cancel.</p>
-              </div>
-            </div>
-          </CardContent>
-          
-          <CardFooter className="flex flex-col space-y-2">
-            <Button 
-              className="w-full" 
-              onClick={handlePayment}
-              disabled={isLoading}
-            >
-              {isLoading ? "Processing payment..." : "Pay $2.99 and Complete Registration"}
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={() => setShowPayment(false)}
-              disabled={isLoading}
-            >
-              Back to Registration
-            </Button>
-          </CardFooter>
-        </Card>
+        <PaymentForm
+          onSubmit={handlePayment}
+          onBack={() => setShowPayment(false)}
+          isLoading={isLoading}
+        />
       )}
     </div>
   );
