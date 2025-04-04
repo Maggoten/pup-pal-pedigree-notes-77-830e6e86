@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDogs, DogsProvider } from '@/context/DogsContext';
 import DogList from '@/components/DogList';
-import DogDetails from '@/components/DogDetails';
+import DogDetails from '@/components/dogs/DogDetails';
 
 const MyDogsContent: React.FC = () => {
   const { dogs, activeDog } = useDogs();
