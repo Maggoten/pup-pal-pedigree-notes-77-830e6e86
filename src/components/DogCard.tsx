@@ -21,8 +21,11 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
     return `${years}y ${months}m`;
   };
 
-  // Use the existing placeholder.svg without modifying it
-  const dogImage = dog.image || '/placeholder.svg';
+  // Create a constant for the placeholder path rather than hardcoding it multiple times
+  const PLACEHOLDER_IMAGE = '/placeholder.svg';
+  
+  // Use the dog's image or fall back to placeholder without modifying the placeholder
+  const dogImage = dog.image || PLACEHOLDER_IMAGE;
 
   return (
     <Card className="dog-card w-full h-full overflow-hidden" onClick={() => onClick(dog)}>
@@ -35,7 +38,7 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
             onError={(e) => {
               // If image fails to load, set to placeholder
               const target = e.target as HTMLImageElement;
-              target.src = '/placeholder.svg';
+              target.src = PLACEHOLDER_IMAGE;
             }}
           />
           <div className="absolute top-2 right-2">
