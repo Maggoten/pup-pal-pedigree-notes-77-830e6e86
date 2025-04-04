@@ -3,7 +3,7 @@ import React from 'react';
 import { Dog } from '@/context/DogsContext';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Heart } from 'lucide-react';
+import { Calendar, Heart, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface DogCardProps {
@@ -26,6 +26,7 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
   
   // Determine which image to show (dog's image or placeholder)
   const imageSrc = dog.image || PLACEHOLDER_IMAGE_PATH;
+  const isPlaceholder = !dog.image || dog.image === PLACEHOLDER_IMAGE_PATH;
 
   // Handle image loading error
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -45,6 +46,11 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
             className="object-cover w-full h-full"
             onError={handleImageError}
           />
+          {isPlaceholder && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/5">
+              <Image className="h-12 w-12 text-muted-foreground/40" />
+            </div>
+          )}
           <div className="absolute top-2 right-2">
             <Badge className={dog.gender === 'male' ? 'bg-blue-500' : 'bg-rose-400'}>
               {dog.gender === 'male' ? 'Male' : 'Female'}
