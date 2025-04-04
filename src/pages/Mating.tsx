@@ -2,13 +2,15 @@
 import React, { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Info, PawPrint } from 'lucide-react';
+import { Calendar, Info, PawPrint, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { useDogs } from '@/context/DogsContext';
 import { calculateUpcomingHeats, UpcomingHeat } from '@/utils/heatCalculator';
-import { format } from 'date-fns';
+import { format, parseISO, isBefore } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { plannedLitterService } from '@/services/PlannedLitterService';
+import { PlannedLitter } from '@/types/breeding';
 
 const MatingTips = [
   "Wait until the bitch is in standing heat before mating",
@@ -18,13 +20,46 @@ const MatingTips = [
   "Keep both dogs calm and relaxed before and after mating"
 ];
 
+interface RecentMating {
+  id: string;
+  maleName: string;
+  femaleName: string;
+  date: Date;
+}
+
 const Mating: React.FC = () => {
   const { dogs } = useDogs();
   const [upcomingHeats, setUpcomingHeats] = useState<UpcomingHeat[]>([]);
+  const [recentMatings, setRecentMatings] = useState<RecentMating[]>([]);
   const navigate = useNavigate();
   
   useEffect(() => {
     setUpcomingHeats(calculateUpcomingHeats(dogs));
+    
+    // Load planned litters and extract mating dates
+    const plannedLitters = plannedLitterService.loadPlannedLitters();
+    const matings: RecentMating[] = [];
+    
+    plannedLitters.forEach(litter => {
+      if (litter.matingDates && litter.matingDates.length > 0) {
+        litter.matingDates.forEach(dateStr => {
+          const matingDate = parseISO(dateStr);
+          // Only include matings that have already occurred
+          if (isBefore(matingDate, new Date())) {
+            matings.push({
+              id: `${litter.id}-${dateStr}`,
+              maleName: litter.maleName,
+              femaleName: litter.femaleName,
+              date: matingDate
+            });
+          }
+        });
+      }
+    });
+    
+    // Sort by date, most recent first
+    matings.sort((a, b) => b.date.getTime() - a.date.getTime());
+    setRecentMatings(matings);
   }, [dogs]);
   
   const handleAddMatingClick = () => {
@@ -79,12 +114,33 @@ const Mating: React.FC = () => {
             <CardDescription>Recent breeding attempts</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8">
-              <Info className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No Recent Matings</h3>
-              <p className="text-muted-foreground mb-4">Record your breeding attempts</p>
-              <Button onClick={handleAddMatingClick}>Log Mating</Button>
-            </div>
+            {recentMatings.length > 0 ? (
+              <div className="space-y-3">
+                {recentMatings.map((mating) => (
+                  <div
+                    key={mating.id}
+                    className="flex items-start gap-3 p-3 rounded-lg border bg-purple-50 border-purple-200"
+                  >
+                    <div className="mt-0.5">
+                      <Heart className="h-5 w-5 text-purple-500" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">{mating.maleName} × {mating.femaleName}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Mated on {format(mating.date, 'PPP')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Info className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">No Recent Matings</h3>
+                <p className="text-muted-foreground mb-4">Record your breeding attempts</p>
+                <Button onClick={handleAddMatingClick}>Log Mating</Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
