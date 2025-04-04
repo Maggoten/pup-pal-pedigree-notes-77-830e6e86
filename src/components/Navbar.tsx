@@ -1,14 +1,27 @@
 
 import React from 'react';
-import { Dog, FileText, HeartPulse, Users, Settings, PawPrint, Calendar } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Dog, FileText, HeartPulse, Settings, PawPrint, Calendar, LogOut } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/components/ui/use-toast';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+  
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out."
+    });
+    navigate('/login');
   };
   
   return (
@@ -59,6 +72,9 @@ export const Navbar: React.FC = () => {
         </nav>
         
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+            <LogOut className="h-5 w-5" />
+          </Button>
           <Button variant="ghost" size="icon">
             <Settings className="h-5 w-5" />
           </Button>

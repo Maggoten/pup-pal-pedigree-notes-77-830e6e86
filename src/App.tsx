@@ -11,28 +11,36 @@ import PlannedLitters from "./pages/PlannedLitters";
 import Mating from "./pages/Mating";
 import Pregnancy from "./pages/Pregnancy";
 import MyLitters from "./pages/MyLitters";
+import Login from "./pages/Login";
+import AuthGuard from "./components/AuthGuard";
+import { AuthProvider } from "./hooks/useAuth";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/my-dogs" element={<MyDogs />} />
-          <Route path="/planned-litters" element={<PlannedLitters />} />
-          <Route path="/mating" element={<Mating />} />
-          <Route path="/pregnancy" element={<Pregnancy />} />
-          <Route path="/my-litters" element={<MyLitters />} />
-          <Route path="/puppies" element={<MyLitters />} /> {/* Redirect from old URL */}
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthGuard>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/my-dogs" element={<MyDogs />} />
+              <Route path="/planned-litters" element={<PlannedLitters />} />
+              <Route path="/mating" element={<Mating />} />
+              <Route path="/pregnancy" element={<Pregnancy />} />
+              <Route path="/my-litters" element={<MyLitters />} />
+              <Route path="/puppies" element={<MyLitters />} /> {/* Redirect from old URL */}
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthGuard>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

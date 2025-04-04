@@ -17,6 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { DogsProvider, useDogs } from '@/context/DogsContext';
+import { Switch } from '@/components/ui/switch';
 
 interface PlannedLitter {
   id: string;
@@ -27,6 +28,8 @@ interface PlannedLitter {
   expectedHeatDate: string;
   matingDates?: string[];
   notes: string;
+  externalMale?: boolean;
+  externalMaleBreed?: string;
 }
 
 // Sample data
@@ -43,12 +46,25 @@ const samplePlannedLitters: PlannedLitter[] = [
 ];
 
 const formSchema = z.object({
-  maleId: z.string({ required_error: "Sire is required" }),
+  maleId: z.string().optional(),
   femaleId: z.string({ required_error: "Dam is required" }),
   expectedHeatDate: z.date({
     required_error: "Expected heat date is required",
   }),
   notes: z.string().optional(),
+  externalMale: z.boolean().default(false),
+  externalMaleName: z.string().optional(),
+  externalMaleBreed: z.string().optional(),
+}).refine(data => {
+  // If externalMale is true, externalMaleName is required
+  if (data.externalMale) {
+    return !!data.externalMaleName;
+  }
+  // If externalMale is false, maleId is required
+  return !!data.maleId;
+}, {
+  message: "Please select a male dog or provide external dog details",
+  path: ["maleId"],
 });
 
 const PlannedLittersContent: React.FC = () => {
@@ -67,17 +83,41 @@ const PlannedLittersContent: React.FC = () => {
       maleId: "",
       femaleId: "",
       notes: "",
+      externalMale: false,
     }
   });
   
+  // Watch for changes to externalMale to update form logic
+  const isExternalMale = form.watch("externalMale");
+  
   const handleAddPlannedLitter = (values: z.infer<typeof formSchema>) => {
-    const male = dogs.find(dog => dog.id === values.maleId);
-    const female = dogs.find(dog => dog.id === values.femaleId);
+    let maleName: string;
+    let maleId: string;
     
-    if (!male || !female) {
+    if (values.externalMale) {
+      // For external male, use the provided name
+      maleName = values.externalMaleName || "Unknown Sire";
+      maleId = `external-${Date.now()}`;
+    } else {
+      // For own male, get the name from dogs
+      const male = dogs.find(dog => dog.id === values.maleId);
+      if (!male) {
+        toast({
+          title: "Error",
+          description: "Selected male dog not found.",
+          variant: "destructive"
+        });
+        return;
+      }
+      maleName = male.name;
+      maleId = male.id;
+    }
+    
+    const female = dogs.find(dog => dog.id === values.femaleId);
+    if (!female) {
       toast({
         title: "Error",
-        description: "Selected dogs not found.",
+        description: "Selected female dog not found.",
         variant: "destructive"
       });
       return;
@@ -85,12 +125,14 @@ const PlannedLittersContent: React.FC = () => {
     
     const newLitter: PlannedLitter = {
       id: Date.now().toString(),
-      maleId: values.maleId,
+      maleId: maleId,
       femaleId: values.femaleId,
-      maleName: male.name,
+      maleName: maleName,
       femaleName: female.name,
       expectedHeatDate: format(values.expectedHeatDate, 'yyyy-MM-dd'),
-      notes: values.notes || ''
+      notes: values.notes || '',
+      externalMale: values.externalMale,
+      externalMaleBreed: values.externalMaleBreed,
     };
     
     setPlannedLitters([...plannedLitters, newLitter]);
@@ -99,7 +141,7 @@ const PlannedLittersContent: React.FC = () => {
     
     toast({
       title: "Planned Litter Added",
-      description: `${male.name} × ${female.name} planned breeding added successfully.`
+      description: `${maleName} × ${female.name} planned breeding added successfully.`
     });
   };
   
@@ -141,43 +183,15 @@ const PlannedLittersContent: React.FC = () => {
               Add Planned Litter
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>Add Planned Litter</DialogTitle>
               <DialogDescription>
-                Plan a future breeding between two of your dogs
+                Plan a future breeding between dogs
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleAddPlannedLitter)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="maleId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sire (Male)</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select male dog" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {males.map(dog => (
-                            <SelectItem key={dog.id} value={dog.id}>
-                              {dog.name} ({dog.breed})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
                 <FormField
                   control={form.control}
                   name="femaleId"
@@ -205,6 +219,87 @@ const PlannedLittersContent: React.FC = () => {
                     </FormItem>
                   )}
                 />
+                
+                <FormField
+                  control={form.control}
+                  name="externalMale"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel>External Sire</FormLabel>
+                        <FormDescription>
+                          Select if the sire is not one of your dogs
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                {!isExternalMale ? (
+                  <FormField
+                    control={form.control}
+                    name="maleId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sire (Male)</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select male dog" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {males.map(dog => (
+                              <SelectItem key={dog.id} value={dog.id}>
+                                {dog.name} ({dog.breed})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="externalMaleName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>External Sire Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Enter dog name" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="externalMaleBreed"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>External Sire Breed</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Enter dog breed" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
                 
                 <FormField
                   control={form.control}
@@ -278,6 +373,11 @@ const PlannedLittersContent: React.FC = () => {
                 <Calendar className="h-4 w-4" />
                 Expected heat: {new Date(litter.expectedHeatDate).toLocaleDateString()}
               </CardDescription>
+              {litter.externalMale && (
+                <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                  External Sire
+                </span>
+              )}
             </CardHeader>
             <CardContent>
               <p className="text-sm">{litter.notes}</p>
@@ -315,6 +415,13 @@ const PlannedLittersContent: React.FC = () => {
                       <h3 className="text-sm font-medium text-muted-foreground">Expected Heat</h3>
                       <p>{new Date(litter.expectedHeatDate).toLocaleDateString()}</p>
                     </div>
+                    
+                    {litter.externalMale && litter.externalMaleBreed && (
+                      <div>
+                        <h3 className="text-sm font-medium text-muted-foreground">External Sire Breed</h3>
+                        <p>{litter.externalMaleBreed}</p>
+                      </div>
+                    )}
                     
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground">Notes</h3>

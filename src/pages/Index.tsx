@@ -3,13 +3,17 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import BreedingStats from '@/components/BreedingStats';
 import BreedingCalendar from '@/components/BreedingCalendar';
+import BreedingReminders from '@/components/BreedingReminders';
 import DogList from '@/components/DogList';
 import AddDogButton from '@/components/AddDogButton';
 import { DogsProvider } from '@/context/DogsContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
+  const { user } = useAuth();
+  
   const handleAddDogClick = () => {
     // In a real app, this would open a modal or navigate to a form
     toast({
@@ -27,11 +31,18 @@ const Index = () => {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Breeding Journey</h1>
-              <p className="text-muted-foreground">Manage your breeding program efficiently</p>
+              <p className="text-muted-foreground">Welcome back, {user?.email?.split('@')[0] || 'Breeder'}! Manage your breeding program efficiently</p>
             </div>
           </div>
           
-          <BreedingCalendar />
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="md:col-span-2">
+              <BreedingCalendar />
+            </div>
+            <div>
+              <BreedingReminders />
+            </div>
+          </div>
           
           <BreedingStats />
           
