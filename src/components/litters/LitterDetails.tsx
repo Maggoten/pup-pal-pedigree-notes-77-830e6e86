@@ -50,6 +50,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             puppies={litter.puppies}
             onAddPuppy={onAddPuppy}
             onSelectPuppy={handlePuppySelect}
+            onUpdatePuppy={handleUpdatePuppy}
             showAddPuppyDialog={showAddPuppyDialog}
             setShowAddPuppyDialog={setShowAddPuppyDialog}
             puppyNumber={litter.puppies.length + 1}

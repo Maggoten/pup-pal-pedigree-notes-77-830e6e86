@@ -12,6 +12,11 @@ export interface PlannedLitter {
   externalMaleBreed?: string;
 }
 
+export interface PuppyNote {
+  date: string;
+  content: string;
+}
+
 export interface Puppy {
   id: string;
   name: string;
@@ -23,6 +28,7 @@ export interface Puppy {
   imageUrl?: string;
   weightLog: { date: string; weight: number }[];
   heightLog: { date: string; height: number }[];
+  notes?: PuppyNote[]; // Add notes array
 }
 
 export interface Litter {

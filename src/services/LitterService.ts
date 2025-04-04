@@ -68,6 +68,11 @@ class LitterService {
     const litters = this.loadLitters();
     const updatedLitters = litters.map(litter => {
       if (litter.id === litterId) {
+        // Initialize the notes array if it doesn't exist
+        if (!puppy.notes) {
+          puppy.notes = [];
+        }
+        
         return {
           ...litter,
           puppies: [...litter.puppies, puppy]
@@ -86,6 +91,11 @@ class LitterService {
     const litters = this.loadLitters();
     const updatedLitters = litters.map(litter => {
       if (litter.id === litterId) {
+        // Ensure notes array exists
+        if (!updatedPuppy.notes) {
+          updatedPuppy.notes = [];
+        }
+        
         const updatedPuppies = litter.puppies.map(puppy => 
           puppy.id === updatedPuppy.id ? updatedPuppy : puppy
         );

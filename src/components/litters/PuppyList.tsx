@@ -1,16 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PlusCircle, Pencil } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Puppy } from '@/types/breeding';
 import AddPuppyDialog from './AddPuppyDialog';
+import PuppyMeasurementsDialog from './puppies/PuppyMeasurementsDialog';
 
 interface PuppyListProps {
   puppies: Puppy[];
   onAddPuppy: (puppy: Puppy) => void;
   onSelectPuppy: (puppy: Puppy) => void;
+  onUpdatePuppy: (puppy: Puppy) => void;
   showAddPuppyDialog: boolean;
   setShowAddPuppyDialog: (show: boolean) => void;
   puppyNumber: number;
@@ -21,11 +23,20 @@ const PuppyList: React.FC<PuppyListProps> = ({
   puppies,
   onAddPuppy,
   onSelectPuppy,
+  onUpdatePuppy,
   showAddPuppyDialog,
   setShowAddPuppyDialog,
   puppyNumber,
   litterDob
 }) => {
+  const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
+  const [showMeasurementsDialog, setShowMeasurementsDialog] = useState(false);
+
+  const handleNameClick = (puppy: Puppy) => {
+    setSelectedPuppy(puppy);
+    setShowMeasurementsDialog(true);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -61,7 +72,14 @@ const PuppyList: React.FC<PuppyListProps> = ({
           <TableBody>
             {puppies.map(puppy => (
               <TableRow key={puppy.id}>
-                <TableCell>{puppy.name}</TableCell>
+                <TableCell>
+                  <button
+                    onClick={() => handleNameClick(puppy)}
+                    className="text-primary hover:underline font-medium cursor-pointer"
+                  >
+                    {puppy.name}
+                  </button>
+                </TableCell>
                 <TableCell>{puppy.gender}</TableCell>
                 <TableCell>{puppy.color}</TableCell>
                 <TableCell>{puppy.breed || '-'}</TableCell>
@@ -93,6 +111,17 @@ const PuppyList: React.FC<PuppyListProps> = ({
             Add First Puppy
           </Button>
         </div>
+      )}
+
+      {/* Puppy Measurements Dialog */}
+      {selectedPuppy && (
+        <Dialog open={showMeasurementsDialog} onOpenChange={setShowMeasurementsDialog}>
+          <PuppyMeasurementsDialog 
+            puppy={selectedPuppy} 
+            onClose={() => setShowMeasurementsDialog(false)}
+            onUpdate={onUpdatePuppy}
+          />
+        </Dialog>
       )}
     </div>
   );
