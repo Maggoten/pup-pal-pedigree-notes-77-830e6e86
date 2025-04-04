@@ -1,10 +1,16 @@
 
 import React from 'react';
-import { Dog, FileText, HeartPulse, Settings, PawPrint, Calendar, LogOut } from 'lucide-react';
+import { Dog, FileText, HeartPulse, Settings, PawPrint, Calendar, LogOut, Menu } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerClose
+} from '@/components/ui/drawer';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
@@ -24,51 +30,68 @@ export const Navbar: React.FC = () => {
     navigate('/login');
   };
   
+  const navItems = [
+    { path: "/", label: "Home", icon: Calendar },
+    { path: "/my-dogs", label: "My Dogs", icon: Dog },
+    { path: "/planned-litters", label: "Planned Litters", icon: FileText },
+    { path: "/mating", label: "Mating", icon: HeartPulse },
+    { path: "/pregnancy", label: "Pregnancy", icon: PawPrint },
+    { path: "/my-litters", label: "My Litters", icon: Dog }
+  ];
+  
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
+          <Drawer>
+            <DrawerTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent className="pt-10">
+              <nav className="flex flex-col space-y-2 p-4">
+                {navItems.map((item) => (
+                  <DrawerClose key={item.path} asChild>
+                    <Button 
+                      variant={isActive(item.path) ? "default" : "ghost"} 
+                      asChild
+                      className="justify-start w-full"
+                    >
+                      <Link to={item.path} className="flex items-center gap-2">
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </Button>
+                  </DrawerClose>
+                ))}
+                <DrawerClose asChild>
+                  <Button 
+                    variant="destructive" 
+                    className="justify-start w-full mt-4"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    <span>Logout</span>
+                  </Button>
+                </DrawerClose>
+              </nav>
+            </DrawerContent>
+          </Drawer>
           <Dog className="h-6 w-6 text-primary" />
           <span className="text-xl font-bold text-primary">Breeding Journey</span>
         </div>
         
         <nav className="hidden md:flex items-center space-x-4">
-          <Button variant={isActive("/") ? "default" : "ghost"} asChild>
-            <Link to="/" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <span>Home</span>
-            </Link>
-          </Button>
-          <Button variant={isActive("/my-dogs") ? "default" : "ghost"} asChild>
-            <Link to="/my-dogs" className="flex items-center gap-2">
-              <Dog className="h-4 w-4" />
-              <span>My Dogs</span>
-            </Link>
-          </Button>
-          <Button variant={isActive("/planned-litters") ? "default" : "ghost"} asChild>
-            <Link to="/planned-litters" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              <span>Planned Litters</span>
-            </Link>
-          </Button>
-          <Button variant={isActive("/mating") ? "default" : "ghost"} asChild>
-            <Link to="/mating" className="flex items-center gap-2">
-              <HeartPulse className="h-4 w-4" />
-              <span>Mating</span>
-            </Link>
-          </Button>
-          <Button variant={isActive("/pregnancy") ? "default" : "ghost"} asChild>
-            <Link to="/pregnancy" className="flex items-center gap-2">
-              <PawPrint className="h-4 w-4" />
-              <span>Pregnancy</span>
-            </Link>
-          </Button>
-          <Button variant={isActive("/my-litters") ? "default" : "ghost"} asChild>
-            <Link to="/my-litters" className="flex items-center gap-2">
-              <Dog className="h-4 w-4" />
-              <span>My Litters</span>
-            </Link>
-          </Button>
+          {navItems.map((item) => (
+            <Button key={item.path} variant={isActive(item.path) ? "default" : "ghost"} asChild>
+              <Link to={item.path} className="flex items-center gap-2">
+                <item.icon className="h-4 w-4" />
+                <span>{item.label}</span>
+              </Link>
+            </Button>
+          ))}
         </nav>
         
         <div className="flex items-center gap-2">
