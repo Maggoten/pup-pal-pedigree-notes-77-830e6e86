@@ -42,7 +42,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   return (
     <DialogContent className="sm:max-w-[500px]">
       <DialogHeader>
-        <DialogTitle>Puppy Information</DialogTitle>
+        <DialogTitle>Edit Puppy</DialogTitle>
         <DialogDescription>
           Edit information for {puppy.name}.
         </DialogDescription>

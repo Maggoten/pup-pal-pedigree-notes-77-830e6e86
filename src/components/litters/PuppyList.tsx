@@ -39,6 +39,11 @@ const PuppyList: React.FC<PuppyListProps> = ({
 
   const handleNameClick = (puppy: Puppy) => {
     setActivePuppy(puppy);
+    onSelectPuppy(puppy);
+  };
+
+  const handleEditClick = (puppy: Puppy) => {
+    setActivePuppy(puppy);
     setShowMeasurementsDialog(true);
   };
 
@@ -128,7 +133,7 @@ const PuppyList: React.FC<PuppyListProps> = ({
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation(); // Prevent row click
-                      onSelectPuppy(puppy);
+                      handleEditClick(puppy);
                     }}
                     className="flex items-center gap-1"
                   >
