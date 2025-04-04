@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { Puppy } from '@/types/breeding';
 import PuppyDetailsForm from './puppies/PuppyDetailsForm';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import PuppyGrowthLogger from './puppies/PuppyGrowthLogger';
 
 interface PuppyDetailsDialogProps {
   puppy: Puppy;
@@ -17,6 +19,8 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   onClose, 
   onUpdate 
 }) => {
+  const [activeTab, setActiveTab] = useState('details');
+
   const handleSubmit = (updatedPuppy: Puppy) => {
     onUpdate(updatedPuppy);
     toast({
@@ -35,22 +39,40 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
         </DialogDescription>
       </DialogHeader>
 
-      <PuppyDetailsForm puppy={puppy} onSubmit={handleSubmit} />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="growth">Growth Log</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="details">
+          <PuppyDetailsForm puppy={puppy} onSubmit={handleSubmit} />
+        </TabsContent>
+        
+        <TabsContent value="growth">
+          <PuppyGrowthLogger 
+            puppy={puppy} 
+            onUpdatePuppy={onUpdate}
+          />
+        </TabsContent>
+      </Tabs>
 
       <DialogFooter className="mt-6">
         <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+          Close
         </Button>
-        <Button type="submit" form="puppy-form" onClick={(e) => {
-          // This will trigger the form's onSubmit
-          const form = document.querySelector('form');
-          if (form) {
-            e.preventDefault();
-            form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-          }
-        }}>
-          Save Changes
-        </Button>
+        {activeTab === 'details' && (
+          <Button type="submit" form="puppy-form" onClick={(e) => {
+            // This will trigger the form's onSubmit
+            const form = document.querySelector('form');
+            if (form) {
+              e.preventDefault();
+              form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }
+          }}>
+            Save Changes
+          </Button>
+        )}
       </DialogFooter>
     </DialogContent>
   );

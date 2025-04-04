@@ -83,12 +83,13 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             <CardDescription>
               {selectedPuppy 
                 ? `Tracking ${logType} for ${selectedPuppy.name}`
-                : 'Select a puppy to view growth charts'}
+                : 'Tracking the entire litter'}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <PuppyGrowthChart
               selectedPuppy={selectedPuppy}
+              puppies={litter.puppies}
               logType={logType}
               setLogType={setLogType}
             />
