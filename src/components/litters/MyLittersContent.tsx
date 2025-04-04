@@ -113,8 +113,6 @@ const MyLittersContent: React.FC = () => {
             currentPage={activePage}
             setCurrentPage={setActivePage}
             isArchived={false}
-            searchQuery={searchQuery}
-            filterYear={filterYear}
           />
         </TabsContent>
         
@@ -132,8 +130,6 @@ const MyLittersContent: React.FC = () => {
             currentPage={archivedPage}
             setCurrentPage={setArchivedPage}
             isArchived={true}
-            searchQuery={searchQuery}
-            filterYear={filterYear}
           />
         </TabsContent>
       </Tabs>

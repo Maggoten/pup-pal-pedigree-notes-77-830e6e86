@@ -6,6 +6,7 @@ import LitterListView from './LitterListView';
 import LitterPagination from './LitterPagination';
 import EmptyLitterState from './EmptyLitterState';
 import { useLitterFilters } from './LitterFilterProvider';
+import { Button } from '@/components/ui/button';
 
 interface LitterTabContentProps {
   litters: Litter[];
