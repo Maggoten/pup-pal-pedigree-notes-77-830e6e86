@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
@@ -12,43 +11,23 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Switch } from '@/components/ui/switch';
 import { Dog } from '@/context/DogsContext';
+import { plannedLitterFormSchema, PlannedLitterFormValues } from '@/services/PlannedLitterService';
 
 interface AddPlannedLitterDialogProps {
   males: Dog[];
   females: Dog[];
-  onSubmit: (values: z.infer<typeof formSchema>) => void;
+  onSubmit: (values: PlannedLitterFormValues) => void;
 }
-
-const formSchema = z.object({
-  maleId: z.string().optional(),
-  femaleId: z.string({ required_error: "Dam is required" }),
-  expectedHeatDate: z.date({
-    required_error: "Expected heat date is required",
-  }),
-  notes: z.string().optional(),
-  externalMale: z.boolean().default(false),
-  externalMaleName: z.string().optional(),
-  externalMaleBreed: z.string().optional(),
-}).refine(data => {
-  if (data.externalMale) {
-    return !!data.externalMaleName;
-  }
-  return !!data.maleId;
-}, {
-  message: "Please select a male dog or provide external dog details",
-  path: ["maleId"],
-});
 
 const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
   males,
   females,
   onSubmit
 }) => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<PlannedLitterFormValues>({
+    resolver: zodResolver(plannedLitterFormSchema),
     defaultValues: {
       maleId: "",
       femaleId: "",

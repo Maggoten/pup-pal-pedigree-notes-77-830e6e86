@@ -6,129 +6,55 @@ import { PlusCircle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
-import { z } from 'zod';
 import { useDogs } from '@/context/DogsContext';
 import { PlannedLitter } from '@/types/breeding';
 import PlannedLitterCard from '@/components/planned-litters/PlannedLitterCard';
 import AddPlannedLitterDialog from '@/components/planned-litters/AddPlannedLitterDialog';
 import EmptyPlannedLitters from '@/components/planned-litters/EmptyPlannedLitters';
-
-const loadPlannedLitters = (): PlannedLitter[] => {
-  const stored = localStorage.getItem('plannedLitters');
-  if (stored) {
-    return JSON.parse(stored);
-  }
-  return [
-    {
-      id: '1',
-      maleId: '3',
-      femaleId: '2',
-      maleName: 'Rocky',
-      femaleName: 'Bella',
-      expectedHeatDate: '2025-05-15',
-      notes: 'First planned breeding, watching for genetic diversity'
-    }
-  ];
-};
-
-const formSchema = z.object({
-  maleId: z.string().optional(),
-  femaleId: z.string({ required_error: "Dam is required" }),
-  expectedHeatDate: z.date({
-    required_error: "Expected heat date is required",
-  }),
-  notes: z.string().optional(),
-  externalMale: z.boolean().default(false),
-  externalMaleName: z.string().optional(),
-  externalMaleBreed: z.string().optional(),
-}).refine(data => {
-  if (data.externalMale) {
-    return !!data.externalMaleName;
-  }
-  return !!data.maleId;
-}, {
-  message: "Please select a male dog or provide external dog details",
-  path: ["maleId"],
-});
+import { plannedLitterService, PlannedLitterFormValues } from '@/services/PlannedLitterService';
 
 const PlannedLittersContent: React.FC = () => {
   const { dogs } = useDogs();
-  const [plannedLitters, setPlannedLitters] = useState<PlannedLitter[]>(loadPlannedLitters());
+  const [plannedLitters, setPlannedLitters] = useState<PlannedLitter[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState<{ [litterId: string]: boolean }>({});
   
   const males = dogs.filter(dog => dog.gender === 'male');
   const females = dogs.filter(dog => dog.gender === 'female');
   
+  // Load planned litters on component mount
   useEffect(() => {
-    localStorage.setItem('plannedLitters', JSON.stringify(plannedLitters));
+    const litters = plannedLitterService.loadPlannedLitters();
+    setPlannedLitters(litters);
+  }, []);
+  
+  // Save planned litters to localStorage whenever they change
+  useEffect(() => {
+    plannedLitterService.savePlannedLitters(plannedLitters);
   }, [plannedLitters]);
   
-  const handleAddPlannedLitter = (values: z.infer<typeof formSchema>) => {
-    let maleName: string;
-    let maleId: string;
-    
-    if (values.externalMale) {
-      maleName = values.externalMaleName || "Unknown Sire";
-      maleId = `external-${Date.now()}`;
-    } else {
-      const male = dogs.find(dog => dog.id === values.maleId);
-      if (!male) {
-        toast({
-          title: "Error",
-          description: "Selected male dog not found.",
-          variant: "destructive"
-        });
-        return;
-      }
-      maleName = male.name;
-      maleId = male.id;
-    }
-    
-    const female = dogs.find(dog => dog.id === values.femaleId);
-    if (!female) {
+  const handleAddPlannedLitter = (values: PlannedLitterFormValues) => {
+    try {
+      const newLitter = plannedLitterService.createPlannedLitter(values, dogs);
+      setPlannedLitters([...plannedLitters, newLitter]);
+      setOpenDialog(false);
+      
+      toast({
+        title: "Planned Litter Added",
+        description: `${newLitter.maleName} × ${newLitter.femaleName} planned breeding added successfully.`
+      });
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Selected female dog not found.",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive"
       });
-      return;
     }
-    
-    const newLitter: PlannedLitter = {
-      id: Date.now().toString(),
-      maleId: maleId,
-      femaleId: values.femaleId,
-      maleName: maleName,
-      femaleName: female.name,
-      expectedHeatDate: format(values.expectedHeatDate, 'yyyy-MM-dd'),
-      notes: values.notes || '',
-      externalMale: values.externalMale,
-      externalMaleBreed: values.externalMaleBreed,
-    };
-    
-    setPlannedLitters([...plannedLitters, newLitter]);
-    setOpenDialog(false);
-    
-    toast({
-      title: "Planned Litter Added",
-      description: `${maleName} × ${female.name} planned breeding added successfully.`
-    });
   };
   
   const handleAddMatingDate = (litterId: string, date: Date) => {
-    const formattedDate = format(date, 'yyyy-MM-dd');
-    const updatedLitters = plannedLitters.map(litter => 
-      litter.id === litterId 
-        ? { 
-            ...litter, 
-            matingDates: [...(litter.matingDates || []), formattedDate] 
-          } 
-        : litter
-    );
-    
+    const updatedLitters = plannedLitterService.addMatingDate(plannedLitters, litterId, date);
     setPlannedLitters(updatedLitters);
-    localStorage.setItem('plannedLitters', JSON.stringify(updatedLitters));
     
     toast({
       title: "Mating Date Added",
@@ -143,9 +69,8 @@ const PlannedLittersContent: React.FC = () => {
   };
 
   const handleDeleteLitter = (litterId: string) => {
-    const updatedLitters = plannedLitters.filter(litter => litter.id !== litterId);
+    const updatedLitters = plannedLitterService.deletePlannedLitter(plannedLitters, litterId);
     setPlannedLitters(updatedLitters);
-    localStorage.setItem('plannedLitters', JSON.stringify(updatedLitters));
     
     toast({
       title: "Planned Litter Deleted",
