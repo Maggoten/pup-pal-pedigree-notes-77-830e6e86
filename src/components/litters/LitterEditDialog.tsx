@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { CalendarIcon, Trash2 } from 'lucide-react';
+import { CalendarIcon, Trash2, Archive, SquareCheck } from 'lucide-react';
 import { Litter } from '@/types/breeding';
 import { format } from 'date-fns';
 
@@ -16,13 +16,15 @@ interface LitterEditDialogProps {
   onClose: () => void;
   onUpdate: (litter: Litter) => void;
   onDelete: (litterId: string) => void;
+  onArchive?: (litterId: string, archived: boolean) => void;
 }
 
 const LitterEditDialog: React.FC<LitterEditDialogProps> = ({ 
   litter, 
   onClose, 
   onUpdate,
-  onDelete 
+  onDelete,
+  onArchive
 }) => {
   const [litterName, setLitterName] = useState(litter.name);
   const [sireName, setSireName] = useState(litter.sireName);
@@ -125,6 +127,29 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
               </Popover>
             </div>
           </div>
+          
+          {onArchive && (
+            <div className="col-span-4 mt-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => onArchive(litter.id, !litter.archived)}
+                className="w-full flex items-center gap-2"
+              >
+                {litter.archived ? (
+                  <>
+                    <SquareCheck className="h-4 w-4" />
+                    Unarchive Litter
+                  </>
+                ) : (
+                  <>
+                    <Archive className="h-4 w-4" />
+                    Archive Litter
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
           
           <div className="col-span-4 mt-4">
             <Alert variant="destructive" className="bg-destructive/10 border-destructive/30">

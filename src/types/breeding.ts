@@ -40,4 +40,6 @@ export interface Litter {
   sireName: string;
   damName: string;
   puppies: Puppy[];
+  archived?: boolean; // New field to mark litters as archived
 }
+

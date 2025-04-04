@@ -1,4 +1,3 @@
-
 import { Litter, Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
@@ -33,6 +32,11 @@ class LitterService {
    * Add a new litter
    */
   addLitter(litter: Litter): Litter[] {
+    // Ensure the archived property is set (default to false)
+    if (litter.archived === undefined) {
+      litter.archived = false;
+    }
+    
     const litters = this.loadLitters();
     const updatedLitters = [...litters, litter];
     this.saveLitters(updatedLitters);
@@ -57,6 +61,24 @@ class LitterService {
   deleteLitter(litterId: string): Litter[] {
     const litters = this.loadLitters();
     const updatedLitters = litters.filter(litter => litter.id !== litterId);
+    this.saveLitters(updatedLitters);
+    return updatedLitters;
+  }
+
+  /**
+   * Archive or unarchive a litter
+   */
+  toggleArchiveLitter(litterId: string, archive: boolean): Litter[] {
+    const litters = this.loadLitters();
+    const updatedLitters = litters.map(litter => {
+      if (litter.id === litterId) {
+        return {
+          ...litter,
+          archived: archive
+        };
+      }
+      return litter;
+    });
     this.saveLitters(updatedLitters);
     return updatedLitters;
   }
@@ -126,6 +148,22 @@ class LitterService {
     });
     this.saveLitters(updatedLitters);
     return updatedLitters;
+  }
+
+  /**
+   * Get active (non-archived) litters
+   */
+  getActiveLitters(): Litter[] {
+    const litters = this.loadLitters();
+    return litters.filter(litter => !litter.archived);
+  }
+
+  /**
+   * Get archived litters
+   */
+  getArchivedLitters(): Litter[] {
+    const litters = this.loadLitters();
+    return litters.filter(litter => litter.archived);
   }
 }
 
