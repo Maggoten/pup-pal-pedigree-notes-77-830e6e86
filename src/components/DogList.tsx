@@ -6,10 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState } from 'react';
 
-const DogList: React.FC = () => {
-  const { dogs, setActiveDog } = useDogs();
+interface DogListProps {
+  dogsList?: Dog[];
+}
+
+const DogList: React.FC<DogListProps> = ({ dogsList }) => {
+  const { dogs: allDogs, setActiveDog } = useDogs();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+
+  // Use the provided dogsList or fall back to all dogs from context
+  const dogs = dogsList || allDogs;
 
   const filteredDogs = dogs.filter(dog => {
     // Search filter
