@@ -44,8 +44,7 @@ const LitterTabContent: React.FC<LitterTabContentProps> = ({
   searchQuery,
   filterYear
 }) => {
-  const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
-  const { setSearchQuery, setFilterYear } = useLitterFilters();
+  const { view: viewType, setView: setViewType, setSearchQuery, setFilterYear } = useLitterFilters();
   
   // Handle creating a new litter
   const handleAddLitterClick = () => {

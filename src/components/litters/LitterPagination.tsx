@@ -10,14 +10,14 @@ import {
 } from '@/components/ui/pagination';
 
 interface LitterPaginationProps {
-  pageCount: number;  // Changed from totalPages to pageCount
+  pageCount: number;
   currentPage: number;
   onPageChange: (page: number) => void;
 }
 
 const LitterPagination: React.FC<LitterPaginationProps> = ({
   currentPage,
-  pageCount,  // Changed from totalPages to pageCount
+  pageCount,
   onPageChange
 }) => {
   if (pageCount <= 1) return null;

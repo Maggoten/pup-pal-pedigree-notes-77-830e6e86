@@ -4,7 +4,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Grid2X2, List } from 'lucide-react';
 
 interface ViewToggleProps {
-  viewType: 'grid' | 'list';  // Changed from "view" to "viewType" to match usage
+  viewType: 'grid' | 'list';
   onViewChange: (view: 'grid' | 'list') => void;
 }
 
