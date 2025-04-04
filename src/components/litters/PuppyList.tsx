@@ -20,6 +20,7 @@ interface PuppyListProps {
   puppyNumber: number;
   litterDob: string;
   selectedPuppy: Puppy | null;
+  damBreed?: string; // Add the dam's breed as an optional prop
 }
 
 const PuppyList: React.FC<PuppyListProps> = ({
@@ -32,7 +33,8 @@ const PuppyList: React.FC<PuppyListProps> = ({
   setShowAddPuppyDialog,
   puppyNumber,
   litterDob,
-  selectedPuppy
+  selectedPuppy,
+  damBreed
 }) => {
   const [activePuppy, setActivePuppy] = useState<Puppy | null>(null);
   const [showMeasurementsDialog, setShowMeasurementsDialog] = useState(false);
@@ -78,6 +80,7 @@ const PuppyList: React.FC<PuppyListProps> = ({
             onSubmit={onAddPuppy}
             puppyNumber={puppyNumber + puppies.length}
             litterDob={litterDob}
+            damBreed={damBreed} // Pass the dam's breed to the dialog
           />
         </Dialog>
       </div>

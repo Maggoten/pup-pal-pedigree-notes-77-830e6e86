@@ -7,19 +7,22 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/components/ui/use-toast';
 import DatePicker from '@/components/common/DatePicker';
+import BreedDropdown from '@/components/dogs/BreedDropdown';
 
 interface AddPuppyDialogProps {
   onClose: () => void;
   onSubmit: (puppy: any) => void;
   puppyNumber: number;
   litterDob: string;
+  damBreed?: string; // Add the dam's breed as an optional prop
 }
 
 const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({ 
   onClose, 
   onSubmit, 
   puppyNumber,
-  litterDob
+  litterDob,
+  damBreed = '' // Default to empty string if not provided
 }) => {
   const defaultDob = new Date(litterDob);
   const [name, setName] = useState<string>(`Puppy ${puppyNumber}`);
@@ -28,7 +31,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
   const [birthWeight, setBirthWeight] = useState<string>('');
   const [timeOfBirth, setTimeOfBirth] = useState<string>('');
   const [dateOfBirth, setDateOfBirth] = useState<Date>(defaultDob);
-  const [breed, setBreed] = useState<string>('');
+  const [breed, setBreed] = useState<string>(damBreed); // Use the dam's breed as default
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,11 +107,9 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
 
           <div>
             <Label htmlFor="breed">Breed</Label>
-            <Input 
-              id="breed" 
+            <BreedDropdown 
               value={breed} 
-              onChange={(e) => setBreed(e.target.value)} 
-              placeholder="Breed"
+              onChange={setBreed}
             />
           </div>
 
