@@ -3,10 +3,10 @@ import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useDogs } from '@/context/DogsContext';
+import { useDogs, DogsProvider } from '@/context/DogsContext';
 import DogList from '@/components/DogList';
 
-const MyDogs: React.FC = () => {
+const MyDogsContent: React.FC = () => {
   const { dogs } = useDogs();
   
   const females = dogs.filter(dog => dog.gender === 'female');
@@ -52,6 +52,14 @@ const MyDogs: React.FC = () => {
         </TabsContent>
       </Tabs>
     </PageLayout>
+  );
+};
+
+const MyDogs: React.FC = () => {
+  return (
+    <DogsProvider>
+      <MyDogsContent />
+    </DogsProvider>
   );
 };
 
