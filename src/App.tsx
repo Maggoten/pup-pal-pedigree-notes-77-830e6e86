@@ -8,7 +8,6 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MyDogs from "./pages/MyDogs";
 import PlannedLitters from "./pages/PlannedLitters";
-import Mating from "./pages/Mating";
 import Pregnancy from "./pages/Pregnancy";
 import PregnancyDetails from "./pages/PregnancyDetails";
 import MyLitters from "./pages/MyLitters";
@@ -33,7 +32,6 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/my-dogs" element={<MyDogs />} />
                 <Route path="/planned-litters" element={<PlannedLitters />} />
-                <Route path="/mating" element={<Mating />} />
                 <Route path="/pregnancy" element={<Pregnancy />} />
                 <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
                 <Route path="/my-litters" element={<MyLitters />} />
