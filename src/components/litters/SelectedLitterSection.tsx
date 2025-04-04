@@ -32,11 +32,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
 
   return (
     <div className="mt-10">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">
-          Selected Litter: {selectedLitter.name}
-        </h2>
-        
+      <div className="flex justify-end items-center mb-4">
         <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
           <DialogTrigger asChild>
             <Button variant="outline" className="flex items-center gap-2">

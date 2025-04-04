@@ -5,23 +5,26 @@ import LitterCard from './LitterCard';
 
 interface LitterGridViewProps {
   litters: Litter[];
-  onSelect: (litter: Litter) => void;
-  onArchive: (litter: Litter) => void;
+  onSelectLitter: (litter: Litter) => void;
+  onArchive?: (litter: Litter) => void;
+  selectedLitterId?: string | null;
 }
 
-const LitterGridView: React.FC<LitterGridViewProps> = ({
-  litters,
-  onSelect,
+const LitterGridView: React.FC<LitterGridViewProps> = ({ 
+  litters, 
+  onSelectLitter, 
   onArchive,
+  selectedLitterId
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {litters.map(litter => (
         <LitterCard 
           key={litter.id}
-          litter={litter}
-          onSelect={onSelect}
+          litter={litter} 
+          onSelect={onSelectLitter}
           onArchive={onArchive}
+          isSelected={selectedLitterId === litter.id}
         />
       ))}
     </div>

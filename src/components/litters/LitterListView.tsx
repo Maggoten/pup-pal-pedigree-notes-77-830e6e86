@@ -1,40 +1,83 @@
 
 import React from 'react';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Litter } from '@/types/breeding';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Archive } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 
 interface LitterListViewProps {
   litters: Litter[];
-  selectedLitterId: string | null;
-  onLitterSelect: (litterId: string) => void;
+  onSelectLitter: (litter: Litter) => void;
+  onArchive?: (litter: Litter) => void;
+  selectedLitterId?: string | null;
 }
 
-const LitterListView: React.FC<LitterListViewProps> = ({
-  litters,
-  selectedLitterId,
-  onLitterSelect
+const LitterListView: React.FC<LitterListViewProps> = ({ 
+  litters, 
+  onSelectLitter, 
+  onArchive,
+  selectedLitterId
 }) => {
   return (
-    <div className="space-y-2">
-      <Tabs 
-        value={selectedLitterId || ''} 
-        onValueChange={onLitterSelect} 
-        className="space-y-4"
-      >
-        <TabsList className="w-full justify-start overflow-auto border p-2 rounded-lg bg-muted/50">
-          {litters.map(litter => (
-            <TabsTrigger 
-              key={litter.id} 
-              value={litter.id} 
-              className="px-6 py-2 font-medium rounded-md relative"
-            >
-              <span className={litter.archived ? "font-semibold" : "text-primary font-semibold"}>
-                {litter.name}
-              </span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Date of Birth</TableHead>
+            <TableHead>Sire</TableHead>
+            <TableHead>Dam</TableHead>
+            <TableHead>Puppies</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {litters.map(litter => {
+            const puppyCount = litter.puppies?.length || 0;
+            const birthDate = parseISO(litter.dateOfBirth);
+            const isSelected = selectedLitterId === litter.id;
+            
+            return (
+              <TableRow 
+                key={litter.id}
+                className={`cursor-pointer ${isSelected ? 'bg-primary/10' : ''}`}
+                onClick={() => onSelectLitter(litter)}
+              >
+                <TableCell className="font-medium">{litter.name}</TableCell>
+                <TableCell>{format(birthDate, 'MMM d, yyyy')}</TableCell>
+                <TableCell>{litter.sireName}</TableCell>
+                <TableCell>{litter.damName}</TableCell>
+                <TableCell>
+                  {puppyCount > 0 ? (
+                    <Badge variant="secondary">
+                      {puppyCount} {puppyCount === 1 ? 'puppy' : 'puppies'}
+                    </Badge>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">None</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  {onArchive && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onArchive(litter);
+                      }}
+                      title={litter.archived ? "Unarchive Litter" : "Archive Litter"}
+                    >
+                      <Archive className="h-4 w-4" />
+                    </Button>
+                  )}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </div>
   );
 };

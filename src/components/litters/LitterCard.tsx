@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { format, parseISO } from 'date-fns';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, Dog, Archive, Grid2X2 } from 'lucide-react';
@@ -11,9 +11,10 @@ interface LitterCardProps {
   litter: Litter;
   onSelect: (litter: Litter) => void;
   onArchive?: (litter: Litter) => void;
+  isSelected?: boolean;
 }
 
-const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive }) => {
+const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, isSelected = false }) => {
   // Parse ISO date string to Date object
   const birthDate = parseISO(litter.dateOfBirth);
   
@@ -40,8 +41,13 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive }) 
   };
 
   return (
-    <Card className="h-full overflow-hidden hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2">
+    <Card 
+      className={`h-full overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${
+        isSelected ? 'ring-2 ring-primary' : ''
+      }`}
+      onClick={() => onSelect(litter)}
+    >
+      <CardHeader className="pb-2 pt-3 px-4">
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg font-semibold">{litter.name}</CardTitle>
           <div className="flex gap-1">
@@ -57,8 +63,8 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive }) 
         </div>
       </CardHeader>
       
-      <CardContent className="pb-3">
-        <div className="space-y-2 text-sm">
+      <CardContent className="pb-3 pt-1 px-4">
+        <div className="space-y-1 text-sm">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <span>Born: {format(birthDate, 'MMM d, yyyy')}</span>
@@ -81,31 +87,24 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive }) 
             </div>
           )}
         </div>
-      </CardContent>
-      
-      <CardFooter className="flex gap-2 pt-0">
-        <Button 
-          variant="default" 
-          className="flex-1"
-          onClick={() => onSelect(litter)}
-        >
-          View Details
-        </Button>
         
         {onArchive && (
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              onArchive(litter);
-            }}
-            title={litter.archived ? "Unarchive Litter" : "Archive Litter"}
-          >
-            <Archive className="h-4 w-4" />
-          </Button>
+          <div className="flex justify-end mt-3">
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                onArchive(litter);
+              }}
+              title={litter.archived ? "Unarchive Litter" : "Archive Litter"}
+              className="h-7 w-7"
+            >
+              <Archive className="h-3 w-3" />
+            </Button>
+          </div>
         )}
-      </CardFooter>
+      </CardContent>
     </Card>
   );
 };
