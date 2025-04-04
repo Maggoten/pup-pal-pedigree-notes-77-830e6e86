@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { PlusCircle, Calendar, Dog } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -32,7 +31,6 @@ interface PlannedLitter {
   externalMaleBreed?: string;
 }
 
-// Sample data
 const samplePlannedLitters: PlannedLitter[] = [
   {
     id: '1',
@@ -56,11 +54,9 @@ const formSchema = z.object({
   externalMaleName: z.string().optional(),
   externalMaleBreed: z.string().optional(),
 }).refine(data => {
-  // If externalMale is true, externalMaleName is required
   if (data.externalMale) {
     return !!data.externalMaleName;
   }
-  // If externalMale is false, maleId is required
   return !!data.maleId;
 }, {
   message: "Please select a male dog or provide external dog details",
@@ -87,7 +83,6 @@ const PlannedLittersContent: React.FC = () => {
     }
   });
   
-  // Watch for changes to externalMale to update form logic
   const isExternalMale = form.watch("externalMale");
   
   const handleAddPlannedLitter = (values: z.infer<typeof formSchema>) => {
@@ -95,11 +90,9 @@ const PlannedLittersContent: React.FC = () => {
     let maleId: string;
     
     if (values.externalMale) {
-      // For external male, use the provided name
       maleName = values.externalMaleName || "Unknown Sire";
       maleId = `external-${Date.now()}`;
     } else {
-      // For own male, get the name from dogs
       const male = dogs.find(dog => dog.id === values.maleId);
       if (!male) {
         toast({
@@ -157,7 +150,6 @@ const PlannedLittersContent: React.FC = () => {
     
     setMatingDates(newMatingDates);
     
-    // Update the planned litter with mating dates
     setPlannedLitters(plannedLitters.map(litter => 
       litter.id === litterId 
         ? { ...litter, matingDates: newMatingDates[litterId] } 
