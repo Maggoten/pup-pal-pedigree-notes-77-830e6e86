@@ -100,10 +100,18 @@ const Pregnancy: React.FC = () => {
   };
 
   const handleLogTemperature = () => {
-    toast({
-      title: "Feature Coming Soon",
-      description: "Temperature logging will be available in the next update."
-    });
+    if (activePregnancies.length > 0) {
+      navigate(`/pregnancy/${activePregnancies[0].id}`);
+    } else {
+      toast({
+        title: "No active pregnancies",
+        description: "Add a pregnancy before recording temperature."
+      });
+    }
+  };
+  
+  const handlePregnancyClick = (pregnancyId: string) => {
+    navigate(`/pregnancy/${pregnancyId}`);
   };
 
   return (
@@ -126,7 +134,11 @@ const Pregnancy: React.FC = () => {
             {activePregnancies.length > 0 ? (
               <div className="space-y-4">
                 {activePregnancies.map((pregnancy) => (
-                  <div key={pregnancy.id} className="rounded-lg border p-4 bg-blue-50 border-blue-200">
+                  <div 
+                    key={pregnancy.id} 
+                    className="rounded-lg border p-4 bg-blue-50 border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                    onClick={() => handlePregnancyClick(pregnancy.id)}
+                  >
                     <h3 className="font-medium text-lg">
                       {pregnancy.femaleName} × {pregnancy.maleName}
                     </h3>
