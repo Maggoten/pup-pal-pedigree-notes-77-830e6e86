@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,13 +14,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Checkbox } from '@/components/ui/checkbox';
 
-// Validation schema for login form
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-// Validation schema for registration form
 const registrationSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
@@ -43,7 +40,6 @@ const Login: React.FC = () => {
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
 
-  // Login form
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -52,7 +48,6 @@ const Login: React.FC = () => {
     },
   });
 
-  // Registration form
   const registrationForm = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
@@ -102,11 +97,8 @@ const Login: React.FC = () => {
   const handlePayment = () => {
     setIsLoading(true);
     
-    // In a real implementation, this would process the payment through a payment provider
     setTimeout(() => {
-      // For demo purposes, we're just simulating a successful registration
       if (registrationData) {
-        // Store the user in localStorage
         localStorage.setItem('user', JSON.stringify({ email: registrationData.email }));
         localStorage.setItem('isLoggedIn', 'true');
         
@@ -127,19 +119,19 @@ const Login: React.FC = () => {
         <Card className="w-full max-w-md shadow-lg bg-white/95 backdrop-blur">
           <CardHeader className="space-y-1 text-center">
             <div className="flex justify-center mb-2">
-              <Dog className="h-12 w-12 text-brown-500" style={{ filter: 'url(#sketch-filter)' }} />
+              <Dog className="h-12 w-12 text-primary" />
             </div>
-            <CardTitle className="text-2xl font-bold text-brown-700">Breeding Journey</CardTitle>
-            <CardDescription className="text-brown-500">
+            <CardTitle className="text-2xl font-bold text-foreground">Breeding Journey</CardTitle>
+            <CardDescription>
               Your companion for dog breeding management
             </CardDescription>
           </CardHeader>
           
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4 bg-cream-100">
-                <TabsTrigger value="login" className="data-[state=active]:bg-brown-500 data-[state=active]:text-white">Login</TabsTrigger>
-                <TabsTrigger value="register" className="data-[state=active]:bg-brown-500 data-[state=active]:text-white">Register</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="register">Register</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
@@ -174,7 +166,7 @@ const Login: React.FC = () => {
                     />
                     
                     <Button 
-                      className="w-full bg-brown-500 hover:bg-brown-600 text-white" 
+                      className="w-full" 
                       type="submit" 
                       disabled={isLoading}
                     >
@@ -264,13 +256,13 @@ const Login: React.FC = () => {
                       control={registrationForm.control}
                       name="agreeToTerms"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-cream-50">
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-secondary/50">
                           <FormControl>
                             <input
                               type="checkbox"
                               checked={field.value}
                               onChange={field.onChange}
-                              className="h-4 w-4 rounded border-gray-300 text-brown-500 focus:ring-brown-500"
+                              className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
                             />
                           </FormControl>
                           <div className="space-y-1 leading-none">
@@ -287,7 +279,7 @@ const Login: React.FC = () => {
                     />
                     
                     <Button 
-                      className="w-full bg-brown-500 hover:bg-brown-600 text-white" 
+                      className="w-full" 
                       type="submit"
                       disabled={isLoading}
                     >
@@ -303,8 +295,8 @@ const Login: React.FC = () => {
       ) : (
         <Card className="w-full max-w-md shadow-lg bg-white/95 backdrop-blur">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold text-brown-700">Payment Information</CardTitle>
-            <CardDescription className="text-brown-500">
+            <CardTitle className="text-2xl font-bold">Payment Information</CardTitle>
+            <CardDescription>
               Complete your subscription - $2.99/month
             </CardDescription>
           </CardHeader>
@@ -313,26 +305,26 @@ const Login: React.FC = () => {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="cardNumber">Card Number</Label>
-                <Input id="cardNumber" placeholder="1234 5678 9012 3456" className="border-brown-200" />
+                <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="expiry">Expiration Date</Label>
-                  <Input id="expiry" placeholder="MM/YY" className="border-brown-200" />
+                  <Input id="expiry" placeholder="MM/YY" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="cvc">CVC</Label>
-                  <Input id="cvc" placeholder="123" type="password" className="border-brown-200" />
+                  <Input id="cvc" placeholder="123" type="password" />
                 </div>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="nameOnCard">Name on Card</Label>
-                <Input id="nameOnCard" placeholder="John Doe" className="border-brown-200" />
+                <Input id="nameOnCard" placeholder="John Doe" />
               </div>
               
-              <div className="rounded-md bg-cream-100 p-4 text-sm text-brown-700">
+              <div className="rounded-md bg-secondary p-4 text-sm">
                 <p className="font-medium">Subscription Summary:</p>
                 <p>Monthly Membership: $2.99</p>
                 <p>Your card will be charged monthly until you cancel.</p>
@@ -342,7 +334,7 @@ const Login: React.FC = () => {
           
           <CardFooter className="flex flex-col space-y-2">
             <Button 
-              className="w-full bg-brown-500 hover:bg-brown-600 text-white" 
+              className="w-full" 
               onClick={handlePayment}
               disabled={isLoading}
             >
@@ -350,7 +342,7 @@ const Login: React.FC = () => {
             </Button>
             <Button 
               variant="outline" 
-              className="w-full border-brown-300 text-brown-700 hover:bg-cream-100" 
+              className="w-full" 
               onClick={() => setShowPayment(false)}
               disabled={isLoading}
             >
@@ -360,7 +352,6 @@ const Login: React.FC = () => {
         </Card>
       )}
       
-      {/* SVG filter for sketch effect */}
       <svg width="0" height="0" style={{ position: 'absolute' }}>
         <filter id="sketch-filter">
           <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
