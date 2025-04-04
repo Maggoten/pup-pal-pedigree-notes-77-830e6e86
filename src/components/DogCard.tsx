@@ -21,14 +21,22 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
     return `${years}y ${months}m`;
   };
 
+  // Use the existing placeholder.svg without modifying it
+  const dogImage = dog.image || '/placeholder.svg';
+
   return (
     <Card className="dog-card w-full h-full overflow-hidden" onClick={() => onClick(dog)}>
       <CardHeader className="p-0">
         <div className="aspect-[4/3] w-full relative">
           <img 
-            src={dog.image || '/placeholder.svg'} 
+            src={dogImage} 
             alt={dog.name} 
             className="object-cover w-full h-full"
+            onError={(e) => {
+              // If image fails to load, set to placeholder
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder.svg';
+            }}
           />
           <div className="absolute top-2 right-2">
             <Badge className={dog.gender === 'male' ? 'bg-blue-500' : 'bg-rose-400'}>
