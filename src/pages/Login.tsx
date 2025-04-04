@@ -13,6 +13,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Checkbox } from '@/components/ui/checkbox';
 
 // Validation schema for login form
 const loginSchema = z.object({
@@ -173,7 +174,7 @@ const Login: React.FC = () => {
                     />
                     
                     <Button 
-                      className="w-full bg-brown-500 hover:bg-brown-600" 
+                      className="w-full bg-brown-500 hover:bg-brown-600 text-white" 
                       type="submit" 
                       disabled={isLoading}
                     >
@@ -286,7 +287,7 @@ const Login: React.FC = () => {
                     />
                     
                     <Button 
-                      className="w-full bg-brown-500 hover:bg-brown-600" 
+                      className="w-full bg-brown-500 hover:bg-brown-600 text-white" 
                       type="submit"
                       disabled={isLoading}
                     >
@@ -312,23 +313,23 @@ const Login: React.FC = () => {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="cardNumber">Card Number</Label>
-                <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
+                <Input id="cardNumber" placeholder="1234 5678 9012 3456" className="border-brown-200" />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="expiry">Expiration Date</Label>
-                  <Input id="expiry" placeholder="MM/YY" />
+                  <Input id="expiry" placeholder="MM/YY" className="border-brown-200" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="cvc">CVC</Label>
-                  <Input id="cvc" placeholder="123" type="password" />
+                  <Input id="cvc" placeholder="123" type="password" className="border-brown-200" />
                 </div>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="nameOnCard">Name on Card</Label>
-                <Input id="nameOnCard" placeholder="John Doe" />
+                <Input id="nameOnCard" placeholder="John Doe" className="border-brown-200" />
               </div>
               
               <div className="rounded-md bg-cream-100 p-4 text-sm text-brown-700">
@@ -341,7 +342,7 @@ const Login: React.FC = () => {
           
           <CardFooter className="flex flex-col space-y-2">
             <Button 
-              className="w-full bg-brown-500 hover:bg-brown-600" 
+              className="w-full bg-brown-500 hover:bg-brown-600 text-white" 
               onClick={handlePayment}
               disabled={isLoading}
             >
