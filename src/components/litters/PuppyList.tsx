@@ -7,6 +7,7 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Puppy } from '@/types/breeding';
 import AddPuppyDialog from './AddPuppyDialog';
 import PuppyMeasurementsDialog from './puppies/PuppyMeasurementsDialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface PuppyListProps {
   puppies: Puppy[];
@@ -41,6 +42,21 @@ const PuppyList: React.FC<PuppyListProps> = ({
     setShowMeasurementsDialog(true);
   };
 
+  // Function to get the current/latest weight of a puppy
+  const getCurrentWeight = (puppy: Puppy): string => {
+    if (!puppy.weightLog || puppy.weightLog.length === 0) {
+      return puppy.birthWeight.toString();
+    }
+    
+    // Sort weight log by date (newest first)
+    const sortedLog = [...puppy.weightLog].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    // Return the most recent weight
+    return sortedLog[0].weight.toString();
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -68,8 +84,8 @@ const PuppyList: React.FC<PuppyListProps> = ({
               <TableHead>Name</TableHead>
               <TableHead>Gender</TableHead>
               <TableHead>Color</TableHead>
-              <TableHead>Breed</TableHead>
               <TableHead>Birth Weight</TableHead>
+              <TableHead>Current Weight</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -81,20 +97,31 @@ const PuppyList: React.FC<PuppyListProps> = ({
                 onClick={() => onRowSelect(puppy)}
               >
                 <TableCell>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent row click
-                      handleNameClick(puppy);
-                    }}
-                    className="text-primary hover:underline font-medium cursor-pointer"
-                  >
-                    {puppy.name}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      {puppy.imageUrl ? (
+                        <AvatarImage src={puppy.imageUrl} alt={puppy.name} />
+                      ) : (
+                        <AvatarFallback>
+                          {puppy.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent row click
+                        handleNameClick(puppy);
+                      }}
+                      className="text-primary hover:underline font-medium cursor-pointer"
+                    >
+                      {puppy.name}
+                    </button>
+                  </div>
                 </TableCell>
                 <TableCell>{puppy.gender}</TableCell>
                 <TableCell>{puppy.color}</TableCell>
-                <TableCell>{puppy.breed || '-'}</TableCell>
                 <TableCell>{puppy.birthWeight} kg</TableCell>
+                <TableCell>{getCurrentWeight(puppy)} kg</TableCell>
                 <TableCell>
                   <Button 
                     variant="ghost" 
