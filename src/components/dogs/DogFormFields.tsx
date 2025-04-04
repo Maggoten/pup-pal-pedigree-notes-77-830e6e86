@@ -29,6 +29,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { UseFormReturn } from 'react-hook-form';
+import BreedDropdown from './BreedDropdown';
 
 // Define the form schema with Zod
 export const dogFormSchema = z.object({
@@ -85,7 +86,10 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({ form }) => {
           <FormItem>
             <FormLabel>Breed</FormLabel>
             <FormControl>
-              <Input placeholder="Golden Retriever" {...field} />
+              <BreedDropdown
+                value={field.value}
+                onChange={field.onChange}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

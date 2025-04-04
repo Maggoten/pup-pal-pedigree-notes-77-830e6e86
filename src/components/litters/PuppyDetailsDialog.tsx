@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import DatePicker from '@/components/common/DatePicker';
 import { Camera, Upload } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Puppy } from '@/types/breeding';
+import BreedDropdown from '@/components/dogs/BreedDropdown';
 
 interface PuppyDetailsDialogProps {
   puppy: Puppy;
@@ -150,11 +152,9 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
 
           <div>
             <Label htmlFor="breed">Breed</Label>
-            <Input 
-              id="breed" 
+            <BreedDropdown 
               value={breed} 
-              onChange={(e) => setBreed(e.target.value)} 
-              placeholder="Breed"
+              onChange={setBreed}
             />
           </div>
 
