@@ -136,9 +136,9 @@ const Login: React.FC = () => {
           
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-4 bg-cream-100">
+                <TabsTrigger value="login" className="data-[state=active]:bg-brown-500 data-[state=active]:text-white">Login</TabsTrigger>
+                <TabsTrigger value="register" className="data-[state=active]:bg-brown-500 data-[state=active]:text-white">Register</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
@@ -263,7 +263,7 @@ const Login: React.FC = () => {
                       control={registrationForm.control}
                       name="agreeToTerms"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-cream-50">
                           <FormControl>
                             <input
                               type="checkbox"
@@ -275,7 +275,9 @@ const Login: React.FC = () => {
                           <div className="space-y-1 leading-none">
                             <FormLabel>Accept terms and conditions</FormLabel>
                             <FormDescription>
-                              By creating an account, you agree to our Terms of Service and Privacy Policy.
+                              By creating an account, you agree to our Terms of Service and Privacy Policy. 
+                              Your membership will be charged $2.99 monthly. 
+                              You can end your subscription at any time.
                             </FormDescription>
                           </div>
                           <FormMessage />
@@ -302,7 +304,7 @@ const Login: React.FC = () => {
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold text-brown-700">Payment Information</CardTitle>
             <CardDescription className="text-brown-500">
-              Complete your subscription - $2.99/year
+              Complete your subscription - $2.99/month
             </CardDescription>
           </CardHeader>
           
@@ -331,8 +333,8 @@ const Login: React.FC = () => {
               
               <div className="rounded-md bg-cream-100 p-4 text-sm text-brown-700">
                 <p className="font-medium">Subscription Summary:</p>
-                <p>Annual Membership: $2.99</p>
-                <p>Your card will be charged annually until you cancel.</p>
+                <p>Monthly Membership: $2.99</p>
+                <p>Your card will be charged monthly until you cancel.</p>
               </div>
             </div>
           </CardContent>
@@ -347,7 +349,7 @@ const Login: React.FC = () => {
             </Button>
             <Button 
               variant="outline" 
-              className="w-full" 
+              className="w-full border-brown-300 text-brown-700 hover:bg-cream-100" 
               onClick={() => setShowPayment(false)}
               disabled={isLoading}
             >
