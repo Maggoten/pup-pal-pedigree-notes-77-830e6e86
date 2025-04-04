@@ -35,7 +35,9 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
     
     return logData.map(entry => ({
       date: new Date(entry.date).toLocaleDateString(),
-      [puppy.name]: logType === 'weight' ? entry.weight : entry.height
+      [puppy.name]: logType === 'weight' 
+        ? 'weight' in entry ? entry.weight : null 
+        : 'height' in entry ? entry.height : null
     }));
   };
 
@@ -61,9 +63,11 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
         );
         
         if (matchingEntry) {
-          dataPoint[puppy.name] = logType === 'weight' 
-            ? matchingEntry.weight 
-            : matchingEntry.height;
+          if (logType === 'weight' && 'weight' in matchingEntry) {
+            dataPoint[puppy.name] = matchingEntry.weight;
+          } else if (logType === 'height' && 'height' in matchingEntry) {
+            dataPoint[puppy.name] = matchingEntry.height;
+          }
         }
       });
       
