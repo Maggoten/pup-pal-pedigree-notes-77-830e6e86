@@ -3,6 +3,9 @@ import { useState, useEffect, createContext, useContext, ReactNode } from 'react
 
 interface User {
   email: string;
+  firstName?: string;
+  lastName?: string;
+  address?: string;
 }
 
 interface AuthContextType {
@@ -10,6 +13,15 @@ interface AuthContextType {
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  register: (userData: RegisterData) => Promise<boolean>;
+}
+
+interface RegisterData {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  address: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,6 +56,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return false;
   };
 
+  const register = async (userData: RegisterData): Promise<boolean> => {
+    // Mock registration - in a real app, this would call an API
+    try {
+      // Store user data (except password) in localStorage
+      const userToStore = {
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        address: userData.address
+      };
+      
+      localStorage.setItem('user', JSON.stringify(userToStore));
+      localStorage.setItem('isLoggedIn', 'true');
+      
+      setUser(userToStore);
+      setIsLoggedIn(true);
+      return true;
+    } catch (error) {
+      console.error("Registration error:", error);
+      return false;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('isLoggedIn');
@@ -53,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoggedIn, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
