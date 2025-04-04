@@ -12,28 +12,32 @@ interface PuppyListProps {
   puppies: Puppy[];
   onAddPuppy: (puppy: Puppy) => void;
   onSelectPuppy: (puppy: Puppy) => void;
+  onRowSelect: (puppy: Puppy) => void;
   onUpdatePuppy: (puppy: Puppy) => void;
   showAddPuppyDialog: boolean;
   setShowAddPuppyDialog: (show: boolean) => void;
   puppyNumber: number;
   litterDob: string;
+  selectedPuppy: Puppy | null;
 }
 
 const PuppyList: React.FC<PuppyListProps> = ({
   puppies,
   onAddPuppy,
   onSelectPuppy,
+  onRowSelect,
   onUpdatePuppy,
   showAddPuppyDialog,
   setShowAddPuppyDialog,
   puppyNumber,
-  litterDob
+  litterDob,
+  selectedPuppy
 }) => {
-  const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
+  const [activePuppy, setActivePuppy] = useState<Puppy | null>(null);
   const [showMeasurementsDialog, setShowMeasurementsDialog] = useState(false);
 
   const handleNameClick = (puppy: Puppy) => {
-    setSelectedPuppy(puppy);
+    setActivePuppy(puppy);
     setShowMeasurementsDialog(true);
   };
 
@@ -51,7 +55,7 @@ const PuppyList: React.FC<PuppyListProps> = ({
           <AddPuppyDialog 
             onClose={() => setShowAddPuppyDialog(false)} 
             onSubmit={onAddPuppy}
-            puppyNumber={puppyNumber}
+            puppyNumber={puppyNumber + puppies.length}
             litterDob={litterDob}
           />
         </Dialog>
@@ -71,10 +75,17 @@ const PuppyList: React.FC<PuppyListProps> = ({
           </TableHeader>
           <TableBody>
             {puppies.map(puppy => (
-              <TableRow key={puppy.id}>
+              <TableRow 
+                key={puppy.id} 
+                className={`cursor-pointer ${selectedPuppy?.id === puppy.id ? 'bg-muted' : ''}`}
+                onClick={() => onRowSelect(puppy)}
+              >
                 <TableCell>
                   <button
-                    onClick={() => handleNameClick(puppy)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent row click
+                      handleNameClick(puppy);
+                    }}
                     className="text-primary hover:underline font-medium cursor-pointer"
                   >
                     {puppy.name}
@@ -88,7 +99,10 @@ const PuppyList: React.FC<PuppyListProps> = ({
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => onSelectPuppy(puppy)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent row click
+                      onSelectPuppy(puppy);
+                    }}
                     className="flex items-center gap-1"
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -114,10 +128,10 @@ const PuppyList: React.FC<PuppyListProps> = ({
       )}
 
       {/* Puppy Measurements Dialog */}
-      {selectedPuppy && (
+      {activePuppy && (
         <Dialog open={showMeasurementsDialog} onOpenChange={setShowMeasurementsDialog}>
           <PuppyMeasurementsDialog 
-            puppy={selectedPuppy} 
+            puppy={activePuppy} 
             onClose={() => setShowMeasurementsDialog(false)}
             onUpdate={onUpdatePuppy}
           />

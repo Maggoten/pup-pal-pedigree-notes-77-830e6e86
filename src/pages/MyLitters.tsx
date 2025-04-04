@@ -35,6 +35,9 @@ const MyLitters: React.FC = () => {
   }, []);
   
   const handleAddLitter = (newLitter: Litter) => {
+    // Ensure the new litter has an empty puppies array
+    newLitter.puppies = [];
+    
     const updatedLitters = litterService.addLitter(newLitter);
     setLittersData(updatedLitters);
     setSelectedLitterId(newLitter.id);
@@ -138,7 +141,7 @@ const MyLitters: React.FC = () => {
           <p className="text-muted-foreground">Try adjusting your search term</p>
         </div>
       ) : (
-        <EmptyLitterState onAddLitter={() => setShowAddLitterDialog(false)} />
+        <EmptyLitterState onAddLitter={() => setShowAddLitterDialog(true)} />
       )}
     </PageLayout>
   );

@@ -29,6 +29,11 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
     setShowPuppyDetailsDialog(true);
   };
 
+  const handleRowSelect = (puppy: Puppy) => {
+    // This is used when clicking on a row to select a puppy for the chart
+    setSelectedPuppy(puppy);
+  };
+
   const handleUpdatePuppy = (updatedPuppy: Puppy) => {
     onUpdatePuppy(updatedPuppy);
     setSelectedPuppy(updatedPuppy);
@@ -50,11 +55,13 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             puppies={litter.puppies}
             onAddPuppy={onAddPuppy}
             onSelectPuppy={handlePuppySelect}
+            onRowSelect={handleRowSelect}
             onUpdatePuppy={handleUpdatePuppy}
             showAddPuppyDialog={showAddPuppyDialog}
             setShowAddPuppyDialog={setShowAddPuppyDialog}
-            puppyNumber={litter.puppies.length + 1}
+            puppyNumber={1} // Always start with puppy 1 for each litter
             litterDob={litter.dateOfBirth}
+            selectedPuppy={selectedPuppy}
           />
         </CardContent>
       </Card>
@@ -63,7 +70,11 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>Puppy Growth Charts</span>
+              <span>
+                {selectedPuppy 
+                  ? `${selectedPuppy.name}'s Growth Chart` 
+                  : 'Litter Growth Chart'}
+              </span>
               <div className="flex gap-2">
                 <Button 
                   variant={logType === 'weight' ? 'default' : 'outline'} 
@@ -84,7 +95,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             <CardDescription>
               {selectedPuppy 
                 ? `Tracking ${logType} for ${selectedPuppy.name}`
-                : 'Tracking the entire litter'}
+                : `Tracking ${logType} for the entire litter`}
             </CardDescription>
           </CardHeader>
           <CardContent>
