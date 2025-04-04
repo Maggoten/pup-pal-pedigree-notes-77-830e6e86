@@ -2,28 +2,37 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { Edit, Grid2X2 } from 'lucide-react';
 import { Litter, Puppy } from '@/types/breeding';
 import PuppyList from './PuppyList';
 import PuppyDetailsDialog from './PuppyDetailsDialog';
 import PuppyGrowthChart from './PuppyGrowthChart';
+import LitterEditDialog from './LitterEditDialog';
 
 interface LitterDetailsProps {
   litter: Litter;
   onAddPuppy: (puppy: Puppy) => void;
   onUpdatePuppy: (puppy: Puppy) => void;
   onDeletePuppy: (puppyId: string) => void;
+  onUpdateLitter: (litter: Litter) => void;
+  onDeleteLitter: (litterId: string) => void;
+  onArchiveLitter: (litterId: string, archive: boolean) => void;
 }
 
 const LitterDetails: React.FC<LitterDetailsProps> = ({
   litter,
   onAddPuppy,
   onUpdatePuppy,
-  onDeletePuppy
+  onDeletePuppy,
+  onUpdateLitter,
+  onDeleteLitter,
+  onArchiveLitter
 }) => {
   const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
   const [showAddPuppyDialog, setShowAddPuppyDialog] = useState(false);
   const [showPuppyDetailsDialog, setShowPuppyDetailsDialog] = useState(false);
+  const [showEditLitterDialog, setShowEditLitterDialog] = useState(false);
   const [logType, setLogType] = useState<'weight' | 'height'>('weight');
 
   const handlePuppySelect = (puppy: Puppy) => {
@@ -42,15 +51,16 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
   };
 
   // Extract the dam's breed from puppies array if available
-  const getDamBreed = () => {
-    if (litter.puppies.length > 0) {
-      // Check if any puppy has a breed set
-      const puppyWithBreed = litter.puppies.find(puppy => puppy.breed);
-      if (puppyWithBreed && puppyWithBreed.breed) {
-        return puppyWithBreed.breed;
-      }
-    }
-    return ''; // Return empty string if no breed found
+  const getBreeds = () => {
+    if (!litter.puppies || litter.puppies.length === 0) return 'Unknown';
+    
+    // Get unique breeds
+    const breeds = [...new Set(litter.puppies
+      .filter(puppy => puppy.breed)
+      .map(puppy => puppy.breed))];
+    
+    if (breeds.length === 0) return 'Unknown';
+    return breeds.join(', ');
   };
 
   const handleDeletePuppy = (puppyId: string) => {
@@ -61,16 +71,43 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
     }
   };
 
+  const puppyCount = litter.puppies?.length || 0;
+
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader>
-          <CardTitle>Litter Details</CardTitle>
-          <CardDescription>
-            Born: {new Date(litter.dateOfBirth).toLocaleDateString()} | 
-            Sire: {litter.sireName} | 
-            Dam: {litter.damName}
-          </CardDescription>
+        <CardHeader className="pb-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle>Litter Details</CardTitle>
+              <CardDescription>
+                Born: {new Date(litter.dateOfBirth).toLocaleDateString()} | 
+                Sire: {litter.sireName} | 
+                Dam: {litter.damName}
+              </CardDescription>
+            </div>
+            <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Edit className="h-4 w-4" />
+                  Edit Litter Details
+                </Button>
+              </DialogTrigger>
+              <LitterEditDialog 
+                litter={litter}
+                onClose={() => setShowEditLitterDialog(false)}
+                onUpdate={onUpdateLitter}
+                onDelete={onDeleteLitter}
+                onArchive={onArchiveLitter}
+              />
+            </Dialog>
+          </div>
+          {puppyCount > 0 && (
+            <div className="flex items-center gap-2 mt-2">
+              <Grid2X2 className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Breed: {getBreeds()}</span>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <PuppyList 
@@ -85,7 +122,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             puppyNumber={1} // Always start with puppy 1 for each litter
             litterDob={litter.dateOfBirth}
             selectedPuppy={selectedPuppy}
-            damBreed={getDamBreed()} // Pass the mother's breed
+            damBreed={getBreeds()} // Pass the mother's breed
           />
         </CardContent>
       </Card>

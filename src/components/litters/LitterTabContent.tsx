@@ -1,10 +1,6 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Litter } from '@/types/breeding';
-import { Button } from '@/components/ui/button';
-import LitterSearchForm from './LitterSearchForm';
-import YearFilterDropdown from './YearFilterDropdown';
-import ViewToggle from './ViewToggle';
 import LitterGridView from './LitterGridView';
 import LitterListView from './LitterListView';
 import LitterPagination from './LitterPagination';
@@ -24,8 +20,6 @@ interface LitterTabContentProps {
   currentPage: number;
   setCurrentPage: (page: number) => void;
   isArchived: boolean;
-  searchQuery: string;
-  filterYear: number | null;
 }
 
 const LitterTabContent: React.FC<LitterTabContentProps> = ({
@@ -40,27 +34,13 @@ const LitterTabContent: React.FC<LitterTabContentProps> = ({
   pageCount,
   currentPage,
   setCurrentPage,
-  isArchived,
-  searchQuery,
-  filterYear
+  isArchived
 }) => {
-  const { view, setView, setSearchQuery, setFilterYear } = useLitterFilters();
+  const { view } = useLitterFilters();
   
   // Handle creating a new litter
   const handleAddLitterClick = () => {
     onAddLitter();
-  };
-
-  // Get available years for filtering
-  const getAvailableYears = () => {
-    const yearsSet = new Set<number>();
-    
-    litters.forEach(litter => {
-      const year = new Date(litter.dateOfBirth).getFullYear();
-      yearsSet.add(year);
-    });
-    
-    return Array.from(yearsSet).sort((a, b) => b - a); // Sort descending
   };
 
   // Handle empty state
@@ -83,24 +63,6 @@ const LitterTabContent: React.FC<LitterTabContentProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <LitterSearchForm 
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
-        <div className="flex gap-2 items-center">
-          <YearFilterDropdown 
-            years={getAvailableYears()}
-            selectedYear={filterYear}
-            onYearChange={setFilterYear}
-          />
-          <ViewToggle 
-            view={view} 
-            onViewChange={setView} 
-          />
-        </div>
-      </div>
-      
       {view === 'grid' ? (
         <LitterGridView 
           litters={paginatedLitters} 

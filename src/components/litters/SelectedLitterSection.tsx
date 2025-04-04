@@ -1,11 +1,7 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
-import { Edit } from 'lucide-react';
+import React from 'react';
 import { Litter, Puppy } from '@/types/breeding';
 import LitterDetails from './LitterDetails';
-import LitterEditDialog from './LitterEditDialog';
 
 interface SelectedLitterSectionProps {
   selectedLitter: Litter | null;
@@ -26,35 +22,18 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
   onUpdatePuppy,
   onDeletePuppy
 }) => {
-  const [showEditLitterDialog, setShowEditLitterDialog] = useState(false);
-  
   if (!selectedLitter) return null;
 
   return (
     <div className="mt-10">
-      <div className="flex justify-end items-center mb-4">
-        <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Edit className="h-4 w-4" />
-              Edit Litter Details
-            </Button>
-          </DialogTrigger>
-          <LitterEditDialog 
-            litter={selectedLitter}
-            onClose={() => setShowEditLitterDialog(false)}
-            onUpdate={onUpdateLitter}
-            onDelete={onDeleteLitter}
-            onArchive={onArchiveLitter}
-          />
-        </Dialog>
-      </div>
-      
       <LitterDetails
         litter={selectedLitter}
         onAddPuppy={onAddPuppy}
         onUpdatePuppy={onUpdatePuppy}
         onDeletePuppy={onDeletePuppy}
+        onUpdateLitter={onUpdateLitter}
+        onDeleteLitter={onDeleteLitter}
+        onArchiveLitter={onArchiveLitter}
       />
     </div>
   );

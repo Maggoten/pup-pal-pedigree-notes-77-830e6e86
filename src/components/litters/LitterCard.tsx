@@ -4,7 +4,7 @@ import { format, parseISO } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Dog, Archive, Grid2X2 } from 'lucide-react';
+import { Calendar, Dog, Archive } from 'lucide-react';
 import { Litter } from '@/types/breeding';
 
 interface LitterCardProps {
@@ -26,19 +26,6 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
   
   // Get count of puppies, 0 if none
   const puppyCount = litter.puppies?.length || 0;
-  
-  // Determine breed(s) from puppies if available
-  const getBreeds = () => {
-    if (!litter.puppies || litter.puppies.length === 0) return 'Unknown';
-    
-    // Get unique breeds
-    const breeds = [...new Set(litter.puppies
-      .filter(puppy => puppy.breed)
-      .map(puppy => puppy.breed))];
-    
-    if (breeds.length === 0) return 'Unknown';
-    return breeds.join(', ');
-  };
 
   return (
     <Card 
@@ -79,13 +66,6 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
             <Dog className="h-4 w-4 text-muted-foreground" />
             <span>Dam: {litter.damName}</span>
           </div>
-          
-          {puppyCount > 0 && (
-            <div className="flex items-center gap-2">
-              <Grid2X2 className="h-4 w-4 text-muted-foreground" />
-              <span>Breed: {getBreeds()}</span>
-            </div>
-          )}
         </div>
         
         {onArchive && (
