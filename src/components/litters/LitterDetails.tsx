@@ -74,12 +74,12 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
       <Card>
         <CardHeader className="pb-4">
           <div>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center gap-1">
               <CardTitle>Litter Details</CardTitle>
               <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
                 <DialogTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Edit className="h-4 w-4" />
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-1">
+                    <Edit className="h-3.5 w-3.5" />
                   </Button>
                 </DialogTrigger>
                 <LitterEditDialog 
