@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, Calendar, Dog } from 'lucide-react';
+import { PlusCircle, Calendar, Dog, Trash2 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
@@ -75,6 +76,7 @@ const PlannedLittersContent: React.FC = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedLitter, setSelectedLitter] = useState<PlannedLitter | null>(null);
   const [matingDates, setMatingDates] = useState<{ [litterId: string]: string[] }>({});
+  const [calendarOpen, setCalendarOpen] = useState<{ [litterId: string]: boolean }>({});
   
   const males = dogs.filter(dog => dog.gender === 'male');
   const females = dogs.filter(dog => dog.gender === 'female');
@@ -172,6 +174,30 @@ const PlannedLittersContent: React.FC = () => {
     toast({
       title: "Mating Date Added",
       description: `Mating date ${format(date, 'PPP')} added successfully. A pregnancy has been created.`
+    });
+    
+    // Close the calendar after selection
+    setCalendarOpen({
+      ...calendarOpen,
+      [litterId]: false
+    });
+  };
+
+  const handleDeleteLitter = (litterId: string) => {
+    const updatedLitters = plannedLitters.filter(litter => litter.id !== litterId);
+    setPlannedLitters(updatedLitters);
+    localStorage.setItem('plannedLitters', JSON.stringify(updatedLitters));
+    
+    toast({
+      title: "Planned Litter Deleted",
+      description: "The planned litter has been removed successfully."
+    });
+  };
+
+  const toggleCalendar = (litterId: string) => {
+    setCalendarOpen({
+      ...calendarOpen,
+      [litterId]: !calendarOpen[litterId]
     });
   };
 
@@ -372,7 +398,15 @@ const PlannedLittersContent: React.FC = () => {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {plannedLitters.map(litter => (
           <Card key={litter.id}>
-            <CardHeader>
+            <CardHeader className="relative">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="absolute right-2 top-2" 
+                onClick={() => handleDeleteLitter(litter.id)}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
               <CardTitle>{litter.maleName} × {litter.femaleName}</CardTitle>
               <CardDescription className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
@@ -399,6 +433,29 @@ const PlannedLittersContent: React.FC = () => {
                   </ul>
                 </div>
               )}
+              
+              <div className="mt-4">
+                <Popover open={calendarOpen[litter.id]} onOpenChange={(open) => setCalendarOpen({...calendarOpen, [litter.id]: open})}>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="w-full mt-2" 
+                      onClick={() => toggleCalendar(litter.id)}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Add Mating Date
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <CalendarComponent
+                      mode="single"
+                      onSelect={(date) => date && handleAddMatingDate(litter.id, date)}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </CardContent>
             <CardFooter>
               <Dialog>
