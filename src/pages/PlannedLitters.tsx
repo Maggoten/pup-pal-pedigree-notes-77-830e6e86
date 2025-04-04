@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { DogsProvider, useDogs } from '@/context/DogsContext';
+import { useDogs } from '@/context/DogsContext';
 import { Switch } from '@/components/ui/switch';
 
 interface PlannedLitter {
@@ -31,17 +31,23 @@ interface PlannedLitter {
   externalMaleBreed?: string;
 }
 
-const samplePlannedLitters: PlannedLitter[] = [
-  {
-    id: '1',
-    maleId: '3',
-    femaleId: '2',
-    maleName: 'Rocky',
-    femaleName: 'Bella',
-    expectedHeatDate: '2025-05-15',
-    notes: 'First planned breeding, watching for genetic diversity'
+const loadPlannedLitters = (): PlannedLitter[] => {
+  const stored = localStorage.getItem('plannedLitters');
+  if (stored) {
+    return JSON.parse(stored);
   }
-];
+  return [
+    {
+      id: '1',
+      maleId: '3',
+      femaleId: '2',
+      maleName: 'Rocky',
+      femaleName: 'Bella',
+      expectedHeatDate: '2025-05-15',
+      notes: 'First planned breeding, watching for genetic diversity'
+    }
+  ];
+};
 
 const formSchema = z.object({
   maleId: z.string().optional(),
@@ -65,13 +71,17 @@ const formSchema = z.object({
 
 const PlannedLittersContent: React.FC = () => {
   const { dogs } = useDogs();
-  const [plannedLitters, setPlannedLitters] = useState<PlannedLitter[]>(samplePlannedLitters);
+  const [plannedLitters, setPlannedLitters] = useState<PlannedLitter[]>(loadPlannedLitters());
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedLitter, setSelectedLitter] = useState<PlannedLitter | null>(null);
   const [matingDates, setMatingDates] = useState<{ [litterId: string]: string[] }>({});
   
   const males = dogs.filter(dog => dog.gender === 'male');
   const females = dogs.filter(dog => dog.gender === 'female');
+  
+  useEffect(() => {
+    localStorage.setItem('plannedLitters', JSON.stringify(plannedLitters));
+  }, [plannedLitters]);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -150,15 +160,18 @@ const PlannedLittersContent: React.FC = () => {
     
     setMatingDates(newMatingDates);
     
-    setPlannedLitters(plannedLitters.map(litter => 
+    const updatedLitters = plannedLitters.map(litter => 
       litter.id === litterId 
         ? { ...litter, matingDates: newMatingDates[litterId] } 
         : litter
-    ));
+    );
+    
+    setPlannedLitters(updatedLitters);
+    localStorage.setItem('plannedLitters', JSON.stringify(updatedLitters));
     
     toast({
       title: "Mating Date Added",
-      description: `Mating date ${format(date, 'PPP')} added successfully.`
+      description: `Mating date ${format(date, 'PPP')} added successfully. A pregnancy has been created.`
     });
   };
 
@@ -478,11 +491,7 @@ const PlannedLittersContent: React.FC = () => {
 };
 
 const PlannedLitters: React.FC = () => {
-  return (
-    <DogsProvider>
-      <PlannedLittersContent />
-    </DogsProvider>
-  );
+  return <PlannedLittersContent />;
 };
 
 export default PlannedLitters;

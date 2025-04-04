@@ -8,6 +8,7 @@ import { toast } from '@/components/ui/use-toast';
 import { useDogs } from '@/context/DogsContext';
 import { calculateUpcomingHeats, UpcomingHeat } from '@/utils/heatCalculator';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 const MatingTips = [
   "Wait until the bitch is in standing heat before mating",
@@ -20,16 +21,14 @@ const MatingTips = [
 const Mating: React.FC = () => {
   const { dogs } = useDogs();
   const [upcomingHeats, setUpcomingHeats] = useState<UpcomingHeat[]>([]);
+  const navigate = useNavigate();
   
   useEffect(() => {
     setUpcomingHeats(calculateUpcomingHeats(dogs));
   }, [dogs]);
   
   const handleAddMatingClick = () => {
-    toast({
-      title: "Feature Coming Soon",
-      description: "Adding mating records will be available in the next update."
-    });
+    navigate('/planned-litters');
   };
 
   return (
