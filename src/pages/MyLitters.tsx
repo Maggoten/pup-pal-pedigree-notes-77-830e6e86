@@ -13,12 +13,14 @@ import { plannedLitterService } from '@/services/PlannedLitterService';
 import AddLitterDialog from '@/components/litters/AddLitterDialog';
 import EmptyLitterState from '@/components/litters/EmptyLitterState';
 import LitterDetails from '@/components/litters/LitterDetails';
+import LitterSearchForm from '@/components/litters/LitterSearchForm';
 
 const MyLitters: React.FC = () => {
   const [littersData, setLittersData] = useState<Litter[]>([]);
   const [selectedLitterId, setSelectedLitterId] = useState<string | null>(null);
   const [showAddLitterDialog, setShowAddLitterDialog] = useState(false);
   const [plannedLitters, setPlannedLitters] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Load litters and planned litters on component mount
   useEffect(() => {
@@ -62,9 +64,21 @@ const MyLitters: React.FC = () => {
     setLittersData(updatedLitters);
   };
   
+  // Filter litters based on search query
+  const filteredLitters = littersData.filter(litter => {
+    if (!searchQuery.trim()) return true;
+    
+    const searchTermLower = searchQuery.toLowerCase();
+    return (
+      litter.name.toLowerCase().includes(searchTermLower) ||
+      litter.sireName.toLowerCase().includes(searchTermLower) ||
+      litter.damName.toLowerCase().includes(searchTermLower)
+    );
+  });
+  
   // Find the selected litter
   const selectedLitter = selectedLitterId 
-    ? littersData.find(litter => litter.id === selectedLitterId) 
+    ? filteredLitters.find(litter => litter.id === selectedLitterId) 
     : null;
   
   return (
@@ -73,44 +87,58 @@ const MyLitters: React.FC = () => {
       description="Track your litters and individual puppies"
       icon={<Dog className="h-6 w-6" />}
     >
-      <div className="flex justify-end">
-        <Dialog open={showAddLitterDialog} onOpenChange={setShowAddLitterDialog}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2 mb-6">
-              <PlusCircle className="h-4 w-4" />
-              Add New Litter
-            </Button>
-          </DialogTrigger>
-          <AddLitterDialog 
-            onClose={() => setShowAddLitterDialog(false)} 
-            onSubmit={handleAddLitter}
-            plannedLitters={plannedLitters}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <h2 className="text-2xl font-bold">My Litters</h2>
+        
+        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-4">
+          <LitterSearchForm 
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
           />
-        </Dialog>
+          
+          <Dialog open={showAddLitterDialog} onOpenChange={setShowAddLitterDialog}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2">
+                <PlusCircle className="h-4 w-4" />
+                Add New Litter
+              </Button>
+            </DialogTrigger>
+            <AddLitterDialog 
+              onClose={() => setShowAddLitterDialog(false)} 
+              onSubmit={handleAddLitter}
+              plannedLitters={plannedLitters}
+            />
+          </Dialog>
+        </div>
       </div>
       
-      {littersData.length > 0 ? (
+      {filteredLitters.length > 0 ? (
         <>
           <Tabs value={selectedLitterId || ''} onValueChange={setSelectedLitterId} className="space-y-4">
             <TabsList className="w-full justify-start overflow-auto">
-              {littersData.map(litter => (
+              {filteredLitters.map(litter => (
                 <TabsTrigger key={litter.id} value={litter.id}>{litter.name}</TabsTrigger>
               ))}
             </TabsList>
             
-            {littersData.map(litter => (
-              <TabsContent key={litter.id} value={litter.id} className="space-y-4">
+            {selectedLitter && (
+              <TabsContent value={selectedLitter.id} className="space-y-4">
                 <LitterDetails
-                  litter={litter}
+                  litter={selectedLitter}
                   onAddPuppy={handleAddPuppy}
                   onUpdatePuppy={handleUpdatePuppy}
                 />
               </TabsContent>
-            ))}
+            )}
           </Tabs>
         </>
+      ) : searchQuery ? (
+        <div className="text-center py-12">
+          <h3 className="text-lg font-medium mb-2">No matching litters found</h3>
+          <p className="text-muted-foreground">Try adjusting your search term</p>
+        </div>
       ) : (
-        <EmptyLitterState onAddLitter={() => setShowAddLitterDialog(true)} />
+        <EmptyLitterState onAddLitter={() => setShowAddLitterDialog(false)} />
       )}
     </PageLayout>
   );
