@@ -4,13 +4,13 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Grid2X2, List } from 'lucide-react';
 
 interface ViewToggleProps {
-  viewType: 'grid' | 'list';
+  view: 'grid' | 'list';  // Changed from viewType to view to match usage in LitterFilterControls
   onViewChange: (view: 'grid' | 'list') => void;
 }
 
-const ViewToggle: React.FC<ViewToggleProps> = ({ viewType, onViewChange }) => {
+const ViewToggle: React.FC<ViewToggleProps> = ({ view, onViewChange }) => {
   return (
-    <ToggleGroup type="single" value={viewType} onValueChange={(value) => {
+    <ToggleGroup type="single" value={view} onValueChange={(value) => {
       if (value) onViewChange(value as 'grid' | 'list');
     }}>
       <ToggleGroupItem value="grid" aria-label="Grid View">
