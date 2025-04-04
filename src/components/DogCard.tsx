@@ -21,25 +21,29 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
     return `${years}y ${months}m`;
   };
 
-  // Create a constant for the placeholder path rather than hardcoding it multiple times
-  const PLACEHOLDER_IMAGE = '/placeholder.svg';
+  // Define this as a constant to ensure we're not accidentally modifying the file path
+  const PLACEHOLDER_IMAGE_PATH = '/placeholder.svg';
   
-  // Use the dog's image or fall back to placeholder without modifying the placeholder
-  const dogImage = dog.image || PLACEHOLDER_IMAGE;
+  // Determine which image to show (dog's image or placeholder)
+  const imageSrc = dog.image || PLACEHOLDER_IMAGE_PATH;
+
+  // Handle image loading error
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const target = e.target as HTMLImageElement;
+    if (target.src !== PLACEHOLDER_IMAGE_PATH) {
+      target.src = PLACEHOLDER_IMAGE_PATH;
+    }
+  };
 
   return (
     <Card className="dog-card w-full h-full overflow-hidden" onClick={() => onClick(dog)}>
       <CardHeader className="p-0">
         <div className="aspect-[4/3] w-full relative">
           <img 
-            src={dogImage} 
+            src={imageSrc} 
             alt={dog.name} 
             className="object-cover w-full h-full"
-            onError={(e) => {
-              // If image fails to load, set to placeholder
-              const target = e.target as HTMLImageElement;
-              target.src = PLACEHOLDER_IMAGE;
-            }}
+            onError={handleImageError}
           />
           <div className="absolute top-2 right-2">
             <Badge className={dog.gender === 'male' ? 'bg-blue-500' : 'bg-rose-400'}>
