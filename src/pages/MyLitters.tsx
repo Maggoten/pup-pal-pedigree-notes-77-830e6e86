@@ -1,165 +1,83 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, BarChart, Dog, LineChart } from 'lucide-react';
+import { PlusCircle, BarChart, Dog, LineChart, Pencil } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-interface Puppy {
-  id: string;
-  name: string;
-  gender: 'male' | 'female';
-  color: string;
-  weightLog: { date: string; weight: number }[];
-  heightLog: { date: string; height: number }[];
-}
-
-interface Litter {
-  id: string;
-  name: string;
-  dateOfBirth: string;
-  sireId: string;
-  damId: string;
-  sireName: string;
-  damName: string;
-  puppies: Puppy[];
-}
-
-// Sample data
-const litters: Litter[] = [
-  {
-    id: '1',
-    name: 'Spring Litter 2025',
-    dateOfBirth: '2025-04-15',
-    sireId: '1',
-    damId: '2',
-    sireName: 'Max',
-    damName: 'Bella',
-    puppies: [
-      {
-        id: '1',
-        name: 'Puppy 1',
-        gender: 'male',
-        color: 'Golden',
-        weightLog: [
-          { date: '2025-04-15', weight: 0.45 },
-          { date: '2025-04-16', weight: 0.48 },
-          { date: '2025-04-17', weight: 0.52 },
-        ],
-        heightLog: [
-          { date: '2025-04-15', height: 8.5 },
-          { date: '2025-04-16', height: 8.7 },
-          { date: '2025-04-17', height: 9.0 },
-        ]
-      },
-      {
-        id: '2',
-        name: 'Puppy 2',
-        gender: 'female',
-        color: 'Light Golden',
-        weightLog: [
-          { date: '2025-04-15', weight: 0.42 },
-          { date: '2025-04-16', weight: 0.46 },
-          { date: '2025-04-17', weight: 0.49 },
-        ],
-        heightLog: [
-          { date: '2025-04-15', height: 8.2 },
-          { date: '2025-04-16', height: 8.5 },
-          { date: '2025-04-17', height: 8.7 },
-        ]
-      }
-    ]
-  }
-];
+import { Litter, Puppy } from '@/types/breeding';
+import { litterService } from '@/services/LitterService';
+import { plannedLitterService } from '@/services/PlannedLitterService';
+import AddLitterDialog from '@/components/litters/AddLitterDialog';
+import AddPuppyDialog from '@/components/litters/AddPuppyDialog';
+import PuppyDetailsDialog from '@/components/litters/PuppyDetailsDialog';
 
 const MyLitters: React.FC = () => {
-  const [littersData, setLittersData] = useState<Litter[]>(litters);
-  const [selectedLitterId, setSelectedLitterId] = useState<string | null>(littersData.length > 0 ? littersData[0].id : null);
+  const [littersData, setLittersData] = useState<Litter[]>([]);
+  const [selectedLitterId, setSelectedLitterId] = useState<string | null>(null);
   const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
   const [logType, setLogType] = useState<'weight' | 'height'>('weight');
-  const [newEntry, setNewEntry] = useState<{ value: string }>({ value: '' });
-  const [showDialog, setShowDialog] = useState(false);
+  const [showAddLitterDialog, setShowAddLitterDialog] = useState(false);
+  const [showAddPuppyDialog, setShowAddPuppyDialog] = useState(false);
+  const [showPuppyDetailsDialog, setShowPuppyDetailsDialog] = useState(false);
+  const [plannedLitters, setPlannedLitters] = useState([]);
   
-  const selectedLitter = littersData.find(litter => litter.id === selectedLitterId);
+  // Get the selected litter
+  const selectedLitter = selectedLitterId 
+    ? littersData.find(litter => litter.id === selectedLitterId) 
+    : null;
   
-  const handleAddLitterClick = () => {
+  // Load litters and planned litters on component mount
+  useEffect(() => {
+    const loadedLitters = litterService.loadLitters();
+    if (loadedLitters.length > 0) {
+      setLittersData(loadedLitters);
+      setSelectedLitterId(loadedLitters[0].id);
+    }
+    
+    const loadedPlannedLitters = plannedLitterService.loadPlannedLitters();
+    setPlannedLitters(loadedPlannedLitters);
+  }, []);
+  
+  const handleAddLitter = (newLitter: Litter) => {
+    const updatedLitters = litterService.addLitter(newLitter);
+    setLittersData(updatedLitters);
+    setSelectedLitterId(newLitter.id);
+    
     toast({
-      title: "Feature Coming Soon",
-      description: "Adding new litters will be available in the next update."
+      title: "Litter Added",
+      description: `${newLitter.name} has been added successfully.`
     });
   };
   
-  const handleLogEntry = () => {
-    if (!selectedPuppy || !newEntry.value || isNaN(parseFloat(newEntry.value))) {
-      toast({
-        title: "Invalid Entry",
-        description: "Please enter a valid number.",
-        variant: "destructive"
-      });
-      return;
-    }
+  const handleAddPuppy = (newPuppy: Puppy) => {
+    if (!selectedLitterId) return;
     
-    const value = parseFloat(newEntry.value);
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-    
-    // Add entry to the selected puppy
-    const updatedLitters = littersData.map(litter => {
-      if (litter.id === selectedLitterId) {
-        const updatedPuppies = litter.puppies.map(puppy => {
-          if (puppy.id === selectedPuppy.id) {
-            if (logType === 'weight') {
-              return {
-                ...puppy,
-                weightLog: [...puppy.weightLog, { date: today, weight: value }]
-              };
-            } else {
-              return {
-                ...puppy,
-                heightLog: [...puppy.heightLog, { date: today, height: value }]
-              };
-            }
-          }
-          return puppy;
-        });
-        
-        return { ...litter, puppies: updatedPuppies };
-      }
-      return litter;
-    });
-    
+    const updatedLitters = litterService.addPuppy(selectedLitterId, newPuppy);
     setLittersData(updatedLitters);
-    setNewEntry({ value: '' });
-    setShowDialog(false);
-    
-    // Also update selected puppy
-    if (logType === 'weight') {
-      setSelectedPuppy({
-        ...selectedPuppy,
-        weightLog: [...selectedPuppy.weightLog, { date: today, weight: value }]
-      });
-    } else {
-      setSelectedPuppy({
-        ...selectedPuppy,
-        heightLog: [...selectedPuppy.heightLog, { date: today, height: value }]
-      });
-    }
     
     toast({
-      title: `${logType === 'weight' ? 'Weight' : 'Height'} Logged`,
-      description: `Added ${value} ${logType === 'weight' ? 'kg' : 'cm'} for ${selectedPuppy.name}.`
+      title: "Puppy Added",
+      description: `${newPuppy.name} has been added to the litter.`
     });
+  };
+  
+  const handleUpdatePuppy = (updatedPuppy: Puppy) => {
+    if (!selectedLitterId) return;
+    
+    const updatedLitters = litterService.updatePuppy(selectedLitterId, updatedPuppy);
+    setLittersData(updatedLitters);
+    setSelectedPuppy(updatedPuppy);
   };
   
   const handlePuppySelect = (puppy: Puppy) => {
     setSelectedPuppy(puppy);
+    setShowPuppyDetailsDialog(true);
   };
   
   // Prepare chart data
@@ -195,12 +113,6 @@ const MyLitters: React.FC = () => {
           <p className="text-muted-foreground">
             No {logType} data available for {selectedPuppy.name}
           </p>
-          <Button 
-            onClick={() => { setLogType(logType); setShowDialog(true); }} 
-            className="mt-4"
-          >
-            Add {logType === 'weight' ? 'Weight' : 'Height'} Entry
-          </Button>
         </div>
       );
     }
@@ -222,7 +134,7 @@ const MyLitters: React.FC = () => {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis />
-            <ChartTooltip content={<ChartTooltipContent />} />
+            <Tooltip content={<ChartTooltipContent />} />
             <Line
               type="monotone"
               dataKey={logType}
@@ -242,10 +154,19 @@ const MyLitters: React.FC = () => {
       icon={<Dog className="h-6 w-6" />}
     >
       <div className="flex justify-end">
-        <Button onClick={handleAddLitterClick} className="flex items-center gap-2 mb-6">
-          <PlusCircle className="h-4 w-4" />
-          Add New Litter
-        </Button>
+        <Dialog open={showAddLitterDialog} onOpenChange={setShowAddLitterDialog}>
+          <DialogTrigger asChild>
+            <Button className="flex items-center gap-2 mb-6">
+              <PlusCircle className="h-4 w-4" />
+              Add New Litter
+            </Button>
+          </DialogTrigger>
+          <AddLitterDialog 
+            onClose={() => setShowAddLitterDialog(false)} 
+            onSubmit={handleAddLitter}
+            plannedLitters={plannedLitters}
+          />
+        </Dialog>
       </div>
       
       {littersData.length > 0 ? (
@@ -272,146 +193,128 @@ const MyLitters: React.FC = () => {
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <h3 className="text-lg font-semibold">Puppies ({litter.puppies.length})</h3>
-                        <Dialog open={showDialog} onOpenChange={setShowDialog}>
+                        <Dialog open={showAddPuppyDialog} onOpenChange={setShowAddPuppyDialog}>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm" className="flex items-center gap-2">
-                              <BarChart className="h-4 w-4" />
-                              Log {logType === 'weight' ? 'Weight' : 'Height'}
+                              <PlusCircle className="h-4 w-4" />
+                              Add New Puppy
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
-                              <DialogTitle>Log {logType === 'weight' ? 'Weight' : 'Height'}</DialogTitle>
-                              <DialogDescription>
-                                Enter the {logType === 'weight' ? 'weight in kg' : 'height in cm'} for the selected puppy.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                              <div className="grid gap-2">
-                                <Label htmlFor="puppy">Puppy</Label>
-                                <select 
-                                  id="puppy"
-                                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                  value={selectedPuppy?.id || ''}
-                                  onChange={(e) => {
-                                    const puppy = litter.puppies.find(p => p.id === e.target.value);
-                                    if (puppy) setSelectedPuppy(puppy);
-                                  }}
-                                >
-                                  <option value="" disabled>Select a puppy</option>
-                                  {litter.puppies.map(puppy => (
-                                    <option key={puppy.id} value={puppy.id}>
-                                      {puppy.name}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div className="grid gap-2">
-                                <Label htmlFor="value">{logType === 'weight' ? 'Weight (kg)' : 'Height (cm)'}</Label>
-                                <Input
-                                  id="value"
-                                  type="number"
-                                  step="0.01"
-                                  value={newEntry.value}
-                                  onChange={(e) => setNewEntry({ value: e.target.value })}
-                                  placeholder={logType === 'weight' ? '0.00 kg' : '0.0 cm'}
-                                />
-                              </div>
-                            </div>
-                            <DialogFooter>
-                              <Button onClick={handleLogEntry}>Save Entry</Button>
-                            </DialogFooter>
-                          </DialogContent>
+                          <AddPuppyDialog 
+                            onClose={() => setShowAddPuppyDialog(false)} 
+                            onSubmit={handleAddPuppy}
+                            puppyNumber={litter.puppies.length + 1}
+                            litterDob={litter.dateOfBirth}
+                          />
                         </Dialog>
                       </div>
                       
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Gender</TableHead>
-                            <TableHead>Color</TableHead>
-                            <TableHead>Current Weight</TableHead>
-                            <TableHead>Current Height</TableHead>
-                            <TableHead>Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {litter.puppies.map(puppy => {
-                            const latestWeight = puppy.weightLog.length > 0 
-                              ? puppy.weightLog[puppy.weightLog.length - 1].weight 
-                              : 0;
-                              
-                            const latestHeight = puppy.heightLog.length > 0
-                              ? puppy.heightLog[puppy.heightLog.length - 1].height
-                              : 0;
-                              
-                            return (
+                      {litter.puppies.length > 0 ? (
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Name</TableHead>
+                              <TableHead>Gender</TableHead>
+                              <TableHead>Color</TableHead>
+                              <TableHead>Breed</TableHead>
+                              <TableHead>Birth Weight</TableHead>
+                              <TableHead>Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {litter.puppies.map(puppy => (
                               <TableRow key={puppy.id}>
                                 <TableCell>{puppy.name}</TableCell>
                                 <TableCell>{puppy.gender}</TableCell>
                                 <TableCell>{puppy.color}</TableCell>
-                                <TableCell>{latestWeight} kg</TableCell>
-                                <TableCell>{latestHeight} cm</TableCell>
+                                <TableCell>{puppy.breed || '-'}</TableCell>
+                                <TableCell>{puppy.birthWeight} kg</TableCell>
                                 <TableCell>
                                   <Button 
                                     variant="ghost" 
                                     size="sm"
                                     onClick={() => handlePuppySelect(puppy)}
+                                    className="flex items-center gap-1"
                                   >
-                                    View Growth
+                                    <Pencil className="h-3.5 w-3.5" />
+                                    Edit
                                   </Button>
                                 </TableCell>
                               </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      ) : (
+                        <div className="text-center py-8 border rounded-md">
+                          <p className="text-muted-foreground mb-4">No puppies added to this litter yet</p>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => setShowAddPuppyDialog(true)}
+                            className="flex items-center gap-2"
+                          >
+                            <PlusCircle className="h-4 w-4" />
+                            Add First Puppy
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
                 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>Puppy Growth Charts</span>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant={logType === 'weight' ? 'default' : 'outline'} 
-                          size="sm"
-                          onClick={() => setLogType('weight')}
-                        >
-                          Weight
-                        </Button>
-                        <Button 
-                          variant={logType === 'height' ? 'default' : 'outline'} 
-                          size="sm"
-                          onClick={() => setLogType('height')}
-                        >
-                          Height
-                        </Button>
-                      </div>
-                    </CardTitle>
-                    <CardDescription>
-                      {selectedPuppy 
-                        ? `Tracking ${logType} for ${selectedPuppy.name}`
-                        : 'Select a puppy to view growth charts'}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {renderPuppyGrowthChart()}
-                  </CardContent>
-                </Card>
+                {litter.puppies.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span>Puppy Growth Charts</span>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant={logType === 'weight' ? 'default' : 'outline'} 
+                            size="sm"
+                            onClick={() => setLogType('weight')}
+                          >
+                            Weight
+                          </Button>
+                          <Button 
+                            variant={logType === 'height' ? 'default' : 'outline'} 
+                            size="sm"
+                            onClick={() => setLogType('height')}
+                          >
+                            Height
+                          </Button>
+                        </div>
+                      </CardTitle>
+                      <CardDescription>
+                        {selectedPuppy 
+                          ? `Tracking ${logType} for ${selectedPuppy.name}`
+                          : 'Select a puppy to view growth charts'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {renderPuppyGrowthChart()}
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
             ))}
           </Tabs>
+          
+          {/* Puppy Details Dialog */}
+          {selectedPuppy && (
+            <Dialog open={showPuppyDetailsDialog} onOpenChange={setShowPuppyDetailsDialog}>
+              <PuppyDetailsDialog 
+                puppy={selectedPuppy} 
+                onClose={() => setShowPuppyDetailsDialog(false)} 
+                onUpdate={handleUpdatePuppy}
+              />
+            </Dialog>
+          )}
         </>
       ) : (
         <Card>
           <CardContent className="text-center py-12">
             <h3 className="text-lg font-medium mb-2">No Litters Yet</h3>
             <p className="text-muted-foreground mb-4">Add your first litter to start tracking puppies</p>
-            <Button onClick={handleAddLitterClick}>Add Your First Litter</Button>
+            <Button onClick={() => setShowAddLitterDialog(true)}>Add Your First Litter</Button>
           </CardContent>
         </Card>
       )}

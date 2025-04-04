@@ -37,7 +37,6 @@ const App = () => (
                 <Route path="/pregnancy" element={<Pregnancy />} />
                 <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
                 <Route path="/my-litters" element={<MyLitters />} />
-                <Route path="/puppies" element={<MyLitters />} /> {/* Redirect from old URL */}
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
