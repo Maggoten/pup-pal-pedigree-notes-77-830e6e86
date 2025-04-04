@@ -27,8 +27,6 @@ const Index = () => {
       <PageLayout 
         title="Breeding Journey" 
         description={`Welcome back, ${user?.email?.split('@')[0] || 'Breeder'}! Manage your breeding program efficiently`}
-        headerImage="/lovable-uploads/15be06f0-e9ee-449e-911e-078b98f91a34.png"
-        headerAlt="Cute puppies sitting in a row"
       >
         <div className="grid gap-6 md:grid-cols-3">
           <div className="md:col-span-2">
