@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { Puppy } from '@/types/breeding';
 import PuppyDetailsForm from './puppies/PuppyDetailsForm';
-import ImageUploader from '@/components/ImageUploader';
+import PuppyImageUploader from './puppies/PuppyImageUploader';
 import { Trash2 } from 'lucide-react';
 
 interface PuppyDetailsDialogProps {
@@ -66,10 +66,10 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
       <div className="grid gap-6">
         <div className="mb-2">
           <h3 className="text-sm font-medium mb-2">Puppy Photo</h3>
-          <ImageUploader 
-            currentImage={puppy.imageUrl}
+          <PuppyImageUploader 
+            puppyName={puppy.name}
+            currentImage={imageUrl}
             onImageChange={handleImageChange}
-            className="max-w-[200px] mx-auto"
           />
         </div>
         

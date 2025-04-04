@@ -6,7 +6,6 @@ import { Puppy } from '@/types/breeding';
 import DatePicker from '@/components/common/DatePicker';
 import BreedDropdown from '@/components/dogs/BreedDropdown';
 import PuppyGenderSelector from './PuppyGenderSelector';
-import PuppyImageUpload from './PuppyImageUpload';
 
 interface PuppyDetailsFormProps {
   puppy: Puppy;
@@ -19,7 +18,6 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
   const [color, setColor] = useState(puppy.color);
   const [birthWeight, setBirthWeight] = useState(puppy.birthWeight.toString());
   const [breed, setBreed] = useState(puppy.breed || '');
-  const [imageUrl, setImageUrl] = useState(puppy.imageUrl || '');
   
   const birthDate = new Date(puppy.birthDateTime);
   const [dateOfBirth, setDateOfBirth] = useState<Date>(birthDate);
@@ -46,7 +44,6 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
         breed,
         birthWeight: parseFloat(birthWeight),
         birthDateTime: birthDateTime.toISOString(),
-        imageUrl
       };
 
       if (parseFloat(birthWeight) !== puppy.birthWeight) {
@@ -69,10 +66,8 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
   };
 
   return (
-    <form onSubmit={handleFormSubmit}>
+    <form id="puppy-form" onSubmit={handleFormSubmit}>
       <div className="space-y-4 mt-4">
-        <PuppyImageUpload name={name} imageUrl={imageUrl} />
-
         <div>
           <Label htmlFor="name">Name</Label>
           <Input 
@@ -130,10 +125,6 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
             type="time"
           />
         </div>
-      </div>
-
-      <div className="mt-6 flex justify-end space-x-2">
-        <button type="submit" hidden />
       </div>
     </form>
   );
