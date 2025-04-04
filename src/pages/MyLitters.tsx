@@ -109,8 +109,8 @@ const MyLitters: React.FC = () => {
       description="Track your litters and individual puppies"
       icon={<Dog className="h-6 w-6" />}
     >
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-4">
+      <div className="flex justify-end mb-6">
+        <div className="flex items-center gap-4">
           <LitterSearchForm 
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
