@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Dog, Trash2 } from 'lucide-react';
+import { PlusCircle, Dog, Edit } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -13,11 +14,13 @@ import AddLitterDialog from '@/components/litters/AddLitterDialog';
 import EmptyLitterState from '@/components/litters/EmptyLitterState';
 import LitterDetails from '@/components/litters/LitterDetails';
 import LitterSearchForm from '@/components/litters/LitterSearchForm';
+import LitterEditDialog from '@/components/litters/LitterEditDialog';
 
 const MyLitters: React.FC = () => {
   const [littersData, setLittersData] = useState<Litter[]>([]);
   const [selectedLitterId, setSelectedLitterId] = useState<string | null>(null);
   const [showAddLitterDialog, setShowAddLitterDialog] = useState(false);
+  const [showEditLitterDialog, setShowEditLitterDialog] = useState(false);
   const [plannedLitters, setPlannedLitters] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -43,6 +46,18 @@ const MyLitters: React.FC = () => {
       title: "Litter Added",
       description: `${newLitter.name} has been added successfully.`
     });
+  };
+  
+  const handleUpdateLitter = (updatedLitter: Litter) => {
+    const updatedLitters = litterService.updateLitter(updatedLitter);
+    setLittersData(updatedLitters);
+    
+    toast({
+      title: "Litter Updated",
+      description: `${updatedLitter.name} has been updated successfully.`
+    });
+    
+    setShowEditLitterDialog(false);
   };
   
   const handleAddPuppy = (newPuppy: Puppy) => {
@@ -85,6 +100,8 @@ const MyLitters: React.FC = () => {
         description: "The litter has been deleted successfully.",
         variant: "destructive"
       });
+      
+      setShowEditLitterDialog(false);
     }
   };
   
@@ -136,21 +153,14 @@ const MyLitters: React.FC = () => {
         <>
           <Tabs value={selectedLitterId || ''} onValueChange={setSelectedLitterId} className="space-y-4">
             <div className="flex items-start">
-              <TabsList className="w-full justify-start overflow-auto border-2 p-1">
+              <TabsList className="w-full justify-start overflow-auto border p-2 rounded-lg bg-muted/50">
                 {filteredLitters.map(litter => (
-                  <TabsTrigger key={litter.id} value={litter.id} className="relative group">
-                    <span className="text-primary">{litter.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute -right-2 -top-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevent tab change
-                        handleDeleteLitter(litter.id);
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                  <TabsTrigger 
+                    key={litter.id} 
+                    value={litter.id} 
+                    className="px-6 py-2 font-medium rounded-md relative"
+                  >
+                    <span className="text-primary font-semibold">{litter.name}</span>
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -158,6 +168,23 @@ const MyLitters: React.FC = () => {
             
             {selectedLitter && (
               <TabsContent value={selectedLitter.id} className="space-y-4">
+                <div className="flex justify-end mb-2">
+                  <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="flex items-center gap-2">
+                        <Edit className="h-4 w-4" />
+                        Edit Litter Details
+                      </Button>
+                    </DialogTrigger>
+                    <LitterEditDialog 
+                      litter={selectedLitter}
+                      onClose={() => setShowEditLitterDialog(false)}
+                      onUpdate={handleUpdateLitter}
+                      onDelete={handleDeleteLitter}
+                    />
+                  </Dialog>
+                </div>
+                
                 <LitterDetails
                   litter={selectedLitter}
                   onAddPuppy={handleAddPuppy}
