@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card } from '@/components/ui/card';
@@ -22,7 +21,6 @@ const MyLitters: React.FC = () => {
   const [plannedLitters, setPlannedLitters] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Load litters and planned litters on component mount
   useEffect(() => {
     const loadedLitters = litterService.loadLitters();
     if (loadedLitters.length > 0) {
@@ -35,7 +33,6 @@ const MyLitters: React.FC = () => {
   }, []);
   
   const handleAddLitter = (newLitter: Litter) => {
-    // Ensure the new litter has an empty puppies array
     newLitter.puppies = [];
     
     const updatedLitters = litterService.addLitter(newLitter);
@@ -79,7 +76,6 @@ const MyLitters: React.FC = () => {
       const updatedLitters = litterService.deleteLitter(litterId);
       setLittersData(updatedLitters);
       
-      // If the deleted litter was selected, select the first litter or set to null
       if (selectedLitterId === litterId) {
         setSelectedLitterId(updatedLitters.length > 0 ? updatedLitters[0].id : null);
       }
@@ -92,7 +88,6 @@ const MyLitters: React.FC = () => {
     }
   };
   
-  // Filter litters based on search query
   const filteredLitters = littersData.filter(litter => {
     if (!searchQuery.trim()) return true;
     
@@ -104,7 +99,6 @@ const MyLitters: React.FC = () => {
     );
   });
   
-  // Find the selected litter
   const selectedLitter = selectedLitterId 
     ? filteredLitters.find(litter => litter.id === selectedLitterId) 
     : null;
@@ -116,8 +110,6 @@ const MyLitters: React.FC = () => {
       icon={<Dog className="h-6 w-6" />}
     >
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <h2 className="text-2xl font-bold">My Litters</h2>
-        
         <div className="flex flex-col sm:flex-row w-full md:w-auto gap-4">
           <LitterSearchForm 
             searchQuery={searchQuery}
@@ -144,10 +136,10 @@ const MyLitters: React.FC = () => {
         <>
           <Tabs value={selectedLitterId || ''} onValueChange={setSelectedLitterId} className="space-y-4">
             <div className="flex items-start">
-              <TabsList className="w-full justify-start overflow-auto">
+              <TabsList className="w-full justify-start overflow-auto border-2 p-1">
                 {filteredLitters.map(litter => (
                   <TabsTrigger key={litter.id} value={litter.id} className="relative group">
-                    {litter.name}
+                    <span className="text-primary">{litter.name}</span>
                     <Button
                       variant="ghost"
                       size="icon"
