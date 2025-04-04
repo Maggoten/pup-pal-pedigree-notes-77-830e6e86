@@ -2,35 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, Calendar, Dog, Trash2 } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useDogs } from '@/context/DogsContext';
-import { Switch } from '@/components/ui/switch';
-
-interface PlannedLitter {
-  id: string;
-  maleId: string;
-  femaleId: string;
-  maleName: string;
-  femaleName: string;
-  expectedHeatDate: string;
-  matingDates?: string[];
-  notes: string;
-  externalMale?: boolean;
-  externalMaleBreed?: string;
-}
+import { PlannedLitter } from '@/types/breeding';
+import PlannedLitterCard from '@/components/planned-litters/PlannedLitterCard';
+import AddPlannedLitterDialog from '@/components/planned-litters/AddPlannedLitterDialog';
+import EmptyPlannedLitters from '@/components/planned-litters/EmptyPlannedLitters';
 
 const loadPlannedLitters = (): PlannedLitter[] => {
   const stored = localStorage.getItem('plannedLitters');
@@ -74,8 +55,6 @@ const PlannedLittersContent: React.FC = () => {
   const { dogs } = useDogs();
   const [plannedLitters, setPlannedLitters] = useState<PlannedLitter[]>(loadPlannedLitters());
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedLitter, setSelectedLitter] = useState<PlannedLitter | null>(null);
-  const [matingDates, setMatingDates] = useState<{ [litterId: string]: string[] }>({});
   const [calendarOpen, setCalendarOpen] = useState<{ [litterId: string]: boolean }>({});
   
   const males = dogs.filter(dog => dog.gender === 'male');
@@ -84,18 +63,6 @@ const PlannedLittersContent: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('plannedLitters', JSON.stringify(plannedLitters));
   }, [plannedLitters]);
-  
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      maleId: "",
-      femaleId: "",
-      notes: "",
-      externalMale: false,
-    }
-  });
-  
-  const isExternalMale = form.watch("externalMale");
   
   const handleAddPlannedLitter = (values: z.infer<typeof formSchema>) => {
     let maleName: string;
@@ -141,7 +108,6 @@ const PlannedLittersContent: React.FC = () => {
     };
     
     setPlannedLitters([...plannedLitters, newLitter]);
-    form.reset();
     setOpenDialog(false);
     
     toast({
@@ -150,21 +116,14 @@ const PlannedLittersContent: React.FC = () => {
     });
   };
   
-  const handleViewDetails = (litter: PlannedLitter) => {
-    setSelectedLitter(litter);
-  };
-  
   const handleAddMatingDate = (litterId: string, date: Date) => {
-    const newMatingDates = { 
-      ...matingDates,
-      [litterId]: [...(matingDates[litterId] || []), format(date, 'yyyy-MM-dd')]
-    };
-    
-    setMatingDates(newMatingDates);
-    
+    const formattedDate = format(date, 'yyyy-MM-dd');
     const updatedLitters = plannedLitters.map(litter => 
       litter.id === litterId 
-        ? { ...litter, matingDates: newMatingDates[litterId] } 
+        ? { 
+            ...litter, 
+            matingDates: [...(litter.matingDates || []), formattedDate] 
+          } 
         : litter
     );
     
@@ -194,13 +153,6 @@ const PlannedLittersContent: React.FC = () => {
     });
   };
 
-  const toggleCalendar = (litterId: string) => {
-    setCalendarOpen({
-      ...calendarOpen,
-      [litterId]: !calendarOpen[litterId]
-    });
-  };
-
   return (
     <PageLayout 
       title="Planned Litters" 
@@ -214,334 +166,29 @@ const PlannedLittersContent: React.FC = () => {
               Add Planned Litter
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Add Planned Litter</DialogTitle>
-              <DialogDescription>
-                Plan a future breeding between dogs
-              </DialogDescription>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleAddPlannedLitter)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="femaleId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Dam (Female)</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select female dog" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {females.map(dog => (
-                            <SelectItem key={dog.id} value={dog.id}>
-                              {dog.name} ({dog.breed})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="externalMale"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                      <div className="space-y-0.5">
-                        <FormLabel>External Sire</FormLabel>
-                        <FormDescription>
-                          Select if the sire is not one of your dogs
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                
-                {!isExternalMale ? (
-                  <FormField
-                    control={form.control}
-                    name="maleId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Sire (Male)</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select male dog" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {males.map(dog => (
-                              <SelectItem key={dog.id} value={dog.id}>
-                                {dog.name} ({dog.breed})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ) : (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="externalMaleName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>External Sire Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Enter dog name" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="externalMaleBreed"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>External Sire Breed</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Enter dog breed" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
-                
-                <FormField
-                  control={form.control}
-                  name="expectedHeatDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Expected Heat Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <CalendarComponent
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            initialFocus
-                            className="p-3 pointer-events-auto"
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Notes</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <DialogFooter>
-                  <Button type="submit">Add Litter</Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </DialogContent>
+          <AddPlannedLitterDialog 
+            males={males} 
+            females={females} 
+            onSubmit={handleAddPlannedLitter} 
+          />
         </Dialog>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {plannedLitters.map(litter => (
-          <Card key={litter.id}>
-            <CardHeader className="relative">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute right-2 top-2" 
-                onClick={() => handleDeleteLitter(litter.id)}
-              >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
-              <CardTitle>{litter.maleName} × {litter.femaleName}</CardTitle>
-              <CardDescription className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                Expected heat: {new Date(litter.expectedHeatDate).toLocaleDateString()}
-              </CardDescription>
-              {litter.externalMale && (
-                <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-                  External Sire
-                </span>
-              )}
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">{litter.notes}</p>
-              
-              {litter.matingDates && litter.matingDates.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium">Mating Dates:</h4>
-                  <ul className="mt-1 space-y-1">
-                    {litter.matingDates.map((date, index) => (
-                      <li key={index} className="text-sm">
-                        {new Date(date).toLocaleDateString()}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              
-              <div className="mt-4">
-                <Popover open={calendarOpen[litter.id]} onOpenChange={(open) => setCalendarOpen({...calendarOpen, [litter.id]: open})}>
-                  <PopoverTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className="w-full mt-2" 
-                      onClick={() => toggleCalendar(litter.id)}
-                    >
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Add Mating Date
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <CalendarComponent
-                      mode="single"
-                      onSelect={(date) => date && handleAddMatingDate(litter.id, date)}
-                      initialFocus
-                      className="p-3 pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full" onClick={() => handleViewDetails(litter)}>
-                    View Details
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Litter Details</DialogTitle>
-                    <DialogDescription>
-                      {litter.maleName} × {litter.femaleName}
-                    </DialogDescription>
-                  </DialogHeader>
-                  
-                  <div className="grid gap-4">
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Expected Heat</h3>
-                      <p>{new Date(litter.expectedHeatDate).toLocaleDateString()}</p>
-                    </div>
-                    
-                    {litter.externalMale && litter.externalMaleBreed && (
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground">External Sire Breed</h3>
-                        <p>{litter.externalMaleBreed}</p>
-                      </div>
-                    )}
-                    
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Notes</h3>
-                      <p>{litter.notes || 'No notes'}</p>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-medium text-muted-foreground">Mating Dates</h3>
-                      
-                      {litter.matingDates && litter.matingDates.length > 0 ? (
-                        <ul className="space-y-1">
-                          {litter.matingDates.map((date, index) => (
-                            <li key={index}>{new Date(date).toLocaleDateString()}</li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No mating dates recorded</p>
-                      )}
-                      
-                      <div className="mt-4">
-                        <h4 className="text-sm font-medium">Add Mating Date:</h4>
-                        <div className="mt-2">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="outline" className="w-full">
-                                <Calendar className="mr-2 h-4 w-4" />
-                                <span>Select Date</span>
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                              <CalendarComponent
-                                mode="single"
-                                onSelect={(date) => date && handleAddMatingDate(litter.id, date)}
-                                initialFocus
-                                className="p-3 pointer-events-auto"
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </CardFooter>
-          </Card>
+          <PlannedLitterCard 
+            key={litter.id}
+            litter={litter}
+            onAddMatingDate={handleAddMatingDate}
+            onDeleteLitter={handleDeleteLitter}
+            calendarOpen={calendarOpen[litter.id] || false}
+            onCalendarOpenChange={(open) => setCalendarOpen({...calendarOpen, [litter.id]: open})}
+          />
         ))}
       </div>
 
       {plannedLitters.length === 0 && (
-        <div className="text-center py-12">
-          <Dog className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h3 className="text-lg font-medium mt-4 mb-2">No Planned Litters</h3>
-          <p className="text-muted-foreground">Create your first planned breeding combination</p>
-          <Button onClick={() => setOpenDialog(true)} className="mt-4">
-            Add Your First Planned Litter
-          </Button>
-        </div>
+        <EmptyPlannedLitters onAddClick={() => setOpenDialog(true)} />
       )}
     </PageLayout>
   );
