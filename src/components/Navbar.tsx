@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Dog, FileText, Settings, PawPrint, Calendar, LogOut, Menu } from 'lucide-react';
+import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
