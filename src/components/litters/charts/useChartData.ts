@@ -8,66 +8,95 @@ const useChartData = (
   viewMode: 'single' | 'litter',
   logType: 'weight' | 'height'
 ) => {
-  // Define puppy color scheme
+  // Define puppy color scheme - moved outside of processing functions
   const puppyColors = {
     male: ['#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a'],
     female: ['#ec4899', '#db2777', '#be185d', '#9d174d', '#831843'],
   };
 
-  // Get color for a puppy based on gender and index
+  // Get color for a puppy based on gender and index - kept simple
   const getPuppyColor = (index: number, gender: 'male' | 'female') => {
     const colors = puppyColors[gender];
     return colors[index % colors.length];
   };
 
-  // Generate chart data for a single puppy
-  const getChartDataForSinglePuppy = (puppy: Puppy) => {
-    const logData = logType === 'weight' ? puppy.weightLog : puppy.heightLog;
-    
-    return logData.map(entry => ({
-      date: new Date(entry.date).toLocaleDateString(),
-      [puppy.name]: logType === 'weight' 
-        ? 'weight' in entry ? entry.weight : null 
-        : 'height' in entry ? entry.height : null
-    }));
-  };
-
-  // Generate chart data for all puppies in a litter
-  const getChartDataForLitter = () => {
-    const allDates = new Set<string>();
+  // Memoize all date entries for better performance when dealing with large datasets
+  const allDatesSet = useMemo(() => {
+    const dateSet = new Set<string>();
     
     puppies.forEach(puppy => {
       const logData = logType === 'weight' ? puppy.weightLog : puppy.heightLog;
       logData.forEach(entry => {
-        allDates.add(new Date(entry.date).toLocaleDateString());
+        dateSet.add(new Date(entry.date).toLocaleDateString());
       });
     });
     
-    return Array.from(allDates)
-      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
-      .map(date => {
-        const dataPoint: { [key: string]: any } = { date };
-        
-        puppies.forEach(puppy => {
-          const logData = logType === 'weight' ? puppy.weightLog : puppy.heightLog;
-          const matchingEntry = logData.find(entry => 
-            new Date(entry.date).toLocaleDateString() === date
-          );
+    return dateSet;
+  }, [puppies, logType]);
+
+  // Convert dates to sorted array - done once and cached
+  const allDates = useMemo(() => {
+    return Array.from(allDatesSet)
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+  }, [allDatesSet]);
+
+  // Pre-process puppy data for faster lookups when generating chart data
+  const puppyDataMap = useMemo(() => {
+    const dataMap = new Map<string, Map<string, number>>();
+    
+    puppies.forEach(puppy => {
+      const dateValueMap = new Map<string, number>();
+      const logData = logType === 'weight' ? puppy.weightLog : puppy.heightLog;
+      
+      logData.forEach(entry => {
+        const dateKey = new Date(entry.date).toLocaleDateString();
+        const value = logType === 'weight' 
+          ? 'weight' in entry ? entry.weight : null
+          : 'height' in entry ? entry.height : null;
           
-          if (matchingEntry) {
-            if (logType === 'weight' && 'weight' in matchingEntry) {
-              dataPoint[puppy.name] = matchingEntry.weight;
-            } else if (logType === 'height' && 'height' in matchingEntry) {
-              dataPoint[puppy.name] = matchingEntry.height;
-            }
-          }
-        });
-        
-        return dataPoint;
+        if (value !== null) {
+          dateValueMap.set(dateKey, value);
+        }
       });
+      
+      dataMap.set(puppy.name, dateValueMap);
+    });
+    
+    return dataMap;
+  }, [puppies, logType]);
+
+  // Generate chart data for a single puppy - optimized with cached data
+  const getChartDataForSinglePuppy = (puppy: Puppy) => {
+    // For single puppy, we only need dates that have data for this puppy
+    const puppyDateMap = puppyDataMap.get(puppy.name) || new Map<string, number>();
+    
+    // Filter to only include dates with data for this puppy
+    return Array.from(puppyDateMap.entries())
+      .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
+      .map(([date, value]) => ({
+        date,
+        [puppy.name]: value
+      }));
   };
 
-  // Generate chart configuration based on view mode
+  // Generate chart data for all puppies in a litter - much more efficient
+  const getChartDataForLitter = () => {
+    return allDates.map(date => {
+      const dataPoint: { [key: string]: any } = { date };
+      
+      // Use the cached map to quickly look up values for each puppy
+      puppies.forEach(puppy => {
+        const puppyDateMap = puppyDataMap.get(puppy.name);
+        if (puppyDateMap && puppyDateMap.has(date)) {
+          dataPoint[puppy.name] = puppyDateMap.get(date);
+        }
+      });
+      
+      return dataPoint;
+    });
+  };
+
+  // Generate chart configuration based on view mode - same logic but memoized
   const chartConfig = useMemo(() => {
     const config: { [key: string]: any } = {};
 
@@ -88,19 +117,24 @@ const useChartData = (
     return config;
   }, [viewMode, selectedPuppy, puppies]);
 
-  // Determine if any data is available for the chart
+  // Determine if any data is available for the chart - optimized
   const noDataAvailable = useMemo(() => {
-    return viewMode === 'single' 
-      ? selectedPuppy && getChartDataForSinglePuppy(selectedPuppy).length === 0
-      : getChartDataForLitter().length === 0;
-  }, [viewMode, selectedPuppy, puppies, logType]);
+    if (viewMode === 'single' && selectedPuppy) {
+      // Check if the puppy has any data in our cached map
+      const puppyDateMap = puppyDataMap.get(selectedPuppy.name);
+      return !puppyDateMap || puppyDateMap.size === 0;
+    } else {
+      // For litter view, check if we have any dates with data
+      return allDates.length === 0;
+    }
+  }, [viewMode, selectedPuppy, puppyDataMap, allDates]);
 
-  // Generate the final chart data based on view mode
+  // Generate the final chart data based on view mode - same logic but uses optimized functions
   const chartData = useMemo(() => {
     return viewMode === 'single' && selectedPuppy 
       ? getChartDataForSinglePuppy(selectedPuppy)
       : getChartDataForLitter();
-  }, [viewMode, selectedPuppy, puppies, logType]);
+  }, [viewMode, selectedPuppy, puppies, logType, puppyDataMap, allDates]);
 
   return {
     chartData,
