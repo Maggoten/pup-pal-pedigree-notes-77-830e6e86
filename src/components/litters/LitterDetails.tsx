@@ -39,6 +39,18 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
     setSelectedPuppy(updatedPuppy);
   };
 
+  // Extract the dam's breed from puppies array if available
+  const getDamBreed = () => {
+    if (litter.puppies.length > 0) {
+      // Check if any puppy has a breed set
+      const puppyWithBreed = litter.puppies.find(puppy => puppy.breed);
+      if (puppyWithBreed && puppyWithBreed.breed) {
+        return puppyWithBreed.breed;
+      }
+    }
+    return ''; // Return empty string if no breed found
+  };
+
   return (
     <div className="space-y-4">
       <Card>
@@ -62,6 +74,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             puppyNumber={1} // Always start with puppy 1 for each litter
             litterDob={litter.dateOfBirth}
             selectedPuppy={selectedPuppy}
+            damBreed={getDamBreed()} // Pass the mother's breed
           />
         </CardContent>
       </Card>
