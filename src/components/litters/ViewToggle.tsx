@@ -4,13 +4,13 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Grid2X2, List } from 'lucide-react';
 
 interface ViewToggleProps {
-  view: 'grid' | 'list';
+  viewType: 'grid' | 'list';  // Changed from "view" to "viewType" to match usage
   onViewChange: (view: 'grid' | 'list') => void;
 }
 
-const ViewToggle: React.FC<ViewToggleProps> = ({ view, onViewChange }) => {
+const ViewToggle: React.FC<ViewToggleProps> = ({ viewType, onViewChange }) => {
   return (
-    <ToggleGroup type="single" value={view} onValueChange={(value) => {
+    <ToggleGroup type="single" value={viewType} onValueChange={(value) => {
       if (value) onViewChange(value as 'grid' | 'list');
     }}>
       <ToggleGroupItem value="grid" aria-label="Grid View">

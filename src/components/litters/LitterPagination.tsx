@@ -10,17 +10,17 @@ import {
 } from '@/components/ui/pagination';
 
 interface LitterPaginationProps {
+  pageCount: number;  // Changed from totalPages to pageCount
   currentPage: number;
-  totalPages: number;
   onPageChange: (page: number) => void;
 }
 
 const LitterPagination: React.FC<LitterPaginationProps> = ({
   currentPage,
-  totalPages,
+  pageCount,  // Changed from totalPages to pageCount
   onPageChange
 }) => {
-  if (totalPages <= 1) return null;
+  if (pageCount <= 1) return null;
   
   return (
     <Pagination className="mt-6">
@@ -32,7 +32,7 @@ const LitterPagination: React.FC<LitterPaginationProps> = ({
           />
         </PaginationItem>
         
-        {Array.from({ length: totalPages }).map((_, i) => (
+        {Array.from({ length: pageCount }).map((_, i) => (
           <PaginationItem key={i}>
             <PaginationLink 
               isActive={currentPage === i + 1}
@@ -45,8 +45,8 @@ const LitterPagination: React.FC<LitterPaginationProps> = ({
         
         <PaginationItem>
           <PaginationNext 
-            onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-            className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+            onClick={() => onPageChange(Math.min(pageCount, currentPage + 1))}
+            className={currentPage === pageCount ? "pointer-events-none opacity-50" : ""}
           />
         </PaginationItem>
       </PaginationContent>

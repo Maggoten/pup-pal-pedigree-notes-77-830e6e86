@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Litter } from '@/types/breeding';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import LitterGridView from './LitterGridView';
 import LitterListView from './LitterListView';
 import LitterPagination from './LitterPagination';
 import EmptyLitterState from './EmptyLitterState';
+import { useLitterFilters } from './LitterFilterProvider';
 
 interface LitterTabContentProps {
   litters: Litter[];
@@ -43,10 +45,23 @@ const LitterTabContent: React.FC<LitterTabContentProps> = ({
   filterYear
 }) => {
   const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
+  const { setSearchQuery, setFilterYear } = useLitterFilters();
   
   // Handle creating a new litter
   const handleAddLitterClick = () => {
     onAddLitter();
+  };
+
+  // Get available years for filtering
+  const getAvailableYears = () => {
+    const yearsSet = new Set<number>();
+    
+    litters.forEach(litter => {
+      const year = new Date(litter.dateOfBirth).getFullYear();
+      yearsSet.add(year);
+    });
+    
+    return Array.from(yearsSet).sort((a, b) => b - a); // Sort descending
   };
 
   // Handle empty state
@@ -70,10 +85,20 @@ const LitterTabContent: React.FC<LitterTabContentProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <LitterSearchForm />
+        <LitterSearchForm 
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
         <div className="flex gap-2 items-center">
-          <YearFilterDropdown />
-          <ViewToggle viewType={viewType} onViewChange={setViewType} />
+          <YearFilterDropdown 
+            years={getAvailableYears()}
+            selectedYear={filterYear}
+            onYearChange={setFilterYear}
+          />
+          <ViewToggle 
+            viewType={viewType} 
+            onViewChange={setViewType} 
+          />
         </div>
       </div>
       
@@ -96,7 +121,7 @@ const LitterTabContent: React.FC<LitterTabContentProps> = ({
       <LitterPagination
         pageCount={pageCount}
         currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
+        onPageChange={setCurrentPage}
       />
     </div>
   );
