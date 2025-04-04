@@ -34,6 +34,9 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       dateOfBirth: format(values.dateOfBirth, 'yyyy-MM-dd'),
       dewormingDate: values.dewormingDate ? format(values.dewormingDate, 'yyyy-MM-dd') : undefined,
       vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : undefined,
+      heatHistory: values.heatHistory ? values.heatHistory.map(heat => ({
+        date: format(heat.date, 'yyyy-MM-dd')
+      })) : undefined,
     };
     
     updateDog(dog.id, formattedValues);

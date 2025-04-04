@@ -15,6 +15,8 @@ export type Dog = {
   notes?: string;
   dewormingDate?: string;
   vaccinationDate?: string;
+  heatHistory?: { date: string }[];
+  heatInterval?: number;
   health?: {
     vaccinations: { name: string; date: string }[];
     medicalIssues: { issue: string; date: string; notes: string }[];
@@ -78,6 +80,11 @@ const initialDogs: Dog[] = [
     notes: 'Excellent mother, calm disposition',
     dewormingDate: '2023-03-25',
     vaccinationDate: '2023-01-20',
+    heatHistory: [
+      { date: '2023-04-10' },
+      { date: '2023-10-15' }
+    ],
+    heatInterval: 180,
     health: {
       vaccinations: [
         { name: 'Rabies', date: '2023-01-20' },

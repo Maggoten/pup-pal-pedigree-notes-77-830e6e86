@@ -9,6 +9,7 @@ import { toast } from '@/components/ui/use-toast';
 import { Dog } from '@/context/DogsContext';
 import DogFormFields, { dogFormSchema, DogFormValues } from './DogFormFields';
 import DogImageField from './DogImageField';
+import HeatRecordsField from './HeatRecordsField';
 
 interface DogEditFormProps {
   dog: Dog;
@@ -17,6 +18,11 @@ interface DogEditFormProps {
 }
 
 const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
+  // Transform date strings to Date objects for form
+  const transformHeatHistory = dog.heatHistory 
+    ? dog.heatHistory.map(heat => ({ date: new Date(heat.date) }))
+    : [];
+
   const form = useForm<DogFormValues>({
     resolver: zodResolver(dogFormSchema),
     defaultValues: {
@@ -30,6 +36,8 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
       vaccinationDate: dog.vaccinationDate ? new Date(dog.vaccinationDate) : undefined,
       notes: dog.notes || '',
       image: dog.image || '',
+      heatHistory: transformHeatHistory,
+      heatInterval: dog.heatInterval,
     },
   });
   
@@ -54,7 +62,16 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
             form={form} 
             handleImageChange={handleImageChange} 
           />
-          <DogFormFields form={form} />
+          <div className="space-y-6">
+            <DogFormFields form={form} />
+            
+            {form.watch('gender') === 'female' && (
+              <div className="border-t pt-4">
+                <h3 className="text-lg font-medium mb-4">Heat Cycle Information</h3>
+                <HeatRecordsField form={form} />
+              </div>
+            )}
+          </div>
         </div>
         
         <div className="flex justify-end gap-2">

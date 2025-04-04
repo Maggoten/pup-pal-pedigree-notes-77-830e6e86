@@ -1,10 +1,13 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Info } from 'lucide-react';
+import { Calendar, Info, PawPrint } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
+import { useDogs } from '@/context/DogsContext';
+import { calculateUpcomingHeats, UpcomingHeat } from '@/utils/heatCalculator';
+import { format } from 'date-fns';
 
 const MatingTips = [
   "Wait until the bitch is in standing heat before mating",
@@ -15,6 +18,13 @@ const MatingTips = [
 ];
 
 const Mating: React.FC = () => {
+  const { dogs } = useDogs();
+  const [upcomingHeats, setUpcomingHeats] = useState<UpcomingHeat[]>([]);
+  
+  useEffect(() => {
+    setUpcomingHeats(calculateUpcomingHeats(dogs));
+  }, [dogs]);
+  
   const handleAddMatingClick = () => {
     toast({
       title: "Feature Coming Soon",
@@ -34,12 +44,33 @@ const Mating: React.FC = () => {
             <CardDescription>Track your bitches' heat cycles</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8">
-              <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No Upcoming Heat Cycles</h3>
-              <p className="text-muted-foreground mb-4">Add your first heat cycle tracking</p>
-              <Button onClick={handleAddMatingClick}>Add Heat Cycle</Button>
-            </div>
+            {upcomingHeats.length > 0 ? (
+              <div className="space-y-3">
+                {upcomingHeats.map((heat, index) => (
+                  <div
+                    key={`${heat.dogId}-${index}`}
+                    className="flex items-start gap-3 p-3 rounded-lg border bg-rose-50 border-rose-200"
+                  >
+                    <div className="mt-0.5">
+                      <PawPrint className="h-5 w-5 text-rose-500" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">{heat.dogName}'s Heat Cycle</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Expected on {format(heat.date, 'PPP')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">No Upcoming Heat Cycles</h3>
+                <p className="text-muted-foreground mb-4">Add heat information to your female dogs to track cycles</p>
+                <Button onClick={handleAddMatingClick}>Add Heat Cycle</Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 

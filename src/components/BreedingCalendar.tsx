@@ -1,9 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format, addDays, startOfWeek, addWeeks, subWeeks } from 'date-fns';
+import { useDogs } from '@/context/DogsContext';
+import { calculateUpcomingHeats, UpcomingHeat } from '@/utils/heatCalculator';
 
 interface CalendarEvent {
   id: string;
@@ -14,37 +15,44 @@ interface CalendarEvent {
   dogName: string;
 }
 
-// Sample data
-const sampleEvents: CalendarEvent[] = [
-  {
-    id: '1',
-    title: 'Heat Cycle',
-    date: new Date(2025, 3, 10), // April 10, 2025
-    type: 'heat',
-    dogId: '2',
-    dogName: 'Bella'
-  },
-  {
-    id: '2',
-    title: 'Planned Mating',
-    date: new Date(2025, 3, 12), // April 12, 2025
-    type: 'planned-mating',
-    dogId: '2',
-    dogName: 'Bella'
-  },
-  {
-    id: '3',
-    title: 'Due Date',
-    date: new Date(2025, 4, 5), // May 5, 2025
-    type: 'due-date',
-    dogId: '2',
-    dogName: 'Bella'
-  }
-];
-
 const BreedingCalendar: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [calendarEvents] = useState<CalendarEvent[]>(sampleEvents);
+  const { dogs } = useDogs();
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  
+  useEffect(() => {
+    const sampleEvents: CalendarEvent[] = [
+      {
+        id: '2',
+        title: 'Planned Mating',
+        date: new Date(2025, 3, 12), // April 12, 2025
+        type: 'planned-mating',
+        dogId: '2',
+        dogName: 'Bella'
+      },
+      {
+        id: '3',
+        title: 'Due Date',
+        date: new Date(2025, 4, 5), // May 5, 2025
+        type: 'due-date',
+        dogId: '2',
+        dogName: 'Bella'
+      }
+    ];
+    
+    const upcomingHeats = calculateUpcomingHeats(dogs);
+    
+    const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
+      id: `heat-${heat.dogId}-${index}`,
+      title: 'Heat Cycle',
+      date: heat.date,
+      type: 'heat',
+      dogId: heat.dogId,
+      dogName: heat.dogName
+    }));
+    
+    setCalendarEvents([...sampleEvents, ...heatEvents]);
+  }, [dogs]);
   
   const startDate = startOfWeek(currentDate, { weekStartsOn: 1 }); // Start on Monday
   
@@ -56,24 +64,20 @@ const BreedingCalendar: React.FC = () => {
     setCurrentDate(subWeeks(currentDate, 1));
   };
   
-  // Create an array of dates for the next 4 weeks
   const calendarDays = Array.from({ length: 28 }, (_, index) => {
     return addDays(startDate, index);
   });
   
-  // Group days by week
   const weeks = Array.from({ length: 4 }, (_, weekIndex) => {
     return calendarDays.slice(weekIndex * 7, (weekIndex + 1) * 7);
   });
   
-  // Get events for a specific date
   const getEventsForDate = (date: Date) => {
     return calendarEvents.filter(event => 
       format(event.date, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
     );
   };
   
-  // Function to determine event color based on type
   const getEventColor = (type: string) => {
     switch (type) {
       case 'heat':
@@ -116,14 +120,12 @@ const BreedingCalendar: React.FC = () => {
       <CardContent>
         <div className="overflow-x-auto">
           <div className="grid grid-cols-7 gap-1 min-w-[700px]">
-            {/* Day headers */}
             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
               <div key={day} className="text-center font-medium py-1 text-sm">
                 {day}
               </div>
             ))}
             
-            {/* Calendar grid */}
             {weeks.map((week, weekIndex) => (
               <React.Fragment key={weekIndex}>
                 {week.map((day) => {
