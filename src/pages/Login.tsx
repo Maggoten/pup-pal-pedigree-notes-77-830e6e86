@@ -114,9 +114,9 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cream-100 to-brown-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       {!showPayment ? (
-        <Card className="w-full max-w-md shadow-lg bg-white/95 backdrop-blur">
+        <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="space-y-1 text-center">
             <div className="flex justify-center mb-2">
               <Dog className="h-12 w-12 text-primary" />
@@ -293,7 +293,7 @@ const Login: React.FC = () => {
           </CardContent>
         </Card>
       ) : (
-        <Card className="w-full max-w-md shadow-lg bg-white/95 backdrop-blur">
+        <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold">Payment Information</CardTitle>
             <CardDescription>
@@ -351,13 +351,6 @@ const Login: React.FC = () => {
           </CardFooter>
         </Card>
       )}
-      
-      <svg width="0" height="0" style={{ position: 'absolute' }}>
-        <filter id="sketch-filter">
-          <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
-        </filter>
-      </svg>
     </div>
   );
 };
