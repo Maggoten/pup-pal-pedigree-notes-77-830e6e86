@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,19 +8,7 @@ import { toast } from '@/components/ui/use-toast';
 import DatePicker from '@/components/common/DatePicker';
 import { Camera, Upload } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-
-interface Puppy {
-  id: string;
-  name: string;
-  gender: 'male' | 'female';
-  color: string;
-  birthWeight: number;
-  birthDateTime: string;
-  breed: string;
-  imageUrl?: string;
-  weightLog: { date: string; weight: number }[];
-  heightLog: { date: string; height: number }[];
-}
+import { Puppy } from '@/types/breeding';
 
 interface PuppyDetailsDialogProps {
   puppy: Puppy;
@@ -41,11 +28,9 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   const [breed, setBreed] = useState(puppy.breed || '');
   const [imageUrl, setImageUrl] = useState(puppy.imageUrl || '');
   
-  // Parse birth date and time
   const birthDate = new Date(puppy.birthDateTime);
   const [dateOfBirth, setDateOfBirth] = useState<Date>(birthDate);
   
-  // Format time as HH:MM
   const hours = birthDate.getHours().toString().padStart(2, '0');
   const minutes = birthDate.getMinutes().toString().padStart(2, '0');
   const [timeOfBirth, setTimeOfBirth] = useState(`${hours}:${minutes}`);
@@ -54,7 +39,6 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
     e.preventDefault();
 
     try {
-      // Combine date and time for the time of birth
       let birthDateTime = new Date(dateOfBirth);
       if (timeOfBirth) {
         const [hours, minutes] = timeOfBirth.split(':').map(Number);
@@ -72,10 +56,8 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
         imageUrl
       };
 
-      // Update weight log if birth weight changed
       if (parseFloat(birthWeight) !== puppy.birthWeight) {
         const newWeightLog = [...puppy.weightLog];
-        // Find and update first entry (birth weight)
         const birthWeightEntryIndex = newWeightLog.findIndex(
           log => new Date(log.date).toDateString() === new Date(puppy.birthDateTime).toDateString()
         );
@@ -103,7 +85,6 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   };
 
   const handleImageUpload = () => {
-    // Simulating image upload for now
     toast({
       title: "Upload Feature Coming Soon",
       description: "Image upload will be available in the next update."

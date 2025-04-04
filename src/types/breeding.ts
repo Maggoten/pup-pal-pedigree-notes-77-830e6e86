@@ -17,7 +17,7 @@ export interface Puppy {
   name: string;
   gender: 'male' | 'female';
   color: string;
-  breed?: string;
+  breed?: string; // Keep this optional for backward compatibility
   birthWeight: number;
   birthDateTime: string;
   imageUrl?: string;
