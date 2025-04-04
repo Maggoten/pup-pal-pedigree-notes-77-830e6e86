@@ -44,7 +44,7 @@ const LitterTabContent: React.FC<LitterTabContentProps> = ({
   searchQuery,
   filterYear
 }) => {
-  const { view: viewType, setView: setViewType, setSearchQuery, setFilterYear } = useLitterFilters();
+  const { view, setView, setSearchQuery, setFilterYear } = useLitterFilters();
   
   // Handle creating a new litter
   const handleAddLitterClick = () => {
@@ -95,13 +95,13 @@ const LitterTabContent: React.FC<LitterTabContentProps> = ({
             onYearChange={setFilterYear}
           />
           <ViewToggle 
-            viewType={viewType} 
-            onViewChange={setViewType} 
+            view={view} 
+            onViewChange={setView} 
           />
         </div>
       </div>
       
-      {viewType === 'grid' ? (
+      {view === 'grid' ? (
         <LitterGridView 
           litters={paginatedLitters} 
           onSelectLitter={onSelectLitter} 

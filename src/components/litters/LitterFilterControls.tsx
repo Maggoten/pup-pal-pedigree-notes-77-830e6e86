@@ -48,7 +48,7 @@ const LitterFilterControls: React.FC<LitterFilterControlsProps> = ({
       />
       
       <ViewToggle 
-        viewType={view}
+        view={view}
         onViewChange={setView}
       />
       
