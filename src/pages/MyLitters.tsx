@@ -1,41 +1,27 @@
 
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { 
-  PlusCircle, 
-  Dog, 
-  Edit,
-  Calendar,
-  List,
-  Grid2X2
-} from 'lucide-react';
+import { Dog } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { 
   Tabs, 
   TabsContent, 
-  TabsList, 
-  TabsTrigger, 
   CategoryTabsList, 
   CategoryTabsTrigger 
 } from '@/components/ui/tabs';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Litter, Puppy } from '@/types/breeding';
 import { litterService } from '@/services/LitterService';
 import { plannedLitterService } from '@/services/PlannedLitterService';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
-import AddLitterDialog from '@/components/litters/AddLitterDialog';
-import EmptyLitterState from '@/components/litters/EmptyLitterState';
-import LitterDetails from '@/components/litters/LitterDetails';
-import LitterSearchForm from '@/components/litters/LitterSearchForm';
-import LitterEditDialog from '@/components/litters/LitterEditDialog';
-import LitterCard from '@/components/litters/LitterCard';
-import YearFilterDropdown from '@/components/litters/YearFilterDropdown';
-import ViewToggle from '@/components/litters/ViewToggle';
+import { LitterFilterProvider, useLitterFilters } from '@/components/litters/LitterFilterProvider';
+import LitterFilterControls from '@/components/litters/LitterFilterControls';
+import LitterTabContent from '@/components/litters/LitterTabContent';
+import SelectedLitterSection from '@/components/litters/SelectedLitterSection';
+import useLitterFiltering from '@/hooks/useLitterFiltering';
 
-const MyLitters: React.FC = () => {
+const ITEMS_PER_PAGE = 12;
+
+const MyLittersContent: React.FC = () => {
   // State for litters data
   const [activeLitters, setActiveLitters] = useState<Litter[]>([]);
   const [archivedLitters, setArchivedLitters] = useState<Litter[]>([]);
@@ -43,17 +29,32 @@ const MyLitters: React.FC = () => {
   
   // UI state
   const [showAddLitterDialog, setShowAddLitterDialog] = useState(false);
-  const [showEditLitterDialog, setShowEditLitterDialog] = useState(false);
   const [plannedLitters, setPlannedLitters] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryTab, setCategoryTab] = useState('active');
-  const [filterYear, setFilterYear] = useState<number | null>(null);
-  const [view, setView] = useState<'grid' | 'list'>('grid');
   
-  // Pagination
-  const [activePage, setActivePage] = useState(1);
-  const [archivedPage, setArchivedPage] = useState(1);
-  const ITEMS_PER_PAGE = 12;
+  // Get filter state from context
+  const { 
+    searchQuery, 
+    filterYear, 
+    categoryTab, 
+    setCategoryTab,
+    activePage,
+    setActivePage,
+    archivedPage,
+    setArchivedPage
+  } = useLitterFilters();
+  
+  // Filter and paginate litters
+  const {
+    filteredLitters: filteredActiveLitters,
+    paginatedLitters: paginateActiveLitters,
+    pageCount: activePageCount
+  } = useLitterFiltering(activeLitters, searchQuery, filterYear, activePage, ITEMS_PER_PAGE);
+  
+  const {
+    filteredLitters: filteredArchivedLitters,
+    paginatedLitters: paginateArchivedLitters,
+    pageCount: archivedPageCount
+  } = useLitterFiltering(archivedLitters, searchQuery, filterYear, archivedPage, ITEMS_PER_PAGE);
   
   // Load litters on component mount
   useEffect(() => {
@@ -87,7 +88,7 @@ const MyLitters: React.FC = () => {
     newLitter.puppies = [];
     newLitter.archived = false;
     
-    const updatedLitters = litterService.addLitter(newLitter);
+    litterService.addLitter(newLitter);
     setActiveLitters(litterService.getActiveLitters());
     setSelectedLitterId(newLitter.id);
     
@@ -98,7 +99,7 @@ const MyLitters: React.FC = () => {
   };
   
   const handleUpdateLitter = (updatedLitter: Litter) => {
-    const updatedLitters = litterService.updateLitter(updatedLitter);
+    litterService.updateLitter(updatedLitter);
     setActiveLitters(litterService.getActiveLitters());
     setArchivedLitters(litterService.getArchivedLitters());
     
@@ -106,14 +107,12 @@ const MyLitters: React.FC = () => {
       title: "Litter Updated",
       description: `${updatedLitter.name} has been updated successfully.`
     });
-    
-    setShowEditLitterDialog(false);
   };
   
   const handleAddPuppy = (newPuppy: Puppy) => {
     if (!selectedLitterId) return;
     
-    const updatedLitters = litterService.addPuppy(selectedLitterId, newPuppy);
+    litterService.addPuppy(selectedLitterId, newPuppy);
     setActiveLitters(litterService.getActiveLitters());
     setArchivedLitters(litterService.getArchivedLitters());
     
@@ -126,7 +125,7 @@ const MyLitters: React.FC = () => {
   const handleUpdatePuppy = (updatedPuppy: Puppy) => {
     if (!selectedLitterId) return;
     
-    const updatedLitters = litterService.updatePuppy(selectedLitterId, updatedPuppy);
+    litterService.updatePuppy(selectedLitterId, updatedPuppy);
     setActiveLitters(litterService.getActiveLitters());
     setArchivedLitters(litterService.getArchivedLitters());
   };
@@ -134,14 +133,14 @@ const MyLitters: React.FC = () => {
   const handleDeletePuppy = (puppyId: string) => {
     if (!selectedLitterId) return;
     
-    const updatedLitters = litterService.deletePuppy(selectedLitterId, puppyId);
+    litterService.deletePuppy(selectedLitterId, puppyId);
     setActiveLitters(litterService.getActiveLitters());
     setArchivedLitters(litterService.getArchivedLitters());
   };
 
   const handleDeleteLitter = (litterId: string) => {
     if (confirm('Are you sure you want to delete this litter? This action cannot be undone.')) {
-      const updatedLitters = litterService.deleteLitter(litterId);
+      litterService.deleteLitter(litterId);
       setActiveLitters(litterService.getActiveLitters());
       setArchivedLitters(litterService.getArchivedLitters());
       
@@ -161,13 +160,11 @@ const MyLitters: React.FC = () => {
         description: "The litter has been deleted successfully.",
         variant: "destructive"
       });
-      
-      setShowEditLitterDialog(false);
     }
   };
   
   const handleArchiveLitter = (litterId: string, archive: boolean) => {
-    const updatedLitters = litterService.toggleArchiveLitter(litterId, archive);
+    litterService.toggleArchiveLitter(litterId, archive);
     setActiveLitters(litterService.getActiveLitters());
     setArchivedLitters(litterService.getArchivedLitters());
     
@@ -177,34 +174,7 @@ const MyLitters: React.FC = () => {
         ? "The litter has been moved to the archive." 
         : "The litter has been moved to active litters."
     });
-    
-    setShowEditLitterDialog(false);
   };
-  
-  // Filter and search functions
-  const filterLittersByYear = (litters: Litter[]) => {
-    if (!filterYear) return litters;
-    
-    return litters.filter(litter => {
-      const birthDate = new Date(litter.dateOfBirth);
-      return birthDate.getFullYear() === filterYear;
-    });
-  };
-  
-  const searchLitters = (litters: Litter[]) => {
-    if (!searchQuery.trim()) return litters;
-    
-    const searchTermLower = searchQuery.toLowerCase();
-    return litters.filter(litter => (
-      litter.name.toLowerCase().includes(searchTermLower) ||
-      litter.sireName.toLowerCase().includes(searchTermLower) ||
-      litter.damName.toLowerCase().includes(searchTermLower)
-    ));
-  };
-  
-  // Combine filtering and searching
-  const filteredActiveLitters = searchLitters(filterLittersByYear(activeLitters));
-  const filteredArchivedLitters = searchLitters(filterLittersByYear(archivedLitters));
   
   // Get available years for filtering
   const getAvailableYears = () => {
@@ -217,20 +187,6 @@ const MyLitters: React.FC = () => {
     
     return Array.from(yearsSet).sort((a, b) => b - a); // Sort descending
   };
-  
-  // Calculate pagination
-  const paginateActiveLitters = filteredActiveLitters.slice(
-    (activePage - 1) * ITEMS_PER_PAGE, 
-    activePage * ITEMS_PER_PAGE
-  );
-  
-  const paginateArchivedLitters = filteredArchivedLitters.slice(
-    (archivedPage - 1) * ITEMS_PER_PAGE, 
-    archivedPage * ITEMS_PER_PAGE
-  );
-  
-  const activePageCount = Math.ceil(filteredActiveLitters.length / ITEMS_PER_PAGE);
-  const archivedPageCount = Math.ceil(filteredArchivedLitters.length / ITEMS_PER_PAGE);
   
   // Find the currently selected litter
   const selectedLitter = selectedLitterId 
@@ -269,224 +225,72 @@ const MyLitters: React.FC = () => {
             </CategoryTabsTrigger>
           </CategoryTabsList>
           
-          <div className="flex items-center gap-2 self-end">
-            <LitterSearchForm 
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-            />
-            
-            <YearFilterDropdown
-              years={getAvailableYears()}
-              selectedYear={filterYear}
-              onYearChange={setFilterYear}
-            />
-            
-            <ViewToggle 
-              view={view}
-              onViewChange={setView}
-            />
-            
-            <Dialog open={showAddLitterDialog} onOpenChange={setShowAddLitterDialog}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-2 ml-2">
-                  <PlusCircle className="h-4 w-4" />
-                  Add New Litter
-                </Button>
-              </DialogTrigger>
-              <AddLitterDialog 
-                onClose={() => setShowAddLitterDialog(false)} 
-                onSubmit={handleAddLitter}
-                plannedLitters={plannedLitters}
-              />
-            </Dialog>
-          </div>
+          <LitterFilterControls
+            showAddLitterDialog={showAddLitterDialog}
+            setShowAddLitterDialog={setShowAddLitterDialog}
+            onAddLitter={handleAddLitter}
+            plannedLitters={plannedLitters}
+            availableYears={getAvailableYears()}
+          />
         </div>
         
         <TabsContent value="active" className="space-y-6">
-          {filteredActiveLitters.length > 0 ? (
-            <>
-              {view === 'grid' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {paginateActiveLitters.map(litter => (
-                    <LitterCard 
-                      key={litter.id}
-                      litter={litter}
-                      onSelect={handleSelectLitter}
-                      onArchive={(litter) => handleArchiveLitter(litter.id, true)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Tabs value={selectedLitterId || ''} onValueChange={setSelectedLitterId} className="space-y-4">
-                    <TabsList className="w-full justify-start overflow-auto border p-2 rounded-lg bg-muted/50">
-                      {paginateActiveLitters.map(litter => (
-                        <TabsTrigger 
-                          key={litter.id} 
-                          value={litter.id} 
-                          className="px-6 py-2 font-medium rounded-md relative"
-                        >
-                          <span className="text-primary font-semibold">{litter.name}</span>
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                  </Tabs>
-                </div>
-              )}
-              
-              {activePageCount > 1 && (
-                <Pagination className="mt-6">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        onClick={() => setActivePage(p => Math.max(1, p - 1))}
-                        className={activePage === 1 ? "pointer-events-none opacity-50" : ""}
-                      />
-                    </PaginationItem>
-                    
-                    {Array.from({ length: activePageCount }).map((_, i) => (
-                      <PaginationItem key={i}>
-                        <PaginationLink 
-                          isActive={activePage === i + 1}
-                          onClick={() => setActivePage(i + 1)}
-                        >
-                          {i + 1}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-                    
-                    <PaginationItem>
-                      <PaginationNext 
-                        onClick={() => setActivePage(p => Math.min(activePageCount, p + 1))}
-                        className={activePage === activePageCount ? "pointer-events-none opacity-50" : ""}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              )}
-            </>
-          ) : searchQuery || filterYear ? (
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium mb-2">No matching litters found</h3>
-              <p className="text-muted-foreground">Try adjusting your search or filter</p>
-            </div>
-          ) : (
-            <EmptyLitterState onAddLitter={() => setShowAddLitterDialog(true)} />
-          )}
+          <LitterTabContent
+            litters={activeLitters}
+            filteredLitters={filteredActiveLitters}
+            paginatedLitters={paginateActiveLitters}
+            selectedLitterId={selectedLitterId}
+            onSelectLitter={handleSelectLitter}
+            onSelectLitterId={setSelectedLitterId}
+            onArchive={(litter) => handleArchiveLitter(litter.id, true)}
+            onAddLitter={() => setShowAddLitterDialog(true)}
+            pageCount={activePageCount}
+            currentPage={activePage}
+            setCurrentPage={setActivePage}
+            isArchived={false}
+            searchQuery={searchQuery}
+            filterYear={filterYear}
+          />
         </TabsContent>
         
         <TabsContent value="archived" className="space-y-6">
-          {filteredArchivedLitters.length > 0 ? (
-            <>
-              {view === 'grid' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {paginateArchivedLitters.map(litter => (
-                    <LitterCard 
-                      key={litter.id}
-                      litter={litter}
-                      onSelect={handleSelectLitter}
-                      onArchive={(litter) => handleArchiveLitter(litter.id, false)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Tabs value={selectedLitterId || ''} onValueChange={setSelectedLitterId} className="space-y-4">
-                    <TabsList className="w-full justify-start overflow-auto border p-2 rounded-lg bg-muted/50">
-                      {paginateArchivedLitters.map(litter => (
-                        <TabsTrigger 
-                          key={litter.id} 
-                          value={litter.id} 
-                          className="px-6 py-2 font-medium rounded-md relative"
-                        >
-                          <span className="font-semibold">{litter.name}</span>
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                  </Tabs>
-                </div>
-              )}
-              
-              {archivedPageCount > 1 && (
-                <Pagination className="mt-6">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        onClick={() => setArchivedPage(p => Math.max(1, p - 1))}
-                        className={archivedPage === 1 ? "pointer-events-none opacity-50" : ""}
-                      />
-                    </PaginationItem>
-                    
-                    {Array.from({ length: archivedPageCount }).map((_, i) => (
-                      <PaginationItem key={i}>
-                        <PaginationLink 
-                          isActive={archivedPage === i + 1}
-                          onClick={() => setArchivedPage(i + 1)}
-                        >
-                          {i + 1}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-                    
-                    <PaginationItem>
-                      <PaginationNext 
-                        onClick={() => setArchivedPage(p => Math.min(archivedPageCount, p + 1))}
-                        className={archivedPage === archivedPageCount ? "pointer-events-none opacity-50" : ""}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              )}
-            </>
-          ) : searchQuery || filterYear ? (
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium mb-2">No matching archived litters found</h3>
-              <p className="text-muted-foreground">Try adjusting your search or filter</p>
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium mb-2">No archived litters</h3>
-              <p className="text-muted-foreground">
-                You can archive litters you no longer actively work with
-              </p>
-            </div>
-          )}
+          <LitterTabContent
+            litters={archivedLitters}
+            filteredLitters={filteredArchivedLitters}
+            paginatedLitters={paginateArchivedLitters}
+            selectedLitterId={selectedLitterId}
+            onSelectLitter={handleSelectLitter}
+            onSelectLitterId={setSelectedLitterId}
+            onArchive={(litter) => handleArchiveLitter(litter.id, false)}
+            onAddLitter={() => setShowAddLitterDialog(true)}
+            pageCount={archivedPageCount}
+            currentPage={archivedPage}
+            setCurrentPage={setArchivedPage}
+            isArchived={true}
+            searchQuery={searchQuery}
+            filterYear={filterYear}
+          />
         </TabsContent>
       </Tabs>
       
-      {selectedLitter && (
-        <div className="mt-10">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">
-              Selected Litter: {selectedLitter.name}
-            </h2>
-            
-            <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Edit className="h-4 w-4" />
-                  Edit Litter Details
-                </Button>
-              </DialogTrigger>
-              <LitterEditDialog 
-                litter={selectedLitter}
-                onClose={() => setShowEditLitterDialog(false)}
-                onUpdate={handleUpdateLitter}
-                onDelete={handleDeleteLitter}
-                onArchive={handleArchiveLitter}
-              />
-            </Dialog>
-          </div>
-          
-          <LitterDetails
-            litter={selectedLitter}
-            onAddPuppy={handleAddPuppy}
-            onUpdatePuppy={handleUpdatePuppy}
-            onDeletePuppy={handleDeletePuppy}
-          />
-        </div>
-      )}
+      <SelectedLitterSection
+        selectedLitter={selectedLitter}
+        onUpdateLitter={handleUpdateLitter}
+        onDeleteLitter={handleDeleteLitter}
+        onArchiveLitter={handleArchiveLitter}
+        onAddPuppy={handleAddPuppy}
+        onUpdatePuppy={handleUpdatePuppy}
+        onDeletePuppy={handleDeletePuppy}
+      />
     </PageLayout>
+  );
+};
+
+const MyLitters: React.FC = () => {
+  return (
+    <LitterFilterProvider>
+      <MyLittersContent />
+    </LitterFilterProvider>
   );
 };
 
