@@ -15,6 +15,7 @@ interface PuppyListProps {
   onSelectPuppy: (puppy: Puppy) => void;
   onRowSelect: (puppy: Puppy) => void;
   onUpdatePuppy: (puppy: Puppy) => void;
+  onDeletePuppy: (puppyId: string) => void;
   showAddPuppyDialog: boolean;
   setShowAddPuppyDialog: (show: boolean) => void;
   puppyNumber: number;
@@ -29,6 +30,7 @@ const PuppyList: React.FC<PuppyListProps> = ({
   onSelectPuppy,
   onRowSelect,
   onUpdatePuppy,
+  onDeletePuppy,
   showAddPuppyDialog,
   setShowAddPuppyDialog,
   puppyNumber,

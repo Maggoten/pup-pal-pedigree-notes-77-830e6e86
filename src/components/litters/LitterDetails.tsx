@@ -12,12 +12,14 @@ interface LitterDetailsProps {
   litter: Litter;
   onAddPuppy: (puppy: Puppy) => void;
   onUpdatePuppy: (puppy: Puppy) => void;
+  onDeletePuppy: (puppyId: string) => void;
 }
 
 const LitterDetails: React.FC<LitterDetailsProps> = ({
   litter,
   onAddPuppy,
-  onUpdatePuppy
+  onUpdatePuppy,
+  onDeletePuppy
 }) => {
   const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
   const [showAddPuppyDialog, setShowAddPuppyDialog] = useState(false);
@@ -51,6 +53,14 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
     return ''; // Return empty string if no breed found
   };
 
+  const handleDeletePuppy = (puppyId: string) => {
+    onDeletePuppy(puppyId);
+    if (selectedPuppy && selectedPuppy.id === puppyId) {
+      setSelectedPuppy(null);
+      setShowPuppyDetailsDialog(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <Card>
@@ -69,6 +79,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             onSelectPuppy={handlePuppySelect}
             onRowSelect={handleRowSelect}
             onUpdatePuppy={handleUpdatePuppy}
+            onDeletePuppy={handleDeletePuppy}
             showAddPuppyDialog={showAddPuppyDialog}
             setShowAddPuppyDialog={setShowAddPuppyDialog}
             puppyNumber={1} // Always start with puppy 1 for each litter
@@ -129,6 +140,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             puppy={selectedPuppy} 
             onClose={() => setShowPuppyDetailsDialog(false)} 
             onUpdate={handleUpdatePuppy}
+            onDelete={handleDeletePuppy}
           />
         </Dialog>
       )}

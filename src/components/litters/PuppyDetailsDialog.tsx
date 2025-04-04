@@ -6,17 +6,20 @@ import { toast } from '@/components/ui/use-toast';
 import { Puppy } from '@/types/breeding';
 import PuppyDetailsForm from './puppies/PuppyDetailsForm';
 import ImageUploader from '@/components/ImageUploader';
+import { Trash2 } from 'lucide-react';
 
 interface PuppyDetailsDialogProps {
   puppy: Puppy;
   onClose: () => void;
   onUpdate: (updatedPuppy: Puppy) => void;
+  onDelete: (puppyId: string) => void;
 }
 
 const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({ 
   puppy, 
   onClose, 
-  onUpdate 
+  onUpdate,
+  onDelete
 }) => {
   const [imageUrl, setImageUrl] = useState<string>(puppy.imageUrl || '');
   
@@ -37,6 +40,18 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
       description: `${updatedPuppy.name} has been updated successfully.`
     });
     onClose();
+  };
+
+  const handleDelete = () => {
+    if (confirm(`Are you sure you want to delete ${puppy.name}?`)) {
+      onDelete(puppy.id);
+      toast({
+        title: "Puppy Deleted",
+        description: `${puppy.name} has been deleted from the litter.`,
+        variant: "destructive"
+      });
+      onClose();
+    }
   };
 
   return (
@@ -61,13 +76,24 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
         <PuppyDetailsForm puppy={puppy} onSubmit={handleSubmit} />
       </div>
 
-      <DialogFooter className="mt-6">
-        <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+      <DialogFooter className="mt-6 flex items-center justify-between">
+        <Button 
+          type="button" 
+          variant="destructive" 
+          onClick={handleDelete}
+          className="flex items-center"
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete Puppy
         </Button>
-        <Button type="submit" form="puppy-form">
-          Save Changes
-        </Button>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" form="puppy-form">
+            Save Changes
+          </Button>
+        </div>
       </DialogFooter>
     </DialogContent>
   );

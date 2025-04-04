@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Dog } from 'lucide-react';
+import { PlusCircle, Dog, Trash2 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -66,6 +66,31 @@ const MyLitters: React.FC = () => {
     const updatedLitters = litterService.updatePuppy(selectedLitterId, updatedPuppy);
     setLittersData(updatedLitters);
   };
+
+  const handleDeletePuppy = (puppyId: string) => {
+    if (!selectedLitterId) return;
+    
+    const updatedLitters = litterService.deletePuppy(selectedLitterId, puppyId);
+    setLittersData(updatedLitters);
+  };
+
+  const handleDeleteLitter = (litterId: string) => {
+    if (confirm('Are you sure you want to delete this litter? This action cannot be undone.')) {
+      const updatedLitters = litterService.deleteLitter(litterId);
+      setLittersData(updatedLitters);
+      
+      // If the deleted litter was selected, select the first litter or set to null
+      if (selectedLitterId === litterId) {
+        setSelectedLitterId(updatedLitters.length > 0 ? updatedLitters[0].id : null);
+      }
+      
+      toast({
+        title: "Litter Deleted",
+        description: "The litter has been deleted successfully.",
+        variant: "destructive"
+      });
+    }
+  };
   
   // Filter litters based on search query
   const filteredLitters = littersData.filter(litter => {
@@ -118,11 +143,26 @@ const MyLitters: React.FC = () => {
       {filteredLitters.length > 0 ? (
         <>
           <Tabs value={selectedLitterId || ''} onValueChange={setSelectedLitterId} className="space-y-4">
-            <TabsList className="w-full justify-start overflow-auto">
-              {filteredLitters.map(litter => (
-                <TabsTrigger key={litter.id} value={litter.id}>{litter.name}</TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="flex items-start">
+              <TabsList className="w-full justify-start overflow-auto">
+                {filteredLitters.map(litter => (
+                  <TabsTrigger key={litter.id} value={litter.id} className="relative group">
+                    {litter.name}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute -right-2 -top-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent tab change
+                        handleDeleteLitter(litter.id);
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
             
             {selectedLitter && (
               <TabsContent value={selectedLitter.id} className="space-y-4">
@@ -130,6 +170,7 @@ const MyLitters: React.FC = () => {
                   litter={selectedLitter}
                   onAddPuppy={handleAddPuppy}
                   onUpdatePuppy={handleUpdatePuppy}
+                  onDeletePuppy={handleDeletePuppy}
                 />
               </TabsContent>
             )}
