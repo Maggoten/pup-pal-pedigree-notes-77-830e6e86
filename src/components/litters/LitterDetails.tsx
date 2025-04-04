@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,7 +40,6 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
   };
 
   const handleRowSelect = (puppy: Puppy) => {
-    // This is used when clicking on a row to select a puppy for the chart
     setSelectedPuppy(puppy);
   };
 
@@ -50,11 +48,9 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
     setSelectedPuppy(updatedPuppy);
   };
 
-  // Extract the dam's breed from puppies array if available
   const getBreeds = () => {
     if (!litter.puppies || litter.puppies.length === 0) return 'Unknown';
     
-    // Get unique breeds
     const breeds = [...new Set(litter.puppies
       .filter(puppy => puppy.breed)
       .map(puppy => puppy.breed))];
@@ -77,30 +73,29 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
     <div className="space-y-4">
       <Card>
         <CardHeader className="pb-4">
-          <div className="flex justify-between items-start">
-            <div>
+          <div>
+            <div className="flex justify-between items-center">
               <CardTitle>Litter Details</CardTitle>
-              <CardDescription>
-                Born: {new Date(litter.dateOfBirth).toLocaleDateString()} | 
-                Sire: {litter.sireName} | 
-                Dam: {litter.damName}
-              </CardDescription>
+              <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <LitterEditDialog 
+                  litter={litter}
+                  onClose={() => setShowEditLitterDialog(false)}
+                  onUpdate={onUpdateLitter}
+                  onDelete={onDeleteLitter}
+                  onArchive={onArchiveLitter}
+                />
+              </Dialog>
             </div>
-            <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Edit className="h-4 w-4" />
-                  Edit Litter Details
-                </Button>
-              </DialogTrigger>
-              <LitterEditDialog 
-                litter={litter}
-                onClose={() => setShowEditLitterDialog(false)}
-                onUpdate={onUpdateLitter}
-                onDelete={onDeleteLitter}
-                onArchive={onArchiveLitter}
-              />
-            </Dialog>
+            <CardDescription>
+              Born: {new Date(litter.dateOfBirth).toLocaleDateString()} | 
+              Sire: {litter.sireName} | 
+              Dam: {litter.damName}
+            </CardDescription>
           </div>
           {puppyCount > 0 && (
             <div className="flex items-center gap-2 mt-2">
@@ -170,7 +165,6 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
         </Card>
       )}
       
-      {/* Puppy Details Dialog */}
       {selectedPuppy && (
         <Dialog open={showPuppyDetailsDialog} onOpenChange={setShowPuppyDetailsDialog}>
           <PuppyDetailsDialog 
