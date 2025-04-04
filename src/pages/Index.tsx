@@ -2,6 +2,7 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import BreedingStats from '@/components/BreedingStats';
+import BreedingCalendar from '@/components/BreedingCalendar';
 import DogList from '@/components/DogList';
 import AddDogButton from '@/components/AddDogButton';
 import { DogsProvider } from '@/context/DogsContext';
@@ -25,10 +26,12 @@ const Index = () => {
         <main className="flex-1 container py-6 space-y-6">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Breeder's Journal</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Breeding Journey</h1>
               <p className="text-muted-foreground">Manage your breeding program efficiently</p>
             </div>
           </div>
+          
+          <BreedingCalendar />
           
           <BreedingStats />
           

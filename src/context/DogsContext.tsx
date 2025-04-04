@@ -13,6 +13,8 @@ export type Dog = {
   sire?: string;
   dam?: string;
   notes?: string;
+  dewormingDate?: string;
+  vaccinationDate?: string;
   health?: {
     vaccinations: { name: string; date: string }[];
     medicalIssues: { issue: string; date: string; notes: string }[];
@@ -46,6 +48,8 @@ const initialDogs: Dog[] = [
     registrationNumber: 'AKC123456',
     image: '/placeholder.svg',
     notes: 'Champion bloodline, excellent temperament',
+    dewormingDate: '2023-03-20',
+    vaccinationDate: '2023-01-15',
     health: {
       vaccinations: [
         { name: 'Rabies', date: '2023-01-15' },
@@ -72,6 +76,8 @@ const initialDogs: Dog[] = [
     registrationNumber: 'AKC789012',
     image: '/placeholder.svg',
     notes: 'Excellent mother, calm disposition',
+    dewormingDate: '2023-03-25',
+    vaccinationDate: '2023-01-20',
     health: {
       vaccinations: [
         { name: 'Rabies', date: '2023-01-20' },
@@ -98,6 +104,8 @@ const initialDogs: Dog[] = [
     registrationNumber: 'AKC345678',
     image: '/placeholder.svg',
     notes: 'Working line, excellent structure',
+    dewormingDate: '2023-04-01',
+    vaccinationDate: '2023-02-01',
     health: {
       vaccinations: [
         { name: 'Rabies', date: '2023-02-01' },
@@ -122,6 +130,11 @@ export const DogsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const updateDog = (id: string, data: Partial<Dog>) => {
     setDogs(dogs.map(dog => dog.id === id ? { ...dog, ...data } : dog));
+    
+    // If we're updating the active dog, update it too
+    if (activeDog && activeDog.id === id) {
+      setActiveDog({ ...activeDog, ...data });
+    }
   };
 
   return (

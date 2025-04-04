@@ -5,19 +5,23 @@ import Navbar from '@/components/Navbar';
 interface PageLayoutProps {
   title: string;
   description?: string;
+  icon?: ReactNode;
   children: ReactNode;
 }
 
-const PageLayout: React.FC<PageLayoutProps> = ({ title, description, children }) => {
+const PageLayout: React.FC<PageLayoutProps> = ({ title, description, icon, children }) => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       
       <main className="flex-1 container py-6 space-y-6">
         <div className="flex flex-col items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-            {description && <p className="text-muted-foreground">{description}</p>}
+          <div className="flex items-center gap-3">
+            {icon && <div className="text-primary">{icon}</div>}
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+              {description && <p className="text-muted-foreground">{description}</p>}
+            </div>
           </div>
         </div>
         

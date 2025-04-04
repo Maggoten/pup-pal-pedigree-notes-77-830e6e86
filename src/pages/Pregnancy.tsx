@@ -3,7 +3,7 @@ import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Thermometer, Baby } from 'lucide-react';
+import { Calendar, Thermometer, PawPrint } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 const weeklyDevelopment = [
@@ -64,6 +64,7 @@ const Pregnancy: React.FC = () => {
     <PageLayout 
       title="Pregnancy" 
       description="Track your pregnant bitches and fetal development"
+      icon={<PawPrint className="h-6 w-6" />}
     >
       <div className="flex justify-end">
         <Button onClick={handleAddPregnancyClick} className="mb-6">Add Pregnancy</Button>
@@ -77,7 +78,7 @@ const Pregnancy: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-center py-8">
-              <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <PawPrint className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">No Active Pregnancies</h3>
               <p className="text-muted-foreground mb-4">Add a pregnancy to start tracking</p>
               <Button onClick={handleAddPregnancyClick}>Add Pregnancy</Button>
@@ -111,7 +112,7 @@ const Pregnancy: React.FC = () => {
             {weeklyDevelopment.map((week) => (
               <div key={week.week} className="flex gap-4">
                 <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Baby className="h-6 w-6 text-primary" />
+                  <PawPrint className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <h4 className="font-medium">Week {week.week}</h4>

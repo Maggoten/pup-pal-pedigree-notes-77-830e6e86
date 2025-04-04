@@ -10,7 +10,7 @@ import MyDogs from "./pages/MyDogs";
 import PlannedLitters from "./pages/PlannedLitters";
 import Mating from "./pages/Mating";
 import Pregnancy from "./pages/Pregnancy";
-import Puppies from "./pages/Puppies";
+import MyLitters from "./pages/MyLitters";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +26,8 @@ const App = () => (
           <Route path="/planned-litters" element={<PlannedLitters />} />
           <Route path="/mating" element={<Mating />} />
           <Route path="/pregnancy" element={<Pregnancy />} />
-          <Route path="/puppies" element={<Puppies />} />
+          <Route path="/my-litters" element={<MyLitters />} />
+          <Route path="/puppies" element={<MyLitters />} /> {/* Redirect from old URL */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
