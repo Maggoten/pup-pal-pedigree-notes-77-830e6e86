@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LineChart, BarChart, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,6 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
     selectedPuppy ? 'single' : 'litter'
   );
 
-  // Switch to litter view if no puppy is selected
   React.useEffect(() => {
     if (!selectedPuppy && viewMode === 'single') {
       setViewMode('litter');
@@ -42,7 +40,6 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
   };
 
   const getChartDataForLitter = () => {
-    // Get all unique dates across all puppies
     const allDates = new Set<string>();
     
     puppies.forEach(puppy => {
@@ -52,7 +49,6 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
       });
     });
     
-    // Create chart data with a column for each puppy
     return Array.from(allDates).sort((a, b) => new Date(a).getTime() - new Date(b).getTime()).map(date => {
       const dataPoint: { [key: string]: any } = { date };
       
@@ -74,8 +70,7 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
       return dataPoint;
     });
   };
-  
-  // No data placeholders
+
   if (viewMode === 'single' && !selectedPuppy) {
     return (
       <div className="text-center py-12">
@@ -108,7 +103,6 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
     ? getChartDataForSinglePuppy(selectedPuppy)
     : getChartDataForLitter();
   
-  // Generate colors for each puppy line
   const puppyColors = {
     male: ['#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a'],
     female: ['#ec4899', '#db2777', '#be185d', '#9d174d', '#831843'],
@@ -119,7 +113,6 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
     return colors[index % colors.length];
   };
   
-  // Create a config object for the charting system
   const chartConfig: { [key: string]: any } = {};
   
   if (viewMode === 'single' && selectedPuppy) {
@@ -157,24 +150,37 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
         </Button>
       </div>
       
-      <div className="h-[300px] w-full">
+      <div className="w-full aspect-[16/9]">
         <ChartContainer config={chartConfig}>
           <RechartsLineChart
             data={chartData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis label={{ value: logType === 'weight' ? 'Weight (kg)' : 'Height (cm)', angle: -90, position: 'insideLeft' }} />
+            <XAxis 
+              dataKey="date" 
+              tick={{ fontSize: 11 }}
+              tickMargin={10}
+            />
+            <YAxis 
+              label={{ 
+                value: logType === 'weight' ? 'Weight (kg)' : 'Height (cm)', 
+                angle: -90, 
+                position: 'insideLeft',
+                style: { textAnchor: 'middle', fontSize: 12 }
+              }} 
+              tick={{ fontSize: 11 }}
+            />
             <Tooltip content={<ChartTooltipContent />} />
-            <Legend />
+            <Legend wrapperStyle={{ fontSize: 11, marginTop: 10 }} />
             
             {viewMode === 'single' && selectedPuppy ? (
               <Line
                 type="monotone"
                 dataKey={selectedPuppy.name}
                 stroke={chartConfig[selectedPuppy.name].color}
-                activeDot={{ r: 8 }}
+                activeDot={{ r: 6 }}
+                strokeWidth={2}
               />
             ) : (
               puppies.map((puppy, index) => (
@@ -183,7 +189,8 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
                   type="monotone"
                   dataKey={puppy.name}
                   stroke={chartConfig[puppy.name].color}
-                  activeDot={{ r: 6 }}
+                  activeDot={{ r: 4 }}
+                  strokeWidth={1.5}
                 />
               ))
             )}
