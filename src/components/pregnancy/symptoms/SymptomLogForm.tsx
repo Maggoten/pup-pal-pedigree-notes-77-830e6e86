@@ -4,13 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
 import { Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { SymptomRecord } from './types';
+import DatePicker from '@/components/common/DatePicker';
 
 interface SymptomLogFormProps {
   onAddSymptom: (record: Omit<SymptomRecord, 'id'>) => void;
@@ -55,31 +52,11 @@ const SymptomLogForm: React.FC<SymptomLogFormProps> = ({ onAddSymptom }) => {
   return (
     <div className="grid gap-4 py-4 border rounded-lg p-4 bg-slate-50">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="date">Date</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                {date ? format(date, "PPP") : <span>Pick a date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={(date) => date && setDate(date)}
-                initialFocus
-                className="p-3 pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
+        <DatePicker 
+          date={date} 
+          setDate={setDate} 
+          label="Date" 
+        />
         
         <div className="space-y-2">
           <Label htmlFor="title">Title</Label>
