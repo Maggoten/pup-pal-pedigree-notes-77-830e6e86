@@ -34,14 +34,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
   });
   
   const handleSubmit = (values: DogFormValues) => {
-    const formattedValues = {
-      ...values,
-      dewormingDate: values.dewormingDate ? format(values.dewormingDate, 'yyyy-MM-dd') : undefined,
-      vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : undefined,
-      dateOfBirth: format(values.dateOfBirth, 'yyyy-MM-dd'),
-    };
-    
-    onSave(formattedValues);
+    onSave(values);
     
     toast({
       title: "Dog updated",
