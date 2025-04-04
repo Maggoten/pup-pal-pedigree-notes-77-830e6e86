@@ -7,10 +7,11 @@ import AuthTabs from '@/components/auth/AuthTabs';
 import PaymentForm from '@/components/auth/PaymentForm';
 import { LoginFormValues } from '@/components/auth/LoginForm';
 import { RegistrationFormValues } from '@/components/auth/RegistrationForm';
+import { RegisterData } from '@/types/auth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
@@ -49,23 +50,47 @@ const Login: React.FC = () => {
     setShowPayment(true);
   };
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     setIsLoading(true);
     
-    setTimeout(() => {
-      if (registrationData) {
-        localStorage.setItem('user', JSON.stringify({ email: registrationData.email }));
-        localStorage.setItem('isLoggedIn', 'true');
+    if (registrationData) {
+      try {
+        const registerData: RegisterData = {
+          email: registrationData.email,
+          password: registrationData.password,
+          firstName: registrationData.firstName,
+          lastName: registrationData.lastName,
+          address: registrationData.address
+        };
         
+        const success = await register(registerData);
+        
+        if (success) {
+          toast({
+            title: "Registration successful",
+            description: "Welcome to Breeding Journey! Your account has been created."
+          });
+          
+          navigate('/');
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Registration failed",
+            description: "Please try again."
+          });
+          setShowPayment(false);
+        }
+      } catch (error) {
         toast({
-          title: "Registration successful",
-          description: "Welcome to Breeding Journey! Your account has been created."
+          variant: "destructive",
+          title: "Registration error",
+          description: "An unexpected error occurred. Please try again."
         });
-        
-        navigate('/');
+        setShowPayment(false);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
