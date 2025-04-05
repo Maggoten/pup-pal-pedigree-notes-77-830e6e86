@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
@@ -22,6 +22,12 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   onDeletePuppy
 }) => {
   const [imageUrl, setImageUrl] = useState<string>(puppy.imageUrl || '');
+  const [displayName, setDisplayName] = useState<string>(puppy.name);
+  
+  // Update display name when puppy prop changes
+  useEffect(() => {
+    setDisplayName(puppy.name);
+  }, [puppy.name]);
   
   const handleImageChange = (newImageUrl: string) => {
     setImageUrl(newImageUrl);
@@ -43,11 +49,11 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   };
 
   const handleDelete = () => {
-    if (confirm(`Are you sure you want to delete ${puppy.name}?`)) {
+    if (confirm(`Are you sure you want to delete ${displayName}?`)) {
       onDeletePuppy(puppy.id);
       toast({
         title: "Puppy Deleted",
-        description: `${puppy.name} has been deleted from the litter.`,
+        description: `${displayName} has been deleted from the litter.`,
         variant: "destructive"
       });
       if (onClose) onClose();
@@ -59,7 +65,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
       <DialogHeader>
         <DialogTitle>Puppy Information</DialogTitle>
         <DialogDescription>
-          View and edit information for {puppy.name}.
+          View and edit information for {displayName}.
         </DialogDescription>
       </DialogHeader>
 
@@ -67,7 +73,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
         <div className="mb-2">
           <h3 className="text-sm font-medium mb-2">Puppy Photo</h3>
           <PuppyImageUploader 
-            puppyName={puppy.name}
+            puppyName={displayName}
             currentImage={imageUrl}
             onImageChange={handleImageChange}
           />

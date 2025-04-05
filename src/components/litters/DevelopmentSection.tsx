@@ -4,6 +4,8 @@ import { Milestone } from 'lucide-react';
 import { Litter } from '@/types/breeding';
 import PuppyDevelopmentChecklist from './PuppyDevelopmentChecklist';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 interface DevelopmentSectionProps {
   litter: Litter;
