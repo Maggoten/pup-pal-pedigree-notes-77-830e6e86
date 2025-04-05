@@ -7,12 +7,13 @@ import PuppyDetailsDialog from './PuppyDetailsDialog';
 import PuppyDevelopmentChecklist from './PuppyDevelopmentChecklist';
 import { toast } from '@/components/ui/use-toast';
 import { Dialog } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChartBar, CheckSquare, Users, Edit } from 'lucide-react';
+import { ChartBar, CheckSquare, Users, Edit, Calendar, User, Users2 } from 'lucide-react';
 import PuppyGrowthChart from './PuppyGrowthChart';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import LitterEditDialog from './LitterEditDialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { format, parseISO, differenceInWeeks } from 'date-fns';
 
 interface SelectedLitterSectionProps {
   selectedLitter: Litter | null;
@@ -37,7 +38,6 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
   const [showAddPuppyDialog, setShowAddPuppyDialog] = useState(false);
   const [showPuppyDetailsDialog, setShowPuppyDetailsDialog] = useState(false);
   const [showEditLitterDialog, setShowEditLitterDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState("puppies");
   const [logType, setLogType] = useState<'weight' | 'height'>('weight');
   const isMobile = useIsMobile();
   
@@ -59,10 +59,15 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
     setSelectedPuppy(puppy);
     setShowPuppyDetailsDialog(true);
   };
+
+  // Calculate litter age
+  const birthDate = parseISO(selectedLitter.dateOfBirth);
+  const ageInWeeks = differenceInWeeks(new Date(), birthDate);
   
   return (
-    <div className="mt-6 animate-fade-in">
-      <div className="flex justify-between items-center mb-4">
+    <div className="mt-6 animate-fade-in space-y-8">
+      {/* Header with edit button */}
+      <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">{selectedLitter.name}</h2>
         <Button 
           variant="ghost" 
@@ -84,60 +89,102 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
         </Dialog>
       </div>
       
-      <div className="grid md:grid-cols-1 gap-4 mb-4">
-        <PuppyDevelopmentChecklist 
-          litter={selectedLitter} 
-          onToggleItem={handleToggleChecklistItem}
-          compact={true}
+      {/* Litter summary card with Sire and Dam on the same row */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-primary" />
+            Litter Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="flex items-center">
+              <Calendar className="h-4 w-4 text-primary mr-2" />
+              <span className="text-sm">
+                Born: <span className="font-medium">{format(birthDate, 'MMMM d, yyyy')}</span> 
+                {ageInWeeks > 0 && <span className="text-muted-foreground ml-1">({ageInWeeks} weeks old)</span>}
+              </span>
+            </div>
+            
+            <div className="flex items-center">
+              <Users2 className="h-4 w-4 text-primary mr-2" />
+              <span className="text-sm">
+                Puppies: <span className="font-medium">{selectedLitter.puppies.length}</span>
+              </span>
+            </div>
+            
+            {/* Sire and Dam on same row */}
+            <div className="flex items-center col-span-1">
+              <User className="h-4 w-4 text-primary mr-2" />
+              <span className="text-sm">
+                Sire: <span className="font-medium">{selectedLitter.sireName}</span>
+              </span>
+            </div>
+            
+            <div className="flex items-center col-span-1">
+              <User className="h-4 w-4 text-primary mr-2" />
+              <span className="text-sm">
+                Dam: <span className="font-medium">{selectedLitter.damName}</span>
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* 1. Puppy Development Checklist - Compact Version */}
+      <PuppyDevelopmentChecklist 
+        litter={selectedLitter} 
+        onToggleItem={handleToggleChecklistItem}
+        compact={true}
+      />
+      
+      {/* 2. Puppies Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Users className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold">Puppies ({selectedLitter.puppies.length})</h3>
+        </div>
+        
+        <PuppyList 
+          puppies={selectedLitter.puppies}
+          onAddPuppy={() => setShowAddPuppyDialog(true)}
+          onSelectPuppy={setSelectedPuppy}
+          onRowSelect={handleRowSelect}
+          onUpdatePuppy={onUpdatePuppy}
+          onDeletePuppy={onDeletePuppy}
+          showAddPuppyDialog={showAddPuppyDialog}
+          setShowAddPuppyDialog={setShowAddPuppyDialog}
+          puppyNumber={1}
+          litterDob={selectedLitter.dateOfBirth}
+          selectedPuppy={selectedPuppy}
+          damBreed=""
         />
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-        <TabsList className={`grid ${isMobile ? 'grid-cols-3' : 'w-auto inline-flex'} gap-1`}>
-          <TabsTrigger value="puppies" className="flex items-center gap-1.5 px-4">
-            <Users className="h-4 w-4" />
-            <span>Puppies ({selectedLitter.puppies.length})</span>
-          </TabsTrigger>
-          <TabsTrigger value="development" className="flex items-center gap-1.5 px-4">
-            <CheckSquare className="h-4 w-4" />
-            <span>Development</span>
-          </TabsTrigger>
-          <TabsTrigger value="growth" className="flex items-center gap-1.5 px-4">
-            <ChartBar className="h-4 w-4" />
-            <span>Growth</span>
-          </TabsTrigger>
-        </TabsList>
+      {/* 3. Development Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <CheckSquare className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold">Development</h3>
+        </div>
         
-        {/* Puppies Tab - Shows puppy list */}
-        <TabsContent value="puppies" className="mt-4 animate-fade-in">
-          <PuppyList 
-            puppies={selectedLitter.puppies}
-            onAddPuppy={() => setShowAddPuppyDialog(true)}
-            onSelectPuppy={setSelectedPuppy}
-            onRowSelect={handleRowSelect}
-            onUpdatePuppy={onUpdatePuppy}
-            onDeletePuppy={onDeletePuppy}
-            showAddPuppyDialog={showAddPuppyDialog}
-            setShowAddPuppyDialog={setShowAddPuppyDialog}
-            puppyNumber={1}
-            litterDob={selectedLitter.dateOfBirth}
-            selectedPuppy={selectedPuppy}
-            damBreed=""
-          />
-        </TabsContent>
-        
-        {/* Development Tab - Shows the full development checklist */}
-        <TabsContent value="development" className="mt-4 animate-fade-in">
-          <PuppyDevelopmentChecklist 
-            litter={selectedLitter} 
-            onToggleItem={handleToggleChecklistItem}
-            compact={false}
-          />
-        </TabsContent>
-        
-        {/* Growth Charts Tab - Shows growth charts */}
-        <TabsContent value="growth" className="mt-4 animate-fade-in">
-          <div className="flex gap-2 justify-end mb-4">
+        <PuppyDevelopmentChecklist 
+          litter={selectedLitter} 
+          onToggleItem={handleToggleChecklistItem}
+          compact={false}
+        />
+      </div>
+      
+      {/* 4. Growth Charts Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ChartBar className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">Growth Charts</h3>
+          </div>
+          
+          <div className="flex gap-2 justify-end">
             <button 
               className={`px-3 py-1.5 text-sm rounded-md transition-colors ${logType === 'weight' ? 'bg-primary text-white' : 'bg-muted hover:bg-muted/80'}`}
               onClick={() => setLogType('weight')}
@@ -151,15 +198,15 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
               Height
             </button>
           </div>
-          
-          <PuppyGrowthChart
-            selectedPuppy={selectedPuppy}
-            puppies={selectedLitter.puppies}
-            logType={logType}
-            setLogType={setLogType}
-          />
-        </TabsContent>
-      </Tabs>
+        </div>
+        
+        <PuppyGrowthChart
+          selectedPuppy={selectedPuppy}
+          puppies={selectedLitter.puppies}
+          logType={logType}
+          setLogType={setLogType}
+        />
+      </div>
       
       {/* Add Puppy Dialog - Wrapped in a Dialog component */}
       <Dialog open={showAddPuppyDialog} onOpenChange={setShowAddPuppyDialog}>
