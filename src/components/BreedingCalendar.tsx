@@ -15,7 +15,7 @@ const BreedingCalendar: React.FC = () => {
   } = useCalendarEvents(dogs);
   
   return (
-    <Card className="border-primary/20 bg-gradient-to-br from-cream-50 to-cream-100">
+    <Card className="border-primary/20 overflow-hidden shadow-sm">
       <CalendarContent
         dogs={dogs}
         getEventsForDate={getEventsForDate}

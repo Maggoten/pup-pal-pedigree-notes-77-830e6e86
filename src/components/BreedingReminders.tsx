@@ -9,17 +9,17 @@ const BreedingReminders: React.FC = () => {
   const { reminders, handleMarkComplete } = useBreedingReminders();
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <Card className="border-primary/20 shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+      <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent">
+        <CardTitle className="flex items-center gap-2 text-primary">
           <BellRing className="h-5 w-5" />
           Breeding Reminders
         </CardTitle>
         <CardDescription>
-          Important tasks, health checks and upcoming events
+          Important tasks and upcoming events
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
         <RemindersList reminders={reminders} onComplete={handleMarkComplete} />
       </CardContent>
     </Card>
