@@ -5,7 +5,7 @@ import { Calendar, Thermometer, MessageSquare, ClipboardList } from 'lucide-reac
 import PregnancyTimeline from '@/components/pregnancy/PregnancyTimeline';
 import TemperatureLog from '@/components/pregnancy/TemperatureLog';
 import SymptomsLog from '@/components/pregnancy/SymptomsLog';
-import PregnancyChecklist from '@/components/pregnancy/symptoms/PregnancyChecklist';
+import PregnancyJourney from '@/components/pregnancy/journey/PregnancyJourney';
 
 interface PregnancyTabsProps {
   pregnancyId: string;
@@ -21,8 +21,11 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
   expectedDueDate 
 }) => {
   return (
-    <Tabs defaultValue="timeline" className="w-full">
+    <Tabs defaultValue="journey" className="w-full">
       <TabsList className="grid grid-cols-4 mb-4">
+        <TabsTrigger value="journey" className="flex items-center gap-2">
+          <ClipboardList className="h-4 w-4" /> Journey
+        </TabsTrigger>
         <TabsTrigger value="timeline" className="flex items-center gap-2">
           <Calendar className="h-4 w-4" /> Timeline
         </TabsTrigger>
@@ -30,12 +33,18 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
           <Thermometer className="h-4 w-4" /> Temperature
         </TabsTrigger>
         <TabsTrigger value="symptoms" className="flex items-center gap-2">
-          <MessageSquare className="h-4 w-4" /> Notes & Symptoms
-        </TabsTrigger>
-        <TabsTrigger value="checklist" className="flex items-center gap-2">
-          <ClipboardList className="h-4 w-4" /> Checklist
+          <MessageSquare className="h-4 w-4" /> Notes
         </TabsTrigger>
       </TabsList>
+      
+      <TabsContent value="journey">
+        <PregnancyJourney
+          pregnancyId={pregnancyId}
+          femaleName={femaleName}
+          matingDate={matingDate}
+          expectedDueDate={expectedDueDate}
+        />
+      </TabsContent>
       
       <TabsContent value="timeline">
         <PregnancyTimeline 
@@ -53,13 +62,6 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
       
       <TabsContent value="symptoms">
         <SymptomsLog 
-          pregnancyId={pregnancyId} 
-          femaleName={femaleName} 
-        />
-      </TabsContent>
-      
-      <TabsContent value="checklist">
-        <PregnancyChecklist 
           pregnancyId={pregnancyId} 
           femaleName={femaleName} 
         />
