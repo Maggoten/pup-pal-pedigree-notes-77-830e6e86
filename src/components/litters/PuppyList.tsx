@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Edit, Trash2, BarChart2 } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -5,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Puppy } from '@/types/breeding';
 import PuppyDetailsDialog from './PuppyDetailsDialog';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface PuppyListProps {
   puppies: Puppy[];
@@ -68,7 +70,18 @@ const PuppyList: React.FC<PuppyListProps> = ({
               onClick={() => onPuppyClick && onPuppyClick(puppy)}
             >
               <td className="px-4 py-3">
-                <span>{puppy.name}</span>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    {puppy.imageUrl ? (
+                      <AvatarImage src={puppy.imageUrl} alt={puppy.name} className="object-cover" />
+                    ) : (
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                        {puppy.name.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <span>{puppy.name}</span>
+                </div>
               </td>
               <td className="px-4 py-3 capitalize">{puppy.gender}</td>
               <td className="px-4 py-3">{puppy.color}</td>
