@@ -33,3 +33,8 @@ export const getActivePregnancies = (): ActivePregnancy[] => {
   
   return pregnancies;
 };
+
+export const getFirstActivePregnancy = (): string | null => {
+  const pregnancies = getActivePregnancies();
+  return pregnancies.length > 0 ? pregnancies[0].id : null;
+};

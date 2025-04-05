@@ -8,7 +8,6 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MyDogs from "./pages/MyDogs";
 import PlannedLitters from "./pages/PlannedLitters";
-import Pregnancy from "./pages/Pregnancy";
 import PregnancyDetails from "./pages/PregnancyDetails";
 import MyLitters from "./pages/MyLitters";
 import Login from "./pages/Login";
@@ -32,7 +31,6 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/my-dogs" element={<MyDogs />} />
                 <Route path="/planned-litters" element={<PlannedLitters />} />
-                <Route path="/pregnancy" element={<Pregnancy />} />
                 <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
                 <Route path="/my-litters" element={<MyLitters />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

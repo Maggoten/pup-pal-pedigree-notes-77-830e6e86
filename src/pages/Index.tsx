@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import BreedingStats from '@/components/BreedingStats';
 import BreedingCalendar from '@/components/BreedingCalendar';
 import BreedingReminders from '@/components/BreedingReminders';
@@ -10,9 +10,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import PageLayout from '@/components/PageLayout';
+import ActivePregnanciesCard from '@/components/home/ActivePregnanciesCard';
+import { getActivePregnancies } from '@/services/PregnancyService';
+import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 
 const Index = () => {
   const { user } = useAuth();
+  const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
+  
+  useEffect(() => {
+    const pregnancies = getActivePregnancies();
+    setActivePregnancies(pregnancies);
+  }, []);
   
   const handleAddDogClick = () => {
     // In a real app, this would open a modal or navigate to a form
@@ -36,6 +45,11 @@ const Index = () => {
             <BreedingReminders />
           </div>
         </div>
+        
+        {/* Active Pregnancies Section */}
+        {activePregnancies.length > 0 && (
+          <ActivePregnanciesCard pregnancies={activePregnancies} />
+        )}
         
         <BreedingStats />
         

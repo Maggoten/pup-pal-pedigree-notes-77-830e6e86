@@ -1,8 +1,19 @@
 
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
 import { usePregnancyDetails } from '@/hooks/usePregnancyDetails';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, ChevronDown } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getActivePregnancies } from '@/services/PregnancyService';
+import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 
 // Import our new component files
 import PregnancyHeader from '@/components/pregnancy/PregnancyHeader';
@@ -12,7 +23,22 @@ import LoadingPregnancy from '@/components/pregnancy/LoadingPregnancy';
 
 const PregnancyDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { pregnancy, loading } = usePregnancyDetails(id);
+  const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
+  
+  useEffect(() => {
+    const pregnancies = getActivePregnancies();
+    setActivePregnancies(pregnancies);
+  }, []);
+  
+  const handleBack = () => {
+    navigate('/');
+  };
+  
+  const handlePregnancyChange = (pregnancyId: string) => {
+    navigate(`/pregnancy/${pregnancyId}`);
+  };
   
   if (loading || !pregnancy) {
     return <LoadingPregnancy />;
@@ -24,6 +50,34 @@ const PregnancyDetails: React.FC = () => {
       description=""
       icon={null}
     >
+      <div className="mb-6 flex justify-between items-center">
+        <Button variant="outline" onClick={handleBack} className="flex items-center gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Home
+        </Button>
+        
+        {activePregnancies.length > 1 && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Select Pregnancy:</span>
+            <Select 
+              value={id} 
+              onValueChange={handlePregnancyChange}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select pregnancy" />
+              </SelectTrigger>
+              <SelectContent>
+                {activePregnancies.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.femaleName} × {p.maleName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+      
       <PregnancyHeader 
         femaleName={pregnancy.femaleName}
         maleName={pregnancy.maleName}

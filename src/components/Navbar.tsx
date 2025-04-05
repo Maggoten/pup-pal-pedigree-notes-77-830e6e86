@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -34,7 +33,6 @@ export const Navbar: React.FC = () => {
     { path: "/", label: "Home", icon: Calendar },
     { path: "/my-dogs", label: "My Dogs", icon: Dog },
     { path: "/planned-litters", label: "Planned Litters", icon: FileText },
-    { path: "/pregnancy", label: "Pregnancy", icon: PawPrint },
     { path: "/my-litters", label: "My Litters", icon: Dog }
   ];
   
