@@ -1,56 +1,24 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { format, addDays, startOfWeek, addWeeks, subWeeks, parseISO, setHours, setMinutes } from 'date-fns';
 import { useDogs } from '@/context/DogsContext';
-import { calculateUpcomingHeats, UpcomingHeat } from '@/utils/heatCalculator';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { calculateUpcomingHeats } from '@/utils/heatCalculator';
+import { Dialog } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/use-toast';
-import { useForm } from 'react-hook-form';
 import { v4 as uuidv4 } from 'uuid';
 
-interface CalendarEvent {
-  id: string;
-  title: string;
-  date: Date;
-  time?: string;
-  type: 'heat' | 'mating' | 'due-date' | 'planned-mating' | 'custom';
-  dogId?: string;
-  dogName?: string;
-  notes?: string;
-}
-
-interface AddEventFormValues {
-  title: string;
-  date: Date;
-  time: string;
-  type: string;
-  dogId?: string;
-  notes?: string;
-}
+// Import our new components
+import CalendarHeader from './calendar/CalendarHeader';
+import CalendarGrid from './calendar/CalendarGrid';
+import AddEventDialog from './calendar/AddEventDialog';
+import { CalendarEvent, AddEventFormValues } from './calendar/types';
 
 const BreedingCalendar: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const { dogs } = useDogs();
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
-  const form = useForm<AddEventFormValues>({
-    defaultValues: {
-      title: '',
-      date: new Date(),
-      time: format(new Date(), 'HH:mm'),
-      type: 'custom',
-      notes: ''
-    }
-  });
   
   useEffect(() => {
     // Load events from localStorage if available
@@ -169,7 +137,6 @@ const BreedingCalendar: React.FC = () => {
     
     setCalendarEvents([...calendarEvents, newEvent]);
     setIsDialogOpen(false);
-    form.reset();
     
     toast({
       title: "Event Added",
@@ -179,213 +146,24 @@ const BreedingCalendar: React.FC = () => {
   
   return (
     <Card className="border-primary/20 bg-gradient-to-br from-cream-50 to-cream-100">
-      <CardHeader className="flex flex-row items-center justify-between pb-2 bg-primary/5 border-b border-primary/20">
-        <div>
-          <CardTitle className="flex items-center gap-2 text-primary">
-            <CalendarIcon className="h-5 w-5" />
-            Breeding Calendar
-          </CardTitle>
-          <CardDescription>
-            Track heats, matings, and due dates
-          </CardDescription>
-        </div>
-        <div className="flex items-center gap-2">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Plus className="h-4 w-4" />
-                Add Event
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-cream-50">
-              <DialogHeader>
-                <DialogTitle>Add Calendar Event</DialogTitle>
-                <DialogDescription>
-                  Add a custom event to your breeding calendar
-                </DialogDescription>
-              </DialogHeader>
-              
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Event Title</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter event title" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="date"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Event Date</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className="w-full justify-start text-left font-normal"
-                                >
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                initialFocus
-                                className="p-3 pointer-events-auto"
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="time"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Event Time</FormLabel>
-                          <div className="flex items-center">
-                            <FormControl>
-                              <Input
-                                type="time"
-                                {...field}
-                                className="flex-1"
-                              />
-                            </FormControl>
-                            <Clock className="ml-2 h-4 w-4 text-muted-foreground" />
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <FormField
-                    control={form.control}
-                    name="dogId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Associated Dog (Optional)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a dog (optional)" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {dogs.map((dog) => (
-                              <SelectItem key={dog.id} value={dog.id}>
-                                {dog.name} ({dog.gender})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="notes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Notes (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Add notes about this event" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <DialogFooter>
-                    <Button type="submit">Add Event</Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-          
-          <Button variant="outline" size="icon" onClick={handlePrevWeek}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm font-medium">
-            {format(startDate, 'MMM d')} - {format(addDays(startDate, 27), 'MMM d, yyyy')}
-          </span>
-          <Button variant="outline" size="icon" onClick={handleNextWeek}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="p-4 bg-gradient-to-br from-cream-50 to-[#FFDEE2]/30">
-        <div className="overflow-x-auto">
-          <div className="grid grid-cols-7 gap-1 min-w-[700px]">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-              <div key={day} className="text-center font-medium py-1 text-sm text-primary">
-                {day}
-              </div>
-            ))}
-            
-            {weeks.map((week, weekIndex) => (
-              <React.Fragment key={weekIndex}>
-                {week.map((day) => {
-                  const dayEvents = getEventsForDate(day);
-                  const isToday = format(new Date(), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
-                  
-                  return (
-                    <div 
-                      key={format(day, 'yyyy-MM-dd')} 
-                      className={`min-h-[100px] p-1 border rounded text-sm ${
-                        isToday ? 'bg-primary/10 border-primary' : 'bg-white/80 border-cream-300'
-                      }`}
-                    >
-                      <div className="font-medium text-right mb-1 text-primary">
-                        {format(day, 'd')}
-                      </div>
-                      <div className="space-y-1">
-                        {dayEvents.map((event) => (
-                          <div 
-                            key={event.id}
-                            className={`p-1 rounded text-xs border ${getEventColor(event.type)}`}
-                          >
-                            <div className="font-medium">{event.title}</div>
-                            {event.time && <div className="text-xs flex items-center gap-1">
-                              <Clock className="h-3 w-3 inline" /> {event.time}
-                            </div>}
-                            {event.dogName && <div>{event.dogName}</div>}
-                            {event.notes && <div className="text-xs italic mt-1 truncate">{event.notes}</div>}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-      </CardContent>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <CalendarHeader 
+          currentDate={currentDate}
+          startDate={startDate}
+          handlePrevWeek={handlePrevWeek}
+          handleNextWeek={handleNextWeek}
+        />
+        
+        <CardContent className="p-4 bg-gradient-to-br from-cream-50 to-[#FFDEE2]/30">
+          <CalendarGrid 
+            weeks={weeks}
+            getEventsForDate={getEventsForDate}
+            getEventColor={getEventColor}
+          />
+        </CardContent>
+        
+        <AddEventDialog dogs={dogs} onSubmit={handleSubmit} />
+      </Dialog>
     </Card>
   );
 };
