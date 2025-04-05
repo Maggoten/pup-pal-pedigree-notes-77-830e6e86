@@ -10,7 +10,7 @@ const BreedingReminders: React.FC = () => {
   
   return (
     <Card className="border-primary/20 shadow-sm overflow-hidden transition-shadow hover:shadow-md">
-      <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent">
+      <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent border-b border-primary/10 pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
           <BellRing className="h-5 w-5" />
           Breeding Reminders
@@ -19,7 +19,7 @@ const BreedingReminders: React.FC = () => {
           Important tasks and upcoming events
         </CardDescription>
       </CardHeader>
-      <CardContent className="max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+      <CardContent className="p-0 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
         <RemindersList reminders={reminders} onComplete={handleMarkComplete} />
       </CardContent>
     </Card>

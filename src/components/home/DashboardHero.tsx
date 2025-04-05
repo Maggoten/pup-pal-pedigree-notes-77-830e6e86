@@ -1,43 +1,59 @@
 
 import React from 'react';
 import StatsCards from './StatsCards';
-import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
-import { Dog } from 'lucide-react';
+import { Dog, Calendar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface DashboardHeroProps {
   username: string;
-  activePregnancies: ActivePregnancy[];
 }
 
-const DashboardHero: React.FC<DashboardHeroProps> = ({ username, activePregnancies }) => {
+const DashboardHero: React.FC<DashboardHeroProps> = ({ username }) => {
+  const navigate = useNavigate();
+  
+  const handleAddDogClick = () => {
+    navigate('/my-dogs');
+  };
+  
   return (
-    <div className="rounded-lg overflow-hidden border border-primary/20">
-      <div className="bg-gradient-to-br from-primary/20 to-primary/5 p-6">
-        <div className="flex items-start justify-between">
+    <div className="rounded-lg overflow-hidden border border-primary/20 bg-gradient-to-br from-[#F5F0E5] to-[#EAE0C9]">
+      <div className="p-6 md:p-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
+            <h2 className="text-2xl md:text-3xl font-bold text-primary flex items-center gap-2">
               <Dog className="h-6 w-6 text-primary" />
               Good day, {username}!
             </h2>
             <p className="text-muted-foreground max-w-md">
-              Here's what's happening with your breeding program today. Track pregnancies, 
-              manage upcoming events, and monitor your dogs' health.
+              Keep track of your breeding program with our helpful tools.
             </p>
           </div>
-          <div className="hidden md:block">
-            <span className="text-xs font-medium text-primary/80">
-              {new Date().toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
-            </span>
+          
+          <div className="flex flex-wrap gap-3">
+            <Button 
+              onClick={handleAddDogClick}
+              variant="default" 
+              className="shadow-sm"
+            >
+              <Dog className="mr-2 h-4 w-4" />
+              Add New Dog
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="bg-white/50 shadow-sm border-primary/20"
+              onClick={() => navigate('/planned-litters')}
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              Plan Litter
+            </Button>
           </div>
         </div>
-      </div>
-      <div className="p-6 bg-gradient-to-br from-cream-50 to-cream-100">
-        <StatsCards activePregnancies={activePregnancies} />
+        
+        <div className="mt-6">
+          <StatsCards condensed={true} />
+        </div>
       </div>
     </div>
   );

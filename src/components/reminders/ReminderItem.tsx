@@ -31,9 +31,9 @@ const ReminderItem: React.FC<ReminderItemProps> = ({
   const navigate = useNavigate();
   
   const priorityStyles = {
-    high: 'bg-rose-50 border-rose-200',
-    medium: 'bg-amber-50 border-amber-200',
-    low: 'bg-blue-50 border-blue-200'
+    high: 'border-l-rose-500 bg-rose-50/50',
+    medium: 'border-l-amber-500 bg-amber-50/50',
+    low: 'border-l-blue-500 bg-blue-50/50'
   };
 
   const isNavigable = relatedId && (
@@ -57,7 +57,7 @@ const ReminderItem: React.FC<ReminderItemProps> = ({
 
   return (
     <div 
-      className={`p-4 rounded-lg border flex flex-col items-start justify-between ${priorityStyles[priority]}`}
+      className={`border-l-4 py-3 px-4 ${priorityStyles[priority]} hover:bg-white/50 transition-colors border-b border-primary/5 flex flex-col items-start justify-between`}
     >
       <div className="flex items-start gap-3 w-full">
         <div className="mt-1">{icon}</div>

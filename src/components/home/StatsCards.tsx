@@ -15,6 +15,7 @@ interface StatsCardProps {
   linkText: string;
   linkPath: string;
   color: string;
+  condensed?: boolean;
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({ 
@@ -24,9 +25,36 @@ const StatsCard: React.FC<StatsCardProps> = ({
   icon, 
   linkText, 
   linkPath,
-  color
+  color,
+  condensed = false
 }) => {
   const navigate = useNavigate();
+  
+  if (condensed) {
+    return (
+      <div className="bg-white/70 rounded-md shadow-sm p-3 border border-primary/10 hover:shadow-md transition-all duration-300">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full" style={{ backgroundColor: `${color}20` }}>
+              {icon}
+            </div>
+            <div>
+              <div className="font-medium text-lg">{value}</div>
+              <div className="text-xs text-muted-foreground">{title}</div>
+            </div>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate(linkPath)}
+            className="rounded-full hover:bg-primary/10"
+          >
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <Card className="bg-white h-full transition-all duration-300 hover:shadow-md hover:-translate-y-1 border-t-4" style={{ borderTopColor: color }}>
@@ -46,10 +74,11 @@ const StatsCard: React.FC<StatsCardProps> = ({
 };
 
 interface StatsCardsProps {
-  activePregnancies: ActivePregnancy[];
+  activePregnancies?: ActivePregnancy[];
+  condensed?: boolean;
 }
 
-const StatsCards: React.FC<StatsCardsProps> = ({ activePregnancies }) => {
+const StatsCards: React.FC<StatsCardsProps> = ({ activePregnancies = [], condensed = false }) => {
   const { dogs } = useDogs();
   
   // Calculate statistics
@@ -98,6 +127,26 @@ const StatsCards: React.FC<StatsCardsProps> = ({ activePregnancies }) => {
       color: "#d97706" // amber-600
     }
   ];
+  
+  if (condensed) {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {statCards.map((card, index) => (
+          <StatsCard 
+            key={index}
+            title={card.title}
+            value={card.value}
+            description={card.description}
+            icon={card.icon}
+            linkText={card.linkText}
+            linkPath={card.linkPath}
+            color={card.color}
+            condensed={true}
+          />
+        ))}
+      </div>
+    );
+  }
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

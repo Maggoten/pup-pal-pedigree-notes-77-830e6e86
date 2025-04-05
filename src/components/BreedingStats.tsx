@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dog, Heart, CalendarCheck, Users } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Dog, Heart, CalendarCheck, Users, BarChart } from 'lucide-react';
 import { useDogs } from '@/context/DogsContext';
 
 const BreedingStats = () => {
@@ -52,19 +52,31 @@ const BreedingStats = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.map((stat, index) => (
-        <Card key={index} className="stats-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-            <stat.icon className={`h-4 w-4 ${stat.color}`} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+    <Card className="border-primary/20 shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+      <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent border-b border-primary/10 pb-3">
+        <CardTitle className="flex items-center gap-2 text-primary">
+          <BarChart className="h-5 w-5" />
+          Breeding Statistics
+        </CardTitle>
+        <CardDescription>
+          Overview of your breeding program
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-4">
+        <div className="grid grid-cols-2 gap-4">
+          {stats.map((stat, index) => (
+            <div 
+              key={index} 
+              className="p-3 bg-white/70 rounded-md shadow-sm border border-primary/10 flex flex-col items-center text-center"
+            >
+              <stat.icon className={`h-5 w-5 ${stat.color} mb-1`} />
+              <div className="text-xl font-bold">{stat.value}</div>
+              <div className="text-xs text-muted-foreground">{stat.title}</div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

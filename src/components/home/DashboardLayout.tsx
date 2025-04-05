@@ -29,29 +29,29 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         title="Breeding Journey Dashboard" 
         description={`Welcome back, ${username}! Here's an overview of your breeding program`}
       >
-        <div className="space-y-8">
+        <div className="space-y-6">
           <DashboardHero 
             username={username} 
-            activePregnancies={activePregnancies}
           />
           
           {/* Main dashboard content */}
-          <div className="grid gap-8 grid-cols-1 lg:grid-cols-4">
-            {/* Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="space-y-6">
-                <BreedingReminders />
-                <BreedingStats />
-              </div>
-            </div>
-            
-            {/* Main content area */}
-            <div className="lg:col-span-3">
+          <div className="grid gap-6 grid-cols-1 lg:grid-cols-12">
+            {/* Main content area with calendar */}
+            <div className="lg:col-span-8">
               <div className="space-y-6">
                 <BreedingCalendar />
+                
                 {activePregnancies.length > 0 && 
                   <ActivePregnanciesSection pregnancies={activePregnancies} />
                 }
+              </div>
+            </div>
+            
+            {/* Sidebar */}
+            <div className="lg:col-span-4">
+              <div className="space-y-6">
+                <BreedingReminders />
+                <BreedingStats />
               </div>
             </div>
           </div>
