@@ -1,24 +1,26 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { format, addDays, startOfWeek, addWeeks, subWeeks, parseISO, setHours, setMinutes } from 'date-fns';
+import { format, addDays, startOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { useDogs } from '@/context/DogsContext';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dialog } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
+import { useIsMobile } from '@/hooks/use-mobile';
 
-// Import our new components
+// Import our components
 import CalendarHeader from './calendar/CalendarHeader';
 import CalendarGrid from './calendar/CalendarGrid';
 import AddEventDialog from './calendar/AddEventDialog';
-import { CalendarEvent, AddEventFormValues } from './calendar/types';
+import { CalendarEvent, AddEventFormValues, DeleteEventParams } from './calendar/types';
 
 const BreedingCalendar: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const { dogs } = useDogs();
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     // Load events from localStorage if available
@@ -79,11 +81,14 @@ const BreedingCalendar: React.FC = () => {
     setCurrentDate(subWeeks(currentDate, 1));
   };
   
-  const calendarDays = Array.from({ length: 28 }, (_, index) => {
+  // On mobile, we show 2 weeks at a time instead of 4 to make it more readable
+  const weeksToShow = isMobile ? 2 : 4;
+  
+  const calendarDays = Array.from({ length: weeksToShow * 7 }, (_, index) => {
     return addDays(startDate, index);
   });
   
-  const weeks = Array.from({ length: 4 }, (_, weekIndex) => {
+  const weeks = Array.from({ length: weeksToShow }, (_, weekIndex) => {
     return calendarDays.slice(weekIndex * 7, (weekIndex + 1) * 7);
   });
   
@@ -144,7 +149,7 @@ const BreedingCalendar: React.FC = () => {
     });
   };
 
-  // New function to handle event deletion
+  // Function to handle event deletion
   const handleDeleteEvent = (eventId: string) => {
     // Only filter out custom events (system events cannot be deleted)
     const eventToDelete = calendarEvents.find(event => event.id === eventId);
@@ -175,12 +180,14 @@ const BreedingCalendar: React.FC = () => {
         />
         
         <CardContent className="p-4 bg-gradient-to-br from-cream-50 to-[#FFDEE2]/30">
-          <CalendarGrid 
-            weeks={weeks}
-            getEventsForDate={getEventsForDate}
-            getEventColor={getEventColor}
-            onDeleteEvent={handleDeleteEvent}
-          />
+          <div className={isMobile ? "overflow-x-auto -mx-4 px-4" : ""}>
+            <CalendarGrid 
+              weeks={weeks}
+              getEventsForDate={getEventsForDate}
+              getEventColor={getEventColor}
+              onDeleteEvent={handleDeleteEvent}
+            />
+          </div>
         </CardContent>
         
         <AddEventDialog dogs={dogs} onSubmit={handleSubmit} />
