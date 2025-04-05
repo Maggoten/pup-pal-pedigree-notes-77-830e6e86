@@ -19,22 +19,28 @@ const initialLitters: Litter[] = [
         name: 'Puppy 1',
         gender: 'male',
         color: 'Golden',
+        birthWeight: 0.45,
+        birthDateTime: '2025-04-15T08:30:00',
         weightLog: [
           { date: '2025-04-15', weight: 0.45 },
           { date: '2025-04-16', weight: 0.48 },
           { date: '2025-04-17', weight: 0.52 },
-        ]
+        ],
+        heightLog: [] // Add empty heightLog array
       },
       {
         id: '2',
         name: 'Puppy 2',
         gender: 'female',
         color: 'Light Golden',
+        birthWeight: 0.42,
+        birthDateTime: '2025-04-15T09:15:00',
         weightLog: [
           { date: '2025-04-15', weight: 0.42 },
           { date: '2025-04-16', weight: 0.46 },
           { date: '2025-04-17', weight: 0.49 },
-        ]
+        ],
+        heightLog: [] // Add empty heightLog array
       }
     ]
   }
