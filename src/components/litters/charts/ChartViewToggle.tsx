@@ -28,13 +28,15 @@ const ChartViewToggle: React.FC<ChartViewToggleProps> = ({
 }) => {
   // Handle puppy selection from dropdown
   const handlePuppySelect = (puppyId: string) => {
-    const puppy = puppies.find(p => p.id === puppyId);
-    if (puppy) {
-      onSelectPuppy(puppy);
-      setViewMode('single');
-    } else {
-      // If no puppy is selected, switch to litter view
+    if (puppyId === "litter") {
+      // If "Whole Litter" is selected, clear selected puppy and switch to litter view
       setViewMode('litter');
+    } else {
+      const puppy = puppies.find(p => p.id === puppyId);
+      if (puppy) {
+        onSelectPuppy(puppy);
+        setViewMode('single');
+      }
     }
   };
 
@@ -42,14 +44,14 @@ const ChartViewToggle: React.FC<ChartViewToggleProps> = ({
     <div className="flex gap-2 justify-end items-center">
       <div className="w-[180px]">
         <Select
-          value={selectedPuppy?.id || ""}
+          value={selectedPuppy?.id || "litter"}
           onValueChange={handlePuppySelect}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select puppy" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Whole Litter</SelectItem>
+            <SelectItem value="litter">Whole Litter</SelectItem>
             {puppies.map(puppy => (
               <SelectItem key={puppy.id} value={puppy.id}>
                 {puppy.name}
