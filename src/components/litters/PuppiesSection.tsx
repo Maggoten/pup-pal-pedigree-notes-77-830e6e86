@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -49,6 +50,28 @@ const PuppiesSection: React.FC<PuppiesSectionProps> = ({
   
   const litterAge = differenceInWeeks(new Date(), parseISO(litterDob));
   
+  // Determine the next puppy number based on existing puppies
+  const getNextPuppyNumber = () => {
+    if (puppies.length === 0) return 1;
+    
+    // Try to find the highest number in existing puppy names
+    const numberPattern = /Puppy\s+(\d+)/i;
+    let highestNumber = 0;
+    
+    puppies.forEach(puppy => {
+      const match = puppy.name.match(numberPattern);
+      if (match && match[1]) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > highestNumber) {
+          highestNumber = num;
+        }
+      }
+    });
+    
+    // If we found numbered puppies, return the next number, otherwise default to puppies.length + 1
+    return highestNumber > 0 ? highestNumber + 1 : puppies.length + 1;
+  };
+  
   return (
     <Card className="shadow-sm">
       <CardHeader className="bg-primary/5 pb-4">
@@ -71,7 +94,7 @@ const PuppiesSection: React.FC<PuppiesSectionProps> = ({
               onAddPuppy={onAddPuppy} 
               litterDob={litterDob} 
               damBreed={damBreed}
-              puppyNumber={puppies.length + 1}
+              puppyNumber={getNextPuppyNumber()}
             />
           </Dialog>
         </div>
@@ -109,8 +132,6 @@ const PuppiesSection: React.FC<PuppiesSectionProps> = ({
           />
         )}
       </Dialog>
-      
-      {/* Keep existing PuppyDetailsDialog */}
     </Card>
   );
 };

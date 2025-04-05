@@ -98,20 +98,6 @@ const PuppyList: React.FC<PuppyListProps> = ({
                       onDeletePuppy={onDeletePuppy}
                     />
                   </Dialog>
-                  
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => {
-                      if (confirm(`Are you sure you want to delete ${puppy.name}?`)) {
-                        onDeletePuppy(puppy.id);
-                      }
-                    }}
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Delete puppy</span>
-                  </Button>
                 </div>
               </td>
             </tr>
