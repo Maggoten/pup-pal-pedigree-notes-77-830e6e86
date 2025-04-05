@@ -96,7 +96,7 @@ const PuppyList: React.FC<PuppyListProps> = ({
               <TableHead>Color</TableHead>
               <TableHead>Birth Weight</TableHead>
               <TableHead>Current Weight</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>Height/Weight</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
