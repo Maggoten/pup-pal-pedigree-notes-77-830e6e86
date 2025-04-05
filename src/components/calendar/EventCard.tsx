@@ -1,34 +1,28 @@
 
 import React from 'react';
-import { Clock } from 'lucide-react';
-import { CalendarEvent } from './types';
 
 interface EventCardProps {
-  event: CalendarEvent;
-  getEventColor: (type: string) => string;
+  event: any;
+  colorClass: string;
+  onClick: () => void;
+  compact?: boolean;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event, getEventColor }) => {
-  // Add a visual indicator for custom events that can be deleted
-  const isCustomEvent = event.type === 'custom';
-  
+const EventCard: React.FC<EventCardProps> = ({ event, colorClass, onClick, compact = false }) => {
   return (
-    <div 
-      className={`p-1 rounded text-xs border ${getEventColor(event.type)} cursor-default ${isCustomEvent ? 'relative group' : ''}`}
+    <div
+      className={`
+        px-1.5 py-0.5 rounded border text-left cursor-pointer
+        transition-colors duration-150 hover:opacity-90
+        ${colorClass}
+        ${compact ? 'text-[9px] leading-tight' : 'text-[10px]'}
+      `}
+      onClick={onClick}
     >
-      <div className="font-medium">{event.title}</div>
-      {event.time && <div className="text-xs flex items-center gap-1">
-        <Clock className="h-3 w-3 inline" /> {event.time}
-      </div>}
-      {event.dogName && <div>{event.dogName}</div>}
-      {event.notes && <div className="text-xs italic mt-1 truncate">{event.notes}</div>}
-      
-      {/* Visual indicator for deletable events */}
-      {isCustomEvent && (
-        <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100">
-          <div className="bg-white rounded-full p-0.5 shadow-sm -mt-1 -mr-1">
-            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-          </div>
+      {event.title}
+      {event.dogName && !compact && (
+        <div className="text-[8px] font-semibold truncate">
+          {event.dogName}
         </div>
       )}
     </div>

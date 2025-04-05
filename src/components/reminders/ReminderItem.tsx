@@ -15,6 +15,7 @@ interface ReminderItemProps {
   type: string;
   relatedId?: string;
   onComplete: (id: string) => void;
+  compact?: boolean;
 }
 
 const ReminderItem: React.FC<ReminderItemProps> = ({
@@ -26,7 +27,8 @@ const ReminderItem: React.FC<ReminderItemProps> = ({
   dueDate,
   type,
   relatedId,
-  onComplete
+  onComplete,
+  compact = false
 }) => {
   const navigate = useNavigate();
   
@@ -54,6 +56,31 @@ const ReminderItem: React.FC<ReminderItemProps> = ({
       navigate(`/my-litters?litterId=${relatedId}`);
     }
   };
+
+  if (compact) {
+    return (
+      <div className={`border-l-4 py-2 px-3 ${priorityStyles[priority]} hover:bg-white/50 transition-colors flex items-start gap-2`}>
+        <div className="mt-0.5">{icon}</div>
+        <div className="flex-1">
+          <h4 className="font-medium text-sm">{title}</h4>
+          {dueDate && (
+            <p className="text-xs text-muted-foreground">
+              Due: {format(dueDate, 'MMM d')}
+            </p>
+          )}
+        </div>
+        <Button 
+          size="sm" 
+          variant="ghost" 
+          className="h-6 w-6 p-0 rounded-full flex-shrink-0"
+          onClick={() => onComplete(id)}
+        >
+          <Check className="h-3 w-3" />
+          <span className="sr-only">Mark as complete</span>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div 

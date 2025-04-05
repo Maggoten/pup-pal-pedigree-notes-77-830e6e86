@@ -4,7 +4,7 @@ export interface CalendarEvent {
   title: string;
   date: Date;
   time?: string;
-  type: 'heat' | 'mating' | 'due-date' | 'planned-mating' | 'custom';
+  type: string;
   dogId?: string;
   dogName?: string;
   notes?: string;
@@ -13,13 +13,15 @@ export interface CalendarEvent {
 export interface AddEventFormValues {
   title: string;
   date: Date;
-  time: string;
-  type: string;
+  time?: string;
   dogId?: string;
   notes?: string;
 }
 
-// New interface for delete event functionality
-export interface DeleteEventParams {
-  eventId: string;
+export interface CalendarGridProps {
+  weeks: Date[][];
+  getEventsForDate: (date: Date) => CalendarEvent[];
+  getEventColor: (type: string) => string;
+  onDeleteEvent: (eventId: string) => void;
+  compact?: boolean;
 }

@@ -16,7 +16,7 @@ const BreedingCalendar: React.FC = () => {
   } = useCalendarEvents(dogs);
   
   return (
-    <Card className="border-primary/20 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+    <Card className="border-primary/20 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full">
       <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent border-b border-primary/10 pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
           <CalendarIcon className="h-5 w-5" />
@@ -32,6 +32,7 @@ const BreedingCalendar: React.FC = () => {
         getEventColor={getEventColor}
         onDeleteEvent={deleteEvent}
         onAddEvent={addEvent}
+        compact={true}
       />
     </Card>
   );

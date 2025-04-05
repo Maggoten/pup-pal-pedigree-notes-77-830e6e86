@@ -1,145 +1,148 @@
 
-import React from 'react';
-import { format } from 'date-fns';
-import { Trash2 } from 'lucide-react';
-import { CalendarEvent } from './types';
+import React, { useState } from 'react';
+import { format, isSameMonth, isSameDay } from 'date-fns';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import EventCard from './EventCard';
 import MobileEventCard from './MobileEventCard';
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from '@/components/ui/context-menu';
 import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 interface CalendarGridProps {
   weeks: Date[][];
-  getEventsForDate: (date: Date) => CalendarEvent[];
+  getEventsForDate: (date: Date) => any[];
   getEventColor: (type: string) => string;
-  onDeleteEvent?: (eventId: string) => void;
+  onDeleteEvent: (eventId: string) => void;
+  compact?: boolean;
 }
 
 const CalendarGrid: React.FC<CalendarGridProps> = ({ 
   weeks, 
-  getEventsForDate,
-  getEventColor,
-  onDeleteEvent
+  getEventsForDate, 
+  getEventColor, 
+  onDeleteEvent,
+  compact = false 
 }) => {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
   const isMobile = useIsMobile();
-  const [selectedEvent, setSelectedEvent] = React.useState<CalendarEvent | null>(null);
-  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
   
-  const handleDeleteConfirm = () => {
-    if (selectedEvent && onDeleteEvent) {
-      onDeleteEvent(selectedEvent.id);
+  const today = new Date();
+  const handleEventClick = (event: any) => {
+    if (isMobile) {
+      setSelectedEvent(event);
     }
-    setIsAlertOpen(false);
+  };
+  
+  const handleCloseEventDetails = () => {
     setSelectedEvent(null);
   };
   
-  // Function to handle direct delete action
-  const handleDeleteAction = (event: CalendarEvent) => {
-    if (event.type === 'custom' && onDeleteEvent) {
-      setSelectedEvent(event);
-      setIsAlertOpen(true);
-    }
+  const handleDeleteEvent = (eventId: string) => {
+    onDeleteEvent(eventId);
+    setSelectedEvent(null);
   };
-  
+
   return (
     <>
-      <div className="overflow-x-auto">
-        <div className="grid grid-cols-7 gap-1 min-w-[700px]">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-            <div key={day} className="text-center font-medium py-1 text-sm text-primary">
-              {day}
-            </div>
-          ))}
-          
-          {weeks.map((week, weekIndex) => (
-            <React.Fragment key={weekIndex}>
-              {week.map((day) => {
-                const dayEvents = getEventsForDate(day);
-                const isToday = format(new Date(), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
-                
-                return (
-                  <div 
-                    key={format(day, 'yyyy-MM-dd')} 
-                    className={`min-h-[100px] p-1 border rounded text-sm ${
-                      isToday ? 'bg-primary/10 border-primary' : 'bg-white/80 border-cream-300'
-                    }`}
-                  >
-                    <div className="font-medium text-right mb-1 text-primary">
-                      {format(day, 'd')}
-                    </div>
-                    <div className="space-y-1">
-                      {dayEvents.map((event) => (
-                        isMobile ? (
-                          <MobileEventCard 
-                            key={event.id} 
-                            event={event} 
-                            getEventColor={getEventColor}
-                            onDelete={handleDeleteAction}
-                          />
-                        ) : (
-                          <div key={event.id}>
-                            {event.type === 'custom' && onDeleteEvent ? (
-                              <ContextMenu>
-                                <ContextMenuTrigger>
-                                  <EventCard event={event} getEventColor={getEventColor} />
-                                </ContextMenuTrigger>
-                                <ContextMenuContent className="bg-white z-50">
-                                  <ContextMenuItem 
-                                    className="flex items-center gap-2 text-red-600 cursor-pointer"
-                                    onClick={() => handleDeleteAction(event)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                    Delete Event
-                                  </ContextMenuItem>
-                                </ContextMenuContent>
-                              </ContextMenu>
-                            ) : (
-                              <EventCard event={event} getEventColor={getEventColor} />
-                            )}
-                          </div>
-                        )
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </React.Fragment>
-          ))}
-        </div>
+      <div className="grid grid-cols-7 gap-1 text-center font-medium mb-1">
+        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+          <div key={day} className="text-xs py-1">
+            {day}
+          </div>
+        ))}
       </div>
       
-      {/* Confirmation Dialog */}
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Event</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this event? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600 hover:bg-red-700">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <div className="grid gap-1">
+        {weeks.map((week, weekIndex) => (
+          <div key={weekIndex} className="grid grid-cols-7 gap-1">
+            {week.map((day) => {
+              const isToday = isSameDay(day, today);
+              const isCurrentMonth = isSameMonth(day, today);
+              const events = getEventsForDate(day);
+              const maxEvents = compact ? 1 : 3;
+              const displayEvents = events.slice(0, maxEvents);
+              const hiddenEventsCount = events.length - maxEvents;
+              
+              return (
+                <ContextMenu key={day.toISOString()}>
+                  <ContextMenuTrigger>
+                    <div 
+                      className={`
+                        rounded-md border h-full ${compact ? 'min-h-[80px]' : 'min-h-[100px]'}
+                        flex flex-col
+                        ${isToday 
+                          ? 'bg-primary/10 border-primary/30' 
+                          : 'bg-white/70 border-neutral-100'
+                        }
+                        ${!isCurrentMonth ? 'opacity-50' : ''}
+                      `}
+                    >
+                      <div className={`
+                        text-xs py-1 px-2 flex justify-between items-center
+                        ${isToday ? 'font-bold text-primary' : ''}
+                      `}>
+                        <span>
+                          {format(day, 'd')}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {format(day, 'EEE')}
+                        </span>
+                      </div>
+                      
+                      <div className="flex-1 p-1 space-y-1 overflow-y-auto scrollbar-thin">
+                        {displayEvents.map((event) => (
+                          <EventCard
+                            key={event.id}
+                            event={event}
+                            colorClass={getEventColor(event.type)}
+                            onClick={() => handleEventClick(event)}
+                            compact={compact}
+                          />
+                        ))}
+                        
+                        {hiddenEventsCount > 0 && (
+                          <div className="text-[10px] text-center p-1 bg-neutral-100 rounded">
+                            +{hiddenEventsCount} more
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </ContextMenuTrigger>
+                  
+                  <ContextMenuContent>
+                    {events
+                      .filter(event => event.type === 'custom')
+                      .map(event => (
+                        <ContextMenuItem 
+                          key={event.id} 
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => onDeleteEvent(event.id)}
+                        >
+                          Delete "{event.title}"
+                        </ContextMenuItem>
+                      ))}
+                    
+                    {events.filter(event => event.type === 'custom').length === 0 && (
+                      <ContextMenuItem disabled>
+                        No custom events to manage
+                      </ContextMenuItem>
+                    )}
+                  </ContextMenuContent>
+                </ContextMenu>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+      
+      {/* Mobile event details modal */}
+      {isMobile && selectedEvent && (
+        <MobileEventCard
+          event={selectedEvent}
+          colorClass={getEventColor(selectedEvent.type)}
+          onClose={handleCloseEventDetails}
+          onDelete={selectedEvent.type === 'custom' ? handleDeleteEvent : undefined}
+        />
+      )}
     </>
   );
 };

@@ -11,6 +11,7 @@ const Index = () => {
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
   
   useEffect(() => {
+    // Get active pregnancies from the service
     const pregnancies = getActivePregnancies();
     setActivePregnancies(pregnancies);
   }, []);

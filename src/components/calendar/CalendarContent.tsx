@@ -16,6 +16,7 @@ interface CalendarContentProps {
   getEventColor: (type: string) => string;
   onDeleteEvent: (eventId: string) => void;
   onAddEvent: (data: AddEventFormValues) => boolean;
+  compact?: boolean;
 }
 
 const CalendarContent: React.FC<CalendarContentProps> = ({
@@ -23,7 +24,8 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
   getEventsForDate,
   getEventColor,
   onDeleteEvent,
-  onAddEvent
+  onAddEvent,
+  compact = false
 }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -39,8 +41,8 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
     setCurrentDate(subWeeks(currentDate, 1));
   };
   
-  // On mobile, we show 2 weeks at a time instead of 4 to make it more readable
-  const weeksToShow = isMobile ? 2 : 4;
+  // On mobile or compact mode, we show 2 weeks at a time instead of 4 to make it more readable
+  const weeksToShow = isMobile || compact ? 2 : 4;
   
   const calendarDays = Array.from({ length: weeksToShow * 7 }, (_, index) => {
     return addDays(startDate, index);
@@ -67,7 +69,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
         handleNextWeek={handleNextWeek}
       />
       
-      <CardContent className="p-4 bg-gradient-to-br from-cream-50 to-[#FFDEE2]/30">
+      <CardContent className={`p-4 bg-gradient-to-br from-cream-50 to-[#FFDEE2]/30 ${compact ? 'max-h-[300px] overflow-y-auto' : ''}`}>
         <div className="text-xs text-gray-500 mb-2">
           {isMobile 
             ? "Tap custom events to view details and delete option" 
@@ -79,6 +81,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
             getEventsForDate={getEventsForDate}
             getEventColor={getEventColor}
             onDeleteEvent={onDeleteEvent}
+            compact={compact}
           />
         </div>
       </CardContent>
