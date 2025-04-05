@@ -110,6 +110,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
             setShowAddPuppyDialog={setShowAddPuppyDialog}
             puppyNumber={1}
             litterDob={selectedLitter.dateOfBirth}
+            selectedPuppy={selectedPuppy}
             damBreed=""
           />
         </TabsContent>
