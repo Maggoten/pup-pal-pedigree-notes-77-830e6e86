@@ -1,13 +1,20 @@
 
 import { useMemo } from 'react';
 import { Puppy } from '@/types/breeding';
+import { GrowthLogType, ChartColorConfig } from './types';
+
+interface UseChartDataResult {
+  chartData: GrowthLogType[];
+  chartConfig: ChartColorConfig;
+  noDataAvailable: boolean;
+}
 
 const useChartData = (
   puppies: Puppy[],
   selectedPuppy: Puppy | null,
   viewMode: 'single' | 'litter',
   logType: 'weight' | 'height'
-) => {
+): UseChartDataResult => {
   // Define puppy color scheme - moved outside of processing functions
   const puppyColors = {
     male: ['#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a'],
@@ -66,23 +73,25 @@ const useChartData = (
   }, [puppies, logType]);
 
   // Generate chart data for a single puppy - optimized with cached data
-  const getChartDataForSinglePuppy = (puppy: Puppy) => {
+  const getChartDataForSinglePuppy = useMemo(() => {
+    if (!selectedPuppy) return [];
+    
     // For single puppy, we only need dates that have data for this puppy
-    const puppyDateMap = puppyDataMap.get(puppy.name) || new Map<string, number>();
+    const puppyDateMap = puppyDataMap.get(selectedPuppy.name) || new Map<string, number>();
     
     // Filter to only include dates with data for this puppy
     return Array.from(puppyDateMap.entries())
       .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
       .map(([date, value]) => ({
         date,
-        [puppy.name]: value
+        [selectedPuppy.name]: value
       }));
-  };
+  }, [selectedPuppy, puppyDataMap]);
 
   // Generate chart data for all puppies in a litter - much more efficient
-  const getChartDataForLitter = () => {
+  const getChartDataForLitter = useMemo(() => {
     return allDates.map(date => {
-      const dataPoint: { [key: string]: any } = { date };
+      const dataPoint: GrowthLogType = { date };
       
       // Use the cached map to quickly look up values for each puppy
       puppies.forEach(puppy => {
@@ -94,11 +103,11 @@ const useChartData = (
       
       return dataPoint;
     });
-  };
+  }, [allDates, puppies, puppyDataMap]);
 
   // Generate chart configuration based on view mode - same logic but memoized
   const chartConfig = useMemo(() => {
-    const config: { [key: string]: any } = {};
+    const config: ChartColorConfig = {};
 
     if (viewMode === 'single' && selectedPuppy) {
       config[selectedPuppy.name] = {
@@ -132,16 +141,14 @@ const useChartData = (
   // Generate the final chart data based on view mode - same logic but uses optimized functions
   const chartData = useMemo(() => {
     return viewMode === 'single' && selectedPuppy 
-      ? getChartDataForSinglePuppy(selectedPuppy)
-      : getChartDataForLitter();
-  }, [viewMode, selectedPuppy, puppies, logType, puppyDataMap, allDates]);
+      ? getChartDataForSinglePuppy
+      : getChartDataForLitter;
+  }, [viewMode, selectedPuppy, getChartDataForSinglePuppy, getChartDataForLitter]);
 
   return {
-    chartData,
+    chartData: viewMode === 'single' && selectedPuppy ? getChartDataForSinglePuppy : getChartDataForLitter,
     chartConfig,
     noDataAvailable,
-    getChartDataForSinglePuppy,
-    getChartDataForLitter
   };
 };
 

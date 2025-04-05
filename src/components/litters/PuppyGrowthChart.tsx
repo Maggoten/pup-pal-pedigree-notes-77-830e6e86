@@ -1,17 +1,10 @@
 
 import React, { useEffect } from 'react';
-import { Puppy } from '@/types/breeding';
+import { PuppyGrowthChartProps } from './charts/types';
 import ChartViewToggle from './charts/ChartViewToggle';
 import EmptyChartState from './charts/EmptyChartState';
 import GrowthLineChart from './charts/GrowthLineChart';
 import useChartData from './charts/useChartData';
-
-interface PuppyGrowthChartProps {
-  selectedPuppy: Puppy | null;
-  puppies: Puppy[];
-  logType: 'weight' | 'height';
-  setLogType: (type: 'weight' | 'height') => void;
-}
 
 const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
   selectedPuppy,

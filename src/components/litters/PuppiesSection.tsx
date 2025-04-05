@@ -1,12 +1,14 @@
-
-import React, { useState } from 'react';
-import { Baby } from 'lucide-react';
+import React from 'react';
+import { format, parseISO, differenceInWeeks } from 'date-fns';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { PlusCircle, Users } from 'lucide-react';
 import { Puppy } from '@/types/breeding';
 import PuppyList from './PuppyList';
-import { Dialog } from '@/components/ui/dialog';
-import PuppyDetailsDialog from './PuppyDetailsDialog';
 import AddPuppyDialog from './AddPuppyDialog';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PuppyDetailsDialog from './PuppyDetailsDialog';
 import PuppyMeasurementsDialog from './puppies/PuppyMeasurementsDialog';
 
 interface PuppiesSectionProps {
@@ -16,6 +18,8 @@ interface PuppiesSectionProps {
   onDeletePuppy: (puppyId: string) => void;
   litterDob: string;
   damBreed?: string;
+  onSelectPuppy?: (puppy: Puppy | null) => void;
+  selectedPuppy?: Puppy | null;
 }
 
 const PuppiesSection: React.FC<PuppiesSectionProps> = ({
@@ -24,82 +28,84 @@ const PuppiesSection: React.FC<PuppiesSectionProps> = ({
   onUpdatePuppy,
   onDeletePuppy,
   litterDob,
-  damBreed = ""
+  damBreed,
+  onSelectPuppy,
+  selectedPuppy
 }) => {
-  const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
-  const [showAddPuppyDialog, setShowAddPuppyDialog] = useState(false);
-  const [showPuppyDetailsDialog, setShowPuppyDetailsDialog] = useState(false);
-  const [showMeasurementsDialog, setShowMeasurementsDialog] = useState(false);
+  const [measurementDialogOpen, setMeasurementDialogOpen] = React.useState(false);
+  const [activePuppy, setActivePuppy] = React.useState<Puppy | null>(null);
   
-  const handleRowSelect = (puppy: Puppy) => {
-    setSelectedPuppy(puppy);
-    setShowPuppyDetailsDialog(true);
+  const handlePuppyClick = (puppy: Puppy) => {
+    setActivePuppy(puppy);
+    if (onSelectPuppy) {
+      onSelectPuppy(puppy === selectedPuppy ? null : puppy);
+    }
   };
-
-  const handleMeasurementsClick = (puppy: Puppy) => {
-    setSelectedPuppy(puppy);
-    setShowMeasurementsDialog(true);
+  
+  const handleAddMeasurement = (puppy: Puppy) => {
+    setActivePuppy(puppy);
+    setMeasurementDialogOpen(true);
   };
+  
+  const litterAge = differenceInWeeks(new Date(), parseISO(litterDob));
   
   return (
     <Card className="shadow-sm">
       <CardHeader className="bg-primary/5 pb-4">
-        <div className="flex items-center gap-2">
-          <Baby className="h-5 w-5 text-primary" />
-          <CardTitle className="text-lg font-semibold">Puppies ({puppies.length})</CardTitle>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg font-semibold">
+              Puppies {puppies.length > 0 && `(${puppies.length})`}
+            </CardTitle>
+          </div>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5">
+                <PlusCircle className="h-4 w-4" />
+                <span>Add Puppy</span>
+              </Button>
+            </DialogTrigger>
+            <AddPuppyDialog onAddPuppy={onAddPuppy} litterDob={litterDob} damBreed={damBreed} />
+          </Dialog>
         </div>
       </CardHeader>
+      
       <CardContent className="p-4">
-        <PuppyList 
-          puppies={puppies}
-          onAddPuppy={() => setShowAddPuppyDialog(true)}
-          onSelectPuppy={setSelectedPuppy}
-          onRowSelect={handleRowSelect}
-          onUpdatePuppy={onUpdatePuppy}
-          onDeletePuppy={onDeletePuppy}
-          showAddPuppyDialog={showAddPuppyDialog}
-          setShowAddPuppyDialog={setShowAddPuppyDialog}
-          puppyNumber={1}
-          litterDob={litterDob}
-          selectedPuppy={selectedPuppy}
-          damBreed={damBreed}
-          onMeasurementsClick={handleMeasurementsClick}
-        />
-        
-        {/* Add Puppy Dialog - Wrapped in a Dialog component */}
-        <Dialog open={showAddPuppyDialog} onOpenChange={setShowAddPuppyDialog}>
-          <AddPuppyDialog 
-            onClose={() => setShowAddPuppyDialog(false)}
-            onSubmit={onAddPuppy}
-            puppyNumber={puppies.length + 1}
-            litterDob={litterDob}
-            damBreed={damBreed}
+        {puppies.length > 0 ? (
+          <PuppyList 
+            puppies={puppies} 
+            onUpdatePuppy={onUpdatePuppy} 
+            onDeletePuppy={onDeletePuppy}
+            onPuppyClick={handlePuppyClick}
+            selectedPuppyId={selectedPuppy?.id}
+            onAddMeasurement={handleAddMeasurement}
+            litterAge={litterAge}
           />
-        </Dialog>
-        
-        {/* Puppy Details Dialog - Only render when a puppy is selected, wrapped in Dialog */}
-        {selectedPuppy && (
-          <Dialog open={showPuppyDetailsDialog} onOpenChange={setShowPuppyDetailsDialog}>
-            <PuppyDetailsDialog 
-              puppy={selectedPuppy}
-              onClose={() => setShowPuppyDetailsDialog(false)}
-              onUpdate={onUpdatePuppy}
-              onDelete={onDeletePuppy}
-            />
-          </Dialog>
-        )}
-
-        {/* Puppy Measurements Dialog */}
-        {selectedPuppy && (
-          <Dialog open={showMeasurementsDialog} onOpenChange={setShowMeasurementsDialog}>
-            <PuppyMeasurementsDialog 
-              puppy={selectedPuppy}
-              onClose={() => setShowMeasurementsDialog(false)}
-              onUpdate={onUpdatePuppy}
-            />
-          </Dialog>
+        ) : (
+          <div className="text-center py-8 space-y-3">
+            <Skeleton className="h-12 w-12 rounded-full mx-auto" />
+            <h3 className="text-lg font-medium">No Puppies Added Yet</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Add your puppies to track their growth, development milestones, and keep detailed records.
+            </p>
+          </div>
         )}
       </CardContent>
+      
+      {/* Puppy Measurements Dialog */}
+      <Dialog open={measurementDialogOpen} onOpenChange={setMeasurementDialogOpen}>
+        {activePuppy && (
+          <PuppyMeasurementsDialog 
+            puppy={activePuppy} 
+            onClose={() => setMeasurementDialogOpen(false)} 
+            onUpdate={onUpdatePuppy}
+          />
+        )}
+      </Dialog>
+      
+      {/* Keep existing PuppyDetailsDialog */}
     </Card>
   );
 };

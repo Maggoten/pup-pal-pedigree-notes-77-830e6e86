@@ -2,16 +2,7 @@
 import React from 'react';
 import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Line } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
-import { Puppy } from '@/types/breeding';
-
-interface GrowthLineChartProps {
-  chartData: any[];
-  chartConfig: { [key: string]: any };
-  logType: 'weight' | 'height';
-  viewMode: 'single' | 'litter';
-  selectedPuppy: Puppy | null;
-  puppies: Puppy[];
-}
+import { GrowthLineChartProps } from './types';
 
 const GrowthLineChart: React.FC<GrowthLineChartProps> = ({
   chartData,

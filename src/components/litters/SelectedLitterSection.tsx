@@ -73,6 +73,8 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
         onDeletePuppy={onDeletePuppy}
         litterDob={selectedLitter.dateOfBirth}
         damBreed={selectedLitter.damName}
+        onSelectPuppy={setSelectedPuppy}
+        selectedPuppy={selectedPuppy}
       />
       
       {/* 3. Growth Charts Section */}

@@ -1,14 +1,10 @@
 
 import React, { useState } from 'react';
 import { ChartBar } from 'lucide-react';
-import { Puppy } from '@/types/breeding';
-import PuppyGrowthChart from './PuppyGrowthChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-interface GrowthChartsSectionProps {
-  selectedPuppy: Puppy | null;
-  puppies: Puppy[];
-}
+import { GrowthChartsSectionProps } from './charts/types';
+import PuppyGrowthChart from './PuppyGrowthChart';
+import LogTypeToggle from './charts/LogTypeToggle';
 
 const GrowthChartsSection: React.FC<GrowthChartsSectionProps> = ({
   selectedPuppy,
@@ -25,20 +21,7 @@ const GrowthChartsSection: React.FC<GrowthChartsSectionProps> = ({
             <CardTitle className="text-lg font-semibold">Growth Charts</CardTitle>
           </div>
           
-          <div className="flex gap-2 justify-end">
-            <button 
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${logType === 'weight' ? 'bg-primary text-white' : 'bg-muted hover:bg-muted/80'}`}
-              onClick={() => setLogType('weight')}
-            >
-              Weight
-            </button>
-            <button 
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${logType === 'height' ? 'bg-primary text-white' : 'bg-muted hover:bg-muted/80'}`}
-              onClick={() => setLogType('height')}
-            >
-              Height
-            </button>
-          </div>
+          <LogTypeToggle logType={logType} setLogType={setLogType} />
         </div>
       </CardHeader>
       <CardContent className="p-4">
