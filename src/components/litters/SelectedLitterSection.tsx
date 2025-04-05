@@ -7,9 +7,9 @@ import { differenceInWeeks, parseISO } from 'date-fns';
 import { Baby, BarChart2, Milestone } from 'lucide-react';
 import SelectedLitterHeader from './SelectedLitterHeader';
 import CompactDevelopmentSection from './CompactDevelopmentSection';
-import PuppiesSection from './PuppiesSection';
-import DevelopmentSection from './DevelopmentSection';
-import GrowthChartsSection from './GrowthChartsSection';
+import PuppiesTabContent from './tabs/PuppiesTabContent';
+import DevelopmentTabContent from './tabs/DevelopmentTabContent';
+import GrowthChartsTabContent from './tabs/GrowthChartsTabContent';
 
 interface SelectedLitterSectionProps {
   selectedLitter: Litter | null;
@@ -83,7 +83,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
         </TabsList>
         
         <TabsContent value="puppies" className="mt-0">
-          <PuppiesSection 
+          <PuppiesTabContent 
             puppies={selectedLitter.puppies}
             onAddPuppy={onAddPuppy}
             onUpdatePuppy={onUpdatePuppy}
@@ -92,18 +92,19 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
             damBreed={selectedLitter.damName}
             onSelectPuppy={setSelectedPuppy}
             selectedPuppy={selectedPuppy}
+            litterAge={ageInWeeks}
           />
         </TabsContent>
         
         <TabsContent value="charts" className="mt-0">
-          <GrowthChartsSection 
+          <GrowthChartsTabContent 
             selectedPuppy={selectedPuppy}
             puppies={selectedLitter.puppies}
           />
         </TabsContent>
         
         <TabsContent value="development" className="mt-0">
-          <DevelopmentSection 
+          <DevelopmentTabContent 
             litter={selectedLitter}
             onToggleItem={handleToggleChecklistItem}
           />

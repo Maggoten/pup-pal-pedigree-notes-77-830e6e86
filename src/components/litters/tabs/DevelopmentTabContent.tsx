@@ -2,17 +2,15 @@
 import React from 'react';
 import { Milestone } from 'lucide-react';
 import { Litter } from '@/types/breeding';
-import PuppyDevelopmentChecklist from './PuppyDevelopmentChecklist';
+import PuppyDevelopmentChecklist from '../PuppyDevelopmentChecklist';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 
-interface DevelopmentSectionProps {
+interface DevelopmentTabContentProps {
   litter: Litter;
   onToggleItem: (itemId: string, completed: boolean) => void;
 }
 
-const DevelopmentSection: React.FC<DevelopmentSectionProps> = ({
+const DevelopmentTabContent: React.FC<DevelopmentTabContentProps> = ({
   litter,
   onToggleItem
 }) => {
@@ -35,4 +33,4 @@ const DevelopmentSection: React.FC<DevelopmentSectionProps> = ({
   );
 };
 
-export default DevelopmentSection;
+export default DevelopmentTabContent;

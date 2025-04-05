@@ -1,29 +1,29 @@
 
 import React, { useState } from 'react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { Puppy } from '@/types/breeding';
+import PuppyList from '../PuppyList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PlusCircle, Users } from 'lucide-react';
-import { Puppy } from '@/types/breeding';
-import PuppyList from './PuppyList';
-import AddPuppyDialog from './AddPuppyDialog';
-import PuppyDetailsDialog from './PuppyDetailsDialog';
-import PuppyMeasurementsDialog from './puppies/PuppyMeasurementsDialog';
+import AddPuppyDialog from '../AddPuppyDialog';
+import PuppyMeasurementsDialog from '../puppies/PuppyMeasurementsDialog';
 
-interface PuppiesSectionProps {
+interface PuppiesTabContentProps {
   puppies: Puppy[];
   onAddPuppy: (puppy: Puppy) => void;
   onUpdatePuppy: (puppy: Puppy) => void;
   onDeletePuppy: (puppyId: string) => void;
   litterDob: string;
   damBreed?: string;
-  onSelectPuppy?: (puppy: Puppy | null) => void;
-  selectedPuppy?: Puppy | null;
+  onSelectPuppy: (puppy: Puppy | null) => void;
+  selectedPuppy: Puppy | null;
+  litterAge: number;
 }
 
-const PuppiesSection: React.FC<PuppiesSectionProps> = ({
+const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   puppies,
   onAddPuppy,
   onUpdatePuppy,
@@ -31,24 +31,21 @@ const PuppiesSection: React.FC<PuppiesSectionProps> = ({
   litterDob,
   damBreed,
   onSelectPuppy,
-  selectedPuppy
+  selectedPuppy,
+  litterAge,
 }) => {
   const [measurementDialogOpen, setMeasurementDialogOpen] = useState(false);
   const [activePuppy, setActivePuppy] = useState<Puppy | null>(null);
   
   const handlePuppyClick = (puppy: Puppy) => {
     setActivePuppy(puppy);
-    if (onSelectPuppy) {
-      onSelectPuppy(puppy === selectedPuppy ? null : puppy);
-    }
+    onSelectPuppy(puppy === selectedPuppy ? null : puppy);
   };
   
   const handleAddMeasurement = (puppy: Puppy) => {
     setActivePuppy(puppy);
     setMeasurementDialogOpen(true);
   };
-  
-  const litterAge = differenceInWeeks(new Date(), parseISO(litterDob));
   
   // Improved next puppy number calculation
   const getNextPuppyNumber = () => {
@@ -133,4 +130,4 @@ const PuppiesSection: React.FC<PuppiesSectionProps> = ({
   );
 };
 
-export default PuppiesSection;
+export default PuppiesTabContent;

@@ -2,11 +2,16 @@
 import React, { useState } from 'react';
 import { ChartBar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { GrowthChartsSectionProps } from './charts/types';
-import PuppyGrowthChart from './PuppyGrowthChart';
-import LogTypeToggle from './charts/LogTypeToggle';
+import { Puppy } from '@/types/breeding';
+import PuppyGrowthChart from '../PuppyGrowthChart';
+import LogTypeToggle from '../charts/LogTypeToggle';
 
-const GrowthChartsSection: React.FC<GrowthChartsSectionProps> = ({
+interface GrowthChartsTabContentProps {
+  selectedPuppy: Puppy | null;
+  puppies: Puppy[];
+}
+
+const GrowthChartsTabContent: React.FC<GrowthChartsTabContentProps> = ({
   selectedPuppy,
   puppies
 }) => {
@@ -36,4 +41,4 @@ const GrowthChartsSection: React.FC<GrowthChartsSectionProps> = ({
   );
 };
 
-export default GrowthChartsSection;
+export default GrowthChartsTabContent;
