@@ -1,8 +1,8 @@
 
 import { useDogs } from '@/context/DogsContext';
-import { PawPrint, CalendarClock, Scale } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { differenceInDays, parseISO, addDays } from 'date-fns';
+import { createPawPrintIcon, createCalendarClockIcon, createScaleIcon } from '@/utils/iconUtils';
 
 export interface Reminder {
   id: string;
@@ -40,7 +40,7 @@ export const useBreedingReminders = () => {
               id: `heat-${dog.id}`,
               title: `${dog.name}'s Heat Approaching`,
               description: `Expected heat cycle in ${differenceInDays(nextHeatDate, today)} days`,
-              icon: <PawPrint className="h-5 w-5 text-rose-500" />,
+              icon: createPawPrintIcon("rose-500"),
               dueDate: nextHeatDate,
               priority: 'high',
               type: 'heat'
@@ -59,7 +59,7 @@ export const useBreedingReminders = () => {
             id: `vaccine-${dog.id}`,
             title: `${dog.name}'s Vaccination Due`,
             description: `Vaccination due in ${differenceInDays(nextVaccination, today)} days`,
-            icon: <CalendarClock className="h-5 w-5 text-amber-500" />,
+            icon: createCalendarClockIcon("amber-500"),
             dueDate: nextVaccination,
             priority: 'medium',
             type: 'vaccination'
@@ -77,7 +77,7 @@ export const useBreedingReminders = () => {
             id: `deworm-${dog.id}`,
             title: `${dog.name}'s Deworming Due`,
             description: `Deworming due in ${differenceInDays(nextDeworming, today)} days`,
-            icon: <CalendarClock className="h-5 w-5 text-green-500" />,
+            icon: createCalendarClockIcon("green-500"),
             dueDate: nextDeworming,
             priority: 'medium',
             type: 'deworming'
@@ -92,7 +92,7 @@ export const useBreedingReminders = () => {
         id: 'add-female',
         title: 'Add Female Dogs',
         description: 'Add your female dogs to start tracking heat cycles',
-        icon: <PawPrint className="h-5 w-5 text-primary" />,
+        icon: createPawPrintIcon("primary"),
         dueDate: today,
         priority: 'low',
         type: 'other'
@@ -114,7 +114,7 @@ export const useBreedingReminders = () => {
         id: 'weigh-puppies',
         title: 'Weigh Puppies',
         description: 'Regular weight tracking is important for puppy development',
-        icon: <Scale className="h-5 w-5 text-blue-500" />,
+        icon: createScaleIcon("blue-500"),
         dueDate: today,
         priority: 'high',
         type: 'weighing'
