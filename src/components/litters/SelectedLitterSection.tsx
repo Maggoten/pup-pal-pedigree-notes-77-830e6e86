@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { Litter, Puppy } from '@/types/breeding';
-import LitterDetails from './LitterDetails';
 import AddPuppyDialog from './AddPuppyDialog';
 import PuppyList from './PuppyList';
 import PuppyDetailsDialog from './PuppyDetailsDialog';
@@ -9,9 +8,11 @@ import PuppyDevelopmentChecklist from './PuppyDevelopmentChecklist';
 import { toast } from '@/components/ui/use-toast';
 import { Dialog } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChartBar, CheckSquare, Users } from 'lucide-react';
+import { ChartBar, CheckSquare, Users, Edit } from 'lucide-react';
 import PuppyGrowthChart from './PuppyGrowthChart';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from '@/components/ui/button';
+import LitterEditDialog from './LitterEditDialog';
 
 interface SelectedLitterSectionProps {
   selectedLitter: Litter | null;
@@ -35,6 +36,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
   const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
   const [showAddPuppyDialog, setShowAddPuppyDialog] = useState(false);
   const [showPuppyDetailsDialog, setShowPuppyDetailsDialog] = useState(false);
+  const [showEditLitterDialog, setShowEditLitterDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("puppies");
   const [logType, setLogType] = useState<'weight' | 'height'>('weight');
   const isMobile = useIsMobile();
@@ -60,25 +62,34 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
   
   return (
     <div className="mt-6 animate-fade-in">
-      <div className="grid md:grid-cols-5 gap-4 mb-4">
-        <div className="md:col-span-3">
-          <LitterDetails 
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">{selectedLitter.name}</h2>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="h-8 w-8 p-0" 
+          onClick={() => setShowEditLitterDialog(true)}
+        >
+          <Edit className="h-4 w-4" />
+          <span className="sr-only">Edit Litter</span>
+        </Button>
+        <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
+          <LitterEditDialog 
             litter={selectedLitter}
-            onUpdateLitter={onUpdateLitter}
-            onDeleteLitter={onDeleteLitter}
-            onArchiveLitter={onArchiveLitter}
-            onAddPuppy={onAddPuppy}
-            onUpdatePuppy={onUpdatePuppy}
-            onDeletePuppy={onDeletePuppy}
+            onClose={() => setShowEditLitterDialog(false)}
+            onUpdate={onUpdateLitter}
+            onDelete={onDeleteLitter}
+            onArchive={onArchiveLitter}
           />
-        </div>
-        <div className="md:col-span-2">
-          <PuppyDevelopmentChecklist 
-            litter={selectedLitter} 
-            onToggleItem={handleToggleChecklistItem}
-            compact={true}
-          />
-        </div>
+        </Dialog>
+      </div>
+      
+      <div className="grid md:grid-cols-1 gap-4 mb-4">
+        <PuppyDevelopmentChecklist 
+          litter={selectedLitter} 
+          onToggleItem={handleToggleChecklistItem}
+          compact={true}
+        />
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
