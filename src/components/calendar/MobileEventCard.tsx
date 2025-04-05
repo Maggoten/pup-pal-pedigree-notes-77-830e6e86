@@ -15,29 +15,21 @@ import { Button } from '@/components/ui/button';
 
 interface MobileEventCardProps {
   event: CalendarEvent;
-  getEventColor: (type: string) => string;
-  onDelete?: (event: CalendarEvent) => void;
+  colorClass: string;
+  onClose: () => void;
+  onDelete?: () => void;
 }
 
 const MobileEventCard: React.FC<MobileEventCardProps> = ({ 
   event, 
-  getEventColor,
+  colorClass,
+  onClose,
   onDelete 
 }) => {
   const canDelete = event.type === 'custom' && onDelete;
   
   return (
-    <Drawer>
-      <DrawerTrigger asChild>
-        <div className={`p-1 rounded text-xs border ${getEventColor(event.type)} cursor-pointer`}>
-          <div className="font-medium">{event.title}</div>
-          {event.time && <div className="text-xs flex items-center gap-1">
-            <Clock className="h-3 w-3 inline" /> {event.time}
-          </div>}
-          {event.dogName && <div>{event.dogName}</div>}
-          {event.notes && <div className="text-xs italic mt-1 truncate">{event.notes}</div>}
-        </div>
-      </DrawerTrigger>
+    <Drawer open={true} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{event.title}</DrawerTitle>
@@ -54,7 +46,7 @@ const MobileEventCard: React.FC<MobileEventCardProps> = ({
             <Button 
               variant="destructive" 
               className="w-full flex items-center justify-center gap-2" 
-              onClick={() => onDelete && onDelete(event)}
+              onClick={onDelete}
             >
               <Trash2 className="h-4 w-4" />
               Delete Event
