@@ -25,6 +25,7 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
     totalWeeks,
     allWeeks,
     currentWeekData,
+    calculatedCurrentWeek,
     changeWeek,
     toggleChecklistItem,
     calculateWeekProgress,
@@ -47,6 +48,7 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
           currentWeek={currentWeek} 
           totalWeeks={totalWeeks}
           overallProgress={overallProgress}
+          calculatedCurrentWeek={calculatedCurrentWeek}
         />
       </CardHeader>
       

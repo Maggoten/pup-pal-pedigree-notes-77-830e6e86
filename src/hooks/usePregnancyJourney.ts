@@ -15,6 +15,7 @@ export const usePregnancyJourney = (
     totalWeeks: 9,
     allWeeks: []
   });
+  const [calculatedCurrentWeek, setCalculatedCurrentWeek] = useState<number>(1);
 
   // Calculate current week based on mating date
   const calculateCurrentWeek = () => {
@@ -31,12 +32,15 @@ export const usePregnancyJourney = (
       // Try to load from localStorage
       const savedData = localStorage.getItem(`pregnancy_journey_${pregnancyId}`);
       
+      // Calculate the real current week
+      const calculatedWeek = calculateCurrentWeek();
+      setCalculatedCurrentWeek(calculatedWeek);
+      
       if (savedData) {
         const parsedData = JSON.parse(savedData);
         
         // If we have saved data but want to update the current week
         // based on the actual pregnancy progress
-        const calculatedWeek = calculateCurrentWeek();
         
         // Update current week in saved data
         const updatedData = {
@@ -54,10 +58,9 @@ export const usePregnancyJourney = (
       } else {
         // Initialize new journey data
         const allWeeks = generatePregnancyJourneyData();
-        const currentWeek = calculateCurrentWeek();
         
         const newJourneyState = {
-          currentWeek,
+          currentWeek: calculatedWeek,
           totalWeeks: 9,
           allWeeks
         };
@@ -148,6 +151,7 @@ export const usePregnancyJourney = (
     totalWeeks: journeyState.totalWeeks,
     allWeeks: journeyState.allWeeks,
     currentWeekData: journeyState.allWeeks.find(week => week.weekNumber === journeyState.currentWeek) || null,
+    calculatedCurrentWeek,
     changeWeek,
     toggleChecklistItem,
     calculateWeekProgress,
