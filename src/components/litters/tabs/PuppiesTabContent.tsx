@@ -38,13 +38,6 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   const [addPuppyDialogOpen, setAddPuppyDialogOpen] = useState(false);
   const [activePuppy, setActivePuppy] = useState<Puppy | null>(null);
   
-  // Ensure consistent puppy numbering when the component mounts or puppies change
-  useEffect(() => {
-    if (puppies.length > 0) {
-      renumberAllPuppies();
-    }
-  }, []);
-  
   const handlePuppyClick = (puppy: Puppy) => {
     setActivePuppy(puppy);
     onSelectPuppy(puppy === selectedPuppy ? null : puppy);
@@ -63,60 +56,17 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   // Update puppy names after deletion to maintain consistent numbering
   const handleDeletePuppy = (puppyId: string) => {
     onDeletePuppy(puppyId);
-    
-    // After deletion, we should renumber all puppies
-    setTimeout(() => {
-      renumberAllPuppies();
-    }, 0);
   };
   
   const handleAddPuppy = (puppy: Puppy) => {
     onAddPuppy(puppy);
     setAddPuppyDialogOpen(false);
-    
-    // After adding a puppy, renumber all puppies to ensure consistency
-    setTimeout(() => {
-      renumberAllPuppies();
-    }, 0);
   };
   
-  // Function to update puppy names to match their position
+  // Function to update puppy data without changing its name
   const updatePuppyNames = (updatedPuppy: Puppy) => {
-    // Always update the puppy with the data provided
+    // Simply update the puppy with exactly the data provided - no renumbering
     onUpdatePuppy(updatedPuppy);
-    
-    // Only renumber if it's a standard "Puppy X" naming format
-    const puppyNamePattern = /^Puppy \d+$/;
-    if (puppyNamePattern.test(updatedPuppy.name)) {
-      // Then trigger a renumbering of all puppies to ensure consistency
-      setTimeout(() => {
-        renumberAllPuppies();
-      }, 0);
-    }
-  };
-  
-  // Function to renumber all puppies in the litter based on their position
-  const renumberAllPuppies = () => {
-    if (puppies.length === 0) return;
-    
-    // Only update puppies with the standard naming pattern
-    const puppyNamePattern = /^Puppy \d+$/;
-    
-    // Create a copy of puppies to avoid issues with the original array changing during updates
-    const puppiesCopy = [...puppies];
-    
-    puppiesCopy.forEach((puppy, index) => {
-      // Only renumber puppies that follow the standard naming pattern
-      if (puppyNamePattern.test(puppy.name)) {
-        const newName = `Puppy ${index + 1}`;
-        if (puppy.name !== newName) {
-          onUpdatePuppy({
-            ...puppy,
-            name: newName
-          });
-        }
-      }
-    });
   };
   
   return (
