@@ -42,6 +42,11 @@ const Index = () => {
     navigate(path);
   };
 
+  // Calculate some quick statistics
+  const totalDogs = dogs.length;
+  const femaleDogs = dogs.filter(dog => dog.gender === 'female').length;
+  const maleDogs = dogs.filter(dog => dog.gender === 'male').length;
+
   return (
     <DogsProvider>
       <PageLayout 
@@ -54,6 +59,77 @@ const Index = () => {
           <p className="text-muted-foreground mb-4">
             Track pregnancies, plan litters, and manage your breeding program all in one place.
           </p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="bg-white">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Dog className="h-5 w-5 text-primary" />
+                  <span>Dogs</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{totalDogs}</div>
+                <p className="text-sm text-muted-foreground">{maleDogs} males, {femaleDogs} females</p>
+                <Button variant="link" className="px-0 mt-1" onClick={() => handleNavigate('/my-dogs')}>
+                  View all dogs <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  <span>Planned Litters</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {/* Will need actual data here */}
+                  {Math.round(Math.random() * 5)}
+                </div>
+                <p className="text-sm text-muted-foreground">Upcoming breeding plans</p>
+                <Button variant="link" className="px-0 mt-1" onClick={() => handleNavigate('/planned-litters')}>
+                  Manage plans <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <PawPrint className="h-5 w-5 text-primary" />
+                  <span>Active Pregnancies</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{activePregnancies.length}</div>
+                <p className="text-sm text-muted-foreground">Pregnancies in progress</p>
+                <Button variant="link" className="px-0 mt-1" onClick={() => handleNavigate('/pregnancy')}>
+                  Track pregnancies <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Dog className="h-5 w-5 text-primary" />
+                  <span>Litters</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {/* Will need actual data here */}
+                  {Math.round(Math.random() * 3)}
+                </div>
+                <p className="text-sm text-muted-foreground">Current litters</p>
+                <Button variant="link" className="px-0 mt-1" onClick={() => handleNavigate('/my-litters')}>
+                  Manage litters <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
         
         <div className="grid gap-6 md:grid-cols-3 mb-6">
