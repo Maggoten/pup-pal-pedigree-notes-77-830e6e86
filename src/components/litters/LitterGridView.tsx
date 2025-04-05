@@ -2,6 +2,7 @@
 import React from 'react';
 import { Litter } from '@/types/breeding';
 import LitterCard from './LitterCard';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LitterGridViewProps {
   litters: Litter[];
@@ -16,8 +17,10 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
   onArchive,
   selectedLitterId
 }) => {
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className={`grid grid-cols-1 ${isMobile ? '' : 'sm:grid-cols-2 lg:grid-cols-3'} gap-4 animate-fade-in`}>
       {litters.map(litter => (
         <LitterCard 
           key={litter.id}

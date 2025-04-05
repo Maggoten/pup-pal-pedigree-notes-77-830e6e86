@@ -6,7 +6,6 @@ import { PlusCircle } from 'lucide-react';
 import { useLitterFilters } from './LitterFilterProvider';
 import LitterSearchForm from './LitterSearchForm';
 import YearFilterDropdown from './YearFilterDropdown';
-import ViewToggle from './ViewToggle';
 import AddLitterDialog from './AddLitterDialog';
 import { PlannedLitter, Litter } from '@/types/breeding';
 
@@ -29,13 +28,11 @@ const LitterFilterControls: React.FC<LitterFilterControlsProps> = ({
     searchQuery, 
     setSearchQuery, 
     filterYear, 
-    setFilterYear,
-    view,
-    setView
+    setFilterYear
   } = useLitterFilters();
 
   return (
-    <div className="flex items-center gap-2 self-end">
+    <div className="flex flex-wrap items-center gap-2 self-end">
       <LitterSearchForm 
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -47,16 +44,11 @@ const LitterFilterControls: React.FC<LitterFilterControlsProps> = ({
         onYearChange={setFilterYear}
       />
       
-      <ViewToggle 
-        view={view}
-        onViewChange={setView}
-      />
-      
       <Dialog open={showAddLitterDialog} onOpenChange={setShowAddLitterDialog}>
         <DialogTrigger asChild>
           <Button className="flex items-center gap-2 ml-2">
             <PlusCircle className="h-4 w-4" />
-            Add New Litter
+            Add Litter
           </Button>
         </DialogTrigger>
         <AddLitterDialog 

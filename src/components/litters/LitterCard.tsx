@@ -29,20 +29,20 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
 
   return (
     <Card 
-      className={`h-full overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${
-        isSelected ? 'ring-2 ring-primary' : ''
-      }`}
+      className={`h-full overflow-hidden hover:shadow-md transition-all duration-300 ${
+        isSelected ? 'ring-2 ring-primary shadow-lg transform scale-[1.02]' : 'hover:scale-[1.01]'
+      } cursor-pointer`}
       onClick={() => onSelect(litter)}
     >
-      <CardHeader className="pb-2 pt-3 px-4">
+      <CardHeader className="pb-1 pt-3 px-4">
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg font-semibold">{litter.name}</CardTitle>
           <div className="flex gap-1">
             {isRecent && (
-              <Badge variant="default" className="bg-primary">Active</Badge>
+              <Badge variant="success" className="text-xs">Active</Badge>
             )}
             {puppyCount > 0 && (
-              <Badge variant="secondary">
+              <Badge variant="secondary" className="text-xs">
                 {puppyCount} {puppyCount === 1 ? 'puppy' : 'puppies'}
               </Badge>
             )}
@@ -52,18 +52,18 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
       
       <CardContent className="pb-3 pt-1 px-4">
         <div className="space-y-1 text-sm">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-1.5">
+            <Calendar className="h-3.5 w-3.5 text-primary opacity-70" />
             <span>Born: {format(birthDate, 'MMM d, yyyy')}</span>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Dog className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-1.5">
+            <Dog className="h-3.5 w-3.5 text-primary opacity-70" />
             <span>Sire: {litter.sireName}</span>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Dog className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-1.5">
+            <Dog className="h-3.5 w-3.5 text-primary opacity-70" />
             <span>Dam: {litter.damName}</span>
           </div>
         </div>
@@ -71,16 +71,16 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
         {onArchive && (
           <div className="flex justify-end mt-3">
             <Button 
-              variant="outline" 
+              variant="ghost" 
               size="icon"
               onClick={(e) => {
                 e.stopPropagation();
                 onArchive(litter);
               }}
               title={litter.archived ? "Unarchive Litter" : "Archive Litter"}
-              className="h-7 w-7"
+              className="h-7 w-7 opacity-60 hover:opacity-100 transition-opacity"
             >
-              <Archive className="h-3 w-3" />
+              <Archive className="h-3.5 w-3.5" />
             </Button>
           </div>
         )}

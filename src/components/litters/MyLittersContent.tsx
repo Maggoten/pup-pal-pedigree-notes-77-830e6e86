@@ -11,9 +11,12 @@ import {
 import { useLitterFilters } from './LitterFilterProvider';
 import { useLitterManagement } from '@/hooks/useLitterManagement';
 import LitterFilterControls from './LitterFilterControls';
-import LitterTabContent from './LitterTabContent';
+import LitterGridView from './LitterGridView';
+import EmptyLitterState from './EmptyLitterState';
+import LitterPagination from './LitterPagination';
 import SelectedLitterSection from './SelectedLitterSection';
 import useLitterFiltering from '@/hooks/useLitterFiltering';
+import { Button } from '@/components/ui/button';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -63,6 +66,32 @@ const MyLittersContent: React.FC = () => {
     pageCount: archivedPageCount
   } = useLitterFiltering(archivedLitters, searchQuery, filterYear, archivedPage, ITEMS_PER_PAGE);
   
+  // Handle creating a new litter
+  const handleAddLitterClick = () => {
+    setShowAddLitterDialog(true);
+  };
+
+  // Handle filtered empty state
+  const renderEmptyState = (filterApplied: boolean, litters: any[], onClearFilter: () => void) => {
+    if (litters.length === 0) {
+      return <EmptyLitterState onAddLitter={handleAddLitterClick} />;
+    }
+    
+    if (filterApplied) {
+      return (
+        <div className="text-center py-10">
+          <h3 className="text-lg font-medium mb-2">No litters found</h3>
+          <p className="text-muted-foreground mb-6">Try adjusting your search or filters</p>
+          <Button variant="outline" onClick={onClearFilter}>Clear Filters</Button>
+        </div>
+      );
+    }
+    
+    return null;
+  };
+  
+  const isFilterActive = !!searchQuery || !!filterYear;
+  
   return (
     <PageLayout 
       title="My Litters" 
@@ -100,37 +129,51 @@ const MyLittersContent: React.FC = () => {
         </div>
         
         <TabsContent value="active" className="space-y-6">
-          <LitterTabContent
-            litters={activeLitters}
-            filteredLitters={filteredActiveLitters}
-            paginatedLitters={paginateActiveLitters}
-            selectedLitterId={selectedLitterId}
-            onSelectLitter={handleSelectLitter}
-            onSelectLitterId={setSelectedLitterId}
-            onArchive={(litter) => handleArchiveLitter(litter.id, true)}
-            onAddLitter={() => setShowAddLitterDialog(true)}
-            pageCount={activePageCount}
-            currentPage={activePage}
-            setCurrentPage={setActivePage}
-            isArchived={false}
-          />
+          {renderEmptyState(isFilterActive, activeLitters, () => {
+            setFilterYear(null);
+            setSearchQuery('');
+          })}
+          
+          {activeLitters.length > 0 && filteredActiveLitters.length > 0 && (
+            <>
+              <LitterGridView
+                litters={paginateActiveLitters}
+                onSelectLitter={handleSelectLitter}
+                onArchive={(litter) => handleArchiveLitter(litter.id, true)}
+                selectedLitterId={selectedLitterId}
+              />
+              
+              <LitterPagination
+                pageCount={activePageCount}
+                currentPage={activePage}
+                onPageChange={setActivePage}
+              />
+            </>
+          )}
         </TabsContent>
         
         <TabsContent value="archived" className="space-y-6">
-          <LitterTabContent
-            litters={archivedLitters}
-            filteredLitters={filteredArchivedLitters}
-            paginatedLitters={paginateArchivedLitters}
-            selectedLitterId={selectedLitterId}
-            onSelectLitter={handleSelectLitter}
-            onSelectLitterId={setSelectedLitterId}
-            onArchive={(litter) => handleArchiveLitter(litter.id, false)}
-            onAddLitter={() => setShowAddLitterDialog(true)}
-            pageCount={archivedPageCount}
-            currentPage={archivedPage}
-            setCurrentPage={setArchivedPage}
-            isArchived={true}
-          />
+          {renderEmptyState(isFilterActive, archivedLitters, () => {
+            setFilterYear(null);
+            setSearchQuery('');
+          })}
+          
+          {archivedLitters.length > 0 && filteredArchivedLitters.length > 0 && (
+            <>
+              <LitterGridView
+                litters={paginateArchivedLitters}
+                onSelectLitter={handleSelectLitter}
+                onArchive={(litter) => handleArchiveLitter(litter.id, false)}
+                selectedLitterId={selectedLitterId}
+              />
+              
+              <LitterPagination
+                pageCount={archivedPageCount}
+                currentPage={archivedPage}
+                onPageChange={setArchivedPage}
+              />
+            </>
+          )}
         </TabsContent>
       </Tabs>
       
