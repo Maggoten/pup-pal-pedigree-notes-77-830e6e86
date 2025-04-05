@@ -25,8 +25,8 @@ const ActivePregnanciesCard: React.FC<ActivePregnanciesCardProps> = ({
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-primary/20">
+      <CardHeader className="bg-primary/5">
         <CardTitle className="flex items-center gap-2">
           <PawPrint className="h-5 w-5" />
           Active Pregnancies
@@ -35,7 +35,7 @@ const ActivePregnanciesCard: React.FC<ActivePregnanciesCardProps> = ({
       </CardHeader>
       <CardContent>
         {pregnancies.length > 0 ? (
-          <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {pregnancies.map((pregnancy) => (
               <div 
                 key={pregnancy.id} 
@@ -54,10 +54,13 @@ const ActivePregnanciesCard: React.FC<ActivePregnanciesCardProps> = ({
                     <span className="font-medium">Due Date:</span> 
                     {format(pregnancy.expectedDueDate, 'PPP')}
                   </p>
-                  <p className="flex items-center gap-2">
-                    <span className="font-medium">Days Left:</span> 
-                    {pregnancy.daysLeft}
-                  </p>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="flex items-center gap-2">
+                      <span className="font-medium">Days Left:</span> 
+                      <span className="font-bold text-primary">{pregnancy.daysLeft}</span>
+                    </p>
+                    <Button size="sm">Details</Button>
+                  </div>
                 </div>
               </div>
             ))}
