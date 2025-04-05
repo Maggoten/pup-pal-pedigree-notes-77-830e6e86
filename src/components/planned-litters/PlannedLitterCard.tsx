@@ -1,14 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Trash2 } from 'lucide-react';
+import { Calendar, Trash2, ClipboardCheck } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { PlannedLitter } from '@/types/breeding';
 import PlannedLitterDetailsDialog from './PlannedLitterDetailsDialog';
+import PreBreedingChecklist from './PreBreedingChecklist';
 
 interface PlannedLitterCardProps {
   litter: PlannedLitter;
@@ -25,6 +26,8 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
   calendarOpen,
   onCalendarOpenChange
 }) => {
+  const [showChecklist, setShowChecklist] = useState(false);
+
   return (
     <Card>
       <CardHeader className="relative">
@@ -63,12 +66,12 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
           </div>
         )}
         
-        <div className="mt-4">
+        <div className="mt-4 grid grid-cols-1 gap-2">
           <Popover open={calendarOpen} onOpenChange={onCalendarOpenChange}>
             <PopoverTrigger asChild>
               <Button 
                 variant="outline" 
-                className="w-full mt-2"
+                className="w-full"
               >
                 <Calendar className="mr-2 h-4 w-4" />
                 Add Mating Date
@@ -83,6 +86,15 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
               />
             </PopoverContent>
           </Popover>
+          
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => setShowChecklist(true)}
+          >
+            <ClipboardCheck className="mr-2 h-4 w-4" />
+            Breeding Checklist
+          </Button>
         </div>
       </CardContent>
       <CardFooter>
@@ -98,6 +110,13 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
           />
         </Dialog>
       </CardFooter>
+
+      {/* Breeding Checklist Dialog */}
+      <Dialog open={showChecklist} onOpenChange={setShowChecklist}>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+          <PreBreedingChecklist litter={litter} />
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

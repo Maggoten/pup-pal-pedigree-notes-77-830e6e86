@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Thermometer, MessageSquare } from 'lucide-react';
+import { Calendar, Thermometer, MessageSquare, ClipboardList } from 'lucide-react';
 import PregnancyTimeline from '@/components/pregnancy/PregnancyTimeline';
 import TemperatureLog from '@/components/pregnancy/TemperatureLog';
 import SymptomsLog from '@/components/pregnancy/SymptomsLog';
+import PregnancyChecklist from '@/components/pregnancy/symptoms/PregnancyChecklist';
 
 interface PregnancyTabsProps {
   pregnancyId: string;
@@ -21,7 +22,7 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
 }) => {
   return (
     <Tabs defaultValue="timeline" className="w-full">
-      <TabsList className="grid grid-cols-3 mb-4">
+      <TabsList className="grid grid-cols-4 mb-4">
         <TabsTrigger value="timeline" className="flex items-center gap-2">
           <Calendar className="h-4 w-4" /> Timeline
         </TabsTrigger>
@@ -30,6 +31,9 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
         </TabsTrigger>
         <TabsTrigger value="symptoms" className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4" /> Notes & Symptoms
+        </TabsTrigger>
+        <TabsTrigger value="checklist" className="flex items-center gap-2">
+          <ClipboardList className="h-4 w-4" /> Checklist
         </TabsTrigger>
       </TabsList>
       
@@ -49,6 +53,13 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
       
       <TabsContent value="symptoms">
         <SymptomsLog 
+          pregnancyId={pregnancyId} 
+          femaleName={femaleName} 
+        />
+      </TabsContent>
+      
+      <TabsContent value="checklist">
+        <PregnancyChecklist 
           pregnancyId={pregnancyId} 
           femaleName={femaleName} 
         />
