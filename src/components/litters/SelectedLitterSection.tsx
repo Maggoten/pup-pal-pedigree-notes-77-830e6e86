@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Litter, Puppy } from '@/types/breeding';
 import { toast } from '@/components/ui/use-toast';
@@ -32,20 +32,24 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
 }) => {
   const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
   const [activeTab, setActiveTab] = useState('puppies');
+  const [checklistVersion, setChecklistVersion] = useState(0);
   
   // If no litter is selected, don't show this section
   if (!selectedLitter) {
     return null;
   }
   
-  const handleToggleChecklistItem = (itemId: string, completed: boolean) => {
+  const handleToggleChecklistItem = useCallback((itemId: string, completed: boolean) => {
+    // Force a re-render when a checklist item is toggled
+    setChecklistVersion(prev => prev + 1);
+    
     toast({
       title: completed ? "Task Completed" : "Task Reopened",
       description: completed 
         ? "Item marked as completed" 
         : "Item marked as not completed"
     });
-  };
+  }, []);
 
   // Calculate litter age
   const birthDate = parseISO(selectedLitter.dateOfBirth);
@@ -66,6 +70,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
       <CompactDevelopmentSection 
         litter={selectedLitter}
         onToggleItem={handleToggleChecklistItem}
+        key={`compact-${checklistVersion}`}
       />
       
       {/* Tab-based layout for different sections */}
@@ -108,6 +113,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
           <DevelopmentTabContent 
             litter={selectedLitter}
             onToggleItem={handleToggleChecklistItem}
+            key={`development-${checklistVersion}`}
           />
         </TabsContent>
       </Tabs>
