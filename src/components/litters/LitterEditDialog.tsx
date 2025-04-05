@@ -47,7 +47,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
   };
   
   return (
-    <DialogContent className="sm:max-w-[500px]">
+    <DialogContent className="sm:max-w-[600px]">
       <DialogHeader>
         <DialogTitle>Edit Litter Details</DialogTitle>
         <DialogDescription>
@@ -56,80 +56,67 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
       </DialogHeader>
       
       <form onSubmit={handleSubmit}>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Litter Name
-            </Label>
+        <div className="grid gap-5 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="name">Litter Name</Label>
             <Input
               id="name"
               value={litterName}
               onChange={(e) => setLitterName(e.target.value)}
-              className="col-span-3"
               required
             />
           </div>
           
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="sire" className="text-right">
-              Sire Name
-            </Label>
+          <div className="grid gap-2">
+            <Label htmlFor="sire">Sire Name</Label>
             <Input
               id="sire"
               value={sireName}
               onChange={(e) => setSireName(e.target.value)}
-              className="col-span-3"
               required
             />
           </div>
           
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="dam" className="text-right">
-              Dam Name
-            </Label>
+          <div className="grid gap-2">
+            <Label htmlFor="dam">Dam Name</Label>
             <Input
               id="dam"
               value={damName}
               onChange={(e) => setDamName(e.target.value)}
-              className="col-span-3"
               required
             />
           </div>
           
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="dob" className="text-right">
-              Date of Birth
-            </Label>
-            <div className="col-span-3">
-              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(birthDate, "PPP")}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={birthDate}
-                    onSelect={(date) => {
-                      if (date) {
-                        setBirthDate(date);
-                        setIsCalendarOpen(false);
-                      }
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+          <div className="grid gap-2">
+            <Label htmlFor="dob">Date of Birth</Label>
+            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(birthDate, "PPP")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={birthDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setBirthDate(date);
+                      setIsCalendarOpen(false);
+                    }
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
           
           {onArchive && (
-            <div className="col-span-4 mt-2">
+            <div className="mt-2">
               <Button 
                 type="button" 
                 variant="outline" 
@@ -151,18 +138,19 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
             </div>
           )}
           
-          <div className="col-span-4 mt-4">
+          <div className="mt-4">
             <Alert variant="destructive" className="bg-destructive/10 border-destructive/30">
               <AlertDescription className="flex items-center justify-between">
                 <span>Delete this litter and all its puppies?</span>
                 <Button 
                   type="button" 
                   variant="destructive" 
+                  size="sm"
                   onClick={() => onDelete(litter.id)}
                   className="flex items-center gap-2"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Delete Litter
+                  Delete
                 </Button>
               </AlertDescription>
             </Alert>
