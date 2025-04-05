@@ -5,6 +5,7 @@ import { usePuppyData } from '@/hooks/usePuppyData';
 import PuppiesHeader from '@/components/puppies/PuppiesHeader';
 import LitterTabs from '@/components/puppies/LitterTabs';
 import EmptyPuppiesState from '@/components/puppies/EmptyPuppiesState';
+import { PawPrint } from 'lucide-react';
 
 const Puppies: React.FC = () => {
   const {
@@ -19,19 +20,22 @@ const Puppies: React.FC = () => {
     <PageLayout 
       title="Puppies" 
       description="Track your litters and individual puppies"
+      icon={<PawPrint className="h-6 w-6" />}
     >
-      <PuppiesHeader onAddLitterClick={handleAddLitterClick} />
-      
-      {litters.length > 0 ? (
-        <LitterTabs 
-          litters={litters}
-          selectedLitterId={selectedLitterId}
-          setSelectedLitterId={setSelectedLitterId}
-          onLogWeights={handleAddWeightLog}
-        />
-      ) : (
-        <EmptyPuppiesState onAddLitter={handleAddLitterClick} />
-      )}
+      <div className="bg-background min-h-[calc(100vh-6rem)]">
+        <PuppiesHeader onAddLitterClick={handleAddLitterClick} />
+        
+        {litters.length > 0 ? (
+          <LitterTabs 
+            litters={litters}
+            selectedLitterId={selectedLitterId}
+            setSelectedLitterId={setSelectedLitterId}
+            onLogWeights={handleAddWeightLog}
+          />
+        ) : (
+          <EmptyPuppiesState onAddLitter={handleAddLitterClick} />
+        )}
+      </div>
     </PageLayout>
   );
 };

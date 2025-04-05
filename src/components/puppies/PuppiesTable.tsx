@@ -9,13 +9,13 @@ interface PuppiesTableProps {
 
 const PuppiesTable: React.FC<PuppiesTableProps> = ({ puppies }) => {
   return (
-    <Table>
-      <TableHeader>
+    <Table className="border border-border rounded-md overflow-hidden">
+      <TableHeader className="bg-secondary/40">
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Gender</TableHead>
-          <TableHead>Color</TableHead>
-          <TableHead>Current Weight</TableHead>
+          <TableHead className="text-foreground font-medium">Name</TableHead>
+          <TableHead className="text-foreground font-medium">Gender</TableHead>
+          <TableHead className="text-foreground font-medium">Color</TableHead>
+          <TableHead className="text-foreground font-medium">Current Weight</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -25,9 +25,11 @@ const PuppiesTable: React.FC<PuppiesTableProps> = ({ puppies }) => {
             : 0;
             
           return (
-            <TableRow key={puppy.id}>
-              <TableCell>{puppy.name}</TableCell>
-              <TableCell>{puppy.gender}</TableCell>
+            <TableRow key={puppy.id} className="hover:bg-secondary/20">
+              <TableCell className="font-medium">{puppy.name}</TableCell>
+              <TableCell className={puppy.gender === 'male' ? 'text-blue-500' : 'text-pink-400'}>
+                {puppy.gender}
+              </TableCell>
               <TableCell>{puppy.color}</TableCell>
               <TableCell>{latestWeight} kg</TableCell>
             </TableRow>

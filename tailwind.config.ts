@@ -54,41 +54,17 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				// Custom colors
-				brown: {
-					50: '#FAF6F1',
-					100: '#F0E6D9',
-					200: '#E1D0B4',
-					300: '#D2B990',
-					400: '#C3A36B',
-					500: '#8B5A2B',
-					600: '#7A4E26',
-					700: '#5C3B1D',
-					800: '#3D2713',
-					900: '#1E140A'
-				},
-				cream: {
-					50: '#FFFFFE',
-					100: '#FCFCF7',
-					200: '#F9F9EF',
-					300: '#F5F5DC', // Main cream
-					400: '#F0F0D0',
-					500: '#EBEBC1',
-					600: '#D6D6B1',
-					700: '#A7A78A',
-					800: '#787864',
-					900: '#3C3C32'
-				},
-				blue: {
-					50: '#F0F8FF',
-					100: '#E3F1FF',
-					200: '#C7E2FF',
-					300: '#AAD4FF',
-					400: '#8EC5FF',
-					500: '#4A90E2', // Main blue
-					600: '#3A73B5',
-					700: '#2B5688',
-					800: '#1D3A5B',
-					900: '#0E1D2E'
+				green: {
+					50: '#F2FCF5',
+					100: '#E1F0E5',
+					200: '#C3E1CB',
+					300: '#A5D2B1',
+					400: '#87C397',
+					500: '#43935E', // Main green
+					600: '#3A7A51',
+					700: '#2C5D3D',
+					800: '#1E3F29',
+					900: '#0F2014'
 				},
 				pink: {
 					50: '#FFF0F3',
@@ -101,6 +77,18 @@ export default {
 					700: '#FF1438',
 					800: '#F0001F',
 					900: '#D30018'
+				},
+				greige: {
+					50: '#F8F6F2',
+					100: '#F5F0E5', // Main greige
+					200: '#EAE0C9',
+					300: '#DFD0AE',
+					400: '#D4C193',
+					500: '#C9B177',
+					600: '#B9993F',
+					700: '#8A7330',
+					800: '#5C4C20',
+					900: '#2E2610'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
