@@ -50,17 +50,45 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   
   // Get next puppy number based on position in the list
   const getNextPuppyNumber = () => {
-    // If there are no puppies, start with 1
-    if (puppies.length === 0) return 1;
-    
-    // Find the highest number in the existing numbered puppies
-    // This ensures we don't reuse a number if a puppy was deleted
     return puppies.length + 1;
+  };
+  
+  // Update puppy names after deletion to maintain consistent numbering
+  const handleDeletePuppy = (puppyId: string) => {
+    onDeletePuppy(puppyId);
+    
+    // The puppies state will be updated by the parent component after deletion
+    // We don't need to manually update names here
   };
   
   const handleAddPuppy = (puppy: Puppy) => {
     onAddPuppy(puppy);
     setAddPuppyDialogOpen(false);
+  };
+  
+  // Function to update puppy names to match their position
+  const updatePuppyNames = (updatedPuppy: Puppy) => {
+    // Only update custom naming if we're editing a puppy with a name in the format "Puppy X"
+    const puppyNamePattern = /^Puppy \d+$/;
+    if (!puppyNamePattern.test(updatedPuppy.name)) {
+      // If it's a custom name, just update without renaming
+      onUpdatePuppy(updatedPuppy);
+      return;
+    }
+    
+    // Find the puppy's index
+    const index = puppies.findIndex(p => p.id === updatedPuppy.id);
+    if (index !== -1) {
+      // Update the name to match its position+1
+      const newPuppy = {
+        ...updatedPuppy,
+        name: `Puppy ${index + 1}`
+      };
+      onUpdatePuppy(newPuppy);
+    } else {
+      // Just update the puppy if we can't find it (shouldn't happen)
+      onUpdatePuppy(updatedPuppy);
+    }
   };
   
   return (
@@ -96,8 +124,8 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
         {puppies.length > 0 ? (
           <PuppyList 
             puppies={puppies} 
-            onUpdatePuppy={onUpdatePuppy} 
-            onDeletePuppy={onDeletePuppy}
+            onUpdatePuppy={updatePuppyNames} 
+            onDeletePuppy={handleDeletePuppy}
             onPuppyClick={handlePuppyClick}
             selectedPuppyId={selectedPuppy?.id}
             onAddMeasurement={handleAddMeasurement}
@@ -120,7 +148,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
           <PuppyMeasurementsDialog 
             puppy={activePuppy} 
             onClose={() => setMeasurementDialogOpen(false)} 
-            onUpdate={onUpdatePuppy}
+            onUpdate={updatePuppyNames}
           />
         )}
       </Dialog>

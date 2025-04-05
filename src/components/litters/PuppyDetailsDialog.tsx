@@ -49,7 +49,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   };
 
   const handleDelete = () => {
-    if (confirm(`Are you sure you want to delete ${displayName}?`)) {
+    if (confirm(`Do you want to delete "${displayName}"?`)) {
       onDeletePuppy(puppy.id);
       toast({
         title: "Puppy Deleted",
