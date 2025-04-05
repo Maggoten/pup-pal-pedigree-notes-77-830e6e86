@@ -7,6 +7,7 @@ import PuppyList from './PuppyList';
 import PuppyDetailsDialog from './PuppyDetailsDialog';
 import PuppyDevelopmentChecklist from './PuppyDevelopmentChecklist';
 import { toast } from '@/components/ui/use-toast';
+import { Dialog } from '@/components/ui/dialog';
 
 interface SelectedLitterSectionProps {
   selectedLitter: Litter | null;
@@ -29,6 +30,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
 }) => {
   const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
   const [showAddPuppyDialog, setShowAddPuppyDialog] = useState(false);
+  const [showPuppyDetailsDialog, setShowPuppyDetailsDialog] = useState(false);
   
   // If no litter is selected, don't show this section
   if (!selectedLitter) {
@@ -46,6 +48,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
   
   const handleRowSelect = (puppy: Puppy) => {
     setSelectedPuppy(puppy);
+    setShowPuppyDetailsDialog(true);
   };
   
   return (
@@ -89,21 +92,28 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
         </div>
       </div>
       
-      {/* Dialogs */}
-      <AddPuppyDialog 
-        onClose={() => setShowAddPuppyDialog(false)}
-        onSubmit={onAddPuppy}
-        puppyNumber={selectedLitter.puppies.length + 1}
-        litterDob={selectedLitter.dateOfBirth}
-        damBreed=""
-      />
+      {/* Add Puppy Dialog - Wrapped in a Dialog component */}
+      <Dialog open={showAddPuppyDialog} onOpenChange={setShowAddPuppyDialog}>
+        <AddPuppyDialog 
+          onClose={() => setShowAddPuppyDialog(false)}
+          onSubmit={onAddPuppy}
+          puppyNumber={selectedLitter.puppies.length + 1}
+          litterDob={selectedLitter.dateOfBirth}
+          damBreed=""
+        />
+      </Dialog>
       
-      <PuppyDetailsDialog 
-        puppy={selectedPuppy}
-        onClose={() => setSelectedPuppy(null)}
-        onUpdate={onUpdatePuppy}
-        onDelete={onDeletePuppy}
-      />
+      {/* Puppy Details Dialog - Only render when a puppy is selected, wrapped in Dialog */}
+      {selectedPuppy && (
+        <Dialog open={showPuppyDetailsDialog} onOpenChange={setShowPuppyDetailsDialog}>
+          <PuppyDetailsDialog 
+            puppy={selectedPuppy}
+            onClose={() => setShowPuppyDetailsDialog(false)}
+            onUpdate={onUpdatePuppy}
+            onDelete={onDeletePuppy}
+          />
+        </Dialog>
+      )}
     </div>
   );
 };
