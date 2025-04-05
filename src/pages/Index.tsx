@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BreedingStats from '@/components/BreedingStats';
 import BreedingCalendar from '@/components/BreedingCalendar';
 import BreedingReminders from '@/components/BreedingReminders';
 import DogList from '@/components/DogList';
@@ -203,55 +202,6 @@ const Index = () => {
             </Card>
           </div>
         )}
-        
-        <BreedingStats />
-        
-        <div className="mt-6">
-          <Tabs defaultValue="all" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <TabsList>
-                <TabsTrigger value="all">All Dogs</TabsTrigger>
-                <TabsTrigger value="matings">Recent Matings</TabsTrigger>
-                <TabsTrigger value="litters">Litters</TabsTrigger>
-                <TabsTrigger value="health">Health Records</TabsTrigger>
-              </TabsList>
-              <Button 
-                variant="outline" 
-                className="hidden sm:flex items-center gap-2" 
-                onClick={() => navigate('/my-dogs')}
-              >
-                View All Dogs <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-            <TabsContent value="all" className="space-y-4">
-              <DogList />
-            </TabsContent>
-            <TabsContent value="matings">
-              <div className="rounded-lg border p-8 text-center">
-                <h3 className="text-lg font-semibold mb-2">Coming Soon</h3>
-                <p className="text-muted-foreground">
-                  Mating records will be available in the next update.
-                </p>
-              </div>
-            </TabsContent>
-            <TabsContent value="litters">
-              <div className="rounded-lg border p-8 text-center">
-                <h3 className="text-lg font-semibold mb-2">Coming Soon</h3>
-                <p className="text-muted-foreground">
-                  Litter tracking will be available in the next update.
-                </p>
-              </div>
-            </TabsContent>
-            <TabsContent value="health">
-              <div className="rounded-lg border p-8 text-center">
-                <h3 className="text-lg font-semibold mb-2">Coming Soon</h3>
-                <p className="text-muted-foreground">
-                  Health records will be available in the next update.
-                </p>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
       </PageLayout>
         
       <AddDogButton onClick={handleAddDogClick} />

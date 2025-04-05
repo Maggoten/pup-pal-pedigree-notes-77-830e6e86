@@ -1,26 +1,62 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { format, addDays, startOfWeek, addWeeks, subWeeks } from 'date-fns';
+import { format, addDays, startOfWeek, addWeeks, subWeeks, parseISO } from 'date-fns';
 import { useDogs } from '@/context/DogsContext';
 import { calculateUpcomingHeats, UpcomingHeat } from '@/utils/heatCalculator';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { toast } from '@/components/ui/use-toast';
+import { useForm } from 'react-hook-form';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CalendarEvent {
   id: string;
   title: string;
   date: Date;
-  type: 'heat' | 'mating' | 'due-date' | 'planned-mating';
-  dogId: string;
-  dogName: string;
+  type: 'heat' | 'mating' | 'due-date' | 'planned-mating' | 'custom';
+  dogId?: string;
+  dogName?: string;
+  notes?: string;
+}
+
+interface AddEventFormValues {
+  title: string;
+  date: Date;
+  type: string;
+  dogId?: string;
+  notes?: string;
 }
 
 const BreedingCalendar: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const { dogs } = useDogs();
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  const form = useForm<AddEventFormValues>({
+    defaultValues: {
+      title: '',
+      date: new Date(),
+      type: 'custom',
+      notes: ''
+    }
+  });
   
   useEffect(() => {
+    // Load events from localStorage if available
+    const savedEvents = localStorage.getItem('breedingCalendarEvents');
+    const customEvents = savedEvents ? JSON.parse(savedEvents).map((event: any) => ({
+      ...event,
+      date: new Date(event.date)
+    })) : [];
+    
     const sampleEvents: CalendarEvent[] = [
       {
         id: '2',
@@ -51,8 +87,16 @@ const BreedingCalendar: React.FC = () => {
       dogName: heat.dogName
     }));
     
-    setCalendarEvents([...sampleEvents, ...heatEvents]);
+    setCalendarEvents([...sampleEvents, ...heatEvents, ...customEvents]);
   }, [dogs]);
+  
+  // Save custom events to localStorage whenever they change
+  useEffect(() => {
+    const customEvents = calendarEvents.filter(event => event.type === 'custom');
+    if (customEvents.length > 0) {
+      localStorage.setItem('breedingCalendarEvents', JSON.stringify(customEvents));
+    }
+  }, [calendarEvents]);
   
   const startDate = startOfWeek(currentDate, { weekStartsOn: 1 }); // Start on Monday
   
@@ -88,9 +132,38 @@ const BreedingCalendar: React.FC = () => {
         return 'bg-indigo-100 border-indigo-300 text-indigo-800';
       case 'due-date':
         return 'bg-amber-100 border-amber-300 text-amber-800';
+      case 'custom':
+        return 'bg-green-100 border-green-300 text-green-800';
       default:
         return 'bg-gray-100 border-gray-300 text-gray-800';
     }
+  };
+  
+  const handleSubmit = (data: AddEventFormValues) => {
+    const newEvent: CalendarEvent = {
+      id: uuidv4(),
+      title: data.title,
+      date: data.date,
+      type: 'custom',
+      notes: data.notes
+    };
+    
+    if (data.dogId) {
+      const selectedDog = dogs.find(dog => dog.id === data.dogId);
+      if (selectedDog) {
+        newEvent.dogId = data.dogId;
+        newEvent.dogName = selectedDog.name;
+      }
+    }
+    
+    setCalendarEvents([...calendarEvents, newEvent]);
+    setIsDialogOpen(false);
+    form.reset();
+    
+    toast({
+      title: "Event Added",
+      description: "Your event has been added to the calendar.",
+    });
   };
   
   return (
@@ -106,6 +179,119 @@ const BreedingCalendar: React.FC = () => {
           </CardDescription>
         </div>
         <div className="flex items-center gap-2">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Event
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Calendar Event</DialogTitle>
+                <DialogDescription>
+                  Add a custom event to your breeding calendar
+                </DialogDescription>
+              </DialogHeader>
+              
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Event Title</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter event title" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="date"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Event Date</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className="w-full justify-start text-left font-normal"
+                              >
+                                {field.value ? (
+                                  format(field.value, "PPP")
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="dogId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Associated Dog (Optional)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a dog (optional)" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {dogs.map((dog) => (
+                              <SelectItem key={dog.id} value={dog.id}>
+                                {dog.name} ({dog.gender})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Notes (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Add notes about this event" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <DialogFooter>
+                    <Button type="submit">Add Event</Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+          
           <Button variant="outline" size="icon" onClick={handlePrevWeek}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -149,7 +335,8 @@ const BreedingCalendar: React.FC = () => {
                             className={`p-1 rounded text-xs border ${getEventColor(event.type)}`}
                           >
                             <div className="font-medium">{event.title}</div>
-                            <div>{event.dogName}</div>
+                            {event.dogName && <div>{event.dogName}</div>}
+                            {event.notes && <div className="text-xs italic mt-1 truncate">{event.notes}</div>}
                           </div>
                         ))}
                       </div>
