@@ -90,9 +90,9 @@ export const useBreedingReminders = () => {
         }
       }
       
-      // Check for dog birthdays (if birthdate is available)
-      if (dog.birthdate) {
-        const birthdate = parseISO(dog.birthdate);
+      // Check for dog birthdays (if dateOfBirth is available)
+      if (dog.dateOfBirth) {
+        const birthdate = parseISO(dog.dateOfBirth);
         const birthdateThisYear = new Date(today.getFullYear(), birthdate.getMonth(), birthdate.getDate());
         
         // If birthday is within the next 7 days or was in the last 2 days

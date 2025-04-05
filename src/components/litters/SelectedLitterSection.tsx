@@ -44,6 +44,10 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
     });
   };
   
+  const handleRowSelect = (puppy: Puppy) => {
+    setSelectedPuppy(puppy);
+  };
+  
   return (
     <div className="mt-8">
       <h2 className="text-2xl font-bold mb-4">{selectedLitter.name}</h2>
@@ -58,9 +62,12 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
         <div className="lg:col-span-1">
           <LitterDetails 
             litter={selectedLitter}
-            onUpdate={onUpdateLitter}
-            onDelete={onDeleteLitter}
-            onArchive={onArchiveLitter}
+            onUpdateLitter={onUpdateLitter}
+            onDeleteLitter={onDeleteLitter}
+            onArchiveLitter={onArchiveLitter}
+            onAddPuppy={onAddPuppy}
+            onUpdatePuppy={onUpdatePuppy}
+            onDeletePuppy={onDeletePuppy}
           />
         </div>
         
@@ -69,16 +76,26 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
             puppies={selectedLitter.puppies}
             onAddPuppy={() => setShowAddPuppyDialog(true)}
             onSelectPuppy={setSelectedPuppy}
+            onRowSelect={handleRowSelect}
+            onUpdatePuppy={onUpdatePuppy}
+            onDeletePuppy={onDeletePuppy}
+            showAddPuppyDialog={showAddPuppyDialog}
+            setShowAddPuppyDialog={setShowAddPuppyDialog}
+            puppyNumber={1} // Always start with puppy 1 for each litter
+            litterDob={selectedLitter.dateOfBirth}
+            selectedPuppy={selectedPuppy}
+            damBreed="" // Pass an empty string for now
           />
         </div>
       </div>
       
       {/* Dialogs */}
       <AddPuppyDialog 
-        open={showAddPuppyDialog}
-        onOpenChange={setShowAddPuppyDialog}
-        onAddPuppy={onAddPuppy}
-        litter={selectedLitter}
+        onClose={() => setShowAddPuppyDialog(false)}
+        onSubmit={onAddPuppy}
+        puppyNumber={selectedLitter.puppies.length + 1}
+        litterDob={selectedLitter.dateOfBirth}
+        damBreed=""
       />
       
       <PuppyDetailsDialog 
