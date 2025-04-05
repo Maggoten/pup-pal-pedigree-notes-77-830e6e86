@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PlusCircle, Pencil } from 'lucide-react';
+import { PlusCircle, ChartBar, Pencil } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Puppy } from '@/types/breeding';
 import AddPuppyDialog from './AddPuppyDialog';
-import PuppyMeasurementsDialog from './puppies/PuppyMeasurementsDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 interface PuppyListProps {
   puppies: Puppy[];
@@ -21,7 +21,8 @@ interface PuppyListProps {
   puppyNumber: number;
   litterDob: string;
   selectedPuppy: Puppy | null;
-  damBreed?: string; 
+  damBreed?: string;
+  onMeasurementsClick: (puppy: Puppy) => void;
 }
 
 const PuppyList: React.FC<PuppyListProps> = ({
@@ -36,21 +37,9 @@ const PuppyList: React.FC<PuppyListProps> = ({
   puppyNumber,
   litterDob,
   selectedPuppy,
-  damBreed
+  damBreed,
+  onMeasurementsClick
 }) => {
-  const [activePuppy, setActivePuppy] = useState<Puppy | null>(null);
-  const [showMeasurementsDialog, setShowMeasurementsDialog] = useState(false);
-
-  const handleNameClick = (puppy: Puppy) => {
-    setActivePuppy(puppy);
-    onSelectPuppy(puppy);
-  };
-
-  const handleEditClick = (puppy: Puppy) => {
-    setActivePuppy(puppy);
-    setShowMeasurementsDialog(true);
-  };
-
   // Function to get the current/latest weight of a puppy
   const getCurrentWeight = (puppy: Puppy): string => {
     if (!puppy.weightLog || puppy.weightLog.length === 0) {
@@ -87,68 +76,69 @@ const PuppyList: React.FC<PuppyListProps> = ({
       </div>
       
       {puppies.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Gender</TableHead>
-              <TableHead>Color</TableHead>
-              <TableHead>Birth Weight</TableHead>
-              <TableHead>Current Weight</TableHead>
-              <TableHead>Height/Weight</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {puppies.map(puppy => (
-              <TableRow 
-                key={puppy.id} 
-                className={`cursor-pointer ${selectedPuppy?.id === puppy.id ? 'bg-muted' : ''}`}
-                onClick={() => onRowSelect(puppy)}
-              >
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
-                      {puppy.imageUrl ? (
-                        <AvatarImage src={puppy.imageUrl} alt={puppy.name} />
-                      ) : (
-                        <AvatarFallback>
-                          {puppy.name.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                    <button
+        <div className="rounded-md border overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead>Name</TableHead>
+                <TableHead>Gender</TableHead>
+                <TableHead>Color</TableHead>
+                <TableHead>Birth Weight</TableHead>
+                <TableHead>Current Weight</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {puppies.map(puppy => (
+                <TableRow 
+                  key={puppy.id} 
+                  className={`cursor-pointer transition-colors ${selectedPuppy?.id === puppy.id ? 'bg-muted' : ''}`}
+                  onClick={() => onRowSelect(puppy)}
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        {puppy.imageUrl ? (
+                          <AvatarImage src={puppy.imageUrl} alt={puppy.name} />
+                        ) : (
+                          <AvatarFallback>
+                            {puppy.name.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="text-primary hover:underline font-medium">{puppy.name}</span>
+                        {puppy.breed && <span className="text-xs text-muted-foreground">{puppy.breed}</span>}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={puppy.gender === 'male' ? 'default' : 'secondary'} className="font-normal">
+                      {puppy.gender}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{puppy.color}</TableCell>
+                  <TableCell>{puppy.birthWeight} kg</TableCell>
+                  <TableCell>{getCurrentWeight(puppy)} kg</TableCell>
+                  <TableCell className="text-right">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent row click
-                        handleNameClick(puppy);
+                        onMeasurementsClick(puppy);
                       }}
-                      className="text-primary hover:underline font-medium cursor-pointer"
+                      className="flex items-center gap-1 mr-2"
                     >
-                      {puppy.name}
-                    </button>
-                  </div>
-                </TableCell>
-                <TableCell>{puppy.gender}</TableCell>
-                <TableCell>{puppy.color}</TableCell>
-                <TableCell>{puppy.birthWeight} kg</TableCell>
-                <TableCell>{getCurrentWeight(puppy)} kg</TableCell>
-                <TableCell>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent row click
-                      handleEditClick(puppy);
-                    }}
-                    className="flex items-center gap-1"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                    Edit
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                      <ChartBar className="h-3.5 w-3.5" />
+                      Measurements
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       ) : (
         <div className="text-center py-8 border rounded-md">
           <p className="text-muted-foreground mb-4">No puppies added to this litter yet</p>
@@ -161,17 +151,6 @@ const PuppyList: React.FC<PuppyListProps> = ({
             Add First Puppy
           </Button>
         </div>
-      )}
-
-      {/* Puppy Measurements Dialog */}
-      {activePuppy && (
-        <Dialog open={showMeasurementsDialog} onOpenChange={setShowMeasurementsDialog}>
-          <PuppyMeasurementsDialog 
-            puppy={activePuppy} 
-            onClose={() => setShowMeasurementsDialog(false)}
-            onUpdate={onUpdatePuppy}
-          />
-        </Dialog>
       )}
     </div>
   );

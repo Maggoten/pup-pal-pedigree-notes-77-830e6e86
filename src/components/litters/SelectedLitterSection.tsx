@@ -49,7 +49,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
   const ageInWeeks = differenceInWeeks(new Date(), birthDate);
   
   return (
-    <div className="mt-6 animate-fade-in space-y-8">
+    <div className="mt-6 animate-fade-in space-y-6">
       {/* Header with edit button */}
       <SelectedLitterHeader 
         litter={selectedLitter}
@@ -72,19 +72,19 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
         onUpdatePuppy={onUpdatePuppy}
         onDeletePuppy={onDeletePuppy}
         litterDob={selectedLitter.dateOfBirth}
-        damBreed=""
+        damBreed={selectedLitter.damName}
       />
       
-      {/* 3. Development Section */}
-      <DevelopmentSection 
-        litter={selectedLitter}
-        onToggleItem={handleToggleChecklistItem}
-      />
-      
-      {/* 4. Growth Charts Section */}
+      {/* 3. Growth Charts Section */}
       <GrowthChartsSection 
         selectedPuppy={selectedPuppy}
         puppies={selectedLitter.puppies}
+      />
+      
+      {/* 4. Development Section */}
+      <DevelopmentSection 
+        litter={selectedLitter}
+        onToggleItem={handleToggleChecklistItem}
       />
     </div>
   );
