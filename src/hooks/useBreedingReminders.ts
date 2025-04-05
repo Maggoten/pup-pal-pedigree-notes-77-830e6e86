@@ -1,8 +1,9 @@
 
 import { useDogs } from '@/context/DogsContext';
 import { toast } from '@/components/ui/use-toast';
-import { differenceInDays, parseISO, addDays } from 'date-fns';
+import { differenceInDays, parseISO, addDays, isSameMonth, isSameDay } from 'date-fns';
 import { createPawPrintIcon, createCalendarClockIcon, createScaleIcon } from '@/utils/iconUtils';
+import { litterService } from '@/services/LitterService';
 
 export interface Reminder {
   id: string;
@@ -11,7 +12,8 @@ export interface Reminder {
   icon: React.ReactNode;
   dueDate: Date;
   priority: 'high' | 'medium' | 'low';
-  type: 'heat' | 'mating' | 'vaccination' | 'deworming' | 'weighing' | 'other';
+  type: 'heat' | 'mating' | 'vaccination' | 'deworming' | 'weighing' | 'vet-visit' | 'birthday' | 'other';
+  relatedId?: string; // ID of the related dog or litter
 }
 
 export const useBreedingReminders = () => {
@@ -43,7 +45,8 @@ export const useBreedingReminders = () => {
               icon: createPawPrintIcon("rose-500"),
               dueDate: nextHeatDate,
               priority: 'high',
-              type: 'heat'
+              type: 'heat',
+              relatedId: dog.id
             });
           }
         }
@@ -62,7 +65,8 @@ export const useBreedingReminders = () => {
             icon: createCalendarClockIcon("amber-500"),
             dueDate: nextVaccination,
             priority: 'medium',
-            type: 'vaccination'
+            type: 'vaccination',
+            relatedId: dog.id
           });
         }
       }
@@ -80,9 +84,115 @@ export const useBreedingReminders = () => {
             icon: createCalendarClockIcon("green-500"),
             dueDate: nextDeworming,
             priority: 'medium',
-            type: 'deworming'
+            type: 'deworming',
+            relatedId: dog.id
           });
         }
+      }
+      
+      // Check for dog birthdays (if birthdate is available)
+      if (dog.birthdate) {
+        const birthdate = parseISO(dog.birthdate);
+        const birthdateThisYear = new Date(today.getFullYear(), birthdate.getMonth(), birthdate.getDate());
+        
+        // If birthday is within the next 7 days or was in the last 2 days
+        const daysUntilBirthday = differenceInDays(birthdateThisYear, today);
+        if ((daysUntilBirthday >= -2 && daysUntilBirthday <= 7) || 
+            (isSameMonth(birthdate, today) && isSameDay(birthdate, today))) {
+          const age = today.getFullYear() - birthdate.getFullYear();
+          
+          reminders.push({
+            id: `birthday-${dog.id}`,
+            title: `${dog.name}'s Birthday`,
+            description: daysUntilBirthday <= 0 
+              ? `${dog.name} turns ${age} today!` 
+              : `${dog.name} turns ${age} in ${daysUntilBirthday} days`,
+            icon: createPawPrintIcon("blue-500"),
+            dueDate: birthdateThisYear,
+            priority: 'low',
+            type: 'birthday',
+            relatedId: dog.id
+          });
+        }
+      }
+    });
+    
+    // Add puppy-related reminders from litters
+    const litters = litterService.loadLitters();
+    const activeLitters = litters.filter(litter => !litter.archived);
+    
+    activeLitters.forEach(litter => {
+      const litterBirthDate = parseISO(litter.dateOfBirth);
+      const puppyAge = differenceInDays(today, litterBirthDate);
+      
+      // Deworming at 3 weeks
+      if (puppyAge >= 19 && puppyAge <= 22) {
+        reminders.push({
+          id: `deworm-3w-${litter.id}`,
+          title: `Deworm ${litter.name} Puppies`,
+          description: `First deworming for puppies at 3 weeks old`,
+          icon: createCalendarClockIcon("green-500"),
+          dueDate: addDays(litterBirthDate, 21),
+          priority: 'high',
+          type: 'deworming',
+          relatedId: litter.id
+        });
+      }
+      
+      // Deworming at 5 weeks
+      if (puppyAge >= 33 && puppyAge <= 36) {
+        reminders.push({
+          id: `deworm-5w-${litter.id}`,
+          title: `Deworm ${litter.name} Puppies`,
+          description: `Second deworming for puppies at 5 weeks old`,
+          icon: createCalendarClockIcon("green-500"),
+          dueDate: addDays(litterBirthDate, 35),
+          priority: 'high',
+          type: 'deworming',
+          relatedId: litter.id
+        });
+      }
+      
+      // Deworming at 7 weeks
+      if (puppyAge >= 47 && puppyAge <= 50) {
+        reminders.push({
+          id: `deworm-7w-${litter.id}`,
+          title: `Deworm ${litter.name} Puppies`,
+          description: `Third deworming for puppies at 7 weeks old`,
+          icon: createCalendarClockIcon("green-500"),
+          dueDate: addDays(litterBirthDate, 49),
+          priority: 'high',
+          type: 'deworming',
+          relatedId: litter.id
+        });
+      }
+      
+      // Vet visit reminder at 6 weeks
+      if (puppyAge >= 40 && puppyAge <= 43) {
+        reminders.push({
+          id: `vet-6w-${litter.id}`,
+          title: `Schedule Vet Visit for ${litter.name}`,
+          description: `Book vet appointment for final check before puppies go to new homes`,
+          icon: createCalendarClockIcon("purple-500"),
+          dueDate: addDays(litterBirthDate, 42),
+          priority: 'high',
+          type: 'vet-visit',
+          relatedId: litter.id
+        });
+      }
+      
+      // Weight check reminders for young puppies (every 3 days for first 3 weeks)
+      if (puppyAge <= 21 && puppyAge % 3 === 0) {
+        reminders.push({
+          id: `weight-${litter.id}-${puppyAge}`,
+          title: `Weigh ${litter.name} Puppies`,
+          description: `Regular weight tracking at ${puppyAge} days old`,
+          icon: createScaleIcon("blue-500"),
+          dueDate: today,
+          priority: 'medium',
+          type: 'weighing',
+          relatedId: litter.id
+        });
       }
     });
     

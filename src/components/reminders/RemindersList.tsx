@@ -24,6 +24,9 @@ const RemindersList: React.FC<RemindersListProps> = ({ reminders, onComplete }) 
           description={reminder.description}
           icon={reminder.icon}
           priority={reminder.priority}
+          dueDate={reminder.dueDate}
+          type={reminder.type}
+          relatedId={reminder.relatedId}
           onComplete={onComplete}
         />
       ))}

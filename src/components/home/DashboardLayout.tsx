@@ -34,11 +34,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         />
         
         <div className="grid gap-6 md:grid-cols-3 mb-6">
-          <div className="md:col-span-2">
-            <BreedingCalendar />
-          </div>
           <div>
             <BreedingReminders />
+          </div>
+          <div className="md:col-span-2">
+            <BreedingCalendar />
           </div>
         </div>
         
