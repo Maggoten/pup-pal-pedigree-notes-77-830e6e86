@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { format, addDays, startOfWeek } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { CardTitle, CardDescription } from '@/components/ui/card';
 import { CalendarIcon, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,33 +20,35 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   handleNextWeek
 }) => {
   return (
-    <div className="flex flex-row items-center justify-between pb-2 bg-primary/5 border-b border-primary/20">
+    <div className="flex flex-row items-center justify-between p-4 pb-2 bg-primary/5 border-b border-primary/20">
       <div>
-        <CardTitle className="flex items-center gap-2 text-primary">
+        <CardTitle className="flex items-center gap-2 text-primary text-xl">
           <CalendarIcon className="h-5 w-5" />
           Breeding Calendar
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-xs mt-1">
           Track heats, matings, and due dates
         </CardDescription>
       </div>
       <div className="flex items-center gap-2">
+        <div className="flex items-center bg-white/80 rounded-md border border-primary/10 px-2 py-1">
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handlePrevWeek}>
+            <ChevronLeft className="h-3 w-3" />
+          </Button>
+          <span className="text-xs font-medium px-2">
+            {format(startDate, 'MMM d')} - {format(addDays(startDate, 27), 'MMM d')}
+          </span>
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleNextWeek}>
+            <ChevronRight className="h-3 w-3" />
+          </Button>
+        </div>
+        
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Event
+          <Button variant="outline" size="sm" className="gap-1 text-xs h-7">
+            <Plus className="h-3 w-3" />
+            Event
           </Button>
         </DialogTrigger>
-        
-        <Button variant="outline" size="icon" onClick={handlePrevWeek}>
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <span className="text-sm font-medium">
-          {format(startDate, 'MMM d')} - {format(addDays(startDate, 27), 'MMM d, yyyy')}
-        </span>
-        <Button variant="outline" size="icon" onClick={handleNextWeek}>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
       </div>
     </div>
   );

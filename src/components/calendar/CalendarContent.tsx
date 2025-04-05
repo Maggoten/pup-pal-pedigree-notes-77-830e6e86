@@ -69,12 +69,12 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
         handleNextWeek={handleNextWeek}
       />
       
-      <CardContent className={`p-4 bg-gradient-to-br from-cream-50 to-[#FFDEE2]/30 ${compact ? 'max-h-[300px] overflow-y-auto' : ''}`}>
-        <div className="text-xs text-gray-500 mb-2">
-          {isMobile 
-            ? "Tap custom events to view details and delete option" 
-            : "Right-click on custom events to delete them"}
-        </div>
+      <CardContent className={`p-3 bg-gradient-to-br from-cream-50 to-[#FFDEE2]/30 ${compact ? 'max-h-[300px] overflow-y-auto' : ''}`}>
+        {isMobile && (
+          <div className="text-xs text-gray-500 mb-2">
+            Tap events to view/delete
+          </div>
+        )}
         <div className={isMobile ? "overflow-x-auto -mx-4 px-4" : ""}>
           <CalendarGrid 
             weeks={weeks}
