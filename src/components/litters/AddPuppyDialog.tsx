@@ -34,7 +34,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
   const [dateOfBirth, setDateOfBirth] = useState<Date>(defaultDob);
   const [breed, setBreed] = useState<string>(damBreed);
   
-  // Set default name when puppyNumber changes
+  // Set default name when puppyNumber changes, making sure the name is just "Puppy X" without any extra digits
   useEffect(() => {
     setName(`Puppy ${puppyNumber}`);
   }, [puppyNumber]);
@@ -52,7 +52,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
 
       const newPuppy = {
         id: Date.now().toString(),
-        name,
+        name, // Use the name exactly as entered, no manipulation
         gender,
         color,
         breed,

@@ -71,6 +71,7 @@ export function useLitterManagement() {
   const handleAddPuppy = (newPuppy: Puppy) => {
     if (!selectedLitterId) return;
     
+    // Add the puppy without modifying its name
     litterService.addPuppy(selectedLitterId, newPuppy);
     setActiveLitters(litterService.getActiveLitters());
     setArchivedLitters(litterService.getArchivedLitters());
@@ -84,6 +85,7 @@ export function useLitterManagement() {
   const handleUpdatePuppy = (updatedPuppy: Puppy) => {
     if (!selectedLitterId) return;
     
+    // Update the puppy without modifying its name
     litterService.updatePuppy(selectedLitterId, updatedPuppy);
     setActiveLitters(litterService.getActiveLitters());
     setArchivedLitters(litterService.getArchivedLitters());

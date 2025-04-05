@@ -53,19 +53,19 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
     return puppies.length + 1;
   };
   
-  // Update puppy names after deletion to maintain consistent numbering
   const handleDeletePuppy = (puppyId: string) => {
     onDeletePuppy(puppyId);
   };
   
   const handleAddPuppy = (puppy: Puppy) => {
+    // Add the puppy exactly as is, without modifying the name
     onAddPuppy(puppy);
     setAddPuppyDialogOpen(false);
   };
   
   // Function to update puppy data without changing its name
   const updatePuppyNames = (updatedPuppy: Puppy) => {
-    // Simply update the puppy with exactly the data provided - no renumbering
+    // Update the puppy with exactly the data provided - no modifications
     onUpdatePuppy(updatedPuppy);
   };
   
@@ -99,6 +99,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
       </CardHeader>
       
       <CardContent className="p-4">
+        {/* Directly pass the puppies array without any manipulation */}
         {puppies.length > 0 ? (
           <PuppyList 
             puppies={puppies} 

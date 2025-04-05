@@ -114,6 +114,7 @@ class LitterService {
           });
         }
         
+        // Add the puppy to the litter without modifying its name
         return {
           ...litter,
           puppies: [...litter.puppies, puppy]
@@ -141,6 +142,7 @@ class LitterService {
         if (!updatedPuppy.weightLog) updatedPuppy.weightLog = [];
         if (!updatedPuppy.heightLog) updatedPuppy.heightLog = [];
         
+        // Update the puppy in the litter without modifying its name
         const updatedPuppies = litter.puppies.map(puppy => 
           puppy.id === updatedPuppy.id ? updatedPuppy : puppy
         );

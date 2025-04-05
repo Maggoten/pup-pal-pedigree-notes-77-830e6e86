@@ -13,6 +13,7 @@ interface PuppyDetailsFormProps {
 }
 
 const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) => {
+  // Ensure we're using the exact puppy name without any string manipulation
   const [name, setName] = useState(puppy.name);
   const [gender, setGender] = useState(puppy.gender);
   const [color, setColor] = useState(puppy.color);
@@ -36,9 +37,10 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
         birthDateTime.setHours(hours, minutes);
       }
 
+      // Create the updated puppy object with the exact name as entered in the form
       const updatedPuppy = {
         ...puppy,
-        name,
+        name,  // Use the name exactly as entered in the form
         gender,
         color,
         breed,

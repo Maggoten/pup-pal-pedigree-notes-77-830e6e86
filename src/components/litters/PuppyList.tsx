@@ -70,7 +70,8 @@ const PuppyList: React.FC<PuppyListProps> = ({
             >
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
-                  {puppy.name}
+                  {/* Ensure we're displaying the exact puppy name with no modifications */}
+                  <span>{puppy.name}</span>
                   {litterAge && litterAge < 2 && (
                     <Badge variant="outline" className="text-xs font-normal">New</Badge>
                   )}

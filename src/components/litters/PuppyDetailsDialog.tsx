@@ -22,9 +22,10 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   onDeletePuppy
 }) => {
   const [imageUrl, setImageUrl] = useState<string>(puppy.imageUrl || '');
+  // Make sure we're using the exact puppy name without any manipulation
   const [displayName, setDisplayName] = useState<string>(puppy.name);
   
-  // Update display name when puppy prop changes
+  // Update display name when puppy prop changes - ensure we're using the exact name
   useEffect(() => {
     setDisplayName(puppy.name);
   }, [puppy.name]);
@@ -40,6 +41,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
       imageUrl: imageUrl
     };
     
+    // Pass the puppy data directly without modifying the name
     onUpdatePuppy(updatedPuppy);
     toast({
       title: "Puppy Updated",
