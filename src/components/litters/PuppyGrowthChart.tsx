@@ -1,10 +1,10 @@
 
 import React, { useEffect } from 'react';
 import { PuppyGrowthChartProps } from './charts/types';
-import ChartViewToggle from './charts/ChartViewToggle';
 import EmptyChartState from './charts/EmptyChartState';
 import GrowthLineChart from './charts/GrowthLineChart';
 import useChartData from './charts/useChartData';
+import PuppySelect from './charts/PuppySelect';
 
 const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
   selectedPuppy,
@@ -52,14 +52,16 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
   
   return (
     <div className="space-y-4">
-      <ChartViewToggle 
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        selectedPuppyExists={!!selectedPuppy}
-        puppies={puppies}
-        selectedPuppy={selectedPuppy}
-        onSelectPuppy={onSelectPuppy}
-      />
+      <div className="flex justify-end">
+        <PuppySelect 
+          puppies={puppies} 
+          selectedPuppy={selectedPuppy} 
+          onSelectPuppy={(puppy) => {
+            onSelectPuppy(puppy);
+            setViewMode(puppy ? 'single' : 'litter');
+          }} 
+        />
+      </div>
       
       <GrowthLineChart
         chartData={chartData}

@@ -10,7 +10,7 @@ import PuppySelect from '../charts/PuppySelect';
 interface GrowthChartsTabContentProps {
   selectedPuppy: Puppy | null;
   puppies: Puppy[];
-  onSelectPuppy: (puppy: Puppy) => void;
+  onSelectPuppy: (puppy: Puppy | null) => void;
 }
 
 const GrowthChartsTabContent: React.FC<GrowthChartsTabContentProps> = ({
@@ -30,13 +30,6 @@ const GrowthChartsTabContent: React.FC<GrowthChartsTabContentProps> = ({
           </div>
           
           <div className="flex items-center gap-4">
-            {puppies.length > 0 && (
-              <PuppySelect 
-                puppies={puppies} 
-                selectedPuppy={selectedPuppy} 
-                onSelectPuppy={onSelectPuppy} 
-              />
-            )}
             <LogTypeToggle logType={logType} setLogType={setLogType} />
           </div>
         </div>
