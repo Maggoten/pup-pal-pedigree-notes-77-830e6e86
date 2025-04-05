@@ -1,8 +1,10 @@
 
 import React from 'react';
 import { format } from 'date-fns';
-import { Clock, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { CalendarEvent } from './types';
+import EventCard from './EventCard';
+import MobileEventCard from './MobileEventCard';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -10,16 +12,6 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,84 +48,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     setSelectedEvent(null);
   };
   
-  const EventCard = ({ event }: { event: CalendarEvent }) => {
-    // Add a visual indicator for custom events that can be deleted
-    const isCustomEvent = event.type === 'custom';
-    
-    return (
-      <div 
-        className={`p-1 rounded text-xs border ${getEventColor(event.type)} cursor-default ${isCustomEvent ? 'relative group' : ''}`}
-      >
-        <div className="font-medium">{event.title}</div>
-        {event.time && <div className="text-xs flex items-center gap-1">
-          <Clock className="h-3 w-3 inline" /> {event.time}
-        </div>}
-        {event.dogName && <div>{event.dogName}</div>}
-        {event.notes && <div className="text-xs italic mt-1 truncate">{event.notes}</div>}
-        
-        {/* Visual indicator for deletable events */}
-        {isCustomEvent && (
-          <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100">
-            <div className="bg-white rounded-full p-0.5 shadow-sm -mt-1 -mr-1">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-  
-  const MobileEventCard = ({ event }: { event: CalendarEvent }) => {
-    const canDelete = event.type === 'custom' && onDeleteEvent;
-    
-    return (
-      <Drawer>
-        <DrawerTrigger asChild>
-          <div className={`p-1 rounded text-xs border ${getEventColor(event.type)} cursor-pointer`}>
-            <div className="font-medium">{event.title}</div>
-            {event.time && <div className="text-xs flex items-center gap-1">
-              <Clock className="h-3 w-3 inline" /> {event.time}
-            </div>}
-            {event.dogName && <div>{event.dogName}</div>}
-            {event.notes && <div className="text-xs italic mt-1 truncate">{event.notes}</div>}
-          </div>
-        </DrawerTrigger>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>{event.title}</DrawerTitle>
-          </DrawerHeader>
-          <div className="px-4 py-2 space-y-2">
-            {event.time && <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4" /> {event.time}
-            </div>}
-            {event.dogName && <div className="font-medium">Dog: {event.dogName}</div>}
-            {event.notes && <div className="text-sm mt-2">{event.notes}</div>}
-          </div>
-          <DrawerFooter>
-            {canDelete && (
-              <Button 
-                variant="destructive" 
-                className="w-full flex items-center justify-center gap-2" 
-                onClick={() => {
-                  setSelectedEvent(event);
-                  setIsAlertOpen(true);
-                }}
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete Event
-              </Button>
-            )}
-            <DrawerClose asChild>
-              <Button variant="outline" className="w-full">Close</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    );
-  };
-
   // Function to handle direct delete action
-  const handleDirectDelete = (event: CalendarEvent) => {
+  const handleDeleteAction = (event: CalendarEvent) => {
     if (event.type === 'custom' && onDeleteEvent) {
       setSelectedEvent(event);
       setIsAlertOpen(true);
@@ -169,18 +85,23 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     <div className="space-y-1">
                       {dayEvents.map((event) => (
                         isMobile ? (
-                          <MobileEventCard key={event.id} event={event} />
+                          <MobileEventCard 
+                            key={event.id} 
+                            event={event} 
+                            getEventColor={getEventColor}
+                            onDelete={handleDeleteAction}
+                          />
                         ) : (
                           <div key={event.id}>
                             {event.type === 'custom' && onDeleteEvent ? (
                               <ContextMenu>
                                 <ContextMenuTrigger>
-                                  <EventCard event={event} />
+                                  <EventCard event={event} getEventColor={getEventColor} />
                                 </ContextMenuTrigger>
                                 <ContextMenuContent className="bg-white z-50">
                                   <ContextMenuItem 
                                     className="flex items-center gap-2 text-red-600 cursor-pointer"
-                                    onClick={() => handleDirectDelete(event)}
+                                    onClick={() => handleDeleteAction(event)}
                                   >
                                     <Trash2 className="h-4 w-4" />
                                     Delete Event
@@ -188,7 +109,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                                 </ContextMenuContent>
                               </ContextMenu>
                             ) : (
-                              <EventCard event={event} />
+                              <EventCard event={event} getEventColor={getEventColor} />
                             )}
                           </div>
                         )
