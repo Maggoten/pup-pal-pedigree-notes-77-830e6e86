@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { format, addDays, startOfWeek, addWeeks, subWeeks, parseISO } from 'date-fns';
+import { format, addDays, startOfWeek, addWeeks, subWeeks, parseISO, setHours, setMinutes } from 'date-fns';
 import { useDogs } from '@/context/DogsContext';
 import { calculateUpcomingHeats, UpcomingHeat } from '@/utils/heatCalculator';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -20,6 +20,7 @@ interface CalendarEvent {
   id: string;
   title: string;
   date: Date;
+  time?: string;
   type: 'heat' | 'mating' | 'due-date' | 'planned-mating' | 'custom';
   dogId?: string;
   dogName?: string;
@@ -29,6 +30,7 @@ interface CalendarEvent {
 interface AddEventFormValues {
   title: string;
   date: Date;
+  time: string;
   type: string;
   dogId?: string;
   notes?: string;
@@ -44,6 +46,7 @@ const BreedingCalendar: React.FC = () => {
     defaultValues: {
       title: '',
       date: new Date(),
+      time: format(new Date(), 'HH:mm'),
       type: 'custom',
       notes: ''
     }
@@ -140,10 +143,18 @@ const BreedingCalendar: React.FC = () => {
   };
   
   const handleSubmit = (data: AddEventFormValues) => {
+    // Combine date and time
+    const combinedDate = new Date(data.date);
+    if (data.time) {
+      const [hours, minutes] = data.time.split(':').map(Number);
+      combinedDate.setHours(hours, minutes);
+    }
+    
     const newEvent: CalendarEvent = {
       id: uuidv4(),
       title: data.title,
-      date: data.date,
+      date: combinedDate,
+      time: data.time,
       type: 'custom',
       notes: data.notes
     };
@@ -167,10 +178,10 @@ const BreedingCalendar: React.FC = () => {
   };
   
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+    <Card className="border-primary/20 bg-gradient-to-br from-cream-50 to-cream-100">
+      <CardHeader className="flex flex-row items-center justify-between pb-2 bg-primary/5 border-b border-primary/20">
         <div>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-primary">
             <CalendarIcon className="h-5 w-5" />
             Breeding Calendar
           </CardTitle>
@@ -186,7 +197,7 @@ const BreedingCalendar: React.FC = () => {
                 Add Event
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-cream-50">
               <DialogHeader>
                 <DialogTitle>Add Calendar Event</DialogTitle>
                 <DialogDescription>
@@ -210,40 +221,64 @@ const BreedingCalendar: React.FC = () => {
                     )}
                   />
                   
-                  <FormField
-                    control={form.control}
-                    name="date"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Event Date</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Event Date</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className="w-full justify-start text-left font-normal"
+                                >
+                                  {field.value ? (
+                                    format(field.value, "PPP")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                initialFocus
+                                className="p-3 pointer-events-auto"
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="time"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Event Time</FormLabel>
+                          <div className="flex items-center">
                             <FormControl>
-                              <Button
-                                variant={"outline"}
-                                className="w-full justify-start text-left font-normal"
-                              >
-                                {field.value ? (
-                                  format(field.value, "PPP")
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
-                              </Button>
+                              <Input
+                                type="time"
+                                {...field}
+                                className="flex-1"
+                              />
                             </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                            <Clock className="ml-2 h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   
                   <FormField
                     control={form.control}
@@ -303,11 +338,11 @@ const BreedingCalendar: React.FC = () => {
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 bg-gradient-to-br from-cream-50 to-[#FFDEE2]/30">
         <div className="overflow-x-auto">
           <div className="grid grid-cols-7 gap-1 min-w-[700px]">
             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-              <div key={day} className="text-center font-medium py-1 text-sm">
+              <div key={day} className="text-center font-medium py-1 text-sm text-primary">
                 {day}
               </div>
             ))}
@@ -322,10 +357,10 @@ const BreedingCalendar: React.FC = () => {
                     <div 
                       key={format(day, 'yyyy-MM-dd')} 
                       className={`min-h-[100px] p-1 border rounded text-sm ${
-                        isToday ? 'bg-secondary/50 border-primary' : 'bg-card border-border'
+                        isToday ? 'bg-primary/10 border-primary' : 'bg-white/80 border-cream-300'
                       }`}
                     >
-                      <div className="font-medium text-right mb-1">
+                      <div className="font-medium text-right mb-1 text-primary">
                         {format(day, 'd')}
                       </div>
                       <div className="space-y-1">
@@ -335,6 +370,9 @@ const BreedingCalendar: React.FC = () => {
                             className={`p-1 rounded text-xs border ${getEventColor(event.type)}`}
                           >
                             <div className="font-medium">{event.title}</div>
+                            {event.time && <div className="text-xs flex items-center gap-1">
+                              <Clock className="h-3 w-3 inline" /> {event.time}
+                            </div>}
                             {event.dogName && <div>{event.dogName}</div>}
                             {event.notes && <div className="text-xs italic mt-1 truncate">{event.notes}</div>}
                           </div>
