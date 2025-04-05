@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,13 +26,18 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
   damBreed = ''
 }) => {
   const defaultDob = new Date(litterDob);
-  const [name, setName] = useState<string>(`Puppy ${puppyNumber}`);
+  const [name, setName] = useState<string>('');
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [color, setColor] = useState<string>('');
   const [birthWeight, setBirthWeight] = useState<string>('');
   const [timeOfBirth, setTimeOfBirth] = useState<string>('');
   const [dateOfBirth, setDateOfBirth] = useState<Date>(defaultDob);
   const [breed, setBreed] = useState<string>(damBreed);
+  
+  // Set default name when puppyNumber changes
+  useEffect(() => {
+    setName(`Puppy ${puppyNumber}`);
+  }, [puppyNumber]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +62,8 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
         weightLog: [
           { date: dateOfBirth.toISOString().split('T')[0], weight: birthWeight ? parseFloat(birthWeight) : 0 }
         ],
-        heightLog: []
+        heightLog: [],
+        notes: []
       };
 
       onAddPuppy(newPuppy);

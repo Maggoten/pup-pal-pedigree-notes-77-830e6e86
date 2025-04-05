@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,8 +33,8 @@ const PuppiesSection: React.FC<PuppiesSectionProps> = ({
   onSelectPuppy,
   selectedPuppy
 }) => {
-  const [measurementDialogOpen, setMeasurementDialogOpen] = React.useState(false);
-  const [activePuppy, setActivePuppy] = React.useState<Puppy | null>(null);
+  const [measurementDialogOpen, setMeasurementDialogOpen] = useState(false);
+  const [activePuppy, setActivePuppy] = useState<Puppy | null>(null);
   
   const handlePuppyClick = (puppy: Puppy) => {
     setActivePuppy(puppy);
