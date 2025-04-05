@@ -10,16 +10,16 @@ import { Trash2 } from 'lucide-react';
 
 interface PuppyDetailsDialogProps {
   puppy: Puppy;
-  onClose: () => void;
-  onUpdate: (updatedPuppy: Puppy) => void;
-  onDelete: (puppyId: string) => void;
+  onClose?: () => void;
+  onUpdatePuppy: (updatedPuppy: Puppy) => void;
+  onDeletePuppy: (puppyId: string) => void;
 }
 
 const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({ 
   puppy, 
   onClose, 
-  onUpdate,
-  onDelete
+  onUpdatePuppy,
+  onDeletePuppy
 }) => {
   const [imageUrl, setImageUrl] = useState<string>(puppy.imageUrl || '');
   
@@ -34,23 +34,23 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
       imageUrl: imageUrl
     };
     
-    onUpdate(updatedPuppy);
+    onUpdatePuppy(updatedPuppy);
     toast({
       title: "Puppy Updated",
       description: `${updatedPuppy.name} has been updated successfully.`
     });
-    onClose();
+    if (onClose) onClose();
   };
 
   const handleDelete = () => {
     if (confirm(`Are you sure you want to delete ${puppy.name}?`)) {
-      onDelete(puppy.id);
+      onDeletePuppy(puppy.id);
       toast({
         title: "Puppy Deleted",
         description: `${puppy.name} has been deleted from the litter.`,
         variant: "destructive"
       });
-      onClose();
+      if (onClose) onClose();
     }
   };
 

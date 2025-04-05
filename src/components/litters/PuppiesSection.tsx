@@ -67,7 +67,12 @@ const PuppiesSection: React.FC<PuppiesSectionProps> = ({
                 <span>Add Puppy</span>
               </Button>
             </DialogTrigger>
-            <AddPuppyDialog onAddPuppy={onAddPuppy} litterDob={litterDob} damBreed={damBreed} />
+            <AddPuppyDialog 
+              onAddPuppy={onAddPuppy} 
+              litterDob={litterDob} 
+              damBreed={damBreed}
+              puppyNumber={puppies.length + 1}
+            />
           </Dialog>
         </div>
       </CardHeader>

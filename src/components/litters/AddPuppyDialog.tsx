@@ -8,21 +8,22 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/components/ui/use-toast';
 import DatePicker from '@/components/common/DatePicker';
 import BreedDropdown from '@/components/dogs/BreedDropdown';
+import { Puppy } from '@/types/breeding';
 
 interface AddPuppyDialogProps {
-  onClose: () => void;
-  onSubmit: (puppy: any) => void;
-  puppyNumber: number;
+  onClose?: () => void;
+  onAddPuppy: (puppy: Puppy) => void;
+  puppyNumber?: number;
   litterDob: string;
-  damBreed?: string; // Add the dam's breed as an optional prop
+  damBreed?: string;
 }
 
 const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({ 
   onClose, 
-  onSubmit, 
-  puppyNumber,
+  onAddPuppy, 
+  puppyNumber = 1,
   litterDob,
-  damBreed = '' // Default to empty string if not provided
+  damBreed = ''
 }) => {
   const defaultDob = new Date(litterDob);
   const [name, setName] = useState<string>(`Puppy ${puppyNumber}`);
@@ -31,7 +32,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
   const [birthWeight, setBirthWeight] = useState<string>('');
   const [timeOfBirth, setTimeOfBirth] = useState<string>('');
   const [dateOfBirth, setDateOfBirth] = useState<Date>(defaultDob);
-  const [breed, setBreed] = useState<string>(damBreed); // Use the dam's breed as default
+  const [breed, setBreed] = useState<string>(damBreed);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,15 +53,15 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
         breed,
         birthWeight: birthWeight ? parseFloat(birthWeight) : 0,
         birthDateTime: birthDateTime.toISOString(),
-        imageUrl: '', // Will be populated later when image is uploaded
+        imageUrl: '',
         weightLog: [
           { date: dateOfBirth.toISOString().split('T')[0], weight: birthWeight ? parseFloat(birthWeight) : 0 }
         ],
-        heightLog: [] // Adding empty height log for consistency with existing code
+        heightLog: []
       };
 
-      onSubmit(newPuppy);
-      onClose();
+      onAddPuppy(newPuppy);
+      if (onClose) onClose();
     } catch (error) {
       toast({
         title: "Error Adding Puppy",
