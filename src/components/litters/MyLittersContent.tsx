@@ -44,7 +44,9 @@ const MyLittersContent: React.FC = () => {
   // Get filter state from context
   const { 
     searchQuery, 
+    setSearchQuery,
     filterYear, 
+    setFilterYear,
     categoryTab, 
     setCategoryTab,
     activePage,
