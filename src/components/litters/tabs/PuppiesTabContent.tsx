@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PlusCircle, Users } from 'lucide-react';
+import { PlusCircle, PawPrint } from 'lucide-react';
 import AddPuppyDialog from '../AddPuppyDialog';
 import PuppyMeasurementsDialog from '../puppies/PuppyMeasurementsDialog';
 
@@ -74,7 +74,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
       <CardHeader className="bg-primary/5 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
+            <PawPrint className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg font-semibold">
               Puppies {puppies.length > 0 && `(${puppies.length})`}
             </CardTitle>

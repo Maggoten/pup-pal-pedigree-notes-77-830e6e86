@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Puppy } from '@/types/breeding';
 import PuppyGrowthChart from '../PuppyGrowthChart';
 import LogTypeToggle from '../charts/LogTypeToggle';
+import PuppySelect from '../charts/PuppySelect';
 
 interface GrowthChartsTabContentProps {
   selectedPuppy: Puppy | null;
@@ -28,7 +29,16 @@ const GrowthChartsTabContent: React.FC<GrowthChartsTabContentProps> = ({
             <CardTitle className="text-lg font-semibold">Growth Charts</CardTitle>
           </div>
           
-          <LogTypeToggle logType={logType} setLogType={setLogType} />
+          <div className="flex items-center gap-4">
+            {puppies.length > 0 && (
+              <PuppySelect 
+                puppies={puppies} 
+                selectedPuppy={selectedPuppy} 
+                onSelectPuppy={onSelectPuppy} 
+              />
+            )}
+            <LogTypeToggle logType={logType} setLogType={setLogType} />
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-4">

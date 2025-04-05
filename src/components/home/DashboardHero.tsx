@@ -10,11 +10,7 @@ interface DashboardHeroProps {
 
 const DashboardHero: React.FC<DashboardHeroProps> = ({ username, activePregnancies }) => {
   return (
-    <div className="mb-8 p-6 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
-      <h1 className="text-3xl font-bold tracking-tight mb-2">Your Breeding Program at a Glance</h1>
-      <p className="text-muted-foreground mb-4">
-        Track pregnancies, plan litters, and manage your breeding program all in one place.
-      </p>
+    <div className="mb-6 p-4 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
       <StatsCards activePregnancies={activePregnancies} />
     </div>
   );

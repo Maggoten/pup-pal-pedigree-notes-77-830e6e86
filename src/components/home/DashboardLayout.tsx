@@ -33,16 +33,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           activePregnancies={activePregnancies}
         />
         
-        <div className="grid gap-6 md:grid-cols-3 mb-6">
-          <div>
+        <div className="grid gap-6 mb-6 grid-cols-1 lg:grid-cols-3">
+          <div className="lg:col-span-1">
             <BreedingReminders />
           </div>
-          <div className="md:col-span-2">
-            <BreedingCalendar />
+          <div className="lg:col-span-2">
+            <div className="space-y-6">
+              <BreedingCalendar />
+              {activePregnancies.length > 0 && <ActivePregnanciesSection pregnancies={activePregnancies} />}
+            </div>
           </div>
         </div>
-        
-        <ActivePregnanciesSection pregnancies={activePregnancies} />
       </PageLayout>
         
       <AddDogButton onClick={onAddDogClick} />

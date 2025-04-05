@@ -17,9 +17,11 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
     selectedPuppy ? 'single' : 'litter'
   );
 
-  // Reset view mode to litter if no puppy is selected
+  // Update view mode when selectedPuppy changes
   useEffect(() => {
-    if (!selectedPuppy && viewMode === 'single') {
+    if (selectedPuppy) {
+      setViewMode('single');
+    } else if (!selectedPuppy && viewMode === 'single') {
       setViewMode('litter');
     }
   }, [selectedPuppy, viewMode]);

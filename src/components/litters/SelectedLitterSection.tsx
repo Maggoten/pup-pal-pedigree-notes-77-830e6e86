@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Litter, Puppy } from '@/types/breeding';
 import { toast } from '@/components/ui/use-toast';
 import { differenceInWeeks, parseISO } from 'date-fns';
-import { Baby, BarChart2, Milestone } from 'lucide-react';
+import { Baby, BarChart2, ClipboardCheck } from 'lucide-react';
 import SelectedLitterHeader from './SelectedLitterHeader';
 import CompactDevelopmentSection from './CompactDevelopmentSection';
 import PuppiesTabContent from './tabs/PuppiesTabContent';
@@ -78,7 +78,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
             <BarChart2 className="h-4 w-4" /> Growth Charts
           </TabsTrigger>
           <TabsTrigger value="development" className="flex items-center gap-2">
-            <Milestone className="h-4 w-4" /> Development
+            <ClipboardCheck className="h-4 w-4" /> Checklist
           </TabsTrigger>
         </TabsList>
         
