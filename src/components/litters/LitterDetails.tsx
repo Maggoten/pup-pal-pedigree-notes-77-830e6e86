@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Grid2X2, Calendar, Users } from 'lucide-react';
+import { Edit, Grid2X2 } from 'lucide-react';
 import { Litter, Puppy } from '@/types/breeding';
 import LitterEditDialog from './LitterEditDialog';
 
@@ -40,10 +40,6 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
     return breeds.join(', ');
   };
 
-  // Calculate litter age in weeks
-  const birthDate = new Date(litter.dateOfBirth);
-  const ageInWeeks = Math.floor((new Date().getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
-
   return (
     <Card className="shadow-md hover:shadow-lg transition-all duration-300">
       <CardHeader className="pb-2">
@@ -66,20 +62,6 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
       </CardHeader>
       <CardContent>
         <div className="grid gap-4">
-          <div className="bg-muted rounded-lg p-3">
-            <h3 className="text-sm font-medium mb-2">Litter Information</h3>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div>
-                <span className="text-muted-foreground">Age:</span>
-                <span className="ml-2 font-medium">{ageInWeeks} weeks</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Total:</span>
-                <span className="ml-2 font-medium">{litter.puppies.length} puppies</span>
-              </div>
-            </div>
-          </div>
-          
           {litter.puppies.length > 0 && (
             <div>
               <div className="flex flex-wrap items-center gap-1.5 mb-2">
