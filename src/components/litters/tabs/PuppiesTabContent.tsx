@@ -57,8 +57,10 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   const handleDeletePuppy = (puppyId: string) => {
     onDeletePuppy(puppyId);
     
-    // The puppies state will be updated by the parent component after deletion
-    // We don't need to manually update names here
+    // After deletion, we should renumber all puppies
+    setTimeout(() => {
+      renumberAllPuppies();
+    }, 0);
   };
   
   const handleAddPuppy = (puppy: Puppy) => {
@@ -68,27 +70,41 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   
   // Function to update puppy names to match their position
   const updatePuppyNames = (updatedPuppy: Puppy) => {
-    // Only update custom naming if we're editing a puppy with a name in the format "Puppy X"
+    // If it's not a standard "Puppy X" naming format, just update normally
     const puppyNamePattern = /^Puppy \d+$/;
     if (!puppyNamePattern.test(updatedPuppy.name)) {
-      // If it's a custom name, just update without renaming
       onUpdatePuppy(updatedPuppy);
       return;
     }
     
-    // Find the puppy's index
-    const index = puppies.findIndex(p => p.id === updatedPuppy.id);
-    if (index !== -1) {
-      // Update the name to match its position+1
-      const newPuppy = {
-        ...updatedPuppy,
-        name: `Puppy ${index + 1}`
-      };
-      onUpdatePuppy(newPuppy);
-    } else {
-      // Just update the puppy if we can't find it (shouldn't happen)
-      onUpdatePuppy(updatedPuppy);
-    }
+    // If it is a standard name, preserve it exactly as it was entered
+    onUpdatePuppy(updatedPuppy);
+    
+    // Then trigger a renumbering of all puppies to ensure consistency
+    setTimeout(() => {
+      renumberAllPuppies();
+    }, 0);
+  };
+  
+  // Function to renumber all puppies in the litter based on their position
+  const renumberAllPuppies = () => {
+    if (puppies.length === 0) return;
+    
+    // Only update puppies with the standard naming pattern
+    const puppyNamePattern = /^Puppy \d+$/;
+    
+    puppies.forEach((puppy, index) => {
+      // Only renumber puppies that follow the standard naming pattern
+      if (puppyNamePattern.test(puppy.name)) {
+        const newName = `Puppy ${index + 1}`;
+        if (puppy.name !== newName) {
+          onUpdatePuppy({
+            ...puppy,
+            name: newName
+          });
+        }
+      }
+    });
   };
   
   return (
