@@ -11,7 +11,7 @@ import BreedDropdown from '@/components/dogs/BreedDropdown';
 import { Puppy } from '@/types/breeding';
 
 interface AddPuppyDialogProps {
-  onClose?: () => void;
+  onClose: () => void;
   onAddPuppy: (puppy: Puppy) => void;
   puppyNumber?: number;
   litterDob: string;
@@ -67,7 +67,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
       };
 
       onAddPuppy(newPuppy);
-      if (onClose) onClose();
+      // Dialog closing is now handled by the parent component
     } catch (error) {
       toast({
         title: "Error Adding Puppy",

@@ -35,6 +35,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   litterAge,
 }) => {
   const [measurementDialogOpen, setMeasurementDialogOpen] = useState(false);
+  const [addPuppyDialogOpen, setAddPuppyDialogOpen] = useState(false);
   const [activePuppy, setActivePuppy] = useState<Puppy | null>(null);
   
   const handlePuppyClick = (puppy: Puppy) => {
@@ -47,23 +48,19 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
     setMeasurementDialogOpen(true);
   };
   
-  // Improved next puppy number calculation
+  // Get next puppy number based on position in the list
   const getNextPuppyNumber = () => {
+    // If there are no puppies, start with 1
     if (puppies.length === 0) return 1;
     
-    // Extract numeric parts from puppy names using a regex
-    const numberPattern = /Puppy\s+(\d+)/i;
-    const numbers = puppies
-      .map(puppy => {
-        const match = puppy.name.match(numberPattern);
-        return match && match[1] ? parseInt(match[1], 10) : null;
-      })
-      .filter(num => num !== null) as number[];
-    
-    // If we found numbered puppies, use the max + 1, otherwise use puppies.length + 1
-    return numbers.length > 0
-      ? Math.max(...numbers) + 1
-      : puppies.length + 1;
+    // Find the highest number in the existing numbered puppies
+    // This ensures we don't reuse a number if a puppy was deleted
+    return puppies.length + 1;
+  };
+  
+  const handleAddPuppy = (puppy: Puppy) => {
+    onAddPuppy(puppy);
+    setAddPuppyDialogOpen(false);
   };
   
   return (
@@ -77,15 +74,16 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
             </CardTitle>
           </div>
           
-          <Dialog>
+          <Dialog open={addPuppyDialogOpen} onOpenChange={setAddPuppyDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-1.5">
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5" onClick={() => setAddPuppyDialogOpen(true)}>
                 <PlusCircle className="h-4 w-4" />
                 <span>Add Puppy</span>
               </Button>
             </DialogTrigger>
             <AddPuppyDialog 
-              onAddPuppy={onAddPuppy} 
+              onAddPuppy={handleAddPuppy} 
+              onClose={() => setAddPuppyDialogOpen(false)}
               litterDob={litterDob} 
               damBreed={damBreed}
               puppyNumber={getNextPuppyNumber()}

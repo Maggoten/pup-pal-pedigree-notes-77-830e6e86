@@ -41,6 +41,13 @@ const PuppyList: React.FC<PuppyListProps> = ({
     return `${value} ${type === 'weight' ? 'kg' : 'cm'}`;
   };
 
+  const handleDeletePuppy = (puppyId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this puppy?')) {
+      onDeletePuppy(puppyId);
+    }
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
@@ -98,6 +105,16 @@ const PuppyList: React.FC<PuppyListProps> = ({
                       onDeletePuppy={onDeletePuppy}
                     />
                   </Dialog>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={(e) => handleDeletePuppy(puppy.id, e)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete puppy</span>
+                  </Button>
                 </div>
               </td>
             </tr>
