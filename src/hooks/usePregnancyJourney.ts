@@ -16,23 +16,41 @@ export const usePregnancyJourney = (
     allWeeks: []
   });
 
+  // Calculate current week based on mating date
+  const calculateCurrentWeek = () => {
+    const today = new Date();
+    const daysSinceMating = differenceInDays(today, matingDate);
+    // Calculate which week of pregnancy (1-9)
+    const currentWeek = Math.max(1, Math.min(9, Math.floor(daysSinceMating / 7) + 1));
+    return currentWeek;
+  };
+
   // Load or initialize journey data
   useEffect(() => {
-    const calculateCurrentWeek = () => {
-      const today = new Date();
-      const daysSinceMating = differenceInDays(today, matingDate);
-      // Calculate which week of pregnancy (1-9)
-      const currentWeek = Math.max(1, Math.min(9, Math.floor(daysSinceMating / 7) + 1));
-      return currentWeek;
-    };
-
     const loadJourneyData = () => {
       // Try to load from localStorage
       const savedData = localStorage.getItem(`pregnancy_journey_${pregnancyId}`);
       
       if (savedData) {
         const parsedData = JSON.parse(savedData);
-        setJourneyState(parsedData);
+        
+        // If we have saved data but want to update the current week
+        // based on the actual pregnancy progress
+        const calculatedWeek = calculateCurrentWeek();
+        
+        // Update current week in saved data
+        const updatedData = {
+          ...parsedData,
+          currentWeek: calculatedWeek
+        };
+        
+        setJourneyState(updatedData);
+        
+        // Save the updated current week
+        localStorage.setItem(
+          `pregnancy_journey_${pregnancyId}`,
+          JSON.stringify(updatedData)
+        );
       } else {
         // Initialize new journey data
         const allWeeks = generatePregnancyJourneyData();
