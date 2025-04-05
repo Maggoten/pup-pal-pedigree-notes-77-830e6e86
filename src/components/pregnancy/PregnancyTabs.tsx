@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Thermometer, MessageSquare, ClipboardList } from 'lucide-react';
-import PregnancyTimeline from '@/components/pregnancy/PregnancyTimeline';
+import { Thermometer, MessageSquare, ClipboardList } from 'lucide-react';
 import TemperatureLog from '@/components/pregnancy/TemperatureLog';
 import SymptomsLog from '@/components/pregnancy/SymptomsLog';
 import PregnancyJourney from '@/components/pregnancy/journey/PregnancyJourney';
@@ -22,12 +21,9 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
 }) => {
   return (
     <Tabs defaultValue="journey" className="w-full">
-      <TabsList className="grid grid-cols-4 mb-4">
+      <TabsList className="grid grid-cols-3 mb-4">
         <TabsTrigger value="journey" className="flex items-center gap-2">
           <ClipboardList className="h-4 w-4" /> Journey
-        </TabsTrigger>
-        <TabsTrigger value="timeline" className="flex items-center gap-2">
-          <Calendar className="h-4 w-4" /> Timeline
         </TabsTrigger>
         <TabsTrigger value="temperature" className="flex items-center gap-2">
           <Thermometer className="h-4 w-4" /> Temperature
@@ -43,13 +39,6 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
           femaleName={femaleName}
           matingDate={matingDate}
           expectedDueDate={expectedDueDate}
-        />
-      </TabsContent>
-      
-      <TabsContent value="timeline">
-        <PregnancyTimeline 
-          matingDate={matingDate} 
-          expectedDueDate={expectedDueDate} 
         />
       </TabsContent>
       
