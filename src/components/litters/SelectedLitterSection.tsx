@@ -1,8 +1,10 @@
 
 import React, { useState } from 'react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Litter, Puppy } from '@/types/breeding';
 import { toast } from '@/components/ui/use-toast';
 import { differenceInWeeks, parseISO } from 'date-fns';
+import { Baby, BarChart2, Milestone } from 'lucide-react';
 import SelectedLitterHeader from './SelectedLitterHeader';
 import CompactDevelopmentSection from './CompactDevelopmentSection';
 import PuppiesSection from './PuppiesSection';
@@ -29,6 +31,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
   onDeletePuppy
 }) => {
   const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
+  const [activeTab, setActiveTab] = useState('puppies');
   
   // If no litter is selected, don't show this section
   if (!selectedLitter) {
@@ -49,7 +52,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
   const ageInWeeks = differenceInWeeks(new Date(), birthDate);
   
   return (
-    <div className="mt-6 animate-fade-in space-y-6">
+    <div className="animate-fade-in space-y-6">
       {/* Header with edit button */}
       <SelectedLitterHeader 
         litter={selectedLitter}
@@ -59,35 +62,53 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
         ageInWeeks={ageInWeeks}
       />
       
-      {/* 1. Puppy Development Checklist - Compact Version */}
+      {/* Compact Development Checklist - Always visible */}
       <CompactDevelopmentSection 
         litter={selectedLitter}
         onToggleItem={handleToggleChecklistItem}
       />
       
-      {/* 2. Puppies Section */}
-      <PuppiesSection 
-        puppies={selectedLitter.puppies}
-        onAddPuppy={onAddPuppy}
-        onUpdatePuppy={onUpdatePuppy}
-        onDeletePuppy={onDeletePuppy}
-        litterDob={selectedLitter.dateOfBirth}
-        damBreed={selectedLitter.damName}
-        onSelectPuppy={setSelectedPuppy}
-        selectedPuppy={selectedPuppy}
-      />
-      
-      {/* 3. Growth Charts Section */}
-      <GrowthChartsSection 
-        selectedPuppy={selectedPuppy}
-        puppies={selectedLitter.puppies}
-      />
-      
-      {/* 4. Development Section */}
-      <DevelopmentSection 
-        litter={selectedLitter}
-        onToggleItem={handleToggleChecklistItem}
-      />
+      {/* Tab-based layout for different sections */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="puppies" className="flex items-center gap-2">
+            <Baby className="h-4 w-4" /> Puppies
+          </TabsTrigger>
+          <TabsTrigger value="charts" className="flex items-center gap-2">
+            <BarChart2 className="h-4 w-4" /> Growth Charts
+          </TabsTrigger>
+          <TabsTrigger value="development" className="flex items-center gap-2">
+            <Milestone className="h-4 w-4" /> Development
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="puppies" className="mt-0">
+          <PuppiesSection 
+            puppies={selectedLitter.puppies}
+            onAddPuppy={onAddPuppy}
+            onUpdatePuppy={onUpdatePuppy}
+            onDeletePuppy={onDeletePuppy}
+            litterDob={selectedLitter.dateOfBirth}
+            damBreed={selectedLitter.damName}
+            onSelectPuppy={setSelectedPuppy}
+            selectedPuppy={selectedPuppy}
+          />
+        </TabsContent>
+        
+        <TabsContent value="charts" className="mt-0">
+          <GrowthChartsSection 
+            selectedPuppy={selectedPuppy}
+            puppies={selectedLitter.puppies}
+          />
+        </TabsContent>
+        
+        <TabsContent value="development" className="mt-0">
+          <DevelopmentSection 
+            litter={selectedLitter}
+            onToggleItem={handleToggleChecklistItem}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

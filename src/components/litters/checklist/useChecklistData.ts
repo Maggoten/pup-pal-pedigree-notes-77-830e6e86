@@ -37,11 +37,6 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
   const getFilteredItems = (compact: boolean = false) => {
     let filtered = checklist;
     
-    // Filter by category if not 'all'
-    if (activeCategory !== 'all') {
-      filtered = filtered.filter(item => item.category === activeCategory);
-    }
-    
     // For compact view, show only relevant items based on current puppy age
     if (compact) {
       filtered = filtered.filter(item => 
@@ -53,7 +48,7 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
     return filtered;
   };
   
-  // Group items by timeline segment
+  // Group items by timeline segment (week ranges)
   const getItemsByTimeline = (filteredItems: ChecklistItem[]) => {
     return timelineSegments.map(segment => ({
       ...segment,

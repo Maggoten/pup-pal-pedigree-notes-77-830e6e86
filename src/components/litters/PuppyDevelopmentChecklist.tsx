@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useChecklistData } from './checklist/useChecklistData';
 import { PuppyDevelopmentChecklistProps } from './checklist/types';
 import ChecklistHeader from './checklist/ChecklistHeader';
@@ -14,8 +13,6 @@ const PuppyDevelopmentChecklist: React.FC<PuppyDevelopmentChecklistProps> = ({
   compact = false
 }) => {
   const {
-    activeCategory,
-    setActiveCategory,
     puppyAge,
     puppyWeeks,
     completedItems,
@@ -45,17 +42,6 @@ const PuppyDevelopmentChecklist: React.FC<PuppyDevelopmentChecklistProps> = ({
       />
       
       <CardContent className="p-4">
-        {!compact && (
-          <Tabs value={activeCategory} onValueChange={setActiveCategory} className="mb-6">
-            <TabsList className="grid grid-cols-4 mb-4">
-              <TabsTrigger value="all">All Tasks</TabsTrigger>
-              <TabsTrigger value="health">Health</TabsTrigger>
-              <TabsTrigger value="development">Development</TabsTrigger>
-              <TabsTrigger value="admin">Administrative</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        )}
-        
         {compact ? (
           <CompactView items={filteredItems} onToggle={handleToggle} />
         ) : (

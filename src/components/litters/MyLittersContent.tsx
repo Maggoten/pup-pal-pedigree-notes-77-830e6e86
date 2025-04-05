@@ -1,10 +1,12 @@
 
 import React from 'react';
-import { Dog } from 'lucide-react';
+import { Dog, Baby, BarChart2, ClipboardList } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import { 
   Tabs, 
   TabsContent, 
+  TabsList, 
+  TabsTrigger,
   CategoryTabsList, 
   CategoryTabsTrigger 
 } from '@/components/ui/tabs';
@@ -179,15 +181,19 @@ const MyLittersContent: React.FC = () => {
         </TabsContent>
       </Tabs>
       
-      <SelectedLitterSection
-        selectedLitter={selectedLitter}
-        onUpdateLitter={handleUpdateLitter}
-        onDeleteLitter={handleDeleteLitter}
-        onArchiveLitter={handleArchiveLitter}
-        onAddPuppy={handleAddPuppy}
-        onUpdatePuppy={handleUpdatePuppy}
-        onDeletePuppy={handleDeletePuppy}
-      />
+      {selectedLitter && (
+        <div className="mt-6 animate-fade-in space-y-6">
+          <SelectedLitterSection
+            selectedLitter={selectedLitter}
+            onUpdateLitter={handleUpdateLitter}
+            onDeleteLitter={handleDeleteLitter}
+            onArchiveLitter={handleArchiveLitter}
+            onAddPuppy={handleAddPuppy}
+            onUpdatePuppy={handleUpdatePuppy}
+            onDeletePuppy={handleDeletePuppy}
+          />
+        </div>
+      )}
     </PageLayout>
   );
 };
