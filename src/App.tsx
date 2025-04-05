@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MyDogs from "./pages/MyDogs";
@@ -36,6 +36,15 @@ const App = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/my-dogs" element={<MyDogs />} />
                   <Route path="/planned-litters" element={<PlannedLitters />} />
+                  {/* Add a generic pregnancy route that redirects to the first active pregnancy or shows a message */}
+                  <Route 
+                    path="/pregnancy" 
+                    element={
+                      firstPregnancyId !== "none" ? 
+                        <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
+                        <PregnancyDetails />
+                    } 
+                  />
                   <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
                   <Route path="/my-litters" element={<MyLitters />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
