@@ -5,6 +5,7 @@
 
 @layer base {
   :root {
+    /* Light Mode Colors */
     --background: 40 30% 96%;
     --foreground: 140 20% 25%;
 
