@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { Puppy } from '@/types/breeding';
@@ -85,22 +85,28 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
       </div>
 
       <DialogFooter className="mt-6 flex items-center justify-between">
-        <Button 
-          type="button" 
-          variant="destructive" 
-          onClick={handleDelete}
-          className="flex items-center"
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Delete Puppy
-        </Button>
+        <DialogClose asChild>
+          <Button 
+            type="button" 
+            variant="destructive" 
+            onClick={handleDelete}
+            className="flex items-center"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Puppy
+          </Button>
+        </DialogClose>
         <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="submit" form="puppy-form">
-            Save Changes
-          </Button>
+          <DialogClose asChild>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+          </DialogClose>
+          <DialogClose asChild>
+            <Button type="submit" form="puppy-form">
+              Save Changes
+            </Button>
+          </DialogClose>
         </div>
       </DialogFooter>
     </DialogContent>
