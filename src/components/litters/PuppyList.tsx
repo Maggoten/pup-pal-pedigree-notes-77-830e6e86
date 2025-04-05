@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Edit, Trash2, BarChart2 } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -69,12 +68,7 @@ const PuppyList: React.FC<PuppyListProps> = ({
               onClick={() => onPuppyClick && onPuppyClick(puppy)}
             >
               <td className="px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <span>{puppy.name}</span>
-                  {typeof litterAge === 'number' && litterAge < 2 ? (
-                    <Badge variant="outline" className="text-xs font-normal">New</Badge>
-                  ) : null}
-                </div>
+                <span>{puppy.name}</span>
               </td>
               <td className="px-4 py-3 capitalize">{puppy.gender}</td>
               <td className="px-4 py-3">{puppy.color}</td>
