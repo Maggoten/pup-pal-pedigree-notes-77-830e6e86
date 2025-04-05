@@ -58,12 +58,12 @@ const PregnancyDetails: React.FC = () => {
         
         {activePregnancies.length > 1 && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Select Pregnancy:</span>
+            <span className="text-sm font-medium text-green-600">Select Pregnancy:</span>
             <Select 
               value={id} 
               onValueChange={handlePregnancyChange}
             >
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[200px] bg-white border-green-200 text-green-700 hover:bg-green-50">
                 <SelectValue placeholder="Select pregnancy" />
               </SelectTrigger>
               <SelectContent>
