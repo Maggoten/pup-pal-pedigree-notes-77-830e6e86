@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Users } from 'lucide-react';
+import { Baby } from 'lucide-react';
 import { Puppy } from '@/types/breeding';
 import PuppyList from './PuppyList';
 import { Dialog } from '@/components/ui/dialog';
@@ -36,7 +36,7 @@ const PuppiesSection: React.FC<PuppiesSectionProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Users className="h-5 w-5 text-primary" />
+        <Baby className="h-5 w-5 text-primary" />
         <h3 className="text-lg font-semibold">Puppies ({puppies.length})</h3>
       </div>
       

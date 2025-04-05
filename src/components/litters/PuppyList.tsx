@@ -21,7 +21,7 @@ interface PuppyListProps {
   puppyNumber: number;
   litterDob: string;
   selectedPuppy: Puppy | null;
-  damBreed?: string; // Add the dam's breed as an optional prop
+  damBreed?: string; 
 }
 
 const PuppyList: React.FC<PuppyListProps> = ({
@@ -68,8 +68,7 @@ const PuppyList: React.FC<PuppyListProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Puppies ({puppies.length})</h3>
+      <div className="flex justify-end">
         <Dialog open={showAddPuppyDialog} onOpenChange={setShowAddPuppyDialog}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" className="flex items-center gap-2">
@@ -82,7 +81,7 @@ const PuppyList: React.FC<PuppyListProps> = ({
             onSubmit={onAddPuppy}
             puppyNumber={puppyNumber + puppies.length}
             litterDob={litterDob}
-            damBreed={damBreed} // Pass the dam's breed to the dialog
+            damBreed={damBreed}
           />
         </Dialog>
       </div>
