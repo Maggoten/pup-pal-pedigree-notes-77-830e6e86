@@ -143,6 +143,26 @@ const BreedingCalendar: React.FC = () => {
       description: "Your event has been added to the calendar.",
     });
   };
+
+  // New function to handle event deletion
+  const handleDeleteEvent = (eventId: string) => {
+    // Only filter out custom events (system events cannot be deleted)
+    const eventToDelete = calendarEvents.find(event => event.id === eventId);
+    
+    if (eventToDelete && eventToDelete.type === 'custom') {
+      const updatedEvents = calendarEvents.filter(event => event.id !== eventId);
+      setCalendarEvents(updatedEvents);
+      
+      // Update localStorage
+      const customEvents = updatedEvents.filter(event => event.type === 'custom');
+      localStorage.setItem('breedingCalendarEvents', JSON.stringify(customEvents));
+      
+      toast({
+        title: "Event Deleted",
+        description: "Your event has been removed from the calendar.",
+      });
+    }
+  };
   
   return (
     <Card className="border-primary/20 bg-gradient-to-br from-cream-50 to-cream-100">
@@ -159,6 +179,7 @@ const BreedingCalendar: React.FC = () => {
             weeks={weeks}
             getEventsForDate={getEventsForDate}
             getEventColor={getEventColor}
+            onDeleteEvent={handleDeleteEvent}
           />
         </CardContent>
         

@@ -18,3 +18,8 @@ export interface AddEventFormValues {
   dogId?: string;
   notes?: string;
 }
+
+// New interface for delete event functionality
+export interface DeleteEventParams {
+  eventId: string;
+}
