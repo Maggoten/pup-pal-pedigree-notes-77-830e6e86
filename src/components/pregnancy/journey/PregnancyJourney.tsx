@@ -6,6 +6,7 @@ import WeekSelector from './WeekSelector';
 import WeeklyDevelopmentCard from './WeeklyDevelopmentCard';
 import WeeklyChecklist from './WeeklyChecklist';
 import JourneyProgress from './JourneyProgress';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface PregnancyJourneyProps {
   pregnancyId: string;
@@ -26,6 +27,7 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
     allWeeks,
     currentWeekData,
     calculatedCurrentWeek,
+    isLoading,
     changeWeek,
     toggleChecklistItem,
     calculateWeekProgress,
@@ -33,6 +35,35 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
   } = usePregnancyJourney(pregnancyId, matingDate, expectedDueDate);
 
   const overallProgress = calculateOverallProgress();
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Skeleton className="h-6 w-40" />
+          </CardTitle>
+          <CardDescription>
+            <Skeleton className="h-4 w-64" />
+          </CardDescription>
+          
+          <div className="mt-4 space-y-4">
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+          </div>
+        </CardHeader>
+        
+        <CardContent>
+          <Skeleton className="h-10 w-full mb-6" />
+          
+          <div className="grid gap-6 mt-6 md:grid-cols-2">
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

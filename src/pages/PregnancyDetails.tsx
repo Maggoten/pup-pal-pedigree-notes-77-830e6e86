@@ -26,10 +26,22 @@ const PregnancyDetails: React.FC = () => {
   const navigate = useNavigate();
   const { pregnancy, loading } = usePregnancyDetails(id);
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
+  const [loadingPregnancies, setLoadingPregnancies] = useState(true);
   
   useEffect(() => {
-    const pregnancies = getActivePregnancies();
-    setActivePregnancies(pregnancies);
+    const loadActivePregnancies = () => {
+      setLoadingPregnancies(true);
+      try {
+        const pregnancies = getActivePregnancies();
+        setActivePregnancies(pregnancies);
+      } catch (error) {
+        console.error("Error loading active pregnancies:", error);
+      } finally {
+        setLoadingPregnancies(false);
+      }
+    };
+    
+    loadActivePregnancies();
   }, []);
   
   const handleBack = () => {
@@ -56,7 +68,7 @@ const PregnancyDetails: React.FC = () => {
           Back to Home
         </Button>
         
-        {activePregnancies.length > 1 && (
+        {!loadingPregnancies && activePregnancies.length > 1 && (
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-primary">Select Pregnancy:</span>
             <Select 
