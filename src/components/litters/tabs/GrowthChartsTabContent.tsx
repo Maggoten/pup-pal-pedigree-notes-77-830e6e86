@@ -9,11 +9,13 @@ import LogTypeToggle from '../charts/LogTypeToggle';
 interface GrowthChartsTabContentProps {
   selectedPuppy: Puppy | null;
   puppies: Puppy[];
+  onSelectPuppy: (puppy: Puppy) => void;
 }
 
 const GrowthChartsTabContent: React.FC<GrowthChartsTabContentProps> = ({
   selectedPuppy,
-  puppies
+  puppies,
+  onSelectPuppy
 }) => {
   const [logType, setLogType] = useState<'weight' | 'height'>('weight');
   
@@ -35,6 +37,7 @@ const GrowthChartsTabContent: React.FC<GrowthChartsTabContentProps> = ({
           puppies={puppies}
           logType={logType}
           setLogType={setLogType}
+          onSelectPuppy={onSelectPuppy}
         />
       </CardContent>
     </Card>

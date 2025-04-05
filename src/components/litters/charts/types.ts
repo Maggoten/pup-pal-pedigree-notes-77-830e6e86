@@ -23,6 +23,7 @@ export interface PuppyGrowthChartProps {
   puppies: Puppy[];
   logType: 'weight' | 'height';
   setLogType: (type: 'weight' | 'height') => void;
+  onSelectPuppy: (puppy: Puppy) => void;
 }
 
 export interface GrowthLineChartProps {

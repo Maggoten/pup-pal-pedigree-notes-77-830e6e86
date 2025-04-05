@@ -100,6 +100,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
           <GrowthChartsTabContent 
             selectedPuppy={selectedPuppy}
             puppies={selectedLitter.puppies}
+            onSelectPuppy={setSelectedPuppy}
           />
         </TabsContent>
         

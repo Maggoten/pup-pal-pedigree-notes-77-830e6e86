@@ -10,7 +10,8 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
   selectedPuppy,
   puppies,
   logType,
-  setLogType
+  setLogType,
+  onSelectPuppy
 }) => {
   const [viewMode, setViewMode] = React.useState<'single' | 'litter'>(
     selectedPuppy ? 'single' : 'litter'
@@ -53,6 +54,9 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
         viewMode={viewMode}
         setViewMode={setViewMode}
         selectedPuppyExists={!!selectedPuppy}
+        puppies={puppies}
+        selectedPuppy={selectedPuppy}
+        onSelectPuppy={onSelectPuppy}
       />
       
       <GrowthLineChart
