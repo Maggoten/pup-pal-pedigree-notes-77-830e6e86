@@ -57,9 +57,12 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   };
   
   const EventCard = ({ event }: { event: CalendarEvent }) => {
+    // Add a visual indicator for custom events that can be deleted
+    const isCustomEvent = event.type === 'custom';
+    
     return (
       <div 
-        className={`p-1 rounded text-xs border ${getEventColor(event.type)} cursor-default`}
+        className={`p-1 rounded text-xs border ${getEventColor(event.type)} cursor-default ${isCustomEvent ? 'relative group' : ''}`}
       >
         <div className="font-medium">{event.title}</div>
         {event.time && <div className="text-xs flex items-center gap-1">
@@ -67,6 +70,15 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         </div>}
         {event.dogName && <div>{event.dogName}</div>}
         {event.notes && <div className="text-xs italic mt-1 truncate">{event.notes}</div>}
+        
+        {/* Visual indicator for deletable events */}
+        {isCustomEvent && (
+          <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100">
+            <div className="bg-white rounded-full p-0.5 shadow-sm -mt-1 -mr-1">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -119,6 +131,14 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       </Drawer>
     );
   };
+
+  // Function to handle direct delete action
+  const handleDirectDelete = (event: CalendarEvent) => {
+    if (event.type === 'custom' && onDeleteEvent) {
+      setSelectedEvent(event);
+      setIsAlertOpen(true);
+    }
+  };
   
   return (
     <>
@@ -151,23 +171,26 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                         isMobile ? (
                           <MobileEventCard key={event.id} event={event} />
                         ) : (
-                          <ContextMenu key={event.id}>
-                            <ContextMenuTrigger asChild>
+                          <div key={event.id}>
+                            {event.type === 'custom' && onDeleteEvent ? (
+                              <ContextMenu>
+                                <ContextMenuTrigger>
+                                  <EventCard event={event} />
+                                </ContextMenuTrigger>
+                                <ContextMenuContent className="bg-white z-50">
+                                  <ContextMenuItem 
+                                    className="flex items-center gap-2 text-red-600 cursor-pointer"
+                                    onClick={() => handleDirectDelete(event)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Delete Event
+                                  </ContextMenuItem>
+                                </ContextMenuContent>
+                              </ContextMenu>
+                            ) : (
                               <EventCard event={event} />
-                            </ContextMenuTrigger>
-                            {/* Only show delete option for custom events */}
-                            {event.type === 'custom' && onDeleteEvent && (
-                              <ContextMenuContent className="bg-white">
-                                <ContextMenuItem 
-                                  className="flex items-center gap-2 text-red-600 cursor-pointer"
-                                  onClick={() => onDeleteEvent(event.id)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Delete Event
-                                </ContextMenuItem>
-                              </ContextMenuContent>
                             )}
-                          </ContextMenu>
+                          </div>
                         )
                       ))}
                     </div>

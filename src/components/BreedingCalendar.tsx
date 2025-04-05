@@ -180,6 +180,11 @@ const BreedingCalendar: React.FC = () => {
         />
         
         <CardContent className="p-4 bg-gradient-to-br from-cream-50 to-[#FFDEE2]/30">
+          <div className="text-xs text-gray-500 mb-2">
+            {isMobile 
+              ? "Tap custom events to view details and delete option" 
+              : "Right-click on custom events to delete them"}
+          </div>
           <div className={isMobile ? "overflow-x-auto -mx-4 px-4" : ""}>
             <CalendarGrid 
               weeks={weeks}
