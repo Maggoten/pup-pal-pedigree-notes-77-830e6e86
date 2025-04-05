@@ -60,10 +60,6 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
   
   return (
     <div className="mt-6 animate-fade-in">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold">{selectedLitter.name}</h2>
-      </div>
-      
       <div className="grid md:grid-cols-5 gap-4 mb-4">
         <div className="md:col-span-3">
           <LitterDetails 

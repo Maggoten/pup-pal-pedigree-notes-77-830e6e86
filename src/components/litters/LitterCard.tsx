@@ -4,7 +4,7 @@ import { format, parseISO } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Dog, Archive } from 'lucide-react';
+import { Calendar, Dog, Archive, Users } from 'lucide-react';
 import { Litter } from '@/types/breeding';
 
 interface LitterCardProps {
@@ -26,6 +26,8 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
   
   // Get count of puppies, 0 if none
   const puppyCount = litter.puppies?.length || 0;
+  const maleCount = litter.puppies?.filter(p => p.gender === 'male').length || 0;
+  const femaleCount = litter.puppies?.filter(p => p.gender === 'female').length || 0;
 
   return (
     <Card 
@@ -51,7 +53,7 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
       </CardHeader>
       
       <CardContent className="pb-3 pt-1 px-4">
-        <div className="space-y-1 text-sm">
+        <div className="space-y-3 text-sm">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5 text-primary opacity-70" />
             <span>Born: {format(birthDate, 'MMM d, yyyy')}</span>
@@ -66,6 +68,17 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
             <Dog className="h-3.5 w-3.5 text-primary opacity-70" />
             <span>Dam: {litter.damName}</span>
           </div>
+          
+          {puppyCount > 0 && (
+            <div className="flex items-center gap-1.5">
+              <Users className="h-3.5 w-3.5 text-primary opacity-70" />
+              <div className="flex gap-2">
+                <span>{puppyCount} total</span>
+                <span className="text-blue-500">{maleCount} ♂</span>
+                <span className="text-pink-500">{femaleCount} ♀</span>
+              </div>
+            </div>
+          )}
         </div>
         
         {onArchive && (
