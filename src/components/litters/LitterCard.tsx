@@ -61,12 +61,7 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
           
           <div className="flex items-center gap-1.5">
             <Dog className="h-3.5 w-3.5 text-primary opacity-70" />
-            <span>Sire: {litter.sireName}</span>
-          </div>
-          
-          <div className="flex items-center gap-1.5">
-            <Dog className="h-3.5 w-3.5 text-primary opacity-70" />
-            <span>Dam: {litter.damName}</span>
+            <span>{litter.damName} × {litter.sireName}</span>
           </div>
           
           {puppyCount > 0 && (

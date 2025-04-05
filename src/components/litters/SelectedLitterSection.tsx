@@ -7,13 +7,12 @@ import PuppyDetailsDialog from './PuppyDetailsDialog';
 import PuppyDevelopmentChecklist from './PuppyDevelopmentChecklist';
 import { toast } from '@/components/ui/use-toast';
 import { Dialog } from '@/components/ui/dialog';
-import { ChartBar, CheckSquare, Users, Edit, Calendar, User, Users2 } from 'lucide-react';
+import { ChartBar, CheckSquare, Users, Edit } from 'lucide-react';
 import PuppyGrowthChart from './PuppyGrowthChart';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import LitterEditDialog from './LitterEditDialog';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { format, parseISO, differenceInWeeks } from 'date-fns';
+import { differenceInWeeks, parseISO } from 'date-fns';
 
 interface SelectedLitterSectionProps {
   selectedLitter: Litter | null;
@@ -88,49 +87,6 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
           />
         </Dialog>
       </div>
-      
-      {/* Litter summary card with Sire and Dam on the same row */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
-            Litter Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <Calendar className="h-4 w-4 text-primary mr-2" />
-              <span className="text-sm">
-                Born: <span className="font-medium">{format(birthDate, 'MMMM d, yyyy')}</span> 
-                {ageInWeeks > 0 && <span className="text-muted-foreground ml-1">({ageInWeeks} weeks old)</span>}
-              </span>
-            </div>
-            
-            <div className="flex items-center">
-              <Users2 className="h-4 w-4 text-primary mr-2" />
-              <span className="text-sm">
-                Puppies: <span className="font-medium">{selectedLitter.puppies.length}</span>
-              </span>
-            </div>
-            
-            {/* Sire and Dam on same row */}
-            <div className="flex items-center col-span-1">
-              <User className="h-4 w-4 text-primary mr-2" />
-              <span className="text-sm">
-                Sire: <span className="font-medium">{selectedLitter.sireName}</span>
-              </span>
-            </div>
-            
-            <div className="flex items-center col-span-1">
-              <User className="h-4 w-4 text-primary mr-2" />
-              <span className="text-sm">
-                Dam: <span className="font-medium">{selectedLitter.damName}</span>
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
       
       {/* 1. Puppy Development Checklist - Compact Version */}
       <PuppyDevelopmentChecklist 
