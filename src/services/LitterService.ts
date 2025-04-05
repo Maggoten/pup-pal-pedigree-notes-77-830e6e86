@@ -38,6 +38,11 @@ class LitterService {
       litter.archived = false;
     }
     
+    // Initialize puppies array if it doesn't exist
+    if (!litter.puppies) {
+      litter.puppies = [];
+    }
+    
     const litters = this.loadLitters();
     const updatedLitters = [...litters, litter];
     this.saveLitters(updatedLitters);
@@ -96,6 +101,19 @@ class LitterService {
           puppy.notes = [];
         }
         
+        // Ensure weight and height logs exist
+        if (!puppy.weightLog) puppy.weightLog = [];
+        if (!puppy.heightLog) puppy.heightLog = [];
+        
+        // Ensure birth weight is included in weight log if not already
+        if (puppy.birthWeight && puppy.weightLog.length === 0) {
+          const birthDate = new Date(puppy.birthDateTime).toISOString().split('T')[0];
+          puppy.weightLog.push({
+            date: birthDate,
+            weight: puppy.birthWeight
+          });
+        }
+        
         return {
           ...litter,
           puppies: [...litter.puppies, puppy]
@@ -118,6 +136,10 @@ class LitterService {
         if (!updatedPuppy.notes) {
           updatedPuppy.notes = [];
         }
+        
+        // Ensure weight and height logs exist
+        if (!updatedPuppy.weightLog) updatedPuppy.weightLog = [];
+        if (!updatedPuppy.heightLog) updatedPuppy.heightLog = [];
         
         const updatedPuppies = litter.puppies.map(puppy => 
           puppy.id === updatedPuppy.id ? updatedPuppy : puppy

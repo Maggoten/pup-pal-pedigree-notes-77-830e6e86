@@ -40,8 +40,10 @@ const GrowthLineChart: React.FC<GrowthLineChartProps> = ({
           {viewMode === 'single' && selectedPuppy ? (
             <Line
               type="monotone"
-              dataKey={selectedPuppy.name}
-              stroke={chartConfig[selectedPuppy.name].color}
+              // Use puppy ID instead of name as dataKey
+              dataKey={selectedPuppy.id}
+              name={selectedPuppy.name}
+              stroke={chartConfig[selectedPuppy.id].color}
               activeDot={{ r: 6 }}
               strokeWidth={2}
             />
@@ -50,8 +52,10 @@ const GrowthLineChart: React.FC<GrowthLineChartProps> = ({
               <Line
                 key={puppy.id}
                 type="monotone"
-                dataKey={puppy.name}
-                stroke={chartConfig[puppy.name].color}
+                // Use puppy ID instead of name as dataKey
+                dataKey={puppy.id}
+                name={puppy.name}
+                stroke={chartConfig[puppy.id].color}
                 activeDot={{ r: 4 }}
                 strokeWidth={1.5}
               />

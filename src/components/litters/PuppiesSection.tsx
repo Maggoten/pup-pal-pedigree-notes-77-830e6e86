@@ -50,26 +50,23 @@ const PuppiesSection: React.FC<PuppiesSectionProps> = ({
   
   const litterAge = differenceInWeeks(new Date(), parseISO(litterDob));
   
-  // Determine the next puppy number based on existing puppies
+  // Improved next puppy number calculation
   const getNextPuppyNumber = () => {
     if (puppies.length === 0) return 1;
     
-    // Try to find the highest number in existing puppy names
+    // Extract numeric parts from puppy names using a regex
     const numberPattern = /Puppy\s+(\d+)/i;
-    let highestNumber = 0;
+    const numbers = puppies
+      .map(puppy => {
+        const match = puppy.name.match(numberPattern);
+        return match && match[1] ? parseInt(match[1], 10) : null;
+      })
+      .filter(num => num !== null) as number[];
     
-    puppies.forEach(puppy => {
-      const match = puppy.name.match(numberPattern);
-      if (match && match[1]) {
-        const num = parseInt(match[1], 10);
-        if (!isNaN(num) && num > highestNumber) {
-          highestNumber = num;
-        }
-      }
-    });
-    
-    // If we found numbered puppies, return the next number, otherwise default to puppies.length + 1
-    return highestNumber > 0 ? highestNumber + 1 : puppies.length + 1;
+    // If we found numbered puppies, use the max + 1, otherwise use puppies.length + 1
+    return numbers.length > 0
+      ? Math.max(...numbers) + 1
+      : puppies.length + 1;
   };
   
   return (

@@ -66,7 +66,8 @@ const useChartData = (
         }
       });
       
-      dataMap.set(puppy.name, dateValueMap);
+      // Use puppy.id as key instead of name to prevent duplicates
+      dataMap.set(puppy.id, dateValueMap);
     });
     
     return dataMap;
@@ -77,15 +78,17 @@ const useChartData = (
     if (!selectedPuppy) return [];
     
     // For single puppy, we only need dates that have data for this puppy
-    const puppyDateMap = puppyDataMap.get(selectedPuppy.name) || new Map<string, number>();
+    const puppyDateMap = puppyDataMap.get(selectedPuppy.id) || new Map<string, number>();
     
     // Filter to only include dates with data for this puppy
     return Array.from(puppyDateMap.entries())
       .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
-      .map(([date, value]) => ({
-        date,
-        [selectedPuppy.name]: value
-      }));
+      .map(([date, value]) => {
+        // Use ID as the data key to ensure uniqueness
+        const dataPoint: GrowthLogType = { date };
+        dataPoint[selectedPuppy.id] = value;
+        return dataPoint;
+      });
   }, [selectedPuppy, puppyDataMap]);
 
   // Generate chart data for all puppies in a litter - much more efficient
@@ -95,9 +98,10 @@ const useChartData = (
       
       // Use the cached map to quickly look up values for each puppy
       puppies.forEach(puppy => {
-        const puppyDateMap = puppyDataMap.get(puppy.name);
+        const puppyDateMap = puppyDataMap.get(puppy.id);
         if (puppyDateMap && puppyDateMap.has(date)) {
-          dataPoint[puppy.name] = puppyDateMap.get(date);
+          // Use puppy.id instead of name for the data point key
+          dataPoint[puppy.id] = puppyDateMap.get(date);
         }
       });
       
@@ -110,13 +114,13 @@ const useChartData = (
     const config: ChartColorConfig = {};
 
     if (viewMode === 'single' && selectedPuppy) {
-      config[selectedPuppy.name] = {
+      config[selectedPuppy.id] = {
         label: selectedPuppy.name,
         color: getPuppyColor(0, selectedPuppy.gender),
       };
     } else {
       puppies.forEach((puppy, index) => {
-        config[puppy.name] = {
+        config[puppy.id] = {
           label: puppy.name,
           color: getPuppyColor(index, puppy.gender),
         };
@@ -130,7 +134,7 @@ const useChartData = (
   const noDataAvailable = useMemo(() => {
     if (viewMode === 'single' && selectedPuppy) {
       // Check if the puppy has any data in our cached map
-      const puppyDateMap = puppyDataMap.get(selectedPuppy.name);
+      const puppyDateMap = puppyDataMap.get(selectedPuppy.id);
       return !puppyDateMap || puppyDateMap.size === 0;
     } else {
       // For litter view, check if we have any dates with data
@@ -138,7 +142,7 @@ const useChartData = (
     }
   }, [viewMode, selectedPuppy, puppyDataMap, allDates]);
 
-  // Generate the final chart data based on view mode - same logic but uses optimized functions
+  // Generate the final chart data based on view mode
   const chartData = useMemo(() => {
     return viewMode === 'single' && selectedPuppy 
       ? getChartDataForSinglePuppy
