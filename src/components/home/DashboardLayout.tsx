@@ -33,11 +33,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           activePregnancies={activePregnancies}
         />
         
-        <div className="grid gap-6 mb-6 grid-cols-1 lg:grid-cols-3">
-          <div className="lg:col-span-1">
-            <BreedingReminders />
+        <div className="grid gap-6 mb-6 grid-cols-1 md:grid-cols-4">
+          <div className="md:col-span-1">
+            <div className="h-full">
+              <BreedingReminders />
+            </div>
           </div>
-          <div className="lg:col-span-2">
+          <div className="md:col-span-3">
             <div className="space-y-6">
               <BreedingCalendar />
               {activePregnancies.length > 0 && <ActivePregnanciesSection pregnancies={activePregnancies} />}

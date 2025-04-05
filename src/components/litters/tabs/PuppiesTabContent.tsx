@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Puppy } from '@/types/breeding';
@@ -48,7 +47,6 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
     setMeasurementDialogOpen(true);
   };
   
-  // Get next puppy number based on position in the list
   const getNextPuppyNumber = () => {
     return puppies.length + 1;
   };
@@ -58,14 +56,11 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   };
   
   const handleAddPuppy = (puppy: Puppy) => {
-    // Add the puppy exactly as is, without modifying the name
     onAddPuppy(puppy);
     setAddPuppyDialogOpen(false);
   };
   
-  // Function to update puppy data without changing its name
   const updatePuppyNames = (updatedPuppy: Puppy) => {
-    // Update the puppy with exactly the data provided - no modifications
     onUpdatePuppy(updatedPuppy);
   };
   
@@ -99,7 +94,6 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
       </CardHeader>
       
       <CardContent className="p-4">
-        {/* Directly pass the puppies array without any manipulation */}
         {puppies.length > 0 ? (
           <PuppyList 
             puppies={puppies} 
@@ -121,7 +115,6 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
         )}
       </CardContent>
       
-      {/* Puppy Measurements Dialog */}
       <Dialog open={measurementDialogOpen} onOpenChange={setMeasurementDialogOpen}>
         {activePuppy && (
           <PuppyMeasurementsDialog 

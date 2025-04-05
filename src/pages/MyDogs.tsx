@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,19 +8,17 @@ import { useDogs, DogsProvider } from '@/context/DogsContext';
 import DogList from '@/components/DogList';
 import DogDetails from '@/components/dogs/DogDetails';
 import { PlusCircle } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import AddDogDialog from '@/components/dogs/AddDogDialog';
 
 const MyDogsContent: React.FC = () => {
-  const { dogs, activeDog } = useDogs();
+  const { dogs, activeDog, addDog } = useDogs();
+  const [showAddDogDialog, setShowAddDogDialog] = useState(false);
   
   const females = dogs.filter(dog => dog.gender === 'female');
   const males = dogs.filter(dog => dog.gender === 'male');
 
-  const handleAddDog = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Add dog feature will be available in the next update.",
-    });
+  const handleAddDog = (dog: any) => {
+    addDog(dog);
   };
 
   return (
@@ -34,7 +32,7 @@ const MyDogsContent: React.FC = () => {
         <>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Breeding Dogs</h2>
-            <Button onClick={handleAddDog} className="flex items-center gap-1.5">
+            <Button onClick={() => setShowAddDogDialog(true)} className="flex items-center gap-1.5">
               <PlusCircle className="h-4 w-4" />
               Add New Dog
             </Button>
@@ -76,6 +74,12 @@ const MyDogsContent: React.FC = () => {
           </Tabs>
         </>
       )}
+      
+      <AddDogDialog 
+        open={showAddDogDialog} 
+        onOpenChange={setShowAddDogDialog} 
+        onAddDog={handleAddDog} 
+      />
     </PageLayout>
   );
 };

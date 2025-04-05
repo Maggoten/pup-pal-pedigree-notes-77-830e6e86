@@ -64,67 +64,83 @@ const PuppyList: React.FC<PuppyListProps> = ({
         </thead>
         <tbody>
           {puppies.map(puppy => (
-            <tr 
-              key={puppy.id}
-              className={`border-b hover:bg-muted/50 cursor-pointer ${selectedPuppyId === puppy.id ? 'bg-primary/5' : ''}`}
-              onClick={() => onPuppyClick && onPuppyClick(puppy)}
-            >
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8">
-                    {puppy.imageUrl ? (
-                      <AvatarImage src={puppy.imageUrl} alt={puppy.name} className="object-cover" />
-                    ) : (
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                        {puppy.name.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <span>{puppy.name}</span>
-                </div>
-              </td>
-              <td className="px-4 py-3 capitalize">{puppy.gender}</td>
-              <td className="px-4 py-3">{puppy.color}</td>
-              <td className="px-4 py-3">{getLatestMeasurement(puppy, 'weight')}</td>
-              <td className="px-4 py-3">{getLatestMeasurement(puppy, 'height')}</td>
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => onAddMeasurement && onAddMeasurement(puppy)}
-                    className="h-8 w-8"
-                  >
-                    <BarChart2 className="h-4 w-4" />
-                    <span className="sr-only">Add measurement</span>
-                  </Button>
-                  
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Edit className="h-4 w-4" />
-                        <span className="sr-only">Edit puppy</span>
+            <Dialog key={puppy.id}>
+              <DialogTrigger asChild>
+                <tr 
+                  className={`border-b hover:bg-muted/50 cursor-pointer ${selectedPuppyId === puppy.id ? 'bg-primary/5' : ''}`}
+                  onClick={() => onPuppyClick && onPuppyClick(puppy)}
+                >
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        {puppy.imageUrl ? (
+                          <AvatarImage src={puppy.imageUrl} alt={puppy.name} className="object-cover" />
+                        ) : (
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                            {puppy.name.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      <span>{puppy.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 capitalize">{puppy.gender}</td>
+                  <td className="px-4 py-3">{puppy.color}</td>
+                  <td className="px-4 py-3">{getLatestMeasurement(puppy, 'weight')}</td>
+                  <td className="px-4 py-3">{getLatestMeasurement(puppy, 'height')}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAddMeasurement && onAddMeasurement(puppy);
+                        }}
+                        className="h-8 w-8"
+                      >
+                        <BarChart2 className="h-4 w-4" />
+                        <span className="sr-only">Add measurement</span>
                       </Button>
-                    </DialogTrigger>
-                    <PuppyDetailsDialog 
-                      puppy={puppy} 
-                      onUpdatePuppy={onUpdatePuppy} 
-                      onDeletePuppy={onDeletePuppy}
-                    />
-                  </Dialog>
-                  
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    onClick={(e) => handleDeletePuppy(puppy.id, puppy.name, e)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Delete puppy</span>
-                  </Button>
-                </div>
-              </td>
-            </tr>
+                      
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Edit className="h-4 w-4" />
+                            <span className="sr-only">Edit puppy</span>
+                          </Button>
+                        </DialogTrigger>
+                        <PuppyDetailsDialog 
+                          puppy={puppy} 
+                          onUpdatePuppy={onUpdatePuppy} 
+                          onDeletePuppy={onDeletePuppy}
+                        />
+                      </Dialog>
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={(e) => handleDeletePuppy(puppy.id, puppy.name, e)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete puppy</span>
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              </DialogTrigger>
+              <PuppyDetailsDialog 
+                puppy={puppy} 
+                onUpdatePuppy={onUpdatePuppy} 
+                onDeletePuppy={onDeletePuppy}
+              />
+            </Dialog>
           ))}
         </tbody>
       </table>
