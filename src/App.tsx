@@ -14,19 +14,14 @@ import Login from "./pages/Login";
 import AuthGuard from "./components/AuthGuard";
 import { AuthProvider } from "./hooks/useAuth";
 import { DogsProvider } from "./context/DogsContext";
-import { getActivePregnancies } from "./services/PregnancyService";
-import Pregnancy from "./pages/Pregnancy";
+import { getFirstActivePregnancy } from "./services/PregnancyService";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 const App = () => {
+  // Get the first active pregnancy ID for the pregnancy link
+  const firstPregnancyId = getFirstActivePregnancy() || "none";
+  
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -41,7 +36,15 @@ const App = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/my-dogs" element={<MyDogs />} />
                   <Route path="/planned-litters" element={<PlannedLitters />} />
-                  <Route path="/pregnancy" element={<Pregnancy />} />
+                  {/* Add a generic pregnancy route that redirects to the first active pregnancy or shows a message */}
+                  <Route 
+                    path="/pregnancy" 
+                    element={
+                      firstPregnancyId !== "none" ? 
+                        <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
+                        <PregnancyDetails />
+                    } 
+                  />
                   <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
                   <Route path="/my-litters" element={<MyLitters />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

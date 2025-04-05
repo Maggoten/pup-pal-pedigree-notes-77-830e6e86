@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChecklistItem as ChecklistItemType } from '@/types/checklist';
 import { ClipboardList } from 'lucide-react';
@@ -16,11 +16,6 @@ const WeeklyChecklist: React.FC<WeeklyChecklistProps> = ({
   onToggleItem,
   weekNumber
 }) => {
-  // Memoize the toggle handler to prevent unnecessary re-renders
-  const handleToggle = useCallback((itemId: string) => {
-    onToggleItem(itemId);
-  }, [onToggleItem]);
-  
   if (checklistItems.length === 0) {
     return (
       <Card className="h-full">
@@ -51,7 +46,7 @@ const WeeklyChecklist: React.FC<WeeklyChecklistProps> = ({
             <ChecklistItem
               key={item.id}
               item={item}
-              onToggle={() => handleToggle(item.id)}
+              onToggle={() => onToggleItem(item.id)}
             />
           ))}
         </div>
@@ -60,4 +55,4 @@ const WeeklyChecklist: React.FC<WeeklyChecklistProps> = ({
   );
 };
 
-export default React.memo(WeeklyChecklist);
+export default WeeklyChecklist;
