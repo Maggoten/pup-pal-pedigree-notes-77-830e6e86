@@ -1,8 +1,9 @@
 
 import React from 'react';
+import { CalendarEvent } from './types';
 
 interface EventCardProps {
-  event: any;
+  event: CalendarEvent;
   colorClass: string;
   onClick: () => void;
   compact?: boolean;

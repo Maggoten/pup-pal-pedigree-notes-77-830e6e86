@@ -5,10 +5,11 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } 
 import EventCard from './EventCard';
 import MobileEventCard from './MobileEventCard';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { CalendarEvent } from './types';
 
 interface CalendarGridProps {
   weeks: Date[][];
-  getEventsForDate: (date: Date) => any[];
+  getEventsForDate: (date: Date) => CalendarEvent[];
   getEventColor: (type: string) => string;
   onDeleteEvent: (eventId: string) => void;
   compact?: boolean;
@@ -22,11 +23,11 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   compact = false 
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const isMobile = useIsMobile();
   
   const today = new Date();
-  const handleEventClick = (event: any) => {
+  const handleEventClick = (event: CalendarEvent) => {
     if (isMobile) {
       setSelectedEvent(event);
     }
@@ -140,7 +141,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           event={selectedEvent}
           colorClass={getEventColor(selectedEvent.type)}
           onClose={handleCloseEventDetails}
-          onDelete={selectedEvent.type === 'custom' ? handleDeleteEvent : undefined}
+          onDelete={selectedEvent.type === 'custom' ? () => handleDeleteEvent(selectedEvent.id) : undefined}
         />
       )}
     </>

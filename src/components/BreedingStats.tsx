@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Dog, Heart, PieChart, Puppy, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Dog, Heart, PieChart, Baby, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useDogs } from '@/context/DogsContext';
 import { Button } from '@/components/ui/button';
 
@@ -58,7 +58,7 @@ const BreedingStats = () => {
     {
       title: "Total Puppies",
       value: yearPuppies,
-      icon: <Puppy className="h-5 w-5 text-amber-500" />,
+      icon: <Baby className="h-5 w-5 text-amber-500" />,
       color: "text-amber-500 bg-amber-50"
     },
     {
