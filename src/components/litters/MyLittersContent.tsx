@@ -8,19 +8,16 @@ import {
 } from '@/components/ui/tabs';
 import { useLitterFilters } from './LitterFilterProvider';
 import { useLitterManagement } from '@/hooks/useLitterManagement';
-import useLitterFiltering from '@/hooks/useLitterFiltering';
+import useLitterFilteredData from '@/hooks/useLitterFilteredData';
 import SelectedLitterSection from './SelectedLitterSection';
 import LitterFilterHeader from './filters/LitterFilterHeader';
 import LitterTabContent from './tabs/LitterTabContent';
-
-const ITEMS_PER_PAGE = 12;
 
 const MyLittersContent: React.FC = () => {
   const {
     activeLitters,
     archivedLitters,
     selectedLitterId,
-    setSelectedLitterId,
     plannedLitters,
     showAddLitterDialog,
     setShowAddLitterDialog,
@@ -38,9 +35,7 @@ const MyLittersContent: React.FC = () => {
   
   // Get filter state from context
   const { 
-    searchQuery, 
     setSearchQuery,
-    filterYear, 
     setFilterYear,
     categoryTab, 
     setCategoryTab,
@@ -50,25 +45,21 @@ const MyLittersContent: React.FC = () => {
     setArchivedPage
   } = useLitterFilters();
   
-  // Filter and paginate litters
+  // Use our new hook for filtering logic
   const {
-    filteredLitters: filteredActiveLitters,
-    paginatedLitters: paginateActiveLitters,
-    pageCount: activePageCount
-  } = useLitterFiltering(activeLitters, searchQuery, filterYear, activePage, ITEMS_PER_PAGE);
-  
-  const {
-    filteredLitters: filteredArchivedLitters,
-    paginatedLitters: paginateArchivedLitters,
-    pageCount: archivedPageCount
-  } = useLitterFiltering(archivedLitters, searchQuery, filterYear, archivedPage, ITEMS_PER_PAGE);
+    filteredActiveLitters,
+    paginatedActiveLitters,
+    activePageCount,
+    filteredArchivedLitters,
+    paginatedArchivedLitters,
+    archivedPageCount,
+    isFilterActive
+  } = useLitterFilteredData(activeLitters, archivedLitters);
   
   // Handle creating a new litter
   const handleAddLitterClick = () => {
     setShowAddLitterDialog(true);
   };
-
-  const isFilterActive = !!searchQuery || !!filterYear;
   
   const handleClearFilter = () => {
     setFilterYear(null);
@@ -98,7 +89,7 @@ const MyLittersContent: React.FC = () => {
           <LitterTabContent
             litters={activeLitters}
             filteredLitters={filteredActiveLitters}
-            paginatedLitters={paginateActiveLitters}
+            paginatedLitters={paginatedActiveLitters}
             selectedLitterId={selectedLitterId}
             onSelectLitter={handleSelectLitter}
             onAddLitter={handleAddLitterClick}
@@ -115,7 +106,7 @@ const MyLittersContent: React.FC = () => {
           <LitterTabContent
             litters={archivedLitters}
             filteredLitters={filteredArchivedLitters}
-            paginatedLitters={paginateArchivedLitters}
+            paginatedLitters={paginatedArchivedLitters}
             selectedLitterId={selectedLitterId}
             onSelectLitter={handleSelectLitter}
             onAddLitter={handleAddLitterClick}
