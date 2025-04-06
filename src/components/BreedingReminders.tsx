@@ -1,21 +1,37 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BellRing, PawPrint } from 'lucide-react';
+import { BellRing, PawPrint, ArrowRight } from 'lucide-react';
 import RemindersList from './reminders/RemindersList';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import DogIllustration from './illustrations/DogIllustration';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const BreedingReminders: React.FC = () => {
   const { reminders, handleMarkComplete } = useBreedingReminders();
+  const navigate = useNavigate();
   
-  // Take only the top 3 high priority reminders for compact view
-  const highPriorityReminders = reminders
-    .filter(r => r.priority === 'high')
-    .slice(0, 3);
+  // Take the top 5 reminders, prioritizing by high priority first
+  const sortedReminders = [...reminders]
+    .sort((a, b) => {
+      // First sort by priority
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+      
+      if (priorityDiff !== 0) return priorityDiff;
+      
+      // Then by due date (if priority is the same)
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    })
+    .slice(0, 5);
+  
+  const handleViewAllReminders = () => {
+    navigate('/reminders');
+  };
   
   return (
-    <Card className="border-primary/20 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full relative">
+    <Card className="border-primary/20 shadow-md overflow-hidden transition-shadow hover:shadow-lg h-full relative">
       {/* Decorative background elements */}
       <div className="absolute top-1 right-1 opacity-5">
         <DogIllustration 
@@ -41,26 +57,27 @@ const BreedingReminders: React.FC = () => {
           Important tasks and upcoming events
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-0 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+      <CardContent className="p-0 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
         <RemindersList 
-          reminders={highPriorityReminders.length > 0 ? highPriorityReminders : reminders.slice(0, 3)} 
+          reminders={sortedReminders} 
           onComplete={handleMarkComplete} 
-          compact={true} 
+          compact={false} 
         />
+        
+        {reminders.length > sortedReminders.length && (
+          <div className="p-3 flex justify-center">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full flex items-center justify-center gap-1"
+              onClick={handleViewAllReminders}
+            >
+              View All Reminders
+              <ArrowRight className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
       </CardContent>
-      
-      {/* Indicator at the bottom */}
-      <div className="absolute bottom-2 right-2 opacity-30">
-        <div className="flex gap-1">
-          {[...Array(3)].map((_, i) => (
-            <div 
-              key={i}
-              className="w-1.5 h-1.5 rounded-full bg-primary"
-              style={{ opacity: 0.5 + (i * 0.25) }}
-            ></div>
-          ))}
-        </div>
-      </div>
     </Card>
   );
 };

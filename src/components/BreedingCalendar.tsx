@@ -15,14 +15,14 @@ const BreedingCalendar: React.FC = () => {
   } = useCalendarEvents(dogs);
   
   return (
-    <Card className="border-primary/20 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full">
+    <Card className="border-primary/20 overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full">
       <CalendarContent
         dogs={dogs}
         getEventsForDate={getEventsForDate}
         getEventColor={getEventColor}
         onDeleteEvent={deleteEvent}
         onAddEvent={addEvent}
-        compact={true}
+        compact={false} // Set to false to make the calendar larger
       />
     </Card>
   );
