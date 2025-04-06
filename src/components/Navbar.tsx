@@ -31,6 +31,10 @@ export const Navbar: React.FC = () => {
     navigate('/login');
   };
   
+  const handleSettings = () => {
+    navigate('/settings');
+  };
+  
   const navItems = [
     { path: "/", label: "Home", icon: Calendar },
     { path: "/my-dogs", label: "My Dogs", icon: Dog },
@@ -68,6 +72,16 @@ export const Navbar: React.FC = () => {
                 ))}
                 <DrawerClose asChild>
                   <Button 
+                    variant="ghost" 
+                    className="justify-start w-full"
+                    onClick={handleSettings}
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    <span>Settings</span>
+                  </Button>
+                </DrawerClose>
+                <DrawerClose asChild>
+                  <Button 
                     variant="destructive" 
                     className="justify-start w-full mt-4"
                     onClick={handleLogout}
@@ -99,7 +113,7 @@ export const Navbar: React.FC = () => {
           <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
             <LogOut className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" onClick={handleSettings} title="Settings">
             <Settings className="h-5 w-5" />
           </Button>
         </div>

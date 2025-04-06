@@ -7,7 +7,8 @@ import {
   saveUserToStorage, 
   removeUserFromStorage,
   getUserFromStorage,
-  getLoggedInStateFromStorage
+  getLoggedInStateFromStorage,
+  updateUserProfile
 } from '@/services/authService';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -51,6 +52,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return false;
   };
 
+  const updateProfile = async (userData: Partial<User>): Promise<boolean> => {
+    if (!user) return false;
+    
+    try {
+      const updatedUser = await updateUserProfile(user, userData);
+      if (updatedUser) {
+        saveUserToStorage(updatedUser);
+        setUser(updatedUser);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      return false;
+    }
+  };
+
   const logout = () => {
     removeUserFromStorage();
     setUser(null);
@@ -58,7 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, login, logout, register }}>
+    <AuthContext.Provider value={{ user, isLoggedIn, login, logout, register, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
