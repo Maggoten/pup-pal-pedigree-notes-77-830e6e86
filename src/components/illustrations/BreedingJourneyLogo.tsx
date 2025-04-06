@@ -12,9 +12,9 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
   showSlogan = false,
   compact = false
 }) => {
-  // Calculate sizes with 50% increase
-  const baseWidth = compact ? 12 : 15; // 8 -> 12, 10 -> 15
-  const baseHeight = compact ? 12 : 15; // 8 -> 12, 10 -> 15
+  // Calculate sizes with 100% increase
+  const baseWidth = compact ? 16 : 20; // 8 -> 16, 10 -> 20
+  const baseHeight = compact ? 16 : 20; // 8 -> 16, 10 -> 20
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
