@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Heart } from 'lucide-react';
 
 export type DogBreed = 'border-collie' | 'shetland-sheepdog' | 'generic';
 
@@ -20,73 +21,29 @@ const DogIllustration: React.FC<DogIllustrationProps> = ({
   secondaryColor = '#F0EDE5', // greige-100
   withBackground = false
 }) => {
-  // Simpler dog icon shapes for all breed types
-  const illustrationData = {
-    'shetland-sheepdog': {
-      viewBox: '0 0 100 100',
-      paths: [
-        // Main dog shape - simple dog icon
-        <path key="body" d="M50,30 C65,30 75,42 75,55 C75,68 65,80 50,80 C35,80 25,68 25,55 C25,42 35,30 50,30 Z" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />,
-        
-        // Simple dog ears
-        <path key="ear-left" d="M35,38 C30,32 25,34 23,40" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="ear-right" d="M65,38 C70,32 75,34 77,40" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        
-        // Simple face features
-        <path key="eyes" d="M40,45 C41,44 43,44 44,45 M56,45 C57,44 59,44 60,45" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="nose" d="M48,55 C49,56 51,56 52,55" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="mouth" d="M50,55 L50,60 M45,62 C48,64 52,64 55,62" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-      ]
-    },
-    'border-collie': {
-      viewBox: '0 0 100 100',
-      paths: [
-        // Main dog shape - simple dog icon
-        <path key="body" d="M50,30 C65,30 75,42 75,55 C75,68 65,80 50,80 C35,80 25,68 25,55 C25,42 35,30 50,30 Z" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />,
-        
-        // Simple dog ears
-        <path key="ear-left" d="M35,38 C30,32 25,34 23,40" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="ear-right" d="M65,38 C70,32 75,34 77,40" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        
-        // Simple face features
-        <path key="eyes" d="M40,45 C41,44 43,44 44,45 M56,45 C57,44 59,44 60,45" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="nose" d="M48,55 C49,56 51,56 52,55" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="mouth" d="M50,55 L50,60 M45,62 C48,64 52,64 55,62" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-      ]
-    },
-    'generic': {
-      viewBox: '0 0 100 100',
-      paths: [
-        // Main dog shape - simple dog icon
-        <path key="body" d="M50,30 C65,30 75,42 75,55 C75,68 65,80 50,80 C35,80 25,68 25,55 C25,42 35,30 50,30 Z" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />,
-        
-        // Simple dog ears
-        <path key="ear-left" d="M35,38 C30,35 28,38 27,42" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="ear-right" d="M65,38 C70,35 72,38 73,42" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        
-        // Simple face features
-        <path key="eyes" d="M40,45 C41,44 43,44 44,45 M56,45 C57,44 59,44 60,45" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="nose" d="M48,55 C49,56 51,56 52,55" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="mouth" d="M50,55 L50,60 M45,62 C48,64 52,64 55,62" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-      ]
-    }
-  };
-
-  const { viewBox, paths } = illustrationData[breed];
+  // Use heart icon for all breed types with slight variations
+  const heartSize = Math.floor(size * 0.7); // Adjust heart size relative to the container
   
   return (
-    <svg 
-      className={className} 
-      viewBox={viewBox} 
-      width={size} 
-      height={size} 
-      xmlns="http://www.w3.org/2000/svg"
+    <div 
+      className={`relative flex items-center justify-center ${className}`}
+      style={{ width: size, height: size }}
     >
       {withBackground && (
-        <circle cx="50" cy="50" r="40" fill={secondaryColor} opacity="0.8" />
+        <div 
+          className="absolute inset-0 rounded-full"
+          style={{ backgroundColor: secondaryColor, opacity: 0.8 }}
+        />
       )}
-      {paths}
-    </svg>
+      
+      <Heart 
+        size={heartSize} 
+        color={color}
+        className={`transform ${breed === 'border-collie' ? 'rotate-12' : breed === 'shetland-sheepdog' ? '-rotate-12' : ''}`}
+        fill={breed === 'border-collie' ? 'rgba(255,0,0,0.1)' : breed === 'shetland-sheepdog' ? 'rgba(255,0,0,0.2)' : 'transparent'}
+        strokeWidth={breed === 'generic' ? 2 : 1.5}
+      />
+    </div>
   );
 };
 
