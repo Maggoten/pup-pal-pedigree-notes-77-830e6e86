@@ -16,7 +16,7 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
     <div className={`flex items-center gap-2 ${className}`}>
       <div className={`relative ${compact ? 'w-8 h-8' : 'w-10 h-10'}`}>
         <img 
-          src="/doglogotransparent.png" 
+          src="/lovable-uploads/15be06f0-e9ee-449e-911e-078b98f91a34.png" 
           alt="Breeding Journey Logo" 
           className="w-full h-full object-contain"
         />
