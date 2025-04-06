@@ -25,7 +25,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           <div className="flex items-center gap-3">
             {icon && <div className="text-primary">{icon}</div>}
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+              <h1 className="text-3xl font-le-jour font-bold tracking-tight">{title}</h1>
               {description && <p className="text-muted-foreground">{description}</p>}
             </div>
           </div>
