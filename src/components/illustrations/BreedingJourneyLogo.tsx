@@ -1,39 +1,23 @@
 
 import React from 'react';
-import { useTheme } from 'next-themes';
+import DogIllustration from './DogIllustration';
 
 interface BreedingJourneyLogoProps {
   className?: string;
-  withSlogan?: boolean;
-  iconOnly?: boolean;
 }
 
-const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({ 
-  className = '', 
-  withSlogan = false,
-  iconOnly = false
-}) => {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-  
+const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({ className = '' }) => {
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
       <div className="relative">
-        <img 
-          src="/lovable-uploads/15be06f0-e9ee-449e-911e-078b98f91a34.png" 
-          alt="Breeding Journey Logo" 
-          className="h-10 w-auto"
+        <DogIllustration 
+          breed="border-collie" 
+          size={28}
+          color="currentColor"
+          secondaryColor="transparent"
         />
       </div>
-      
-      {!iconOnly && (
-        <div className="flex flex-col items-start">
-          <span className="text-xl font-bold tracking-tight">Breeding Journey</span>
-          {withSlogan && (
-            <span className="text-xs text-muted-foreground">Where Smart Breeding Begins</span>
-          )}
-        </div>
-      )}
+      <span className="text-xl font-bold tracking-tight">Breeding Journey</span>
     </div>
   );
 };

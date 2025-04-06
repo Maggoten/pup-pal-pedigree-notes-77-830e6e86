@@ -94,7 +94,7 @@ export const Navbar: React.FC = () => {
             </DrawerContent>
           </Drawer>
           <Link to="/">
-            <BreedingJourneyLogo withSlogan={true} />
+            <BreedingJourneyLogo />
           </Link>
         </div>
         
