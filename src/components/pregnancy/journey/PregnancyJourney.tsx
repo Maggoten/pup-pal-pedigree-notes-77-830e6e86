@@ -36,8 +36,8 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+      <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent border-b border-primary/10 pb-3">
+        <CardTitle className="flex items-center gap-2 text-primary">
           {femaleName}'s Pregnancy Journey
         </CardTitle>
         <CardDescription>

@@ -21,7 +21,7 @@ const ActivePregnanciesSection: React.FC<ActivePregnanciesSectionProps> = ({ pre
   return (
     <Card className="border-primary/20">
       <CardHeader className="bg-primary/5 border-b border-primary/20 pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
+        <CardTitle className="flex items-center gap-2 text-lg text-primary">
           <PawPrint className="h-5 w-5 text-primary" />
           Active Pregnancies
         </CardTitle>
@@ -32,7 +32,7 @@ const ActivePregnanciesSection: React.FC<ActivePregnanciesSectionProps> = ({ pre
           {pregnancies.map((pregnancy) => (
             <div 
               key={pregnancy.id} 
-              className="rounded-lg border p-3 bg-blue-50 border-blue-200 cursor-pointer hover:shadow-md transition-all"
+              className="rounded-lg border p-3 bg-blush-50 border-blush-200 cursor-pointer hover:shadow-md transition-all"
               onClick={() => navigate(`/pregnancy/${pregnancy.id}`)}
             >
               <h3 className="font-medium text-base">
