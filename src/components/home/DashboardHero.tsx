@@ -28,39 +28,39 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
     {
       title: "Reminders",
       count: reminders.count,
-      icon: <Calendar className="h-5 w-5 text-amber-600" />,
+      icon: <Calendar className="h-5 w-5 text-sage-600" />,
       highlight: reminders.highPriority > 0 ? `${reminders.highPriority} high priority` : null,
       path: "#reminders",
-      color: "bg-amber-50 border-amber-200"
+      color: "bg-sage-50 border-sage-200"
     },
     {
       title: "Planned Litters",
       count: plannedLitters.count,
-      icon: <PawPrint className="h-5 w-5 text-indigo-600" />,
+      icon: <PawPrint className="h-5 w-5 text-brown-600" />,
       highlight: plannedLitters.nextDate ? `Next: ${format(plannedLitters.nextDate, 'MMM d')}` : null,
       path: "/planned-litters",
-      color: "bg-indigo-50 border-indigo-200"
+      color: "bg-greige-50 border-greige-200"
     },
     {
       title: "Active Pregnancies",
       count: activePregnancies.length,
-      icon: <PawPrint className="h-5 w-5 text-rose-600" />,
+      icon: <PawPrint className="h-5 w-5 text-blush-600" />,
       highlight: activePregnancies.length > 0 ? `${activePregnancies[0].daysLeft} days to due date` : null,
       path: "/pregnancy",
-      color: "bg-rose-50 border-rose-200"
+      color: "bg-blush-50 border-blush-200"
     },
     {
       title: "Recent Litters",
       count: recentLitters.count,
-      icon: <Heart className="h-5 w-5 text-green-600" />,
+      icon: <Heart className="h-5 w-5 text-sage-600" />,
       highlight: recentLitters.latest ? `Latest: ${format(recentLitters.latest, 'MMM d')}` : null,
       path: "/my-litters",
-      color: "bg-green-50 border-green-200"
+      color: "bg-sage-100 border-sage-300"
     }
   ];
   
   return (
-    <div className="rounded-lg overflow-hidden border border-primary/20 bg-gradient-to-br from-[#F5F0E5] to-[#EAE0C9]">
+    <div className="rounded-lg overflow-hidden border border-greige-300 sage-gradient">
       <div className="p-6 md:p-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {metricCards.map((card, index) => (
