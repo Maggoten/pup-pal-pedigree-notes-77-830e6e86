@@ -55,6 +55,9 @@ export const Navbar: React.FC = () => {
               </Button>
             </DrawerTrigger>
             <DrawerContent className="pt-10">
+              <div className="flex justify-center mb-6">
+                <BreedingJourneyLogo showSlogan />
+              </div>
               <nav className="flex flex-col space-y-2 p-4">
                 {navItems.map((item) => (
                   <DrawerClose key={item.path} asChild>
@@ -94,7 +97,7 @@ export const Navbar: React.FC = () => {
             </DrawerContent>
           </Drawer>
           <Link to="/">
-            <BreedingJourneyLogo />
+            <BreedingJourneyLogo showSlogan={false} />
           </Link>
         </div>
         

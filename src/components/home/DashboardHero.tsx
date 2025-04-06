@@ -83,6 +83,10 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       </div>
       
       <div className="p-6 md:p-8 relative z-10">
+        <div className="mb-4">
+          <h2 className="text-2xl font-bold">Welcome back, {username}!</h2>
+          <p className="text-muted-foreground text-sm">Where Smart Breeding Begins</p>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {metricCards.map((card, index) => (
             <div 

@@ -11,6 +11,7 @@ interface DogIllustrationProps {
   color?: string;
   secondaryColor?: string;
   withBackground?: boolean;
+  filled?: boolean;
 }
 
 const DogIllustration: React.FC<DogIllustrationProps> = ({
@@ -19,7 +20,8 @@ const DogIllustration: React.FC<DogIllustrationProps> = ({
   size = 120,
   color = 'currentColor',
   secondaryColor = '#F0EDE5', // greige-100
-  withBackground = false
+  withBackground = false,
+  filled = false
 }) => {
   // Use heart icon for all breed types with slight variations
   const heartSize = Math.floor(size * 0.7); // Adjust heart size relative to the container
@@ -40,7 +42,7 @@ const DogIllustration: React.FC<DogIllustrationProps> = ({
         size={heartSize} 
         color={color}
         className={`transform ${breed === 'border-collie' ? 'rotate-12' : breed === 'shetland-sheepdog' ? '-rotate-12' : ''}`}
-        fill={breed === 'border-collie' ? 'rgba(255,0,0,0.1)' : breed === 'shetland-sheepdog' ? 'rgba(255,0,0,0.2)' : 'transparent'}
+        fill={filled ? color : breed === 'border-collie' ? 'rgba(255,0,0,0.1)' : breed === 'shetland-sheepdog' ? 'rgba(255,0,0,0.2)' : 'transparent'}
         strokeWidth={breed === 'generic' ? 2 : 1.5}
       />
     </div>

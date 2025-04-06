@@ -1,6 +1,7 @@
 
 import React, { ReactNode } from 'react';
 import Navbar from '@/components/Navbar';
+import BreedingJourneyLogo from './illustrations/BreedingJourneyLogo';
 
 interface PageLayoutProps {
   title: string;
@@ -32,6 +33,15 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         
         {children}
       </main>
+      
+      <footer className="bg-background border-t py-6">
+        <div className="container flex flex-col md:flex-row justify-between items-center gap-4">
+          <BreedingJourneyLogo showSlogan={true} />
+          <div className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Breeding Journey. All rights reserved.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
