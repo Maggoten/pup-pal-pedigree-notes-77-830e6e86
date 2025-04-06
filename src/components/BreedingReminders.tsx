@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BellRing, PawPrint } from 'lucide-react';
 import RemindersList from './reminders/RemindersList';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
+import DogIllustration from './illustrations/DogIllustration';
 
 const BreedingReminders: React.FC = () => {
   const { reminders, handleMarkComplete } = useBreedingReminders();
@@ -17,7 +18,11 @@ const BreedingReminders: React.FC = () => {
     <Card className="border-primary/20 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full relative">
       {/* Decorative background elements */}
       <div className="absolute top-1 right-1 opacity-5">
-        <PawPrint className="h-40 w-40 text-primary transform rotate-12" />
+        <DogIllustration 
+          breed="border-collie"
+          size={120}
+          color="var(--primary)"
+        />
       </div>
       
       <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent border-b border-primary/10 pb-3 relative">
@@ -44,7 +49,7 @@ const BreedingReminders: React.FC = () => {
         />
       </CardContent>
       
-      {/* Paw print indicator at the bottom */}
+      {/* Indicator at the bottom */}
       <div className="absolute bottom-2 right-2 opacity-30">
         <div className="flex gap-1">
           {[...Array(3)].map((_, i) => (

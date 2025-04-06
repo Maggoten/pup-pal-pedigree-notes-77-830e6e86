@@ -18,7 +18,6 @@ const EmptyPlannedLitters: React.FC<EmptyPlannedLittersProps> = ({ onAddClick })
               breed="shetland-sheepdog" 
               size={60}
               color="var(--primary)"
-              secondaryColor="#F8F6F2"
             />
             <div className="absolute -top-1 -right-2">
               <Heart className="h-5 w-5 text-accent animate-pulse" />

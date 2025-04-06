@@ -6,12 +6,11 @@ import DogIllustration from '../illustrations/DogIllustration';
 const EmptyReminders: React.FC = () => {
   return (
     <div className="text-center py-8 px-4 bg-primary/5 rounded-lg border border-dashed border-primary/30 relative overflow-hidden">
-      <div className="absolute -right-6 -top-5 opacity-10">
+      <div className="absolute -right-6 -top-5 opacity-20">
         <DogIllustration 
           breed="border-collie" 
           size={80} 
           color="#75869B" 
-          secondaryColor="#E5DEFF" 
         />
       </div>
       
@@ -37,12 +36,11 @@ const EmptyReminders: React.FC = () => {
         <div className="w-1.5 h-1.5 rounded-full bg-primary/40"></div>
       </div>
       
-      <div className="absolute -left-6 -bottom-5 opacity-10">
+      <div className="absolute -left-6 -bottom-5 opacity-20">
         <DogIllustration 
           breed="generic" 
           size={60} 
-          color="#75869B" 
-          secondaryColor="#E5DEFF" 
+          color="#75869B"
         />
       </div>
     </div>

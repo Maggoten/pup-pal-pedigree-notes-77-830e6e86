@@ -21,8 +21,7 @@ const EmptyPuppiesState: React.FC<EmptyPuppiesStateProps> = ({ onAddLitter }) =>
               <DogIllustration 
                 breed="generic" 
                 size={40} 
-                color="#88A684" 
-                secondaryColor="#F5F7F3"
+                color="#88A684"
               />
             </div>
             <div className="bg-sage-200/50 w-24 h-24 rounded-full flex items-center justify-center">
@@ -30,7 +29,6 @@ const EmptyPuppiesState: React.FC<EmptyPuppiesStateProps> = ({ onAddLitter }) =>
                 breed="border-collie" 
                 size={60} 
                 color="#4D684D"
-                secondaryColor="#F5F7F3"
               />
             </div>
             <div className="absolute -left-8 -bottom-2">
@@ -38,7 +36,6 @@ const EmptyPuppiesState: React.FC<EmptyPuppiesStateProps> = ({ onAddLitter }) =>
                 breed="shetland-sheepdog" 
                 size={40} 
                 color="#88A684"
-                secondaryColor="#F5F7F3"
               />
             </div>
           </div>

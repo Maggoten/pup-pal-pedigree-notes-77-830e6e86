@@ -14,7 +14,7 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({ className = '
           breed="border-collie" 
           size={24}
           color="currentColor"
-          secondaryColor="#F5F7F3"
+          secondaryColor="transparent"
         />
       </div>
       <span className="text-xl font-bold">Breeding Journey</span>

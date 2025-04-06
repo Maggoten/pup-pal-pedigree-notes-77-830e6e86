@@ -20,7 +20,6 @@ const EmptyChartState: React.FC<EmptyChartStateProps> = ({ type, logType, puppyN
                 breed="shetland-sheepdog"
                 size={40}
                 color="var(--primary)"
-                secondaryColor="#F5F7F3"
               />
             ) : (
               <LineChart className="h-8 w-8 text-primary/80" />
@@ -34,7 +33,6 @@ const EmptyChartState: React.FC<EmptyChartStateProps> = ({ type, logType, puppyN
                 breed="generic"
                 size={20}
                 color="var(--accent)"
-                secondaryColor="#F5F7F3"
               />
             </div>
           </div>

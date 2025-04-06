@@ -38,7 +38,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
     {
       title: "Planned Litters",
       count: plannedLitters.count,
-      icon: <DogIllustration breed="shetland-sheepdog" size={20} color="#7A6E52" secondaryColor="#F0EDE5" />,
+      icon: <DogIllustration breed="shetland-sheepdog" size={20} color="#7A6E52" />,
       highlight: plannedLitters.nextDate ? `Next: ${format(plannedLitters.nextDate, 'MMM d')}` : null,
       path: "/planned-litters",
       color: "bg-greige-50 border-greige-200 hover:border-greige-300",
@@ -47,7 +47,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
     {
       title: "Active Pregnancies",
       count: activePregnancies.length,
-      icon: <DogIllustration breed="border-collie" size={20} color="#B3003A" secondaryColor="#FFDEE8" />,
+      icon: <DogIllustration breed="border-collie" size={20} color="#B3003A" />,
       highlight: activePregnancies.length > 0 ? `${activePregnancies[0].daysLeft} days to due date` : null,
       path: "/pregnancy",
       color: "bg-blush-50 border-blush-200 hover:border-blush-300",
@@ -72,7 +72,6 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
           breed="border-collie"
           size={160}
           color="#7A6E52"
-          secondaryColor="#F0EDE5"
         />
       </div>
       <div className="absolute bottom-0 left-0 opacity-10">
@@ -80,7 +79,6 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
           breed="shetland-sheepdog"
           size={120}
           color="#4D684D"
-          secondaryColor="#E7EDE3"
         />
       </div>
       
