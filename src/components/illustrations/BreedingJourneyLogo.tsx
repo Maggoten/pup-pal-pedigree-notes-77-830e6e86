@@ -12,11 +12,15 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
   showSlogan = false,
   compact = false
 }) => {
+  // Calculate sizes with 50% increase
+  const baseWidth = compact ? 12 : 15; // 8 -> 12, 10 -> 15
+  const baseHeight = compact ? 12 : 15; // 8 -> 12, 10 -> 15
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className={`relative ${compact ? 'w-8 h-8' : 'w-10 h-10'}`}>
+      <div className={`relative w-${baseWidth} h-${baseHeight}`}>
         <img 
-          src="/doglogotransparent.png" 
+          src="/lovable-uploads/cadcb216-d59c-418a-a7dd-60e66ec57fcc.png" 
           alt="Breeding Journey Logo" 
           className="w-full h-full object-contain"
         />
