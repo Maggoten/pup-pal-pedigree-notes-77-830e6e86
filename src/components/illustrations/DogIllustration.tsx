@@ -25,43 +25,58 @@ const DogIllustration: React.FC<DogIllustrationProps> = ({
     'border-collie': {
       viewBox: '0 0 100 100',
       paths: [
-        // Main outline - continuous line art
-        <path key="outline" d="M30,45 C28,35 32,25 42,20 C52,15 62,20 65,25 C68,20 75,25 75,35 C75,45 70,55 65,60 C70,70 65,85 50,85 C35,85 30,70 35,60 C30,55 25,45 30,45 Z" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />,
-        // Face details - minimalist style
+        // Main head and body outline - more defined dog shape
+        <path key="outline" d="M30,45 C27,38 28,30 35,25 C42,20 52,18 60,25 C65,20 75,25 73,35 C78,40 75,50 70,55 C75,65 70,80 60,85 C45,90 35,85 30,75 C25,65 25,55 30,45 Z" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />,
+        // Border collie distinctive ears - pointy and alert
+        <path key="ear-left" d="M35,25 C32,20 30,15 25,15" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
+        <path key="ear-right" d="M60,25 C63,20 65,15 70,15" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
+        // Face features
         <path key="eye-left" d="M40,40 C38,40 36,38 36,36 C36,34 38,32 40,32" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
         <path key="eye-right" d="M60,40 C62,40 64,38 64,36 C64,34 62,32 60,32" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
         <path key="nose" d="M48,48 C48,50 52,50 52,48" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="mouth" d="M46,55 C48,57 52,57 54,55" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        // Border collie distinctive feature - simple ear accent
-        <path key="ear-accent" d="M35,30 C38,25 42,22 48,25" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2,3" />
+        <path key="mouth" d="M44,55 C48,58 52,58 56,55" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
+        // Border collie face marking - characteristic stripe down face
+        <path key="blaze" d="M50,32 L50,48" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
+        // Collar suggestion
+        <path key="collar" d="M35,60 C40,63 50,63 65,60" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
       ]
     },
     'shetland-sheepdog': {
       viewBox: '0 0 100 100',
       paths: [
-        // Main outline with fluffier, pointier ears
-        <path key="outline" d="M25,45 C22,35 25,22 35,18 C45,14 55,15 58,20 C62,15 75,20 70,30 C75,40 80,50 75,60 C80,70 70,85 50,85 C30,85 20,70 25,60 C20,50 22,45 25,45 Z" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />,
+        // Main outline with fluffier appearance for Sheltie
+        <path key="outline" d="M25,45 C22,38 23,30 30,25 C37,20 50,18 60,25 C65,20 75,25 73,35 C78,40 75,50 70,55 C75,65 70,80 60,85 C45,90 35,85 30,75 C25,65 25,55 25,45 Z" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />,
+        // Sheltie's smaller, more forward-folding ears
+        <path key="ear-left" d="M35,25 C33,22 30,20 28,22" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
+        <path key="ear-right" d="M60,25 C62,22 65,20 67,22" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
         // Face details
-        <path key="eye-left" d="M38,40 C36,40 34,38 34,36 C34,34 36,32 38,32" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="eye-right" d="M62,40 C64,40 66,38 66,36 C66,34 64,32 62,32" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="nose" d="M48,50 C48,52 52,52 52,50" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="mouth" d="M46,55 C48,57 52,57 54,55" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        // Shetland sheepdog distinctive feature - fluffy mane suggestion
-        <path key="mane" d="M35,55 C30,65 40,68 50,68 C60,68 70,65 65,55" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2,3" />
+        <path key="eye-left" d="M40,40 C38,40 36,38 36,36 C36,34 38,32 40,32" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
+        <path key="eye-right" d="M60,40 C62,40 64,38 64,36 C64,34 62,32 60,32" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
+        <path key="nose" d="M48,48 C48,50 52,50 52,48" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
+        <path key="mouth" d="M44,55 C48,58 52,58 56,55" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
+        // Sheltie's distinctive mane and fluffy fur
+        <path key="mane" d="M30,60 C25,68 35,75 50,75 C65,75 75,68 70,60" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2,3" />,
+        // Sheltie facial markings
+        <path key="markings" d="M50,32 L50,48" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
       ]
     },
     'generic': {
       viewBox: '0 0 100 100',
       paths: [
-        // Simple dog outline
-        <path key="outline" d="M30,45 C25,35 30,20 45,20 C60,20 70,30 70,40 C70,50 65,55 60,60 C65,70 60,85 50,85 C40,85 35,70 40,60 C35,55 30,50 30,45 Z" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />,
+        // Simple dog outline - more defined
+        <path key="outline" d="M30,45 C25,38 28,28 40,25 C52,22 62,25 65,35 C70,40 70,50 65,55 C70,65 65,80 55,85 C45,90 35,85 30,75 C25,65 25,55 30,45 Z" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />,
+        // Generic floppy ears - like a beagle
+        <path key="ear-left" d="M35,30 C32,28 25,32 25,40" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
+        <path key="ear-right" d="M65,30 C68,28 75,32 75,40" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
         // Face details
         <path key="eye-left" d="M40,40 C38,40 36,38 36,36 C36,34 38,32 40,32" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
         <path key="eye-right" d="M60,40 C62,40 64,38 64,36 C64,34 62,32 60,32" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
         <path key="nose" d="M48,48 C48,50 52,50 52,48" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        <path key="mouth" d="M46,55 C48,57 52,57 54,55" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
-        // Generic dog feature - floppy ear suggestion
-        <path key="ear" d="M35,25 C30,30 25,40 30,45" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+        <path key="mouth" d="M44,55 C48,58 52,58 56,55" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
+        // Snout definition to make it more dog-like
+        <path key="snout" d="M40,48 C43,55 57,55 60,48" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />,
+        // Collar suggestion
+        <path key="collar" d="M35,65 C45,68 55,68 65,65" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
       ]
     }
   };
