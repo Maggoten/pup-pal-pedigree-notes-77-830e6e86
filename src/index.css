@@ -6,82 +6,82 @@
 @layer base {
   :root {
     /* Light Mode Colors */
-    --background: 40 30% 96%;
-    --foreground: 140 20% 25%;
+    --background: 60 15% 96%;
+    --foreground: 130 20% 25%;
 
     --card: 0 0% 100%;
-    --card-foreground: 140 20% 25%;
+    --card-foreground: 130 20% 25%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 140 20% 25%;
+    --popover-foreground: 130 20% 25%;
 
-    --primary: 140 30% 25%; /* Dark green */
-    --primary-foreground: 40 30% 96%;
+    --primary: 130 25% 45%; /* Sage green */
+    --primary-foreground: 60 15% 96%;
 
     --secondary: 40 15% 90%; /* Greige */
-    --secondary-foreground: 140 20% 25%;
+    --secondary-foreground: 130 20% 25%;
 
     --muted: 40 15% 90%;
-    --muted-foreground: 140 10% 40%;
+    --muted-foreground: 130 10% 40%;
 
     --accent: 347 100% 86%; /* Soft pink */
-    --accent-foreground: 140 20% 25%;
+    --accent-foreground: 130 20% 25%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 40 30% 96%;
+    --destructive-foreground: 60 15% 96%;
 
     --border: 40 20% 85%;
     --input: 40 20% 85%;
-    --ring: 140 30% 25%;
+    --ring: 130 25% 45%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 40 30% 94%;
-    --sidebar-foreground: 140 20% 25%;
-    --sidebar-primary: 140 30% 25%;
-    --sidebar-primary-foreground: 40 30% 96%;
+    --sidebar-background: 40 15% 94%;
+    --sidebar-foreground: 130 20% 25%;
+    --sidebar-primary: 130 25% 45%;
+    --sidebar-primary-foreground: 60 15% 96%;
     --sidebar-accent: 40 15% 90%;
-    --sidebar-accent-foreground: 140 20% 25%;
+    --sidebar-accent-foreground: 130 20% 25%;
     --sidebar-border: 40 20% 85%;
     --sidebar-ring: 342 40% 55%;
   }
 
   .dark {
-    --background: 140 15% 15%;
-    --foreground: 40 30% 96%;
+    --background: 130 15% 15%;
+    --foreground: 60 15% 96%;
 
-    --card: 140 10% 20%;
-    --card-foreground: 40 30% 96%;
+    --card: 130 10% 20%;
+    --card-foreground: 60 15% 96%;
 
-    --popover: 140 10% 20%;
-    --popover-foreground: 40 30% 96%;
+    --popover: 130 10% 20%;
+    --popover-foreground: 60 15% 96%;
 
-    --primary: 140 25% 35%;
-    --primary-foreground: 40 30% 96%;
+    --primary: 130 20% 35%;
+    --primary-foreground: 60 15% 96%;
 
-    --secondary: 140 10% 25%;
-    --secondary-foreground: 40 30% 96%;
+    --secondary: 130 10% 25%;
+    --secondary-foreground: 60 15% 96%;
 
-    --muted: 140 10% 25%;
-    --muted-foreground: 140 10% 70%;
+    --muted: 130 10% 25%;
+    --muted-foreground: 130 10% 70%;
 
     --accent: 347 70% 70%;
-    --accent-foreground: 40 30% 96%;
+    --accent-foreground: 60 15% 96%;
 
     --destructive: 0 62.8% 40.6%;
-    --destructive-foreground: 40 30% 96%;
+    --destructive-foreground: 60 15% 96%;
 
-    --border: 140 10% 25%;
-    --input: 140 10% 25%;
-    --ring: 140 25% 35%;
+    --border: 130 10% 25%;
+    --input: 130 10% 25%;
+    --ring: 130 20% 35%;
 
-    --sidebar-background: 140 10% 20%;
-    --sidebar-foreground: 40 30% 96%;
-    --sidebar-primary: 140 25% 35%;
-    --sidebar-primary-foreground: 40 30% 96%;
-    --sidebar-accent: 140 10% 25%;
-    --sidebar-accent-foreground: 40 30% 96%;
-    --sidebar-border: 140 10% 25%;
+    --sidebar-background: 130 10% 20%;
+    --sidebar-foreground: 60 15% 96%;
+    --sidebar-primary: 130 20% 35%;
+    --sidebar-primary-foreground: 60 15% 96%;
+    --sidebar-accent: 130 10% 25%;
+    --sidebar-accent-foreground: 60 15% 96%;
+    --sidebar-border: 130 10% 25%;
     --sidebar-ring: 342 30% 40%;
   }
 }
@@ -110,19 +110,19 @@
   }
 
   .nature-gradient {
-    @apply bg-gradient-to-br from-[#F2FCE2] to-[#E6EDC9];
+    @apply bg-gradient-to-br from-sage-100 to-sage-200;
   }
 
-  .beige-gradient {
-    @apply bg-gradient-to-br from-[#F5F0E5] to-[#EAE0C9];
+  .greige-gradient {
+    @apply bg-gradient-to-br from-greige-100 to-greige-200;
   }
   
   .pink-gradient {
-    @apply bg-gradient-to-br from-[#FFDEE2] to-[#FFC8CE];
+    @apply bg-gradient-to-br from-blush-100 to-blush-200;
   }
   
-  .green-gradient {
-    @apply bg-gradient-to-br from-[#E1F0E5] to-[#D1E6D7];
+  .sage-gradient {
+    @apply bg-gradient-to-br from-sage-100 to-sage-300;
   }
   
   .greige-card {
@@ -133,4 +133,3 @@
     @apply bg-accent/30 border border-accent/40 shadow-sm hover:shadow-md transition-all duration-300;
   }
 }
-

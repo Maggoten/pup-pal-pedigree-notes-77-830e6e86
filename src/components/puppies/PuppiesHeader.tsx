@@ -12,7 +12,7 @@ const PuppiesHeader: React.FC<PuppiesHeaderProps> = ({ onAddLitterClick }) => {
     <div className="flex justify-end">
       <Button 
         onClick={onAddLitterClick} 
-        className="flex items-center gap-2 mb-6 bg-primary hover:bg-primary/90 text-primary-foreground"
+        className="flex items-center gap-2 mb-6 bg-sage-500 hover:bg-sage-600 text-white"
       >
         <PlusCircle className="h-4 w-4" />
         Add New Litter

@@ -10,7 +10,7 @@ interface PuppiesTableProps {
 const PuppiesTable: React.FC<PuppiesTableProps> = ({ puppies }) => {
   return (
     <Table className="border border-border rounded-md overflow-hidden">
-      <TableHeader className="bg-secondary/40">
+      <TableHeader className="bg-greige-100/40">
         <TableRow>
           <TableHead className="text-foreground font-medium">Name</TableHead>
           <TableHead className="text-foreground font-medium">Gender</TableHead>
@@ -25,9 +25,9 @@ const PuppiesTable: React.FC<PuppiesTableProps> = ({ puppies }) => {
             : 0;
             
           return (
-            <TableRow key={puppy.id} className="hover:bg-secondary/20">
+            <TableRow key={puppy.id} className="hover:bg-greige-100/20">
               <TableCell className="font-medium">{puppy.name}</TableCell>
-              <TableCell className={puppy.gender === 'male' ? 'text-blue-500' : 'text-pink-400'}>
+              <TableCell className={puppy.gender === 'male' ? 'text-sage-600' : 'text-blush-400'}>
                 {puppy.gender}
               </TableCell>
               <TableCell>{puppy.color}</TableCell>
