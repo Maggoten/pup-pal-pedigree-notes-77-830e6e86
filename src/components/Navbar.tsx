@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar } from 'lucide-react';
+import { LogOut, Menu, Calendar, Dog, FileText, Settings, PawPrint } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,6 +11,7 @@ import {
   DrawerTrigger,
   DrawerClose
 } from '@/components/ui/drawer';
+import BreedingJourneyLogo from './illustrations/BreedingJourneyLogo';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
@@ -78,8 +79,9 @@ export const Navbar: React.FC = () => {
               </nav>
             </DrawerContent>
           </Drawer>
-          <Dog className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold text-primary">Breeding Journey</span>
+          <Link to="/">
+            <BreedingJourneyLogo />
+          </Link>
         </div>
         
         <nav className="hidden md:flex items-center space-x-4">

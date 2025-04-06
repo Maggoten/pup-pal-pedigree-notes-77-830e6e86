@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { Calendar, PawPrint, Heart } from 'lucide-react';
+import { Calendar, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import StatsCards from './StatsCards';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { format } from 'date-fns';
+import DogIllustration from '../illustrations/DogIllustration';
 
 interface DashboardHeroProps {
   username: string;
@@ -31,23 +32,26 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       icon: <Calendar className="h-5 w-5 text-sage-600" />,
       highlight: reminders.highPriority > 0 ? `${reminders.highPriority} high priority` : null,
       path: "#reminders",
-      color: "bg-sage-50 border-sage-200 hover:border-sage-300"
+      color: "bg-sage-50 border-sage-200 hover:border-sage-300",
+      breed: "generic" as const
     },
     {
       title: "Planned Litters",
       count: plannedLitters.count,
-      icon: <PawPrint className="h-5 w-5 text-brown-600" />,
+      icon: <DogIllustration breed="shetland-sheepdog" size={20} color="#7A6E52" secondaryColor="#F0EDE5" />,
       highlight: plannedLitters.nextDate ? `Next: ${format(plannedLitters.nextDate, 'MMM d')}` : null,
       path: "/planned-litters",
-      color: "bg-greige-50 border-greige-200 hover:border-greige-300"
+      color: "bg-greige-50 border-greige-200 hover:border-greige-300",
+      breed: "shetland-sheepdog" as const
     },
     {
       title: "Active Pregnancies",
       count: activePregnancies.length,
-      icon: <PawPrint className="h-5 w-5 text-blush-600" />,
+      icon: <DogIllustration breed="border-collie" size={20} color="#B3003A" secondaryColor="#FFDEE8" />,
       highlight: activePregnancies.length > 0 ? `${activePregnancies[0].daysLeft} days to due date` : null,
       path: "/pregnancy",
-      color: "bg-blush-50 border-blush-200 hover:border-blush-300"
+      color: "bg-blush-50 border-blush-200 hover:border-blush-300",
+      breed: "border-collie" as const
     },
     {
       title: "Recent Litters",
@@ -55,18 +59,29 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       icon: <Heart className="h-5 w-5 text-sage-600" />,
       highlight: recentLitters.latest ? `Latest: ${format(recentLitters.latest, 'MMM d')}` : null,
       path: "/my-litters",
-      color: "bg-sage-100 border-sage-300 hover:border-sage-400"
+      color: "bg-sage-100 border-sage-300 hover:border-sage-400",
+      breed: "generic" as const
     }
   ];
   
   return (
     <div className="rounded-lg overflow-hidden border border-greige-300 sage-gradient relative">
-      {/* Decorative elements */}
+      {/* Background illustration */}
       <div className="absolute top-0 right-0 opacity-10">
-        <PawPrint className="h-40 w-40 text-primary transform rotate-12" />
+        <DogIllustration 
+          breed="border-collie"
+          size={160}
+          color="#7A6E52"
+          secondaryColor="#F0EDE5"
+        />
       </div>
       <div className="absolute bottom-0 left-0 opacity-10">
-        <PawPrint className="h-28 w-28 text-primary transform -rotate-12" />
+        <DogIllustration 
+          breed="shetland-sheepdog"
+          size={120}
+          color="#4D684D"
+          secondaryColor="#E7EDE3"
+        />
       </div>
       
       <div className="p-6 md:p-8 relative z-10">
@@ -88,9 +103,13 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
                 <div className="text-xs text-muted-foreground mt-1 relative z-10">{card.highlight}</div>
               )}
               
-              {/* Small decorative paw print */}
+              {/* Card background illustration */}
               <div className="absolute bottom-0 right-0 opacity-10">
-                <PawPrint className="h-12 w-12 text-primary transform rotate-12" />
+                <DogIllustration 
+                  breed={card.breed}
+                  size={48}
+                  color="currentColor"
+                />
               </div>
             </div>
           ))}
