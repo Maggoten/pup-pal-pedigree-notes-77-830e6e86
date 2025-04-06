@@ -7,6 +7,7 @@ import StatsCards from './StatsCards';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { format } from 'date-fns';
 import DogIllustration from '../illustrations/DogIllustration';
+import BreedingJourneyLogo from '../illustrations/BreedingJourneyLogo';
 
 interface DashboardHeroProps {
   username: string;
@@ -67,22 +68,20 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   return (
     <div className="rounded-lg overflow-hidden border border-greige-300 sage-gradient relative">
       {/* Background illustration */}
-      <div className="absolute top-0 right-0 opacity-10">
-        <DogIllustration 
-          breed="border-collie"
-          size={160}
-          color="#7A6E52"
-        />
-      </div>
-      <div className="absolute bottom-0 left-0 opacity-10">
-        <DogIllustration 
-          breed="shetland-sheepdog"
-          size={120}
-          color="#4D684D"
+      <div className="absolute top-8 right-8 opacity-15">
+        <img 
+          src="/lovable-uploads/15be06f0-e9ee-449e-911e-078b98f91a34.png" 
+          alt="Breeding Journey Logo" 
+          className="h-32 w-auto"
         />
       </div>
       
       <div className="p-6 md:p-8 relative z-10">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold">Welcome, {username}!</h2>
+          <p className="text-muted-foreground">Where Smart Breeding Begins</p>
+        </div>
+        
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {metricCards.map((card, index) => (
             <div 

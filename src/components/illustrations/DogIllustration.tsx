@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Heart } from 'lucide-react';
+import { Dog } from 'lucide-react';
 
 export type DogBreed = 'border-collie' | 'shetland-sheepdog' | 'generic';
 
@@ -21,8 +21,8 @@ const DogIllustration: React.FC<DogIllustrationProps> = ({
   secondaryColor = '#F0EDE5', // greige-100
   withBackground = false
 }) => {
-  // Use heart icon for all breed types with slight variations
-  const heartSize = Math.floor(size * 0.7); // Adjust heart size relative to the container
+  // Use the actual dog icon for the illustrations
+  const iconSize = Math.floor(size * 0.9);
   
   return (
     <div 
@@ -36,11 +36,10 @@ const DogIllustration: React.FC<DogIllustrationProps> = ({
         />
       )}
       
-      <Heart 
-        size={heartSize} 
+      <Dog 
+        size={iconSize} 
         color={color}
         className={`transform ${breed === 'border-collie' ? 'rotate-12' : breed === 'shetland-sheepdog' ? '-rotate-12' : ''}`}
-        fill={breed === 'border-collie' ? 'rgba(255,0,0,0.1)' : breed === 'shetland-sheepdog' ? 'rgba(255,0,0,0.2)' : 'transparent'}
         strokeWidth={breed === 'generic' ? 2 : 1.5}
       />
     </div>
