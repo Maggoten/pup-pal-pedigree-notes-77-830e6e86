@@ -12,23 +12,23 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
   showSlogan = false,
   compact = false
 }) => {
-  // Calculate the new dimensions (20% bigger)
+  // Calculate new sizes based on 50% increase
   const baseWidth = compact ? 8 : 10;
   const baseHeight = compact ? 8 : 10;
-  const newWidth = baseWidth * 1.2;
-  const newHeight = baseHeight * 1.2;
-  
+  const newWidth = baseWidth * 1.5;
+  const newHeight = baseHeight * 1.5;
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <div className={`relative w-${newWidth} h-${newHeight}`} style={{ width: `${newWidth}rem`, height: `${newHeight}rem` }}>
         <img 
-          src="/lovable-uploads/2b559bb9-22c4-4aa5-aa5a-059da0b6c483.png" 
+          src="/lovable-uploads/0435bbbb-272c-4b9e-b210-c70112066294.png" 
           alt="Breeding Journey Logo" 
           className="w-full h-full object-contain"
         />
       </div>
       <div className="flex flex-col">
-        <span className={`font-le-jour font-bold tracking-tight ${compact ? 'text-lg' : 'text-xl'}`}>Breeding Journey</span>
+        <span className={`font-le-jour font-bold tracking-tight ${compact ? 'text-xl' : 'text-2xl'}`}>Breeding Journey</span>
         {showSlogan && (
           <span className="text-xs text-muted-foreground">Where Smart Breeding Begins</span>
         )}
