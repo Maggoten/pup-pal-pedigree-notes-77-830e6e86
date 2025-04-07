@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
+import BreedingJourneyLogo from '@/components/BreedingJourneyLogo';
 import {
   Drawer,
   DrawerContent,
@@ -39,7 +40,7 @@ export const Navbar: React.FC = () => {
   ];
   
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur shadow-sm">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Drawer>
@@ -78,8 +79,7 @@ export const Navbar: React.FC = () => {
               </nav>
             </DrawerContent>
           </Drawer>
-          <Dog className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold text-primary">Breeding Journey</span>
+          <BreedingJourneyLogo />
         </div>
         
         <nav className="hidden md:flex items-center space-x-4">

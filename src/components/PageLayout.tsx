@@ -19,7 +19,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       
-      <main className="flex-1 container py-6 space-y-6">
+      <main className="flex-1 container py-8 space-y-6">
         <div className="flex flex-col items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             {icon && <div className="text-primary">{icon}</div>}
