@@ -26,9 +26,9 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
         />
       </div>
       <div className="flex flex-col">
-        <span className={`font-le-jour font-bold tracking-tight ${compact ? 'text-lg' : 'text-xl'}`}>Breeding Journey</span>
+        <span className={`font-le-jour font-bold tracking-tight ${compact ? 'text-lg' : 'text-xl'} text-primary`}>Breeding Journey</span>
         {showSlogan && (
-          <span className="text-xs text-muted-foreground">Where Smart Breeding Begins</span>
+          <span className="text-xs text-muted-foreground italic">Where Smart Breeding Begins</span>
         )}
       </div>
     </div>

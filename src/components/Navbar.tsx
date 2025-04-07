@@ -96,7 +96,7 @@ export const Navbar: React.FC = () => {
               </nav>
             </DrawerContent>
           </Drawer>
-          <Link to="/">
+          <Link to="/" className="hover:opacity-80 transition-opacity duration-200">
             <BreedingJourneyLogo showSlogan={false} />
           </Link>
         </div>

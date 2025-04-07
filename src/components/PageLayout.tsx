@@ -36,7 +36,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       
       <footer className="bg-background border-t py-6">
         <div className="container flex flex-col md:flex-row justify-between items-center gap-4">
-          <BreedingJourneyLogo showSlogan={true} />
+          <div className="transition-transform hover:scale-105 duration-300">
+            <BreedingJourneyLogo showSlogan={true} />
+          </div>
           <div className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Breeding Journey. All rights reserved.
           </div>
