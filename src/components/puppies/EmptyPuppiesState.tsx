@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import DogIllustration from '../illustrations/DogIllustration';
+import { PawPrint, Baby } from 'lucide-react';
 
 interface EmptyPuppiesStateProps {
   onAddLitter: () => void;
@@ -17,26 +17,14 @@ const EmptyPuppiesState: React.FC<EmptyPuppiesStateProps> = ({ onAddLitter }) =>
       <CardContent className="text-center py-16 px-6 relative z-10">
         <div className="flex items-center justify-center mb-6">
           <div className="relative mx-auto">
-            <div className="absolute -right-8 -top-2">
-              <DogIllustration 
-                breed="generic" 
-                size={40} 
-                color="#88A684"
-              />
+            <div className="absolute -right-6 top-1">
+              <PawPrint className="h-10 w-10 text-sage-300 transform rotate-12" />
             </div>
-            <div className="bg-sage-200/50 w-24 h-24 rounded-full flex items-center justify-center">
-              <DogIllustration 
-                breed="border-collie" 
-                size={60} 
-                color="#4D684D"
-              />
+            <div className="bg-sage-200/50 w-20 h-20 rounded-full flex items-center justify-center">
+              <Baby className="h-10 w-10 text-sage-600" />
             </div>
-            <div className="absolute -left-8 -bottom-2">
-              <DogIllustration 
-                breed="shetland-sheepdog" 
-                size={40} 
-                color="#88A684"
-              />
+            <div className="absolute -left-6 bottom-1">
+              <PawPrint className="h-8 w-8 text-sage-300 transform -rotate-12" />
             </div>
           </div>
         </div>

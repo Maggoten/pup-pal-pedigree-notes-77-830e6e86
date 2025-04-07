@@ -28,22 +28,6 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
   }
 };
 
-// Handle profile update functionality
-export const updateUserProfile = async (currentUser: User, userData: Partial<User>): Promise<User | null> => {
-  try {
-    // Mock profile update - in a real app, this would call an API
-    const updatedUser = {
-      ...currentUser,
-      ...userData
-    };
-    
-    return updatedUser;
-  } catch (error) {
-    console.error("Profile update error:", error);
-    return null;
-  }
-};
-
 // Save user data to local storage
 export const saveUserToStorage = (user: User) => {
   localStorage.setItem('user', JSON.stringify(user));

@@ -1,12 +1,11 @@
 
 import React from 'react';
-import { Calendar, Heart } from 'lucide-react';
+import { Calendar, PawPrint, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import StatsCards from './StatsCards';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { format } from 'date-fns';
-import DogIllustration from '../illustrations/DogIllustration';
 
 interface DashboardHeroProps {
   username: string;
@@ -32,26 +31,23 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       icon: <Calendar className="h-5 w-5 text-sage-600" />,
       highlight: reminders.highPriority > 0 ? `${reminders.highPriority} high priority` : null,
       path: "#reminders",
-      color: "bg-sage-50 border-sage-200 hover:border-sage-300",
-      breed: "generic" as const
+      color: "bg-sage-50 border-sage-200 hover:border-sage-300"
     },
     {
       title: "Planned Litters",
       count: plannedLitters.count,
-      icon: <DogIllustration breed="shetland-sheepdog" size={20} color="#7A6E52" />,
+      icon: <PawPrint className="h-5 w-5 text-brown-600" />,
       highlight: plannedLitters.nextDate ? `Next: ${format(plannedLitters.nextDate, 'MMM d')}` : null,
       path: "/planned-litters",
-      color: "bg-greige-50 border-greige-200 hover:border-greige-300",
-      breed: "shetland-sheepdog" as const
+      color: "bg-greige-50 border-greige-200 hover:border-greige-300"
     },
     {
       title: "Active Pregnancies",
       count: activePregnancies.length,
-      icon: <DogIllustration breed="border-collie" size={20} color="#B3003A" />,
+      icon: <PawPrint className="h-5 w-5 text-blush-600" />,
       highlight: activePregnancies.length > 0 ? `${activePregnancies[0].daysLeft} days to due date` : null,
       path: "/pregnancy",
-      color: "bg-blush-50 border-blush-200 hover:border-blush-300",
-      breed: "border-collie" as const
+      color: "bg-blush-50 border-blush-200 hover:border-blush-300"
     },
     {
       title: "Recent Litters",
@@ -59,34 +55,21 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       icon: <Heart className="h-5 w-5 text-sage-600" />,
       highlight: recentLitters.latest ? `Latest: ${format(recentLitters.latest, 'MMM d')}` : null,
       path: "/my-litters",
-      color: "bg-sage-100 border-sage-300 hover:border-sage-400",
-      breed: "generic" as const
+      color: "bg-sage-100 border-sage-300 hover:border-sage-400"
     }
   ];
   
   return (
     <div className="rounded-lg overflow-hidden border border-greige-300 sage-gradient relative">
-      {/* Background illustration */}
+      {/* Decorative elements */}
       <div className="absolute top-0 right-0 opacity-10">
-        <DogIllustration 
-          breed="border-collie"
-          size={160}
-          color="#7A6E52"
-        />
+        <PawPrint className="h-40 w-40 text-primary transform rotate-12" />
       </div>
       <div className="absolute bottom-0 left-0 opacity-10">
-        <DogIllustration 
-          breed="shetland-sheepdog"
-          size={120}
-          color="#4D684D"
-        />
+        <PawPrint className="h-28 w-28 text-primary transform -rotate-12" />
       </div>
       
       <div className="p-6 md:p-8 relative z-10">
-        <div className="mb-4">
-          <h2 className="text-2xl font-bold">Welcome back, {username}!</h2>
-          <p className="text-muted-foreground text-sm">Where Smart Breeding Begins</p>
-        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {metricCards.map((card, index) => (
             <div 
@@ -105,13 +88,9 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
                 <div className="text-xs text-muted-foreground mt-1 relative z-10">{card.highlight}</div>
               )}
               
-              {/* Card background illustration */}
+              {/* Small decorative paw print */}
               <div className="absolute bottom-0 right-0 opacity-10">
-                <DogIllustration 
-                  breed={card.breed}
-                  size={48}
-                  color="currentColor"
-                />
+                <PawPrint className="h-12 w-12 text-primary transform rotate-12" />
               </div>
             </div>
           ))}

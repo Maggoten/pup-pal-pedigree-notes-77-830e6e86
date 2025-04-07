@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { LineChart } from 'lucide-react';
-import DogIllustration from '../../illustrations/DogIllustration';
+import { LineChart, PawPrint, LineChartIcon } from 'lucide-react';
 
 interface EmptyChartStateProps {
   type: 'no-selection' | 'no-data';
@@ -15,25 +14,13 @@ const EmptyChartState: React.FC<EmptyChartStateProps> = ({ type, logType, puppyN
       <div className="relative mx-auto w-20 h-20 mb-6">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center">
-            {type === 'no-selection' ? (
-              <DogIllustration 
-                breed="shetland-sheepdog"
-                size={40}
-                color="var(--primary)"
-              />
-            ) : (
-              <LineChart className="h-8 w-8 text-primary/80" />
-            )}
+            <LineChart className="h-8 w-8 text-primary/80" />
           </div>
         </div>
         {type === 'no-selection' && (
           <div className="absolute -bottom-3 -right-3">
             <div className="bg-accent/20 rounded-full p-1.5">
-              <DogIllustration 
-                breed="generic"
-                size={20}
-                color="var(--accent)"
-              />
+              <PawPrint className="h-5 w-5 text-accent/80" />
             </div>
           </div>
         )}

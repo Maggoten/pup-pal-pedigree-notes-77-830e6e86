@@ -11,7 +11,6 @@ import PlannedLitters from "./pages/PlannedLitters";
 import PregnancyDetails from "./pages/PregnancyDetails";
 import MyLitters from "./pages/MyLitters";
 import Login from "./pages/Login";
-import Settings from "./pages/Settings";
 import AuthGuard from "./components/AuthGuard";
 import { AuthProvider } from "./hooks/useAuth";
 import { DogsProvider } from "./context/DogsContext";
@@ -48,7 +47,6 @@ const App = () => {
                   />
                   <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
                   <Route path="/my-litters" element={<MyLitters />} />
-                  <Route path="/settings" element={<Settings />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

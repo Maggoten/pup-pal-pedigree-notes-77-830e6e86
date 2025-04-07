@@ -65,24 +65,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             recentLitters={recentLittersData}
           />
           
-          {/* Updated dashboard content layout */}
+          {/* Main dashboard content */}
           <div className="grid gap-6 grid-cols-1 lg:grid-cols-12">
-            {/* Full-width calendar (spans all 12 columns) */}
-            <div className="lg:col-span-12">
-              <BreedingCalendar />
-            </div>
-            
-            {/* Side-by-side reminders and stats */}
-            <div className="lg:col-span-4">
-              <div className="space-y-6">
+            {/* Left side - Calendar and Weekly Tasks */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <BreedingCalendar />
                 <BreedingReminders />
-                <BreedingStats />
               </div>
+              
+              <WeeklyTasks reminders={reminders} onComplete={handleMarkComplete} />
             </div>
             
-            {/* Weekly tasks take up more space */}
-            <div className="lg:col-span-8">
-              <WeeklyTasks reminders={reminders} onComplete={handleMarkComplete} />
+            {/* Right side - Annual Breeding Stats */}
+            <div className="lg:col-span-5">
+              <BreedingStats />
             </div>
           </div>
         </div>

@@ -4,7 +4,6 @@ export interface User {
   firstName?: string;
   lastName?: string;
   address?: string;
-  kennelName?: string;
 }
 
 export interface RegisterData {
@@ -21,5 +20,4 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   register: (userData: RegisterData) => Promise<boolean>;
-  updateProfile: (userData: Partial<User>) => Promise<boolean>;
 }
