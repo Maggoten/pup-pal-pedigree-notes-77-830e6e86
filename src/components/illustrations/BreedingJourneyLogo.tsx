@@ -20,7 +20,7 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
     <div className={`flex items-center gap-2 ${className}`}>
       <div className={`relative ${compact ? `w-${baseCompactSize} h-${baseCompactSize}` : `w-${baseNormalSize} h-${baseNormalSize}`}`}>
         <img 
-          src="/lovable-uploads/d966c585-07ce-4936-b57b-d3e1d61993e9.png" 
+          src="/lovable-uploads/048d1d94-ecb8-4790-8b0b-6964d7fd8bfb.png" 
           alt="Breeding Journey Logo" 
           className="w-full h-full object-contain"
         />
