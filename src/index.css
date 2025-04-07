@@ -6,7 +6,7 @@
 @layer base {
   :root {
     /* Light Mode Colors */
-    --background: 60 15% 96%;
+    --background: 37 13% 92%; /* #efebe7 in HSL */
     --foreground: 130 20% 25%;
 
     --card: 0 0% 100%;

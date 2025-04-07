@@ -45,12 +45,12 @@ export const Navbar: React.FC = () => {
   
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="container flex h-20 items-center justify-between">
+        <div className="flex items-center gap-4">
           <Drawer>
             <DrawerTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="md:hidden p-3">
+                <Menu className="h-6 w-6" />
                 <span className="sr-only">Open menu</span>
               </Button>
             </DrawerTrigger>
@@ -64,10 +64,10 @@ export const Navbar: React.FC = () => {
                     <Button 
                       variant={isActive(item.path) ? "default" : "ghost"} 
                       asChild
-                      className="justify-start w-full"
+                      className="justify-start w-full py-3 text-base"
                     >
-                      <Link to={item.path} className="flex items-center gap-2">
-                        <item.icon className="h-4 w-4" />
+                      <Link to={item.path} className="flex items-center gap-3">
+                        <item.icon className="h-5 w-5" />
                         <span>{item.label}</span>
                       </Link>
                     </Button>
@@ -76,20 +76,20 @@ export const Navbar: React.FC = () => {
                 <DrawerClose asChild>
                   <Button 
                     variant="ghost" 
-                    className="justify-start w-full"
+                    className="justify-start w-full py-3 text-base"
                     onClick={handleSettings}
                   >
-                    <Settings className="h-4 w-4 mr-2" />
+                    <Settings className="h-5 w-5 mr-3" />
                     <span>Settings</span>
                   </Button>
                 </DrawerClose>
                 <DrawerClose asChild>
                   <Button 
                     variant="destructive" 
-                    className="justify-start w-full mt-4"
+                    className="justify-start w-full mt-4 py-3 text-base"
                     onClick={handleLogout}
                   >
-                    <LogOut className="h-4 w-4 mr-2" />
+                    <LogOut className="h-5 w-5 mr-3" />
                     <span>Logout</span>
                   </Button>
                 </DrawerClose>
@@ -101,23 +101,23 @@ export const Navbar: React.FC = () => {
           </Link>
         </div>
         
-        <nav className="hidden md:flex items-center space-x-4">
+        <nav className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
-            <Button key={item.path} variant={isActive(item.path) ? "default" : "ghost"} asChild>
-              <Link to={item.path} className="flex items-center gap-2">
-                <item.icon className="h-4 w-4" />
+            <Button key={item.path} variant={isActive(item.path) ? "default" : "ghost"} asChild className="text-base py-6 px-4">
+              <Link to={item.path} className="flex items-center gap-3">
+                <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
               </Link>
             </Button>
           ))}
         </nav>
         
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
-            <LogOut className="h-5 w-5" />
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout" className="p-3">
+            <LogOut className="h-6 w-6" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={handleSettings} title="Settings">
-            <Settings className="h-5 w-5" />
+          <Button variant="ghost" size="icon" onClick={handleSettings} title="Settings" className="p-3">
+            <Settings className="h-6 w-6" />
           </Button>
         </div>
       </div>
