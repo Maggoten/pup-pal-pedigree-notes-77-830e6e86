@@ -22,7 +22,7 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
     <Link to="/" className="flex items-center gap-2 transition-transform hover:scale-105">
       <div className="relative">
         <img 
-          src="/lovable-uploads/15be06f0-e9ee-449e-911e-078b98f91a34.png" 
+          src="/lovable-uploads/0c5301cf-baab-4805-bd48-3354b6664483.png" 
           alt="Breeding Journey Logo" 
           className={`${sizeMap[size]} object-contain`}
         />
