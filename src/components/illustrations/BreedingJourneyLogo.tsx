@@ -7,27 +7,25 @@ interface BreedingJourneyLogoProps {
   compact?: boolean;
 }
 
-const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
-  className = '',
+const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({ 
+  className = '', 
   showSlogan = false,
   compact = false
 }) => {
-  // Calculate sizes at 1/3 of current size
-  const baseWidth = compact ? 10 : 13; // 32/3 ≈ 10, 40/3 ≈ 13 
-  const baseHeight = compact ? 10 : 13; // 32/3 ≈ 10, 40/3 ≈ 13
-
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className={`relative w-${baseWidth} h-${baseHeight}`}>
+      <div className={`relative ${compact ? 'w-8 h-8' : 'w-10 h-10'}`}>
         <img 
+          src="/doglogotransparent.png" 
           alt="Breeding Journey Logo" 
-          className="w-full h-full object-contain" 
-          src="/lovable-uploads/c9617cba-696b-4f69-b5a2-03b55eb6b15c.png" 
+          className="w-full h-full object-contain"
         />
       </div>
       <div className="flex flex-col">
         <span className={`font-le-jour font-bold tracking-tight ${compact ? 'text-lg' : 'text-xl'}`}>Breeding Journey</span>
-        {showSlogan && <span className="text-xs text-muted-foreground">Where Smart Breeding Begins</span>}
+        {showSlogan && (
+          <span className="text-xs text-muted-foreground">Where Smart Breeding Begins</span>
+        )}
       </div>
     </div>
   );
