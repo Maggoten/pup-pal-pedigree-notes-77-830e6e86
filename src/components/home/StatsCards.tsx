@@ -75,10 +75,19 @@ const StatsCard: React.FC<StatsCardProps> = ({
 
 interface StatsCardsProps {
   activePregnancies?: ActivePregnancy[];
+  reminders?: { count: number; highPriority: number };
+  plannedLitters?: { count: number; nextDate: Date };
+  recentLitters?: { count: number; latest: Date };
   condensed?: boolean;
 }
 
-const StatsCards: React.FC<StatsCardsProps> = ({ activePregnancies = [], condensed = false }) => {
+const StatsCards: React.FC<StatsCardsProps> = ({ 
+  activePregnancies = [], 
+  reminders,
+  plannedLitters,
+  recentLitters,
+  condensed = false 
+}) => {
   const { dogs } = useDogs();
   
   // Calculate statistics
@@ -86,8 +95,9 @@ const StatsCards: React.FC<StatsCardsProps> = ({ activePregnancies = [], condens
   const femaleDogs = dogs.filter(dog => dog.gender === 'female').length;
   const maleDogs = dogs.filter(dog => dog.gender === 'male').length;
   
-  const plannedLittersCount = Math.round(Math.random() * 5); // This will be replaced with actual data in the future
-  const littersCount = Math.round(Math.random() * 3); // This will be replaced with actual data in the future
+  // Use provided values or defaults
+  const plannedLittersCount = plannedLitters?.count ?? Math.round(Math.random() * 5);
+  const littersCount = recentLitters?.count ?? Math.round(Math.random() * 3);
   
   const statCards = [
     {
