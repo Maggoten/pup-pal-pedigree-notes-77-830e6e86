@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Dog } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import LoginForm, { LoginFormValues } from './LoginForm';
 import RegistrationForm, { RegistrationFormValues } from './RegistrationForm';
+import BreedingJourneyLogo from '@/components/BreedingJourneyLogo';
 
 interface AuthTabsProps {
   onLogin: (values: LoginFormValues) => void;
@@ -17,9 +17,9 @@ const AuthTabs: React.FC<AuthTabsProps> = ({ onLogin, onRegister, isLoading }) =
     <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="space-y-1 text-center">
         <div className="flex justify-center mb-2">
-          <Dog className="h-12 w-12 text-primary" />
+          <BreedingJourneyLogo size="lg" showText={false} />
         </div>
-        <CardTitle className="text-2xl font-bold text-foreground">Breeding Journey</CardTitle>
+        <CardTitle className="text-2xl font-bold text-foreground font-le-jour">Breeding Journey</CardTitle>
         <CardDescription>
           Your companion for dog breeding management
         </CardDescription>
