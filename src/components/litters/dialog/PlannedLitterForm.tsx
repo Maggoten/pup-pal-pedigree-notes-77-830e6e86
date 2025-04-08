@@ -3,10 +3,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import DatePicker from '@/components/common/DatePicker';
 import { PlannedLitter } from '@/types/breeding';
-import ExternalSireFields from './ExternalSireFields';
 
 interface PlannedLitterFormProps {
   plannedLitters: PlannedLitter[];
@@ -82,26 +80,6 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
           placeholder="Spring Litter 2025" 
         />
       </div>
-
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="external-sire"
-          checked={isExternalSire}
-          onCheckedChange={setIsExternalSire}
-        />
-        <Label htmlFor="external-sire">External Sire (not in your dogs)</Label>
-      </div>
-
-      {isExternalSire && (
-        <ExternalSireFields
-          externalSireName={externalSireName}
-          setExternalSireName={setExternalSireName}
-          externalSireBreed={externalSireBreed}
-          setExternalSireBreed={setExternalSireBreed}
-          externalSireRegistration={externalSireRegistration}
-          setExternalSireRegistration={setExternalSireRegistration}
-        />
-      )}
 
       <DatePicker 
         date={dateOfBirth} 
