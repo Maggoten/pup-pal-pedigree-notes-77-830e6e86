@@ -76,7 +76,7 @@ const BreedingStats = () => {
   ];
 
   return (
-    <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full beige-gradient">
+    <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full bg-greige-50">
       <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 flex flex-row items-center justify-between">
         <div>
           <CardTitle className="flex items-center gap-2 text-primary">

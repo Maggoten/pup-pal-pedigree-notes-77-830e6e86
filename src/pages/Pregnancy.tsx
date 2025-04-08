@@ -50,14 +50,18 @@ const Pregnancy: React.FC = () => {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2">
-        <ActivePregnanciesList 
-          pregnancies={activePregnancies} 
-          onAddPregnancy={handleAddPregnancyClick} 
-        />
-        <TemperatureLogOverview onLogTemperature={handleLogTemperature} />
+        <div className="bg-greige-50 border border-greige-300 rounded-lg shadow-sm">
+          <ActivePregnanciesList 
+            pregnancies={activePregnancies} 
+            onAddPregnancy={handleAddPregnancyClick} 
+          />
+        </div>
+        <div className="bg-greige-50 border border-greige-300 rounded-lg shadow-sm">
+          <TemperatureLogOverview onLogTemperature={handleLogTemperature} />
+        </div>
       </div>
 
-      <div className="mt-6 beige-gradient rounded-lg border border-greige-300 p-4">
+      <div className="mt-6 bg-greige-50 rounded-lg border border-greige-300 p-4">
         <WeeklyDevelopmentGuide />
       </div>
     </PageLayout>

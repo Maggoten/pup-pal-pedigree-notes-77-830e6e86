@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PawPrint } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
@@ -67,7 +67,7 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
           </div>
         ) : (
           <div className="text-center py-8">
-            <PawPrint className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <Heart className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No Active Pregnancies</h3>
             <p className="text-muted-foreground mb-4">Add a pregnancy to start tracking</p>
             <Button onClick={onAddPregnancy}>Add Pregnancy</Button>

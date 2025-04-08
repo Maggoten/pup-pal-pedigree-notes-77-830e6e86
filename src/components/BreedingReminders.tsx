@@ -17,7 +17,7 @@ const BreedingReminders: React.FC = () => {
   
   return (
     <>
-      <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full relative beige-gradient">
+      <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full relative bg-greige-50">
         {/* Decorative background elements */}
         <div className="absolute top-1 right-1 opacity-5">
           <PawPrint className="h-40 w-40 text-primary transform rotate-12" />

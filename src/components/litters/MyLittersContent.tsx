@@ -24,11 +24,11 @@ const MyLittersContent: React.FC = () => {
     selectedLitter,
     handleAddLitter,
     handleUpdateLitter,
+    handleDeleteLitter,
+    handleArchiveLitter,
     handleAddPuppy,
     handleUpdatePuppy,
     handleDeletePuppy,
-    handleDeleteLitter,
-    handleArchiveLitter,
     handleSelectLitter,
     getAvailableYears
   } = useLitterManagement();
@@ -72,7 +72,7 @@ const MyLittersContent: React.FC = () => {
       description="Track your litters and individual puppies"
       icon={<PawPrint className="h-6 w-6" />}
     >
-      <div className="beige-gradient rounded-lg border border-greige-300 p-4 pb-6">
+      <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 pb-6">
         <Tabs value={categoryTab} onValueChange={setCategoryTab} className="space-y-4">
           <LitterFilterHeader 
             activeLitters={activeLitters}
@@ -124,7 +124,7 @@ const MyLittersContent: React.FC = () => {
       
       {selectedLitter && (
         <div className="mt-6 animate-fade-in space-y-6">
-          <div className="beige-gradient rounded-lg border border-greige-300 p-4">
+          <div className="bg-greige-50 rounded-lg border border-greige-300 p-4">
             <SelectedLitterSection
               selectedLitter={selectedLitter}
               onUpdateLitter={handleUpdateLitter}

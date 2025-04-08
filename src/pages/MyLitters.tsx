@@ -5,9 +5,11 @@ import MyLittersContent from '@/components/litters/MyLittersContent';
 
 const MyLitters: React.FC = () => {
   return (
-    <LitterFilterProvider>
-      <MyLittersContent />
-    </LitterFilterProvider>
+    <div className="bg-greige-50">
+      <LitterFilterProvider>
+        <MyLittersContent />
+      </LitterFilterProvider>
+    </div>
   );
 };
 

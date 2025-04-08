@@ -19,7 +19,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   onAddEvent
 }) => {
   return (
-    <div className="flex flex-row items-center justify-between p-4 pb-2 bg-primary/5 border-b border-primary/20">
+    <div className="flex flex-row items-center justify-between p-4 pb-2 bg-greige-50 border-b border-greige-200">
       <div>
         <CardTitle className="flex items-center gap-2 text-primary text-xl">
           <CalendarIcon className="h-5 w-5" />
