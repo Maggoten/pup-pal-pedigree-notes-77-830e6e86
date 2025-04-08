@@ -6,15 +6,16 @@ export interface PlannedLitter {
   maleName: string;
   femaleName: string;
   expectedHeatDate: string;
+  notes?: string;
   matingDates?: string[];
-  notes: string;
   externalMale?: boolean;
   externalMaleBreed?: string;
+  externalMaleRegistration?: string;
 }
 
-export interface PuppyNote {
+export interface Mating {
   date: string;
-  content: string;
+  notes?: string;
 }
 
 export interface Puppy {
@@ -22,13 +23,15 @@ export interface Puppy {
   name: string;
   gender: 'male' | 'female';
   color: string;
-  breed?: string; // Keep this optional for backward compatibility
-  birthWeight: number;
-  birthDateTime: string;
-  imageUrl?: string;
-  weightLog: { date: string; weight: number }[];
-  heightLog: { date: string; height: number }[];
-  notes?: PuppyNote[]; // Add notes array
+  markings?: string;
+  birthWeight?: number;
+  currentWeight?: number;
+  sold?: boolean;
+  reserved?: boolean;
+  newOwner?: string;
+  notes?: string;
+  collar?: string;
+  microchip?: string;
 }
 
 export interface Litter {
@@ -40,6 +43,5 @@ export interface Litter {
   sireName: string;
   damName: string;
   puppies: Puppy[];
-  archived?: boolean; // New field to mark litters as archived
+  archived?: boolean;
 }
-

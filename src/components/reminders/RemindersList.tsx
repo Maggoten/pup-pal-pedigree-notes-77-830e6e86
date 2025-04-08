@@ -10,10 +10,18 @@ import { useNavigate } from 'react-router-dom';
 interface RemindersListProps {
   reminders: Reminder[];
   onComplete: (id: string) => void;
+  onDelete?: (id: string) => void;
   compact?: boolean;
+  showDelete?: boolean;
 }
 
-const RemindersList: React.FC<RemindersListProps> = ({ reminders, onComplete, compact = false }) => {
+const RemindersList: React.FC<RemindersListProps> = ({ 
+  reminders, 
+  onComplete, 
+  onDelete,
+  compact = false,
+  showDelete = false
+}) => {
   const navigate = useNavigate();
   
   if (reminders.length === 0) {
@@ -34,7 +42,9 @@ const RemindersList: React.FC<RemindersListProps> = ({ reminders, onComplete, co
             dueDate={reminder.dueDate}
             type={reminder.type}
             relatedId={reminder.relatedId}
+            isCompleted={reminder.isCompleted}
             onComplete={onComplete}
+            onDelete={showDelete && onDelete ? onDelete : undefined}
             compact={compact}
           />
         ))}

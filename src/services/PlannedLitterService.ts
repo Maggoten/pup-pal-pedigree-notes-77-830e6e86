@@ -15,6 +15,7 @@ export const plannedLitterFormSchema = z.object({
   externalMale: z.boolean().default(false),
   externalMaleName: z.string().optional(),
   externalMaleBreed: z.string().optional(),
+  externalMaleRegistration: z.string().optional(),
 }).refine(data => {
   if (data.externalMale) {
     return !!data.externalMaleName;
@@ -93,6 +94,7 @@ class PlannedLitterService {
       notes: formValues.notes || '',
       externalMale: formValues.externalMale,
       externalMaleBreed: formValues.externalMaleBreed,
+      externalMaleRegistration: formValues.externalMaleRegistration,
     };
   }
 

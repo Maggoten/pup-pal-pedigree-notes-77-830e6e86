@@ -4,6 +4,8 @@ import { toast } from '@/components/ui/use-toast';
 import { differenceInDays, parseISO, addDays, isSameMonth, isSameDay } from 'date-fns';
 import { createPawPrintIcon, createCalendarClockIcon, createScaleIcon } from '@/utils/iconUtils';
 import { litterService } from '@/services/LitterService';
+import { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface Reminder {
   id: string;
@@ -12,13 +14,62 @@ export interface Reminder {
   icon: React.ReactNode;
   dueDate: Date;
   priority: 'high' | 'medium' | 'low';
-  type: 'heat' | 'mating' | 'vaccination' | 'deworming' | 'weighing' | 'vet-visit' | 'birthday' | 'other';
+  type: 'heat' | 'mating' | 'vaccination' | 'deworming' | 'weighing' | 'vet-visit' | 'birthday' | 'other' | 'custom';
   relatedId?: string; // ID of the related dog or litter
+  isCompleted?: boolean;
+}
+
+export interface CustomReminderInput {
+  title: string;
+  description: string;
+  dueDate: Date;
+  priority: 'high' | 'medium' | 'low';
 }
 
 export const useBreedingReminders = () => {
   const { dogs } = useDogs();
   const today = new Date();
+  const [customReminders, setCustomReminders] = useState<Reminder[]>([]);
+  const [completedReminders, setCompletedReminders] = useState<Set<string>>(new Set());
+  
+  // Load custom reminders and completed state from localStorage on mount
+  useEffect(() => {
+    const storedCustomReminders = localStorage.getItem('customReminders');
+    if (storedCustomReminders) {
+      const parsed = JSON.parse(storedCustomReminders).map((r: any) => ({
+        ...r,
+        dueDate: new Date(r.dueDate),
+        icon: createCalendarClockIcon(
+          r.priority === 'high' ? 'rose-500' : 
+          r.priority === 'medium' ? 'amber-500' : 'green-500'
+        )
+      }));
+      setCustomReminders(parsed);
+    }
+    
+    const storedCompletedReminders = localStorage.getItem('completedReminders');
+    if (storedCompletedReminders) {
+      setCompletedReminders(new Set(JSON.parse(storedCompletedReminders)));
+    }
+  }, []);
+  
+  // Save custom reminders to localStorage when they change
+  useEffect(() => {
+    if (customReminders.length > 0) {
+      const serializableReminders = customReminders.map(r => ({
+        ...r,
+        icon: null // Don't store React nodes in localStorage
+      }));
+      localStorage.setItem('customReminders', JSON.stringify(serializableReminders));
+    }
+  }, [customReminders]);
+  
+  // Save completed reminders to localStorage when they change
+  useEffect(() => {
+    if (completedReminders.size > 0) {
+      localStorage.setItem('completedReminders', JSON.stringify([...completedReminders]));
+    }
+  }, [completedReminders]);
   
   // Generate reminders based on dogs data
   const generateReminders = (): Reminder[] => {
@@ -231,27 +282,96 @@ export const useBreedingReminders = () => {
       });
     }
     
-    return reminders;
+    // Add custom reminders
+    const allReminders = [...reminders, ...customReminders];
+    
+    // Add completed status to reminders
+    return allReminders.map(reminder => ({
+      ...reminder,
+      isCompleted: completedReminders.has(reminder.id)
+    }));
   };
 
-  const reminders = generateReminders();
+  const allReminders = generateReminders();
   
-  // Sort reminders by priority (high first)
-  const sortedReminders = [...reminders].sort((a, b) => {
+  // Sort reminders by priority (high first) and then by completion status
+  const sortedReminders = [...allReminders].sort((a, b) => {
+    // First sort by completion status
+    if (a.isCompleted && !b.isCompleted) return 1;
+    if (!a.isCompleted && b.isCompleted) return -1;
+    
+    // Then sort by priority
     const priorityOrder = { high: 0, medium: 1, low: 2 };
     return priorityOrder[a.priority] - priorityOrder[b.priority];
   });
   
   const handleMarkComplete = (id: string) => {
-    toast({
-      title: "Reminder Completed",
-      description: "This task has been marked as completed."
+    setCompletedReminders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
     });
-    // In a real app, this would update the backend
+    
+    toast({
+      title: completedReminders.has(id) ? "Reminder Reopened" : "Reminder Completed",
+      description: completedReminders.has(id) 
+        ? "This task has been marked as not completed."
+        : "This task has been marked as completed."
+    });
+  };
+  
+  const addCustomReminder = (input: CustomReminderInput) => {
+    const newReminder: Reminder = {
+      id: `custom-${uuidv4()}`,
+      title: input.title,
+      description: input.description,
+      dueDate: input.dueDate,
+      priority: input.priority,
+      type: 'custom',
+      icon: createCalendarClockIcon(
+        input.priority === 'high' ? 'rose-500' : 
+        input.priority === 'medium' ? 'amber-500' : 'green-500'
+      )
+    };
+    
+    setCustomReminders(prev => [...prev, newReminder]);
+  };
+  
+  const deleteReminder = (id: string) => {
+    // Only custom reminders can be deleted
+    if (id.startsWith('custom-')) {
+      setCustomReminders(prev => prev.filter(r => r.id !== id));
+      
+      // Also remove from completed if needed
+      if (completedReminders.has(id)) {
+        setCompletedReminders(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(id);
+          return newSet;
+        });
+      }
+      
+      toast({
+        title: "Reminder Deleted",
+        description: "The reminder has been deleted successfully."
+      });
+    } else {
+      toast({
+        title: "Cannot Delete",
+        description: "System-generated reminders cannot be deleted.",
+        variant: "destructive"
+      });
+    }
   };
   
   return {
     reminders: sortedReminders,
-    handleMarkComplete
+    handleMarkComplete,
+    addCustomReminder,
+    deleteReminder
   };
 };

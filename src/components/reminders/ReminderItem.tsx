@@ -1,20 +1,21 @@
 
 import React from 'react';
-import { Check, ExternalLink } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
+import { Check, Trash } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ReminderItemProps {
   id: string;
   title: string;
   description: string;
   icon: React.ReactNode;
+  dueDate: Date;
   priority: 'high' | 'medium' | 'low';
-  dueDate?: Date;
   type: string;
   relatedId?: string;
+  isCompleted?: boolean;
   onComplete: (id: string) => void;
+  onDelete?: (id: string) => void;
   compact?: boolean;
 }
 
@@ -23,104 +24,104 @@ const ReminderItem: React.FC<ReminderItemProps> = ({
   title,
   description,
   icon,
-  priority,
   dueDate,
+  priority,
   type,
   relatedId,
+  isCompleted = false,
   onComplete,
+  onDelete,
   compact = false
 }) => {
-  const navigate = useNavigate();
-  
-  const priorityStyles = {
-    high: 'border-l-rose-500 bg-rose-50/50',
-    medium: 'border-l-amber-500 bg-amber-50/50',
-    low: 'border-l-blue-500 bg-blue-50/50'
+  const priorityColor = {
+    high: 'text-rose-600 bg-rose-50',
+    medium: 'text-amber-600 bg-amber-50',
+    low: 'text-green-600 bg-green-50'
   };
-
-  const isNavigable = relatedId && (
-    type === 'heat' || 
-    type === 'vaccination' || 
-    type === 'deworming' || 
-    type === 'birthday'
-  );
   
-  const handleViewDetails = () => {
-    if (!relatedId) return;
-    
-    if (type === 'heat' || type === 'vaccination' || type === 'deworming' || type === 'birthday') {
-      // Navigate to dog details
-      navigate(`/my-dogs/${relatedId}`);
-    } else if (type === 'weighing' || type === 'vet-visit') {
-      // Navigate to litter details
-      navigate(`/my-litters?litterId=${relatedId}`);
-    }
-  };
-
-  if (compact) {
-    return (
-      <div className={`border-l-4 py-2 px-3 ${priorityStyles[priority]} hover:bg-white/50 transition-colors flex items-start gap-2`}>
-        <div className="mt-0.5">{icon}</div>
-        <div className="flex-1">
-          <h4 className="font-medium text-sm">{title}</h4>
-          {dueDate && (
-            <p className="text-xs text-muted-foreground">
-              Due: {format(dueDate, 'MMM d')}
-            </p>
-          )}
-        </div>
-        <Button 
-          size="sm" 
-          variant="ghost" 
-          className="h-6 w-6 p-0 rounded-full flex-shrink-0"
-          onClick={() => onComplete(id)}
-        >
-          <Check className="h-3 w-3" />
-          <span className="sr-only">Mark as complete</span>
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div 
-      className={`border-l-4 py-3 px-4 ${priorityStyles[priority]} hover:bg-white/50 transition-colors border-b border-primary/5 flex flex-col items-start justify-between`}
+      className={cn(
+        "p-3 relative bg-white hover:bg-gray-50 group transition-colors",
+        isCompleted && "bg-gray-50 opacity-70"
+      )}
     >
-      <div className="flex items-start gap-3 w-full">
-        <div className="mt-1">{icon}</div>
-        <div className="flex-1">
-          <h4 className="font-medium">{title}</h4>
-          <p className="text-sm text-muted-foreground">{description}</p>
-          {dueDate && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Due: {format(dueDate, 'MMM d, yyyy')}
+      <div className="flex items-start gap-2">
+        {/* Left - icon with priority color */}
+        <div className={cn("mt-1 p-1.5 rounded-full", priorityColor[priority])}>
+          {icon}
+        </div>
+        
+        {/* Center - content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h4 
+              className={cn(
+                "font-medium truncate",
+                isCompleted && "line-through text-muted-foreground"
+              )}
+            >
+              {title}
+            </h4>
+            
+            {/* Priority badge for mobile - visible only in non-compact mode */}
+            {!compact && (
+              <span className={cn(
+                "text-xs px-2 py-0.5 rounded-full",
+                priorityColor[priority]
+              )}>
+                {priority}
+              </span>
+            )}
+          </div>
+          
+          {/* Only show description in non-compact mode */}
+          {!compact && (
+            <p 
+              className={cn(
+                "text-sm text-muted-foreground line-clamp-1", 
+                isCompleted && "line-through"
+              )}
+            >
+              {description}
             </p>
           )}
+          
+          {/* Date */}
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-xs text-muted-foreground">
+              {format(dueDate, 'MMM d, yyyy')}
+            </span>
+          </div>
         </div>
-        <Button 
-          size="sm" 
-          variant="ghost" 
-          className="h-8 w-8 p-0 rounded-full flex-shrink-0"
-          onClick={() => onComplete(id)}
-        >
-          <Check className="h-4 w-4" />
-          <span className="sr-only">Mark as complete</span>
-        </Button>
-      </div>
-      
-      {isNavigable && (
-        <div className="ml-8 mt-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-7 text-xs flex items-center gap-1 -ml-2"
-            onClick={handleViewDetails}
+        
+        {/* Right side - action buttons */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => onComplete(id)}
+            className={cn(
+              "p-1.5 rounded-full hover:bg-primary/10 transition-colors",
+              isCompleted && "bg-primary/10"
+            )}
+            title={isCompleted ? "Mark as incomplete" : "Mark as complete"}
           >
-            <ExternalLink className="h-3 w-3" />
-            View Details
-          </Button>
+            <Check className={cn(
+              "h-4 w-4 text-primary/70",
+              isCompleted && "text-primary"
+            )} />
+          </button>
+          
+          {onDelete && type === 'custom' && (
+            <button
+              onClick={() => onDelete(id)}
+              className="p-1.5 rounded-full hover:bg-red-100 transition-colors"
+              title="Delete reminder"
+            >
+              <Trash className="h-4 w-4 text-red-500" />
+            </button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

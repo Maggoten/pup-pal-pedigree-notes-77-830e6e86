@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
@@ -14,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Switch } from '@/components/ui/switch';
 import { Dog } from '@/context/DogsContext';
 import { plannedLitterFormSchema, PlannedLitterFormValues } from '@/services/PlannedLitterService';
+import BreedDropdown from '@/components/dogs/BreedDropdown';
 
 interface AddPlannedLitterDialogProps {
   males: Dog[];
@@ -33,6 +35,8 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
       femaleId: "",
       notes: "",
       externalMale: false,
+      externalMaleBreed: "",
+      externalMaleRegistration: ""
     }
   });
   
@@ -143,12 +147,29 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
               
               <FormField
                 control={form.control}
+                name="externalMaleRegistration"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Registration Number</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Enter registration number" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
                 name="externalMaleBreed"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>External Sire Breed</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter dog breed" />
+                      <BreedDropdown 
+                        value={field.value} 
+                        onChange={field.onChange} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
