@@ -1,20 +1,56 @@
 
 import React from 'react';
-
-// This is a stub that will be filled by the system
-// We need to make sure it exists with the right props
+import ReminderItem from './ReminderItem';
+import EmptyReminders from './EmptyReminders';
+import { Reminder } from '@/hooks/useBreedingReminders';
+import { Button } from '@/components/ui/button';
+import { ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface RemindersListProps {
-  reminders: any[];
+  reminders: Reminder[];
   onComplete: (id: string) => void;
   onDelete?: (id: string) => void;
   compact?: boolean;
-  enableDelete?: boolean;
   showDelete?: boolean;
 }
 
-const RemindersList: React.FC<RemindersListProps> = () => {
-  return <div>Reminders List</div>;
+const RemindersList: React.FC<RemindersListProps> = ({ 
+  reminders, 
+  onComplete, 
+  onDelete,
+  compact = false,
+  showDelete = false
+}) => {
+  const navigate = useNavigate();
+  
+  if (reminders.length === 0) {
+    return <EmptyReminders />;
+  }
+
+  return (
+    <div className="space-y-0">
+      <div className="divide-y divide-primary/5">
+        {reminders.map((reminder) => (
+          <ReminderItem
+            key={reminder.id}
+            id={reminder.id}
+            title={reminder.title}
+            description={reminder.description}
+            icon={reminder.icon}
+            priority={reminder.priority}
+            dueDate={reminder.dueDate}
+            type={reminder.type}
+            relatedId={reminder.relatedId}
+            isCompleted={reminder.isCompleted}
+            onComplete={onComplete}
+            onDelete={showDelete && onDelete ? onDelete : undefined}
+            compact={compact}
+          />
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default RemindersList;

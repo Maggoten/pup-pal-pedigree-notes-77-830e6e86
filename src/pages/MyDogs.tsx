@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import PageLayout from '@/components/PageLayout';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useDogs, DogsProvider } from '@/context/DogsContext';
@@ -12,6 +13,9 @@ import AddDogDialog from '@/components/dogs/AddDogDialog';
 const MyDogsContent: React.FC = () => {
   const { dogs, activeDog, addDog } = useDogs();
   const [showAddDogDialog, setShowAddDogDialog] = useState(false);
+  
+  const females = dogs.filter(dog => dog.gender === 'female');
+  const males = dogs.filter(dog => dog.gender === 'male');
 
   const handleAddDog = (dog: any) => {
     addDog(dog);
@@ -34,17 +38,40 @@ const MyDogsContent: React.FC = () => {
             </Button>
           </div>
           
-          <Card>
-            <CardHeader>
-              <CardTitle>All Dogs</CardTitle>
-              <CardDescription>
-                Dogs in your breeding program
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DogList dogsList={dogs} />
-            </CardContent>
-          </Card>
+          <Tabs defaultValue="bitches" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="bitches">Bitches</TabsTrigger>
+              <TabsTrigger value="dogs">Dogs</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="bitches" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Bitches</CardTitle>
+                  <CardDescription>
+                    Female dogs in your breeding program
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <DogList dogsList={females} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="dogs" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Dogs</CardTitle>
+                  <CardDescription>
+                    Male dogs in your breeding program
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <DogList dogsList={males} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </>
       )}
       

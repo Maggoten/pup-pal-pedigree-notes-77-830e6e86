@@ -1,18 +1,16 @@
 
 import React, { useState } from 'react';
-import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar, Heart, X } from 'lucide-react';
+import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar, Heart } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose
-} from '@/components/ui/sheet';
+  Drawer,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerClose
+} from '@/components/ui/drawer';
 import SettingsDialog from '@/components/settings/SettingsDialog';
 
 export const Navbar: React.FC = () => {
@@ -20,7 +18,6 @@ export const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -47,53 +44,42 @@ export const Navbar: React.FC = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur shadow-sm">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
+          <Drawer>
+            <DrawerTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Open menu</span>
               </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[240px] sm:w-[300px] pt-10">
-              <SheetHeader className="mb-4">
-                <SheetTitle className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">Menu</span>
-                  <SheetClose className="rounded-full hover:bg-muted p-2">
-                    <X className="h-4 w-4" />
-                    <span className="sr-only">Close</span>
-                  </SheetClose>
-                </SheetTitle>
-              </SheetHeader>
-              <nav className="flex flex-col space-y-2">
+            </DrawerTrigger>
+            <DrawerContent className="pt-10">
+              <nav className="flex flex-col space-y-2 p-4">
                 {navItems.map((item) => (
-                  <SheetClose key={item.path} asChild>
+                  <DrawerClose key={item.path} asChild>
                     <Button 
                       variant={isActive(item.path) ? "default" : "ghost"} 
                       asChild
                       className="justify-start w-full"
-                      onClick={() => setMobileMenuOpen(false)}
                     >
                       <Link to={item.path} className="flex items-center gap-2">
                         <item.icon className="h-4 w-4" />
                         <span>{item.label}</span>
                       </Link>
                     </Button>
-                  </SheetClose>
+                  </DrawerClose>
                 ))}
-                <Button 
-                  variant="destructive" 
-                  className="justify-start w-full mt-4"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    handleLogout();
-                  }}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  <span>Logout</span>
-                </Button>
+                <DrawerClose asChild>
+                  <Button 
+                    variant="destructive" 
+                    className="justify-start w-full mt-4"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    <span>Logout</span>
+                  </Button>
+                </DrawerClose>
               </nav>
-            </SheetContent>
-          </Sheet>
+            </DrawerContent>
+          </Drawer>
         </div>
         
         <nav className="hidden md:flex items-center space-x-4">

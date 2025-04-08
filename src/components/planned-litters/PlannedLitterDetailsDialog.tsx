@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar, Trash2, X } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -16,19 +16,6 @@ const PlannedLitterDetailsDialog: React.FC<PlannedLitterDetailsDialogProps> = ({
   litter,
   onAddMatingDate
 }) => {
-  const handleDeleteMatingDate = (index: number) => {
-    if (!litter.matingDates) return;
-    
-    // Create a copy of the mating dates without the one to delete
-    const updatedDates = [...litter.matingDates];
-    updatedDates.splice(index, 1);
-    
-    // Update the litter with the new mating dates
-    // This would require an update to the litter service, but we're simulating the behavior here
-    // In a real implementation, you would call a service method to update the litter
-    console.log(`Deleted mating date at index ${index}`);
-  };
-
   return (
     <DialogContent>
       <DialogHeader>
@@ -62,17 +49,7 @@ const PlannedLitterDetailsDialog: React.FC<PlannedLitterDetailsDialogProps> = ({
           {litter.matingDates && litter.matingDates.length > 0 ? (
             <ul className="space-y-1">
               {litter.matingDates.map((date, index) => (
-                <li key={index} className="flex justify-between items-center">
-                  <span>{new Date(date).toLocaleDateString()}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => handleDeleteMatingDate(index)}
-                  >
-                    <Trash2 className="h-3 w-3 text-destructive" />
-                  </Button>
-                </li>
+                <li key={index}>{new Date(date).toLocaleDateString()}</li>
               ))}
             </ul>
           ) : (
