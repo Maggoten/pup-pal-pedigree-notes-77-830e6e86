@@ -19,9 +19,6 @@ export default {
 			}
 		},
 		extend: {
-			fontFamily: {
-				'le-jour-serif': ['"Le Jour Serif"', 'serif'],
-			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
