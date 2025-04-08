@@ -10,19 +10,21 @@ const WelcomeHeader: React.FC = () => {
           <PawPrint className="h-20 w-20 text-primary transform -rotate-12" />
         </div>
         
-        <img 
-          src="/lovable-uploads/c1216a3f-35cb-43bb-90db-449c17a1120a.png" 
-          alt="Breeding Journey Logo" 
-          className="h-20 w-20" 
-        />
-        
-        <div className="flex flex-col justify-start items-start">
-          <h1 className="text-2xl md:text-3xl font-bold font-le-jour text-primary animate-fade-in">
-            Breeding Journey
-          </h1>
-          <p className="text-black font-glacial animate-fade-in ml-0.5" style={{ animationDelay: "0.3s" }}>
-            - A breeders best friend
-          </p>
+        <div className="flex items-center gap-3">
+          <img 
+            src="/lovable-uploads/c1216a3f-35cb-43bb-90db-449c17a1120a.png" 
+            alt="Breeding Journey Logo" 
+            className="h-20 w-20" 
+          />
+          
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold font-le-jour text-primary animate-fade-in">
+              Breeding Journey
+            </h1>
+            <p className="text-black font-glacial animate-fade-in">
+              - A breeders best friend
+            </p>
+          </div>
         </div>
         
         <div className="flex-grow"></div>
