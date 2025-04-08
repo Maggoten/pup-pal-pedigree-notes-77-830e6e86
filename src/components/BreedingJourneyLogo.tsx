@@ -19,7 +19,7 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
   };
 
   return (
-    <Link to="/" className="flex items-center gap-2 transition-transform hover:scale-105 duration-300">
+    <Link to="/" className="flex items-center gap-2 transition-transform hover:scale-105">
       <div className="relative">
         <img 
           src="/lovable-uploads/0c5301cf-baab-4805-bd48-3354b6664483.png" 
@@ -28,14 +28,9 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
         />
       </div>
       {showText && (
-        <div className="flex flex-col">
-          <span className="text-lg font-bold text-primary font-le-jour hidden md:block">
-            Breeding Journey
-          </span>
-          <span className="text-xs text-muted-foreground hidden md:block">
-            A breeder's best friend
-          </span>
-        </div>
+        <span className="text-xl font-bold text-primary hidden md:block">
+          Breeding Journey
+        </span>
       )}
     </Link>
   );
