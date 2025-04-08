@@ -31,8 +31,9 @@ export const useBreedingReminders = () => {
   const today = new Date();
   const [customReminders, setCustomReminders] = useState<Reminder[]>([]);
   const [completedReminders, setCompletedReminders] = useState<Set<string>>(new Set());
+  const [deletedReminderIds, setDeletedReminderIds] = useState<Set<string>>(new Set());
   
-  // Load custom reminders and completed state from localStorage on mount
+  // Load custom reminders, deleted reminders, and completed state from localStorage on mount
   useEffect(() => {
     const storedCustomReminders = localStorage.getItem('customReminders');
     if (storedCustomReminders) {
@@ -50,6 +51,11 @@ export const useBreedingReminders = () => {
     const storedCompletedReminders = localStorage.getItem('completedReminders');
     if (storedCompletedReminders) {
       setCompletedReminders(new Set(JSON.parse(storedCompletedReminders)));
+    }
+    
+    const storedDeletedReminders = localStorage.getItem('deletedReminderIds');
+    if (storedDeletedReminders) {
+      setDeletedReminderIds(new Set(JSON.parse(storedDeletedReminders)));
     }
   }, []);
   
@@ -70,6 +76,13 @@ export const useBreedingReminders = () => {
       localStorage.setItem('completedReminders', JSON.stringify([...completedReminders]));
     }
   }, [completedReminders]);
+  
+  // Save deleted reminders to localStorage when they change
+  useEffect(() => {
+    if (deletedReminderIds.size > 0) {
+      localStorage.setItem('deletedReminderIds', JSON.stringify([...deletedReminderIds]));
+    }
+  }, [deletedReminderIds]);
   
   // Generate reminders based on dogs data
   const generateReminders = (): Reminder[] => {
@@ -282,8 +295,11 @@ export const useBreedingReminders = () => {
       });
     }
     
+    // Filter out deleted reminders
+    const filteredReminders = reminders.filter(reminder => !deletedReminderIds.has(reminder.id));
+    
     // Add custom reminders
-    const allReminders = [...reminders, ...customReminders];
+    const allReminders = [...filteredReminders, ...customReminders];
     
     // Add completed status to reminders
     return allReminders.map(reminder => ({
@@ -342,30 +358,31 @@ export const useBreedingReminders = () => {
   };
   
   const deleteReminder = (id: string) => {
-    // Only custom reminders can be deleted
+    // If it's a custom reminder, remove it from the custom reminders array
     if (id.startsWith('custom-')) {
       setCustomReminders(prev => prev.filter(r => r.id !== id));
-      
-      // Also remove from completed if needed
-      if (completedReminders.has(id)) {
-        setCompletedReminders(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(id);
-          return newSet;
-        });
-      }
-      
-      toast({
-        title: "Reminder Deleted",
-        description: "The reminder has been deleted successfully."
-      });
     } else {
-      toast({
-        title: "Cannot Delete",
-        description: "System-generated reminders cannot be deleted.",
-        variant: "destructive"
+      // For system-generated reminders, add to the deleted reminders set
+      setDeletedReminderIds(prev => {
+        const newSet = new Set(prev);
+        newSet.add(id);
+        return newSet;
       });
     }
+    
+    // Also remove from completed if needed
+    if (completedReminders.has(id)) {
+      setCompletedReminders(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
+    
+    toast({
+      title: "Reminder Deleted",
+      description: "The reminder has been deleted successfully."
+    });
   };
   
   return {

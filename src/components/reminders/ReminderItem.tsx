@@ -111,7 +111,7 @@ const ReminderItem: React.FC<ReminderItemProps> = ({
             )} />
           </button>
           
-          {onDelete && type === 'custom' && (
+          {onDelete && (
             <button
               onClick={() => onDelete(id)}
               className="p-1.5 rounded-full hover:bg-red-100 transition-colors"
