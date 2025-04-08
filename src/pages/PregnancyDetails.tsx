@@ -51,19 +51,19 @@ const PregnancyDetails: React.FC = () => {
       icon={null}
     >
       <div className="mb-6 flex justify-between items-center">
-        <Button variant="outline" onClick={handleBack} className="flex items-center gap-2">
+        <Button variant="outline" onClick={handleBack} className="flex items-center gap-2 border-greige-300 text-greige-700 hover:bg-greige-100">
           <ArrowLeft className="h-4 w-4" />
           Back to Home
         </Button>
         
         {activePregnancies.length > 1 && (
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-primary">Select Pregnancy:</span>
+            <span className="text-sm font-medium text-greige-700">Select Pregnancy:</span>
             <Select 
               value={id} 
               onValueChange={handlePregnancyChange}
             >
-              <SelectTrigger className="w-[200px] bg-white border-primary text-primary hover:bg-primary/5">
+              <SelectTrigger className="w-[200px] bg-white border-greige-300 text-greige-700 hover:bg-greige-50">
                 <SelectValue placeholder="Select pregnancy" />
               </SelectTrigger>
               <SelectContent>

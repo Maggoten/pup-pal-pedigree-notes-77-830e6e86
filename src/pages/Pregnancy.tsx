@@ -46,22 +46,22 @@ const Pregnancy: React.FC = () => {
       icon={<Heart className="h-6 w-6" />}
     >
       <div className="flex justify-end">
-        <Button onClick={handleAddPregnancyClick} className="mb-6">Add Pregnancy</Button>
+        <Button onClick={handleAddPregnancyClick} className="mb-6 bg-greige-600 hover:bg-greige-700">Add Pregnancy</Button>
       </div>
       
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="bg-greige-50 border border-greige-300 rounded-lg shadow-sm">
+        <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
           <ActivePregnanciesList 
             pregnancies={activePregnancies} 
             onAddPregnancy={handleAddPregnancyClick} 
           />
         </div>
-        <div className="bg-greige-50 border border-greige-300 rounded-lg shadow-sm">
+        <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
           <TemperatureLogOverview onLogTemperature={handleLogTemperature} />
         </div>
       </div>
 
-      <div className="mt-6 bg-greige-50 rounded-lg border border-greige-300 p-4">
+      <div className="mt-6 bg-greige-50 rounded-lg border border-greige-200 p-4">
         <WeeklyDevelopmentGuide />
       </div>
     </PageLayout>

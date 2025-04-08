@@ -21,14 +21,14 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
 }) => {
   return (
     <Tabs defaultValue="journey" className="w-full">
-      <TabsList className="grid grid-cols-3 mb-4">
-        <TabsTrigger value="journey" className="flex items-center gap-2">
+      <TabsList className="grid grid-cols-3 mb-4 bg-greige-100">
+        <TabsTrigger value="journey" className="flex items-center gap-2 data-[state=active]:bg-brown-100 data-[state=active]:text-brown-700">
           <ClipboardList className="h-4 w-4" /> Journey
         </TabsTrigger>
-        <TabsTrigger value="temperature" className="flex items-center gap-2">
+        <TabsTrigger value="temperature" className="flex items-center gap-2 data-[state=active]:bg-brown-100 data-[state=active]:text-brown-700">
           <Thermometer className="h-4 w-4" /> Temperature
         </TabsTrigger>
-        <TabsTrigger value="symptoms" className="flex items-center gap-2">
+        <TabsTrigger value="symptoms" className="flex items-center gap-2 data-[state=active]:bg-brown-100 data-[state=active]:text-brown-700">
           <MessageSquare className="h-4 w-4" /> Notes
         </TabsTrigger>
       </TabsList>
