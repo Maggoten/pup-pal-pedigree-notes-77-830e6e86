@@ -20,6 +20,7 @@ export default {
 		extend: {
 			fontFamily: {
 				'le-jour': ['"Le Jour Serif"', 'serif'],
+				'glacial': ['"Glacial Indifference"', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',

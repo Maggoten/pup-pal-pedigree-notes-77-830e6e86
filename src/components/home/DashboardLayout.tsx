@@ -53,8 +53,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   return (
     <DogsProvider>
       <PageLayout 
-        title="Breeding Journey Dashboard" 
-        description={`Welcome back, ${username}! Here's an overview of your breeding program`}
+        title="" 
+        description={`Welcome back, ${username}!`}
       >
         <div className="space-y-6">
           <DashboardHero 
