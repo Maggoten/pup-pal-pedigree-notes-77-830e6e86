@@ -14,10 +14,10 @@ interface AuthTabsProps {
 
 const AuthTabs: React.FC<AuthTabsProps> = ({ onLogin, onRegister, isLoading }) => {
   return (
-    <Card className="w-full max-w-md shadow-lg">
+    <Card className="w-full max-w-md shadow-lg bg-greige-50 border-greige-100">
       <CardHeader className="space-y-1 text-center">
         <div className="flex justify-center mb-2">
-          <BreedingJourneyLogo size="lg" showText={false} />
+          <BreedingJourneyLogo size="lg" className="h-[50px] w-[50px]" showText={false} />
         </div>
         <CardTitle className="text-2xl font-bold text-foreground font-le-jour">Breeding Journey</CardTitle>
         <CardDescription>
@@ -27,9 +27,9 @@ const AuthTabs: React.FC<AuthTabsProps> = ({ onLogin, onRegister, isLoading }) =
       
       <CardContent>
         <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="register">Register</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-4 bg-greige-100">
+            <TabsTrigger value="login" className="data-[state=active]:bg-greige-50">Login</TabsTrigger>
+            <TabsTrigger value="register" className="data-[state=active]:bg-greige-50">Register</TabsTrigger>
           </TabsList>
           
           <TabsContent value="login">

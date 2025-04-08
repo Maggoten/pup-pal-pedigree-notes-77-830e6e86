@@ -56,9 +56,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>First Name</FormLabel>
+                <FormLabel className="text-brown-800">First Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="John" {...field} />
+                  <Input placeholder="John" {...field} className="border-greige-200 focus:border-greige-300" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -70,9 +70,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
             name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Last Name</FormLabel>
+                <FormLabel className="text-brown-800">Last Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Doe" {...field} />
+                  <Input placeholder="Doe" {...field} className="border-greige-200 focus:border-greige-300" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -85,9 +85,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Address</FormLabel>
+              <FormLabel className="text-brown-800">Address</FormLabel>
               <FormControl>
-                <Input placeholder="123 Main St, City" {...field} />
+                <Input placeholder="123 Main St, City" {...field} className="border-greige-200 focus:border-greige-300" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -99,9 +99,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className="text-brown-800">Email</FormLabel>
               <FormControl>
-                <Input placeholder="your@email.com" {...field} />
+                <Input placeholder="your@email.com" {...field} className="border-greige-200 focus:border-greige-300" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -113,9 +113,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel className="text-brown-800">Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input type="password" {...field} className="border-greige-200 focus:border-greige-300" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -126,18 +126,18 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           control={form.control}
           name="agreeToTerms"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-secondary/50">
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-greige-100/50 border-greige-200">
               <FormControl>
                 <input
                   type="checkbox"
                   checked={field.value}
                   onChange={field.onChange}
-                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                  className="h-4 w-4 rounded border-greige-300 text-primary focus:ring-primary"
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel>Accept terms and conditions</FormLabel>
-                <FormDescription>
+                <FormLabel className="text-brown-800">Accept terms and conditions</FormLabel>
+                <FormDescription className="text-brown-600">
                   By creating an account, you agree to our Terms of Service and Privacy Policy. 
                   Your membership will be charged $2.99 monthly. 
                   You can end your subscription at any time.
@@ -149,7 +149,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
         />
         
         <Button 
-          className="w-full" 
+          className="w-full bg-greige-300 hover:bg-greige-400 text-brown-900" 
           type="submit"
           disabled={isLoading}
         >

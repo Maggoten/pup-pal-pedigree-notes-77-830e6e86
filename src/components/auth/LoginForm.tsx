@@ -44,9 +44,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className="text-brown-800">Email</FormLabel>
               <FormControl>
-                <Input placeholder="your@email.com" {...field} />
+                <Input placeholder="your@email.com" {...field} className="border-greige-200 focus:border-greige-300" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -58,9 +58,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel className="text-brown-800">Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input type="password" {...field} className="border-greige-200 focus:border-greige-300" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -68,7 +68,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
         />
         
         <Button 
-          className="w-full" 
+          className="w-full bg-greige-300 hover:bg-greige-400 text-brown-900" 
           type="submit" 
           disabled={isLoading}
         >
