@@ -2,6 +2,7 @@
 import React, { useMemo } from 'react';
 import BreedingCalendar from '@/components/BreedingCalendar';
 import BreedingReminders from '@/components/BreedingReminders';
+import DashboardHero from './DashboardHero';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { DogsProvider } from '@/context/DogsContext';
 import PageLayout from '@/components/PageLayout';
@@ -10,7 +11,6 @@ import BreedingStats from '@/components/BreedingStats';
 import WeeklyTasks from '@/components/reminders/WeeklyTasks';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import { addDays, subDays } from 'date-fns';
-import StatsCards from './StatsCards';
 
 interface DashboardLayoutProps {
   user: { email?: string } | null;
@@ -50,33 +50,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     };
   }, [reminders]);
   
-  // Custom PageLayout that omits the WelcomeHeader since we're integrating it with the Hero
   return (
     <DogsProvider>
       <PageLayout 
         title="" 
         description=""
-        showWelcomeHeader={false} // Don't show the standard WelcomeHeader
       >
         <div className="space-y-4">
-          {/* Integrate DashboardHero directly in the content */}
-          <div className="rounded-lg overflow-hidden border border-greige-300 sage-gradient relative animate-fade-in mt-4">
-            <div className="px-6 pt-4 pb-1 border-b border-greige-200">
-              <h2 className="text-2xl font-le-jour text-primary">Welcome back, {username}!</h2>
-              <p className="text-sm font-glacial text-muted-foreground">Here's an overview of your breeding program</p>
-            </div>
-          
-            <div className="p-4 md:p-6 relative z-10">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <StatsCards 
-                  reminders={remindersSummary}
-                  plannedLitters={plannedLittersData}
-                  activePregnancies={activePregnancies}
-                  recentLitters={recentLittersData}
-                />
-              </div>
-            </div>
-          </div>
+          <DashboardHero 
+            username={username}
+            reminders={remindersSummary}
+            plannedLitters={plannedLittersData}
+            activePregnancies={activePregnancies}
+            recentLitters={recentLittersData}
+          />
           
           {/* Main dashboard content */}
           <div className="grid gap-6 grid-cols-1 lg:grid-cols-12">
