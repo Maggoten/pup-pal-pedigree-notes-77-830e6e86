@@ -18,6 +18,21 @@ export interface Mating {
   notes?: string;
 }
 
+export interface PuppyWeightRecord {
+  date: string;
+  weight: number;
+}
+
+export interface PuppyHeightRecord {
+  date: string;
+  height: number;
+}
+
+export interface PuppyNote {
+  date: string;
+  content: string;
+}
+
 export interface Puppy {
   id: string;
   name: string;
@@ -29,9 +44,16 @@ export interface Puppy {
   sold?: boolean;
   reserved?: boolean;
   newOwner?: string;
-  notes?: string;
+  notes?: PuppyNote[];
   collar?: string;
   microchip?: string;
+  
+  // New properties that were missing
+  breed?: string;
+  imageUrl?: string;
+  birthDateTime?: string;
+  weightLog: PuppyWeightRecord[];
+  heightLog: PuppyHeightRecord[];
 }
 
 export interface Litter {
