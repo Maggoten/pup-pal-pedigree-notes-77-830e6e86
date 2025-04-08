@@ -11,11 +11,11 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
   size = 'md',
   showText = true
 }) => {
-  // Size mappings (halved from previous values)
+  // Size mappings using standard Tailwind classes
   const sizeMap = {
-    sm: 'h-4 w-4', // halved from h-8 w-8
-    md: 'h-5 w-5', // halved from h-10 w-10
-    lg: 'h-6.5 w-6.5' // halved from h-13 w-13
+    sm: 'h-4 w-4',
+    md: 'h-5 w-5',
+    lg: 'h-[26px] w-[26px]'
   };
 
   return (
