@@ -7,8 +7,10 @@ import React from 'react';
 interface RemindersListProps {
   reminders: any[];
   onComplete: (id: string) => void;
+  onDelete?: (id: string) => void;
   compact?: boolean;
   enableDelete?: boolean;
+  showDelete?: boolean;
 }
 
 const RemindersList: React.FC<RemindersListProps> = () => {

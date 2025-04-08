@@ -8,6 +8,7 @@ interface RemindersDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   enableDelete?: boolean;
+  onDelete?: (id: string) => void;
 }
 
 const RemindersDialog: React.FC<RemindersDialogProps> = () => {
