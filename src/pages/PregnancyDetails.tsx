@@ -63,10 +63,10 @@ const PregnancyDetails: React.FC = () => {
               value={id} 
               onValueChange={handlePregnancyChange}
             >
-              <SelectTrigger className="w-[200px] bg-white border-greige-300 text-greige-700 hover:bg-greige-50">
+              <SelectTrigger className="w-[200px] bg-greige-50 border-greige-300 text-greige-700 hover:bg-greige-100">
                 <SelectValue placeholder="Select pregnancy" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-greige-50">
                 {activePregnancies.map((p) => (
                   <SelectItem key={p.id} value={p.id}>
                     {p.femaleName} × {p.maleName}

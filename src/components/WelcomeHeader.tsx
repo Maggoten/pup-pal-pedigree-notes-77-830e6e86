@@ -14,7 +14,7 @@ const WelcomeHeader: React.FC = () => {
           <img 
             src="/lovable-uploads/0ff492ef-6319-4443-aab1-16d7dc318144.png" 
             alt="Breeding Journey Logo" 
-            className="h-[80px] w-[80px]" 
+            className="h-[100px] w-[100px]" 
           />
           
           <div className="text-right">
