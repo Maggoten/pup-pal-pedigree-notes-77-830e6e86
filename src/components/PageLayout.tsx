@@ -1,6 +1,7 @@
 
 import React, { ReactNode } from 'react';
 import Navbar from '@/components/Navbar';
+import WelcomeHeader from '@/components/WelcomeHeader';
 
 interface PageLayoutProps {
   title: string;
@@ -17,6 +18,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
 }) => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <WelcomeHeader />
       <Navbar />
       
       <main className="flex-1 container py-8 space-y-6">
