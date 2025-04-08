@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -13,9 +12,10 @@ import PlannedLitterForm from './dialog/PlannedLitterForm';
 interface AddLitterDialogProps {
   onClose: () => void;
   onLitterAdded: (litter: Litter) => void;
+  plannedLitters: PlannedLitter[];
 }
 
-const AddLitterDialog: React.FC<AddLitterDialogProps> = ({ onClose, onLitterAdded }) => {
+const AddLitterDialog: React.FC<AddLitterDialogProps> = ({ onClose, onLitterAdded, plannedLitters }) => {
   const { dogs } = useDogs();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('newLitter');
@@ -29,9 +29,6 @@ const AddLitterDialog: React.FC<AddLitterDialogProps> = ({ onClose, onLitterAdde
   const [dateOfBirth, setDateOfBirth] = useState<Date>(new Date());
   
   // Planned litter form state
-  const [plannedLitters, setPlannedLitters] = useState<PlannedLitter[]>(
-    plannedLitterService.loadPlannedLitters()
-  );
   const [selectedPlannedLitterId, setSelectedPlannedLitterId] = useState('');
   const [plannedLitterName, setPlannedLitterName] = useState('');
   const [plannedDateOfBirth, setPlannedDateOfBirth] = useState<Date>(new Date());

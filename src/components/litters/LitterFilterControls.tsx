@@ -53,7 +53,7 @@ const LitterFilterControls: React.FC<LitterFilterControlsProps> = ({
         </DialogTrigger>
         <AddLitterDialog 
           onClose={() => setShowAddLitterDialog(false)} 
-          onSubmit={onAddLitter}
+          onLitterAdded={onAddLitter}
           plannedLitters={plannedLitters}
         />
       </Dialog>
