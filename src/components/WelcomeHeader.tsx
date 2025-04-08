@@ -10,6 +10,12 @@ const WelcomeHeader: React.FC = () => {
           <PawPrint className="h-20 w-20 text-primary transform -rotate-12" />
         </div>
         
+        <img 
+          src="/lovable-uploads/c1216a3f-35cb-43bb-90db-449c17a1120a.png" 
+          alt="Breeding Journey Logo" 
+          className="h-20 w-20" 
+        />
+        
         <div className="flex flex-col justify-start items-start">
           <h1 className="text-2xl md:text-3xl font-bold font-le-jour text-primary animate-fade-in">
             Breeding Journey
@@ -20,12 +26,6 @@ const WelcomeHeader: React.FC = () => {
         </div>
         
         <div className="flex-grow"></div>
-        
-        <img 
-          src="/lovable-uploads/c1216a3f-35cb-43bb-90db-449c17a1120a.png" 
-          alt="Breeding Journey Logo" 
-          className="h-20 w-20" 
-        />
         
         <div className="absolute right-0 opacity-10 hidden md:block">
           <PawPrint className="h-20 w-20 text-primary transform rotate-12" />
