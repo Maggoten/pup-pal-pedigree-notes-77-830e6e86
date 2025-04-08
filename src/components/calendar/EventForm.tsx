@@ -66,7 +66,7 @@ const EventForm: React.FC<EventFormProps> = ({
             name="date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Event Date</FormLabel>
+                <FormLabel>Date</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -102,7 +102,7 @@ const EventForm: React.FC<EventFormProps> = ({
             name="time"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Event Time</FormLabel>
+                <FormLabel>Time</FormLabel>
                 <div className="flex items-center">
                   <FormControl>
                     <Input
