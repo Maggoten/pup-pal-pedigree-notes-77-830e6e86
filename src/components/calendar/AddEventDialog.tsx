@@ -10,7 +10,9 @@ interface AddEventDialogProps {
 
 const AddEventDialog: React.FC<AddEventDialogProps> = ({ dogs, onSubmit }) => {
   return (
-    <EventForm dogs={dogs} onSubmit={onSubmit} />
+    <div className="bg-cream-50">
+      <EventForm dogs={dogs} onSubmit={onSubmit} />
+    </div>
   );
 };
 

@@ -26,7 +26,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({ event, dogs, onSubmit
   };
   
   return (
-    <div>
+    <div className="bg-cream-50">
       <EventForm 
         dogs={dogs} 
         onSubmit={onSubmit} 
