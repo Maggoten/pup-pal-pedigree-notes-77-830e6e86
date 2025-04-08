@@ -1,12 +1,6 @@
-
 import { parseISO, addDays, isAfter } from 'date-fns';
 import { Dog } from '@/context/DogsContext';
-
-export interface UpcomingHeat {
-  dogId: string;
-  dogName: string;
-  date: Date;
-}
+import { UpcomingHeat } from '@/types/reminders';
 
 /**
  * Calculate upcoming heat dates for female dogs

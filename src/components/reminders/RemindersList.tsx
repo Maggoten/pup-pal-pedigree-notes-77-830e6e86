@@ -2,7 +2,7 @@
 import React from 'react';
 import ReminderItem from './ReminderItem';
 import EmptyReminders from './EmptyReminders';
-import { Reminder } from '@/hooks/useBreedingReminders';
+import { Reminder } from '@/types/reminders';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

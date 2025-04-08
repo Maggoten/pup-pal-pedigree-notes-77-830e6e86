@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import DatePicker from '@/components/common/DatePicker';
 import { toast } from '@/components/ui/use-toast';
-import { CustomReminderInput } from '@/hooks/useBreedingReminders';
+import { CustomReminderInput } from '@/types/reminders';
 
 interface AddReminderFormProps {
   onSubmit: (values: CustomReminderInput) => void;

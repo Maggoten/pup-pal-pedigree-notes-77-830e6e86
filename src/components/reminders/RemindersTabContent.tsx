@@ -2,7 +2,7 @@
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import RemindersList from './RemindersList';
-import { Reminder } from '@/hooks/useBreedingReminders';
+import { Reminder } from '@/types/reminders';
 
 interface RemindersTabContentProps {
   reminders: Reminder[];
