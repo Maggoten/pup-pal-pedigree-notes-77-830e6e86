@@ -56,7 +56,18 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// Custom colors
+				cream: {
+					50: '#FFFDF7',
+					100: '#FFF8E8',
+					200: '#FFF2D0',
+					300: '#FFECB8',
+					400: '#FFE59F',
+					500: '#FFDF87',
+					600: '#D4B86F',
+					700: '#AA9257',
+					800: '#7F6B3F',
+					900: '#554628'
+				},
 				sage: {
 					50: '#F5F7F3',
 					100: '#E7EDE3',

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format, addDays, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths } from 'date-fns';
 import { CardContent } from '@/components/ui/card';
@@ -37,9 +36,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const isMobile = useIsMobile();
   
-  // Get the first day of the current month
   const startDate = startOfMonth(currentDate);
-  // Get the last day of the current month
   const endDate = endOfMonth(currentDate);
   
   const handleNextMonth = () => {
@@ -50,33 +47,27 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
     setCurrentDate(subMonths(currentDate, 1));
   };
   
-  // Generate all days in the current month
   const allDaysInMonth = eachDayOfInterval({ start: startDate, end: endDate });
   
-  // Create weeks array for the calendar
   const weeks: Date[][] = [];
   let currentWeek: Date[] = [];
   
-  // Add days from previous month to start the calendar on Monday
-  const dayOfWeek = startDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
-  const daysToAddBefore = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // If Sunday (0), add 6 days before, else add (dayOfWeek - 1)
+  const dayOfWeek = startDate.getDay();
+  const daysToAddBefore = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
   
   for (let i = daysToAddBefore; i > 0; i--) {
     currentWeek.push(addDays(startDate, -i));
   }
   
-  // Add all days from the current month
   allDaysInMonth.forEach((day, index) => {
     currentWeek.push(day);
     
-    // If we've added 7 days to the current week or this is the last day
     if (currentWeek.length === 7 || index === allDaysInMonth.length - 1) {
       weeks.push(currentWeek);
       currentWeek = [];
     }
   });
   
-  // If the last week is not complete, add days from the next month
   if (currentWeek.length > 0 && currentWeek.length < 7) {
     const daysToAddAfter = 7 - currentWeek.length;
     for (let i = 1; i <= daysToAddAfter; i++) {
@@ -137,7 +128,6 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
         </div>
       </CardContent>
       
-      {/* Add Event Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="bg-cream-50">
           <DialogHeader>
@@ -147,7 +137,6 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
         </DialogContent>
       </Dialog>
       
-      {/* Edit Event Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="bg-cream-50">
           <DialogHeader>
