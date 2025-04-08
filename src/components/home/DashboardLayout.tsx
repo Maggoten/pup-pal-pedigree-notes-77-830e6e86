@@ -8,7 +8,6 @@ import { DogsProvider } from '@/context/DogsContext';
 import PageLayout from '@/components/PageLayout';
 import AddDogButton from '@/components/AddDogButton';
 import BreedingStats from '@/components/BreedingStats';
-import WeeklyTasks from '@/components/reminders/WeeklyTasks';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import { addDays, subDays } from 'date-fns';
 
@@ -65,20 +64,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             recentLitters={recentLittersData}
           />
           
-          {/* Main dashboard content */}
-          <div className="grid gap-6 grid-cols-1 lg:grid-cols-12">
-            {/* Left side - Calendar and Weekly Tasks */}
-            <div className="lg:col-span-7 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Main dashboard content - Updated layout */}
+          <div className="space-y-6">
+            {/* Top row: Calendar (2/3) and Reminders (1/3) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Calendar taking 2/3 of the width */}
+              <div className="lg:col-span-2">
                 <BreedingCalendar />
-                <BreedingReminders />
               </div>
               
-              <WeeklyTasks reminders={reminders} onComplete={handleMarkComplete} />
+              {/* Reminders taking 1/3 of the width */}
+              <div className="lg:col-span-1">
+                <BreedingReminders />
+              </div>
             </div>
             
-            {/* Right side - Annual Breeding Stats */}
-            <div className="lg:col-span-5">
+            {/* Bottom row: Annual Breeding Stats (full width) */}
+            <div>
               <BreedingStats />
             </div>
           </div>
