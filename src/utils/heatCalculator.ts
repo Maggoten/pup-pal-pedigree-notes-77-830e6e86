@@ -50,3 +50,6 @@ export const calculateUpcomingHeats = (dogs: Dog[], monthsAhead = 6): UpcomingHe
   // Sort by date (earliest first)
   return upcomingHeats.sort((a, b) => a.date.getTime() - b.date.getTime());
 };
+
+// Re-export the UpcomingHeat type for backward compatibility
+export type { UpcomingHeat };

@@ -3,7 +3,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PawPrint, Calendar } from 'lucide-react';
-import { UpcomingHeat } from '@/utils/heatCalculator';
+import { UpcomingHeat } from '@/types/reminders';
 
 interface UpcomingHeatCardProps {
   upcomingHeats: UpcomingHeat[];

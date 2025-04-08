@@ -3,7 +3,7 @@ import React from 'react';
 import UpcomingHeatCard from './UpcomingHeatCard';
 import RecentMatingsCard from './RecentMatingsCard';
 import MatingTipsCard from './MatingTipsCard';
-import { UpcomingHeat } from '@/utils/heatCalculator';
+import { UpcomingHeat } from '@/types/reminders';
 
 interface RecentMating {
   id: string;

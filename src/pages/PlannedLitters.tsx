@@ -6,7 +6,8 @@ import { format, parseISO, isBefore } from 'date-fns';
 import { useDogs } from '@/context/DogsContext';
 import { PlannedLitter } from '@/types/breeding';
 import { plannedLitterService, PlannedLitterFormValues } from '@/services/PlannedLitterService';
-import { calculateUpcomingHeats, UpcomingHeat } from '@/utils/heatCalculator';
+import { calculateUpcomingHeats } from '@/utils/heatCalculator';
+import { UpcomingHeat } from '@/types/reminders';
 import PlannedLittersList from '@/components/planned-litters/PlannedLittersList';
 import MatingSection from '@/components/planned-litters/MatingSection';
 
