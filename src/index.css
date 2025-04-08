@@ -8,84 +8,84 @@
 
 @layer base {
   :root {
-    /* Light Mode Colors */
-    --background: 34 7% 92%; /* #efebe7 */
-    --foreground: 130 20% 25%;
+    /* Light Mode Colors - More beige tones */
+    --background: 40 30% 94%; /* Soft beige background #f2efea */
+    --foreground: 120 20% 25%;
 
     --card: 0 0% 100%;
-    --card-foreground: 130 20% 25%;
+    --card-foreground: 120 20% 25%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 130 20% 25%;
+    --popover-foreground: 120 20% 25%;
 
-    --primary: 120 47% 28%; /* #296b26 */
-    --primary-foreground: 60 15% 96%;
+    --primary: 120 47% 28%; /* Dark green #296b26 */
+    --primary-foreground: 40 30% 96%;
 
-    --secondary: 40 15% 90%; /* Greige */
-    --secondary-foreground: 130 20% 25%;
+    --secondary: 40 30% 90%; /* Greige */
+    --secondary-foreground: 120 20% 25%;
 
-    --muted: 40 15% 90%;
-    --muted-foreground: 130 10% 40%;
+    --muted: 40 25% 90%;
+    --muted-foreground: 120 10% 40%;
 
-    --accent: 347 100% 86%; /* Soft pink */
-    --accent-foreground: 130 20% 25%;
+    --accent: 40 30% 86%; /* Soft beige accent */
+    --accent-foreground: 120 20% 25%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 60 15% 96%;
+    --destructive-foreground: 40 30% 96%;
 
-    --border: 40 20% 85%;
-    --input: 40 20% 85%;
+    --border: 40 30% 85%;
+    --input: 40 30% 85%;
     --ring: 120 47% 28%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 40 15% 94%;
-    --sidebar-foreground: 130 20% 25%;
+    --sidebar-background: 40 30% 94%;
+    --sidebar-foreground: 120 20% 25%;
     --sidebar-primary: 120 47% 28%;
-    --sidebar-primary-foreground: 60 15% 96%;
-    --sidebar-accent: 40 15% 90%;
-    --sidebar-accent-foreground: 130 20% 25%;
-    --sidebar-border: 40 20% 85%;
-    --sidebar-ring: 342 40% 55%;
+    --sidebar-primary-foreground: 40 30% 96%;
+    --sidebar-accent: 40 30% 90%;
+    --sidebar-accent-foreground: 120 20% 25%;
+    --sidebar-border: 40 30% 85%;
+    --sidebar-ring: 40 30% 70%;
   }
 
   .dark {
-    --background: 130 15% 15%;
-    --foreground: 60 15% 96%;
+    --background: 120 15% 15%;
+    --foreground: 40 30% 96%;
 
-    --card: 130 10% 20%;
-    --card-foreground: 60 15% 96%;
+    --card: 120 10% 20%;
+    --card-foreground: 40 30% 96%;
 
-    --popover: 130 10% 20%;
-    --popover-foreground: 60 15% 96%;
+    --popover: 120 10% 20%;
+    --popover-foreground: 40 30% 96%;
 
-    --primary: 130 20% 35%;
-    --primary-foreground: 60 15% 96%;
+    --primary: 120 20% 35%;
+    --primary-foreground: 40 30% 96%;
 
-    --secondary: 130 10% 25%;
-    --secondary-foreground: 60 15% 96%;
+    --secondary: 120 10% 25%;
+    --secondary-foreground: 40 30% 96%;
 
-    --muted: 130 10% 25%;
-    --muted-foreground: 130 10% 70%;
+    --muted: 120 10% 25%;
+    --muted-foreground: 120 10% 70%;
 
-    --accent: 347 70% 70%;
-    --accent-foreground: 60 15% 96%;
+    --accent: 40 30% 50%;
+    --accent-foreground: 40 30% 96%;
 
     --destructive: 0 62.8% 40.6%;
-    --destructive-foreground: 60 15% 96%;
+    --destructive-foreground: 40 30% 96%;
 
-    --border: 130 10% 25%;
-    --input: 130 10% 25%;
-    --ring: 130 20% 35%;
+    --border: 120 10% 25%;
+    --input: 120 10% 25%;
+    --ring: 120 20% 35%;
 
-    --sidebar-background: 130 10% 20%;
-    --sidebar-foreground: 60 15% 96%;
-    --sidebar-primary: 130 20% 35%;
-    --sidebar-primary-foreground: 60 15% 96%;
-    --sidebar-accent: 130 10% 25%;
-    --sidebar-accent-foreground: 60 15% 96%;
-    --sidebar-border: 130 10% 25%;
-    --sidebar-ring: 342 30% 40%;
+    --sidebar-background: 120 10% 20%;
+    --sidebar-foreground: 40 30% 96%;
+    --sidebar-primary: 120 20% 35%;
+    --sidebar-primary-foreground: 40 30% 96%;
+    --sidebar-accent: 120 10% 25%;
+    --sidebar-accent-foreground: 40 30% 96%;
+    --sidebar-border: 120 10% 25%;
+    --sidebar-ring: 40 30% 40%;
   }
 }
 
@@ -96,6 +96,10 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-primary;
   }
 }
 
@@ -134,6 +138,10 @@
   
   .accent-card {
     @apply bg-accent/30 border border-accent/40 shadow-sm hover:shadow-md transition-all duration-300;
+  }
+  
+  .beige-gradient {
+    @apply bg-gradient-to-br from-greige-50 to-greige-200;
   }
 }
 

@@ -49,20 +49,6 @@ const RemindersList: React.FC<RemindersListProps> = ({
           />
         ))}
       </div>
-      
-      {compact && reminders.length > 0 && (
-        <div className="p-3 text-center">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-xs"
-            onClick={() => navigate('#reminders')}
-          >
-            View All Reminders
-            <ChevronRight className="ml-1 h-3 w-3" />
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

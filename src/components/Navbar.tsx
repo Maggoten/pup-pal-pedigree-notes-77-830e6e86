@@ -12,6 +12,7 @@ import {
   DrawerClose
 } from '@/components/ui/drawer';
 import SettingsDialog from '@/components/settings/SettingsDialog';
+import BreedingJourneyLogo from './BreedingJourneyLogo';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
@@ -80,11 +81,7 @@ export const Navbar: React.FC = () => {
               </nav>
             </DrawerContent>
           </Drawer>
-          <Link to="/" className="hidden md:flex items-center gap-2 transition-transform hover:scale-105">
-            <span className="text-xl font-bold text-primary font-le-jour">
-              Breeding Journey
-            </span>
-          </Link>
+          <BreedingJourneyLogo showText={false} />
         </div>
         
         <nav className="hidden md:flex items-center space-x-4">

@@ -30,40 +30,40 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
     {
       title: "Reminders",
       count: reminders.count,
-      icon: <Calendar className="h-5 w-5 text-sage-600" />,
+      icon: <Calendar className="h-5 w-5 text-primary" />,
       highlight: reminders.highPriority > 0 ? `${reminders.highPriority} high priority` : null,
       action: () => setRemindersDialogOpen(true),
-      color: "bg-sage-50 border-sage-200 hover:border-sage-300"
+      color: "bg-greige-50 border-greige-200 hover:border-greige-300"
     },
     {
       title: "Planned Litters",
       count: plannedLitters.count,
-      icon: <PawPrint className="h-5 w-5 text-brown-600" />,
+      icon: <PawPrint className="h-5 w-5 text-primary" />,
       highlight: plannedLitters.nextDate ? `Next: ${format(plannedLitters.nextDate, 'MMM d')}` : null,
       action: () => navigate("/planned-litters"),
-      color: "bg-greige-50 border-greige-200 hover:border-greige-300"
+      color: "bg-greige-100 border-greige-200 hover:border-greige-300"
     },
     {
       title: "Active Pregnancies",
       count: activePregnancies.length,
-      icon: <PawPrint className="h-5 w-5 text-blush-600" />,
+      icon: <PawPrint className="h-5 w-5 text-primary" />,
       highlight: activePregnancies.length > 0 ? `${activePregnancies[0].daysLeft} days to due date` : null,
       action: () => navigate("/pregnancy"),
-      color: "bg-blush-50 border-blush-200 hover:border-blush-300"
+      color: "bg-greige-50 border-greige-200 hover:border-greige-300"
     },
     {
       title: "Recent Litters",
       count: recentLitters.count,
-      icon: <Heart className="h-5 w-5 text-sage-600" />,
+      icon: <Heart className="h-5 w-5 text-primary" />,
       highlight: recentLitters.latest ? `Latest: ${format(recentLitters.latest, 'MMM d')}` : null,
       action: () => navigate("/my-litters"),
-      color: "bg-sage-100 border-sage-300 hover:border-sage-400"
+      color: "bg-greige-100 border-greige-200 hover:border-greige-300"
     }
   ];
   
   return (
     <>
-      <div className="rounded-lg overflow-hidden border border-greige-300 sage-gradient relative mt-2 animate-fade-in">
+      <div className="rounded-lg overflow-hidden border border-greige-300 beige-gradient relative mt-2 animate-fade-in">
         {/* Personalized welcome message */}
         <div className="px-6 pt-4 pb-1 border-b border-greige-200">
           <h2 className="text-2xl font-le-jour text-primary">Welcome back, {username}!</h2>
