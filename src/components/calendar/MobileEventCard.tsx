@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Clock, Trash2 } from 'lucide-react';
+import { Clock, Trash2, Edit } from 'lucide-react';
 import { CalendarEvent } from './types';
 import {
   Drawer,
@@ -18,15 +18,18 @@ interface MobileEventCardProps {
   colorClass: string;
   onClose: () => void;
   onDelete?: () => void;
+  onEdit?: () => void;
 }
 
 const MobileEventCard: React.FC<MobileEventCardProps> = ({ 
   event, 
   colorClass,
   onClose,
-  onDelete 
+  onDelete,
+  onEdit
 }) => {
   const canDelete = event.type === 'custom' && onDelete;
+  const canEdit = event.type === 'custom' && onEdit;
   
   return (
     <Drawer open={true} onOpenChange={(open) => !open && onClose()}>
@@ -41,7 +44,17 @@ const MobileEventCard: React.FC<MobileEventCardProps> = ({
           {event.dogName && <div className="font-medium">Dog: {event.dogName}</div>}
           {event.notes && <div className="text-sm mt-2">{event.notes}</div>}
         </div>
-        <DrawerFooter>
+        <DrawerFooter className="flex flex-col gap-2">
+          {canEdit && (
+            <Button 
+              variant="outline" 
+              className="w-full flex items-center justify-center gap-2" 
+              onClick={onEdit}
+            >
+              <Edit className="h-4 w-4" />
+              Edit Event
+            </Button>
+          )}
           {canDelete && (
             <Button 
               variant="destructive" 

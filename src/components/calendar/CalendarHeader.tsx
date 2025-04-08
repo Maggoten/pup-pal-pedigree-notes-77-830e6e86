@@ -1,23 +1,22 @@
 
 import React from 'react';
-import { format, addDays } from 'date-fns';
+import { format } from 'date-fns';
 import { CardTitle, CardDescription } from '@/components/ui/card';
 import { CalendarIcon, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { DialogTrigger } from '@/components/ui/dialog';
 
 interface CalendarHeaderProps {
   currentDate: Date;
-  startDate: Date;
-  handlePrevWeek: () => void;
-  handleNextWeek: () => void;
+  handlePrevMonth: () => void;
+  handleNextMonth: () => void;
+  onAddEvent: () => void;
 }
 
 const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   currentDate,
-  startDate,
-  handlePrevWeek,
-  handleNextWeek
+  handlePrevMonth,
+  handleNextMonth,
+  onAddEvent
 }) => {
   return (
     <div className="flex flex-row items-center justify-between p-4 pb-2 bg-primary/5 border-b border-primary/20">
@@ -32,23 +31,21 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       </div>
       <div className="flex items-center gap-2">
         <div className="flex items-center bg-white/80 rounded-md border border-primary/10 px-2 py-1">
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handlePrevWeek}>
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handlePrevMonth}>
             <ChevronLeft className="h-3 w-3" />
           </Button>
           <span className="text-xs font-medium px-2">
-            {format(startDate, 'MMM d')} - {format(addDays(startDate, 27), 'MMM d')}
+            {format(currentDate, 'MMMM yyyy')}
           </span>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleNextWeek}>
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleNextMonth}>
             <ChevronRight className="h-3 w-3" />
           </Button>
         </div>
         
-        <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-1 text-xs h-7">
-            <Plus className="h-3 w-3" />
-            Event
-          </Button>
-        </DialogTrigger>
+        <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={onAddEvent}>
+          <Plus className="h-3 w-3" />
+          Event
+        </Button>
       </div>
     </div>
   );

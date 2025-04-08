@@ -104,6 +104,65 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     return true;
   };
   
+  // Function to edit an event
+  const editEvent = (eventId: string, data: AddEventFormValues) => {
+    // Only custom events can be edited
+    const eventToEdit = calendarEvents.find(event => event.id === eventId);
+    
+    if (eventToEdit && eventToEdit.type === 'custom') {
+      // Combine date and time
+      const combinedDate = new Date(data.date);
+      if (data.time) {
+        const [hours, minutes] = data.time.split(':').map(Number);
+        combinedDate.setHours(hours, minutes);
+      }
+      
+      const updatedEvent: CalendarEvent = {
+        ...eventToEdit,
+        title: data.title,
+        date: combinedDate,
+        time: data.time,
+        notes: data.notes,
+      };
+      
+      // Update dog information if changed
+      if (data.dogId !== eventToEdit.dogId) {
+        if (data.dogId) {
+          const selectedDog = dogs.find(dog => dog.id === data.dogId);
+          if (selectedDog) {
+            updatedEvent.dogId = data.dogId;
+            updatedEvent.dogName = selectedDog.name;
+          } else {
+            updatedEvent.dogId = undefined;
+            updatedEvent.dogName = undefined;
+          }
+        } else {
+          updatedEvent.dogId = undefined;
+          updatedEvent.dogName = undefined;
+        }
+      }
+      
+      const updatedEvents = calendarEvents.map(event => 
+        event.id === eventId ? updatedEvent : event
+      );
+      
+      setCalendarEvents(updatedEvents);
+      
+      // Update localStorage
+      const customEvents = updatedEvents.filter(event => event.type === 'custom');
+      localStorage.setItem('breedingCalendarEvents', JSON.stringify(customEvents));
+      
+      toast({
+        title: "Event Updated",
+        description: "Your event has been updated in the calendar.",
+      });
+      
+      return true;
+    }
+    
+    return false;
+  };
+  
   // Function to delete an event
   const deleteEvent = (eventId: string) => {
     // Only filter out custom events (system events cannot be deleted)
@@ -150,6 +209,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     calendarEvents,
     getEventsForDate,
     addEvent,
+    editEvent,
     deleteEvent,
     getEventColor
   };

@@ -7,7 +7,6 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DialogFooter } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Dog } from '@/context/DogsContext';
@@ -16,7 +15,7 @@ export interface AddEventFormValues {
   title: string;
   date: Date;
   time: string;
-  type: string;
+  type?: string;
   dogId?: string;
   notes?: string;
 }
@@ -24,11 +23,18 @@ export interface AddEventFormValues {
 interface EventFormProps {
   dogs: Dog[];
   onSubmit: (data: AddEventFormValues) => void;
+  defaultValues?: Partial<AddEventFormValues>;
+  submitLabel?: string;
 }
 
-const EventForm: React.FC<EventFormProps> = ({ dogs, onSubmit }) => {
+const EventForm: React.FC<EventFormProps> = ({ 
+  dogs, 
+  onSubmit, 
+  defaultValues, 
+  submitLabel = "Add Event" 
+}) => {
   const form = useForm<AddEventFormValues>({
-    defaultValues: {
+    defaultValues: defaultValues || {
       title: '',
       date: new Date(),
       time: format(new Date(), 'HH:mm'),
@@ -69,7 +75,7 @@ const EventForm: React.FC<EventFormProps> = ({ dogs, onSubmit }) => {
                         className="w-full justify-start text-left font-normal"
                       >
                         {field.value ? (
-                          format(field.value, "PPP")
+                          format(field.value, "PP")
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -152,9 +158,7 @@ const EventForm: React.FC<EventFormProps> = ({ dogs, onSubmit }) => {
           )}
         />
         
-        <DialogFooter>
-          <Button type="submit">Add Event</Button>
-        </DialogFooter>
+        <Button type="submit" className="w-full">{submitLabel}</Button>
       </form>
     </Form>
   );

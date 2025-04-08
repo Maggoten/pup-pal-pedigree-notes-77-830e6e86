@@ -23,5 +23,6 @@ export interface CalendarGridProps {
   getEventsForDate: (date: Date) => CalendarEvent[];
   getEventColor: (type: string) => string;
   onDeleteEvent: (eventId: string) => void;
+  onEventClick: (event: CalendarEvent) => void;
   compact?: boolean;
 }

@@ -11,7 +11,8 @@ const BreedingCalendar: React.FC = () => {
     getEventsForDate, 
     getEventColor, 
     addEvent, 
-    deleteEvent 
+    deleteEvent,
+    editEvent
   } = useCalendarEvents(dogs);
   
   return (
@@ -22,7 +23,8 @@ const BreedingCalendar: React.FC = () => {
         getEventColor={getEventColor}
         onDeleteEvent={deleteEvent}
         onAddEvent={addEvent}
-        compact={true}
+        onEditEvent={editEvent}
+        compact={false} // Use full size calendar now
       />
     </Card>
   );

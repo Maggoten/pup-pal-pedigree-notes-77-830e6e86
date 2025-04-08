@@ -12,6 +12,7 @@ interface CalendarGridProps {
   getEventsForDate: (date: Date) => CalendarEvent[];
   getEventColor: (type: string) => string;
   onDeleteEvent: (eventId: string) => void;
+  onEventClick: (event: CalendarEvent) => void;
   compact?: boolean;
 }
 
@@ -20,6 +21,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   getEventsForDate, 
   getEventColor, 
   onDeleteEvent,
+  onEventClick,
   compact = false 
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -30,6 +32,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   const handleEventClick = (event: CalendarEvent) => {
     if (isMobile) {
       setSelectedEvent(event);
+    } else {
+      onEventClick(event);
     }
   };
   
@@ -57,7 +61,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           <div key={weekIndex} className="grid grid-cols-7 gap-1">
             {week.map((day) => {
               const isToday = isSameDay(day, today);
-              const isCurrentMonth = isSameMonth(day, today);
+              const isCurrentMonth = isSameMonth(day, new Date());
               const events = getEventsForDate(day);
               const maxEvents = compact ? 1 : 3;
               const displayEvents = events.slice(0, maxEvents);
@@ -142,6 +146,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           colorClass={getEventColor(selectedEvent.type)}
           onClose={handleCloseEventDetails}
           onDelete={selectedEvent.type === 'custom' ? () => handleDeleteEvent(selectedEvent.id) : undefined}
+          onEdit={() => {
+            onEventClick(selectedEvent);
+            handleCloseEventDetails();
+          }}
         />
       )}
     </>
