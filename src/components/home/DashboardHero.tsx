@@ -60,7 +60,13 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   ];
   
   return (
-    <div className="rounded-lg overflow-hidden border border-greige-300 sage-gradient relative">
+    <div className="rounded-lg overflow-hidden border border-greige-300 sage-gradient relative mt-2 animate-fade-in">
+      {/* Personalized welcome message */}
+      <div className="px-6 pt-4 pb-1 border-b border-greige-200">
+        <h2 className="text-2xl font-le-jour text-primary">Welcome back, {username}!</h2>
+        <p className="text-sm font-glacial text-muted-foreground">Here's an overview of your breeding program</p>
+      </div>
+      
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 opacity-10">
         <PawPrint className="h-40 w-40 text-primary transform rotate-12" />
@@ -69,13 +75,14 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
         <PawPrint className="h-28 w-28 text-primary transform -rotate-12" />
       </div>
       
-      <div className="p-6 md:p-8 relative z-10">
+      <div className="p-4 md:p-6 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {metricCards.map((card, index) => (
             <div 
               key={index} 
-              className={`${card.color} border rounded-lg p-4 cursor-pointer hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden`}
+              className={`${card.color} border rounded-lg p-4 cursor-pointer hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden animate-scale-in`}
               onClick={() => navigate(card.path)}
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="flex items-center gap-2 mb-1.5 relative z-10">
                 <div className="p-1.5 bg-white/50 rounded-full">

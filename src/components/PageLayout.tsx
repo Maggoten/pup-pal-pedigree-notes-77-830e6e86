@@ -21,16 +21,18 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       <Navbar />
       <WelcomeHeader />
       
-      <main className="flex-1 container py-8 space-y-6">
-        <div className="flex flex-col items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            {icon && <div className="text-primary">{icon}</div>}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-              {description && <p className="text-muted-foreground">{description}</p>}
+      <main className="flex-1 container py-4 space-y-4">
+        {(title || description) && (
+          <div className="flex flex-col items-start justify-between gap-2">
+            <div className="flex items-center gap-3">
+              {icon && <div className="text-primary">{icon}</div>}
+              <div>
+                {title && <h1 className="text-3xl font-bold tracking-tight">{title}</h1>}
+                {description && <p className="text-muted-foreground">{description}</p>}
+              </div>
             </div>
           </div>
-        </div>
+        )}
         
         {children}
       </main>

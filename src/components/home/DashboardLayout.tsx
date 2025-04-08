@@ -54,9 +54,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     <DogsProvider>
       <PageLayout 
         title="" 
-        description={`Welcome back, ${username}!`}
+        description=""
       >
-        <div className="space-y-6">
+        <div className="space-y-4">
           <DashboardHero 
             username={username}
             reminders={remindersSummary}
