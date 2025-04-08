@@ -1,11 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Puppy } from '@/types/breeding';
-import { toast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 
 interface PuppyWeightTabProps {
@@ -55,7 +54,7 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {puppy.weightLog.slice().reverse().slice(0, 5).map((log, index) => (
+                {puppy.weightLog.slice().reverse().map((log, index) => (
                   <TableRow key={index}>
                     <TableCell>{format(new Date(log.date), "PPP p")}</TableCell>
                     <TableCell>{log.weight}</TableCell>

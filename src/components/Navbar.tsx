@@ -12,7 +12,6 @@ import {
   DrawerClose
 } from '@/components/ui/drawer';
 import SettingsDialog from '@/components/settings/SettingsDialog';
-import BreedingJourneyLogo from './BreedingJourneyLogo';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
@@ -37,8 +36,8 @@ export const Navbar: React.FC = () => {
     { path: "/", label: "Home", icon: Calendar },
     { path: "/my-dogs", label: "My Dogs", icon: Dog },
     { path: "/planned-litters", label: "Planned Litters", icon: FileText },
-    { path: "/pregnancy", label: "Pregnancy", icon: Heart }, // Changed from PawPrint to Heart
-    { path: "/my-litters", label: "My Litters", icon: PawPrint } // Changed from Dog to PawPrint
+    { path: "/pregnancy", label: "Pregnancy", icon: Heart },
+    { path: "/my-litters", label: "My Litters", icon: PawPrint }
   ];
   
   return (
@@ -81,7 +80,6 @@ export const Navbar: React.FC = () => {
               </nav>
             </DrawerContent>
           </Drawer>
-          <BreedingJourneyLogo showText={false} />
         </div>
         
         <nav className="hidden md:flex items-center space-x-4">

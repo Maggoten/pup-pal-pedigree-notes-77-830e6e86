@@ -54,7 +54,7 @@ const PuppyHeightTab: React.FC<PuppyHeightTabProps> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {puppy.heightLog.slice().reverse().slice(0, 5).map((log, index) => (
+                {puppy.heightLog.slice().reverse().map((log, index) => (
                   <TableRow key={index}>
                     <TableCell>{format(new Date(log.date), "PPP p")}</TableCell>
                     <TableCell>{log.height}</TableCell>
