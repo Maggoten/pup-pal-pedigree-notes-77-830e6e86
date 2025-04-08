@@ -8,18 +8,20 @@ interface PageLayoutProps {
   description?: string;
   icon?: ReactNode;
   children: ReactNode;
+  showWelcomeHeader?: boolean;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
   title, 
   description, 
   icon, 
-  children
+  children,
+  showWelcomeHeader = true
 }) => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <WelcomeHeader />
+      {showWelcomeHeader && <WelcomeHeader />}
       
       <main className="flex-1 container py-4 space-y-4">
         {(title || description) && (
