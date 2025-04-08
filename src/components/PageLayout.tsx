@@ -21,9 +21,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       <Navbar />
       <WelcomeHeader />
       
-      <main className="flex-1 container py-4 space-y-4">
+      <main className="flex-1 container py-6 space-y-6">
         {(title || description) && (
-          <div className="flex flex-col items-start justify-between gap-2">
+          <div className="flex flex-col items-start justify-between gap-2 animate-fade-in">
             <div className="flex items-center gap-3">
               {icon && <div className="text-primary">{icon}</div>}
               <div>
