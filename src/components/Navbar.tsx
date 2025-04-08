@@ -5,7 +5,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
-import BreedingJourneyLogo from '@/components/BreedingJourneyLogo';
 import {
   Drawer,
   DrawerContent,
@@ -79,7 +78,11 @@ export const Navbar: React.FC = () => {
               </nav>
             </DrawerContent>
           </Drawer>
-          <BreedingJourneyLogo />
+          <Link to="/" className="hidden md:flex items-center gap-2 transition-transform hover:scale-105">
+            <span className="text-xl font-bold text-primary font-le-jour">
+              Breeding Journey
+            </span>
+          </Link>
         </div>
         
         <nav className="hidden md:flex items-center space-x-4">
