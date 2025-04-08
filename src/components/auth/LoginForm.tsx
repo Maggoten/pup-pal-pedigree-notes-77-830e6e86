@@ -3,7 +3,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { LogIn } from 'lucide-react';
+import { LogIn, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -38,15 +38,18 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className="text-sm font-medium text-foreground">Email</FormLabel>
               <FormControl>
-                <Input placeholder="your@email.com" {...field} />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="your@email.com" {...field} className="pl-10 bg-background/50" />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -58,9 +61,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel className="text-sm font-medium text-foreground">Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input type="password" {...field} className="pl-10 bg-background/50" />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -68,7 +74,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
         />
         
         <Button 
-          className="w-full" 
+          className="w-full h-11 mt-2 font-medium" 
           type="submit" 
           disabled={isLoading}
         >
