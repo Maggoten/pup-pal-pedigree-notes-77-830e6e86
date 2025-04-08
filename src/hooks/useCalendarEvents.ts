@@ -1,46 +1,31 @@
 
 import { useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { toast } from '@/components/ui/use-toast';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dog } from '@/context/DogsContext';
 import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
+import { getSampleEvents } from '@/data/sampleCalendarEvents';
+import { 
+  loadEvents, 
+  saveEvents, 
+  addEvent, 
+  editEvent, 
+  deleteEvent,
+  getEventColor 
+} from '@/services/CalendarEventService';
 
 export const useCalendarEvents = (dogs: Dog[]) => {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   
   // Load events on component mount
   useEffect(() => {
-    // Load events from localStorage if available
-    const savedEvents = localStorage.getItem('breedingCalendarEvents');
-    const customEvents = savedEvents 
-      ? JSON.parse(savedEvents).map((event: any) => ({
-          ...event,
-          date: new Date(event.date)
-        })) 
-      : [];
+    // Load custom events from localStorage
+    const customEvents = loadEvents();
     
-    const sampleEvents: CalendarEvent[] = [
-      {
-        id: '2',
-        title: 'Planned Mating',
-        date: new Date(2025, 3, 12), // April 12, 2025
-        type: 'planned-mating',
-        dogId: '2',
-        dogName: 'Bella'
-      },
-      {
-        id: '3',
-        title: 'Due Date',
-        date: new Date(2025, 4, 5), // May 5, 2025
-        type: 'due-date',
-        dogId: '2',
-        dogName: 'Bella'
-      }
-    ];
+    // Get sample events
+    const sampleEvents = getSampleEvents();
     
+    // Calculate heat events based on dogs data
     const upcomingHeats = calculateUpcomingHeats(dogs);
-    
     const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
       id: `heat-${heat.dogId}-${index}`,
       title: 'Heat Cycle',
@@ -50,15 +35,13 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       dogName: heat.dogName
     }));
     
+    // Combine all events
     setCalendarEvents([...sampleEvents, ...heatEvents, ...customEvents]);
   }, [dogs]);
   
   // Save custom events to localStorage whenever they change
   useEffect(() => {
-    const customEvents = calendarEvents.filter(event => event.type === 'custom');
-    if (customEvents.length > 0) {
-      localStorage.setItem('breedingCalendarEvents', JSON.stringify(customEvents));
-    }
+    saveEvents(calendarEvents);
   }, [calendarEvents]);
   
   // Function to get events for a specific date
@@ -69,94 +52,20 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   };
   
   // Function to add a new event
-  const addEvent = (data: AddEventFormValues) => {
-    // Combine date and time
-    const combinedDate = new Date(data.date);
-    if (data.time) {
-      const [hours, minutes] = data.time.split(':').map(Number);
-      combinedDate.setHours(hours, minutes);
-    }
-    
-    const newEvent: CalendarEvent = {
-      id: uuidv4(),
-      title: data.title,
-      date: combinedDate,
-      time: data.time,
-      type: 'custom',
-      notes: data.notes
-    };
-    
-    if (data.dogId) {
-      const selectedDog = dogs.find(dog => dog.id === data.dogId);
-      if (selectedDog) {
-        newEvent.dogId = data.dogId;
-        newEvent.dogName = selectedDog.name;
-      }
-    }
-    
+  const handleAddEvent = (data: AddEventFormValues) => {
+    const newEvent = addEvent(data, dogs);
     setCalendarEvents(prevEvents => [...prevEvents, newEvent]);
-    
-    toast({
-      title: "Event Added",
-      description: "Your event has been added to the calendar.",
-    });
-    
     return true;
   };
   
   // Function to edit an event
-  const editEvent = (eventId: string, data: AddEventFormValues) => {
-    // Only custom events can be edited
-    const eventToEdit = calendarEvents.find(event => event.id === eventId);
+  const handleEditEvent = (eventId: string, data: AddEventFormValues) => {
+    const updatedEvents = editEvent(eventId, data, calendarEvents, dogs);
     
-    if (eventToEdit && eventToEdit.type === 'custom') {
-      // Combine date and time
-      const combinedDate = new Date(data.date);
-      if (data.time) {
-        const [hours, minutes] = data.time.split(':').map(Number);
-        combinedDate.setHours(hours, minutes);
-      }
-      
-      const updatedEvent: CalendarEvent = {
-        ...eventToEdit,
-        title: data.title,
-        date: combinedDate,
-        time: data.time,
-        notes: data.notes,
-      };
-      
-      // Update dog information if changed
-      if (data.dogId !== eventToEdit.dogId) {
-        if (data.dogId) {
-          const selectedDog = dogs.find(dog => dog.id === data.dogId);
-          if (selectedDog) {
-            updatedEvent.dogId = data.dogId;
-            updatedEvent.dogName = selectedDog.name;
-          } else {
-            updatedEvent.dogId = undefined;
-            updatedEvent.dogName = undefined;
-          }
-        } else {
-          updatedEvent.dogId = undefined;
-          updatedEvent.dogName = undefined;
-        }
-      }
-      
-      const updatedEvents = calendarEvents.map(event => 
-        event.id === eventId ? updatedEvent : event
-      );
-      
+    if (updatedEvents) {
       setCalendarEvents(updatedEvents);
-      
-      // Update localStorage
-      const customEvents = updatedEvents.filter(event => event.type === 'custom');
-      localStorage.setItem('breedingCalendarEvents', JSON.stringify(customEvents));
-      
-      toast({
-        title: "Event Updated",
-        description: "Your event has been updated in the calendar.",
-      });
-      
+      // Save to localStorage
+      saveEvents(updatedEvents);
       return true;
     }
     
@@ -164,53 +73,25 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   };
   
   // Function to delete an event
-  const deleteEvent = (eventId: string) => {
-    // Only filter out custom events (system events cannot be deleted)
-    const eventToDelete = calendarEvents.find(event => event.id === eventId);
+  const handleDeleteEvent = (eventId: string) => {
+    const updatedEvents = deleteEvent(eventId, calendarEvents);
     
-    if (eventToDelete && eventToDelete.type === 'custom') {
-      const updatedEvents = calendarEvents.filter(event => event.id !== eventId);
+    if (updatedEvents) {
       setCalendarEvents(updatedEvents);
-      
-      // Update localStorage
-      const customEvents = updatedEvents.filter(event => event.type === 'custom');
-      localStorage.setItem('breedingCalendarEvents', JSON.stringify(customEvents));
-      
-      toast({
-        title: "Event Deleted",
-        description: "Your event has been removed from the calendar.",
-      });
-      
+      // Save to localStorage
+      saveEvents(updatedEvents);
       return true;
     }
     
     return false;
   };
-
-  // Function to determine event color based on type
-  const getEventColor = (type: string) => {
-    switch (type) {
-      case 'heat':
-        return 'bg-rose-100 border-rose-300 text-rose-800';
-      case 'mating':
-        return 'bg-purple-100 border-purple-300 text-purple-800';
-      case 'planned-mating':
-        return 'bg-indigo-100 border-indigo-300 text-indigo-800';
-      case 'due-date':
-        return 'bg-amber-100 border-amber-300 text-amber-800';
-      case 'custom':
-        return 'bg-green-100 border-green-300 text-green-800';
-      default:
-        return 'bg-gray-100 border-gray-300 text-gray-800';
-    }
-  };
   
   return {
     calendarEvents,
     getEventsForDate,
-    addEvent,
-    editEvent,
-    deleteEvent,
+    addEvent: handleAddEvent,
+    editEvent: handleEditEvent,
+    deleteEvent: handleDeleteEvent,
     getEventColor
   };
 };
