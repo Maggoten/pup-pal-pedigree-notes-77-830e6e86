@@ -5,11 +5,13 @@ import { Link } from 'react-router-dom';
 interface BreedingJourneyLogoProps {
   size?: 'sm' | 'md' | 'lg';
   showText?: boolean;
+  className?: string; // Added className prop
 }
 
 const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({ 
   size = 'md',
-  showText = true
+  showText = true,
+  className = '' // Default to empty string
 }) => {
   // Size mappings using standard Tailwind classes
   const sizeMap = {
@@ -24,7 +26,7 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
         <img 
           src="/lovable-uploads/0ff492ef-6319-4443-aab1-16d7dc318144.png" 
           alt="Breeding Journey Logo" 
-          className={`${sizeMap[size]} object-contain`}
+          className={`${sizeMap[size]} object-contain ${className}`}
         />
       </div>
       {showText && (
