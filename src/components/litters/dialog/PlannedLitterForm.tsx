@@ -3,8 +3,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import DatePicker from '@/components/common/DatePicker';
 import { PlannedLitter } from '@/types/breeding';
+import ExternalSireFields from './ExternalSireFields';
 
 interface PlannedLitterFormProps {
   plannedLitters: PlannedLitter[];
@@ -14,6 +16,14 @@ interface PlannedLitterFormProps {
   setSelectedPlannedLitterId: (id: string) => void;
   dateOfBirth: Date;
   setDateOfBirth: (date: Date) => void;
+  isExternalSire: boolean;
+  setIsExternalSire: (value: boolean) => void;
+  externalSireName: string;
+  setExternalSireName: (name: string) => void;
+  externalSireBreed: string;
+  setExternalSireBreed: (breed: string) => void;
+  externalSireRegistration: string;
+  setExternalSireRegistration: (reg: string) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
@@ -25,6 +35,14 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
   setSelectedPlannedLitterId,
   dateOfBirth,
   setDateOfBirth,
+  isExternalSire,
+  setIsExternalSire,
+  externalSireName,
+  setExternalSireName,
+  externalSireBreed,
+  setExternalSireBreed,
+  externalSireRegistration,
+  setExternalSireRegistration,
   onSubmit,
 }) => {
   if (plannedLitters.length === 0) {
@@ -64,6 +82,26 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
           placeholder="Spring Litter 2025" 
         />
       </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="external-sire"
+          checked={isExternalSire}
+          onCheckedChange={setIsExternalSire}
+        />
+        <Label htmlFor="external-sire">External Sire (not in your dogs)</Label>
+      </div>
+
+      {isExternalSire && (
+        <ExternalSireFields
+          externalSireName={externalSireName}
+          setExternalSireName={setExternalSireName}
+          externalSireBreed={externalSireBreed}
+          setExternalSireBreed={setExternalSireBreed}
+          externalSireRegistration={externalSireRegistration}
+          setExternalSireRegistration={setExternalSireRegistration}
+        />
+      )}
 
       <DatePicker 
         date={dateOfBirth} 

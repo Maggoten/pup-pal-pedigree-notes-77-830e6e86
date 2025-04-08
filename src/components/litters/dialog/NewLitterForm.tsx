@@ -1,80 +1,147 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import React from 'react';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import DatePicker from '@/components/common/DatePicker';
-import { toast } from '@/components/ui/use-toast';
-import { useDogs } from '@/context/DogsContext';
+import { Dog } from '@/context/DogsContext';
+import ExternalSireFields from './ExternalSireFields';
 
 interface NewLitterFormProps {
+  dogs: Dog[];
+  sireName: string;
+  setSireName: (name: string) => void;
+  sireId: string;
+  setSireId: (id: string) => void;
+  damName: string;
+  setDamName: (name: string) => void;
+  damId: string;
+  setDamId: (id: string) => void;
   litterName: string;
   setLitterName: (name: string) => void;
-  selectedMaleId: string;
-  setSelectedMaleId: (id: string) => void;
-  selectedFemaleId: string;
-  setSelectedFemaleId: (id: string) => void;
   dateOfBirth: Date;
   setDateOfBirth: (date: Date) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  isExternalSire: boolean;
+  setIsExternalSire: (value: boolean) => void;
+  externalSireName: string;
+  setExternalSireName: (name: string) => void;
+  externalSireBreed: string;
+  setExternalSireBreed: (breed: string) => void;
+  externalSireRegistration: string;
+  setExternalSireRegistration: (reg: string) => void;
 }
 
 const NewLitterForm: React.FC<NewLitterFormProps> = ({
+  dogs,
+  sireName,
+  setSireName,
+  sireId,
+  setSireId,
+  damName,
+  setDamName,
+  damId,
+  setDamId,
   litterName,
   setLitterName,
-  selectedMaleId,
-  setSelectedMaleId,
-  selectedFemaleId,
-  setSelectedFemaleId,
   dateOfBirth,
   setDateOfBirth,
-  onSubmit,
+  isExternalSire,
+  setIsExternalSire,
+  externalSireName,
+  setExternalSireName,
+  externalSireBreed,
+  setExternalSireBreed,
+  externalSireRegistration,
+  setExternalSireRegistration
 }) => {
-  const { dogs } = useDogs();
   const males = dogs.filter(dog => dog.gender === 'male');
   const females = dogs.filter(dog => dog.gender === 'female');
 
+  const handleSireChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const id = e.target.value;
+    setSireId(id);
+    
+    const selectedDog = males.find(dog => dog.id === id);
+    if (selectedDog) {
+      setSireName(selectedDog.name);
+    } else {
+      setSireName('');
+    }
+  };
+
+  const handleDamChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const id = e.target.value;
+    setDamId(id);
+    
+    const selectedDog = females.find(dog => dog.id === id);
+    if (selectedDog) {
+      setDamName(selectedDog.name);
+    } else {
+      setDamName('');
+    }
+  };
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4 mt-4">
+    <div className="space-y-4">
       <div>
         <Label htmlFor="litterName">Litter Name</Label>
         <Input 
           id="litterName" 
           value={litterName} 
-          onChange={(e) => setLitterName(e.target.value)} 
-          placeholder="Spring Litter 2025"
+          onChange={(e) => setLitterName(e.target.value)}
+          placeholder="Spring Litter 2025" 
         />
       </div>
 
-      <div>
-        <Label htmlFor="female">Dam (Female)</Label>
-        <select
-          id="female"
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          value={selectedFemaleId}
-          onChange={(e) => setSelectedFemaleId(e.target.value)}
-        >
-          <option value="">Select Dam</option>
-          {females.map(dog => (
-            <option key={dog.id} value={dog.id}>
-              {dog.name}
-            </option>
-          ))}
-        </select>
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="external-sire"
+          checked={isExternalSire}
+          onCheckedChange={setIsExternalSire}
+        />
+        <Label htmlFor="external-sire">External Sire (not in your dogs)</Label>
       </div>
 
+      {!isExternalSire ? (
+        <div>
+          <Label htmlFor="sire">Sire (Male)</Label>
+          <select
+            id="sire"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            value={sireId}
+            onChange={handleSireChange}
+          >
+            <option value="">Select a male dog</option>
+            {males.map(dog => (
+              <option key={dog.id} value={dog.id}>
+                {dog.name} ({dog.breed})
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <ExternalSireFields
+          externalSireName={externalSireName}
+          setExternalSireName={setExternalSireName}
+          externalSireBreed={externalSireBreed}
+          setExternalSireBreed={setExternalSireBreed}
+          externalSireRegistration={externalSireRegistration}
+          setExternalSireRegistration={setExternalSireRegistration}
+        />
+      )}
+
       <div>
-        <Label htmlFor="male">Sire (Male)</Label>
+        <Label htmlFor="dam">Dam (Female)</Label>
         <select
-          id="male"
+          id="dam"
           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          value={selectedMaleId}
-          onChange={(e) => setSelectedMaleId(e.target.value)}
+          value={damId}
+          onChange={handleDamChange}
         >
-          <option value="">Select Sire</option>
-          {males.map(dog => (
+          <option value="">Select a female dog</option>
+          {females.map(dog => (
             <option key={dog.id} value={dog.id}>
-              {dog.name}
+              {dog.name} ({dog.breed})
             </option>
           ))}
         </select>
@@ -85,7 +152,7 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({
         setDate={setDateOfBirth} 
         label="Date of Birth" 
       />
-    </form>
+    </div>
   );
 };
 

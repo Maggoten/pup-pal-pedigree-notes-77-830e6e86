@@ -95,6 +95,15 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="text-center mb-8">
+        <div className="flex justify-center mb-4">
+          <img
+            src="/lovable-uploads/0ff492ef-6319-4443-aab1-16d7dc318144.png"
+            alt="Breeding Journey Logo"
+            className="h-[50px] w-[50px] object-contain"
+          />
+        </div>
+      </div>
       {!showPayment ? (
         <AuthTabs 
           onLogin={handleLogin}

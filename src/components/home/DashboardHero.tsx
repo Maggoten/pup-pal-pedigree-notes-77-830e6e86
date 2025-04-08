@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Calendar, PawPrint, Heart } from 'lucide-react';
+import { Calendar, PawPrint, Heart, DogBowl } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import StatsCards from './StatsCards';
@@ -38,7 +38,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
     {
       title: "Planned Litters",
       count: plannedLitters.count,
-      icon: <PawPrint className="h-5 w-5 text-primary" />,
+      icon: <Heart className="h-5 w-5 text-primary" />,
       highlight: plannedLitters.nextDate ? `Next: ${format(plannedLitters.nextDate, 'MMM d')}` : null,
       action: () => navigate("/planned-litters"),
       color: "bg-greige-100 border-greige-200 hover:border-greige-300"
@@ -54,7 +54,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
     {
       title: "Recent Litters",
       count: recentLitters.count,
-      icon: <Heart className="h-5 w-5 text-primary" />,
+      icon: <DogBowl className="h-5 w-5 text-primary" />,
       highlight: recentLitters.latest ? `Latest: ${format(recentLitters.latest, 'MMM d')}` : null,
       action: () => navigate("/my-litters"),
       color: "bg-greige-100 border-greige-200 hover:border-greige-300"
