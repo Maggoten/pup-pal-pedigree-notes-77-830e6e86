@@ -96,7 +96,7 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold font-le-jour text-primary">Breeding Journey</h1>
+        {/* Removed the Breeding Journey text */}
       </div>
       {!showPayment ? (
         <AuthTabs 
