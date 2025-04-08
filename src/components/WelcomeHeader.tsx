@@ -14,7 +14,7 @@ const WelcomeHeader: React.FC = () => {
           <h1 className="text-2xl md:text-3xl font-bold font-le-jour text-primary animate-fade-in">
             Breeding Journey
           </h1>
-          <p className="text-black font-glacial animate-fade-in" style={{ animationDelay: "0.3s" }}>
+          <p className="text-black font-glacial animate-fade-in ml-0.5" style={{ animationDelay: "0.3s" }}>
             - A breeders best friend
           </p>
         </div>

@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Le+Jour+Serif:wght@400;700&display=swap');
 @import url('https://fonts.cdnfonts.com/css/glacial-indifference-2');
 
@@ -17,7 +18,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 130 20% 25%;
 
-    --primary: 130 36% 25%; /* Sage-800 (darker green) */
+    --primary: 120 47% 28%; /* #296b26 */
     --primary-foreground: 60 15% 96%;
 
     --secondary: 40 15% 90%; /* Greige */
@@ -34,13 +35,13 @@
 
     --border: 40 20% 85%;
     --input: 40 20% 85%;
-    --ring: 130 36% 25%;
+    --ring: 120 47% 28%;
 
     --radius: 0.5rem;
 
     --sidebar-background: 40 15% 94%;
     --sidebar-foreground: 130 20% 25%;
-    --sidebar-primary: 130 36% 25%;
+    --sidebar-primary: 120 47% 28%;
     --sidebar-primary-foreground: 60 15% 96%;
     --sidebar-accent: 40 15% 90%;
     --sidebar-accent-foreground: 130 20% 25%;
