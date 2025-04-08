@@ -32,8 +32,7 @@ const PlannedLittersList: React.FC<PlannedLittersListProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h2 className="text-2xl font-bold">Planned Litters</h2>
+      <div className="flex justify-end">
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2 whitespace-nowrap">

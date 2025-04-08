@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Check, ChevronsUpDown, Search } from 'lucide-react';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -105,12 +105,14 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
                   key={breed}
                   value={breed}
                   onSelect={() => handleSelect(breed)}
-                  className="text-sm"
+                  className="text-sm cursor-pointer"
                 >
-                  {breed}
-                  {breed === displayValue && (
-                    <Check className="ml-auto h-4 w-4" />
-                  )}
+                  <div className="flex items-center justify-between w-full">
+                    <span>{breed}</span>
+                    {breed === displayValue && (
+                      <Check className="ml-auto h-4 w-4" />
+                    )}
+                  </div>
                 </CommandItem>
               ))}
             </CommandGroup>

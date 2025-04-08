@@ -31,6 +31,8 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
   const [selectedTime, setSelectedTime] = useState<string>(
     format(new Date(), 'HH:mm')
   );
+  // Local state to track updated puppy data
+  const [localPuppy, setLocalPuppy] = useState<Puppy>(puppy);
 
   const handleAddWeight = () => {
     if (!weight || isNaN(parseFloat(weight))) {
@@ -46,14 +48,20 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     const [hours, minutes] = selectedTime.split(':').map(Number);
     measurementDate.setHours(hours, minutes);
 
+    const newWeightRecord = { 
+      date: measurementDate.toISOString(), 
+      weight: parseFloat(weight) 
+    };
+    
     const updatedPuppy = {
-      ...puppy,
+      ...localPuppy,
       weightLog: [
-        ...puppy.weightLog,
-        { date: measurementDate.toISOString(), weight: parseFloat(weight) }
+        ...localPuppy.weightLog,
+        newWeightRecord
       ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     };
 
+    setLocalPuppy(updatedPuppy);
     onUpdate(updatedPuppy);
     setWeight('');
     
@@ -77,14 +85,20 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     const [hours, minutes] = selectedTime.split(':').map(Number);
     measurementDate.setHours(hours, minutes);
 
+    const newHeightRecord = { 
+      date: measurementDate.toISOString(), 
+      height: parseFloat(height) 
+    };
+    
     const updatedPuppy = {
-      ...puppy,
+      ...localPuppy,
       heightLog: [
-        ...puppy.heightLog,
-        { date: measurementDate.toISOString(), height: parseFloat(height) }
+        ...localPuppy.heightLog,
+        newHeightRecord
       ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     };
 
+    setLocalPuppy(updatedPuppy);
     onUpdate(updatedPuppy);
     setHeight('');
     
@@ -109,16 +123,22 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     noteDate.setHours(hours, minutes);
 
     // Make sure the puppy has a notes array, or create one
-    const currentNotes = puppy.notes || [];
+    const currentNotes = localPuppy.notes || [];
+
+    const newNote = { 
+      date: noteDate.toISOString(), 
+      content: note 
+    };
 
     const updatedPuppy = {
-      ...puppy,
+      ...localPuppy,
       notes: [
         ...currentNotes,
-        { date: noteDate.toISOString(), content: note }
+        newNote
       ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     };
 
+    setLocalPuppy(updatedPuppy);
     onUpdate(updatedPuppy);
     setNote('');
     
@@ -154,7 +174,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
           
           <TabsContent value="weight" className="space-y-4 mt-4">
             <PuppyWeightTab
-              puppy={puppy}
+              puppy={localPuppy} // Use local state
               weight={weight}
               setWeight={setWeight}
               selectedDate={selectedDate}
@@ -165,7 +185,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
           
           <TabsContent value="height" className="space-y-4 mt-4">
             <PuppyHeightTab
-              puppy={puppy}
+              puppy={localPuppy} // Use local state
               height={height}
               setHeight={setHeight}
               selectedDate={selectedDate}
@@ -176,7 +196,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
           
           <TabsContent value="notes" className="space-y-4 mt-4">
             <PuppyNotesTab
-              puppy={puppy}
+              puppy={localPuppy} // Use local state
               note={note}
               setNote={setNote}
               selectedDate={selectedDate}

@@ -36,18 +36,18 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
   const overallProgress = calculateOverallProgress();
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent border-b border-primary/10 pb-3 relative">
+    <Card className="overflow-hidden bg-greige-50 border-greige-200">
+      <CardHeader className="bg-gradient-to-r from-greige-100 to-greige-50/80 border-b border-greige-200 pb-3 relative">
         {/* Decorative paw prints */}
         <div className="absolute top-2 right-2 opacity-10">
-          <PawPrint className="h-32 w-32 text-primary transform rotate-12" />
+          <PawPrint className="h-32 w-32 text-greige-700 transform rotate-12" />
         </div>
         
-        <CardTitle className="flex items-center gap-2 text-primary relative z-10">
-          <PawPrint className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 text-greige-800 relative z-10">
+          <PawPrint className="h-5 w-5 text-greige-700" />
           {femaleName}'s Pregnancy Journey
         </CardTitle>
-        <CardDescription className="relative z-10">
+        <CardDescription className="relative z-10 text-greige-600">
           Track development and symptoms week by week
         </CardDescription>
         
@@ -59,7 +59,7 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
         />
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="bg-greige-50">
         <WeekSelector 
           currentWeek={currentWeek} 
           totalWeeks={totalWeeks} 

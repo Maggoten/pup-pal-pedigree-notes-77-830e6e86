@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, PawPrint, Baby } from 'lucide-react';
+import { Calendar, PawPrint, Baby, Heart } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface PregnancySummaryCardsProps {
@@ -29,7 +29,7 @@ const PregnancySummaryCards: React.FC<PregnancySummaryCardsProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-greige-50 border border-greige-200 rounded-lg p-4 flex flex-col items-center transform transition-transform hover:scale-105 hover:shadow-md">
             <div className="bg-greige-100 p-3 rounded-full mb-3">
-              <Calendar className="h-7 w-7 text-greige-700" />
+              <Heart className="h-7 w-7 text-greige-700" />
             </div>
             <h3 className="font-medium text-lg">Mating Date</h3>
             <p className="mt-1">{format(matingDate, 'PPP')}</p>
@@ -45,7 +45,7 @@ const PregnancySummaryCards: React.FC<PregnancySummaryCardsProps> = ({
           
           <div className="bg-greige-50 border border-greige-200 rounded-lg p-4 flex flex-col items-center transform transition-transform hover:scale-105 hover:shadow-md">
             <div className="bg-greige-100 p-3 rounded-full mb-3">
-              <Baby className="h-7 w-7 text-greige-700" />
+              <PawPrint className="h-7 w-7 text-greige-700" />
             </div>
             <h3 className="font-medium text-lg">Days Remaining</h3>
             <p className="mt-1">{daysLeft} days</p>

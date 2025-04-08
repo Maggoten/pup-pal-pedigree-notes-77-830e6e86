@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { Calendar, PawPrint, Plus, Trash } from 'lucide-react';
+import { Calendar, PawPrint, Trash } from 'lucide-react';
 import { Reminder, useBreedingReminders } from '@/hooks/useBreedingReminders';
 import RemindersList from './RemindersList';
 import DatePicker from '@/components/common/DatePicker';
@@ -87,7 +87,6 @@ const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange })
           {/* Left side - Add new reminder */}
           <div className="space-y-4">
             <div className="font-medium text-sm flex items-center gap-2 text-primary">
-              <Plus className="h-4 w-4" />
               Add New Reminder
             </div>
             
