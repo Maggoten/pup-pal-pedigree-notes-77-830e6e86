@@ -19,9 +19,9 @@ const AuthTabs: React.FC<AuthTabsProps> = ({ onLogin, onRegister, isLoading }) =
         <div className="flex justify-center mb-2">
           <BreedingJourneyLogo size="lg" showText={false} />
         </div>
-        <CardTitle className="text-2xl font-bold text-foreground font-le-jour">Breeding Journey</CardTitle>
+        <CardTitle className="text-2xl font-bold text-[#296b26] font-le-jour">Breeding Journey</CardTitle>
         <CardDescription>
-          Your companion for dog breeding management
+          Where smart breeding begins
         </CardDescription>
       </CardHeader>
       

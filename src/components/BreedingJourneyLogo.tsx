@@ -14,11 +14,11 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
   className = '' // Default to empty string
 }) => {
   // Size mappings using standard Tailwind classes
-  // Updated size map to make 'lg' size match the h-[50px] w-[50px] in AuthTabs
+  // Updated size map to make 'lg' size match the h-[80px] w-[80px] for the login dialog
   const sizeMap = {
     sm: 'h-4 w-4',
     md: 'h-5 w-5',
-    lg: 'h-[50px] w-[50px]'
+    lg: 'h-[80px] w-[80px]'
   };
 
   return (

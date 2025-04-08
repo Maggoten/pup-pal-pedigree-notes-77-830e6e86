@@ -68,7 +68,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
         />
         
         <Button 
-          className="w-full bg-greige-300 hover:bg-greige-400 text-brown-900" 
+          className="w-full bg-[#296b26] hover:bg-[#296b26]/90 text-white" 
           type="submit" 
           disabled={isLoading}
         >
