@@ -23,18 +23,20 @@ const Puppies: React.FC = () => {
       icon={<PawPrint className="h-6 w-6" />}
     >
       <div className="bg-background min-h-[calc(100vh-6rem)]">
-        <PuppiesHeader onAddLitterClick={handleAddLitterClick} />
-        
-        {litters.length > 0 ? (
-          <LitterTabs 
-            litters={litters}
-            selectedLitterId={selectedLitterId}
-            setSelectedLitterId={setSelectedLitterId}
-            onLogWeights={handleAddWeightLog}
-          />
-        ) : (
-          <EmptyPuppiesState onAddLitter={handleAddLitterClick} />
-        )}
+        <div className="beige-gradient rounded-lg border border-greige-300 p-4">
+          <PuppiesHeader onAddLitterClick={handleAddLitterClick} />
+          
+          {litters.length > 0 ? (
+            <LitterTabs 
+              litters={litters}
+              selectedLitterId={selectedLitterId}
+              setSelectedLitterId={setSelectedLitterId}
+              onLogWeights={handleAddWeightLog}
+            />
+          ) : (
+            <EmptyPuppiesState onAddLitter={handleAddLitterClick} />
+          )}
+        </div>
       </div>
     </PageLayout>
   );

@@ -33,8 +33,8 @@ const WeeklyTasks: React.FC<WeeklyTasksProps> = ({ reminders, onComplete }) => {
   });
 
   return (
-    <Card className="border-primary/20 shadow-sm overflow-hidden transition-shadow hover:shadow-md">
-      <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent border-b border-primary/10 pb-3">
+    <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md beige-gradient">
+      <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
           <CheckCircle className="h-5 w-5" />
           This Week's Tasks
@@ -44,7 +44,7 @@ const WeeklyTasks: React.FC<WeeklyTasksProps> = ({ reminders, onComplete }) => {
         </CardDescription>
       </CardHeader>
       
-      <div className="px-4 py-2 border-b border-primary/10 bg-primary/5">
+      <div className="px-4 py-2 border-b border-greige-200 bg-greige-50/50">
         <div className="flex justify-between">
           {weekDays.map(day => (
             <div 

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Dog } from 'lucide-react';
+import { PawPrint } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import { 
   Tabs, 
@@ -70,67 +70,71 @@ const MyLittersContent: React.FC = () => {
     <PageLayout 
       title="My Litters" 
       description="Track your litters and individual puppies"
-      icon={<Dog className="h-6 w-6" />}
+      icon={<PawPrint className="h-6 w-6" />}
     >
-      <Tabs value={categoryTab} onValueChange={setCategoryTab} className="space-y-4">
-        <LitterFilterHeader 
-          activeLitters={activeLitters}
-          archivedLitters={archivedLitters}
-          categoryTab={categoryTab}
-          setCategoryTab={setCategoryTab}
-          showAddLitterDialog={showAddLitterDialog}
-          setShowAddLitterDialog={setShowAddLitterDialog}
-          onAddLitter={handleAddLitter}
-          plannedLitters={plannedLitters}
-          availableYears={getAvailableYears()}
-        />
-        
-        <TabsContent value="active" className="space-y-6">
-          <LitterTabContent
-            litters={activeLitters}
-            filteredLitters={filteredActiveLitters}
-            paginatedLitters={paginatedActiveLitters}
-            selectedLitterId={selectedLitterId}
-            onSelectLitter={handleSelectLitter}
-            onAddLitter={handleAddLitterClick}
-            onArchive={(litter) => handleArchiveLitter(litter.id, true)}
-            pageCount={activePageCount}
-            currentPage={activePage}
-            onPageChange={setActivePage}
-            isFilterActive={isFilterActive}
-            onClearFilter={handleClearFilter}
+      <div className="beige-gradient rounded-lg border border-greige-300 p-4 pb-6">
+        <Tabs value={categoryTab} onValueChange={setCategoryTab} className="space-y-4">
+          <LitterFilterHeader 
+            activeLitters={activeLitters}
+            archivedLitters={archivedLitters}
+            categoryTab={categoryTab}
+            setCategoryTab={setCategoryTab}
+            showAddLitterDialog={showAddLitterDialog}
+            setShowAddLitterDialog={setShowAddLitterDialog}
+            onAddLitter={handleAddLitter}
+            plannedLitters={plannedLitters}
+            availableYears={getAvailableYears()}
           />
-        </TabsContent>
-        
-        <TabsContent value="archived" className="space-y-6">
-          <LitterTabContent
-            litters={archivedLitters}
-            filteredLitters={filteredArchivedLitters}
-            paginatedLitters={paginatedArchivedLitters}
-            selectedLitterId={selectedLitterId}
-            onSelectLitter={handleSelectLitter}
-            onAddLitter={handleAddLitterClick}
-            onArchive={(litter) => handleArchiveLitter(litter.id, false)}
-            pageCount={archivedPageCount}
-            currentPage={archivedPage}
-            onPageChange={setArchivedPage}
-            isFilterActive={isFilterActive}
-            onClearFilter={handleClearFilter}
-          />
-        </TabsContent>
-      </Tabs>
+          
+          <TabsContent value="active" className="space-y-6">
+            <LitterTabContent
+              litters={activeLitters}
+              filteredLitters={filteredActiveLitters}
+              paginatedLitters={paginatedActiveLitters}
+              selectedLitterId={selectedLitterId}
+              onSelectLitter={handleSelectLitter}
+              onAddLitter={handleAddLitterClick}
+              onArchive={(litter) => handleArchiveLitter(litter.id, true)}
+              pageCount={activePageCount}
+              currentPage={activePage}
+              onPageChange={setActivePage}
+              isFilterActive={isFilterActive}
+              onClearFilter={handleClearFilter}
+            />
+          </TabsContent>
+          
+          <TabsContent value="archived" className="space-y-6">
+            <LitterTabContent
+              litters={archivedLitters}
+              filteredLitters={filteredArchivedLitters}
+              paginatedLitters={paginatedArchivedLitters}
+              selectedLitterId={selectedLitterId}
+              onSelectLitter={handleSelectLitter}
+              onAddLitter={handleAddLitterClick}
+              onArchive={(litter) => handleArchiveLitter(litter.id, false)}
+              pageCount={archivedPageCount}
+              currentPage={archivedPage}
+              onPageChange={setArchivedPage}
+              isFilterActive={isFilterActive}
+              onClearFilter={handleClearFilter}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
       
       {selectedLitter && (
         <div className="mt-6 animate-fade-in space-y-6">
-          <SelectedLitterSection
-            selectedLitter={selectedLitter}
-            onUpdateLitter={handleUpdateLitter}
-            onDeleteLitter={handleDeleteLitter}
-            onArchiveLitter={handleArchiveLitter}
-            onAddPuppy={handleAddPuppy}
-            onUpdatePuppy={handleUpdatePuppy}
-            onDeletePuppy={handleDeletePuppy}
-          />
+          <div className="beige-gradient rounded-lg border border-greige-300 p-4">
+            <SelectedLitterSection
+              selectedLitter={selectedLitter}
+              onUpdateLitter={handleUpdateLitter}
+              onDeleteLitter={handleDeleteLitter}
+              onArchiveLitter={handleArchiveLitter}
+              onAddPuppy={handleAddPuppy}
+              onUpdatePuppy={handleUpdatePuppy}
+              onDeletePuppy={handleDeletePuppy}
+            />
+          </div>
         </div>
       )}
     </PageLayout>

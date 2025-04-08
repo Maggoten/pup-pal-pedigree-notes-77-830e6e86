@@ -11,11 +11,11 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
   size = 'md',
   showText = true
 }) => {
-  // Size mappings
+  // Size mappings (increased by 1.3x)
   const sizeMap = {
-    sm: 'h-6 w-6',
-    md: 'h-8 w-8',
-    lg: 'h-10 w-10'
+    sm: 'h-8 w-8', // was h-6 w-6
+    md: 'h-10 w-10', // was h-8 w-8
+    lg: 'h-13 w-13' // was h-10 w-10
   };
 
   return (

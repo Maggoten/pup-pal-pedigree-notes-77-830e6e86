@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Dog, Heart, PieChart, Baby, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -75,8 +76,8 @@ const BreedingStats = () => {
   ];
 
   return (
-    <Card className="border-primary/20 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full">
-      <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent border-b border-primary/10 pb-3 flex flex-row items-center justify-between">
+    <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full beige-gradient">
+      <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 flex flex-row items-center justify-between">
         <div>
           <CardTitle className="flex items-center gap-2 text-primary">
             <PieChart className="h-5 w-5" />
@@ -123,7 +124,7 @@ const BreedingStats = () => {
         </div>
         
         <div className="mt-6">
-          <div className="bg-primary/5 rounded-lg p-4">
+          <div className="bg-greige-50/70 rounded-lg p-4">
             <h3 className="font-medium mb-2">Program Health</h3>
             <p className="text-sm text-muted-foreground">
               {yearLitters > 0 

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
-import { PawPrint } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useDogs } from '@/context/DogsContext';
@@ -43,7 +43,7 @@ const Pregnancy: React.FC = () => {
     <PageLayout 
       title="Pregnancy" 
       description="Track your pregnant bitches and fetal development"
-      icon={<PawPrint className="h-6 w-6" />}
+      icon={<Heart className="h-6 w-6" />}
     >
       <div className="flex justify-end">
         <Button onClick={handleAddPregnancyClick} className="mb-6">Add Pregnancy</Button>
@@ -57,7 +57,9 @@ const Pregnancy: React.FC = () => {
         <TemperatureLogOverview onLogTemperature={handleLogTemperature} />
       </div>
 
-      <WeeklyDevelopmentGuide />
+      <div className="mt-6 beige-gradient rounded-lg border border-greige-300 p-4">
+        <WeeklyDevelopmentGuide />
+      </div>
     </PageLayout>
   );
 };

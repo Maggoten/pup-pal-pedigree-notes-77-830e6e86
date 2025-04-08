@@ -17,13 +17,13 @@ const BreedingReminders: React.FC = () => {
   
   return (
     <>
-      <Card className="border-primary/20 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full relative">
+      <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full relative beige-gradient">
         {/* Decorative background elements */}
         <div className="absolute top-1 right-1 opacity-5">
           <PawPrint className="h-40 w-40 text-primary transform rotate-12" />
         </div>
         
-        <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent border-b border-primary/10 pb-3 relative">
+        <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 relative">
           <div className="absolute top-6 right-6">
             <div className="relative">
               <div className="absolute animate-ping w-3 h-3 rounded-full bg-primary/30"></div>
@@ -49,7 +49,7 @@ const BreedingReminders: React.FC = () => {
           <div className="p-3 text-center">
             <button 
               onClick={() => setRemindersDialogOpen(true)}
-              className="text-xs text-primary hover:text-primary/70 font-medium flex items-center justify-center w-full"
+              className="text-xs text-primary hover:text-primary/70 font-medium"
             >
               View All Reminders
             </button>
