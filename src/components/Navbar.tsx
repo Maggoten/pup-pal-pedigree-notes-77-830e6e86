@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,11 +11,13 @@ import {
   DrawerTrigger,
   DrawerClose
 } from '@/components/ui/drawer';
+import SettingsDialog from '@/components/settings/SettingsDialog';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -100,11 +102,19 @@ export const Navbar: React.FC = () => {
           <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
             <LogOut className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setSettingsOpen(true)} 
+            title="Settings"
+          >
             <Settings className="h-5 w-5" />
           </Button>
         </div>
       </div>
+      
+      {/* Settings Dialog */}
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </header>
   );
 };
