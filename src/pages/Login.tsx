@@ -8,8 +8,6 @@ import PaymentForm from '@/components/auth/PaymentForm';
 import { LoginFormValues } from '@/components/auth/LoginForm';
 import { RegistrationFormValues } from '@/components/auth/RegistrationForm';
 import { RegisterData } from '@/types/auth';
-import BreedingJourneyLogo from '@/components/BreedingJourneyLogo';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -17,7 +15,6 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
-  const isMobile = useIsMobile();
 
   const handleLogin = async (values: LoginFormValues) => {
     setIsLoading(true);
@@ -97,27 +94,23 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 sm:p-6">
-      <div className="w-full max-w-md text-center mb-6 md:mb-8 animate-fade-in">
-        <BreedingJourneyLogo size="lg" showText={true} />
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="text-center mb-8">
+        {/* Removed the Breeding Journey text */}
       </div>
-      
-      <div className={`w-full max-w-md ${!showPayment ? 'animate-scale-in' : ''}`}>
-        {!showPayment ? (
-          <AuthTabs 
-            onLogin={handleLogin}
-            onRegister={handleRegistration}
-            isLoading={isLoading}
-            isMobile={isMobile}
-          />
-        ) : (
-          <PaymentForm
-            onSubmit={handlePayment}
-            onBack={() => setShowPayment(false)}
-            isLoading={isLoading}
-          />
-        )}
-      </div>
+      {!showPayment ? (
+        <AuthTabs 
+          onLogin={handleLogin}
+          onRegister={handleRegistration}
+          isLoading={isLoading}
+        />
+      ) : (
+        <PaymentForm
+          onSubmit={handlePayment}
+          onBack={() => setShowPayment(false)}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 };

@@ -3,7 +3,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { UserPlus, Mail, Lock, User, Home } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -56,12 +56,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium">First Name</FormLabel>
+                <FormLabel>First Name</FormLabel>
                 <FormControl>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="John" {...field} className="pl-10 bg-background/50" />
-                  </div>
+                  <Input placeholder="John" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -73,12 +70,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
             name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium">Last Name</FormLabel>
+                <FormLabel>Last Name</FormLabel>
                 <FormControl>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Doe" {...field} className="pl-10 bg-background/50" />
-                  </div>
+                  <Input placeholder="Doe" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -91,12 +85,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium">Address</FormLabel>
+              <FormLabel>Address</FormLabel>
               <FormControl>
-                <div className="relative">
-                  <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="123 Main St, City" {...field} className="pl-10 bg-background/50" />
-                </div>
+                <Input placeholder="123 Main St, City" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -108,12 +99,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium">Email</FormLabel>
+              <FormLabel>Email</FormLabel>
               <FormControl>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="your@email.com" {...field} className="pl-10 bg-background/50" />
-                </div>
+                <Input placeholder="your@email.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -125,12 +113,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium">Password</FormLabel>
+              <FormLabel>Password</FormLabel>
               <FormControl>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input type="password" {...field} className="pl-10 bg-background/50" />
-                </div>
+                <Input type="password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -141,7 +126,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           control={form.control}
           name="agreeToTerms"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-greige-100/50">
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-secondary/50">
               <FormControl>
                 <input
                   type="checkbox"
@@ -152,7 +137,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>Accept terms and conditions</FormLabel>
-                <FormDescription className="text-xs">
+                <FormDescription>
                   By creating an account, you agree to our Terms of Service and Privacy Policy. 
                   Your membership will be charged $2.99 monthly. 
                   You can end your subscription at any time.
@@ -164,7 +149,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
         />
         
         <Button 
-          className="w-full h-11 mt-2 font-medium" 
+          className="w-full" 
           type="submit"
           disabled={isLoading}
         >
