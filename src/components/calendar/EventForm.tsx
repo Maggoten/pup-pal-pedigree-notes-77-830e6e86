@@ -1,166 +1,163 @@
-
 import React from 'react';
-import { format } from 'date-fns';
-import { useForm } from 'react-hook-form';
-import { Clock } from 'lucide-react';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { Dog } from '@/context/DogsContext';
+import { useForm, Controller } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import DatePicker from '@/components/common/DatePicker';
+import TimePicker from '@/components/common/TimePicker';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export interface AddEventFormValues {
   title: string;
-  date: Date;
-  time: string;
-  type?: string;
-  dogId?: string;
+  date: Date | null;
+  time?: string;
   notes?: string;
+  dogId?: string;
 }
+
+const addEventFormSchema = z.object({
+  title: z.string().min(3, {
+    message: "Title must be at least 3 characters.",
+  }),
+  date: z.date({
+    required_error: "A date is required.",
+  }),
+  time: z.string().optional(),
+  notes: z.string().optional(),
+  dogId: z.string().optional(),
+});
 
 interface EventFormProps {
   dogs: Dog[];
   onSubmit: (data: AddEventFormValues) => void;
-  defaultValues?: Partial<AddEventFormValues>;
+  defaultValues?: AddEventFormValues;
   submitLabel?: string;
 }
 
-const EventForm: React.FC<EventFormProps> = ({ 
-  dogs, 
-  onSubmit, 
-  defaultValues, 
-  submitLabel = "Add Event" 
-}) => {
+const EventForm: React.FC<EventFormProps> = ({ dogs, onSubmit, defaultValues, submitLabel = "Add Event" }) => {
   const form = useForm<AddEventFormValues>({
+    resolver: zodResolver(addEventFormSchema),
     defaultValues: defaultValues || {
       title: '',
-      date: new Date(),
-      time: format(new Date(), 'HH:mm'),
-      type: 'custom',
-      notes: ''
-    }
+      date: null,
+      time: '',
+      notes: '',
+      dogId: ''
+    },
   });
   
+  const { control, handleSubmit, formState } = form;
+  const { errors } = formState;
+  
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
+    <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-4">
+      <div>
+        <Label htmlFor="title">Title</Label>
+        <Controller
           name="title"
+          control={control}
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Event Title</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter event title" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <Input 
+              id="title" 
+              placeholder="Event Title" 
+              {...field} 
+              className={cn(errors.title ? "border-destructive" : "")}
+            />
           )}
         />
-        
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
+        {errors.title && (
+          <p className="text-sm text-destructive">{errors.title.message}</p>
+        )}
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="date">Date</Label>
+          <Controller
             name="date"
+            control={control}
             render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Event Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className="w-full justify-start text-left font-normal"
-                      >
-                        {field.value ? (
-                          format(field.value, "PP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                      className="p-3 pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
+              <DatePicker
+                date={field.value}
+                setDate={field.onChange}
+                label=""
+              />
             )}
           />
-          
-          <FormField
-            control={form.control}
-            name="time"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Event Time</FormLabel>
-                <div className="flex items-center">
-                  <FormControl>
-                    <Input
-                      type="time"
-                      {...field}
-                      className="flex-1"
-                    />
-                  </FormControl>
-                  <Clock className="ml-2 h-4 w-4 text-muted-foreground" />
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {errors.date && (
+            <p className="text-sm text-destructive">{errors.date.message}</p>
+          )}
         </div>
         
-        <FormField
-          control={form.control}
-          name="dogId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Associated Dog (Optional)</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a dog (optional)" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {dogs.map((dog) => (
-                    <SelectItem key={dog.id} value={dog.id}>
-                      {dog.name} ({dog.gender})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
+        <div>
+          <Label htmlFor="time">Time</Label>
+          <Controller
+            name="time"
+            control={control}
+            render={({ field }) => (
+              <TimePicker
+                time={field.value || ''}
+                setTime={field.onChange}
+                label=""
+              />
+            )}
+          />
+          {errors.time && (
+            <p className="text-sm text-destructive">{errors.time.message}</p>
           )}
-        />
-        
-        <FormField
-          control={form.control}
+        </div>
+      </div>
+      
+      <div>
+        <Label htmlFor="notes">Notes</Label>
+        <Controller
           name="notes"
+          control={control}
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes (Optional)</FormLabel>
-              <FormControl>
-                <Input placeholder="Add notes about this event" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <Textarea 
+              id="notes" 
+              placeholder="Additional notes" 
+              {...field} 
+            />
           )}
         />
-        
-        <Button type="submit" className="w-full">{submitLabel}</Button>
-      </form>
-    </Form>
+        {errors.notes && (
+          <p className="text-sm text-destructive">{errors.notes.message}</p>
+        )}
+      </div>
+      
+      <div>
+        <Label htmlFor="dogId">Dog</Label>
+        <Controller
+          name="dogId"
+          control={control}
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a dog" />
+              </SelectTrigger>
+              <SelectContent>
+                {dogs.map((dog) => (
+                  <SelectItem key={dog.id} value={dog.id}>
+                    {dog.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+        {errors.dogId && (
+          <p className="text-sm text-destructive">{errors.dogId.message}</p>
+        )}
+      </div>
+      
+      <Button type="submit">{submitLabel}</Button>
+    </form>
   );
 };
 

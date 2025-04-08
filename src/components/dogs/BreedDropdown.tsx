@@ -63,7 +63,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between text-left font-normal h-10"
+          className="w-full justify-between text-left font-normal h-10 bg-greige-50"
         >
           {displayValue || "Select breed..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

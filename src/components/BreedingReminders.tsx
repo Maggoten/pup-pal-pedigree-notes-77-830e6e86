@@ -44,6 +44,7 @@ const BreedingReminders: React.FC = () => {
             reminders={highPriorityReminders.length > 0 ? highPriorityReminders : reminders.slice(0, 3)} 
             onComplete={handleMarkComplete} 
             compact={true} 
+            enableDelete={true}
           />
           
           <div className="p-3 text-center">
@@ -73,6 +74,7 @@ const BreedingReminders: React.FC = () => {
       <RemindersDialog 
         open={remindersDialogOpen} 
         onOpenChange={setRemindersDialogOpen} 
+        enableDelete={true}
       />
     </>
   );

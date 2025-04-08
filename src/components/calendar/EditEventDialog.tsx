@@ -5,6 +5,7 @@ import { Dog } from '@/context/DogsContext';
 import { CalendarEvent } from './types';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface EditEventDialogProps {
   event: CalendarEvent;
@@ -26,7 +27,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({ event, dogs, onSubmit
   };
   
   return (
-    <div className="bg-cream-50">
+    <div className={cn("bg-cream-50")}>
       <EventForm 
         dogs={dogs} 
         onSubmit={onSubmit} 

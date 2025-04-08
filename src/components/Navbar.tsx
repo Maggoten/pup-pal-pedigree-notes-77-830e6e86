@@ -14,7 +14,6 @@ import {
   SheetClose
 } from '@/components/ui/sheet';
 import SettingsDialog from '@/components/settings/SettingsDialog';
-import BreedingJourneyLogo from '@/components/BreedingJourneyLogo';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
@@ -58,7 +57,6 @@ export const Navbar: React.FC = () => {
             <SheetContent side="left" className="w-[240px] sm:w-[300px] pt-10">
               <SheetHeader className="mb-4">
                 <SheetTitle className="flex justify-between items-center">
-                  <BreedingJourneyLogo size="md" showText={false} />
                   <span className="text-lg font-semibold">Menu</span>
                   <SheetClose className="rounded-full hover:bg-muted p-2">
                     <X className="h-4 w-4" />
@@ -96,12 +94,6 @@ export const Navbar: React.FC = () => {
               </nav>
             </SheetContent>
           </Sheet>
-          <div className="md:hidden">
-            <BreedingJourneyLogo size="sm" showText={false} />
-          </div>
-          <div className="hidden md:block">
-            <BreedingJourneyLogo size="md" showText={true} />
-          </div>
         </div>
         
         <nav className="hidden md:flex items-center space-x-4">
