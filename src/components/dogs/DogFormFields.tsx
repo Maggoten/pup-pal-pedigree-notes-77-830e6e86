@@ -28,7 +28,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { UseFormReturn } from 'react-hook-form';
-import BreedDropdown from './BreedDropdown';
+import BreedDropdown from './breed-selector/BreedDropdown';
 
 export const dogFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
