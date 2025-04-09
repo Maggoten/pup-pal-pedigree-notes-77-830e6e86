@@ -16,6 +16,8 @@ interface PlannedLittersListProps {
   females: Dog[];
   onAddPlannedLitter: (values: PlannedLitterFormValues) => void;
   onAddMatingDate: (litterId: string, date: Date) => void;
+  onEditMatingDate?: (litterId: string, dateIndex: number, newDate: Date) => void;
+  onDeleteMatingDate?: (litterId: string, dateIndex: number) => void;
   onDeleteLitter: (litterId: string) => void;
 }
 
@@ -25,6 +27,8 @@ const PlannedLittersList: React.FC<PlannedLittersListProps> = ({
   females,
   onAddPlannedLitter,
   onAddMatingDate,
+  onEditMatingDate,
+  onDeleteMatingDate,
   onDeleteLitter
 }) => {
   const [openDialog, setOpenDialog] = useState(false);
@@ -58,6 +62,8 @@ const PlannedLittersList: React.FC<PlannedLittersListProps> = ({
               key={litter.id}
               litter={litter}
               onAddMatingDate={onAddMatingDate}
+              onEditMatingDate={onEditMatingDate}
+              onDeleteMatingDate={onDeleteMatingDate}
               onDeleteLitter={onDeleteLitter}
               calendarOpen={calendarOpen[litter.id] || false}
               onCalendarOpenChange={(open) => setCalendarOpen({...calendarOpen, [litter.id]: open})}

@@ -1,21 +1,36 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar } from 'lucide-react';
+import { Calendar, PenLine, Trash2 } from 'lucide-react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { PlannedLitter } from '@/types/breeding';
+import { parseISO } from 'date-fns';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PlannedLitterDetailsDialogProps {
   litter: PlannedLitter;
   onAddMatingDate: (litterId: string, date: Date) => void;
+  onDeleteMatingDate?: (litterId: string, dateIndex: number) => void;
+  onEditMatingDate?: (litterId: string, dateIndex: number, newDate: Date) => void;
 }
 
 const PlannedLitterDetailsDialog: React.FC<PlannedLitterDetailsDialogProps> = ({
   litter,
-  onAddMatingDate
+  onAddMatingDate,
+  onDeleteMatingDate,
+  onEditMatingDate
 }) => {
+  const [editingDateIndex, setEditingDateIndex] = useState<number | null>(null);
+  
+  const handleEditMatingDate = (date: Date | undefined) => {
+    if (date && editingDateIndex !== null && onEditMatingDate) {
+      onEditMatingDate(litter.id, editingDateIndex, date);
+      setEditingDateIndex(null);
+    }
+  };
+
   return (
     <DialogContent>
       <DialogHeader>
@@ -49,7 +64,66 @@ const PlannedLitterDetailsDialog: React.FC<PlannedLitterDetailsDialogProps> = ({
           {litter.matingDates && litter.matingDates.length > 0 ? (
             <ul className="space-y-1">
               {litter.matingDates.map((date, index) => (
-                <li key={index}>{new Date(date).toLocaleDateString()}</li>
+                <li key={index} className="flex items-center justify-between py-1">
+                  {editingDateIndex === index ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          {new Date(date).toLocaleDateString()}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={parseISO(date)}
+                          onSelect={handleEditMatingDate}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <span>{new Date(date).toLocaleDateString()}</span>
+                  )}
+                  
+                  <div className="flex space-x-1">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-7 w-7"
+                            onClick={() => setEditingDateIndex(index)}
+                          >
+                            <PenLine className="h-3.5 w-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit date</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => onDeleteMatingDate && onDeleteMatingDate(litter.id, index)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete date</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </li>
               ))}
             </ul>
           ) : (

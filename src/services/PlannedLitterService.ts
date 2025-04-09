@@ -115,6 +115,42 @@ class PlannedLitterService {
   }
 
   /**
+   * Delete a mating date from an existing litter
+   */
+  deleteMatingDate(litters: PlannedLitter[], litterId: string, dateIndex: number): PlannedLitter[] {
+    return litters.map(litter => {
+      if (litter.id === litterId && litter.matingDates) {
+        const updatedDates = [...litter.matingDates];
+        updatedDates.splice(dateIndex, 1);
+        return {
+          ...litter,
+          matingDates: updatedDates
+        };
+      }
+      return litter;
+    });
+  }
+
+  /**
+   * Edit a mating date in an existing litter
+   */
+  editMatingDate(litters: PlannedLitter[], litterId: string, dateIndex: number, newDate: Date): PlannedLitter[] {
+    const formattedDate = format(newDate, 'yyyy-MM-dd');
+    
+    return litters.map(litter => {
+      if (litter.id === litterId && litter.matingDates) {
+        const updatedDates = [...litter.matingDates];
+        updatedDates[dateIndex] = formattedDate;
+        return {
+          ...litter,
+          matingDates: updatedDates
+        };
+      }
+      return litter;
+    });
+  }
+
+  /**
    * Delete a planned litter
    */
   deletePlannedLitter(litters: PlannedLitter[], litterId: string): PlannedLitter[] {

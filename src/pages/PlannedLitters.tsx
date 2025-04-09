@@ -104,6 +104,55 @@ const PlannedLittersContent: React.FC = () => {
     }
   };
 
+  const handleEditMatingDate = (litterId: string, dateIndex: number, newDate: Date) => {
+    const updatedLitters = plannedLitterService.editMatingDate(plannedLitters, litterId, dateIndex, newDate);
+    setPlannedLitters(updatedLitters);
+    
+    toast({
+      title: "Mating Date Updated",
+      description: `Mating date updated to ${format(newDate, 'PPP')} successfully.`
+    });
+    
+    // Update recent matings list
+    updateRecentMatings();
+  };
+  
+  const handleDeleteMatingDate = (litterId: string, dateIndex: number) => {
+    const updatedLitters = plannedLitterService.deleteMatingDate(plannedLitters, litterId, dateIndex);
+    setPlannedLitters(updatedLitters);
+    
+    toast({
+      title: "Mating Date Deleted",
+      description: "The mating date has been removed successfully."
+    });
+    
+    // Update recent matings list
+    updateRecentMatings();
+  };
+  
+  const updateRecentMatings = () => {
+    const matings: RecentMating[] = [];
+    
+    plannedLitters.forEach(litter => {
+      if (litter.matingDates && litter.matingDates.length > 0) {
+        litter.matingDates.forEach(dateStr => {
+          const matingDate = parseISO(dateStr);
+          if (isBefore(matingDate, new Date())) {
+            matings.push({
+              id: `${litter.id}-${dateStr}`,
+              maleName: litter.maleName,
+              femaleName: litter.femaleName,
+              date: matingDate
+            });
+          }
+        });
+      }
+    });
+    
+    matings.sort((a, b) => b.date.getTime() - a.date.getTime());
+    setRecentMatings(matings);
+  };
+
   const handleDeleteLitter = (litterId: string) => {
     const updatedLitters = plannedLitterService.deletePlannedLitter(plannedLitters, litterId);
     setPlannedLitters(updatedLitters);
@@ -132,6 +181,8 @@ const PlannedLittersContent: React.FC = () => {
         females={females}
         onAddPlannedLitter={handleAddPlannedLitter}
         onAddMatingDate={handleAddMatingDate}
+        onEditMatingDate={handleEditMatingDate}
+        onDeleteMatingDate={handleDeleteMatingDate}
         onDeleteLitter={handleDeleteLitter}
       />
       

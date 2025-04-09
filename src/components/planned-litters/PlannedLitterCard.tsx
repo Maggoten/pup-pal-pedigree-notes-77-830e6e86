@@ -2,18 +2,21 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Trash2, ClipboardCheck } from 'lucide-react';
+import { Calendar, Trash2, ClipboardCheck, PenLine } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
-import { format } from 'date-fns';
+import { parseISO } from 'date-fns';
 import { PlannedLitter } from '@/types/breeding';
 import PlannedLitterDetailsDialog from './PlannedLitterDetailsDialog';
 import PreBreedingChecklist from './PreBreedingChecklist';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PlannedLitterCardProps {
   litter: PlannedLitter;
   onAddMatingDate: (litterId: string, date: Date) => void;
+  onEditMatingDate?: (litterId: string, dateIndex: number, newDate: Date) => void;
+  onDeleteMatingDate?: (litterId: string, dateIndex: number) => void;
   onDeleteLitter: (litterId: string) => void;
   calendarOpen: boolean;
   onCalendarOpenChange: (open: boolean) => void;
@@ -22,11 +25,21 @@ interface PlannedLitterCardProps {
 const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
   litter,
   onAddMatingDate,
+  onEditMatingDate,
+  onDeleteMatingDate,
   onDeleteLitter,
   calendarOpen,
   onCalendarOpenChange
 }) => {
   const [showChecklist, setShowChecklist] = useState(false);
+  const [editingDateIndex, setEditingDateIndex] = useState<number | null>(null);
+  
+  const handleEditMatingDate = (date: Date | undefined) => {
+    if (date && editingDateIndex !== null && onEditMatingDate) {
+      onEditMatingDate(litter.id, editingDateIndex, date);
+      setEditingDateIndex(null);
+    }
+  };
 
   return (
     <Card>
@@ -58,8 +71,65 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
             <h4 className="text-sm font-medium">Mating Dates:</h4>
             <ul className="mt-1 space-y-1">
               {litter.matingDates.map((date, index) => (
-                <li key={index} className="text-sm">
-                  {new Date(date).toLocaleDateString()}
+                <li key={index} className="flex items-center justify-between py-1 text-sm">
+                  {editingDateIndex === index ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          {new Date(date).toLocaleDateString()}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={parseISO(date)}
+                          onSelect={handleEditMatingDate}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <span>{new Date(date).toLocaleDateString()}</span>
+                  )}
+                  
+                  <div className="flex space-x-1">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-7 w-7"
+                            onClick={() => setEditingDateIndex(index)}
+                          >
+                            <PenLine className="h-3.5 w-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit date</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => onDeleteMatingDate && onDeleteMatingDate(litter.id, index)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete date</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -77,7 +147,7 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
                 Add Mating Date
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
+            <PopoverContent className="w-auto p-0" align="start">
               <CalendarComponent
                 mode="single"
                 onSelect={(date) => date && onAddMatingDate(litter.id, date)}
@@ -107,6 +177,8 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
           <PlannedLitterDetailsDialog 
             litter={litter} 
             onAddMatingDate={onAddMatingDate}
+            onEditMatingDate={onEditMatingDate}
+            onDeleteMatingDate={onDeleteMatingDate}
           />
         </Dialog>
       </CardFooter>
