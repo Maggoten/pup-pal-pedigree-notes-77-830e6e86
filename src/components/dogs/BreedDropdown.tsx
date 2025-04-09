@@ -104,7 +104,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0 bg-white" align="start">
+      <PopoverContent className="w-full p-0 bg-white z-50" align="start">
         <Command className="w-full">
           <CommandInput 
             placeholder="Search for a breed..." 
@@ -118,7 +118,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
             }}
             className="h-9"
           />
-          <CommandList>
+          <CommandList className="max-h-[300px] overflow-y-auto">
             <CommandEmpty className="py-2 px-2">
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">No breed found. Add a custom breed:</p>
