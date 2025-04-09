@@ -2,7 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import BreedDropdown from '@/components/dogs/BreedDropdown';
+import BreedDropdown from '@/components/dogs/breed-selector/BreedDropdown';
 
 interface ExternalSireFieldsProps {
   externalSireName: string;
