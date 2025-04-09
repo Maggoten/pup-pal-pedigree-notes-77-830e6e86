@@ -87,7 +87,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
                     value={customBreed}
                     onChange={(e) => setCustomBreed(e.target.value)}
                     placeholder="Enter custom breed"
-                    className="h-8"
+                    className="h-8 bg-white"
                   />
                   <Button 
                     size="sm" 
@@ -105,7 +105,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
                   key={breed}
                   value={breed}
                   onSelect={() => handleSelect(breed)}
-                  className="text-sm cursor-pointer"
+                  className="text-sm cursor-pointer hover:bg-accent"
                 >
                   <div className="flex items-center justify-between w-full">
                     <span>{breed}</span>
@@ -125,7 +125,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
                       value={customBreed || searchTerm}
                       onChange={(e) => setCustomBreed(e.target.value)}
                       placeholder="Enter custom breed"
-                      className="h-8"
+                      className="h-8 bg-white"
                     />
                     <Button 
                       size="sm" 
