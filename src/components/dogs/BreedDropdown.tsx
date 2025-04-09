@@ -104,8 +104,13 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0 bg-white z-50" align="start">
-        <Command className="w-full">
+      <PopoverContent 
+        className="w-full p-0 bg-white z-50" 
+        align="start"
+        sideOffset={5}
+        avoidCollisions={true}
+      >
+        <Command className="w-full bg-white">
           <CommandInput 
             placeholder="Search for a breed..." 
             value={searchTerm}
@@ -117,6 +122,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
               }
             }}
             className="h-9"
+            autoFocus
           />
           <CommandList className="max-h-[300px] overflow-y-auto">
             <CommandEmpty className="py-2 px-2">
