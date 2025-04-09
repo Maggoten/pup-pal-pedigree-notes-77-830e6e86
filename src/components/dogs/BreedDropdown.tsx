@@ -1,23 +1,23 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { commonDogBreeds } from '@/utils/dogBreeds';
 import { Input } from '@/components/ui/input';
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { commonDogBreeds } from '@/utils/dogBreeds';
+import { Search, Plus } from 'lucide-react';
 
 interface BreedDropdownProps {
   value: string;
@@ -25,177 +25,138 @@ interface BreedDropdownProps {
 }
 
 const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
-  const [open, setOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [customBreed, setCustomBreed] = useState("");
-  const [displayValue, setDisplayValue] = useState(value);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Initialize display value from props
-  useEffect(() => {
-    setDisplayValue(value);
-    if (value && !commonDogBreeds.includes(value)) {
-      setCustomBreed(value);
-    }
-  }, [value]);
-
+  const [customBreedDialogOpen, setCustomBreedDialogOpen] = useState(false);
+  const [customBreed, setCustomBreed] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  
   // Filter breeds based on search term
-  const filteredBreeds = commonDogBreeds.filter((breed) => 
-    breed.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredBreeds = searchTerm 
+    ? commonDogBreeds.filter(breed => 
+        breed.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : commonDogBreeds;
 
-  // Focus the input when CommandEmpty is shown
+  // Display "Custom..." option if no exact match and there's a search term
+  const hasExactMatch = searchTerm ? 
+    filteredBreeds.some(breed => breed.toLowerCase() === searchTerm.toLowerCase()) : 
+    true;
+  
+  // Reset custom breed input when dialog opens
   useEffect(() => {
-    if (open && inputRef.current && filteredBreeds.length === 0) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
+    if (customBreedDialogOpen) {
+      setCustomBreed(searchTerm);
     }
-  }, [open, searchTerm, filteredBreeds.length]);
+  }, [customBreedDialogOpen, searchTerm]);
 
-  // Handle selection of a predefined breed
-  const handleSelect = (currentValue: string) => {
-    if (currentValue) {
-      onChange(currentValue);
-      setDisplayValue(currentValue);
-      setOpen(false);
-      setSearchTerm("");
-      setCustomBreed("");
+  // Handle value selection
+  const handleValueChange = (selectedValue: string) => {
+    if (selectedValue === 'custom') {
+      setCustomBreedDialogOpen(true);
+    } else {
+      onChange(selectedValue);
     }
   };
 
   // Handle custom breed submission
-  const handleCustomBreed = () => {
-    const trimmedBreed = customBreed.trim() || searchTerm.trim();
-    if (trimmedBreed) {
-      onChange(trimmedBreed);
-      setDisplayValue(trimmedBreed);
-      setSearchTerm("");
-      setCustomBreed("");
-      setOpen(false);
+  const handleCustomBreedSubmit = () => {
+    if (customBreed.trim()) {
+      onChange(customBreed.trim());
+      setCustomBreedDialogOpen(false);
+      setSearchTerm('');
     }
-  };
-
-  // Handle custom breed input key press
-  const handleCustomBreedKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      e.stopPropagation();
-      handleCustomBreed();
-    }
-  };
-
-  // Stop event propagation for the custom breed input
-  const handleInputClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between text-left font-normal h-10 bg-white border-input shadow-sm"
-          onClick={() => setOpen(true)}
-        >
-          {displayValue || "Select breed..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent 
-        className="w-full p-0 bg-white z-50" 
-        align="start"
-        sideOffset={5}
-        avoidCollisions={true}
-      >
-        <Command className="w-full bg-white">
-          <CommandInput 
-            placeholder="Search for a breed..." 
+    <>
+      <div className="relative w-full">
+        <div className="relative">
+          <Input
+            placeholder="Search breeds..."
             value={searchTerm}
-            onValueChange={(value) => {
-              setSearchTerm(value);
-              // Only set custom breed if there's no match in the list
-              if (filteredBreeds.length === 0) {
-                setCustomBreed(value);
-              }
-            }}
-            className="h-9"
-            autoFocus
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pr-10 bg-white"
           />
-          <CommandList className="max-h-[300px] overflow-y-auto">
-            <CommandEmpty className="py-2 px-2">
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">No breed found. Add a custom breed:</p>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    ref={inputRef}
-                    value={customBreed || searchTerm}
-                    onChange={(e) => setCustomBreed(e.target.value)}
-                    onKeyDown={handleCustomBreedKeyPress}
-                    onClick={handleInputClick}
-                    placeholder="Enter custom breed"
-                    className="h-8 bg-white"
-                    autoFocus
-                  />
-                  <Button 
-                    size="sm" 
-                    onClick={handleCustomBreed}
-                    disabled={!(customBreed || searchTerm).trim()}
-                    type="button"
+          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        </div>
+        
+        {searchTerm && (
+          <div className="absolute w-full mt-1 max-h-60 overflow-auto z-50 bg-white border border-gray-200 rounded-md shadow-lg">
+            {filteredBreeds.length > 0 ? (
+              <ul className="py-1">
+                {filteredBreeds.map((breed) => (
+                  <li 
+                    key={breed} 
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                    onClick={() => {
+                      onChange(breed);
+                      setSearchTerm('');
+                    }}
                   >
-                    Add
-                  </Button>
-                </div>
-              </div>
-            </CommandEmpty>
-            <CommandGroup heading="Common Breeds">
-              {filteredBreeds.map((breed) => (
-                <CommandItem
-                  key={breed}
-                  value={breed}
-                  onSelect={() => handleSelect(breed)}
-                  className="text-sm cursor-pointer hover:bg-accent"
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span>{breed}</span>
-                    {breed === displayValue && (
-                      <Check className="ml-auto h-4 w-4" />
+                    {breed}
+                    {breed === value && (
+                      <span className="text-primary">✓</span>
                     )}
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-            {searchTerm && filteredBreeds.length > 0 && (
-              <CommandGroup className="border-t pt-2">
-                <div className="px-2 py-1.5">
-                  <p className="text-sm text-muted-foreground">Or add custom breed:</p>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <Input
-                      value={customBreed || searchTerm}
-                      onChange={(e) => setCustomBreed(e.target.value)}
-                      onKeyDown={handleCustomBreedKeyPress}
-                      onClick={handleInputClick}
-                      placeholder="Enter custom breed"
-                      className="h-8 bg-white"
-                    />
-                    <Button 
-                      size="sm" 
-                      onClick={handleCustomBreed}
-                      disabled={!(customBreed || searchTerm).trim()}
-                      type="button"
-                    >
-                      Add
-                    </Button>
-                  </div>
-                </div>
-              </CommandGroup>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="p-3">
+                <p className="text-sm text-gray-500 mb-2">No breed found. Add a custom breed:</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start flex items-center gap-2"
+                  onClick={() => setCustomBreedDialogOpen(true)}
+                >
+                  <Plus className="h-4 w-4" /> 
+                  Add "{searchTerm}" as custom breed
+                </Button>
+              </div>
             )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+            
+            {!hasExactMatch && filteredBreeds.length > 0 && (
+              <div className="px-3 py-2 border-t">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start flex items-center gap-2"
+                  onClick={() => setCustomBreedDialogOpen(true)}
+                >
+                  <Plus className="h-4 w-4" /> 
+                  Add "{searchTerm}" as custom breed
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      
+      {/* Custom Breed Dialog */}
+      <Dialog open={customBreedDialogOpen} onOpenChange={setCustomBreedDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Custom Breed</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              placeholder="Enter custom breed name"
+              value={customBreed}
+              onChange={(e) => setCustomBreed(e.target.value)}
+              className="w-full"
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCustomBreedDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCustomBreedSubmit} disabled={!customBreed.trim()}>
+              Add Breed
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
