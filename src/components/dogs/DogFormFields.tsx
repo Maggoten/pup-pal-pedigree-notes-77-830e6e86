@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { z } from 'zod';
 import { CalendarIcon } from 'lucide-react';
@@ -31,7 +30,6 @@ import {
 import { UseFormReturn } from 'react-hook-form';
 import BreedDropdown from './BreedDropdown';
 
-// Define the form schema with Zod
 export const dogFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   breed: z.string().min(1, "Breed is required"),
@@ -55,7 +53,6 @@ export const dogFormSchema = z.object({
   heatInterval: z.number().positive().optional(),
 });
 
-// Infer the type from the schema
 export type DogFormValues = z.infer<typeof dogFormSchema>;
 
 interface DogFormFieldsProps {
@@ -133,7 +130,7 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({ form }) => {
                   <Button
                     variant="outline"
                     className={cn(
-                      "pl-3 text-left font-normal",
+                      "pl-3 text-left font-normal bg-white border-input shadow-sm",
                       !field.value && "text-muted-foreground"
                     )}
                   >
@@ -146,7 +143,7 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({ form }) => {
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0 bg-white" align="start">
                 <Calendar
                   mode="single"
                   selected={field.value}
@@ -205,7 +202,7 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({ form }) => {
                   <Button
                     variant="outline"
                     className={cn(
-                      "pl-3 text-left font-normal",
+                      "pl-3 text-left font-normal bg-white border-input shadow-sm",
                       !field.value && "text-muted-foreground"
                     )}
                   >
@@ -218,7 +215,7 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({ form }) => {
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0 bg-white" align="start">
                 <Calendar
                   mode="single"
                   selected={field.value}
@@ -247,7 +244,7 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({ form }) => {
                   <Button
                     variant="outline"
                     className={cn(
-                      "pl-3 text-left font-normal",
+                      "pl-3 text-left font-normal bg-white border-input shadow-sm",
                       !field.value && "text-muted-foreground"
                     )}
                   >
@@ -260,7 +257,7 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({ form }) => {
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0 bg-white" align="start">
                 <Calendar
                   mode="single"
                   selected={field.value}

@@ -63,13 +63,13 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between text-left font-normal h-10"
+          className="w-full justify-between text-left font-normal h-10 bg-white border-input shadow-sm"
         >
           {displayValue || "Select breed..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
+      <PopoverContent className="w-full p-0 bg-white" align="start">
         <Command className="w-full">
           <CommandInput 
             placeholder="Search for a breed..." 
