@@ -22,7 +22,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 }) => {
   return (
     <div className={cn("space-y-2", className)}>
-      {label && <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{label}</label>}
+      {label && <div className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{label}</div>}
       <Popover>
         <PopoverTrigger asChild>
           <Button

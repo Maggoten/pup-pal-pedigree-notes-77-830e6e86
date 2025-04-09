@@ -45,7 +45,7 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
         
         <NotesField form={form} />
         
-        <DialogFooter>
+        <DialogFooter className="mt-6">
           <Button type="submit">Add Litter</Button>
         </DialogFooter>
       </form>

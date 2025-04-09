@@ -71,7 +71,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
         </DialogDescription>
       </DialogHeader>
 
-      <div className="grid gap-6">
+      <div className="grid gap-6 mt-2">
         <div className="mb-2">
           <h3 className="text-sm font-medium mb-2">Puppy Photo</h3>
           <PuppyImageUploader 
@@ -85,28 +85,22 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
       </div>
 
       <DialogFooter className="mt-6 flex items-center justify-between">
-        <DialogClose asChild>
-          <Button 
-            type="button" 
-            variant="destructive" 
-            onClick={handleDelete}
-            className="flex items-center"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete Puppy
-          </Button>
-        </DialogClose>
+        <Button 
+          type="button" 
+          variant="destructive" 
+          onClick={handleDelete}
+          className="flex items-center"
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete Puppy
+        </Button>
         <div className="flex gap-2">
-          <DialogClose asChild>
-            <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
-              Cancel
-            </Button>
-          </DialogClose>
-          <DialogClose asChild>
-            <Button type="submit" form="puppy-form">
-              Save Changes
-            </Button>
-          </DialogClose>
+          <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
+            Cancel
+          </Button>
+          <Button type="submit" form="puppy-form">
+            Save Changes
+          </Button>
         </div>
       </DialogFooter>
     </DialogContent>

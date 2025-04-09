@@ -94,7 +94,7 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({
         />
       </div>
 
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 p-3 border rounded-md bg-white border-greige-300">
         <Switch
           id="external-sire"
           checked={isExternalSire}
@@ -152,7 +152,6 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({
         date={dateOfBirth} 
         setDate={setDateOfBirth} 
         label="Date of Birth" 
-        className="bg-white border-greige-300"
       />
     </div>
   );

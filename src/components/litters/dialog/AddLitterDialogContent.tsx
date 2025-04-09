@@ -28,8 +28,8 @@ const AddLitterDialogContent: React.FC<AddLitterDialogContentProps> = ({
         </DialogDescription>
       </DialogHeader>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
+        <TabsList className="grid grid-cols-2 bg-greige-200">
           <TabsTrigger value="newLitter">New Litter</TabsTrigger>
           <TabsTrigger value="plannedLitter">From Planned Litter</TabsTrigger>
         </TabsList>
@@ -38,7 +38,7 @@ const AddLitterDialogContent: React.FC<AddLitterDialogContentProps> = ({
           <NewLitterTabContent onClose={onClose} onLitterAdded={onLitterAdded} />
         </TabsContent>
         
-        <TabsContent value="plannedLitter" className="space-y-4">
+        <TabsContent value="plannedLitter" className="space-y-4 mt-4">
           <PlannedLitterTabContent 
             onClose={onClose} 
             onLitterAdded={onLitterAdded}

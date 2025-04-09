@@ -39,12 +39,14 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
         </DialogDescription>
       </DialogHeader>
       
-      <PlannedLitterForm 
-        form={form}
-        males={males}
-        females={females}
-        onSubmit={onSubmit}
-      />
+      <div className="mt-2">
+        <PlannedLitterForm 
+          form={form}
+          males={males}
+          females={females}
+          onSubmit={onSubmit}
+        />
+      </div>
     </DialogContent>
   );
 };
