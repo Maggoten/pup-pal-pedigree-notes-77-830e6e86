@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Puppy } from '@/types/breeding';
 import DatePicker from '@/components/common/DatePicker';
-import BreedDropdown from '@/components/dogs/BreedDropdown';
+import BreedDropdown from '@/components/dogs/breed-selector/BreedDropdown';
 import PuppyGenderSelector from './PuppyGenderSelector';
 
 interface PuppyDetailsFormProps {
