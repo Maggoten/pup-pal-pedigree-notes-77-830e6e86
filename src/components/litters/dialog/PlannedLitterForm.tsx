@@ -86,7 +86,7 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
         date={dateOfBirth} 
         setDate={setDateOfBirth} 
         label="Date of Birth" 
-        className="bg-white"
+        className="bg-white border-greige-300"
       />
     </form>
   );
