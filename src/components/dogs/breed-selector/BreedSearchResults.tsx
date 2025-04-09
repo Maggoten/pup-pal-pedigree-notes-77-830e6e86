@@ -10,6 +10,7 @@ interface BreedSearchResultsProps {
   onSelectBreed: (breed: string) => void;
   onAddCustomBreed: () => void;
   hasExactMatch: boolean;
+  isMobile?: boolean;
 }
 
 const BreedSearchResults: React.FC<BreedSearchResultsProps> = ({
@@ -18,7 +19,8 @@ const BreedSearchResults: React.FC<BreedSearchResultsProps> = ({
   currentValue,
   onSelectBreed,
   onAddCustomBreed,
-  hasExactMatch
+  hasExactMatch,
+  isMobile
 }) => {
   // Always show breeds when dropdown is open
   return (
@@ -28,7 +30,7 @@ const BreedSearchResults: React.FC<BreedSearchResultsProps> = ({
           {filteredBreeds.map((breed) => (
             <li 
               key={breed} 
-              className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+              className={`px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between ${isMobile ? "py-3" : ""}`}
               onClick={() => onSelectBreed(breed)}
             >
               {breed}
@@ -44,7 +46,7 @@ const BreedSearchResults: React.FC<BreedSearchResultsProps> = ({
           <Button 
             variant="outline" 
             size="sm" 
-            className="w-full justify-start flex items-center gap-2"
+            className={`w-full justify-start flex items-center gap-2 ${isMobile ? "py-3" : ""}`}
             onClick={onAddCustomBreed}
           >
             <Plus className="h-4 w-4" /> 
@@ -58,7 +60,7 @@ const BreedSearchResults: React.FC<BreedSearchResultsProps> = ({
           <Button 
             variant="outline" 
             size="sm" 
-            className="w-full justify-start flex items-center gap-2"
+            className={`w-full justify-start flex items-center gap-2 ${isMobile ? "py-3" : ""}`}
             onClick={onAddCustomBreed}
           >
             <Plus className="h-4 w-4" /> 

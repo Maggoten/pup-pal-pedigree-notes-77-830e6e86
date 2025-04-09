@@ -6,6 +6,7 @@ import { commonDogBreeds } from '@/utils/dogBreeds';
 import CustomBreedDialog from './CustomBreedDialog';
 import BreedSearchResults from './BreedSearchResults';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BreedDropdownProps {
   value: string;
@@ -19,6 +20,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange, classNam
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
   
   // Show selected breed in the input if available
   useEffect(() => {
@@ -68,20 +70,31 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange, classNam
     setIsDropdownOpen(true);
   };
 
-  // Handle input blur
+  // Handle input blur - with longer delay for mobile
   const handleInputBlur = (e: React.FocusEvent) => {
-    // Delay closing to allow clicking on dropdown items
+    // Use longer delay on mobile for more reliable touch interaction
+    const delay = isMobile ? 300 : 200;
+    
     setTimeout(() => {
       if (document.activeElement !== inputRef.current) {
         setIsDropdownOpen(false);
       }
-    }, 200);
+    }, delay);
   };
 
   // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setIsDropdownOpen(true);
+  };
+
+  // Handle input click/tap for mobile - to better handle touch events
+  const handleInputClick = () => {
+    if (isMobile && !isDropdownOpen) {
+      setIsDropdownOpen(true);
+      // Set focus after opening dropdown
+      inputRef.current?.focus();
+    }
   };
 
   return (
@@ -95,7 +108,12 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange, classNam
             onChange={handleInputChange}
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
-            className={cn("w-full pr-10 bg-white border-greige-300", className)}
+            onClick={handleInputClick}
+            className={cn(
+              "w-full pr-10 bg-white border-greige-300", 
+              isMobile && "py-3", // Larger touch target on mobile
+              className
+            )}
           />
           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         </div>
@@ -108,6 +126,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange, classNam
             onSelectBreed={handleBreedSelect}
             onAddCustomBreed={() => setCustomBreedDialogOpen(true)}
             hasExactMatch={hasExactMatch}
+            isMobile={isMobile}
           />
         )}
       </div>
