@@ -5,13 +5,15 @@ import { Search } from 'lucide-react';
 import { commonDogBreeds } from '@/utils/dogBreeds';
 import CustomBreedDialog from './CustomBreedDialog';
 import BreedSearchResults from './BreedSearchResults';
+import { cn } from '@/lib/utils';
 
 interface BreedDropdownProps {
   value: string;
   onChange: (value: string) => void;
+  className?: string;
 }
 
-const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
+const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange, className }) => {
   const [customBreedDialogOpen, setCustomBreedDialogOpen] = useState(false);
   const [customBreed, setCustomBreed] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,7 +60,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
             placeholder="Search breeds..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pr-10 bg-white"
+            className={cn("w-full pr-10", className)}
           />
           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         </div>
