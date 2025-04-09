@@ -36,7 +36,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             {date ? format(date, "PPP") : <span>Pick a date</span>}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 bg-white">
+        <PopoverContent className="w-auto p-0 bg-white" align="start">
           <Calendar
             mode="single"
             selected={date}

@@ -82,12 +82,14 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
         />
       </div>
 
-      <DatePicker 
-        date={dateOfBirth} 
-        setDate={setDateOfBirth} 
-        label="Date of Birth" 
-        className="bg-white border-greige-300"
-      />
+      <div className="space-y-2">
+        <Label htmlFor="dateOfBirth">Date of Birth</Label>
+        <DatePicker 
+          date={dateOfBirth} 
+          setDate={setDateOfBirth}
+          className="bg-white border-greige-300"
+        />
+      </div>
     </form>
   );
 };
