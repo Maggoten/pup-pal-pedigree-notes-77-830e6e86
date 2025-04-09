@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/components/ui/use-toast';
 import DatePicker from '@/components/common/DatePicker';
-import BreedDropdown from '@/components/dogs/BreedDropdown';
+import BreedDropdown from '@/components/dogs/breed-selector/BreedDropdown';
 import { Puppy } from '@/types/breeding';
 
 interface AddPuppyDialogProps {
@@ -34,7 +33,6 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
   const [dateOfBirth, setDateOfBirth] = useState<Date>(defaultDob);
   const [breed, setBreed] = useState<string>('');
   
-  // Set default name when puppyNumber changes, making sure the name is just "Puppy X" without any extra digits
   useEffect(() => {
     setName(`Puppy ${puppyNumber}`);
   }, [puppyNumber]);
@@ -43,7 +41,6 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
     e.preventDefault();
 
     try {
-      // Combine date and time for the time of birth
       let birthDateTime = new Date(dateOfBirth);
       if (timeOfBirth) {
         const [hours, minutes] = timeOfBirth.split(':').map(Number);
@@ -52,7 +49,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
 
       const newPuppy = {
         id: Date.now().toString(),
-        name, // Use the name exactly as entered, no manipulation
+        name,
         gender,
         color,
         breed,
@@ -67,7 +64,6 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
       };
 
       onAddPuppy(newPuppy);
-      // Dialog closing is now handled by the parent component
     } catch (error) {
       toast({
         title: "Error Adding Puppy",
@@ -118,7 +114,6 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
             <BreedDropdown 
               value={breed} 
               onChange={setBreed}
-              className="bg-white border-greige-300"
             />
           </div>
 

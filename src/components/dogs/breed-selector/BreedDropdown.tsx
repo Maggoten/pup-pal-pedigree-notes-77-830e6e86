@@ -60,7 +60,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange, classNam
             placeholder="Search breeds..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className={cn("w-full pr-10", className)}
+            className={cn("w-full pr-10 bg-white border-greige-300", className)}
           />
           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         </div>
