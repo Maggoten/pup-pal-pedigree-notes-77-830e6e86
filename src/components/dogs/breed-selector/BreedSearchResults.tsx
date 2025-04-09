@@ -20,8 +20,7 @@ const BreedSearchResults: React.FC<BreedSearchResultsProps> = ({
   onAddCustomBreed,
   hasExactMatch
 }) => {
-  if (!searchTerm) return null;
-  
+  // Always show breeds when dropdown is open
   return (
     <div className="absolute w-full mt-1 max-h-60 overflow-auto z-50 bg-white border border-gray-200 rounded-md shadow-lg">
       {filteredBreeds.length > 0 ? (
@@ -54,7 +53,7 @@ const BreedSearchResults: React.FC<BreedSearchResultsProps> = ({
         </div>
       )}
       
-      {!hasExactMatch && filteredBreeds.length > 0 && (
+      {!hasExactMatch && searchTerm && filteredBreeds.length > 0 && (
         <div className="px-3 py-2 border-t">
           <Button 
             variant="outline" 
