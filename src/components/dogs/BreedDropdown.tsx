@@ -31,12 +31,22 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
   const [displayValue, setDisplayValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Initialize custom breed from initial value if needed
   useEffect(() => {
     setDisplayValue(value);
     if (value && !commonDogBreeds.includes(value)) {
       setCustomBreed(value);
     }
   }, [value]);
+
+  // Focus the input when CommandEmpty is shown
+  useEffect(() => {
+    if (open && inputRef.current && filteredBreeds.length === 0) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [open, searchTerm]);
 
   const filteredBreeds = commonDogBreeds.filter((breed) => 
     breed.toLowerCase().includes(searchTerm.toLowerCase())
@@ -53,6 +63,14 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
       onChange(customBreed.trim());
       setDisplayValue(customBreed.trim());
       setOpen(false);
+    }
+  };
+
+  // Handle custom breed input key press
+  const handleCustomBreedKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && customBreed.trim() !== "") {
+      e.preventDefault();
+      handleCustomBreed();
     }
   };
 
@@ -86,13 +104,16 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
                     ref={inputRef}
                     value={customBreed}
                     onChange={(e) => setCustomBreed(e.target.value)}
+                    onKeyDown={handleCustomBreedKeyPress}
                     placeholder="Enter custom breed"
                     className="h-8 bg-white"
+                    autoFocus
                   />
                   <Button 
                     size="sm" 
                     onClick={handleCustomBreed}
                     disabled={!customBreed.trim()}
+                    type="button"
                   >
                     Add
                   </Button>
@@ -124,6 +145,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
                     <Input
                       value={customBreed || searchTerm}
                       onChange={(e) => setCustomBreed(e.target.value)}
+                      onKeyDown={handleCustomBreedKeyPress}
                       placeholder="Enter custom breed"
                       className="h-8 bg-white"
                     />
@@ -131,6 +153,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
                       size="sm" 
                       onClick={handleCustomBreed}
                       disabled={!(customBreed || searchTerm).trim()}
+                      type="button"
                     >
                       Add
                     </Button>
