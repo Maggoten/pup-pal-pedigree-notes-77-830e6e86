@@ -152,7 +152,7 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({
         date={dateOfBirth} 
         setDate={setDateOfBirth} 
         label="Date of Birth" 
-        className="bg-white"
+        className="bg-white border-greige-300"
       />
     </div>
   );
