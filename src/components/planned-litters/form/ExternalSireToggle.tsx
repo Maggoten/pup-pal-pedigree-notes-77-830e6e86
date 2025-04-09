@@ -15,7 +15,7 @@ const ExternalSireToggle: React.FC<ExternalSireToggleProps> = ({ form }) => {
       control={form.control}
       name="externalMale"
       render={({ field }) => (
-        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-white">
           <div className="space-y-0.5">
             <FormLabel>External Sire</FormLabel>
             <FormDescription>

@@ -31,7 +31,7 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
   });
   
   return (
-    <DialogContent className="sm:max-w-[500px]">
+    <DialogContent className="sm:max-w-[500px] bg-slate-100">
       <DialogHeader>
         <DialogTitle>Add Planned Litter</DialogTitle>
         <DialogDescription>

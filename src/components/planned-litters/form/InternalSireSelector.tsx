@@ -24,11 +24,11 @@ const InternalSireSelector: React.FC<InternalSireSelectorProps> = ({ form, males
             defaultValue={field.value}
           >
             <FormControl>
-              <SelectTrigger>
+              <SelectTrigger className="bg-white">
                 <SelectValue placeholder="Select male dog" />
               </SelectTrigger>
             </FormControl>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {males.map(dog => (
                 <SelectItem key={dog.id} value={dog.id}>
                   {dog.name} ({dog.breed})

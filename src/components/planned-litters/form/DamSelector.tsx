@@ -24,11 +24,11 @@ const DamSelector: React.FC<DamSelectorProps> = ({ form, females }) => {
             defaultValue={field.value}
           >
             <FormControl>
-              <SelectTrigger>
+              <SelectTrigger className="bg-white">
                 <SelectValue placeholder="Select female dog" />
               </SelectTrigger>
             </FormControl>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {females.map(dog => (
                 <SelectItem key={dog.id} value={dog.id}>
                   {dog.name} ({dog.breed})
