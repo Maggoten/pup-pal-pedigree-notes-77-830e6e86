@@ -3,8 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
 import { usePregnancyDetails } from '@/hooks/usePregnancyDetails';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, ChevronDown } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -32,10 +30,6 @@ const PregnancyDetails: React.FC = () => {
     setActivePregnancies(pregnancies);
   }, []);
   
-  const handleBack = () => {
-    navigate('/');
-  };
-  
   const handlePregnancyChange = (pregnancyId: string) => {
     navigate(`/pregnancy/${pregnancyId}`);
   };
@@ -50,12 +44,7 @@ const PregnancyDetails: React.FC = () => {
       description=""
       icon={null}
     >
-      <div className="mb-6 flex justify-between items-center">
-        <Button variant="outline" onClick={handleBack} className="flex items-center gap-2 border-greige-300 text-greige-700 hover:bg-greige-100">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Home
-        </Button>
-        
+      <div className="mb-6 flex justify-end">
         {activePregnancies.length > 1 && (
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-greige-700">Select Pregnancy:</span>
