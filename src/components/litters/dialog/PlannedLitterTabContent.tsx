@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
@@ -110,7 +109,7 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
         <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
           Cancel
         </Button>
-        <Button type="button" onClick={handlePlannedLitterSubmit} className="bg-sage-500 hover:bg-sage-600 text-white">
+        <Button type="button" onClick={handlePlannedLitterSubmit}>
           Create From Planned Litter
         </Button>
       </DialogFooter>

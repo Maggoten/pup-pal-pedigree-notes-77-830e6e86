@@ -63,7 +63,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   };
 
   return (
-    <DialogContent className="sm:max-w-[500px]">
+    <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto bg-greige-100 border-greige-300">
       <DialogHeader>
         <DialogTitle>Puppy Information</DialogTitle>
         <DialogDescription>
@@ -98,7 +98,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
         </DialogClose>
         <div className="flex gap-2">
           <DialogClose asChild>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
               Cancel
             </Button>
           </DialogClose>

@@ -77,6 +77,7 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
             value={name} 
             onChange={(e) => setName(e.target.value)} 
             placeholder="Puppy name"
+            className="bg-white border-greige-300"
           />
         </div>
 
@@ -87,6 +88,7 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
           <BreedDropdown 
             value={breed} 
             onChange={setBreed}
+            className="bg-white border-greige-300"
           />
         </div>
 
@@ -97,6 +99,7 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
             value={color} 
             onChange={(e) => setColor(e.target.value)} 
             placeholder="Puppy color"
+            className="bg-white border-greige-300"
           />
         </div>
 
@@ -109,6 +112,7 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
             type="number" 
             step="0.01" 
             placeholder="0.00"
+            className="bg-white border-greige-300"
           />
         </div>
 
@@ -116,6 +120,7 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
           date={dateOfBirth} 
           setDate={setDateOfBirth} 
           label="Date of Birth" 
+          className="bg-white border-greige-300"
         />
 
         <div>
@@ -125,6 +130,7 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
             value={timeOfBirth} 
             onChange={(e) => setTimeOfBirth(e.target.value)} 
             type="time"
+            className="bg-white border-greige-300"
           />
         </div>
       </div>

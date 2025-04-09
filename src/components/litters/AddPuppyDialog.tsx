@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -74,7 +75,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
   };
 
   return (
-    <DialogContent className="sm:max-w-[500px] beige-gradient border-greige-300">
+    <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto bg-greige-100 border-greige-300">
       <form onSubmit={handleSubmit}>
         <DialogHeader>
           <DialogTitle>Add New Puppy</DialogTitle>
@@ -114,6 +115,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
             <BreedDropdown 
               value={breed} 
               onChange={setBreed}
+              className="bg-white border-greige-300"
             />
           </div>
 
@@ -145,6 +147,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
             date={dateOfBirth} 
             setDate={setDateOfBirth} 
             label="Date of Birth" 
+            className="bg-white border-greige-300"
           />
 
           <div>
@@ -160,10 +163,12 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
         </div>
 
         <DialogFooter className="mt-6">
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
             Cancel
           </Button>
-          <Button type="submit">Add Puppy</Button>
+          <Button type="submit">
+            Add Puppy
+          </Button>
         </DialogFooter>
       </form>
     </DialogContent>
