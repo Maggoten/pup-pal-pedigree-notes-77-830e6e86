@@ -39,7 +39,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
     }
   }, [value]);
 
-  // Focus the input when CommandEmpty is shown and maintain focus
+  // Focus the input when CommandEmpty is shown
   useEffect(() => {
     if (open && inputRef.current && filteredBreeds.length === 0) {
       setTimeout(() => {
@@ -57,6 +57,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
     setDisplayValue(currentValue);
     setOpen(false);
     setSearchTerm("");
+    setCustomBreed("");
   };
 
   const handleCustomBreed = () => {
@@ -65,6 +66,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
       onChange(trimmedBreed);
       setDisplayValue(trimmedBreed);
       setSearchTerm("");
+      setCustomBreed("");
       setOpen(false);
     }
   };
