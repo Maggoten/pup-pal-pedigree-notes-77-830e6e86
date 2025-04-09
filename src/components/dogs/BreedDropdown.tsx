@@ -39,7 +39,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
     }
   }, [value]);
 
-  // Focus the input when CommandEmpty is shown
+  // Focus the input when CommandEmpty is shown and maintain focus
   useEffect(() => {
     if (open && inputRef.current && filteredBreeds.length === 0) {
       setTimeout(() => {
@@ -56,19 +56,22 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
     onChange(currentValue);
     setDisplayValue(currentValue);
     setOpen(false);
+    setSearchTerm("");
   };
 
   const handleCustomBreed = () => {
-    if (customBreed.trim() !== "") {
-      onChange(customBreed.trim());
-      setDisplayValue(customBreed.trim());
+    const trimmedBreed = customBreed.trim() || searchTerm.trim();
+    if (trimmedBreed) {
+      onChange(trimmedBreed);
+      setDisplayValue(trimmedBreed);
+      setSearchTerm("");
       setOpen(false);
     }
   };
 
   // Handle custom breed input key press
   const handleCustomBreedKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && customBreed.trim() !== "") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       handleCustomBreed();
     }
@@ -82,6 +85,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between text-left font-normal h-10 bg-white border-input shadow-sm"
+          onClick={() => setOpen(true)}
         >
           {displayValue || "Select breed..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -92,7 +96,10 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
           <CommandInput 
             placeholder="Search for a breed..." 
             value={searchTerm}
-            onValueChange={setSearchTerm}
+            onValueChange={(value) => {
+              setSearchTerm(value);
+              setCustomBreed(value);
+            }}
             className="h-9"
           />
           <CommandList>
@@ -102,7 +109,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
                 <div className="flex items-center space-x-2">
                   <Input
                     ref={inputRef}
-                    value={customBreed}
+                    value={customBreed || searchTerm}
                     onChange={(e) => setCustomBreed(e.target.value)}
                     onKeyDown={handleCustomBreedKeyPress}
                     placeholder="Enter custom breed"
@@ -112,7 +119,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
                   <Button 
                     size="sm" 
                     onClick={handleCustomBreed}
-                    disabled={!customBreed.trim()}
+                    disabled={!(customBreed || searchTerm).trim()}
                     type="button"
                   >
                     Add
