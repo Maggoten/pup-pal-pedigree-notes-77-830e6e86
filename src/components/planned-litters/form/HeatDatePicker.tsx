@@ -28,7 +28,7 @@ const HeatDatePicker: React.FC<HeatDatePickerProps> = ({ form }) => {
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-full pl-3 text-left font-normal bg-white",
+                    "w-full pl-3 text-left font-normal bg-white border-greige-300",
                     !field.value && "text-muted-foreground"
                   )}
                 >

@@ -20,7 +20,7 @@ const ExternalSireFields: React.FC<ExternalSireFieldsProps> = ({ form }) => {
           <FormItem>
             <FormLabel>External Sire Name</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="Enter dog name" className="bg-white" />
+              <Input {...field} placeholder="Enter dog name" className="bg-white border-greige-300" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -34,7 +34,7 @@ const ExternalSireFields: React.FC<ExternalSireFieldsProps> = ({ form }) => {
           <FormItem>
             <FormLabel>Registration Number</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="Enter registration number" className="bg-white" />
+              <Input {...field} placeholder="Enter registration number" className="bg-white border-greige-300" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -51,7 +51,7 @@ const ExternalSireFields: React.FC<ExternalSireFieldsProps> = ({ form }) => {
               <BreedDropdown 
                 value={field.value} 
                 onChange={field.onChange} 
-                className="bg-white"
+                className="bg-white border-greige-300"
               />
             </FormControl>
             <FormMessage />

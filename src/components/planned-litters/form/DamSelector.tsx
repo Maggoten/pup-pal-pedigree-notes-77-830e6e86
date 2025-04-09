@@ -24,7 +24,7 @@ const DamSelector: React.FC<DamSelectorProps> = ({ form, females }) => {
             defaultValue={field.value}
           >
             <FormControl>
-              <SelectTrigger className="bg-white">
+              <SelectTrigger className="bg-white border-greige-300">
                 <SelectValue placeholder="Select female dog" />
               </SelectTrigger>
             </FormControl>

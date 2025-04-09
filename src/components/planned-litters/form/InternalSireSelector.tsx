@@ -24,7 +24,7 @@ const InternalSireSelector: React.FC<InternalSireSelectorProps> = ({ form, males
             defaultValue={field.value}
           >
             <FormControl>
-              <SelectTrigger className="bg-white">
+              <SelectTrigger className="bg-white border-greige-300">
                 <SelectValue placeholder="Select male dog" />
               </SelectTrigger>
             </FormControl>

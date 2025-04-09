@@ -18,7 +18,7 @@ const NotesField: React.FC<NotesFieldProps> = ({ form }) => {
         <FormItem>
           <FormLabel>Notes</FormLabel>
           <FormControl>
-            <Textarea {...field} placeholder="Add any additional notes here" className="bg-white" />
+            <Textarea {...field} placeholder="Add any additional notes here" className="bg-white border-greige-300" />
           </FormControl>
           <FormMessage />
         </FormItem>
