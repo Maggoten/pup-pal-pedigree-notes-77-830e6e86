@@ -31,13 +31,18 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
   const [displayValue, setDisplayValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize custom breed from initial value if needed
+  // Initialize display value from props
   useEffect(() => {
     setDisplayValue(value);
     if (value && !commonDogBreeds.includes(value)) {
       setCustomBreed(value);
     }
   }, [value]);
+
+  // Filter breeds based on search term
+  const filteredBreeds = commonDogBreeds.filter((breed) => 
+    breed.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Focus the input when CommandEmpty is shown
   useEffect(() => {
@@ -46,20 +51,20 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
         inputRef.current?.focus();
       }, 100);
     }
-  }, [open, searchTerm]);
+  }, [open, searchTerm, filteredBreeds.length]);
 
-  const filteredBreeds = commonDogBreeds.filter((breed) => 
-    breed.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+  // Handle selection of a predefined breed
   const handleSelect = (currentValue: string) => {
-    onChange(currentValue);
-    setDisplayValue(currentValue);
-    setOpen(false);
-    setSearchTerm("");
-    setCustomBreed("");
+    if (currentValue) {
+      onChange(currentValue);
+      setDisplayValue(currentValue);
+      setOpen(false);
+      setSearchTerm("");
+      setCustomBreed("");
+    }
   };
 
+  // Handle custom breed submission
   const handleCustomBreed = () => {
     const trimmedBreed = customBreed.trim() || searchTerm.trim();
     if (trimmedBreed) {
@@ -75,8 +80,14 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
   const handleCustomBreedKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
+      e.stopPropagation();
       handleCustomBreed();
     }
+  };
+
+  // Stop event propagation for the custom breed input
+  const handleInputClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
   };
 
   return (
@@ -100,7 +111,10 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
             value={searchTerm}
             onValueChange={(value) => {
               setSearchTerm(value);
-              setCustomBreed(value);
+              // Only set custom breed if there's no match in the list
+              if (filteredBreeds.length === 0) {
+                setCustomBreed(value);
+              }
             }}
             className="h-9"
           />
@@ -114,6 +128,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
                     value={customBreed || searchTerm}
                     onChange={(e) => setCustomBreed(e.target.value)}
                     onKeyDown={handleCustomBreedKeyPress}
+                    onClick={handleInputClick}
                     placeholder="Enter custom breed"
                     className="h-8 bg-white"
                     autoFocus
@@ -155,6 +170,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange }) => {
                       value={customBreed || searchTerm}
                       onChange={(e) => setCustomBreed(e.target.value)}
                       onKeyDown={handleCustomBreedKeyPress}
+                      onClick={handleInputClick}
                       placeholder="Enter custom breed"
                       className="h-8 bg-white"
                     />
