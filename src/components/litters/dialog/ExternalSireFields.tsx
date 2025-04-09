@@ -24,12 +24,13 @@ const ExternalSireFields: React.FC<ExternalSireFieldsProps> = ({
   return (
     <div className="space-y-4">
       <div>
-        <Label htmlFor="externalSireName">Name</Label>
-        <Input 
-          id="externalSireName" 
-          value={externalSireName} 
+        <Label htmlFor="externalSireName">External Sire Name</Label>
+        <Input
+          id="externalSireName"
+          value={externalSireName}
           onChange={(e) => setExternalSireName(e.target.value)}
-          placeholder="Enter sire's name" 
+          placeholder="Enter sire's name"
+          className="bg-white border-greige-300"
         />
       </div>
       
@@ -38,16 +39,18 @@ const ExternalSireFields: React.FC<ExternalSireFieldsProps> = ({
         <BreedDropdown
           value={externalSireBreed}
           onChange={setExternalSireBreed}
+          className="bg-white border-greige-300"
         />
       </div>
       
       <div>
-        <Label htmlFor="externalSireRegistration">Registration Number</Label>
-        <Input 
-          id="externalSireRegistration" 
-          value={externalSireRegistration} 
+        <Label htmlFor="externalSireRegistration">Registration Number (optional)</Label>
+        <Input
+          id="externalSireRegistration"
+          value={externalSireRegistration}
           onChange={(e) => setExternalSireRegistration(e.target.value)}
-          placeholder="Enter registration number" 
+          placeholder="Enter registration number"
+          className="bg-white border-greige-300"
         />
       </div>
     </div>
