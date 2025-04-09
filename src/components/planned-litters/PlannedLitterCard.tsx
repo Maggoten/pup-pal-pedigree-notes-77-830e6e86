@@ -42,7 +42,7 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
   };
 
   return (
-    <Card>
+    <Card className="flex flex-col h-full">
       <CardHeader className="relative">
         <Button 
           variant="ghost" 
@@ -63,7 +63,7 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
           </span>
         )}
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-grow">
         <p className="text-sm">{litter.notes}</p>
         
         {litter.matingDates && litter.matingDates.length > 0 && (
@@ -135,8 +135,9 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
             </ul>
           </div>
         )}
-        
-        <div className="mt-4 grid grid-cols-1 gap-2">
+      </CardContent>
+      <CardFooter className="flex flex-col gap-2 mt-auto pt-4">
+        <div className="grid grid-cols-1 gap-2 w-full">
           <Popover open={calendarOpen} onOpenChange={onCalendarOpenChange}>
             <PopoverTrigger asChild>
               <Button 
@@ -165,22 +166,21 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
             <ClipboardCheck className="mr-2 h-4 w-4" />
             Breeding Checklist
           </Button>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="w-full">
+                View Details
+              </Button>
+            </DialogTrigger>
+            <PlannedLitterDetailsDialog 
+              litter={litter} 
+              onAddMatingDate={onAddMatingDate}
+              onEditMatingDate={onEditMatingDate}
+              onDeleteMatingDate={onDeleteMatingDate}
+            />
+          </Dialog>
         </div>
-      </CardContent>
-      <CardFooter>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="w-full">
-              View Details
-            </Button>
-          </DialogTrigger>
-          <PlannedLitterDetailsDialog 
-            litter={litter} 
-            onAddMatingDate={onAddMatingDate}
-            onEditMatingDate={onEditMatingDate}
-            onDeleteMatingDate={onDeleteMatingDate}
-          />
-        </Dialog>
       </CardFooter>
 
       {/* Breeding Checklist Dialog */}
