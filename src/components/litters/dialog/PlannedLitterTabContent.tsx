@@ -106,11 +106,11 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
         onSubmit={handlePlannedLitterSubmit}
       />
       
-      <DialogFooter>
-        <Button type="button" variant="outline" onClick={onClose}>
+      <DialogFooter className="mt-6">
+        <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
           Cancel
         </Button>
-        <Button type="button" onClick={handlePlannedLitterSubmit}>
+        <Button type="button" onClick={handlePlannedLitterSubmit} className="bg-sage-500 hover:bg-sage-600 text-white">
           Create From Planned Litter
         </Button>
       </DialogFooter>
