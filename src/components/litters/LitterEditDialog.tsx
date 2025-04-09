@@ -47,7 +47,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
   };
   
   return (
-    <DialogContent className="sm:max-w-[600px]">
+    <DialogContent className="sm:max-w-[600px] beige-gradient border-greige-300">
       <DialogHeader>
         <DialogTitle>Edit Litter Details</DialogTitle>
         <DialogDescription>
@@ -64,6 +64,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
               value={litterName}
               onChange={(e) => setLitterName(e.target.value)}
               required
+              className="bg-white border-greige-300"
             />
           </div>
           
@@ -74,6 +75,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
               value={sireName}
               onChange={(e) => setSireName(e.target.value)}
               required
+              className="bg-white border-greige-300"
             />
           </div>
           
@@ -84,6 +86,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
               value={damName}
               onChange={(e) => setDamName(e.target.value)}
               required
+              className="bg-white border-greige-300"
             />
           </div>
           
@@ -93,7 +96,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-left"
+                  className="w-full justify-start text-left bg-white border-greige-300"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {format(birthDate, "PPP")}
@@ -121,7 +124,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
                 type="button" 
                 variant="outline" 
                 onClick={() => onArchive(litter.id, !litter.archived)}
-                className="w-full flex items-center gap-2"
+                className="w-full flex items-center gap-2 bg-white border-greige-300"
               >
                 {litter.archived ? (
                   <>

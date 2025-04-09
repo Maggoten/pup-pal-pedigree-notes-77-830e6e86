@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -78,7 +78,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
   };
 
   return (
-    <DialogContent className="sm:max-w-[500px]">
+    <DialogContent className="sm:max-w-[500px] beige-gradient border-greige-300">
       <form onSubmit={handleSubmit}>
         <DialogHeader>
           <DialogTitle>Add New Puppy</DialogTitle>
@@ -95,6 +95,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
               value={name} 
               onChange={(e) => setName(e.target.value)} 
               placeholder="Puppy name"
+              className="bg-white border-greige-300"
             />
           </div>
 
@@ -117,6 +118,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
             <BreedDropdown 
               value={breed} 
               onChange={setBreed}
+              className="bg-white border-greige-300"
             />
           </div>
 
@@ -127,6 +129,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
               value={color} 
               onChange={(e) => setColor(e.target.value)} 
               placeholder="Puppy color"
+              className="bg-white border-greige-300"
             />
           </div>
 
@@ -139,6 +142,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
               type="number" 
               step="0.01" 
               placeholder="0.00"
+              className="bg-white border-greige-300"
             />
           </div>
 
@@ -155,6 +159,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
               value={timeOfBirth} 
               onChange={(e) => setTimeOfBirth(e.target.value)} 
               type="time"
+              className="bg-white border-greige-300"
             />
           </div>
         </div>

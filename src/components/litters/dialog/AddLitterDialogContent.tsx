@@ -20,7 +20,7 @@ const AddLitterDialogContent: React.FC<AddLitterDialogContentProps> = ({
   const [activeTab, setActiveTab] = useState('newLitter');
 
   return (
-    <DialogContent className="sm:max-w-[550px]">
+    <DialogContent className="sm:max-w-[550px] beige-gradient border-greige-300">
       <DialogHeader>
         <DialogTitle>Add New Litter</DialogTitle>
         <DialogDescription>

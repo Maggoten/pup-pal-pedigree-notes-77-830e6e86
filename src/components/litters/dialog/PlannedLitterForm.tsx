@@ -58,7 +58,7 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
         <Label htmlFor="plannedLitter">Select Planned Litter</Label>
         <select
           id="plannedLitter"
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-10 w-full rounded-md border border-greige-300 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           value={selectedPlannedLitterId}
           onChange={(e) => setSelectedPlannedLitterId(e.target.value)}
         >
@@ -76,8 +76,9 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
         <Input 
           id="plannedLitterName" 
           value={litterName} 
-          onChange={(e) => setLitterName(e.target.value)}
-          placeholder="Spring Litter 2025" 
+          onChange={(e) => setLitterName(e.target.value)} 
+          placeholder="Spring Litter 2025"
+          className="bg-white border-greige-300" 
         />
       </div>
 
