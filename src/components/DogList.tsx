@@ -3,7 +3,6 @@ import React from 'react';
 import { useDogs, Dog } from '@/context/DogsContext';
 import DogCard from './DogCard';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState } from 'react';
 
 interface DogListProps {
@@ -13,20 +12,14 @@ interface DogListProps {
 const DogList: React.FC<DogListProps> = ({ dogsList }) => {
   const { dogs: allDogs, setActiveDog } = useDogs();
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all');
 
   // Use the provided dogsList or fall back to all dogs from context
   const dogs = dogsList || allDogs;
 
   const filteredDogs = dogs.filter(dog => {
-    // Search filter
-    const matchesSearch = dog.name.toLowerCase().includes(search.toLowerCase()) || 
-                          dog.breed.toLowerCase().includes(search.toLowerCase());
-    
-    // Gender filter
-    const matchesGender = filter === 'all' || dog.gender === filter;
-    
-    return matchesSearch && matchesGender;
+    // Search filter only (removed gender filter)
+    return dog.name.toLowerCase().includes(search.toLowerCase()) || 
+           dog.breed.toLowerCase().includes(search.toLowerCase());
   });
 
   const handleDogClick = (dog: Dog) => {
@@ -44,16 +37,6 @@ const DogList: React.FC<DogListProps> = ({ dogsList }) => {
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1"
         />
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Filter by gender" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Dogs</SelectItem>
-            <SelectItem value="male">Males</SelectItem>
-            <SelectItem value="female">Females</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       {filteredDogs.length === 0 ? (

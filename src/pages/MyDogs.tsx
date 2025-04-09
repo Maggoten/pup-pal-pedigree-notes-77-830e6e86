@@ -30,8 +30,7 @@ const MyDogsContent: React.FC = () => {
         <DogDetails dog={activeDog} />
       ) : (
         <>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Breeding Dogs</h2>
+          <div className="flex justify-end items-center mb-4">
             <Button onClick={() => setShowAddDogDialog(true)} className="flex items-center gap-1.5">
               <PlusCircle className="h-4 w-4" />
               Add New Dog
