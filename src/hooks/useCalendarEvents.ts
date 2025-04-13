@@ -12,9 +12,11 @@ import {
   deleteEvent,
   getEventColor 
 } from '@/services/CalendarEventService';
+import { useAuth } from '@/hooks/useAuth';
 
 export const useCalendarEvents = (dogs: Dog[]) => {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const { user } = useAuth();
   
   // Load events on component mount
   useEffect(() => {
@@ -41,12 +43,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     };
     
     fetchEvents();
-  }, [dogs]);
-  
-  // Save custom events to Supabase whenever they change
-  useEffect(() => {
-    saveEvents(calendarEvents);
-  }, [calendarEvents]);
+  }, [dogs, user]);
   
   // Function to get events for a specific date
   const getEventsForDate = (date: Date) => {
@@ -56,34 +53,64 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   };
   
   // Function to add a new event
-  const handleAddEvent = async (data: AddEventFormValues) => {
-    const newEvent = await addEvent(data, dogs);
-    setCalendarEvents(prevEvents => [...prevEvents, newEvent]);
-    return true;
+  const handleAddEvent = async (data: AddEventFormValues): Promise<boolean> => {
+    if (!user) {
+      console.error("User not authenticated");
+      return false;
+    }
+    
+    try {
+      const newEvent = await addEvent(data, dogs);
+      setCalendarEvents(prevEvents => [...prevEvents, newEvent]);
+      return true;
+    } catch (error) {
+      console.error("Error adding event:", error);
+      return false;
+    }
   };
   
   // Function to edit an event
-  const handleEditEvent = async (eventId: string, data: AddEventFormValues) => {
-    const updatedEvents = await editEvent(eventId, data, calendarEvents, dogs);
-    
-    if (updatedEvents) {
-      setCalendarEvents(updatedEvents);
-      return true;
+  const handleEditEvent = async (eventId: string, data: AddEventFormValues): Promise<boolean> => {
+    if (!user) {
+      console.error("User not authenticated");
+      return false;
     }
     
-    return false;
+    try {
+      const updatedEvents = await editEvent(eventId, data, calendarEvents, dogs);
+      
+      if (updatedEvents) {
+        setCalendarEvents(updatedEvents);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Error editing event:", error);
+      return false;
+    }
   };
   
   // Function to delete an event
-  const handleDeleteEvent = async (eventId: string) => {
-    const updatedEvents = await deleteEvent(eventId, calendarEvents);
-    
-    if (updatedEvents) {
-      setCalendarEvents(updatedEvents);
-      return true;
+  const handleDeleteEvent = async (eventId: string): Promise<boolean> => {
+    if (!user) {
+      console.error("User not authenticated");
+      return false;
     }
     
-    return false;
+    try {
+      const updatedEvents = await deleteEvent(eventId, calendarEvents);
+      
+      if (updatedEvents) {
+        setCalendarEvents(updatedEvents);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      return false;
+    }
   };
   
   return {

@@ -8,6 +8,8 @@ export interface CalendarEvent {
   dogId?: string;
   dogName?: string;
   notes?: string;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export interface AddEventFormValues {
@@ -22,7 +24,7 @@ export interface CalendarGridProps {
   weeks: Date[][];
   getEventsForDate: (date: Date) => CalendarEvent[];
   getEventColor: (type: string) => string;
-  onDeleteEvent: (eventId: string) => void;
+  onDeleteEvent: (eventId: string) => Promise<boolean>;
   onEventClick: (event: CalendarEvent) => void;
   compact?: boolean;
 }

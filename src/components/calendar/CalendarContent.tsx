@@ -10,14 +10,15 @@ import EditEventDialog from './EditEventDialog';
 import { Dog } from '@/context/DogsContext';
 import { AddEventFormValues } from './types';
 import { CalendarEvent } from './types';
+import { toast } from '@/components/ui/use-toast';
 
 interface CalendarContentProps {
   dogs: Dog[];
   getEventsForDate: (date: Date) => any[];
   getEventColor: (type: string) => string;
-  onDeleteEvent: (eventId: string) => void;
-  onAddEvent: (data: AddEventFormValues) => boolean;
-  onEditEvent?: (eventId: string, data: AddEventFormValues) => boolean;
+  onDeleteEvent: (eventId: string) => Promise<boolean>;
+  onAddEvent: (data: AddEventFormValues) => Promise<boolean>;
+  onEditEvent?: (eventId: string, data: AddEventFormValues) => Promise<boolean>;
   compact?: boolean;
 }
 
@@ -34,6 +35,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const isMobile = useIsMobile();
   
   const startDate = startOfMonth(currentDate);
@@ -76,22 +78,48 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
     weeks.push(currentWeek);
   }
   
-  const handleAddEvent = (data: AddEventFormValues) => {
-    const success = onAddEvent(data);
-    if (success) {
-      setIsAddDialogOpen(false);
-    }
-    return success;
-  };
-  
-  const handleEditEvent = (data: AddEventFormValues) => {
-    if (selectedEvent && onEditEvent) {
-      const success = onEditEvent(selectedEvent.id, data);
+  const handleAddEvent = async (data: AddEventFormValues) => {
+    setIsLoading(true);
+    try {
+      const success = await onAddEvent(data);
       if (success) {
-        setIsEditDialogOpen(false);
-        setSelectedEvent(null);
+        setIsAddDialogOpen(false);
       }
       return success;
+    } catch (error) {
+      console.error('Error adding event:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add event. Please try again.",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleEditEvent = async (data: AddEventFormValues) => {
+    if (selectedEvent && onEditEvent) {
+      setIsLoading(true);
+      try {
+        const success = await onEditEvent(selectedEvent.id, data);
+        if (success) {
+          setIsEditDialogOpen(false);
+          setSelectedEvent(null);
+        }
+        return success;
+      } catch (error) {
+        console.error('Error editing event:', error);
+        toast({
+          title: "Error",
+          description: "Failed to edit event. Please try again.",
+          variant: "destructive"
+        });
+        return false;
+      } finally {
+        setIsLoading(false);
+      }
     }
     return false;
   };
@@ -133,7 +161,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
           <DialogHeader>
             <DialogTitle>Add Calendar Event</DialogTitle>
           </DialogHeader>
-          <AddEventDialog dogs={dogs} onSubmit={handleAddEvent} />
+          <AddEventDialog dogs={dogs} onSubmit={handleAddEvent} isLoading={isLoading} />
         </DialogContent>
       </Dialog>
       
@@ -147,10 +175,25 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
               event={selectedEvent}
               dogs={dogs} 
               onSubmit={handleEditEvent}
-              onDelete={() => {
-                onDeleteEvent(selectedEvent.id);
-                setIsEditDialogOpen(false);
-                setSelectedEvent(null);
+              isLoading={isLoading}
+              onDelete={async () => {
+                setIsLoading(true);
+                try {
+                  const success = await onDeleteEvent(selectedEvent.id);
+                  if (success) {
+                    setIsEditDialogOpen(false);
+                    setSelectedEvent(null);
+                  }
+                } catch (error) {
+                  console.error('Error deleting event:', error);
+                  toast({
+                    title: "Error",
+                    description: "Failed to delete event. Please try again.",
+                    variant: "destructive"
+                  });
+                } finally {
+                  setIsLoading(false);
+                }
               }}
             />
           )}
