@@ -11,16 +11,17 @@ import DogImageField from './DogImageField';
 import HeatRecordsField from './HeatRecordsField';
 import { Dog } from '@/types/dogs';
 import { useSupabaseDogs } from '@/context/SupabaseDogContext';
+import { Loader2 } from 'lucide-react';
 
 interface DogEditFormProps {
   dog: Dog;
   onCancel: () => void;
   onSave: (values: DogFormValues) => void;
+  isSaving?: boolean;
 }
 
-const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
+const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSaving = false }) => {
   const { heatRecords } = useSupabaseDogs();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageChanged, setImageChanged] = useState(false);
 
   // Transform date strings to Date objects for form
@@ -28,30 +29,34 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
     ? heatRecords.map(heat => ({ date: new Date(heat.date), id: heat.id }))
     : [];
 
+  // Prepare default values with proper date objects
+  const defaultValues = {
+    name: dog.name,
+    breed: dog.breed,
+    dateOfBirth: new Date(dog.dateOfBirth),
+    gender: dog.gender,
+    color: dog.color,
+    registrationNumber: dog.registrationNumber || '',
+    dewormingDate: dog.dewormingDate ? new Date(dog.dewormingDate) : undefined,
+    vaccinationDate: dog.vaccinationDate ? new Date(dog.vaccinationDate) : undefined,
+    notes: dog.notes || '',
+    image: dog.image_url || '',
+    heatHistory: transformHeatHistory,
+    heatInterval: dog.heatInterval,
+  };
+
+  console.log("Form default values:", defaultValues);
+
   const form = useForm<DogFormValues>({
     resolver: zodResolver(dogFormSchema),
-    defaultValues: {
-      name: dog.name,
-      breed: dog.breed,
-      dateOfBirth: new Date(dog.dateOfBirth),
-      gender: dog.gender,
-      color: dog.color,
-      registrationNumber: dog.registrationNumber || '',
-      dewormingDate: dog.dewormingDate ? new Date(dog.dewormingDate) : undefined,
-      vaccinationDate: dog.vaccinationDate ? new Date(dog.vaccinationDate) : undefined,
-      notes: dog.notes || '',
-      image: dog.image_url || '',
-      heatHistory: transformHeatHistory,
-      heatInterval: dog.heatInterval,
-    },
+    defaultValues,
   });
   
   const handleSubmit = async (values: DogFormValues) => {
-    setIsSubmitting(true);
+    console.log("Form submitted with values:", values);
     try {
       // Handle image changes
       if (imageChanged && values.image && values.image !== dog.image_url) {
-        // The base64 image will be processed in onSave/updateDog
         console.log("Image has been changed, passing to parent handler");
       } else if (!imageChanged) {
         // Ensure we're using the existing image URL if it wasn't changed
@@ -60,21 +65,19 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
       
       onSave(values);
     } catch (error) {
-      console.error('Error updating dog:', error);
+      console.error('Error in form submission:', error);
       toast({
         title: "Error",
-        description: "Failed to update dog information. Please try again.",
+        description: "Failed to process form submission. Please try again.",
         variant: "destructive"
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const handleImageChange = (imageBase64: string) => {
     form.setValue('image', imageBase64);
     setImageChanged(true);
-    console.log("Image changed in DogEditForm:", imageChanged);
+    console.log("Image changed in DogEditForm, new image length:", imageBase64.length);
   };
 
   return (
@@ -102,12 +105,17 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
             type="button" 
             variant="outline" 
             onClick={onCancel}
-            disabled={isSubmitting}
+            disabled={isSaving}
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : 'Save Changes'}
+          <Button type="submit" disabled={isSaving}>
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : 'Save Changes'}
           </Button>
         </div>
       </form>

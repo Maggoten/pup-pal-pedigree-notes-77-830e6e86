@@ -18,6 +18,9 @@ const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({ dog }) => {
     }
   }, [dog.id, dog.gender, loadHeatRecords]);
 
+  console.log("Displaying dog info:", dog);
+  console.log("Heat records:", heatRecords);
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr]">
       <div>

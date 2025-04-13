@@ -65,6 +65,7 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
     try {
       setLoading(true);
       const dogsData = await fetchDogs();
+      console.log("Loaded dogs:", dogsData);
       setDogs(dogsData);
       setError(null);
     } catch (err) {

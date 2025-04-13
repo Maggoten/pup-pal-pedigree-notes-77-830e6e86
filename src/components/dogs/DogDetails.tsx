@@ -36,6 +36,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
   const { setActiveDog, updateDogInfo, loadHeatRecords, removeDog } = useSupabaseDogs();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   useEffect(() => {
     if (dog && dog.gender === 'female') {
@@ -48,6 +49,9 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
   };
 
   const handleSave = async (values: DogFormValues) => {
+    setIsSaving(true);
+    console.log("Saving dog with values:", values);
+    
     try {
       // Format values for database
       const formattedValues = {
@@ -64,16 +68,20 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         heatInterval: values.heatInterval,
       };
       
-      // Update the dog
-      const success = await updateDogInfo(dog.id, formattedValues);
+      console.log("Formatted values for database:", formattedValues);
       
-      if (success) {
+      // Update the dog
+      const updatedDog = await updateDogInfo(dog.id, formattedValues);
+      
+      if (updatedDog) {
+        console.log("Successfully updated dog:", updatedDog);
         setIsEditing(false);
         toast({
           title: "Success",
           description: `${values.name}'s information has been updated.`,
         });
       } else {
+        console.error("Failed to update dog: updateDogInfo returned null or undefined");
         toast({
           title: "Error",
           description: "Failed to save changes. Please try again.",
@@ -87,6 +95,8 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         description: "Failed to save changes. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -120,7 +130,8 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
             <DogEditForm 
               dog={dog} 
               onCancel={() => setIsEditing(false)} 
-              onSave={handleSave} 
+              onSave={handleSave}
+              isSaving={isSaving}
             />
           ) : (
             <DogInfoDisplay dog={dog} />
