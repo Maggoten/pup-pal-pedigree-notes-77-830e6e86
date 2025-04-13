@@ -45,51 +45,58 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleRegistration = (values: RegistrationFormValues) => {
-    setRegistrationData(values);
-    setShowPayment(true);
+  const handleRegistration = async (values: RegistrationFormValues) => {
+    // For now, bypass payment and register directly
+    // You can uncomment the payment flow later when you integrate Stripe
+    // setRegistrationData(values);
+    // setShowPayment(true);
+    
+    // Register directly
+    await handleDirectRegistration(values);
+  };
+
+  const handleDirectRegistration = async (values: RegistrationFormValues) => {
+    setIsLoading(true);
+    
+    try {
+      const registerData: RegisterData = {
+        email: values.email,
+        password: values.password,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        address: values.address
+      };
+      
+      const success = await register(registerData);
+      
+      if (success) {
+        toast({
+          title: "Registration successful",
+          description: "Welcome to Breeding Journey! Your account has been created."
+        });
+        
+        navigate('/');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Registration failed",
+          description: "Please try again."
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Registration error",
+        description: "An unexpected error occurred. Please try again."
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePayment = async () => {
-    setIsLoading(true);
-    
     if (registrationData) {
-      try {
-        const registerData: RegisterData = {
-          email: registrationData.email,
-          password: registrationData.password,
-          firstName: registrationData.firstName,
-          lastName: registrationData.lastName,
-          address: registrationData.address
-        };
-        
-        const success = await register(registerData);
-        
-        if (success) {
-          toast({
-            title: "Registration successful",
-            description: "Welcome to Breeding Journey! Your account has been created."
-          });
-          
-          navigate('/');
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Registration failed",
-            description: "Please try again."
-          });
-          setShowPayment(false);
-        }
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "Registration error",
-          description: "An unexpected error occurred. Please try again."
-        });
-        setShowPayment(false);
-      } finally {
-        setIsLoading(false);
-      }
+      await handleDirectRegistration(registrationData);
     }
   };
 

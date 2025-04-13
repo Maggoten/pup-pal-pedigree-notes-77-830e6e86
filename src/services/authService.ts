@@ -19,7 +19,7 @@ export const loginUser = async (email: string, password: string): Promise<User |
       // Get profile data
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('email, first_name, last_name, address')
+        .select('email, first_name, last_name, address, subscription_status, subscription_tier, subscription_end_date')
         .eq('id', data.user.id)
         .single();
 
@@ -27,7 +27,10 @@ export const loginUser = async (email: string, password: string): Promise<User |
         email: profileData?.email || data.user.email || '',
         firstName: profileData?.first_name || '',
         lastName: profileData?.last_name || '',
-        address: profileData?.address || ''
+        address: profileData?.address || '',
+        subscriptionStatus: profileData?.subscription_status || 'free',
+        subscriptionTier: profileData?.subscription_tier || 'free',
+        subscriptionEndDate: profileData?.subscription_end_date ? new Date(profileData.subscription_end_date) : undefined
       };
     }
     
@@ -63,7 +66,9 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
         email: userData.email,
         firstName: userData.firstName,
         lastName: userData.lastName,
-        address: userData.address
+        address: userData.address,
+        subscriptionStatus: 'free',
+        subscriptionTier: 'free'
       };
     }
     
@@ -95,7 +100,7 @@ export const getCurrentUser = async (): Promise<User | null> => {
   // Get profile data
   const { data: profileData } = await supabase
     .from('profiles')
-    .select('email, first_name, last_name, address')
+    .select('email, first_name, last_name, address, subscription_status, subscription_tier, subscription_end_date')
     .eq('id', data.user.id)
     .single();
     
@@ -103,6 +108,9 @@ export const getCurrentUser = async (): Promise<User | null> => {
     email: profileData?.email || data.user.email || '',
     firstName: profileData?.first_name || '',
     lastName: profileData?.last_name || '',
-    address: profileData?.address || ''
+    address: profileData?.address || '',
+    subscriptionStatus: profileData?.subscription_status || 'free',
+    subscriptionTier: profileData?.subscription_tier || 'free',
+    subscriptionEndDate: profileData?.subscription_end_date ? new Date(profileData.subscription_end_date) : undefined
   };
 };

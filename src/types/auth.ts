@@ -4,6 +4,9 @@ export interface User {
   firstName?: string;
   lastName?: string;
   address?: string;
+  subscriptionStatus?: string;
+  subscriptionTier?: string;
+  subscriptionEndDate?: Date;
 }
 
 export interface RegisterData {
