@@ -12,22 +12,41 @@ export const updateDog = async (id: string, dog: Partial<Dog>): Promise<Dog | nu
     // Check if we need to process a base64 image
     let imageUrl = dog.image_url;
     if (imageUrl && imageUrl.startsWith('data:image')) {
-      console.log("Processing base64 image");
-      imageUrl = await uploadDogImageFromBase64(imageUrl, id);
-      console.log("Uploaded image URL:", imageUrl);
+      try {
+        console.log("Processing base64 image");
+        imageUrl = await uploadDogImageFromBase64(imageUrl, id);
+        console.log("Uploaded image URL:", imageUrl);
+      } catch (imageError) {
+        console.error("Error uploading image:", imageError);
+        toast({
+          title: "Image Upload Failed",
+          description: "Could not upload the image, but we'll continue saving other data.",
+          variant: "destructive",
+        });
+        // Continue with existing image if there's an error
+        imageUrl = dog.image_url;
+      }
     }
+    
+    // Validate dates before sending to the database
+    const validateDate = (dateStr: string | undefined): string | null => {
+      if (!dateStr) return null;
+      // Make sure the date is in ISO format (YYYY-MM-DD)
+      const date = new Date(dateStr);
+      return isNaN(date.getTime()) ? null : dateStr;
+    };
     
     // Format the data for database update
     const dbDog = {
       name: dog.name,
       breed: dog.breed,
       gender: dog.gender,
-      date_of_birth: dog.dateOfBirth,
+      date_of_birth: validateDate(dog.dateOfBirth),
       color: dog.color,
       registration_number: dog.registrationNumber,
       notes: dog.notes,
-      deworming_date: dog.dewormingDate,
-      vaccination_date: dog.vaccinationDate,
+      deworming_date: validateDate(dog.dewormingDate),
+      vaccination_date: validateDate(dog.vaccinationDate),
       heat_interval: dog.heatInterval,
       image_url: imageUrl,
       updated_at: new Date().toISOString()
@@ -54,6 +73,11 @@ export const updateDog = async (id: string, dog: Partial<Dog>): Promise<Dog | nu
 
     if (!data) {
       console.error('No data returned from update operation');
+      toast({
+        title: "Error",
+        description: "Could not find the dog record to update.",
+        variant: "destructive",
+      });
       return null;
     }
 

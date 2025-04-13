@@ -10,7 +10,7 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Dog as DogIcon, ArrowLeft, Trash2 } from 'lucide-react';
+import { Dog as DogIcon, ArrowLeft, Trash2, Save, Loader2 } from 'lucide-react';
 import { useSupabaseDogs } from '@/context/dogs';
 import DogInfoDisplay from './DogInfoDisplay';
 import DogEditForm from './DogEditForm';
@@ -37,6 +37,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   useEffect(() => {
     if (dog && dog.gender === 'female') {
@@ -45,7 +46,15 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
   }, [dog, loadHeatRecords, dog.gender, dog.id]);
 
   const handleBack = () => {
-    setActiveDog(null);
+    if (isEditing) {
+      // Confirm before navigating away from unsaved changes
+      if (window.confirm("You have unsaved changes. Are you sure you want to go back?")) {
+        setIsEditing(false);
+        setActiveDog(null);
+      }
+    } else {
+      setActiveDog(null);
+    }
   };
 
   const handleSave = async (values: DogFormValues) => {
@@ -57,7 +66,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       const formattedValues: Partial<Dog> = {
         name: values.name,
         breed: values.breed,
-        dateOfBirth: format(values.dateOfBirth, 'yyyy-MM-dd'),
+        dateOfBirth: values.dateOfBirth ? format(values.dateOfBirth, 'yyyy-MM-dd') : '',
         gender: values.gender,
         color: values.color,
         registrationNumber: values.registrationNumber,
@@ -107,9 +116,32 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
   };
 
   const handleDelete = async () => {
-    const success = await removeDog(dog.id, dog.name);
-    if (success) {
-      setActiveDog(null);
+    setIsDeleting(true);
+    try {
+      const success = await removeDog(dog.id, dog.name);
+      if (success) {
+        toast({
+          title: "Success",
+          description: `${dog.name} has been removed.`,
+        });
+        setActiveDog(null);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to delete dog. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting dog:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while deleting.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -151,9 +183,19 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
                 variant="outline" 
                 onClick={() => setIsDeleteDialogOpen(true)}
                 className="text-destructive hover:text-destructive"
+                disabled={isDeleting}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </>
+                )}
               </Button>
               <Button onClick={() => setIsEditing(true)}>Edit</Button>
             </>
@@ -171,9 +213,18 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-              Delete
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete} 
+              className="bg-destructive text-destructive-foreground"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

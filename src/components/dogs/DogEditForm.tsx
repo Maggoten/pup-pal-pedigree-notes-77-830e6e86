@@ -23,6 +23,7 @@ interface DogEditFormProps {
 const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSaving = false }) => {
   const { heatRecords } = useSupabaseDogs();
   const [imageChanged, setImageChanged] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   // Transform date strings to Date objects for form
   const transformHeatHistory = heatRecords 
@@ -33,7 +34,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSavi
   const defaultValues = {
     name: dog.name,
     breed: dog.breed,
-    dateOfBirth: new Date(dog.dateOfBirth),
+    dateOfBirth: dog.dateOfBirth ? new Date(dog.dateOfBirth) : new Date(),
     gender: dog.gender,
     color: dog.color,
     registrationNumber: dog.registrationNumber || '',
@@ -54,13 +55,32 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSavi
   
   const onSubmit = async (values: DogFormValues) => {
     console.log("Form submitted with values:", values);
+    
+    // Clear previous image error
+    setImageError(null);
+    
     try {
       // Handle image changes
       if (imageChanged && values.image && values.image !== dog.image_url) {
         console.log("Image has been changed, passing to parent handler");
+        
+        // Check image size (rough estimate based on base64 length)
+        if (values.image.length > 5000000) { // ~5MB limit
+          setImageError("Image is too large. Please select a smaller image (under 5MB).");
+          toast({
+            title: "Image Too Large",
+            description: "Please select a smaller image (under 5MB).",
+            variant: "destructive"
+          });
+          return;
+        }
       } else if (!imageChanged) {
         // Ensure we're using the existing image URL if it wasn't changed
         values.image = dog.image_url || '';
+      }
+      
+      if (imageError) {
+        return;
       }
       
       // Call the onSave function passed from the parent
@@ -76,6 +96,19 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSavi
   };
 
   const handleImageChange = (imageBase64: string) => {
+    setImageError(null);
+    
+    // Basic validation for image
+    if (imageBase64.length > 5000000) { // ~5MB limit
+      setImageError("Image is too large. Please select a smaller image (under 5MB).");
+      toast({
+        title: "Image Too Large",
+        description: "Please select a smaller image (under 5MB).",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     form.setValue('image', imageBase64);
     setImageChanged(true);
     console.log("Image changed in DogEditForm, new image length:", imageBase64.length);
@@ -85,10 +118,15 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSavi
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr]">
-          <DogImageField 
-            form={form} 
-            handleImageChange={handleImageChange} 
-          />
+          <div className="space-y-2">
+            <DogImageField 
+              form={form} 
+              handleImageChange={handleImageChange} 
+            />
+            {imageError && (
+              <p className="text-sm text-destructive mt-1">{imageError}</p>
+            )}
+          </div>
           <div className="space-y-6">
             <DogFormFields form={form} />
             
@@ -110,7 +148,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSavi
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" disabled={isSaving || !!imageError}>
             {isSaving ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
