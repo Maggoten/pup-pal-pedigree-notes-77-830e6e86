@@ -1,52 +1,108 @@
 
+import { supabase } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
 
 // Handle login functionality
 export const loginUser = async (email: string, password: string): Promise<User | null> => {
-  // Mock login - in a real app, this would call an API
-  if (email && password) {
-    return { email };
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      console.error("Login error:", error.message);
+      return null;
+    }
+
+    if (data.user) {
+      // Get profile data
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('email, first_name, last_name, address')
+        .eq('id', data.user.id)
+        .single();
+
+      return {
+        email: profileData?.email || data.user.email || '',
+        firstName: profileData?.first_name || '',
+        lastName: profileData?.last_name || '',
+        address: profileData?.address || ''
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Login error:", error);
+    return null;
   }
-  return null;
 };
 
 // Handle registration functionality
 export const registerUser = async (userData: RegisterData): Promise<User | null> => {
   try {
-    // Mock registration - in a real app, this would call an API
-    const userToStore = {
+    const { data, error } = await supabase.auth.signUp({
       email: userData.email,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      address: userData.address
-    };
+      password: userData.password,
+      options: {
+        data: {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          address: userData.address
+        }
+      }
+    });
+
+    if (error) {
+      console.error("Registration error:", error.message);
+      return null;
+    }
+
+    if (data.user) {
+      return {
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        address: userData.address
+      };
+    }
     
-    return userToStore;
+    return null;
   } catch (error) {
     console.error("Registration error:", error);
     return null;
   }
 };
 
-// Save user data to local storage
-export const saveUserToStorage = (user: User) => {
-  localStorage.setItem('user', JSON.stringify(user));
-  localStorage.setItem('isLoggedIn', 'true');
+// We no longer need these localStorage functions as Supabase handles session storage
+export const saveUserToStorage = (_user: User) => {};
+export const removeUserFromStorage = () => {};
+export const getUserFromStorage = (): User | null => null;
+export const getLoggedInStateFromStorage = (): boolean => false;
+
+// Get current session from Supabase
+export const getCurrentSession = async () => {
+  const { data } = await supabase.auth.getSession();
+  return data.session;
 };
 
-// Remove user data from local storage
-export const removeUserFromStorage = () => {
-  localStorage.removeItem('user');
-  localStorage.removeItem('isLoggedIn');
-};
-
-// Get user data from local storage
-export const getUserFromStorage = (): User | null => {
-  const storedUser = localStorage.getItem('user');
-  return storedUser ? JSON.parse(storedUser) : null;
-};
-
-// Check if user is logged in from local storage
-export const getLoggedInStateFromStorage = (): boolean => {
-  return localStorage.getItem('isLoggedIn') === 'true';
+// Get current user from Supabase
+export const getCurrentUser = async (): Promise<User | null> => {
+  const { data } = await supabase.auth.getUser();
+  
+  if (!data.user) return null;
+  
+  // Get profile data
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('email, first_name, last_name, address')
+    .eq('id', data.user.id)
+    .single();
+    
+  return {
+    email: profileData?.email || data.user.email || '',
+    firstName: profileData?.first_name || '',
+    lastName: profileData?.last_name || '',
+    address: profileData?.address || ''
+  };
 };

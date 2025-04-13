@@ -1,13 +1,12 @@
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, RegisterData, AuthContextType } from '@/types/auth';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   loginUser, 
-  registerUser, 
-  saveUserToStorage, 
-  removeUserFromStorage,
-  getUserFromStorage,
-  getLoggedInStateFromStorage
+  registerUser,
+  getCurrentUser,
+  getCurrentSession
 } from '@/services/authService';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -15,50 +14,68 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check local storage for logged in state on component mount
-    const storedLoginState = getLoggedInStateFromStorage();
-    const storedUser = getUserFromStorage();
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setIsLoading(true);
+        
+        if (session) {
+          // Get user data from profile
+          const userData = await getCurrentUser();
+          setUser(userData);
+          setIsLoggedIn(true);
+        } else {
+          setUser(null);
+          setIsLoggedIn(false);
+        }
+        
+        setIsLoading(false);
+      }
+    );
+
+    // Check for existing session
+    const checkSession = async () => {
+      setIsLoading(true);
+      const session = await getCurrentSession();
+      
+      if (session) {
+        const userData = await getCurrentUser();
+        setUser(userData);
+        setIsLoggedIn(true);
+      } else {
+        setUser(null);
+        setIsLoggedIn(false);
+      }
+      
+      setIsLoading(false);
+    };
     
-    if (storedLoginState && storedUser) {
-      setUser(storedUser);
-      setIsLoggedIn(true);
-    }
+    checkSession();
+
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     const user = await loginUser(email, password);
-    
-    if (user) {
-      saveUserToStorage(user);
-      setUser(user);
-      setIsLoggedIn(true);
-      return true;
-    }
-    return false;
+    return !!user;
   };
 
   const register = async (userData: RegisterData): Promise<boolean> => {
     const newUser = await registerUser(userData);
-    
-    if (newUser) {
-      saveUserToStorage(newUser);
-      setUser(newUser);
-      setIsLoggedIn(true);
-      return true;
-    }
-    return false;
+    return !!newUser;
   };
 
-  const logout = () => {
-    removeUserFromStorage();
-    setUser(null);
-    setIsLoggedIn(false);
+  const logout = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, login, logout, register }}>
+    <AuthContext.Provider value={{ user, isLoggedIn, login, logout, register, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
