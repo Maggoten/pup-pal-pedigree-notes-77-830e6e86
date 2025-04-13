@@ -15,7 +15,6 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
-  const [developerMode, setDeveloperMode] = useState(false);
 
   const handleLogin = async (values: LoginFormValues) => {
     setIsLoading(true);
@@ -48,52 +47,7 @@ const Login: React.FC = () => {
 
   const handleRegistration = (values: RegistrationFormValues) => {
     setRegistrationData(values);
-    
-    // If developer mode is enabled, skip payment and register directly
-    if (developerMode) {
-      handleDirectRegistration(values);
-    } else {
-      setShowPayment(true);
-    }
-  };
-  
-  const handleDirectRegistration = async (values: RegistrationFormValues) => {
-    setIsLoading(true);
-    
-    try {
-      const registerData: RegisterData = {
-        email: values.email,
-        password: values.password,
-        firstName: values.firstName,
-        lastName: values.lastName,
-        address: values.address
-      };
-      
-      const success = await register(registerData);
-      
-      if (success) {
-        toast({
-          title: "Registration successful",
-          description: "Welcome to Breeding Journey! Your account has been created."
-        });
-        
-        navigate('/');
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Registration failed",
-          description: "Please try again."
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Registration error",
-        description: "An unexpected error occurred. Please try again."
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    setShowPayment(true);
   };
 
   const handlePayment = async () => {
@@ -139,37 +93,17 @@ const Login: React.FC = () => {
     }
   };
 
-  // Toggle developer mode
-  const toggleDeveloperMode = () => {
-    setDeveloperMode(!developerMode);
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-greige-50 p-4">
       <div className="text-center mb-8">
         {/* Removed the Breeding Journey text */}
       </div>
       {!showPayment ? (
-        <>
-          <AuthTabs 
-            onLogin={handleLogin}
-            onRegister={handleRegistration}
-            isLoading={isLoading}
-          />
-          <div className="mt-4 flex justify-center">
-            <button 
-              onClick={toggleDeveloperMode}
-              className="text-xs text-gray-500 underline hover:text-gray-700"
-            >
-              {developerMode ? "Disable Developer Mode" : "Enable Developer Mode"}
-            </button>
-          </div>
-          {developerMode && (
-            <div className="mt-2 text-xs text-amber-600 max-w-md text-center">
-              Developer Mode is active. Registration will bypass the payment step.
-            </div>
-          )}
-        </>
+        <AuthTabs 
+          onLogin={handleLogin}
+          onRegister={handleRegistration}
+          isLoading={isLoading}
+        />
       ) : (
         <PaymentForm
           onSubmit={handlePayment}
