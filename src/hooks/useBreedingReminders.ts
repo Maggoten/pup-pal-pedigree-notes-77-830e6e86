@@ -1,9 +1,6 @@
-
 import { useDogs } from '@/context/DogsContext';
 import { toast } from '@/components/ui/use-toast';
 import { useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { createCalendarClockIcon } from '@/utils/iconUtils';
 import { Reminder, CustomReminderInput } from '@/types/reminders';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -13,9 +10,8 @@ import {
   updateReminderStatus,
   deleteReminder as deleteReminderFromSupabase,
   migrateLocalRemindersToSupabase,
-  mapToReminder,
-  ReminderData
-} from '@/services/ReminderSupabaseService';
+  mapToReminder
+} from '@/services/reminders';
 import {
   loadCustomReminders,
   loadCompletedReminders,
@@ -25,7 +21,7 @@ import {
   generateDogReminders,
   generateLitterReminders,
   generateGeneralReminders
-} from '@/services/ReminderService';
+} from '@/services/SystemReminderGenerator';
 
 export type { Reminder, CustomReminderInput };
 
@@ -36,7 +32,6 @@ export const useBreedingReminders = () => {
   const [loadingReminders, setLoadingReminders] = useState(true);
   const [migrationComplete, setMigrationComplete] = useState(false);
 
-  // Check if user is authenticated and migration status
   useEffect(() => {
     const hasPerformedMigration = localStorage.getItem('remindersMigrated') === 'true';
     if (hasPerformedMigration) {
@@ -44,7 +39,6 @@ export const useBreedingReminders = () => {
     }
   }, []);
 
-  // Load reminders from Supabase if user is logged in
   useEffect(() => {
     const loadRemindersData = async () => {
       if (!isLoggedIn || !user) {
@@ -55,13 +49,11 @@ export const useBreedingReminders = () => {
       setLoadingReminders(true);
       
       try {
-        // Fetch all reminders and statuses from Supabase
         const [reminderData, statusData] = await Promise.all([
           fetchReminders(),
           fetchReminderStatuses()
         ]);
         
-        // Create a map of reminder statuses for quick lookup
         const statusMap = new Map();
         statusData.forEach(status => {
           statusMap.set(status.reminder_id, {
@@ -70,7 +62,6 @@ export const useBreedingReminders = () => {
           });
         });
         
-        // Filter out deleted reminders and map to Reminder type
         const loadedReminders = reminderData
           .filter(reminder => !statusMap.get(reminder.id)?.isDeleted)
           .map(reminder => mapToReminder(
@@ -78,19 +69,14 @@ export const useBreedingReminders = () => {
             statusMap.get(reminder.id)?.isCompleted || false
           ));
         
-        // Generate system reminders if the user is logged in
         const systemReminders = await generateSupabaseSystemReminders(dogs);
         
-        // Combine custom and system reminders
         const allReminders = [...loadedReminders, ...systemReminders];
         
-        // Sort reminders by priority and completion status
         const sortedReminders = [...allReminders].sort((a, b) => {
-          // First sort by completion status
           if (a.isCompleted && !b.isCompleted) return 1;
           if (!a.isCompleted && b.isCompleted) return -1;
           
-          // Then sort by priority
           const priorityOrder = { high: 0, medium: 1, low: 2 };
           return priorityOrder[a.priority] - priorityOrder[b.priority];
         });
@@ -103,19 +89,16 @@ export const useBreedingReminders = () => {
       }
     };
 
-    // Migrate local reminders if needed and user is logged in
     const migrateIfNeeded = async () => {
       if (!isLoggedIn || !user || migrationComplete) {
         return;
       }
 
       try {
-        // Get local reminders data
         const customReminders = loadCustomReminders();
         const completedReminders = loadCompletedReminders();
         const deletedReminderIds = loadDeletedReminders();
         
-        // Only migrate if there's data to migrate
         if (customReminders.length > 0 || completedReminders.size > 0 || deletedReminderIds.size > 0) {
           const success = await migrateLocalRemindersToSupabase(
             customReminders,
@@ -132,11 +115,9 @@ export const useBreedingReminders = () => {
               description: "Your reminders have been successfully migrated to your account."
             });
             
-            // Reload reminders after migration
             await loadRemindersData();
           }
         } else {
-          // No data to migrate
           localStorage.setItem('remindersMigrated', 'true');
           setMigrationComplete(true);
         }
@@ -149,38 +130,31 @@ export const useBreedingReminders = () => {
     migrateIfNeeded();
   }, [isLoggedIn, user, dogs, migrationComplete]);
 
-  // Generate system reminders and store them in Supabase if needed
   const generateSupabaseSystemReminders = async (dogs: any[]): Promise<Reminder[]> => {
     if (!isLoggedIn || !user) {
       return [];
     }
     
-    // Generate all system reminders
     const dogReminders = generateDogReminders(dogs);
     const litterReminders = generateLitterReminders();
     const generalReminders = generateGeneralReminders(dogs);
     
-    // Combine all system-generated reminders
     const systemReminders = [...dogReminders, ...litterReminders, ...generalReminders];
     
-    // Fetch existing reminder status to filter deleted ones
     const statusData = await fetchReminderStatuses();
     
-    // Create a set of deleted reminder IDs
     const deletedReminderIds = new Set(
       statusData
         .filter(status => status.is_deleted)
         .map(status => status.reminder_id)
     );
     
-    // Create a map of completed reminders
     const completedRemindersMap = new Map(
       statusData
         .filter(status => status.is_completed && !status.is_deleted)
         .map(status => [status.reminder_id, true])
     );
     
-    // Filter out deleted reminders and add completion status
     return systemReminders
       .filter(reminder => !deletedReminderIds.has(reminder.id))
       .map(reminder => ({
@@ -199,23 +173,18 @@ export const useBreedingReminders = () => {
       return;
     }
     
-    // Find the reminder to toggle
     const reminderToToggle = reminders.find(r => r.id === id);
     if (!reminderToToggle) return;
     
-    // Toggle the completion status
     const newIsCompleted = !reminderToToggle.isCompleted;
     
-    // Optimistically update UI
     setReminders(prev => 
       prev.map(r => r.id === id ? { ...r, isCompleted: newIsCompleted } : r)
     );
     
-    // Update in Supabase
     const success = await updateReminderStatus(id, newIsCompleted);
     
     if (!success) {
-      // Revert on failure
       setReminders(prev => 
         prev.map(r => r.id === id ? { ...r, isCompleted: !newIsCompleted } : r)
       );
@@ -246,7 +215,6 @@ export const useBreedingReminders = () => {
       return;
     }
     
-    // Add to Supabase
     const newReminderId = await addCustomReminderToSupabase(input);
     
     if (!newReminderId) {
@@ -258,7 +226,6 @@ export const useBreedingReminders = () => {
       return;
     }
     
-    // Create reminder object for local state
     const newReminder: Reminder = {
       id: newReminderId,
       title: input.title,
@@ -272,7 +239,6 @@ export const useBreedingReminders = () => {
       )
     };
     
-    // Update local state
     setReminders(prev => [...prev, newReminder]);
     
     toast({
@@ -291,20 +257,16 @@ export const useBreedingReminders = () => {
       return;
     }
     
-    // Optimistically update UI
     setReminders(prev => prev.filter(r => r.id !== id));
     
-    // Delete from Supabase
     const success = await deleteReminderFromSupabase(id);
     
     if (!success) {
-      // Fetch fresh data if deletion failed
       const [reminderData, statusData] = await Promise.all([
         fetchReminders(),
         fetchReminderStatuses()
       ]);
       
-      // Re-process the data as before
       const statusMap = new Map();
       statusData.forEach(status => {
         statusMap.set(status.reminder_id, {

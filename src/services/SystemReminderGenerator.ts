@@ -4,7 +4,7 @@ import { Reminder } from '@/types/reminders';
 import { differenceInDays, parseISO, addDays, isSameMonth, isSameDay } from 'date-fns';
 import { createPawPrintIcon, createCalendarClockIcon, createScaleIcon } from '@/utils/iconUtils';
 import { litterService } from '@/services/LitterService';
-import { addSystemReminder } from '@/services/ReminderSupabaseService';
+import { addSystemReminder } from '@/services/reminders';
 
 // Generate all system reminders for a logged-in user
 export const generateAllSystemReminders = async (dogs: Dog[]): Promise<void> => {
