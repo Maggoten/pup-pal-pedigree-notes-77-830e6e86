@@ -52,7 +52,8 @@ export const fetchReminders = async (): Promise<ReminderData[]> => {
       return [];
     }
 
-    return data || [];
+    // Explicitly cast the data to ReminderData[] to ensure type safety
+    return (data || []) as ReminderData[];
   } catch (error) {
     console.error('Unexpected error fetching reminders:', error);
     return [];
@@ -79,7 +80,7 @@ export const fetchReminderStatuses = async (): Promise<ReminderStatusData[]> => 
       return [];
     }
 
-    return data || [];
+    return (data || []) as ReminderStatusData[];
   } catch (error) {
     console.error('Unexpected error fetching reminder statuses:', error);
     return [];
@@ -262,13 +263,16 @@ export const deleteReminder = async (reminderId: string): Promise<boolean> => {
 
 // Map a reminder from Supabase to the application's Reminder type
 export const mapToReminder = (data: ReminderData, isCompleted: boolean = false): Reminder => {
+  // Ensure the type is one of the allowed values in Reminder.type
+  const safeType = data.type as Reminder['type'];
+  
   return {
     id: data.id,
     title: data.title,
     description: data.description,
     dueDate: new Date(data.due_date),
     priority: data.priority,
-    type: data.type,
+    type: safeType,
     relatedId: data.dog_id,
     isCompleted,
     icon: createIconForReminder(data.type, data.priority)
@@ -300,7 +304,7 @@ export const migrateLocalRemindersToSupabase = async (
     
     // Migrate custom reminders
     for (const reminder of customReminders) {
-      await supabase
+      const insertPromise = supabase
         .from('reminders')
         .insert({
           id: reminder.id,
@@ -312,52 +316,55 @@ export const migrateLocalRemindersToSupabase = async (
           type: reminder.type,
           dog_id: reminder.relatedId,
           is_custom: true
-        })
-        .then(({ error }) => {
-          if (error && error.code !== '23505') { // Ignore duplicate key violations
-            console.error(`Error migrating custom reminder ${reminder.id}:`, error);
-          }
         });
+      
+      await insertPromise.then(({ error }) => {
+        if (error && error.code !== '23505') { // Ignore duplicate key violations
+          console.error(`Error migrating custom reminder ${reminder.id}:`, error);
+        }
+      });
     }
     
     // Migrate completed and deleted statuses
     const statusPromises: Promise<any>[] = [];
     
     completedReminders.forEach(reminderId => {
+      const insertPromise = supabase
+        .from('reminder_status')
+        .insert({
+          user_id: userData.user.id,
+          reminder_id: reminderId,
+          is_completed: true,
+          is_deleted: deletedReminders.has(reminderId)
+        });
+      
       statusPromises.push(
-        supabase
-          .from('reminder_status')
-          .insert({
-            user_id: userData.user.id,
-            reminder_id: reminderId,
-            is_completed: true,
-            is_deleted: deletedReminders.has(reminderId)
-          })
-          .then(({ error }) => {
-            if (error && error.code !== '23505') { // Ignore duplicate key violations
-              console.error(`Error migrating status for ${reminderId}:`, error);
-            }
-          })
+        insertPromise.then(({ error }) => {
+          if (error && error.code !== '23505') { // Ignore duplicate key violations
+            console.error(`Error migrating status for ${reminderId}:`, error);
+          }
+        })
       );
     });
     
     // For deleted reminders that aren't completed
     deletedReminders.forEach(reminderId => {
       if (!completedReminders.has(reminderId)) {
+        const insertPromise = supabase
+          .from('reminder_status')
+          .insert({
+            user_id: userData.user.id,
+            reminder_id: reminderId,
+            is_completed: false,
+            is_deleted: true
+          });
+        
         statusPromises.push(
-          supabase
-            .from('reminder_status')
-            .insert({
-              user_id: userData.user.id,
-              reminder_id: reminderId,
-              is_completed: false,
-              is_deleted: true
-            })
-            .then(({ error }) => {
-              if (error && error.code !== '23505') { // Ignore duplicate key violations
-                console.error(`Error migrating deleted status for ${reminderId}:`, error);
-              }
-            })
+          insertPromise.then(({ error }) => {
+            if (error && error.code !== '23505') { // Ignore duplicate key violations
+              console.error(`Error migrating deleted status for ${reminderId}:`, error);
+            }
+          })
         );
       }
     });
