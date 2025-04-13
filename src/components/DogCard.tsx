@@ -36,8 +36,13 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
     }
   };
 
+  // Memoize the card click handler to prevent recreating on every render
+  const handleCardClick = React.useCallback(() => {
+    onClick(dog);
+  }, [dog, onClick]);
+
   return (
-    <Card className="dog-card w-full h-full overflow-hidden" onClick={() => onClick(dog)}>
+    <Card className="dog-card w-full h-full overflow-hidden" onClick={handleCardClick}>
       <CardHeader className="p-0">
         <div className="aspect-[4/3] w-full relative">
           <img 
@@ -45,6 +50,7 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
             alt={dog.name} 
             className="object-cover w-full h-full"
             onError={handleImageError}
+            loading="lazy" // Add lazy loading for images
           />
           {isPlaceholder && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/5">
@@ -84,4 +90,4 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
   );
 };
 
-export default DogCard;
+export default React.memo(DogCard);

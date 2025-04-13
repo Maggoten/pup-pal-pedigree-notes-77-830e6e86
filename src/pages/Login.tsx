@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,7 +19,8 @@ const Login: React.FC = () => {
   // Add state to track if payment is required (default to false)
   const [requirePayment, setRequirePayment] = useState(false);
 
-  const handleLogin = async (values: LoginFormValues) => {
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleLogin = useCallback(async (values: LoginFormValues) => {
     setIsLoading(true);
     try {
       const success = await login(values.email, values.password);
@@ -46,9 +47,9 @@ const Login: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [login, navigate]);
 
-  const handleRegistration = async (values: RegistrationFormValues) => {
+  const handleRegistration = useCallback(async (values: RegistrationFormValues) => {
     // Check if payment is required
     if (requirePayment) {
       // Store registration data and show payment form
@@ -58,9 +59,9 @@ const Login: React.FC = () => {
       // Register directly without payment
       await handleDirectRegistration(values);
     }
-  };
+  }, [requirePayment]);
 
-  const handleDirectRegistration = async (values: RegistrationFormValues) => {
+  const handleDirectRegistration = useCallback(async (values: RegistrationFormValues) => {
     setIsLoading(true);
     
     try {
@@ -97,18 +98,18 @@ const Login: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [register, navigate]);
 
-  const handlePayment = async () => {
+  const handlePayment = useCallback(async () => {
     if (registrationData) {
       await handleDirectRegistration(registrationData);
     }
-  };
+  }, [registrationData, handleDirectRegistration]);
 
-  // Toggle for enabling/disabling payment requirement (for testing/development)
-  const togglePaymentRequirement = () => {
-    setRequirePayment(!requirePayment);
-  };
+  // Toggle for enabling/disabling payment requirement
+  const togglePaymentRequirement = useCallback(() => {
+    setRequirePayment(prev => !prev);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-greige-50 p-4">
