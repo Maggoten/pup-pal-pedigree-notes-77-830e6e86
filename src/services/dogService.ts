@@ -30,12 +30,12 @@ export const fetchDogs = async (): Promise<Dog[]> => {
       return [];
     }
 
-    // Map database fields to our client-side model
+    // Map database fields to our client-side model with proper type casting
     return (data || []).map(dog => ({
       id: dog.id,
       name: dog.name,
       breed: dog.breed,
-      gender: dog.gender,
+      gender: dog.gender as 'male' | 'female', // Cast gender to the expected type
       dateOfBirth: dog.date_of_birth,
       color: dog.color,
       registrationNumber: dog.registration_number,
@@ -69,7 +69,7 @@ export const fetchDogById = async (id: string): Promise<Dog | null> => {
       id: data.id,
       name: data.name,
       breed: data.breed,
-      gender: data.gender,
+      gender: data.gender as 'male' | 'female', // Cast gender to the expected type
       dateOfBirth: data.date_of_birth,
       color: data.color,
       registrationNumber: data.registration_number,
@@ -140,7 +140,7 @@ export const createDog = async (dog: Omit<Dog, "id">): Promise<Dog | null> => {
       id: data.id,
       name: data.name,
       breed: data.breed,
-      gender: data.gender,
+      gender: data.gender as 'male' | 'female', // Cast gender to the expected type
       dateOfBirth: data.date_of_birth,
       color: data.color,
       registrationNumber: data.registration_number,
@@ -201,7 +201,7 @@ export const updateDog = async (id: string, dog: Partial<Dog>): Promise<Dog | nu
       id: data.id,
       name: data.name,
       breed: data.breed,
-      gender: data.gender,
+      gender: data.gender as 'male' | 'female', // Cast gender to the expected type
       dateOfBirth: data.date_of_birth,
       color: data.color,
       registrationNumber: data.registration_number,
