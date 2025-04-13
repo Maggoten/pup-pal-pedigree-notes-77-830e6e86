@@ -14,6 +14,7 @@ import { Dog } from '@/types/dogs';
 import { supabase } from '@/integrations/supabase/client';
 import { SupabaseDogContextType } from './types';
 import { dogsReducer, initialDogsState } from './dogsReducer';
+import { toast } from '@/components/ui/use-toast';
 
 export const SupabaseDogContext = createContext<SupabaseDogContextType | undefined>(undefined);
 
@@ -59,16 +60,31 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   const refreshDogs = useCallback(async () => {
     console.log("Refreshing dogs list...");
-    await loadDogs();
-    
-    // If there's an active dog, we need to refresh its data too
-    if (state.activeDog) {
+    try {
       const updatedDogList = await fetchDogs();
-      const refreshedDog = updatedDogList.find(d => d.id === state.activeDog?.id);
-      if (refreshedDog) {
-        console.log("Updating active dog with fresh data:", refreshedDog);
-        dispatch({ type: 'SET_ACTIVE_DOG', payload: refreshedDog });
+      dispatch({ type: 'SET_DOGS', payload: updatedDogList });
+      
+      // If there's an active dog, we need to refresh its data too
+      if (state.activeDog) {
+        const refreshedDog = updatedDogList.find(d => d.id === state.activeDog?.id);
+        if (refreshedDog) {
+          console.log("Updating active dog with fresh data:", refreshedDog);
+          dispatch({ type: 'SET_ACTIVE_DOG', payload: refreshedDog });
+        } else {
+          console.log("Active dog no longer found in the updated list");
+          dispatch({ type: 'SET_ACTIVE_DOG', payload: null });
+        }
       }
+      
+      return true;
+    } catch (error) {
+      console.error("Error refreshing dogs:", error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh dogs. Please try again.",
+        variant: "destructive",
+      });
+      return false;
     }
   }, [state.activeDog]);
 
@@ -78,63 +94,128 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
       dispatch({ type: 'SET_HEAT_RECORDS', payload: records });
     } catch (err) {
       console.error('Failed to load heat records', err);
+      toast({
+        title: "Error",
+        description: "Failed to load heat records. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
   const addDog = async (dog: Omit<Dog, "id">) => {
-    const newDog = await createDog(dog);
-    if (newDog) {
-      dispatch({ type: 'ADD_DOG', payload: newDog });
+    try {
+      const newDog = await createDog(dog);
+      if (newDog) {
+        dispatch({ type: 'ADD_DOG', payload: newDog });
+      }
+      return newDog;
+    } catch (error) {
+      console.error("Error adding dog:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add dog. Please try again.",
+        variant: "destructive",
+      });
+      return null;
     }
-    return newDog;
   };
 
   const removeDog = async (id: string, dogName: string) => {
-    const success = await deleteDog(id, dogName);
-    if (success) {
-      dispatch({ type: 'REMOVE_DOG', payload: id });
+    try {
+      const success = await deleteDog(id, dogName);
+      if (success) {
+        dispatch({ type: 'REMOVE_DOG', payload: id });
+      }
+      return success;
+    } catch (error) {
+      console.error("Error removing dog:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove dog. Please try again.",
+        variant: "destructive",
+      });
+      return false;
     }
-    return success;
   };
 
   const updateDogInfo = async (id: string, data: Partial<Dog>) => {
     console.log("Updating dog in context:", id, data);
-    const updatedDog = await updateDog(id, data);
-    
-    if (updatedDog) {
-      console.log("Dog updated successfully:", updatedDog);
-      dispatch({ 
-        type: 'UPDATE_DOG', 
-        payload: { id, dog: updatedDog } 
-      });
+    try {
+      const updatedDog = await updateDog(id, data);
       
-      return updatedDog;
+      if (updatedDog) {
+        console.log("Dog updated successfully:", updatedDog);
+        dispatch({ 
+          type: 'UPDATE_DOG', 
+          payload: { id, dog: updatedDog } 
+        });
+        
+        return updatedDog;
+      }
+      
+      console.log("Failed to update dog");
+      return null;
+    } catch (error) {
+      console.error("Error updating dog info:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update dog information. Please try again.",
+        variant: "destructive",
+      });
+      return null;
     }
-    
-    console.log("Failed to update dog");
-    return null;
   };
 
   const addHeatDate = async (dogId: string, date: Date) => {
-    const success = await addHeatRecord(dogId, date);
-    if (success) {
-      // Reload heat records
-      await loadHeatRecords(dogId);
+    try {
+      const success = await addHeatRecord(dogId, date);
+      if (success) {
+        // Reload heat records
+        await loadHeatRecords(dogId);
+      }
+      return success;
+    } catch (error) {
+      console.error("Error adding heat date:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add heat date. Please try again.",
+        variant: "destructive",
+      });
+      return false;
     }
-    return success;
   };
 
   const removeHeatDate = async (id: string) => {
-    const success = await deleteHeatRecord(id);
-    if (success && state.activeDog) {
-      // Reload heat records
-      await loadHeatRecords(state.activeDog.id);
+    try {
+      const success = await deleteHeatRecord(id);
+      if (success && state.activeDog) {
+        // Reload heat records
+        await loadHeatRecords(state.activeDog.id);
+      }
+      return success;
+    } catch (error) {
+      console.error("Error removing heat date:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove heat date. Please try again.",
+        variant: "destructive",
+      });
+      return false;
     }
-    return success;
   };
 
   const uploadImage = async (file: File, dogId: string) => {
-    return await uploadDogImage(file, dogId);
+    try {
+      return await uploadDogImage(file, dogId);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+      return null;
+    }
   };
 
   const setActiveDog = (dog: Dog | null) => {

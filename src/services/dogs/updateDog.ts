@@ -46,19 +46,25 @@ export const updateDog = async (id: string, dog: Partial<Dog>): Promise<Dog | nu
       console.error('Error updating dog:', error);
       toast({
         title: "Error",
-        description: "Failed to update dog. Please try again.",
+        description: `Failed to update dog: ${error.message}`,
         variant: "destructive",
       });
       return null;
     }
 
+    if (!data) {
+      console.error('No data returned from update operation');
+      return null;
+    }
+
     console.log("Successfully updated dog:", data);
 
+    // Map the database response back to our Dog type
     return {
       id: data.id,
       name: data.name,
       breed: data.breed,
-      gender: data.gender as 'male' | 'female', // Cast gender to the expected type
+      gender: data.gender as 'male' | 'female',
       dateOfBirth: data.date_of_birth,
       color: data.color,
       registrationNumber: data.registration_number,
@@ -70,6 +76,11 @@ export const updateDog = async (id: string, dog: Partial<Dog>): Promise<Dog | nu
     };
   } catch (error) {
     console.error('Unexpected error updating dog:', error);
+    toast({
+      title: "Error",
+      description: "An unexpected error occurred. Please try again.",
+      variant: "destructive",
+    });
     return null;
   }
 };

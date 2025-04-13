@@ -75,12 +75,17 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       
       if (updatedDog) {
         console.log("Successfully updated dog:", updatedDog);
-        await refreshDogs(); // Refresh all dogs to ensure we have the latest data
-        setIsEditing(false); // Close the edit form
         toast({
           title: "Success",
           description: `${values.name}'s information has been updated.`,
         });
+        
+        // First refresh all dogs to ensure we have the latest data
+        await refreshDogs();
+        
+        // Then exit edit mode and return to the dog list
+        setIsEditing(false);
+        setActiveDog(null);
       } else {
         console.error("Failed to update dog: updateDogInfo returned null or undefined");
         toast({
