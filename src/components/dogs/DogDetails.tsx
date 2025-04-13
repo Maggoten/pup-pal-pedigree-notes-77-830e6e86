@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { toast } from '@/components/ui/use-toast';
 
 interface DogDetailsProps {
   dog: Dog;
@@ -45,16 +47,41 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
     setActiveDog(null);
   };
 
-  const handleSave = (values: DogFormValues) => {
-    const formattedValues = {
-      ...values,
-      dateOfBirth: format(values.dateOfBirth, 'yyyy-MM-dd'),
-      dewormingDate: values.dewormingDate ? format(values.dewormingDate, 'yyyy-MM-dd') : undefined,
-      vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : undefined,
-    };
-    
-    updateDogInfo(dog.id, formattedValues);
-    setIsEditing(false);
+  const handleSave = async (values: DogFormValues) => {
+    try {
+      // Format values for database
+      const formattedValues = {
+        name: values.name,
+        breed: values.breed,
+        dateOfBirth: format(values.dateOfBirth, 'yyyy-MM-dd'),
+        gender: values.gender,
+        color: values.color,
+        registrationNumber: values.registrationNumber,
+        dewormingDate: values.dewormingDate ? format(values.dewormingDate, 'yyyy-MM-dd') : undefined,
+        vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : undefined,
+        notes: values.notes,
+        image_url: values.image, // Pass the image URL (or base64) to be handled in the service
+        heatInterval: values.heatInterval,
+      };
+      
+      // Update the dog
+      const success = await updateDogInfo(dog.id, formattedValues);
+      
+      if (success) {
+        setIsEditing(false);
+        toast({
+          title: "Success",
+          description: `${values.name}'s information has been updated.`,
+        });
+      }
+    } catch (error) {
+      console.error("Error saving dog:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save changes. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDelete = async () => {

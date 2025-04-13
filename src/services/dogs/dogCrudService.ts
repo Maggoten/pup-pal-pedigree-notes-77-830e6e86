@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Dog } from "@/types/dogs";
 import { toast } from "@/components/ui/use-toast";
+import { uploadDogImageFromBase64 } from "./imageService";
 
 // Fetch all dogs for the current user
 export const fetchDogs = async (): Promise<Dog[]> => {
@@ -158,6 +159,14 @@ export const createDog = async (dog: Omit<Dog, "id">): Promise<Dog | null> => {
 // Update a dog
 export const updateDog = async (id: string, dog: Partial<Dog>): Promise<Dog | null> => {
   try {
+    console.log("Updating dog with data:", dog);
+    
+    // Check if we need to process a base64 image
+    let imageUrl = dog.image_url;
+    if (imageUrl && imageUrl.startsWith('data:image')) {
+      imageUrl = await uploadDogImageFromBase64(imageUrl, id);
+    }
+    
     // Format dates for database
     const dbDog = {
       name: dog.name,
@@ -170,9 +179,11 @@ export const updateDog = async (id: string, dog: Partial<Dog>): Promise<Dog | nu
       deworming_date: dog.dewormingDate,
       vaccination_date: dog.vaccinationDate,
       heat_interval: dog.heatInterval,
-      image_url: dog.image_url,
+      image_url: imageUrl,
       updated_at: new Date().toISOString()
     };
+    
+    console.log("Sending to database:", dbDog);
     
     const { data, error } = await supabase
       .from('dogs')
@@ -191,10 +202,7 @@ export const updateDog = async (id: string, dog: Partial<Dog>): Promise<Dog | nu
       return null;
     }
 
-    toast({
-      title: "Success",
-      description: `${data.name}'s information has been updated.`,
-    });
+    console.log("Successfully updated dog:", data);
 
     return {
       id: data.id,

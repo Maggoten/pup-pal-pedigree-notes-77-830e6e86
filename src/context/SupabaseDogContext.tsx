@@ -104,16 +104,24 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
   };
 
   const updateDogInfo = async (id: string, data: Partial<Dog>) => {
+    console.log("Updating dog in context:", id, data);
     const updatedDog = await updateDog(id, data);
+    
     if (updatedDog) {
-      setDogs(prev => prev.map(dog => dog.id === id ? { ...dog, ...updatedDog } : dog));
+      console.log("Dog updated successfully:", updatedDog);
+      // Update dogs list
+      setDogs(prev => prev.map(dog => dog.id === id ? updatedDog : dog));
       
       // Update active dog if it's the one being edited
       if (activeDog && activeDog.id === id) {
         setActiveDog(updatedDog);
       }
+      
+      return updatedDog;
     }
-    return updatedDog;
+    
+    console.log("Failed to update dog");
+    return null;
   };
 
   const addHeatDate = async (dogId: string, date: Date) => {

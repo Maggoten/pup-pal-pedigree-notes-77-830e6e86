@@ -12,6 +12,7 @@ import DogImageField from './DogImageField';
 import HeatRecordsField from './HeatRecordsField';
 import { Dog } from '@/types/dogs';
 import { useSupabaseDogs } from '@/context/SupabaseDogContext';
+import { uploadDogImageFromBase64 } from '@/services/dogs';
 
 interface DogEditFormProps {
   dog: Dog;
@@ -20,8 +21,9 @@ interface DogEditFormProps {
 }
 
 const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
-  const { heatRecords, updateDogInfo } = useSupabaseDogs();
+  const { heatRecords } = useSupabaseDogs();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageChanged, setImageChanged] = useState(false);
 
   // Transform date strings to Date objects for form
   const transformHeatHistory = heatRecords 
@@ -49,6 +51,16 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
   const handleSubmit = async (values: DogFormValues) => {
     setIsSubmitting(true);
     try {
+      // Handle image upload if it was changed
+      if (imageChanged && values.image && values.image !== dog.image_url) {
+        const imageUrl = await uploadDogImageFromBase64(values.image, dog.id);
+        
+        // Replace the base64 string with the URL for the backend
+        if (imageUrl) {
+          values.image = imageUrl;
+        }
+      }
+      
       onSave(values);
     } catch (error) {
       console.error('Error updating dog:', error);
@@ -64,6 +76,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
 
   const handleImageChange = (imageBase64: string) => {
     form.setValue('image', imageBase64);
+    setImageChanged(true);
   };
 
   return (
