@@ -4,8 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Dog, Heart, PieChart, Baby, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useDogs } from '@/context/DogsContext';
 import { Button } from '@/components/ui/button';
+import { DogsProvider } from '@/context/DogsContext';
 
 const BreedingStats = () => {
+  return (
+    <DogsProvider>
+      <BreedingStatsContent />
+    </DogsProvider>
+  );
+};
+
+const BreedingStatsContent = () => {
   const { dogs } = useDogs();
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);

@@ -7,6 +7,8 @@ import StatsCards from './StatsCards';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { format } from 'date-fns';
 import RemindersDialog from '@/components/reminders/RemindersDialog';
+import { DogsProvider } from '@/context/DogsContext';
+import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 
 interface DashboardHeroProps {
   username: string;
@@ -18,20 +20,53 @@ interface DashboardHeroProps {
 
 const DashboardHero: React.FC<DashboardHeroProps> = ({ 
   username, 
-  reminders,
+  reminders: initialReminders,
+  plannedLitters,
+  activePregnancies,
+  recentLitters
+}) => {
+  return (
+    <DogsProvider>
+      <DashboardHeroContent
+        username={username}
+        initialReminders={initialReminders}
+        plannedLitters={plannedLitters}
+        activePregnancies={activePregnancies}
+        recentLitters={recentLitters}
+      />
+    </DogsProvider>
+  );
+};
+
+const DashboardHeroContent: React.FC<{
+  username: string;
+  initialReminders: { count: number; highPriority: number };
+  plannedLitters: { count: number; nextDate: Date | null };
+  activePregnancies: ActivePregnancy[];
+  recentLitters: { count: number; latest: Date | null };
+}> = ({
+  username,
+  initialReminders,
   plannedLitters,
   activePregnancies,
   recentLitters
 }) => {
   const navigate = useNavigate();
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
+  const { reminders } = useBreedingReminders();
+  
+  // Calculate reminder metrics
+  const remindersSummary = {
+    count: reminders.length,
+    highPriority: reminders.filter(r => r.priority === 'high').length
+  };
   
   const metricCards = [
     {
       title: "Reminders",
-      count: reminders.count,
+      count: remindersSummary.count,
       icon: <Calendar className="h-5 w-5 text-primary" />,
-      highlight: reminders.highPriority > 0 ? `${reminders.highPriority} high priority` : null,
+      highlight: remindersSummary.highPriority > 0 ? `${remindersSummary.highPriority} high priority` : null,
       action: () => setRemindersDialogOpen(true),
       color: "bg-greige-50 border-greige-200 hover:border-greige-300"
     },
