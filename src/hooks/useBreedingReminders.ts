@@ -1,3 +1,4 @@
+
 import { useDogs } from '@/context/DogsContext';
 import { toast } from '@/components/ui/use-toast';
 import { useState, useEffect } from 'react';
@@ -22,6 +23,7 @@ import {
   generateLitterReminders,
   generateGeneralReminders
 } from '@/services/SystemReminderGenerator';
+import { createCalendarClockIcon } from '@/utils/iconUtils';
 
 export type { Reminder, CustomReminderInput };
 
