@@ -10,7 +10,7 @@ import { dogFormSchema, DogFormValues } from './schema/dogFormSchema';
 import DogImageField from './DogImageField';
 import HeatRecordsField from './HeatRecordsField';
 import { Dog } from '@/types/dogs';
-import { useSupabaseDogs } from '@/context/SupabaseDogContext';
+import { useSupabaseDogs } from '@/context/dogs';
 import { Loader2 } from 'lucide-react';
 
 interface DogEditFormProps {

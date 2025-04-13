@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { CalendarIcon, X, Plus } from 'lucide-react';
@@ -10,7 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { UseFormReturn } from 'react-hook-form';
 import { cn } from '@/lib/utils';
-import { useSupabaseDogs } from '@/context/SupabaseDogContext';
+import { useSupabaseDogs } from '@/context/dogs';
 
 interface HeatDate {
   date: Date;
@@ -25,45 +24,35 @@ interface HeatRecordsFieldProps {
 const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) => {
   const { activeDog, addHeatDate, removeHeatDate } = useSupabaseDogs();
   
-  // Skip rendering for male dogs
   if (form.getValues('gender') === 'male') {
     return null;
   }
   
-  // Get heat history from form or initialize empty array
   const heatHistory = form.watch('heatHistory') || [];
   
-  // Add a new heat date record
   const addNewHeatDate = () => {
     const newHeatHistory = [...heatHistory, { date: new Date() }];
     form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
     
-    // If we have an active dog, also add to the database
     if (activeDog) {
       addHeatDate(activeDog.id, new Date());
     }
   };
   
-  // Remove a heat date record
   const removeHeatDateRecord = (index: number, heatRecord: HeatDate) => {
     const newHeatHistory = [...heatHistory];
     newHeatHistory.splice(index, 1);
     form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
     
-    // If we have an active dog and the heat record has an ID, remove from the database
     if (activeDog && heatRecord.id) {
       removeHeatDate(heatRecord.id);
     }
   };
   
-  // Update a heat date
   const updateHeatDate = (index: number, date: Date) => {
     const newHeatHistory = [...heatHistory];
     newHeatHistory[index] = { ...newHeatHistory[index], date };
     form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
-    
-    // Note: Currently we don't update heat dates in the database, only add/remove
-    // To update, you would need to remove the old one and add a new one
   };
   
   return (

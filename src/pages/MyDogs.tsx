@@ -8,7 +8,7 @@ import DogList from '@/components/DogList';
 import DogDetails from '@/components/dogs/DogDetails';
 import { PlusCircle } from 'lucide-react';
 import AddDogDialog from '@/components/dogs/AddDogDialog';
-import { SupabaseDogProvider, useSupabaseDogs } from '@/context/SupabaseDogContext';
+import { SupabaseDogProvider, useSupabaseDogs } from '@/context/dogs';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
 

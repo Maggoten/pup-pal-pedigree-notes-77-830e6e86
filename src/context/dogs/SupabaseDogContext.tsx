@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import React, { createContext, useReducer, ReactNode, useEffect, useCallback } from 'react';
 import { 
   fetchDogs, 
   createDog, 
@@ -10,35 +10,16 @@ import {
   deleteHeatRecord,
   uploadDogImage
 } from '@/services/dogs';
-import { Dog, HeatRecord } from '@/types/dogs';
+import { Dog } from '@/types/dogs';
 import { supabase } from '@/integrations/supabase/client';
+import { SupabaseDogContextType } from './types';
+import { dogsReducer, initialDogsState } from './dogsReducer';
 
-interface SupabaseDogContextType {
-  dogs: Dog[];
-  loading: boolean;
-  error: string | null;
-  activeDog: Dog | null;
-  setActiveDog: (dog: Dog | null) => void;
-  addDog: (dog: Omit<Dog, "id">) => Promise<Dog | null>;
-  removeDog: (id: string, dogName: string) => Promise<boolean>;
-  updateDogInfo: (id: string, data: Partial<Dog>) => Promise<Dog | null>;
-  uploadImage: (file: File, dogId: string) => Promise<string | null>;
-  heatRecords: HeatRecord[];
-  loadHeatRecords: (dogId: string) => Promise<void>;
-  addHeatDate: (dogId: string, date: Date) => Promise<boolean>;
-  removeHeatDate: (id: string) => Promise<boolean>;
-  refreshDogs: () => Promise<void>;
-}
-
-const SupabaseDogContext = createContext<SupabaseDogContextType | undefined>(undefined);
+export const SupabaseDogContext = createContext<SupabaseDogContextType | undefined>(undefined);
 
 export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [dogs, setDogs] = useState<Dog[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activeDog, setActiveDog] = useState<Dog | null>(null);
-  const [heatRecords, setHeatRecords] = useState<HeatRecord[]>([]);
-
+  const [state, dispatch] = useReducer(dogsReducer, initialDogsState);
+  
   // Check for authentication state changes
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -46,8 +27,8 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
       if (event === 'SIGNED_IN') {
         loadDogs();
       } else if (event === 'SIGNED_OUT') {
-        setDogs([]);
-        setActiveDog(null);
+        dispatch({ type: 'SET_DOGS', payload: [] });
+        dispatch({ type: 'SET_ACTIVE_DOG', payload: null });
       }
     });
 
@@ -63,16 +44,16 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   const loadDogs = async () => {
     try {
-      setLoading(true);
+      dispatch({ type: 'SET_LOADING', payload: true });
       const dogsData = await fetchDogs();
       console.log("Loaded dogs:", dogsData);
-      setDogs(dogsData);
-      setError(null);
+      dispatch({ type: 'SET_DOGS', payload: dogsData });
+      dispatch({ type: 'SET_ERROR', payload: null });
     } catch (err) {
-      setError('Failed to load dogs');
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to load dogs' });
       console.error(err);
     } finally {
-      setLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 
@@ -81,20 +62,20 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
     await loadDogs();
     
     // If there's an active dog, we need to refresh its data too
-    if (activeDog) {
+    if (state.activeDog) {
       const updatedDogList = await fetchDogs();
-      const refreshedDog = updatedDogList.find(d => d.id === activeDog.id);
+      const refreshedDog = updatedDogList.find(d => d.id === state.activeDog?.id);
       if (refreshedDog) {
         console.log("Updating active dog with fresh data:", refreshedDog);
-        setActiveDog(refreshedDog);
+        dispatch({ type: 'SET_ACTIVE_DOG', payload: refreshedDog });
       }
     }
-  }, [activeDog]);
+  }, [state.activeDog]);
 
   const loadHeatRecords = async (dogId: string) => {
     try {
       const records = await fetchHeatRecords(dogId);
-      setHeatRecords(records);
+      dispatch({ type: 'SET_HEAT_RECORDS', payload: records });
     } catch (err) {
       console.error('Failed to load heat records', err);
     }
@@ -103,7 +84,7 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
   const addDog = async (dog: Omit<Dog, "id">) => {
     const newDog = await createDog(dog);
     if (newDog) {
-      setDogs(prev => [...prev, newDog]);
+      dispatch({ type: 'ADD_DOG', payload: newDog });
     }
     return newDog;
   };
@@ -111,10 +92,7 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
   const removeDog = async (id: string, dogName: string) => {
     const success = await deleteDog(id, dogName);
     if (success) {
-      setDogs(prev => prev.filter(dog => dog.id !== id));
-      if (activeDog && activeDog.id === id) {
-        setActiveDog(null);
-      }
+      dispatch({ type: 'REMOVE_DOG', payload: id });
     }
     return success;
   };
@@ -125,13 +103,10 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
     
     if (updatedDog) {
       console.log("Dog updated successfully:", updatedDog);
-      // Update dogs list
-      setDogs(prev => prev.map(dog => dog.id === id ? updatedDog : dog));
-      
-      // Update active dog if it's the one being edited
-      if (activeDog && activeDog.id === id) {
-        setActiveDog(updatedDog);
-      }
+      dispatch({ 
+        type: 'UPDATE_DOG', 
+        payload: { id, dog: updatedDog } 
+      });
       
       return updatedDog;
     }
@@ -151,9 +126,9 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   const removeHeatDate = async (id: string) => {
     const success = await deleteHeatRecord(id);
-    if (success && activeDog) {
+    if (success && state.activeDog) {
       // Reload heat records
-      await loadHeatRecords(activeDog.id);
+      await loadHeatRecords(state.activeDog.id);
     }
     return success;
   };
@@ -162,18 +137,22 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
     return await uploadDogImage(file, dogId);
   };
 
+  const setActiveDog = (dog: Dog | null) => {
+    dispatch({ type: 'SET_ACTIVE_DOG', payload: dog });
+  };
+
   return (
     <SupabaseDogContext.Provider value={{
-      dogs,
-      loading,
-      error,
-      activeDog,
+      dogs: state.dogs,
+      loading: state.loading,
+      error: state.error,
+      activeDog: state.activeDog,
       setActiveDog,
       addDog,
       removeDog,
       updateDogInfo,
       uploadImage,
-      heatRecords,
+      heatRecords: state.heatRecords,
       loadHeatRecords,
       addHeatDate,
       removeHeatDate,
@@ -182,12 +161,4 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
       {children}
     </SupabaseDogContext.Provider>
   );
-};
-
-export const useSupabaseDogs = () => {
-  const context = useContext(SupabaseDogContext);
-  if (context === undefined) {
-    throw new Error('useSupabaseDogs must be used within a SupabaseDogProvider');
-  }
-  return context;
 };

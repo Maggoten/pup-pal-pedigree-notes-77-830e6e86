@@ -11,7 +11,7 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { Dog as DogIcon, ArrowLeft, Trash2 } from 'lucide-react';
-import { useSupabaseDogs } from '@/context/SupabaseDogContext';
+import { useSupabaseDogs } from '@/context/dogs';
 import DogInfoDisplay from './DogInfoDisplay';
 import DogEditForm from './DogEditForm';
 import { DogFormValues } from './schema/dogFormSchema';

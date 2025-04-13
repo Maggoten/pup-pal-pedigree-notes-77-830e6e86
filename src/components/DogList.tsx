@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { useSupabaseDogs } from '@/context/SupabaseDogContext';
+import { useSupabaseDogs } from '@/context/dogs';
 import DogCard from './DogCard';
 import { Input } from '@/components/ui/input';
 import { Dog } from '@/types/dogs';

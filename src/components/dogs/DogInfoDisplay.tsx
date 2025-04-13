@@ -1,9 +1,8 @@
-
 import React, { useEffect } from 'react';
 import { format } from 'date-fns';
 import { Dog as DogIcon } from 'lucide-react';
 import { Dog } from '@/types/dogs';
-import { useSupabaseDogs } from '@/context/SupabaseDogContext';
+import { useSupabaseDogs } from '@/context/dogs';
 
 interface DogInfoDisplayProps {
   dog: Dog;
