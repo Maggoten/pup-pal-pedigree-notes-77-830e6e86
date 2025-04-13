@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import ImageUploader from '@/components/ImageUploader';
@@ -19,8 +20,11 @@ const DogImageField: React.FC<DogImageFieldProps> = ({ form, handleImageChange }
           <FormLabel>Dog Photo</FormLabel>
           <FormControl>
             <ImageUploader 
-              currentImage={field.value} 
-              onImageChange={handleImageChange}
+              currentImage={field.value || ''} 
+              onImageChange={(imageBase64) => {
+                field.onChange(imageBase64);
+                handleImageChange(imageBase64);
+              }}
             />
           </FormControl>
           <FormMessage />
