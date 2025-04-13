@@ -326,7 +326,7 @@ export const migrateLocalRemindersToSupabase = async (
     }
     
     // Migrate completed and deleted statuses
-    const statusPromises: Promise<any>[] = [];
+    const statusPromises: Promise<void>[] = [];
     
     completedReminders.forEach(reminderId => {
       const insertPromise = supabase
@@ -343,7 +343,7 @@ export const migrateLocalRemindersToSupabase = async (
           if (error && error.code !== '23505') { // Ignore duplicate key violations
             console.error(`Error migrating status for ${reminderId}:`, error);
           }
-        })
+        }) as Promise<void>
       );
     });
     
@@ -364,7 +364,7 @@ export const migrateLocalRemindersToSupabase = async (
             if (error && error.code !== '23505') { // Ignore duplicate key violations
               console.error(`Error migrating deleted status for ${reminderId}:`, error);
             }
-          })
+          }) as Promise<void>
         );
       }
     });
