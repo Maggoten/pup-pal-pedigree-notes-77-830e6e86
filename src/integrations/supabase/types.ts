@@ -17,6 +17,7 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          sharing_enabled: boolean | null
           subscription_end_date: string | null
           subscription_status: string
           subscription_tier: string | null
@@ -29,6 +30,7 @@ export type Database = {
           first_name?: string | null
           id: string
           last_name?: string | null
+          sharing_enabled?: boolean | null
           subscription_end_date?: string | null
           subscription_status?: string
           subscription_tier?: string | null
@@ -41,10 +43,38 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          sharing_enabled?: boolean | null
           subscription_end_date?: string | null
           subscription_status?: string
           subscription_tier?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      shared_users: {
+        Row: {
+          created_at: string
+          id: string
+          owner_id: string
+          role: string
+          shared_email: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          owner_id: string
+          role: string
+          shared_email: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          owner_id?: string
+          role?: string
+          shared_email?: string
+          status?: string
         }
         Relationships: []
       }
@@ -53,7 +83,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_profile: {
+        Args: {
+          p_first_name: string
+          p_last_name: string
+          p_kennel_name: string
+          p_address: string
+          p_website: string
+          p_phone: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
