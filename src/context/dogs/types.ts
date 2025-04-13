@@ -15,5 +15,5 @@ export interface SupabaseDogContextType {
   loadHeatRecords: (dogId: string) => Promise<void>;
   addHeatDate: (dogId: string, date: Date) => Promise<boolean>;
   removeHeatDate: (id: string) => Promise<boolean>;
-  refreshDogs: () => Promise<void>;
+  refreshDogs: () => Promise<boolean>;
 }
