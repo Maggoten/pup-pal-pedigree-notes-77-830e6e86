@@ -33,7 +33,7 @@ interface DogDetailsProps {
 }
 
 const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
-  const { setActiveDog, updateDogInfo, loadHeatRecords, removeDog } = useSupabaseDogs();
+  const { setActiveDog, updateDogInfo, loadHeatRecords, removeDog, refreshDogs } = useSupabaseDogs();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -54,7 +54,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
     
     try {
       // Format values for database
-      const formattedValues = {
+      const formattedValues: Partial<Dog> = {
         name: values.name,
         breed: values.breed,
         dateOfBirth: format(values.dateOfBirth, 'yyyy-MM-dd'),
@@ -75,6 +75,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       
       if (updatedDog) {
         console.log("Successfully updated dog:", updatedDog);
+        await refreshDogs(); // Refresh all dogs to ensure we have the latest data
         setIsEditing(false);
         toast({
           title: "Success",

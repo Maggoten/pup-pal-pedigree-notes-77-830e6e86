@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { 
   fetchDogs, 
   createDog, 
@@ -76,6 +76,10 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
     }
   };
 
+  const refreshDogs = useCallback(async () => {
+    await loadDogs();
+  }, []);
+
   const loadHeatRecords = async (dogId: string) => {
     try {
       const records = await fetchHeatRecords(dogId);
@@ -145,10 +149,6 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   const uploadImage = async (file: File, dogId: string) => {
     return await uploadDogImage(file, dogId);
-  };
-
-  const refreshDogs = async () => {
-    await loadDogs();
   };
 
   return (

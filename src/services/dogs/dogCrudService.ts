@@ -169,7 +169,7 @@ export const updateDog = async (id: string, dog: Partial<Dog>): Promise<Dog | nu
       console.log("Uploaded image URL:", imageUrl);
     }
     
-    // Format dates for database - ensure we're mapping the fields correctly
+    // Format the data for database update
     const dbDog = {
       name: dog.name,
       breed: dog.breed,

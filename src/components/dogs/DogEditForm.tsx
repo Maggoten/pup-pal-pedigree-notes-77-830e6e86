@@ -52,7 +52,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSavi
     defaultValues,
   });
   
-  const handleSubmit = async (values: DogFormValues) => {
+  const onSubmit = (values: DogFormValues) => {
     console.log("Form submitted with values:", values);
     try {
       // Handle image changes
@@ -82,7 +82,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSavi
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr]">
           <DogImageField 
             form={form} 
