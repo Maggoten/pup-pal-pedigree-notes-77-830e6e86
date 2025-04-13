@@ -15,6 +15,9 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
+  
+  // Add state to track if payment is required (default to false)
+  const [requirePayment, setRequirePayment] = useState(false);
 
   const handleLogin = async (values: LoginFormValues) => {
     setIsLoading(true);
@@ -46,13 +49,15 @@ const Login: React.FC = () => {
   };
 
   const handleRegistration = async (values: RegistrationFormValues) => {
-    // For now, bypass payment and register directly
-    // You can uncomment the payment flow later when you integrate Stripe
-    // setRegistrationData(values);
-    // setShowPayment(true);
-    
-    // Register directly
-    await handleDirectRegistration(values);
+    // Check if payment is required
+    if (requirePayment) {
+      // Store registration data and show payment form
+      setRegistrationData(values);
+      setShowPayment(true);
+    } else {
+      // Register directly without payment
+      await handleDirectRegistration(values);
+    }
   };
 
   const handleDirectRegistration = async (values: RegistrationFormValues) => {
@@ -100,17 +105,34 @@ const Login: React.FC = () => {
     }
   };
 
+  // Toggle for enabling/disabling payment requirement (for testing/development)
+  const togglePaymentRequirement = () => {
+    setRequirePayment(!requirePayment);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-greige-50 p-4">
       <div className="text-center mb-8">
         {/* Removed the Breeding Journey text */}
       </div>
       {!showPayment ? (
-        <AuthTabs 
-          onLogin={handleLogin}
-          onRegister={handleRegistration}
-          isLoading={isLoading}
-        />
+        <div className="flex flex-col gap-4">
+          <AuthTabs 
+            onLogin={handleLogin}
+            onRegister={handleRegistration}
+            isLoading={isLoading}
+          />
+          
+          {/* Development toggle for payment requirement */}
+          <div className="mt-4 text-xs text-center">
+            <button 
+              onClick={togglePaymentRequirement}
+              className="text-greige-500 hover:text-greige-700 underline"
+            >
+              {requirePayment ? "Disable" : "Enable"} Payment Step (Development Only)
+            </button>
+          </div>
+        </div>
       ) : (
         <PaymentForm
           onSubmit={handlePayment}

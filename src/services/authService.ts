@@ -62,6 +62,7 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
     }
 
     if (data.user) {
+      // Return user with default free subscription status
       return {
         email: userData.email,
         firstName: userData.firstName,
@@ -111,6 +112,6 @@ export const getCurrentUser = async (): Promise<User | null> => {
     address: profileData?.address || '',
     subscriptionStatus: profileData?.subscription_status || 'free',
     subscriptionTier: profileData?.subscription_tier || 'free',
-    subscriptionEndDate: profileData?.subscription_end_date ? new Date(profileData.subscription_end_date) : undefined
+    subscriptionEndDate: profileData?.subscription_end_date ? new Date(profileData?.subscription_end_date) : undefined
   };
 };

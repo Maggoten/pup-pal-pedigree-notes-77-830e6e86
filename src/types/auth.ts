@@ -4,8 +4,8 @@ export interface User {
   firstName?: string;
   lastName?: string;
   address?: string;
-  subscriptionStatus?: string;
-  subscriptionTier?: string;
+  subscriptionStatus: string;
+  subscriptionTier: string;
   subscriptionEndDate?: Date;
 }
 
