@@ -57,10 +57,10 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         gender: values.gender,
         color: values.color,
         registrationNumber: values.registrationNumber,
-        dewormingDate: values.dewormingDate ? format(values.dewormingDate, 'yyyy-MM-dd') : undefined,
-        vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : undefined,
+        dewormingDate: values.dewormingDate ? format(values.dewormingDate, 'yyyy-MM-dd') : null,
+        vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : null,
         notes: values.notes,
-        image_url: values.image, // Pass the image URL (or base64) to be handled in the service
+        image_url: values.image, // Pass the image URL to be handled in the service
         heatInterval: values.heatInterval,
       };
       
@@ -72,6 +72,12 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         toast({
           title: "Success",
           description: `${values.name}'s information has been updated.`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to save changes. Please try again.",
+          variant: "destructive",
         });
       }
     } catch (error) {

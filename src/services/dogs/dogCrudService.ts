@@ -164,7 +164,9 @@ export const updateDog = async (id: string, dog: Partial<Dog>): Promise<Dog | nu
     // Check if we need to process a base64 image
     let imageUrl = dog.image_url;
     if (imageUrl && imageUrl.startsWith('data:image')) {
+      console.log("Processing base64 image");
       imageUrl = await uploadDogImageFromBase64(imageUrl, id);
+      console.log("Uploaded image URL:", imageUrl);
     }
     
     // Format dates for database

@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { format } from 'date-fns';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
@@ -12,7 +11,6 @@ import DogImageField from './DogImageField';
 import HeatRecordsField from './HeatRecordsField';
 import { Dog } from '@/types/dogs';
 import { useSupabaseDogs } from '@/context/SupabaseDogContext';
-import { uploadDogImageFromBase64 } from '@/services/dogs';
 
 interface DogEditFormProps {
   dog: Dog;
@@ -27,7 +25,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
 
   // Transform date strings to Date objects for form
   const transformHeatHistory = heatRecords 
-    ? heatRecords.map(heat => ({ date: new Date(heat.date) }))
+    ? heatRecords.map(heat => ({ date: new Date(heat.date), id: heat.id }))
     : [];
 
   const form = useForm<DogFormValues>({
@@ -51,14 +49,13 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
   const handleSubmit = async (values: DogFormValues) => {
     setIsSubmitting(true);
     try {
-      // Handle image upload if it was changed
+      // Handle image changes
       if (imageChanged && values.image && values.image !== dog.image_url) {
-        const imageUrl = await uploadDogImageFromBase64(values.image, dog.id);
-        
-        // Replace the base64 string with the URL for the backend
-        if (imageUrl) {
-          values.image = imageUrl;
-        }
+        // The base64 image will be processed in onSave/updateDog
+        console.log("Image has been changed, passing to parent handler");
+      } else if (!imageChanged) {
+        // Ensure we're using the existing image URL if it wasn't changed
+        values.image = dog.image_url || '';
       }
       
       onSave(values);
@@ -77,6 +74,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
   const handleImageChange = (imageBase64: string) => {
     form.setValue('image', imageBase64);
     setImageChanged(true);
+    console.log("Image changed in DogEditForm:", imageChanged);
   };
 
   return (
