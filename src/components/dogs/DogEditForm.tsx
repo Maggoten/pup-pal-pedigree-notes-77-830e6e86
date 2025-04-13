@@ -63,6 +63,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSavi
         values.image = dog.image_url || '';
       }
       
+      // Call the onSave function passed from the parent
       onSave(values);
     } catch (error) {
       console.error('Error in form submission:', error);

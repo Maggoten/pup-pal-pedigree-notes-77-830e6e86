@@ -77,8 +77,19 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
   };
 
   const refreshDogs = useCallback(async () => {
+    console.log("Refreshing dogs list...");
     await loadDogs();
-  }, []);
+    
+    // If there's an active dog, we need to refresh its data too
+    if (activeDog) {
+      const updatedDogList = await fetchDogs();
+      const refreshedDog = updatedDogList.find(d => d.id === activeDog.id);
+      if (refreshedDog) {
+        console.log("Updating active dog with fresh data:", refreshedDog);
+        setActiveDog(refreshedDog);
+      }
+    }
+  }, [activeDog]);
 
   const loadHeatRecords = async (dogId: string) => {
     try {

@@ -30,6 +30,8 @@ export const fetchDogs = async (): Promise<Dog[]> => {
       return [];
     }
 
+    console.log("Raw database dog data:", data);
+
     // Map database fields to our client-side model with proper type casting
     return (data || []).map(dog => ({
       id: dog.id,
@@ -48,40 +50,6 @@ export const fetchDogs = async (): Promise<Dog[]> => {
   } catch (error) {
     console.error('Unexpected error fetching dogs:', error);
     return [];
-  }
-};
-
-// Fetch a specific dog by ID
-export const fetchDogById = async (id: string): Promise<Dog | null> => {
-  try {
-    const { data, error } = await supabase
-      .from('dogs')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      console.error('Error fetching dog:', error);
-      return null;
-    }
-
-    return {
-      id: data.id,
-      name: data.name,
-      breed: data.breed,
-      gender: data.gender as 'male' | 'female', // Cast gender to the expected type
-      dateOfBirth: data.date_of_birth,
-      color: data.color,
-      registrationNumber: data.registration_number,
-      notes: data.notes,
-      dewormingDate: data.deworming_date,
-      vaccinationDate: data.vaccination_date,
-      heatInterval: data.heat_interval,
-      image_url: data.image_url
-    };
-  } catch (error) {
-    console.error('Unexpected error fetching dog:', error);
-    return null;
   }
 };
 
@@ -115,6 +83,8 @@ export const createDog = async (dog: Omit<Dog, "id">): Promise<Dog | null> => {
       image_url: dog.image_url
     };
     
+    console.log("Creating dog with data:", dbDog);
+    
     const { data, error } = await supabase
       .from('dogs')
       .insert(dbDog)
@@ -135,6 +105,8 @@ export const createDog = async (dog: Omit<Dog, "id">): Promise<Dog | null> => {
       title: "Success",
       description: `${data.name} has been added to your dogs.`,
     });
+
+    console.log("Dog created successfully:", data);
 
     return {
       id: data.id,
@@ -222,6 +194,40 @@ export const updateDog = async (id: string, dog: Partial<Dog>): Promise<Dog | nu
     };
   } catch (error) {
     console.error('Unexpected error updating dog:', error);
+    return null;
+  }
+};
+
+// Fetch a specific dog by ID
+export const fetchDogById = async (id: string): Promise<Dog | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('dogs')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching dog:', error);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      name: data.name,
+      breed: data.breed,
+      gender: data.gender as 'male' | 'female', // Cast gender to the expected type
+      dateOfBirth: data.date_of_birth,
+      color: data.color,
+      registrationNumber: data.registration_number,
+      notes: data.notes,
+      dewormingDate: data.deworming_date,
+      vaccinationDate: data.vaccination_date,
+      heatInterval: data.heat_interval,
+      image_url: data.image_url
+    };
+  } catch (error) {
+    console.error('Unexpected error fetching dog:', error);
     return null;
   }
 };
