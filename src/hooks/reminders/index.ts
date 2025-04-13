@@ -1,10 +1,10 @@
 
 import { useRemindersData } from './useRemindersData';
 import { useReminderActions } from './useReminderActions';
-import { CustomReminderInput } from './types';
+import type { CustomReminderInput } from './types';
 import type { Reminder } from '@/types/reminders';
 
-export { CustomReminderInput };
+export type { CustomReminderInput };
 export type { Reminder };
 
 export const useBreedingReminders = () => {
