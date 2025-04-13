@@ -6,7 +6,6 @@ import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
 import { getSampleEvents } from '@/data/sampleCalendarEvents';
 import { 
   loadEvents, 
-  saveEvents, 
   addEvent, 
   editEvent, 
   deleteEvent,
