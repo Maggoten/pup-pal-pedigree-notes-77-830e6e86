@@ -39,14 +39,14 @@ export const getUserSettings = async (user: User | null): Promise<UserSettings |
         kennelName: user.firstName ? `${user.firstName}'s Kennel` : "My Kennel",
         address: profileData?.address || user.address
       },
-      subscriptionTier: profileData?.subscription_tier || 'free',
+      subscriptionTier: (profileData?.subscription_tier as "free" | "premium" | "professional") || 'free',
       subscriptionEndsAt: profileData?.subscription_end_date ? new Date(profileData.subscription_end_date) : undefined,
       sharedUsers: sharedUsersData ? sharedUsersData.map(u => ({
         id: u.id,
         email: u.shared_email,
-        role: u.role,
+        role: u.role as "admin" | "editor" | "viewer",
         joinedAt: new Date(u.created_at),
-        status: u.status
+        status: u.status as "pending" | "active"
       })) : []
     };
   } catch (error) {
@@ -145,7 +145,7 @@ export const addSharedUser = async (
       .insert({
         owner_id: await getCurrentUserId(),
         shared_email: email,
-        role
+        role: role
       })
       .select()
       .single();
@@ -159,9 +159,9 @@ export const addSharedUser = async (
     return {
       id: data.id,
       email: data.shared_email,
-      role: data.role,
+      role: data.role as 'admin' | 'editor' | 'viewer',
       joinedAt: new Date(data.created_at),
-      status: data.status
+      status: data.status as 'pending' | 'active'
     };
   } catch (error) {
     console.error("Error in addSharedUser:", error);
