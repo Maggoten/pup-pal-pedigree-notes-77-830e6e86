@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ import { Dog as DogIcon, ArrowLeft, Trash2 } from 'lucide-react';
 import { useSupabaseDogs } from '@/context/SupabaseDogContext';
 import DogInfoDisplay from './DogInfoDisplay';
 import DogEditForm from './DogEditForm';
-import { DogFormValues } from './DogFormFields';
+import { DogFormValues } from './schema/dogFormSchema';
 import { Dog } from '@/types/dogs';
 import {
   AlertDialog,
@@ -41,7 +40,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
     if (dog && dog.gender === 'female') {
       loadHeatRecords(dog.id);
     }
-  }, [dog, loadHeatRecords]);
+  }, [dog, loadHeatRecords, dog.gender, dog.id]);
 
   const handleBack = () => {
     setActiveDog(null);

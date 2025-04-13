@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import ImageUploader from '@/components/ImageUploader';
 import { UseFormReturn } from 'react-hook-form';
-import { DogFormValues } from './DogFormFields';
+import { DogFormValues } from './schema/dogFormSchema';
 
 interface DogImageFieldProps {
   form: UseFormReturn<DogFormValues>;

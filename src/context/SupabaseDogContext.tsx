@@ -9,7 +9,7 @@ import {
   addHeatRecord,
   deleteHeatRecord,
   uploadDogImage
-} from '@/services/dogService';
+} from '@/services/dogs';
 import { Dog, HeatRecord } from '@/types/dogs';
 import { supabase } from '@/integrations/supabase/client';
 
