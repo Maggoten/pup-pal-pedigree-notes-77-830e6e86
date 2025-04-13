@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BellRing, PawPrint } from 'lucide-react';
+import { BellRing, PawPrint, Loader2 } from 'lucide-react';
 import RemindersList from './reminders/RemindersList';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import RemindersDialog from './reminders/RemindersDialog';
 
 const BreedingReminders: React.FC = () => {
-  const { reminders, handleMarkComplete } = useBreedingReminders();
+  const { reminders, handleMarkComplete, loadingReminders } = useBreedingReminders();
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
   
   // Take only the top 3 high priority reminders for compact view
@@ -40,20 +40,28 @@ const BreedingReminders: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-          <RemindersList 
-            reminders={highPriorityReminders.length > 0 ? highPriorityReminders : reminders.slice(0, 3)} 
-            onComplete={handleMarkComplete} 
-            compact={true} 
-          />
-          
-          <div className="p-3 text-center">
-            <button 
-              onClick={() => setRemindersDialogOpen(true)}
-              className="text-xs text-primary hover:text-primary/70 font-medium"
-            >
-              View All Reminders
-            </button>
-          </div>
+          {loadingReminders ? (
+            <div className="flex items-center justify-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary/50" />
+            </div>
+          ) : (
+            <>
+              <RemindersList 
+                reminders={highPriorityReminders.length > 0 ? highPriorityReminders : reminders.slice(0, 3)} 
+                onComplete={handleMarkComplete} 
+                compact={true} 
+              />
+              
+              <div className="p-3 text-center">
+                <button 
+                  onClick={() => setRemindersDialogOpen(true)}
+                  className="text-xs text-primary hover:text-primary/70 font-medium"
+                >
+                  View All Reminders
+                </button>
+              </div>
+            </>
+          )}
         </CardContent>
         
         {/* Paw print indicator at the bottom */}
