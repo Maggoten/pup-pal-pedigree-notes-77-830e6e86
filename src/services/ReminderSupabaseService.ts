@@ -1,5 +1,7 @@
 
 // This file now re-exports from the reminders directory to maintain backward compatibility
+import type { ReminderData, ReminderStatusData } from './reminders/types';
+
 export type {
   // Types
   ReminderData,
