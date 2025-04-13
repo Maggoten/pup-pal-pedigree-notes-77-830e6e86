@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { CalendarIcon, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,9 +10,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { UseFormReturn } from 'react-hook-form';
 import { cn } from '@/lib/utils';
+import { useSupabaseDogs } from '@/context/SupabaseDogContext';
 
 interface HeatDate {
   date: Date;
+  id?: string;
 }
 
 interface HeatRecordsFieldProps {
@@ -21,6 +23,8 @@ interface HeatRecordsFieldProps {
 }
 
 const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) => {
+  const { activeDog, addHeatDate, removeHeatDate } = useSupabaseDogs();
+  
   // Skip rendering for male dogs
   if (form.getValues('gender') === 'male') {
     return null;
@@ -30,23 +34,36 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
   const heatHistory = form.watch('heatHistory') || [];
   
   // Add a new heat date record
-  const addHeatDate = () => {
+  const addNewHeatDate = () => {
     const newHeatHistory = [...heatHistory, { date: new Date() }];
     form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
+    
+    // If we have an active dog, also add to the database
+    if (activeDog) {
+      addHeatDate(activeDog.id, new Date());
+    }
   };
   
   // Remove a heat date record
-  const removeHeatDate = (index: number) => {
+  const removeHeatDateRecord = (index: number, heatRecord: HeatDate) => {
     const newHeatHistory = [...heatHistory];
     newHeatHistory.splice(index, 1);
     form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
+    
+    // If we have an active dog and the heat record has an ID, remove from the database
+    if (activeDog && heatRecord.id) {
+      removeHeatDate(heatRecord.id);
+    }
   };
   
   // Update a heat date
   const updateHeatDate = (index: number, date: Date) => {
     const newHeatHistory = [...heatHistory];
-    newHeatHistory[index] = { date };
+    newHeatHistory[index] = { ...newHeatHistory[index], date };
     form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
+    
+    // Note: Currently we don't update heat dates in the database, only add/remove
+    // To update, you would need to remove the old one and add a new one
   };
   
   return (
@@ -88,7 +105,7 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
                     type="button"
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeHeatDate(index)}
+                    onClick={() => removeHeatDateRecord(index, heat)}
                     disabled={disabled}
                   >
                     <X className="h-4 w-4" />
@@ -104,7 +121,7 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
             type="button"
             variant="outline"
             size="sm"
-            onClick={addHeatDate}
+            onClick={addNewHeatDate}
             className="mt-2"
             disabled={disabled}
           >

@@ -1,15 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from '@/components/ui/use-toast';
-import { Dog } from '@/context/DogsContext';
 import DogFormFields, { dogFormSchema, DogFormValues } from './DogFormFields';
 import DogImageField from './DogImageField';
 import HeatRecordsField from './HeatRecordsField';
+import { Dog } from '@/types/dogs';
+import { useSupabaseDogs } from '@/context/SupabaseDogContext';
 
 interface DogEditFormProps {
   dog: Dog;
@@ -18,9 +19,12 @@ interface DogEditFormProps {
 }
 
 const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
+  const { heatRecords, updateDogInfo } = useSupabaseDogs();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Transform date strings to Date objects for form
-  const transformHeatHistory = dog.heatHistory 
-    ? dog.heatHistory.map(heat => ({ date: new Date(heat.date) }))
+  const transformHeatHistory = heatRecords 
+    ? heatRecords.map(heat => ({ date: new Date(heat.date) }))
     : [];
 
   const form = useForm<DogFormValues>({
@@ -35,19 +39,26 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
       dewormingDate: dog.dewormingDate ? new Date(dog.dewormingDate) : undefined,
       vaccinationDate: dog.vaccinationDate ? new Date(dog.vaccinationDate) : undefined,
       notes: dog.notes || '',
-      image: dog.image || '',
+      image: dog.image_url || '',
       heatHistory: transformHeatHistory,
       heatInterval: dog.heatInterval,
     },
   });
   
-  const handleSubmit = (values: DogFormValues) => {
-    onSave(values);
-    
-    toast({
-      title: "Dog updated",
-      description: `${values.name}'s information has been updated.`,
-    });
+  const handleSubmit = async (values: DogFormValues) => {
+    setIsSubmitting(true);
+    try {
+      onSave(values);
+    } catch (error) {
+      console.error('Error updating dog:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update dog information. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleImageChange = (imageBase64: string) => {
@@ -79,10 +90,13 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
             type="button" 
             variant="outline" 
             onClick={onCancel}
+            disabled={isSubmitting}
           >
             Cancel
           </Button>
-          <Button type="submit">Save Changes</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : 'Save Changes'}
+          </Button>
         </div>
       </form>
     </Form>

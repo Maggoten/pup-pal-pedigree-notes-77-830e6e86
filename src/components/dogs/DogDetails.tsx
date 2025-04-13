@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { 
@@ -10,20 +10,39 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Dog as DogIcon, ArrowLeft } from 'lucide-react';
-import { Dog, useDogs } from '@/context/DogsContext';
+import { Dog as DogIcon, ArrowLeft, Trash2 } from 'lucide-react';
+import { useSupabaseDogs } from '@/context/SupabaseDogContext';
 import DogInfoDisplay from './DogInfoDisplay';
 import DogEditForm from './DogEditForm';
 import { DogFormValues } from './DogFormFields';
+import { Dog } from '@/types/dogs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface DogDetailsProps {
   dog: Dog;
 }
 
 const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
-  const { setActiveDog, updateDog } = useDogs();
+  const { setActiveDog, updateDogInfo, loadHeatRecords, removeDog } = useSupabaseDogs();
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
+  // Load heat records when component mounts
+  useEffect(() => {
+    if (dog && dog.gender === 'female') {
+      loadHeatRecords(dog.id);
+    }
+  }, [dog, loadHeatRecords]);
+
   const handleBack = () => {
     setActiveDog(null);
   };
@@ -34,13 +53,17 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       dateOfBirth: format(values.dateOfBirth, 'yyyy-MM-dd'),
       dewormingDate: values.dewormingDate ? format(values.dewormingDate, 'yyyy-MM-dd') : undefined,
       vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : undefined,
-      heatHistory: values.heatHistory ? values.heatHistory.map(heat => ({
-        date: format(heat.date, 'yyyy-MM-dd')
-      })) : undefined,
     };
     
-    updateDog(dog.id, formattedValues);
+    updateDogInfo(dog.id, formattedValues);
     setIsEditing(false);
+  };
+
+  const handleDelete = async () => {
+    const success = await removeDog(dog.id, dog.name);
+    if (success) {
+      setActiveDog(null);
+    }
   };
 
   return (
@@ -73,12 +96,40 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
           )}
         </CardContent>
         
-        <CardFooter className="flex justify-end">
+        <CardFooter className="flex justify-between">
           {!isEditing && (
-            <Button onClick={() => setIsEditing(true)}>Edit</Button>
+            <>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsDeleteDialogOpen(true)}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+              <Button onClick={() => setIsEditing(true)}>Edit</Button>
+            </>
           )}
         </CardFooter>
       </Card>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete {dog.name} from your dogs list.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

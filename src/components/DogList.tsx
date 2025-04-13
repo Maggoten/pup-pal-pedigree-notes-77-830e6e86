@@ -1,15 +1,16 @@
 
 import React, { useState, useMemo } from 'react';
-import { useDogs, Dog } from '@/context/DogsContext';
+import { useSupabaseDogs } from '@/context/SupabaseDogContext';
 import DogCard from './DogCard';
 import { Input } from '@/components/ui/input';
+import { Dog } from '@/types/dogs';
 
 interface DogListProps {
   dogsList?: Dog[];
 }
 
 const DogList: React.FC<DogListProps> = ({ dogsList }) => {
-  const { dogs: allDogs, setActiveDog } = useDogs();
+  const { dogs: allDogs, setActiveDog } = useSupabaseDogs();
   const [search, setSearch] = useState('');
 
   // Use the provided dogsList or fall back to all dogs from context
@@ -18,7 +19,7 @@ const DogList: React.FC<DogListProps> = ({ dogsList }) => {
   // Memoize filtered dogs to prevent unnecessary recalculations
   const filteredDogs = useMemo(() => {
     return dogs.filter(dog => {
-      // Search filter only (removed gender filter)
+      // Search filter only
       return dog.name.toLowerCase().includes(search.toLowerCase()) || 
              dog.breed.toLowerCase().includes(search.toLowerCase());
     });
@@ -27,7 +28,6 @@ const DogList: React.FC<DogListProps> = ({ dogsList }) => {
   const handleDogClick = (dog: Dog) => {
     setActiveDog(dog);
     console.log('Clicked on dog:', dog.name);
-    // In a real app, we would navigate to the dog's profile page
   };
 
   return (

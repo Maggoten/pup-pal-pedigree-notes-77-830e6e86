@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { v4 as uuidv4 } from 'uuid';
+import { format } from 'date-fns';
 import { 
   Dialog,
   DialogContent,
@@ -18,7 +18,9 @@ import { Form } from '@/components/ui/form';
 import DogFormFields, { dogFormSchema } from './DogFormFields';
 import HeatRecordsField from './HeatRecordsField';
 import { toast } from '@/components/ui/use-toast';
-import { Dog } from '@/context/DogsContext';
+import { Dog } from '@/types/dogs';
+import { useSupabaseDogs } from '@/context/SupabaseDogContext';
+import DogImageField from './DogImageField';
 
 interface AddDogDialogProps {
   open: boolean;
@@ -31,6 +33,9 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
   onOpenChange,
   onAddDog 
 }) => {
+  const { addDog, uploadImage } = useSupabaseDogs();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm<z.infer<typeof dogFormSchema>>({
     resolver: zodResolver(dogFormSchema),
     defaultValues: {
@@ -42,36 +47,70 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
       registrationNumber: '',
       notes: '',
       heatHistory: [],
-      heatInterval: undefined
+      heatInterval: undefined,
+      image: ''
     }
   });
 
-  const handleSubmit = (data: z.infer<typeof dogFormSchema>) => {
-    // Convert dates to ISO strings for storage
-    const newDog: Dog = {
-      id: uuidv4(),
-      name: data.name,
-      breed: data.breed,
-      gender: data.gender,
-      dateOfBirth: data.dateOfBirth.toISOString(),
-      color: data.color,
-      registrationNumber: data.registrationNumber,
-      notes: data.notes || '',
-      image: '/placeholder.svg', // Default image
-      heatHistory: data.heatHistory?.map(heat => ({ 
-        date: heat.date.toISOString() 
-      })) || [],
-      heatInterval: data.heatInterval
-    };
+  const handleImageChange = (imageBase64: string) => {
+    form.setValue('image', imageBase64);
+  };
 
-    onAddDog(newDog);
-    onOpenChange(false);
-    form.reset();
-    
-    toast({
-      title: "Dog Added",
-      description: `${data.name} has been added to your dogs.`
-    });
+  const handleSubmit = async (data: z.infer<typeof dogFormSchema>) => {
+    setIsSubmitting(true);
+    try {
+      // Prepare the dog data
+      const newDog: Omit<Dog, "id"> = {
+        name: data.name,
+        breed: data.breed,
+        gender: data.gender,
+        dateOfBirth: format(data.dateOfBirth, 'yyyy-MM-dd'),
+        color: data.color,
+        registrationNumber: data.registrationNumber || undefined,
+        notes: data.notes || undefined,
+        dewormingDate: data.dewormingDate ? format(data.dewormingDate, 'yyyy-MM-dd') : undefined,
+        vaccinationDate: data.vaccinationDate ? format(data.vaccinationDate, 'yyyy-MM-dd') : undefined,
+        heatInterval: data.heatInterval,
+        // We'll update the image after the dog is created
+      };
+
+      // Add the dog to the database
+      const createdDog = await addDog(newDog);
+      
+      if (createdDog) {
+        // Handle image upload if there's a base64 image
+        if (data.image && data.image.startsWith('data:image')) {
+          // Convert base64 to File object
+          const base64Response = await fetch(data.image);
+          const blob = await base64Response.blob();
+          const file = new File([blob], `${createdDog.name}-image.jpg`, { type: 'image/jpeg' });
+          
+          // Upload image
+          const imageUrl = await uploadImage(file, createdDog.id);
+          
+          if (imageUrl) {
+            // Update dog with image URL
+            await addDog({
+              ...newDog,
+              image_url: imageUrl
+            });
+          }
+        }
+        
+        onAddDog(createdDog);
+        onOpenChange(false);
+        form.reset();
+      }
+    } catch (error) {
+      console.error('Error adding dog:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add dog. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -86,20 +125,30 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <DogFormFields form={form} />
-            
-            {form.watch('gender') === 'female' && (
-              <div className="pt-4 border-t">
-                <h3 className="text-lg font-medium mb-4">Heat Cycle Information</h3>
-                <HeatRecordsField form={form} />
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr]">
+              <DogImageField
+                form={form}
+                handleImageChange={handleImageChange}
+              />
+              <div className="space-y-6">
+                <DogFormFields form={form} />
+                
+                {form.watch('gender') === 'female' && (
+                  <div className="pt-4 border-t">
+                    <h3 className="text-lg font-medium mb-4">Heat Cycle Information</h3>
+                    <HeatRecordsField form={form} />
+                  </div>
+                )}
               </div>
-            )}
+            </div>
             
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="button" variant="outline">Cancel</Button>
+                <Button type="button" variant="outline" disabled={isSubmitting}>Cancel</Button>
               </DialogClose>
-              <Button type="submit">Add Dog</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Adding Dog...' : 'Add Dog'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

@@ -4,15 +4,63 @@ import PageLayout from '@/components/PageLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useDogs, DogsProvider } from '@/context/DogsContext';
 import DogList from '@/components/DogList';
 import DogDetails from '@/components/dogs/DogDetails';
 import { PlusCircle } from 'lucide-react';
 import AddDogDialog from '@/components/dogs/AddDogDialog';
+import { SupabaseDogProvider, useSupabaseDogs } from '@/context/SupabaseDogContext';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/components/ui/use-toast';
 
 const MyDogsContent: React.FC = () => {
-  const { dogs, activeDog, addDog } = useDogs();
+  const { isLoggedIn, isLoading: authLoading } = useAuth();
+  const { dogs, activeDog, addDog, loading } = useSupabaseDogs();
   const [showAddDogDialog, setShowAddDogDialog] = useState(false);
+  
+  if (authLoading) {
+    return (
+      <PageLayout 
+        title="My Dogs" 
+        description="Manage your breeding dogs"
+      >
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      </PageLayout>
+    );
+  }
+  
+  if (!isLoggedIn) {
+    return (
+      <PageLayout 
+        title="My Dogs" 
+        description="Manage your breeding dogs"
+      >
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+          <p className="text-muted-foreground">Please sign in to view your dogs</p>
+          <Button onClick={() => toast({
+            title: "Authentication Required",
+            description: "Please implement authentication to access this feature",
+          })}>
+            Sign In
+          </Button>
+        </div>
+      </PageLayout>
+    );
+  }
+  
+  if (loading) {
+    return (
+      <PageLayout 
+        title="My Dogs" 
+        description="Manage your breeding dogs"
+      >
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      </PageLayout>
+    );
+  }
   
   const females = dogs.filter(dog => dog.gender === 'female');
   const males = dogs.filter(dog => dog.gender === 'male');
@@ -85,9 +133,9 @@ const MyDogsContent: React.FC = () => {
 
 const MyDogs: React.FC = () => {
   return (
-    <DogsProvider>
+    <SupabaseDogProvider>
       <MyDogsContent />
-    </DogsProvider>
+    </SupabaseDogProvider>
   );
 };
 
