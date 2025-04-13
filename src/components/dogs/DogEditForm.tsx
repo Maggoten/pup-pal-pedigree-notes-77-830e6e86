@@ -16,7 +16,7 @@ import { Loader2 } from 'lucide-react';
 interface DogEditFormProps {
   dog: Dog;
   onCancel: () => void;
-  onSave: (values: DogFormValues) => void;
+  onSave: (values: DogFormValues) => Promise<void>;
   isSaving?: boolean;
 }
 
@@ -52,7 +52,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSavi
     defaultValues,
   });
   
-  const onSubmit = (values: DogFormValues) => {
+  const onSubmit = async (values: DogFormValues) => {
     console.log("Form submitted with values:", values);
     try {
       // Handle image changes
@@ -64,7 +64,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSavi
       }
       
       // Call the onSave function passed from the parent
-      onSave(values);
+      await onSave(values);
     } catch (error) {
       console.error('Error in form submission:', error);
       toast({

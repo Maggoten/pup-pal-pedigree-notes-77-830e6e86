@@ -76,7 +76,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       if (updatedDog) {
         console.log("Successfully updated dog:", updatedDog);
         await refreshDogs(); // Refresh all dogs to ensure we have the latest data
-        setIsEditing(false);
+        setIsEditing(false); // Close the edit form
         toast({
           title: "Success",
           description: `${values.name}'s information has been updated.`,
