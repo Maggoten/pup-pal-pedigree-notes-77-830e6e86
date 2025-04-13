@@ -3,28 +3,74 @@ import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/components/ui/use-toast';
 import { Dog } from '@/context/DogsContext';
 import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
+import { supabase } from '@/integrations/supabase/client';
 
-// Load events from localStorage
-export const loadEvents = (): CalendarEvent[] => {
-  const savedEvents = localStorage.getItem('breedingCalendarEvents');
-  return savedEvents 
-    ? JSON.parse(savedEvents).map((event: any) => ({
-        ...event,
-        date: new Date(event.date)
-      })) 
-    : [];
-};
+// Load events from Supabase for the current user
+export const loadEvents = async (): Promise<CalendarEvent[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('calendar_events')
+      .select('*')
+      .order('created_at', { ascending: true });
 
-// Save events to localStorage
-export const saveEvents = (events: CalendarEvent[]): void => {
-  const customEvents = events.filter(event => event.type === 'custom');
-  if (customEvents.length > 0) {
-    localStorage.setItem('breedingCalendarEvents', JSON.stringify(customEvents));
+    if (error) {
+      console.error('Error fetching calendar events:', error);
+      return [];
+    }
+
+    return data.map(event => ({
+      ...event,
+      date: new Date(event.date),
+      created_at: new Date(event.created_at),
+      updated_at: new Date(event.updated_at)
+    }));
+  } catch (error) {
+    console.error('Unexpected error fetching events:', error);
+    return [];
   }
 };
 
-// Add a new event
-export const addEvent = (data: AddEventFormValues, dogs: Dog[]): CalendarEvent => {
+// Save events to Supabase for the current user
+export const saveEvents = async (events: CalendarEvent[]): Promise<void> => {
+  const customEvents = events.filter(event => event.type === 'custom');
+  
+  try {
+    // First, delete all existing custom events for the user
+    const { error: deleteError } = await supabase
+      .from('calendar_events')
+      .delete()
+      .eq('type', 'custom');
+
+    if (deleteError) {
+      console.error('Error deleting existing events:', deleteError);
+      return;
+    }
+
+    // Then insert new custom events
+    if (customEvents.length > 0) {
+      const { error: insertError } = await supabase
+        .from('calendar_events')
+        .insert(customEvents.map(event => ({
+          title: event.title,
+          date: event.date.toISOString(),
+          time: event.time,
+          type: event.type,
+          dog_id: event.dogId,
+          dog_name: event.dogName,
+          notes: event.notes
+        })));
+
+      if (insertError) {
+        console.error('Error saving events:', insertError);
+      }
+    }
+  } catch (error) {
+    console.error('Unexpected error saving events:', error);
+  }
+};
+
+// Add a new event to Supabase
+export const addEvent = async (data: AddEventFormValues, dogs: Dog[]): Promise<CalendarEvent> => {
   // Combine date and time
   const combinedDate = new Date(data.date);
   if (data.time) {
@@ -32,8 +78,7 @@ export const addEvent = (data: AddEventFormValues, dogs: Dog[]): CalendarEvent =
     combinedDate.setHours(hours, minutes);
   }
   
-  const newEvent: CalendarEvent = {
-    id: uuidv4(),
+  const newEvent: Omit<CalendarEvent, 'id' | 'created_at' | 'updated_at'> = {
     title: data.title,
     date: combinedDate,
     time: data.time,
@@ -49,22 +94,51 @@ export const addEvent = (data: AddEventFormValues, dogs: Dog[]): CalendarEvent =
     }
   }
   
-  toast({
-    title: "Event Added",
-    description: "Your event has been added to the calendar.",
-  });
-  
-  return newEvent;
+  try {
+    const { data: insertedData, error } = await supabase
+      .from('calendar_events')
+      .insert({
+        title: newEvent.title,
+        date: newEvent.date.toISOString(),
+        time: newEvent.time,
+        type: newEvent.type,
+        dog_id: newEvent.dogId,
+        dog_name: newEvent.dogName,
+        notes: newEvent.notes
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding event:', error);
+      throw error;
+    }
+
+    toast({
+      title: "Event Added",
+      description: "Your event has been added to the calendar.",
+    });
+    
+    return {
+      id: insertedData.id,
+      ...newEvent,
+      date: new Date(insertedData.date),
+      created_at: new Date(insertedData.created_at),
+      updated_at: new Date(insertedData.updated_at)
+    };
+  } catch (error) {
+    console.error('Unexpected error adding event:', error);
+    throw error;
+  }
 };
 
-// Edit an existing event
-export const editEvent = (
+// Edit an existing event in Supabase
+export const editEvent = async (
   eventId: string, 
   data: AddEventFormValues, 
   events: CalendarEvent[],
   dogs: Dog[]
-): CalendarEvent[] | null => {
-  // Only custom events can be edited
+): Promise<CalendarEvent[] | null> => {
   const eventToEdit = events.find(event => event.id === eventId);
   
   if (eventToEdit && eventToEdit.type === 'custom') {
@@ -75,60 +149,91 @@ export const editEvent = (
       combinedDate.setHours(hours, minutes);
     }
     
-    const updatedEvent: CalendarEvent = {
-      ...eventToEdit,
+    const updatedEventData = {
       title: data.title,
-      date: combinedDate,
+      date: combinedDate.toISOString(),
       time: data.time,
       notes: data.notes,
+      dog_id: data.dogId ? data.dogId : null,
+      dog_name: null
     };
-    
+
     // Update dog information if changed
-    if (data.dogId !== eventToEdit.dogId) {
-      if (data.dogId) {
-        const selectedDog = dogs.find(dog => dog.id === data.dogId);
-        if (selectedDog) {
-          updatedEvent.dogId = data.dogId;
-          updatedEvent.dogName = selectedDog.name;
-        } else {
-          updatedEvent.dogId = undefined;
-          updatedEvent.dogName = undefined;
-        }
-      } else {
-        updatedEvent.dogId = undefined;
-        updatedEvent.dogName = undefined;
+    if (data.dogId) {
+      const selectedDog = dogs.find(dog => dog.id === data.dogId);
+      if (selectedDog) {
+        updatedEventData.dog_name = selectedDog.name;
       }
     }
     
-    const updatedEvents = events.map(event => 
-      event.id === eventId ? updatedEvent : event
-    );
-    
-    toast({
-      title: "Event Updated",
-      description: "Your event has been updated in the calendar.",
-    });
-    
-    return updatedEvents;
+    try {
+      const { data: updatedSupabaseEvent, error } = await supabase
+        .from('calendar_events')
+        .update(updatedEventData)
+        .eq('id', eventId)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error updating event:', error);
+        return null;
+      }
+      
+      toast({
+        title: "Event Updated",
+        description: "Your event has been updated in the calendar.",
+      });
+      
+      const updatedEvents = events.map(event => 
+        event.id === eventId ? {
+          ...event,
+          title: updatedSupabaseEvent.title,
+          date: new Date(updatedSupabaseEvent.date),
+          time: updatedSupabaseEvent.time,
+          notes: updatedSupabaseEvent.notes,
+          dogId: updatedSupabaseEvent.dog_id,
+          dogName: updatedSupabaseEvent.dog_name
+        } : event
+      );
+      
+      return updatedEvents;
+    } catch (error) {
+      console.error('Unexpected error updating event:', error);
+      return null;
+    }
   }
   
   return null;
 };
 
-// Delete an event
-export const deleteEvent = (eventId: string, events: CalendarEvent[]): CalendarEvent[] | null => {
-  // Only filter out custom events (system events cannot be deleted)
+// Delete an event from Supabase
+export const deleteEvent = async (eventId: string, events: CalendarEvent[]): Promise<CalendarEvent[] | null> => {
   const eventToDelete = events.find(event => event.id === eventId);
   
   if (eventToDelete && eventToDelete.type === 'custom') {
-    const updatedEvents = events.filter(event => event.id !== eventId);
-    
-    toast({
-      title: "Event Deleted",
-      description: "Your event has been removed from the calendar.",
-    });
-    
-    return updatedEvents;
+    try {
+      const { error } = await supabase
+        .from('calendar_events')
+        .delete()
+        .eq('id', eventId);
+      
+      if (error) {
+        console.error('Error deleting event:', error);
+        return null;
+      }
+      
+      toast({
+        title: "Event Deleted",
+        description: "Your event has been removed from the calendar.",
+      });
+      
+      const updatedEvents = events.filter(event => event.id !== eventId);
+      
+      return updatedEvents;
+    } catch (error) {
+      console.error('Unexpected error deleting event:', error);
+      return null;
+    }
   }
   
   return null;

@@ -18,28 +18,32 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   
   // Load events on component mount
   useEffect(() => {
-    // Load custom events from localStorage
-    const customEvents = loadEvents();
+    const fetchEvents = async () => {
+      // Load custom events from Supabase
+      const customEvents = await loadEvents();
+      
+      // Get sample events
+      const sampleEvents = getSampleEvents();
+      
+      // Calculate heat events based on dogs data
+      const upcomingHeats = calculateUpcomingHeats(dogs);
+      const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
+        id: `heat-${heat.dogId}-${index}`,
+        title: 'Heat Cycle',
+        date: heat.date,
+        type: 'heat',
+        dogId: heat.dogId,
+        dogName: heat.dogName
+      }));
+      
+      // Combine all events
+      setCalendarEvents([...sampleEvents, ...heatEvents, ...customEvents]);
+    };
     
-    // Get sample events
-    const sampleEvents = getSampleEvents();
-    
-    // Calculate heat events based on dogs data
-    const upcomingHeats = calculateUpcomingHeats(dogs);
-    const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
-      id: `heat-${heat.dogId}-${index}`,
-      title: 'Heat Cycle',
-      date: heat.date,
-      type: 'heat',
-      dogId: heat.dogId,
-      dogName: heat.dogName
-    }));
-    
-    // Combine all events
-    setCalendarEvents([...sampleEvents, ...heatEvents, ...customEvents]);
+    fetchEvents();
   }, [dogs]);
   
-  // Save custom events to localStorage whenever they change
+  // Save custom events to Supabase whenever they change
   useEffect(() => {
     saveEvents(calendarEvents);
   }, [calendarEvents]);
@@ -52,20 +56,18 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   };
   
   // Function to add a new event
-  const handleAddEvent = (data: AddEventFormValues) => {
-    const newEvent = addEvent(data, dogs);
+  const handleAddEvent = async (data: AddEventFormValues) => {
+    const newEvent = await addEvent(data, dogs);
     setCalendarEvents(prevEvents => [...prevEvents, newEvent]);
     return true;
   };
   
   // Function to edit an event
-  const handleEditEvent = (eventId: string, data: AddEventFormValues) => {
-    const updatedEvents = editEvent(eventId, data, calendarEvents, dogs);
+  const handleEditEvent = async (eventId: string, data: AddEventFormValues) => {
+    const updatedEvents = await editEvent(eventId, data, calendarEvents, dogs);
     
     if (updatedEvents) {
       setCalendarEvents(updatedEvents);
-      // Save to localStorage
-      saveEvents(updatedEvents);
       return true;
     }
     
@@ -73,13 +75,11 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   };
   
   // Function to delete an event
-  const handleDeleteEvent = (eventId: string) => {
-    const updatedEvents = deleteEvent(eventId, calendarEvents);
+  const handleDeleteEvent = async (eventId: string) => {
+    const updatedEvents = await deleteEvent(eventId, calendarEvents);
     
     if (updatedEvents) {
       setCalendarEvents(updatedEvents);
-      // Save to localStorage
-      saveEvents(updatedEvents);
       return true;
     }
     
