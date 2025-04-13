@@ -2,7 +2,7 @@
 import { useRemindersData } from './useRemindersData';
 import { useReminderActions } from './useReminderActions';
 import { CustomReminderInput } from './types';
-import { Reminder } from '@/types/reminders';
+import type { Reminder } from '@/types/reminders';
 
 export { CustomReminderInput };
 export type { Reminder };
