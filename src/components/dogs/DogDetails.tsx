@@ -53,7 +53,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
     console.log("Saving dog with values:", values);
     
     try {
-      // Format values for database
+      // Format dates for database
       const formattedValues: Partial<Dog> = {
         name: values.name,
         breed: values.breed,
