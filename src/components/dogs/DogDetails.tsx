@@ -35,7 +35,6 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
-  // Load heat records when component mounts
   useEffect(() => {
     if (dog && dog.gender === 'female') {
       loadHeatRecords(dog.id);
