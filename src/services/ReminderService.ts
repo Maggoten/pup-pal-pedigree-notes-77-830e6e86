@@ -1,8 +1,8 @@
 
-// This file now re-exports from SystemReminderGenerator to maintain backward compatibility
+// This file now re-exports from the reminders generators to maintain backward compatibility
 export {
   generateDogReminders,
   generateLitterReminders,
   generateGeneralReminders,
   generateAllSystemReminders
-} from './SystemReminderGenerator';
+} from './reminders/generators';

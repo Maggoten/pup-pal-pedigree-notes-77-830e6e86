@@ -29,3 +29,11 @@ export {
   // Migration services
   migrateLocalRemindersToSupabase
 } from './reminders';
+
+// Export reminder generators as well
+export {
+  generateDogReminders,
+  generateLitterReminders,
+  generateGeneralReminders,
+  generateAllSystemReminders
+} from './reminders/generators';

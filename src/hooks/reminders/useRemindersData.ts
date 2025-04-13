@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Reminder } from '@/types/reminders';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,7 +12,7 @@ import {
   generateDogReminders,
   generateLitterReminders,
   generateGeneralReminders
-} from '@/services/SystemReminderGenerator';
+} from '@/services/reminders/generators';
 
 export const useRemindersData = () => {
   const { dogs } = useDogs();
