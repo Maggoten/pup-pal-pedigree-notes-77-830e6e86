@@ -6,3 +6,4 @@ export * from './reminderStatusService';
 export * from './customReminderService';
 export * from './systemReminderService';
 export * from './migrationService';
+export * from './data';
