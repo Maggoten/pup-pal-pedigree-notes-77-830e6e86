@@ -1,5 +1,5 @@
 
-import { Dog } from "@/types/dogs";
+import { Dog, HeatRecord } from "@/types/dogs";
 
 // Helper function to map database dog record to Dog type
 export const mapDbDogToDog = (dbDog: any): Dog => {
@@ -33,5 +33,15 @@ export const mapDogToDbDog = (dog: Partial<Dog>) => {
     vaccination_date: dog.vaccinationDate,
     heat_interval: dog.heatInterval,
     image_url: dog.image_url
+  };
+};
+
+// Map heat record from DB to client type
+export const mapDbHeatRecordToHeatRecord = (dbRecord: any): HeatRecord => {
+  return {
+    id: dbRecord.id,
+    dog_id: dbRecord.dog_id,
+    date: dbRecord.date,
+    created_at: dbRecord.created_at
   };
 };

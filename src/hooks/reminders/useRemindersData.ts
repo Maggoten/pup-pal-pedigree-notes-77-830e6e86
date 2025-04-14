@@ -8,7 +8,7 @@ import {
   mapToReminder
 } from '@/services/reminders';
 import { useMigration } from './useMigration';
-import { useDogs } from '@/hooks/useDogs';  // Using the updated import
+import { useDogs } from '@/hooks/useDogs';
 import { 
   generateDogReminders,
   generateLitterReminders,
@@ -16,7 +16,7 @@ import {
 } from '@/services/reminders/generators';
 
 export const useRemindersData = () => {
-  const { dogs } = useDogs();  // This now uses the Supabase-connected hook
+  const { dogs } = useDogs();
   const { isLoggedIn, user } = useAuth();
   const { migrationComplete, migrateIfNeeded } = useMigration();
   const [reminders, setReminders] = useState<Reminder[]>([]);

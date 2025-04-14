@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Dog } from '@/types/dogs';
-import { useDogs } from '@/hooks/useDogs';  // Updated import to use the Supabase hook
-import { format } from 'date-fns';
+import { useDogs } from '@/hooks/useDogs';
 import { DogFormValues } from './schema/dogFormSchema';
 import DogDetailsHeader from './components/DogDetailsHeader';
 import DogDetailsCard from './components/DogDetailsCard';
 import DeleteDogDialog from './components/DeleteDogDialog';
 import { toast } from '@/components/ui/use-toast';
+import { format } from 'date-fns';
 
 interface DogDetailsProps {
   dog: Dog;
@@ -17,11 +18,6 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, onBack }) => {
   const { updateDog, deleteDog, isUpdatingDog, isDeletingDog, refreshDogs } = useDogs();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  
-  useEffect(() => {
-    console.log("DogDetails component mounted with dog:", dog);
-    console.log("useDogs hook functions available:", { updateDog, deleteDog, refreshDogs });
-  }, [dog]);
   
   const handleSave = async (values: DogFormValues) => {
     try {
@@ -42,14 +38,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, onBack }) => {
         heatInterval: values.heatInterval,
       };
       
-      console.log("Formatted values for Supabase:", formattedValues);
-      
       await updateDog(dog.id, formattedValues);
-      toast({
-        title: "Success",
-        description: "Dog information updated successfully",
-      });
-      
       await refreshDogs();
       setIsEditing(false);
     } catch (error) {
@@ -63,8 +52,17 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, onBack }) => {
   };
 
   const handleDelete = async () => {
-    await deleteDog(dog.id, dog.name);
-    onBack();
+    try {
+      await deleteDog(dog.id, dog.name);
+      onBack();
+    } catch (error) {
+      console.error("Error deleting dog:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete dog",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

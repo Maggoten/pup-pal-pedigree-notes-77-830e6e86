@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -18,7 +19,6 @@ import { format } from 'date-fns';
 import { useDogs } from '@/hooks/useDogs';
 import { uploadDogImageFromBase64 } from '@/services/dogs';
 import { toast } from '@/components/ui/use-toast';
-import { v4 as uuidv4 } from 'uuid';
 
 interface AddDogDialogProps {
   open: boolean;
@@ -63,24 +63,22 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({ open, onOpenChange }) => {
         vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : undefined,
       };
       
-      const tempDogId = uuidv4();
-      
       let imageUrl = null;
       if (values.image) {
         try {
-          imageUrl = await uploadDogImageFromBase64(values.image, tempDogId);
-          console.log("Uploaded image URL:", imageUrl);
+          // We'll handle the image upload in the service
+          imageUrl = values.image;
         } catch (error) {
-          console.error("Error uploading image:", error);
+          console.error("Error handling image:", error);
           toast({
             title: "Image Upload Failed",
-            description: "Could not upload the image, but we'll continue saving other data.",
+            description: "Could not process the image, but we'll continue saving other data.",
             variant: "destructive",
           });
         }
       }
       
-      const newDog = await addDog({
+      await addDog({
         name: formattedValues.name,
         breed: formattedValues.breed,
         gender: formattedValues.gender,
@@ -93,8 +91,6 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({ open, onOpenChange }) => {
         heatInterval: formattedValues.heatInterval,
         image_url: imageUrl,
       });
-      
-      console.log("Dog added successfully:", newDog);
       
       onOpenChange(false);
       form.reset();

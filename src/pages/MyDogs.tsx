@@ -10,7 +10,7 @@ import { PlusCircle, Loader2 } from 'lucide-react';
 import AddDogDialog from '@/components/dogs/AddDogDialog';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
-import { useDogs } from '@/hooks/useDogs';  // Updated import to use the Supabase hook
+import { useDogs } from '@/hooks/useDogs';
 import { Dog } from '@/types/dogs';
 
 const MyDogs: React.FC = () => {
@@ -42,7 +42,7 @@ const MyDogs: React.FC = () => {
           <p className="text-muted-foreground">Please sign in to view your dogs</p>
           <Button onClick={() => toast({
             title: "Authentication Required",
-            description: "Please implement authentication to access this feature",
+            description: "Please sign in to access this feature",
           })}>
             Sign In
           </Button>

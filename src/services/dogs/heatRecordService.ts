@@ -1,8 +1,8 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { HeatRecord } from "@/types/dogs";
+import { mapDbHeatRecordToHeatRecord } from "./mappers";
 import { format } from "date-fns";
-import { toast } from "@/components/ui/use-toast";
 
 // Fetch heat records for a dog
 export const fetchHeatRecords = async (dogId: string): Promise<HeatRecord[]> => {
@@ -15,20 +15,22 @@ export const fetchHeatRecords = async (dogId: string): Promise<HeatRecord[]> => 
 
     if (error) {
       console.error('Error fetching heat records:', error);
-      return [];
+      throw new Error(`Failed to fetch heat records: ${error.message}`);
     }
 
-    return data || [];
+    return (data || []).map(mapDbHeatRecordToHeatRecord);
   } catch (error) {
     console.error('Unexpected error fetching heat records:', error);
-    return [];
+    throw error;
   }
 };
 
 // Add a heat record
 export const addHeatRecord = async (dogId: string, date: Date): Promise<boolean> => {
   try {
+    // Format date as YYYY-MM-DD for database
     const formattedDate = format(date, 'yyyy-MM-dd');
+    
     const { error } = await supabase
       .from('heat_records')
       .insert({
@@ -38,23 +40,13 @@ export const addHeatRecord = async (dogId: string, date: Date): Promise<boolean>
 
     if (error) {
       console.error('Error adding heat record:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add heat record. Please try again.",
-        variant: "destructive",
-      });
-      return false;
+      throw new Error(`Failed to add heat record: ${error.message}`);
     }
-
-    toast({
-      title: "Success",
-      description: "Heat record has been added.",
-    });
 
     return true;
   } catch (error) {
     console.error('Unexpected error adding heat record:', error);
-    return false;
+    throw error;
   }
 };
 
@@ -68,22 +60,12 @@ export const deleteHeatRecord = async (id: string): Promise<boolean> => {
 
     if (error) {
       console.error('Error deleting heat record:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete heat record. Please try again.",
-        variant: "destructive",
-      });
-      return false;
+      throw new Error(`Failed to delete heat record: ${error.message}`);
     }
-
-    toast({
-      title: "Success",
-      description: "Heat record has been removed.",
-    });
 
     return true;
   } catch (error) {
     console.error('Unexpected error deleting heat record:', error);
-    return false;
+    throw error;
   }
 };

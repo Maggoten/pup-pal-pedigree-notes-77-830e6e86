@@ -11,7 +11,7 @@ interface DogInfoDisplayProps {
 
 const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({ dog }) => {
   const { fetchDogHeatRecords } = useDogs();
-  const { data: heatRecords = [] } = fetchDogHeatRecords(dog.id);
+  const { data: heatRecords = [], isLoading } = fetchDogHeatRecords(dog.id);
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr]">
@@ -23,6 +23,11 @@ const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({ dog }) => {
               src={dog.image_url} 
               alt={dog.name} 
               className="h-full w-full object-cover"
+              onError={(e) => {
+                // If image fails to load, replace with placeholder
+                const target = e.target as HTMLImageElement;
+                target.src = '/placeholder.svg';
+              }}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -46,7 +51,7 @@ const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({ dog }) => {
           
           <div>
             <h3 className="text-sm font-medium text-muted-foreground">Date of Birth</h3>
-            <p>{format(new Date(dog.dateOfBirth), 'PPP')}</p>
+            <p>{dog.dateOfBirth ? format(new Date(dog.dateOfBirth), 'PPP') : 'Unknown'}</p>
           </div>
           
           <div>
@@ -73,7 +78,9 @@ const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({ dog }) => {
         {dog.gender === 'female' && (
           <div className="mt-4">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Heat Records</h3>
-            {heatRecords && heatRecords.length > 0 ? (
+            {isLoading ? (
+              <p className="text-muted-foreground text-sm">Loading heat records...</p>
+            ) : heatRecords && heatRecords.length > 0 ? (
               <div className="space-y-1">
                 <div className="text-sm">Previous heat dates:</div>
                 <ul className="list-disc pl-5 space-y-1">
