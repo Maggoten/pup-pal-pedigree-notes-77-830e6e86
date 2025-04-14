@@ -30,7 +30,6 @@ const DogEditForm: React.FC<DogEditFormProps> = ({
 
   // Prepare default values with proper date objects
   const defaultValues = {
-    id: dog.id,
     name: dog.name,
     breed: dog.breed,
     dateOfBirth: dog.dateOfBirth ? new Date(dog.dateOfBirth) : new Date(),
@@ -43,7 +42,9 @@ const DogEditForm: React.FC<DogEditFormProps> = ({
     image: dog.image_url || '',
     heatHistory: [],
     heatInterval: dog.heatInterval,
-  };
+    // Add id as a non-schema field for reference
+    id: dog.id,
+  } as DogFormValues & { id: string };
 
   const form = useForm<DogFormValues>({
     resolver: zodResolver(dogFormSchema),

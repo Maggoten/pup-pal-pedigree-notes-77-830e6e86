@@ -22,6 +22,8 @@ export const dogFormSchema = z.object({
     })
   ).optional(),
   heatInterval: z.number().positive().optional(),
+  // Add id as an optional field for existing dogs
+  id: z.string().optional()
 });
 
 export type DogFormValues = z.infer<typeof dogFormSchema>;

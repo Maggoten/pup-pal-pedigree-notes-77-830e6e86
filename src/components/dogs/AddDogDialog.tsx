@@ -81,9 +81,18 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({ open, onOpenChange }) => {
         }
       }
       
-      // Add the dog
+      // Add the dog - explicitly define all required fields to match Omit<Dog, "id"> type
       await addDog({
-        ...formattedValues,
+        name: formattedValues.name,
+        breed: formattedValues.breed,
+        gender: formattedValues.gender,
+        dateOfBirth: formattedValues.dateOfBirth,
+        color: formattedValues.color,
+        registrationNumber: formattedValues.registrationNumber,
+        dewormingDate: formattedValues.dewormingDate,
+        vaccinationDate: formattedValues.vaccinationDate,
+        notes: formattedValues.notes,
+        heatInterval: formattedValues.heatInterval,
         image_url: imageUrl,
       });
       

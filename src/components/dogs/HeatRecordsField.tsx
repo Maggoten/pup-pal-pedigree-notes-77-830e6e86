@@ -24,7 +24,11 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form }) => {
   const [newDate, setNewDate] = useState<Date | undefined>(undefined);
   const [isAddingRecord, setIsAddingRecord] = useState(false);
   const [isRemovingRecord, setIsRemovingRecord] = useState<string | null>(null);
-  const activeDogId = form.getValues('id');
+  
+  // Instead of trying to get a non-existent 'id' from the form values,
+  // we'll pass the active dog ID as a prop when needed or store it in state
+  // For now, we'll use a placeholder string for new dogs
+  const activeDogId = form.getValues().id as string || '';
   
   const { data: heatRecords = [], isLoading: isLoadingRecords } = 
     fetchDogHeatRecords(activeDogId || '');
