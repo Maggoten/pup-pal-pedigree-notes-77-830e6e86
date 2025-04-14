@@ -8,7 +8,7 @@ import {
   mapToReminder
 } from '@/services/reminders';
 import { useMigration } from './useMigration';
-import { useDogs } from '@/hooks/useDogs';  // Updated import to use the Supabase-connected hook
+import { useDogs } from '@/hooks/useDogs';  // Using the updated import
 import { 
   generateDogReminders,
   generateLitterReminders,
@@ -27,32 +27,37 @@ export const useRemindersData = () => {
       return [];
     }
     
-    const dogReminders = generateDogReminders(dogs);
-    const litterReminders = generateLitterReminders();
-    const generalReminders = generateGeneralReminders(dogs);
-    
-    const systemReminders = [...dogReminders, ...litterReminders, ...generalReminders];
-    
-    const statusData = await fetchReminderStatuses();
-    
-    const deletedReminderIds = new Set(
-      statusData
-        .filter(status => status.is_deleted)
-        .map(status => status.reminder_id)
-    );
-    
-    const completedRemindersMap = new Map(
-      statusData
-        .filter(status => status.is_completed && !status.is_deleted)
-        .map(status => [status.reminder_id, true])
-    );
-    
-    return systemReminders
-      .filter(reminder => !deletedReminderIds.has(reminder.id))
-      .map(reminder => ({
-        ...reminder,
-        isCompleted: completedRemindersMap.has(reminder.id)
-      }));
+    try {
+      const dogReminders = generateDogReminders(dogs);
+      const litterReminders = generateLitterReminders();
+      const generalReminders = generateGeneralReminders(dogs);
+      
+      const systemReminders = [...dogReminders, ...litterReminders, ...generalReminders];
+      
+      const statusData = await fetchReminderStatuses();
+      
+      const deletedReminderIds = new Set(
+        statusData
+          .filter(status => status.is_deleted)
+          .map(status => status.reminder_id)
+      );
+      
+      const completedRemindersMap = new Map(
+        statusData
+          .filter(status => status.is_completed && !status.is_deleted)
+          .map(status => [status.reminder_id, true])
+      );
+      
+      return systemReminders
+        .filter(reminder => !deletedReminderIds.has(reminder.id))
+        .map(reminder => ({
+          ...reminder,
+          isCompleted: completedRemindersMap.has(reminder.id)
+        }));
+    } catch (error) {
+      console.error("Error generating system reminders:", error);
+      return [];
+    }
   };
 
   const loadRemindersData = async () => {
@@ -99,6 +104,7 @@ export const useRemindersData = () => {
       setReminders(sortedReminders);
     } catch (error) {
       console.error("Error loading reminders:", error);
+      setReminders([]);
     } finally {
       setLoadingReminders(false);
     }
@@ -106,8 +112,13 @@ export const useRemindersData = () => {
 
   useEffect(() => {
     const initialize = async () => {
-      const migrated = await migrateIfNeeded();
-      await loadRemindersData();
+      try {
+        await migrateIfNeeded();
+        await loadRemindersData();
+      } catch (error) {
+        console.error("Error initializing reminders:", error);
+        setLoadingReminders(false);
+      }
     };
 
     initialize();

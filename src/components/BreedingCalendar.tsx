@@ -1,21 +1,11 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { useDogs } from '@/context/DogsContext';
+import { useDogs } from '@/hooks/useDogs';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import CalendarContent from './calendar/CalendarContent';
-import { DogsProvider } from '@/context/DogsContext';
 
 const BreedingCalendar: React.FC = () => {
-  return (
-    <DogsProvider>
-      <BreedingCalendarContent />
-    </DogsProvider>
-  );
-};
-
-// Separate component to avoid context provider nesting issues
-const BreedingCalendarContent: React.FC = () => {
   const { dogs } = useDogs();
   const { 
     getEventsForDate, 

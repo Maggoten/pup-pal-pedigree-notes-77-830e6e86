@@ -5,27 +5,9 @@ import { BellRing, PawPrint, Loader2 } from 'lucide-react';
 import RemindersList from './reminders/RemindersList';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import RemindersDialog from './reminders/RemindersDialog';
-import { DogsProvider } from '@/context/DogsContext';
 
 const BreedingReminders: React.FC = () => {
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
-
-  // Wrap the component content with DogsProvider to ensure useDogs has context
-  return (
-    <DogsProvider>
-      <BreedingRemindersContent 
-        remindersDialogOpen={remindersDialogOpen} 
-        setRemindersDialogOpen={setRemindersDialogOpen} 
-      />
-    </DogsProvider>
-  );
-};
-
-// Separated component to avoid context provider nesting issues
-const BreedingRemindersContent: React.FC<{
-  remindersDialogOpen: boolean;
-  setRemindersDialogOpen: (open: boolean) => void;
-}> = ({ remindersDialogOpen, setRemindersDialogOpen }) => {
   const { reminders, handleMarkComplete, loadingReminders } = useBreedingReminders();
   
   // Take only the top 3 high priority reminders for compact view
