@@ -6,43 +6,43 @@ import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
 import { getSampleEvents } from '@/data/sampleCalendarEvents';
 import { 
   loadEvents, 
+  saveEvents, 
   addEvent, 
   editEvent, 
   deleteEvent,
   getEventColor 
 } from '@/services/CalendarEventService';
-import { useAuth } from '@/hooks/useAuth';
 
 export const useCalendarEvents = (dogs: Dog[]) => {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
-  const { user } = useAuth();
   
   // Load events on component mount
   useEffect(() => {
-    const fetchEvents = async () => {
-      // Load custom events from Supabase
-      const customEvents = await loadEvents();
-      
-      // Get sample events
-      const sampleEvents = getSampleEvents();
-      
-      // Calculate heat events based on dogs data
-      const upcomingHeats = calculateUpcomingHeats(dogs);
-      const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
-        id: `heat-${heat.dogId}-${index}`,
-        title: 'Heat Cycle',
-        date: heat.date,
-        type: 'heat',
-        dogId: heat.dogId,
-        dogName: heat.dogName
-      }));
-      
-      // Combine all events
-      setCalendarEvents([...sampleEvents, ...heatEvents, ...customEvents]);
-    };
+    // Load custom events from localStorage
+    const customEvents = loadEvents();
     
-    fetchEvents();
-  }, [dogs, user]);
+    // Get sample events
+    const sampleEvents = getSampleEvents();
+    
+    // Calculate heat events based on dogs data
+    const upcomingHeats = calculateUpcomingHeats(dogs);
+    const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
+      id: `heat-${heat.dogId}-${index}`,
+      title: 'Heat Cycle',
+      date: heat.date,
+      type: 'heat',
+      dogId: heat.dogId,
+      dogName: heat.dogName
+    }));
+    
+    // Combine all events
+    setCalendarEvents([...sampleEvents, ...heatEvents, ...customEvents]);
+  }, [dogs]);
+  
+  // Save custom events to localStorage whenever they change
+  useEffect(() => {
+    saveEvents(calendarEvents);
+  }, [calendarEvents]);
   
   // Function to get events for a specific date
   const getEventsForDate = (date: Date) => {
@@ -52,64 +52,38 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   };
   
   // Function to add a new event
-  const handleAddEvent = async (data: AddEventFormValues): Promise<boolean> => {
-    if (!user) {
-      console.error("User not authenticated");
-      return false;
-    }
-    
-    try {
-      const newEvent = await addEvent(data, dogs);
-      setCalendarEvents(prevEvents => [...prevEvents, newEvent]);
-      return true;
-    } catch (error) {
-      console.error("Error adding event:", error);
-      return false;
-    }
+  const handleAddEvent = (data: AddEventFormValues) => {
+    const newEvent = addEvent(data, dogs);
+    setCalendarEvents(prevEvents => [...prevEvents, newEvent]);
+    return true;
   };
   
   // Function to edit an event
-  const handleEditEvent = async (eventId: string, data: AddEventFormValues): Promise<boolean> => {
-    if (!user) {
-      console.error("User not authenticated");
-      return false;
+  const handleEditEvent = (eventId: string, data: AddEventFormValues) => {
+    const updatedEvents = editEvent(eventId, data, calendarEvents, dogs);
+    
+    if (updatedEvents) {
+      setCalendarEvents(updatedEvents);
+      // Save to localStorage
+      saveEvents(updatedEvents);
+      return true;
     }
     
-    try {
-      const updatedEvents = await editEvent(eventId, data, calendarEvents, dogs);
-      
-      if (updatedEvents) {
-        setCalendarEvents(updatedEvents);
-        return true;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error("Error editing event:", error);
-      return false;
-    }
+    return false;
   };
   
   // Function to delete an event
-  const handleDeleteEvent = async (eventId: string): Promise<boolean> => {
-    if (!user) {
-      console.error("User not authenticated");
-      return false;
+  const handleDeleteEvent = (eventId: string) => {
+    const updatedEvents = deleteEvent(eventId, calendarEvents);
+    
+    if (updatedEvents) {
+      setCalendarEvents(updatedEvents);
+      // Save to localStorage
+      saveEvents(updatedEvents);
+      return true;
     }
     
-    try {
-      const updatedEvents = await deleteEvent(eventId, calendarEvents);
-      
-      if (updatedEvents) {
-        setCalendarEvents(updatedEvents);
-        return true;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error("Error deleting event:", error);
-      return false;
-    }
+    return false;
   };
   
   return {

@@ -4,68 +4,22 @@ import PageLayout from '@/components/PageLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useDogs, DogsProvider } from '@/context/DogsContext';
 import DogList from '@/components/DogList';
 import DogDetails from '@/components/dogs/DogDetails';
-import { PlusCircle, Loader2 } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import AddDogDialog from '@/components/dogs/AddDogDialog';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/components/ui/use-toast';
-import { useDogs } from '@/hooks/useDogs';
-import { Dog } from '@/types/dogs';
 
-const MyDogs: React.FC = () => {
-  const { isLoggedIn, isLoading: authLoading } = useAuth();
-  const { dogs, isLoading } = useDogs();
-  const [activeDog, setActiveDog] = useState<Dog | null>(null);
+const MyDogsContent: React.FC = () => {
+  const { dogs, activeDog, addDog } = useDogs();
   const [showAddDogDialog, setShowAddDogDialog] = useState(false);
-  
-  if (authLoading) {
-    return (
-      <PageLayout 
-        title="My Dogs" 
-        description="Manage your breeding dogs"
-      >
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      </PageLayout>
-    );
-  }
-  
-  if (!isLoggedIn) {
-    return (
-      <PageLayout 
-        title="My Dogs" 
-        description="Manage your breeding dogs"
-      >
-        <div className="flex flex-col items-center justify-center h-64 space-y-4">
-          <p className="text-muted-foreground">Please sign in to view your dogs</p>
-          <Button onClick={() => toast({
-            title: "Authentication Required",
-            description: "Please sign in to access this feature",
-          })}>
-            Sign In
-          </Button>
-        </div>
-      </PageLayout>
-    );
-  }
-  
-  if (isLoading) {
-    return (
-      <PageLayout 
-        title="My Dogs" 
-        description="Manage your breeding dogs"
-      >
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        </div>
-      </PageLayout>
-    );
-  }
   
   const females = dogs.filter(dog => dog.gender === 'female');
   const males = dogs.filter(dog => dog.gender === 'male');
+
+  const handleAddDog = (dog: any) => {
+    addDog(dog);
+  };
 
   return (
     <PageLayout 
@@ -73,10 +27,7 @@ const MyDogs: React.FC = () => {
       description="Manage your breeding dogs"
     >
       {activeDog ? (
-        <DogDetails 
-          dog={activeDog} 
-          onBack={() => setActiveDog(null)} 
-        />
+        <DogDetails dog={activeDog} />
       ) : (
         <>
           <div className="flex justify-end items-center mb-4">
@@ -101,10 +52,7 @@ const MyDogs: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <DogList 
-                    dogsList={females} 
-                    onDogClick={setActiveDog} 
-                  />
+                  <DogList dogsList={females} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -118,10 +66,7 @@ const MyDogs: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <DogList 
-                    dogsList={males} 
-                    onDogClick={setActiveDog} 
-                  />
+                  <DogList dogsList={males} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -132,8 +77,17 @@ const MyDogs: React.FC = () => {
       <AddDogDialog 
         open={showAddDogDialog} 
         onOpenChange={setShowAddDogDialog} 
+        onAddDog={handleAddDog} 
       />
     </PageLayout>
+  );
+};
+
+const MyDogs: React.FC = () => {
+  return (
+    <DogsProvider>
+      <MyDogsContent />
+    </DogsProvider>
   );
 };
 

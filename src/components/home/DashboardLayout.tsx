@@ -4,6 +4,7 @@ import BreedingCalendar from '@/components/BreedingCalendar';
 import BreedingReminders from '@/components/BreedingReminders';
 import DashboardHero from './DashboardHero';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
+import { DogsProvider } from '@/context/DogsContext';
 import PageLayout from '@/components/PageLayout';
 import AddDogButton from '@/components/AddDogButton';
 import BreedingStats from '@/components/BreedingStats';
@@ -22,6 +23,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   onAddDogClick 
 }) => {
   const username = user?.email?.split('@')[0] || 'Breeder';
+  const { reminders, handleMarkComplete } = useBreedingReminders();
   
   // Sample data for planned litters and recent litters
   // In a real implementation, this would come from actual data services
@@ -39,47 +41,54 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     };
   }, []);
   
-  // We're not using the reminders directly in this component anymore
-  // The BreedingReminders component will get them directly
+  const remindersSummary = useMemo(() => {
+    const highPriorityCount = reminders.filter(r => r.priority === 'high').length;
+    return {
+      count: reminders.length,
+      highPriority: highPriorityCount
+    };
+  }, [reminders]);
   
   return (
-    <PageLayout 
-      title="" 
-      description=""
-    >
-      <div className="space-y-4">
-        <DashboardHero 
-          username={username}
-          reminders={{ count: 0, highPriority: 0 }} // This will be handled by the reminders component
-          plannedLitters={plannedLittersData}
-          activePregnancies={activePregnancies}
-          recentLitters={recentLittersData}
-        />
-        
-        {/* Main dashboard content - Updated layout */}
-        <div className="space-y-6">
-          {/* Top row: Calendar (2/3) and Reminders (1/3) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Calendar taking 2/3 of the width */}
-            <div className="lg:col-span-2">
-              <BreedingCalendar />
+    <DogsProvider>
+      <PageLayout 
+        title="" 
+        description=""
+      >
+        <div className="space-y-4">
+          <DashboardHero 
+            username={username}
+            reminders={remindersSummary}
+            plannedLitters={plannedLittersData}
+            activePregnancies={activePregnancies}
+            recentLitters={recentLittersData}
+          />
+          
+          {/* Main dashboard content - Updated layout */}
+          <div className="space-y-6">
+            {/* Top row: Calendar (2/3) and Reminders (1/3) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Calendar taking 2/3 of the width */}
+              <div className="lg:col-span-2">
+                <BreedingCalendar />
+              </div>
+              
+              {/* Reminders taking 1/3 of the width */}
+              <div className="lg:col-span-1">
+                <BreedingReminders />
+              </div>
             </div>
             
-            {/* Reminders taking 1/3 of the width */}
-            <div className="lg:col-span-1">
-              <BreedingReminders />
+            {/* Bottom row: Annual Breeding Stats (full width) */}
+            <div>
+              <BreedingStats />
             </div>
           </div>
-          
-          {/* Bottom row: Annual Breeding Stats (full width) */}
-          <div>
-            <BreedingStats />
-          </div>
         </div>
-      </div>
+      </PageLayout>
         
       <AddDogButton onClick={onAddDogClick} />
-    </PageLayout>
+    </DogsProvider>
   );
 };
 
