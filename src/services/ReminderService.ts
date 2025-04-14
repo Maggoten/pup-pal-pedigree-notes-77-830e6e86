@@ -1,4 +1,3 @@
-
 import { Dog } from '@/context/DogsContext';
 import { Reminder } from '@/types/reminders';
 import { differenceInDays, parseISO, addDays, isSameMonth, isSameDay } from 'date-fns';
@@ -12,7 +11,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
   // Check each dog for upcoming events
   dogs.forEach((dog) => {
     // If female, add heat cycle reminders (assuming a 6-month cycle)
-    if (dog.gender === 'female' && dog.breedingHistory?.matings) {
+    if (dog.gender === 'female' && dog.breedingHistory?.matings && dog.breedingHistory.matings.length > 0) {
       // Find the last heat date (using the last mating date as an approximation)
       const lastMating = dog.breedingHistory.matings.sort((a, b) => 
         new Date(b.date).getTime() - new Date(a.date).getTime()

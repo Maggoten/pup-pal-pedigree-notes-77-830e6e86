@@ -14,6 +14,7 @@ export interface AddEventFormValues {
   title: string;
   date: Date;
   time?: string;
+  type?: string; // Added type property
   dogId?: string;
   notes?: string;
 }

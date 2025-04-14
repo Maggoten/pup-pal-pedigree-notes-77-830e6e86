@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, ReactNode, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,11 +7,17 @@ export interface HeatRecord {
   date: string;
 }
 
-// Add breeding history type
+// Update breeding history type to include matings
 export interface BreedingHistory {
   litters?: {
     date: string;
     puppies: number;
+  }[];
+  matings?: {
+    date: string;
+    partner_id?: string;
+    partner_name?: string;
+    successful: boolean;
   }[];
 }
 
@@ -31,7 +36,7 @@ export interface Dog {
   heatHistory?: HeatRecord[];
   heatInterval?: number;
   user_id: string;
-  breedingHistory?: BreedingHistory; // Add breedingHistory property
+  breedingHistory?: BreedingHistory;
 }
 
 interface DogsContextType {
@@ -282,7 +287,7 @@ export function DogsProvider({ children }: { children: ReactNode }) {
           id: data.id,
           name: data.name,
           breed: data.breed,
-          gender: data.gender,
+          gender: data.gender as 'male' | 'female',
           color: data.color,
           dateOfBirth: data.date_of_birth,
           registrationNumber: data.registration_number,

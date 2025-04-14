@@ -3,10 +3,12 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-// Define valid table names
-type TableName = 'dogs' | 'heat_records' | 'calendar_events' | 'litters' | 'planned_litters' | 
-                'puppies' | 'puppy_weight_records' | 'puppy_height_records' | 'puppy_notes' | 
-                'mating_dates' | 'profiles';
+// Define valid table names with literal types
+type TableName = 'dogs' | 'heat_records' | 'calendar_events' | 'litters' | 
+                'planned_litters' | 'puppies' | 'puppy_weight_records' | 
+                'puppy_height_records' | 'puppy_notes' | 'mating_dates' | 
+                'profiles' | 'reminders' | 'reminder_status' | 'shared_users' | 
+                'vaccinations' | 'matings' | 'medical_issues';
 
 interface UseSupabaseDataProps<T> {
   tableName: TableName;

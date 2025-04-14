@@ -18,12 +18,24 @@ const BreedingCalendar: React.FC = () => {
   
   // Wrapper functions to match expected return types
   const handleAddEvent = (data: AddEventFormValues): boolean => {
-    addEvent(data);
+    // Set default type as 'custom' if not provided
+    const eventData = {
+      ...data,
+      type: data.type || 'custom'
+    };
+    
+    addEvent(eventData);
     return true; // Return boolean as expected by CalendarContent
   };
   
   const handleEditEvent = (eventId: string, data: AddEventFormValues): boolean => {
-    editEvent(eventId, data);
+    // Preserve the type if not provided in update
+    const eventData = {
+      ...data,
+      type: data.type || 'custom'
+    };
+    
+    editEvent(eventId, eventData);
     return true; // Return boolean as expected by CalendarContent
   };
   
