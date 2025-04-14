@@ -1,160 +1,167 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
-export type Dog = {
+// Define proper types for a dog
+export interface Dog {
   id: string;
   name: string;
   breed: string;
   gender: 'male' | 'female';
   dateOfBirth: string;
   color: string;
-  registrationNumber?: string;
   image?: string;
-  sire?: string;
-  dam?: string;
-  notes?: string;
-  dewormingDate?: string;
   vaccinationDate?: string;
-  heatHistory?: { date: string }[];
-  heatInterval?: number;
-  health?: {
-    vaccinations: { name: string; date: string }[];
-    medicalIssues: { issue: string; date: string; notes: string }[];
-  };
+  dewormingDate?: string;
+  registration_number?: string;
+  notes?: string;
   breedingHistory?: {
-    matings: { partner: string; date: string; successful: boolean }[];
-    litters: { date: string; puppies: number; notes: string }[];
+    matings?: {
+      id: string;
+      date: string;
+      partnerId?: string;
+      partnerName?: string;
+      successful: boolean;
+    }[];
+    litters?: {
+      id: string;
+      date: string;
+      puppies: number;
+    }[];
   };
-};
-
-interface DogsContextType {
-  dogs: Dog[];
-  addDog: (dog: Dog) => void;
-  removeDog: (id: string) => void;
-  updateDog: (id: string, data: Partial<Dog>) => void;
-  activeDog: Dog | null;
-  setActiveDog: (dog: Dog | null) => void;
 }
 
-const DogsContext = createContext<DogsContextType | undefined>(undefined);
-
-// Sample data
-const initialDogs: Dog[] = [
+// Sample data - this would come from an API in a real app
+const sampleDogs: Dog[] = [
   {
     id: '1',
     name: 'Max',
     breed: 'Golden Retriever',
     gender: 'male',
-    dateOfBirth: '2020-05-15',
+    dateOfBirth: '2020-03-15',
     color: 'Golden',
-    registrationNumber: 'AKC123456',
-    image: '/placeholder.svg',
-    notes: 'Champion bloodline, excellent temperament',
-    dewormingDate: '2023-03-20',
-    vaccinationDate: '2023-01-15',
-    health: {
-      vaccinations: [
-        { name: 'Rabies', date: '2023-01-15' },
-        { name: 'DHPP', date: '2023-01-15' }
-      ],
-      medicalIssues: []
-    },
+    image: '/lovable-uploads/0c5301cf-baab-4805-bd48-3354b6664483.png',
+    vaccinationDate: '2024-02-10',
+    dewormingDate: '2024-03-01',
+    registration_number: 'AKC123456',
+    notes: 'Friendly and well-trained',
     breedingHistory: {
       matings: [
-        { partner: 'Bella', date: '2023-02-10', successful: true }
-      ],
-      litters: [
-        { date: '2023-04-15', puppies: 6, notes: 'All healthy' }
+        {
+          id: 'm1',
+          date: '2023-06-15',
+          partnerName: 'Bella',
+          successful: true
+        }
       ]
     }
   },
   {
     id: '2',
-    name: 'Bella',
-    breed: 'Golden Retriever',
+    name: 'Luna',
+    breed: 'German Shepherd',
     gender: 'female',
-    dateOfBirth: '2021-03-20',
-    color: 'Light Golden',
-    registrationNumber: 'AKC789012',
-    image: '/placeholder.svg',
-    notes: 'Excellent mother, calm disposition',
-    dewormingDate: '2023-03-25',
-    vaccinationDate: '2023-01-20',
-    heatHistory: [
-      { date: '2023-04-10' },
-      { date: '2023-10-15' }
-    ],
-    heatInterval: 180,
-    health: {
-      vaccinations: [
-        { name: 'Rabies', date: '2023-01-20' },
-        { name: 'DHPP', date: '2023-01-20' }
-      ],
-      medicalIssues: []
-    },
+    dateOfBirth: '2021-05-20',
+    color: 'Black and Tan',
+    image: '/lovable-uploads/15be06f0-e9ee-449e-911e-078b98f91a34.png',
+    vaccinationDate: '2024-01-15',
+    dewormingDate: '2024-02-20',
+    registration_number: 'AKC789012',
+    notes: 'Excellent temperament',
     breedingHistory: {
       matings: [
-        { partner: 'Max', date: '2023-02-10', successful: true }
+        {
+          id: 'm2',
+          date: '2023-07-10',
+          partnerName: 'Rex',
+          successful: true
+        }
       ],
       litters: [
-        { date: '2023-04-15', puppies: 6, notes: 'All healthy' }
+        {
+          id: 'l1',
+          date: '2023-09-05',
+          puppies: 6
+        }
       ]
     }
   },
   {
     id: '3',
-    name: 'Rocky',
-    breed: 'German Shepherd',
+    name: 'Buddy',
+    breed: 'Labrador Retriever',
     gender: 'male',
-    dateOfBirth: '2019-11-10',
-    color: 'Black and Tan',
-    registrationNumber: 'AKC345678',
-    image: '/placeholder.svg',
-    notes: 'Working line, excellent structure',
-    dewormingDate: '2023-04-01',
-    vaccinationDate: '2023-02-01',
-    health: {
-      vaccinations: [
-        { name: 'Rabies', date: '2023-02-01' },
-        { name: 'DHPP', date: '2023-02-01' }
-      ],
-      medicalIssues: []
-    }
+    dateOfBirth: '2019-12-10',
+    color: 'Chocolate',
+    vaccinationDate: '2024-03-01',
+    dewormingDate: '2024-03-15',
+    registration_number: 'AKC345678',
+    notes: 'Loves water activities'
   }
 ];
 
-export const DogsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [dogs, setDogs] = useState<Dog[]>(initialDogs);
-  const [activeDog, setActiveDog] = useState<Dog | null>(null);
+// Context type
+interface DogsContextType {
+  dogs: Dog[];
+  activeDog: Dog | null;
+  setActiveDog: (dog: Dog | null) => void;
+  addDog: (dog: Dog) => void;
+  updateDog: (updatedDog: Dog) => void;
+  deleteDog: (dogId: string) => void;
+}
 
+// Create the context
+const DogsContext = createContext<DogsContextType | undefined>(undefined);
+
+// Provider component
+export const DogsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [dogs, setDogs] = useState<Dog[]>(sampleDogs);
+  const [activeDog, setActiveDog] = useState<Dog | null>(null);
+  
+  // Add a dog
   const addDog = (dog: Dog) => {
     setDogs([...dogs, dog]);
   };
-
-  const removeDog = (id: string) => {
-    setDogs(dogs.filter(dog => dog.id !== id));
+  
+  // Update a dog
+  const updateDog = (updatedDog: Dog) => {
+    setDogs(dogs.map(dog => dog.id === updatedDog.id ? updatedDog : dog));
   };
-
-  const updateDog = (id: string, data: Partial<Dog>) => {
-    setDogs(dogs.map(dog => dog.id === id ? { ...dog, ...data } : dog));
-    
-    // If we're updating the active dog, update it too
-    if (activeDog && activeDog.id === id) {
-      setActiveDog({ ...activeDog, ...data });
-    }
+  
+  // Delete a dog
+  const deleteDog = (dogId: string) => {
+    setDogs(dogs.filter(dog => dog.id !== dogId));
   };
-
+  
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    dogs,
+    activeDog,
+    setActiveDog,
+    addDog,
+    updateDog,
+    deleteDog
+  }), [dogs, activeDog]);
+  
   return (
-    <DogsContext.Provider value={{ dogs, addDog, removeDog, updateDog, activeDog, setActiveDog }}>
+    <DogsContext.Provider value={contextValue}>
       {children}
     </DogsContext.Provider>
   );
 };
 
+// Hook to use the context
 export const useDogs = () => {
   const context = useContext(DogsContext);
   if (context === undefined) {
-    throw new Error('useDogs must be used within a DogsProvider');
+    console.warn('useDogs must be used within a DogsProvider - returning default values');
+    return {
+      dogs: [],
+      activeDog: null,
+      setActiveDog: () => {},
+      addDog: () => {},
+      updateDog: () => {},
+      deleteDog: () => {}
+    };
   }
   return context;
 };

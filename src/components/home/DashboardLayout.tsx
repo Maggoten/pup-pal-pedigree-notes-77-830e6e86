@@ -42,9 +42,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   }, []);
   
   const remindersSummary = useMemo(() => {
-    const highPriorityCount = reminders.filter(r => r.priority === 'high').length;
+    const highPriorityCount = reminders?.filter(r => r.priority === 'high')?.length || 0;
     return {
-      count: reminders.length,
+      count: reminders?.length || 0,
       highPriority: highPriorityCount
     };
   }, [reminders]);
