@@ -3,8 +3,13 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
+// Define valid table names
+type TableName = 'dogs' | 'heat_records' | 'calendar_events' | 'litters' | 'planned_litters' | 
+                'puppies' | 'puppy_weight_records' | 'puppy_height_records' | 'puppy_notes' | 
+                'mating_dates' | 'profiles';
+
 interface UseSupabaseDataProps<T> {
-  tableName: string;
+  tableName: TableName;
   initialData?: T[];
 }
 
@@ -58,7 +63,7 @@ export function useSupabaseData<T>({ tableName, initialData = [] }: UseSupabaseD
       
       const { data: createdData, error } = await supabase
         .from(tableName)
-        .insert(dataWithUserId)
+        .insert(dataWithUserId as any)
         .select()
         .single();
 
@@ -82,7 +87,7 @@ export function useSupabaseData<T>({ tableName, initialData = [] }: UseSupabaseD
       
       const { data: updatedData, error } = await supabase
         .from(tableName)
-        .update(updates)
+        .update(updates as any)
         .eq('id', id)
         .select()
         .single();

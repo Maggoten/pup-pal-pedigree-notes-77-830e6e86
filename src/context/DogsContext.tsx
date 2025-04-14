@@ -8,6 +8,14 @@ export interface HeatRecord {
   date: string;
 }
 
+// Add breeding history type
+export interface BreedingHistory {
+  litters?: {
+    date: string;
+    puppies: number;
+  }[];
+}
+
 export interface Dog {
   id: string;
   name: string;
@@ -23,6 +31,7 @@ export interface Dog {
   heatHistory?: HeatRecord[];
   heatInterval?: number;
   user_id: string;
+  breedingHistory?: BreedingHistory; // Add breedingHistory property
 }
 
 interface DogsContextType {
@@ -68,7 +77,10 @@ export function DogsProvider({ children }: { children: ReactNode }) {
         // For each dog, fetch its heat records
         const dogsWithHeat = await Promise.all(
           dogsData.map(async (dog) => {
-            if (dog.gender === 'female') {
+            // Ensure gender is properly typed
+            const typedGender = dog.gender === 'male' ? 'male' : 'female';
+            
+            if (typedGender === 'female') {
               const { data: heatData, error: heatError } = await supabase
                 .from('heat_records')
                 .select('*')
@@ -83,23 +95,27 @@ export function DogsProvider({ children }: { children: ReactNode }) {
               
               return {
                 ...dog,
+                gender: typedGender,
                 dateOfBirth: dog.date_of_birth,
                 dewormingDate: dog.deworming_date,
                 vaccinationDate: dog.vaccination_date,
                 registrationNumber: dog.registration_number,
                 heatHistory,
-                image: dog.image_url
-              };
+                image: dog.image_url,
+                breedingHistory: { litters: [] } // Add empty breedingHistory
+              } as Dog;
             }
             
             return {
               ...dog,
+              gender: typedGender,
               dateOfBirth: dog.date_of_birth,
               dewormingDate: dog.deworming_date,
               vaccinationDate: dog.vaccination_date,
               registrationNumber: dog.registration_number,
-              image: dog.image_url
-            };
+              image: dog.image_url,
+              breedingHistory: { litters: [] } // Add empty breedingHistory
+            } as Dog;
           })
         );
 
@@ -150,7 +166,7 @@ export function DogsProvider({ children }: { children: ReactNode }) {
         id: data.id,
         name: data.name,
         breed: data.breed,
-        gender: data.gender,
+        gender: data.gender as 'male' | 'female',
         color: data.color,
         dateOfBirth: data.date_of_birth,
         registrationNumber: data.registration_number,
@@ -160,7 +176,8 @@ export function DogsProvider({ children }: { children: ReactNode }) {
         image: data.image_url,
         heatInterval: data.heat_interval,
         user_id: data.user_id,
-        heatHistory: []
+        heatHistory: [],
+        breedingHistory: { litters: [] }
       };
       
       // If it's a female dog with heat history, add heat records
