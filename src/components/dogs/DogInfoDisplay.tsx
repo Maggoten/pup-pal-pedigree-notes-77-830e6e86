@@ -52,7 +52,7 @@ const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({ dog }) => {
           
           <div>
             <h3 className="text-sm font-medium text-muted-foreground">Registration Number</h3>
-            <p>{dog.registrationNumber || 'N/A'}</p>
+            <p>{dog.registration_number || 'N/A'}</p>
           </div>
           
           <div>

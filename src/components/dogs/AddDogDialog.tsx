@@ -55,7 +55,7 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
       gender: data.gender,
       dateOfBirth: data.dateOfBirth.toISOString(),
       color: data.color,
-      registrationNumber: data.registrationNumber,
+      registration_number: data.registrationNumber,
       notes: data.notes || '',
       image: '/placeholder.svg', // Default image
       heatHistory: data.heatHistory?.map(heat => ({ 

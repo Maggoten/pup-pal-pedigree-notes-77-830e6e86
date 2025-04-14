@@ -28,6 +28,10 @@ export interface Dog {
       puppies: number;
     }[];
   };
+  heatHistory?: {
+    date: string;
+  }[];
+  heatInterval?: number;
 }
 
 // Sample data - this would come from an API in a real app
@@ -83,7 +87,16 @@ const sampleDogs: Dog[] = [
           puppies: 6
         }
       ]
-    }
+    },
+    heatHistory: [
+      {
+        date: '2023-05-15'
+      },
+      {
+        date: '2023-11-20'
+      }
+    ],
+    heatInterval: 180
   },
   {
     id: '3',
