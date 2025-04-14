@@ -21,3 +21,6 @@ export const getSampleEvents = (): CalendarEvent[] => {
     }
   ];
 };
+
+// Export a default value for backward compatibility
+export const sampleCalendarEvents = getSampleEvents();

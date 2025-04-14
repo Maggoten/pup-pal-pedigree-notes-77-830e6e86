@@ -3,10 +3,10 @@ import { useState, useCallback, useMemo } from 'react';
 import { CalendarEvent } from '@/components/calendar/types';
 import { Dog } from '@/context/DogsContext';
 import { v4 as uuidv4 } from 'uuid';
-import { sampleCalendarEvents } from '@/data/sampleCalendarEvents';
+import { getSampleEvents } from '@/data/sampleCalendarEvents';
 
 export const useCalendarEvents = (dogs: Dog[] = []) => {
-  const [events, setEvents] = useState<CalendarEvent[]>(sampleCalendarEvents);
+  const [events, setEvents] = useState<CalendarEvent[]>(getSampleEvents());
   
   // Get events for a specific date
   const getEventsForDate = useCallback((date: Date): CalendarEvent[] => {
@@ -23,7 +23,7 @@ export const useCalendarEvents = (dogs: Dog[] = []) => {
   }, [events]);
   
   // Add a new event
-  const addEvent = useCallback((newEvent: Omit<CalendarEvent, 'id'>) => {
+  const addEvent = useCallback((newEvent: Omit<CalendarEvent, 'id'>): CalendarEvent => {
     const eventWithId: CalendarEvent = {
       ...newEvent,
       id: uuidv4()
