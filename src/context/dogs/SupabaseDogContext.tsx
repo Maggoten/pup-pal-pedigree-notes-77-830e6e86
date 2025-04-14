@@ -1,4 +1,3 @@
-
 import React, { createContext, useReducer, ReactNode, useEffect, useCallback, useState } from 'react';
 import { Dog } from '@/types/dogs';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,10 +23,8 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [isUpdatingDog, setIsUpdatingDog] = useState(false);
   const [isDeletingDog, setIsDeletingDog] = useState(false);
   
-  // Check for authentication state changes
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      // Reload dogs when user logs in or out
       if (event === 'SIGNED_IN') {
         fetchInitialDogs();
       } else if (event === 'SIGNED_OUT') {
@@ -41,7 +38,6 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
     };
   }, []);
 
-  // Load dogs on initial mount
   useEffect(() => {
     fetchInitialDogs();
   }, []);
@@ -72,7 +68,14 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
     return result.success;
   }, [state.activeDog]);
 
-  const fetchDogHeatRecords = async (dogId: string) => {
+  const fetchDogHeatRecords = (dogId: string) => {
+    return {
+      data: state.heatRecords || [],
+      isLoading: state.loading
+    };
+  };
+
+  const loadDogHeatRecords = async (dogId: string) => {
     const result = await loadHeatRecords(dogId);
     
     if (result.success) {
@@ -137,8 +140,7 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
     const result = await addHeatDate(dogId, date);
     
     if (result.success) {
-      // Reload heat records
-      await fetchDogHeatRecords(dogId);
+      await loadDogHeatRecords(dogId);
     }
     
     return result.success;
@@ -148,8 +150,7 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
     const result = await removeHeatDate(id);
     
     if (result.success && state.activeDog) {
-      // Reload heat records
-      await fetchDogHeatRecords(state.activeDog.id);
+      await loadDogHeatRecords(state.activeDog.id);
     }
     
     return result.success;
@@ -171,17 +172,15 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
       updateDogInfo: updateDogData,
       uploadImage,
       heatRecords: state.heatRecords,
-      loadHeatRecords: fetchDogHeatRecords,
+      loadHeatRecords: loadDogHeatRecords,
       addHeatDate: addHeatDateRecord,
       removeHeatDate: removeHeatDateRecord,
       refreshDogs,
-      // Add aliases for existing functions to match component usage
       updateDog: updateDogData,
       deleteDog: removeExistingDog,
       fetchDogHeatRecords,
       addHeatRecord: addHeatDateRecord,
       deleteHeatRecord: removeHeatDateRecord,
-      // Add state variables for loading states
       isAddingDog,
       isUpdatingDog,
       isDeletingDog,
