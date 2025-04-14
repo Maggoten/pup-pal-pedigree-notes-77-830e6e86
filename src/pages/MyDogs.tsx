@@ -6,15 +6,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import DogList from '@/components/DogList';
 import DogDetails from '@/components/dogs/DogDetails';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Loader2 } from 'lucide-react';
 import AddDogDialog from '@/components/dogs/AddDogDialog';
-import { SupabaseDogProvider, useSupabaseDogs } from '@/context/dogs';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
+import { useDogs } from '@/hooks/useDogs';
+import { Dog } from '@/types/dogs';
 
-const MyDogsContent: React.FC = () => {
+const MyDogs: React.FC = () => {
   const { isLoggedIn, isLoading: authLoading } = useAuth();
-  const { dogs, activeDog, addDog, loading } = useSupabaseDogs();
+  const { dogs, isLoading } = useDogs();
+  const [activeDog, setActiveDog] = useState<Dog | null>(null);
   const [showAddDogDialog, setShowAddDogDialog] = useState(false);
   
   if (authLoading) {
@@ -49,14 +51,14 @@ const MyDogsContent: React.FC = () => {
     );
   }
   
-  if (loading) {
+  if (isLoading) {
     return (
       <PageLayout 
         title="My Dogs" 
         description="Manage your breeding dogs"
       >
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       </PageLayout>
     );
@@ -65,17 +67,16 @@ const MyDogsContent: React.FC = () => {
   const females = dogs.filter(dog => dog.gender === 'female');
   const males = dogs.filter(dog => dog.gender === 'male');
 
-  const handleAddDog = (dog: any) => {
-    addDog(dog);
-  };
-
   return (
     <PageLayout 
       title="My Dogs" 
       description="Manage your breeding dogs"
     >
       {activeDog ? (
-        <DogDetails dog={activeDog} />
+        <DogDetails 
+          dog={activeDog} 
+          onBack={() => setActiveDog(null)} 
+        />
       ) : (
         <>
           <div className="flex justify-end items-center mb-4">
@@ -100,7 +101,10 @@ const MyDogsContent: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <DogList dogsList={females} />
+                  <DogList 
+                    dogsList={females} 
+                    onDogClick={setActiveDog} 
+                  />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -114,7 +118,10 @@ const MyDogsContent: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <DogList dogsList={males} />
+                  <DogList 
+                    dogsList={males} 
+                    onDogClick={setActiveDog} 
+                  />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -125,17 +132,8 @@ const MyDogsContent: React.FC = () => {
       <AddDogDialog 
         open={showAddDogDialog} 
         onOpenChange={setShowAddDogDialog} 
-        onAddDog={handleAddDog} 
       />
     </PageLayout>
-  );
-};
-
-const MyDogs: React.FC = () => {
-  return (
-    <SupabaseDogProvider>
-      <MyDogsContent />
-    </SupabaseDogProvider>
   );
 };
 

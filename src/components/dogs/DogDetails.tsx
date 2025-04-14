@@ -1,7 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
-import { format } from 'date-fns';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -10,12 +8,14 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Dog as DogIcon, ArrowLeft, Trash2, Save, Loader2 } from 'lucide-react';
-import { useSupabaseDogs } from '@/context/dogs';
+import { Button } from '@/components/ui/button';
+import { Dog as DogIcon, ArrowLeft, Trash2, Loader2 } from 'lucide-react';
 import DogInfoDisplay from './DogInfoDisplay';
 import DogEditForm from './DogEditForm';
 import { DogFormValues } from './schema/dogFormSchema';
 import { Dog } from '@/types/dogs';
+import { useDogs } from '@/hooks/useDogs';
+import { format } from 'date-fns';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,123 +26,53 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from '@/components/ui/use-toast';
 
 interface DogDetailsProps {
   dog: Dog;
+  onBack: () => void;
 }
 
-const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
-  const { setActiveDog, updateDogInfo, loadHeatRecords, removeDog, refreshDogs } = useSupabaseDogs();
+const DogDetails: React.FC<DogDetailsProps> = ({ dog, onBack }) => {
+  const { updateDog, deleteDog, isUpdatingDog, isDeletingDog, refreshDogs } = useDogs();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   
-  useEffect(() => {
-    if (dog && dog.gender === 'female') {
-      loadHeatRecords(dog.id);
-    }
-  }, [dog, loadHeatRecords, dog.gender, dog.id]);
-
   const handleBack = () => {
     if (isEditing) {
       // Confirm before navigating away from unsaved changes
       if (window.confirm("You have unsaved changes. Are you sure you want to go back?")) {
         setIsEditing(false);
-        setActiveDog(null);
+        onBack();
       }
     } else {
-      setActiveDog(null);
+      onBack();
     }
   };
 
   const handleSave = async (values: DogFormValues) => {
-    setIsSaving(true);
-    console.log("Saving dog with values:", values);
+    // Format dates for database
+    const formattedValues = {
+      name: values.name,
+      breed: values.breed,
+      dateOfBirth: values.dateOfBirth ? format(values.dateOfBirth, 'yyyy-MM-dd') : '',
+      gender: values.gender,
+      color: values.color,
+      registrationNumber: values.registrationNumber,
+      dewormingDate: values.dewormingDate ? format(values.dewormingDate, 'yyyy-MM-dd') : null,
+      vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : null,
+      notes: values.notes,
+      image_url: values.image, // Pass the image URL to be handled in the service
+      heatInterval: values.heatInterval,
+    };
     
-    try {
-      // Format dates for database
-      const formattedValues: Partial<Dog> = {
-        name: values.name,
-        breed: values.breed,
-        dateOfBirth: values.dateOfBirth ? format(values.dateOfBirth, 'yyyy-MM-dd') : '',
-        gender: values.gender,
-        color: values.color,
-        registrationNumber: values.registrationNumber,
-        dewormingDate: values.dewormingDate ? format(values.dewormingDate, 'yyyy-MM-dd') : null,
-        vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : null,
-        notes: values.notes,
-        image_url: values.image, // Pass the image URL to be handled in the service
-        heatInterval: values.heatInterval,
-      };
-      
-      console.log("Formatted values for database:", formattedValues);
-      
-      // Update the dog
-      const updatedDog = await updateDogInfo(dog.id, formattedValues);
-      
-      if (updatedDog) {
-        console.log("Successfully updated dog:", updatedDog);
-        toast({
-          title: "Success",
-          description: `${values.name}'s information has been updated.`,
-        });
-        
-        // First refresh all dogs to ensure we have the latest data
-        await refreshDogs();
-        
-        // Then exit edit mode and return to the dog list
-        setIsEditing(false);
-        setActiveDog(null);
-      } else {
-        console.error("Failed to update dog: updateDogInfo returned null or undefined");
-        toast({
-          title: "Error",
-          description: "Failed to save changes. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Error saving dog:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save changes. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
+    await updateDog(dog.id, formattedValues);
+    await refreshDogs();
+    setIsEditing(false);
   };
 
   const handleDelete = async () => {
-    setIsDeleting(true);
-    try {
-      const success = await removeDog(dog.id, dog.name);
-      if (success) {
-        toast({
-          title: "Success",
-          description: `${dog.name} has been removed.`,
-        });
-        setActiveDog(null);
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to delete dog. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Error deleting dog:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred while deleting.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDeleting(false);
-      setIsDeleteDialogOpen(false);
-    }
+    await deleteDog(dog.id, dog.name);
+    onBack();
   };
 
   return (
@@ -169,7 +99,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
               dog={dog} 
               onCancel={() => setIsEditing(false)} 
               onSave={handleSave}
-              isSaving={isSaving}
+              isSaving={isUpdatingDog}
             />
           ) : (
             <DogInfoDisplay dog={dog} />
@@ -183,9 +113,9 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
                 variant="outline" 
                 onClick={() => setIsDeleteDialogOpen(true)}
                 className="text-destructive hover:text-destructive"
-                disabled={isDeleting}
+                disabled={isDeletingDog}
               >
-                {isDeleting ? (
+                {isDeletingDog ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Deleting...
@@ -213,13 +143,13 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeletingDog}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDelete} 
               className="bg-destructive text-destructive-foreground"
-              disabled={isDeleting}
+              disabled={isDeletingDog}
             >
-              {isDeleting ? (
+              {isDeletingDog ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Deleting...

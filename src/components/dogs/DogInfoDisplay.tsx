@@ -1,24 +1,17 @@
-import React, { useEffect } from 'react';
+
+import React from 'react';
 import { format } from 'date-fns';
 import { Dog as DogIcon } from 'lucide-react';
 import { Dog } from '@/types/dogs';
-import { useSupabaseDogs } from '@/context/dogs';
+import { useDogs } from '@/hooks/useDogs';
 
 interface DogInfoDisplayProps {
   dog: Dog;
 }
 
 const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({ dog }) => {
-  const { heatRecords, loadHeatRecords } = useSupabaseDogs();
-  
-  useEffect(() => {
-    if (dog.gender === 'female') {
-      loadHeatRecords(dog.id);
-    }
-  }, [dog.id, dog.gender, loadHeatRecords]);
-
-  console.log("Displaying dog info:", dog);
-  console.log("Heat records:", heatRecords);
+  const { fetchDogHeatRecords } = useDogs();
+  const { data: heatRecords = [] } = fetchDogHeatRecords(dog.id);
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr]">

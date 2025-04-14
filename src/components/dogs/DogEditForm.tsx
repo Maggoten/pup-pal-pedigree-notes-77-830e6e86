@@ -10,7 +10,6 @@ import { dogFormSchema, DogFormValues } from './schema/dogFormSchema';
 import DogImageField from './DogImageField';
 import HeatRecordsField from './HeatRecordsField';
 import { Dog } from '@/types/dogs';
-import { useSupabaseDogs } from '@/context/dogs';
 import { Loader2 } from 'lucide-react';
 
 interface DogEditFormProps {
@@ -20,18 +19,18 @@ interface DogEditFormProps {
   isSaving?: boolean;
 }
 
-const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSaving = false }) => {
-  const { heatRecords } = useSupabaseDogs();
+const DogEditForm: React.FC<DogEditFormProps> = ({ 
+  dog, 
+  onCancel, 
+  onSave, 
+  isSaving = false 
+}) => {
   const [imageChanged, setImageChanged] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
 
-  // Transform date strings to Date objects for form
-  const transformHeatHistory = heatRecords 
-    ? heatRecords.map(heat => ({ date: new Date(heat.date), id: heat.id }))
-    : [];
-
   // Prepare default values with proper date objects
   const defaultValues = {
+    id: dog.id,
     name: dog.name,
     breed: dog.breed,
     dateOfBirth: dog.dateOfBirth ? new Date(dog.dateOfBirth) : new Date(),
@@ -42,11 +41,9 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSavi
     vaccinationDate: dog.vaccinationDate ? new Date(dog.vaccinationDate) : undefined,
     notes: dog.notes || '',
     image: dog.image_url || '',
-    heatHistory: transformHeatHistory,
+    heatHistory: [],
     heatInterval: dog.heatInterval,
   };
-
-  console.log("Form default values:", defaultValues);
 
   const form = useForm<DogFormValues>({
     resolver: zodResolver(dogFormSchema),
@@ -111,7 +108,6 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isSavi
     
     form.setValue('image', imageBase64);
     setImageChanged(true);
-    console.log("Image changed in DogEditForm, new image length:", imageBase64.length);
   };
 
   return (

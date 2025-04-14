@@ -11,10 +11,12 @@ import {
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import DogFormFields from './DogFormFields';
 import { dogFormSchema, DogFormValues } from './schema/dogFormSchema';
 import DogImageField from './DogImageField';
 import { format } from 'date-fns';
+import { useDogs } from '@/hooks/useDogs';
 import { uploadDogImageFromBase64 } from '@/services/dogs';
 import { toast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,11 +24,11 @@ import { v4 as uuidv4 } from 'uuid';
 interface AddDogDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddDog: (dog: any) => void;
 }
 
-const AddDogDialog: React.FC<AddDogDialogProps> = ({ open, onOpenChange, onAddDog }) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const AddDogDialog: React.FC<AddDogDialogProps> = ({ open, onOpenChange }) => {
+  const [imageChanged, setImageChanged] = useState(false);
+  const { addDog, isAddingDog, refreshDogs } = useDogs();
   
   const form = useForm<DogFormValues>({
     resolver: zodResolver(dogFormSchema),
@@ -48,12 +50,11 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({ open, onOpenChange, onAddDo
 
   const handleImageChange = (imageBase64: string) => {
     form.setValue('image', imageBase64);
+    setImageChanged(true);
   };
 
   const onSubmit = async (values: DogFormValues) => {
     try {
-      setIsSubmitting(true);
-      
       // Format dates
       const formattedValues = {
         ...values,
@@ -68,19 +69,30 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({ open, onOpenChange, onAddDo
       // Handle image upload if an image was provided
       let imageUrl = null;
       if (values.image) {
-        imageUrl = await uploadDogImageFromBase64(values.image, tempDogId);
+        try {
+          imageUrl = await uploadDogImageFromBase64(values.image, tempDogId);
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          toast({
+            title: "Image Upload Failed",
+            description: "Could not upload the image, but we'll continue saving other data.",
+            variant: "destructive",
+          });
+        }
       }
       
-      // Add the image URL to the dog data
-      const dogData = {
+      // Add the dog
+      await addDog({
         ...formattedValues,
         image_url: imageUrl,
-      };
+      });
       
-      // Add the dog
-      onAddDog(dogData);
+      // Close the dialog and reset the form
       onOpenChange(false);
       form.reset();
+      
+      // Refresh the dogs list
+      refreshDogs();
       
     } catch (error) {
       console.error("Error adding dog:", error);
@@ -89,14 +101,12 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({ open, onOpenChange, onAddDo
         description: "Failed to add dog. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={(newOpen) => {
-      if (!isSubmitting) {
+      if (!isAddingDog) {
         onOpenChange(newOpen);
         if (!newOpen) {
           form.reset();
@@ -122,8 +132,13 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({ open, onOpenChange, onAddDo
               </div>
             </div>
             <div className="flex justify-end">
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Adding..." : "Add Dog"}
+              <Button type="submit" disabled={isAddingDog}>
+                {isAddingDog ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Adding...
+                  </>
+                ) : "Add Dog"}
               </Button>
             </div>
           </form>
