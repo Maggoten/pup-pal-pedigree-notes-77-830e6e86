@@ -4,6 +4,7 @@ export interface User {
   firstName?: string;
   lastName?: string;
   address?: string;
+  id: string;
 }
 
 export interface RegisterData {

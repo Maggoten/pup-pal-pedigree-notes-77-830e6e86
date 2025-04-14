@@ -1,29 +1,73 @@
 
 import { User, RegisterData } from '@/types/auth';
+import { supabase } from '@/integrations/supabase/client';
 
 // Handle login functionality
 export const loginUser = async (email: string, password: string): Promise<User | null> => {
-  // Mock login - in a real app, this would call an API
-  if (email && password) {
-    return { email };
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+    if (error) {
+      console.error("Login error:", error.message);
+      return null;
+    }
+    
+    if (!data.user) return null;
+    
+    // Get user profile from profiles table
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
+    
+    return {
+      email: data.user.email || '',
+      firstName: profileData?.first_name || '',
+      lastName: profileData?.last_name || '',
+      address: profileData?.address || '',
+      id: data.user.id
+    };
+  } catch (error) {
+    console.error("Unexpected login error:", error);
+    return null;
   }
-  return null;
 };
 
 // Handle registration functionality
 export const registerUser = async (userData: RegisterData): Promise<User | null> => {
   try {
-    // Mock registration - in a real app, this would call an API
-    const userToStore = {
+    const { data, error } = await supabase.auth.signUp({
       email: userData.email,
+      password: userData.password,
+      options: {
+        data: {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          address: userData.address
+        }
+      }
+    });
+    
+    if (error) {
+      console.error("Registration error:", error.message);
+      return null;
+    }
+    
+    if (!data.user) return null;
+    
+    return {
+      email: data.user.email || '',
       firstName: userData.firstName,
       lastName: userData.lastName,
-      address: userData.address
+      address: userData.address,
+      id: data.user.id
     };
-    
-    return userToStore;
   } catch (error) {
-    console.error("Registration error:", error);
+    console.error("Unexpected registration error:", error);
     return null;
   }
 };
@@ -49,4 +93,13 @@ export const getUserFromStorage = (): User | null => {
 // Check if user is logged in from local storage
 export const getLoggedInStateFromStorage = (): boolean => {
   return localStorage.getItem('isLoggedIn') === 'true';
+};
+
+// Log out user from Supabase
+export const logoutUserFromSupabase = async (): Promise<void> => {
+  try {
+    await supabase.auth.signOut();
+  } catch (error) {
+    console.error("Error signing out:", error);
+  }
 };
