@@ -10,7 +10,7 @@ import { PlusCircle, Loader2 } from 'lucide-react';
 import AddDogDialog from '@/components/dogs/AddDogDialog';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
-import { useDogs } from '@/hooks/useDogs';
+import { useDogs } from '@/hooks/useDogs';  // Updated import to use the Supabase hook
 import { Dog } from '@/types/dogs';
 
 const MyDogs: React.FC = () => {

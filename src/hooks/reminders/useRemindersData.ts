@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Reminder } from '@/types/reminders';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,7 +8,7 @@ import {
   mapToReminder
 } from '@/services/reminders';
 import { useMigration } from './useMigration';
-import { useDogs } from '@/context/DogsContext';
+import { useDogs } from '@/hooks/useDogs';  // Updated import to use the Supabase-connected hook
 import { 
   generateDogReminders,
   generateLitterReminders,
@@ -15,7 +16,7 @@ import {
 } from '@/services/reminders/generators';
 
 export const useRemindersData = () => {
-  const { dogs } = useDogs();
+  const { dogs } = useDogs();  // This now uses the Supabase-connected hook
   const { isLoggedIn, user } = useAuth();
   const { migrationComplete, migrateIfNeeded } = useMigration();
   const [reminders, setReminders] = useState<Reminder[]>([]);

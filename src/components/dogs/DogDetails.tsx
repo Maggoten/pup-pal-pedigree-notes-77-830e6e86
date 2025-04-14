@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Dog } from '@/types/dogs';
-import { useDogs } from '@/hooks/useDogs';
+import { useDogs } from '@/hooks/useDogs';  // Updated import to use the Supabase hook
 import { format } from 'date-fns';
 import { DogFormValues } from './schema/dogFormSchema';
 import DogDetailsHeader from './components/DogDetailsHeader';

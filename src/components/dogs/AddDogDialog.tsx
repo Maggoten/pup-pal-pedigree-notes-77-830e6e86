@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -55,7 +54,8 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({ open, onOpenChange }) => {
 
   const onSubmit = async (values: DogFormValues) => {
     try {
-      // Format dates
+      console.log("Adding new dog with values:", values);
+      
       const formattedValues = {
         ...values,
         dateOfBirth: format(values.dateOfBirth, 'yyyy-MM-dd'),
@@ -63,14 +63,13 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({ open, onOpenChange }) => {
         vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : undefined,
       };
       
-      // Generate temporary dog ID for image upload
       const tempDogId = uuidv4();
       
-      // Handle image upload if an image was provided
       let imageUrl = null;
       if (values.image) {
         try {
           imageUrl = await uploadDogImageFromBase64(values.image, tempDogId);
+          console.log("Uploaded image URL:", imageUrl);
         } catch (error) {
           console.error("Error uploading image:", error);
           toast({
@@ -81,8 +80,7 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({ open, onOpenChange }) => {
         }
       }
       
-      // Add the dog - explicitly define all required fields to match Omit<Dog, "id"> type
-      await addDog({
+      const newDog = await addDog({
         name: formattedValues.name,
         breed: formattedValues.breed,
         gender: formattedValues.gender,
@@ -96,12 +94,12 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({ open, onOpenChange }) => {
         image_url: imageUrl,
       });
       
-      // Close the dialog and reset the form
+      console.log("Dog added successfully:", newDog);
+      
       onOpenChange(false);
       form.reset();
       
-      // Refresh the dogs list
-      refreshDogs();
+      await refreshDogs();
       
     } catch (error) {
       console.error("Error adding dog:", error);
