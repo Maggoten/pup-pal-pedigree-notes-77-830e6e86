@@ -12,7 +12,10 @@ export interface SupabaseDogContextType {
   updateDogInfo: (id: string, data: Partial<Dog>) => Promise<Dog | null>;
   uploadImage: (file: File, dogId: string) => Promise<string | null>;
   heatRecords: HeatRecord[];
-  loadHeatRecords: (dogId: string) => Promise<void>;
+  loadHeatRecords: (dogId: string) => Promise<{
+    data: HeatRecord[];
+    isLoading: boolean;
+  }>;
   addHeatDate: (dogId: string, date: Date) => Promise<boolean>;
   removeHeatDate: (id: string) => Promise<boolean>;
   refreshDogs: () => Promise<boolean>;
@@ -23,7 +26,10 @@ export interface SupabaseDogContextType {
   isAddingDog: boolean;
   updateDog: (id: string, data: Partial<Dog>) => Promise<Dog | null>;
   deleteDog: (id: string, dogName: string) => Promise<boolean>;
-  fetchDogHeatRecords: (dogId: string) => any;
+  fetchDogHeatRecords: (dogId: string) => {
+    data: HeatRecord[];
+    isLoading: boolean;
+  };
   addHeatRecord: (dogId: string, date: Date) => Promise<boolean>;
   deleteHeatRecord: (id: string) => Promise<boolean>;
   isLoading: boolean;
