@@ -1,8 +1,9 @@
 
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { useDogs, Dog } from '@/context/DogsContext';
 import DogCard from './DogCard';
 import { Input } from '@/components/ui/input';
+import { useState } from 'react';
 
 interface DogListProps {
   dogsList?: Dog[];
@@ -15,14 +16,11 @@ const DogList: React.FC<DogListProps> = ({ dogsList }) => {
   // Use the provided dogsList or fall back to all dogs from context
   const dogs = dogsList || allDogs;
 
-  // Memoize filtered dogs to prevent unnecessary recalculations
-  const filteredDogs = useMemo(() => {
-    return dogs.filter(dog => {
-      // Search filter only (removed gender filter)
-      return dog.name.toLowerCase().includes(search.toLowerCase()) || 
-             dog.breed.toLowerCase().includes(search.toLowerCase());
-    });
-  }, [dogs, search]);
+  const filteredDogs = dogs.filter(dog => {
+    // Search filter only (removed gender filter)
+    return dog.name.toLowerCase().includes(search.toLowerCase()) || 
+           dog.breed.toLowerCase().includes(search.toLowerCase());
+  });
 
   const handleDogClick = (dog: Dog) => {
     setActiveDog(dog);
@@ -56,4 +54,4 @@ const DogList: React.FC<DogListProps> = ({ dogsList }) => {
   );
 };
 
-export default React.memo(DogList);
+export default DogList;

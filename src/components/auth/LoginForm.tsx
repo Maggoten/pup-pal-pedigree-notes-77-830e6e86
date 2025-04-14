@@ -12,7 +12,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
@@ -67,17 +66,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
             </FormItem>
           )}
         />
-        
-        {/* Add empty space with FormItem to match registration form height */}
-        <div className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-greige-100/50 border-greige-200 invisible">
-          <div className="h-4 w-4"></div>
-          <div className="space-y-1 leading-none">
-            <div className="text-brown-800">Placeholder</div>
-            <div className="text-brown-600">
-              This hidden element ensures the login form has the same height as the registration form.
-            </div>
-          </div>
-        </div>
         
         <Button 
           className="w-full bg-[#296b26] hover:bg-[#296b26]/90 text-white" 

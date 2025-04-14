@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,12 +15,8 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
-  
-  // Add state to track if payment is required (default to false)
-  const [requirePayment, setRequirePayment] = useState(false);
 
-  // Memoize handlers to prevent unnecessary re-renders
-  const handleLogin = useCallback(async (values: LoginFormValues) => {
+  const handleLogin = async (values: LoginFormValues) => {
     setIsLoading(true);
     try {
       const success = await login(values.email, values.password);
@@ -47,69 +43,55 @@ const Login: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [login, navigate]);
+  };
 
-  const handleRegistration = useCallback(async (values: RegistrationFormValues) => {
-    // Check if payment is required
-    if (requirePayment) {
-      // Store registration data and show payment form
-      setRegistrationData(values);
-      setShowPayment(true);
-    } else {
-      // Register directly without payment
-      await handleDirectRegistration(values);
-    }
-  }, [requirePayment]);
+  const handleRegistration = (values: RegistrationFormValues) => {
+    setRegistrationData(values);
+    setShowPayment(true);
+  };
 
-  const handleDirectRegistration = useCallback(async (values: RegistrationFormValues) => {
+  const handlePayment = async () => {
     setIsLoading(true);
     
-    try {
-      const registerData: RegisterData = {
-        email: values.email,
-        password: values.password,
-        firstName: values.firstName,
-        lastName: values.lastName,
-        address: values.address
-      };
-      
-      const success = await register(registerData);
-      
-      if (success) {
-        toast({
-          title: "Registration successful",
-          description: "Welcome to Breeding Journey! Your account has been created."
-        });
+    if (registrationData) {
+      try {
+        const registerData: RegisterData = {
+          email: registrationData.email,
+          password: registrationData.password,
+          firstName: registrationData.firstName,
+          lastName: registrationData.lastName,
+          address: registrationData.address
+        };
         
-        navigate('/');
-      } else {
+        const success = await register(registerData);
+        
+        if (success) {
+          toast({
+            title: "Registration successful",
+            description: "Welcome to Breeding Journey! Your account has been created."
+          });
+          
+          navigate('/');
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Registration failed",
+            description: "Please try again."
+          });
+          setShowPayment(false);
+        }
+      } catch (error) {
         toast({
           variant: "destructive",
-          title: "Registration failed",
-          description: "Please try again."
+          title: "Registration error",
+          description: "An unexpected error occurred. Please try again."
         });
+        setShowPayment(false);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Registration error",
-        description: "An unexpected error occurred. Please try again."
-      });
-    } finally {
-      setIsLoading(false);
     }
-  }, [register, navigate]);
-
-  const handlePayment = useCallback(async () => {
-    if (registrationData) {
-      await handleDirectRegistration(registrationData);
-    }
-  }, [registrationData, handleDirectRegistration]);
-
-  // Toggle for enabling/disabling payment requirement
-  const togglePaymentRequirement = useCallback(() => {
-    setRequirePayment(prev => !prev);
-  }, []);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-greige-50 p-4">
@@ -117,23 +99,11 @@ const Login: React.FC = () => {
         {/* Removed the Breeding Journey text */}
       </div>
       {!showPayment ? (
-        <div className="flex flex-col gap-4">
-          <AuthTabs 
-            onLogin={handleLogin}
-            onRegister={handleRegistration}
-            isLoading={isLoading}
-          />
-          
-          {/* Development toggle for payment requirement */}
-          <div className="mt-4 text-xs text-center">
-            <button 
-              onClick={togglePaymentRequirement}
-              className="text-greige-500 hover:text-greige-700 underline"
-            >
-              {requirePayment ? "Disable" : "Enable"} Payment Step (Development Only)
-            </button>
-          </div>
-        </div>
+        <AuthTabs 
+          onLogin={handleLogin}
+          onRegister={handleRegistration}
+          isLoading={isLoading}
+        />
       ) : (
         <PaymentForm
           onSubmit={handlePayment}

@@ -142,7 +142,7 @@ const useChartData = (
     }
   }, [viewMode, selectedPuppy, puppyDataMap, allDates]);
 
-  // Final chart data - memoized based on view mode
+  // Generate the final chart data based on view mode
   const chartData = useMemo(() => {
     return viewMode === 'single' && selectedPuppy 
       ? getChartDataForSinglePuppy

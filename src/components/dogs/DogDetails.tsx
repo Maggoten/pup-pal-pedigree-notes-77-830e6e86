@@ -30,19 +30,16 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
 
   const handleSave = (values: DogFormValues) => {
     const formattedValues = {
-      ...dog, // Preserve existing values
       ...values,
       dateOfBirth: format(values.dateOfBirth, 'yyyy-MM-dd'),
       dewormingDate: values.dewormingDate ? format(values.dewormingDate, 'yyyy-MM-dd') : undefined,
       vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : undefined,
-      registration_number: values.registrationNumber,
       heatHistory: values.heatHistory ? values.heatHistory.map(heat => ({
         date: format(heat.date, 'yyyy-MM-dd')
       })) : undefined,
-      heatInterval: values.heatInterval
     };
     
-    updateDog(formattedValues);
+    updateDog(dog.id, formattedValues);
     setIsEditing(false);
   };
 

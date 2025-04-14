@@ -1,72 +1,97 @@
 
-import { useState, useCallback, useMemo } from 'react';
-import { CalendarEvent } from '@/components/calendar/types';
+import { useState, useEffect } from 'react';
+import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dog } from '@/context/DogsContext';
-import { v4 as uuidv4 } from 'uuid';
+import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
 import { getSampleEvents } from '@/data/sampleCalendarEvents';
+import { 
+  loadEvents, 
+  saveEvents, 
+  addEvent, 
+  editEvent, 
+  deleteEvent,
+  getEventColor 
+} from '@/services/CalendarEventService';
 
-export const useCalendarEvents = (dogs: Dog[] = []) => {
-  const [events, setEvents] = useState<CalendarEvent[]>(getSampleEvents());
+export const useCalendarEvents = (dogs: Dog[]) => {
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   
-  // Get events for a specific date
-  const getEventsForDate = useCallback((date: Date): CalendarEvent[] => {
-    if (!date) return [];
+  // Load events on component mount
+  useEffect(() => {
+    // Load custom events from localStorage
+    const customEvents = loadEvents();
     
-    return events.filter(event => {
-      const eventDate = new Date(event.date);
-      return (
-        eventDate.getDate() === date.getDate() &&
-        eventDate.getMonth() === date.getMonth() &&
-        eventDate.getFullYear() === date.getFullYear()
-      );
-    });
-  }, [events]);
+    // Get sample events
+    const sampleEvents = getSampleEvents();
+    
+    // Calculate heat events based on dogs data
+    const upcomingHeats = calculateUpcomingHeats(dogs);
+    const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
+      id: `heat-${heat.dogId}-${index}`,
+      title: 'Heat Cycle',
+      date: heat.date,
+      type: 'heat',
+      dogId: heat.dogId,
+      dogName: heat.dogName
+    }));
+    
+    // Combine all events
+    setCalendarEvents([...sampleEvents, ...heatEvents, ...customEvents]);
+  }, [dogs]);
   
-  // Add a new event
-  const addEvent = useCallback((newEvent: Omit<CalendarEvent, 'id'>): CalendarEvent => {
-    const eventWithId: CalendarEvent = {
-      ...newEvent,
-      id: uuidv4()
-    };
-    setEvents(prev => [...prev, eventWithId]);
-    return eventWithId;
-  }, []);
+  // Save custom events to localStorage whenever they change
+  useEffect(() => {
+    saveEvents(calendarEvents);
+  }, [calendarEvents]);
   
-  // Delete an event
-  const deleteEvent = useCallback((eventId: string) => {
-    setEvents(prev => prev.filter(event => event.id !== eventId));
-  }, []);
-  
-  // Edit an existing event
-  const editEvent = useCallback((updatedEvent: CalendarEvent) => {
-    setEvents(prev => 
-      prev.map(event => 
-        event.id === updatedEvent.id ? updatedEvent : event
-      )
+  // Function to get events for a specific date
+  const getEventsForDate = (date: Date) => {
+    return calendarEvents.filter(event => 
+      new Date(event.date).toDateString() === date.toDateString()
     );
-  }, []);
+  };
   
-  // Get color based on event type
-  const getEventColor = useCallback((type: string): string => {
-    const colorMap: Record<string, string> = {
-      'heat': 'bg-red-500',
-      'breeding': 'bg-purple-500',
-      'whelping': 'bg-blue-500',
-      'vaccination': 'bg-green-500',
-      'health': 'bg-yellow-500',
-      'show': 'bg-indigo-500',
-      'other': 'bg-gray-500'
-    };
+  // Function to add a new event
+  const handleAddEvent = (data: AddEventFormValues) => {
+    const newEvent = addEvent(data, dogs);
+    setCalendarEvents(prevEvents => [...prevEvents, newEvent]);
+    return true;
+  };
+  
+  // Function to edit an event
+  const handleEditEvent = (eventId: string, data: AddEventFormValues) => {
+    const updatedEvents = editEvent(eventId, data, calendarEvents, dogs);
     
-    return colorMap[type] || 'bg-gray-500';
-  }, []);
+    if (updatedEvents) {
+      setCalendarEvents(updatedEvents);
+      // Save to localStorage
+      saveEvents(updatedEvents);
+      return true;
+    }
+    
+    return false;
+  };
+  
+  // Function to delete an event
+  const handleDeleteEvent = (eventId: string) => {
+    const updatedEvents = deleteEvent(eventId, calendarEvents);
+    
+    if (updatedEvents) {
+      setCalendarEvents(updatedEvents);
+      // Save to localStorage
+      saveEvents(updatedEvents);
+      return true;
+    }
+    
+    return false;
+  };
   
   return {
-    events,
+    calendarEvents,
     getEventsForDate,
-    addEvent,
-    deleteEvent,
-    editEvent,
+    addEvent: handleAddEvent,
+    editEvent: handleEditEvent,
+    deleteEvent: handleDeleteEvent,
     getEventColor
   };
 };
