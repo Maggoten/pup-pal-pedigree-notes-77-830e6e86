@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dog } from '@/types/dogs';
 import { useDogs } from '@/hooks/useDogs';  // Updated import to use the Supabase hook
 import { format } from 'date-fns';
@@ -18,6 +17,11 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, onBack }) => {
   const { updateDog, deleteDog, isUpdatingDog, isDeletingDog, refreshDogs } = useDogs();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  
+  useEffect(() => {
+    console.log("DogDetails component mounted with dog:", dog);
+    console.log("useDogs hook functions available:", { updateDog, deleteDog, refreshDogs });
+  }, [dog]);
   
   const handleSave = async (values: DogFormValues) => {
     try {
