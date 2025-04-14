@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useMemo } from 'react';
 import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Line } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { GrowthLineChartProps } from './types';
@@ -11,20 +12,50 @@ const GrowthLineChart: React.FC<GrowthLineChartProps> = ({
   selectedPuppy,
   puppies
 }) => {
-  // Transform data for line chart - keep most recent data point for each puppy
-  const transformedChartData = chartData.map(dataPoint => {
-    const formattedDate = new Date(dataPoint.date).toLocaleDateString();
-    const newDataPoint = { date: formattedDate };
-    
-    // Add data for each puppy to this date point
-    Object.keys(dataPoint).forEach(key => {
-      if (key !== 'date') {
-        newDataPoint[key] = dataPoint[key];
-      }
+  // Transform data for line chart - memoized to prevent recalculation on every render
+  const transformedChartData = useMemo(() => {
+    return chartData.map(dataPoint => {
+      const formattedDate = new Date(dataPoint.date).toLocaleDateString();
+      const newDataPoint = { date: formattedDate };
+      
+      // Add data for each puppy to this date point
+      Object.keys(dataPoint).forEach(key => {
+        if (key !== 'date') {
+          newDataPoint[key] = dataPoint[key];
+        }
+      });
+      
+      return newDataPoint;
     });
+  }, [chartData]);
+  
+  // Memoize the chart lines to prevent recreation on every render
+  const chartLines = useMemo(() => {
+    if (viewMode === 'single' && selectedPuppy) {
+      return (
+        <Line
+          type="monotone"
+          dataKey={selectedPuppy.id}
+          name={selectedPuppy.name}
+          stroke={chartConfig[selectedPuppy.id]?.color || '#8884d8'}
+          activeDot={{ r: 6 }}
+          strokeWidth={2}
+        />
+      );
+    }
     
-    return newDataPoint;
-  });
+    return puppies.map((puppy) => (
+      <Line
+        key={puppy.id}
+        type="monotone"
+        dataKey={puppy.id}
+        name={puppy.name}
+        stroke={chartConfig[puppy.id]?.color || '#8884d8'}
+        activeDot={{ r: 4 }}
+        strokeWidth={1.5}
+      />
+    ));
+  }, [viewMode, selectedPuppy, puppies, chartConfig]);
   
   return (
     <div className="w-full aspect-[16/9]">
@@ -51,32 +82,11 @@ const GrowthLineChart: React.FC<GrowthLineChartProps> = ({
           <Tooltip content={<ChartTooltipContent />} />
           <Legend wrapperStyle={{ fontSize: 11, marginTop: 10 }} />
           
-          {viewMode === 'single' && selectedPuppy ? (
-            <Line
-              type="monotone"
-              dataKey={selectedPuppy.id}
-              name={selectedPuppy.name}
-              stroke={chartConfig[selectedPuppy.id]?.color || '#8884d8'}
-              activeDot={{ r: 6 }}
-              strokeWidth={2}
-            />
-          ) : (
-            puppies.map((puppy) => (
-              <Line
-                key={puppy.id}
-                type="monotone"
-                dataKey={puppy.id}
-                name={puppy.name}
-                stroke={chartConfig[puppy.id]?.color || '#8884d8'}
-                activeDot={{ r: 4 }}
-                strokeWidth={1.5}
-              />
-            ))
-          )}
+          {chartLines}
         </LineChart>
       </ChartContainer>
     </div>
   );
 };
 
-export default GrowthLineChart;
+export default React.memo(GrowthLineChart);

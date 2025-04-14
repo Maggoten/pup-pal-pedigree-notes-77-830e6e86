@@ -9,11 +9,12 @@ import { Trash2 } from 'lucide-react';
 interface EditEventDialogProps {
   event: CalendarEvent;
   dogs: Dog[];
-  onSubmit: (data: AddEventFormValues) => void;
+  onSubmit: (data: AddEventFormValues) => Promise<boolean>;
   onDelete: () => void;
+  isLoading?: boolean;
 }
 
-const EditEventDialog: React.FC<EditEventDialogProps> = ({ event, dogs, onSubmit, onDelete }) => {
+const EditEventDialog: React.FC<EditEventDialogProps> = ({ event, dogs, onSubmit, onDelete, isLoading = false }) => {
   const canDelete = event.type === 'custom';
   
   // Convert the event to form values
@@ -32,6 +33,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({ event, dogs, onSubmit
         onSubmit={onSubmit} 
         defaultValues={defaultValues}
         submitLabel="Update Event"
+        isLoading={isLoading}
       />
       
       {canDelete && (
@@ -40,6 +42,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({ event, dogs, onSubmit
             variant="destructive" 
             className="w-full flex items-center justify-center gap-2"
             onClick={onDelete}
+            disabled={isLoading}
           >
             <Trash2 className="h-4 w-4" />
             Delete Event

@@ -1,32 +1,25 @@
 
-import React from 'react';
-import { useDogs, Dog } from '@/context/DogsContext';
-import DogCard from './DogCard';
+import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
+import { Dog } from '@/types/dogs';
+import DogCard from './DogCard';
 
 interface DogListProps {
-  dogsList?: Dog[];
+  dogsList: Dog[];
+  onDogClick: (dog: Dog) => void;
 }
 
-const DogList: React.FC<DogListProps> = ({ dogsList }) => {
-  const { dogs: allDogs, setActiveDog } = useDogs();
+const DogList: React.FC<DogListProps> = ({ dogsList, onDogClick }) => {
   const [search, setSearch] = useState('');
 
-  // Use the provided dogsList or fall back to all dogs from context
-  const dogs = dogsList || allDogs;
-
-  const filteredDogs = dogs.filter(dog => {
-    // Search filter only (removed gender filter)
-    return dog.name.toLowerCase().includes(search.toLowerCase()) || 
-           dog.breed.toLowerCase().includes(search.toLowerCase());
-  });
-
-  const handleDogClick = (dog: Dog) => {
-    setActiveDog(dog);
-    console.log('Clicked on dog:', dog.name);
-    // In a real app, we would navigate to the dog's profile page
-  };
+  // Memoize filtered dogs to prevent unnecessary recalculations
+  const filteredDogs = useMemo(() => {
+    return dogsList.filter(dog => {
+      // Search filter only
+      return dog.name.toLowerCase().includes(search.toLowerCase()) || 
+             dog.breed.toLowerCase().includes(search.toLowerCase());
+    });
+  }, [dogsList, search]);
 
   return (
     <div className="space-y-4">
@@ -46,7 +39,11 @@ const DogList: React.FC<DogListProps> = ({ dogsList }) => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredDogs.map((dog) => (
-            <DogCard key={dog.id} dog={dog} onClick={handleDogClick} />
+            <DogCard 
+              key={dog.id} 
+              dog={dog} 
+              onClick={() => onDogClick(dog)} 
+            />
           ))}
         </div>
       )}
@@ -54,4 +51,4 @@ const DogList: React.FC<DogListProps> = ({ dogsList }) => {
   );
 };
 
-export default DogList;
+export default React.memo(DogList);

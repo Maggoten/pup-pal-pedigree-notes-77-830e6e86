@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Dog } from '@/context/DogsContext';
+import { Loader2 } from 'lucide-react';
 
 export interface AddEventFormValues {
   title: string;
@@ -22,16 +23,18 @@ export interface AddEventFormValues {
 
 interface EventFormProps {
   dogs: Dog[];
-  onSubmit: (data: AddEventFormValues) => void;
+  onSubmit: (data: AddEventFormValues) => Promise<boolean>;
   defaultValues?: Partial<AddEventFormValues>;
   submitLabel?: string;
+  isLoading?: boolean;
 }
 
 const EventForm: React.FC<EventFormProps> = ({ 
   dogs, 
   onSubmit, 
   defaultValues, 
-  submitLabel = "Add Event" 
+  submitLabel = "Add Event",
+  isLoading = false
 }) => {
   const form = useForm<AddEventFormValues>({
     defaultValues: defaultValues || {
@@ -43,9 +46,13 @@ const EventForm: React.FC<EventFormProps> = ({
     }
   });
   
+  const handleSubmit = async (data: AddEventFormValues) => {
+    await onSubmit(data);
+  };
+  
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="title"
@@ -158,7 +165,20 @@ const EventForm: React.FC<EventFormProps> = ({
           )}
         />
         
-        <Button type="submit" className="w-full">{submitLabel}</Button>
+        <Button 
+          type="submit" 
+          className="w-full" 
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            submitLabel
+          )}
+        </Button>
       </form>
     </Form>
   );

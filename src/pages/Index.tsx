@@ -5,6 +5,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { getActivePregnancies } from '@/services/PregnancyService';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import DashboardLayout from '@/components/home/DashboardLayout';
+import { DogsProvider } from '@/context/DogsContext';
+import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 
 const Index = () => {
   const { user } = useAuth();
@@ -24,11 +26,13 @@ const Index = () => {
   };
 
   return (
-    <DashboardLayout 
-      user={user}
-      activePregnancies={activePregnancies}
-      onAddDogClick={handleAddDogClick}
-    />
+    <DogsProvider>
+      <DashboardLayout 
+        user={user}
+        activePregnancies={activePregnancies}
+        onAddDogClick={handleAddDogClick}
+      />
+    </DogsProvider>
   );
 };
 

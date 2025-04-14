@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { format, addDays, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths } from 'date-fns';
+
+import React from 'react';
 import { CardContent } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
 import CalendarGrid from './CalendarGrid';
@@ -10,14 +10,16 @@ import EditEventDialog from './EditEventDialog';
 import { Dog } from '@/context/DogsContext';
 import { AddEventFormValues } from './types';
 import { CalendarEvent } from './types';
+import { CalendarProvider, useCalendarContext } from './context/CalendarContext';
+import { useCalendarDialogs } from './hooks/useCalendarDialogs';
 
 interface CalendarContentProps {
   dogs: Dog[];
-  getEventsForDate: (date: Date) => any[];
+  getEventsForDate: (date: Date) => CalendarEvent[];
   getEventColor: (type: string) => string;
-  onDeleteEvent: (eventId: string) => void;
-  onAddEvent: (data: AddEventFormValues) => boolean;
-  onEditEvent?: (eventId: string, data: AddEventFormValues) => boolean;
+  onDeleteEvent: (eventId: string) => Promise<boolean>;
+  onAddEvent: (data: AddEventFormValues) => Promise<boolean>;
+  onEditEvent?: (eventId: string, data: AddEventFormValues) => Promise<boolean>;
   compact?: boolean;
 }
 
@@ -30,76 +32,54 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
   onEditEvent,
   compact = false
 }) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  return (
+    <CalendarProvider>
+      <CalendarContentInner
+        dogs={dogs}
+        getEventsForDate={getEventsForDate}
+        getEventColor={getEventColor}
+        onDeleteEvent={onDeleteEvent}
+        onAddEvent={onAddEvent}
+        onEditEvent={onEditEvent}
+        compact={compact}
+      />
+    </CalendarProvider>
+  );
+};
+
+const CalendarContentInner: React.FC<CalendarContentProps> = ({
+  dogs,
+  getEventsForDate,
+  getEventColor,
+  onDeleteEvent,
+  onAddEvent,
+  onEditEvent,
+  compact = false
+}) => {
   const isMobile = useIsMobile();
+  const { 
+    currentDate,
+    handlePrevMonth,
+    handleNextMonth,
+    weeks,
+    isAddDialogOpen,
+    setIsAddDialogOpen,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
+    selectedEvent,
+    handleEventClick,
+    isLoading
+  } = useCalendarContext();
   
-  const startDate = startOfMonth(currentDate);
-  const endDate = endOfMonth(currentDate);
-  
-  const handleNextMonth = () => {
-    setCurrentDate(addMonths(currentDate, 1));
-  };
-  
-  const handlePrevMonth = () => {
-    setCurrentDate(subMonths(currentDate, 1));
-  };
-  
-  const allDaysInMonth = eachDayOfInterval({ start: startDate, end: endDate });
-  
-  const weeks: Date[][] = [];
-  let currentWeek: Date[] = [];
-  
-  const dayOfWeek = startDate.getDay();
-  const daysToAddBefore = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  
-  for (let i = daysToAddBefore; i > 0; i--) {
-    currentWeek.push(addDays(startDate, -i));
-  }
-  
-  allDaysInMonth.forEach((day, index) => {
-    currentWeek.push(day);
-    
-    if (currentWeek.length === 7 || index === allDaysInMonth.length - 1) {
-      weeks.push(currentWeek);
-      currentWeek = [];
-    }
+  const { 
+    handleAddEvent,
+    handleEditEvent,
+    handleDeleteSelectedEvent
+  } = useCalendarDialogs({
+    onAddEvent,
+    onEditEvent,
+    onDeleteEvent
   });
-  
-  if (currentWeek.length > 0 && currentWeek.length < 7) {
-    const daysToAddAfter = 7 - currentWeek.length;
-    for (let i = 1; i <= daysToAddAfter; i++) {
-      currentWeek.push(addDays(endDate, i));
-    }
-    weeks.push(currentWeek);
-  }
-  
-  const handleAddEvent = (data: AddEventFormValues) => {
-    const success = onAddEvent(data);
-    if (success) {
-      setIsAddDialogOpen(false);
-    }
-    return success;
-  };
-  
-  const handleEditEvent = (data: AddEventFormValues) => {
-    if (selectedEvent && onEditEvent) {
-      const success = onEditEvent(selectedEvent.id, data);
-      if (success) {
-        setIsEditDialogOpen(false);
-        setSelectedEvent(null);
-      }
-      return success;
-    }
-    return false;
-  };
-  
-  const handleEventClick = (event: CalendarEvent) => {
-    setSelectedEvent(event);
-    setIsEditDialogOpen(true);
-  };
   
   return (
     <>
@@ -128,12 +108,13 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
         </div>
       </CardContent>
       
+      {/* Event Dialogs */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="bg-cream-50">
           <DialogHeader>
             <DialogTitle>Add Calendar Event</DialogTitle>
           </DialogHeader>
-          <AddEventDialog dogs={dogs} onSubmit={handleAddEvent} />
+          <AddEventDialog dogs={dogs} onSubmit={handleAddEvent} isLoading={isLoading} />
         </DialogContent>
       </Dialog>
       
@@ -147,11 +128,8 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
               event={selectedEvent}
               dogs={dogs} 
               onSubmit={handleEditEvent}
-              onDelete={() => {
-                onDeleteEvent(selectedEvent.id);
-                setIsEditDialogOpen(false);
-                setSelectedEvent(null);
-              }}
+              isLoading={isLoading}
+              onDelete={handleDeleteSelectedEvent}
             />
           )}
         </DialogContent>

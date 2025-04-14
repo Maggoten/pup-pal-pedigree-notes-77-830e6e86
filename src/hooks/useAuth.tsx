@@ -1,5 +1,5 @@
 
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { User, RegisterData, AuthContextType } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -16,41 +16,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Check for existing session - runs only once on mount
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setIsLoading(true);
-        
+      (event, session) => {
         if (session) {
-          // Get user data from profile
-          const userData = await getCurrentUser();
-          setUser(userData);
-          setIsLoggedIn(true);
+          // Get user data but don't block the UI
+          getCurrentUser().then(userData => {
+            setUser(userData);
+            setIsLoggedIn(true);
+            setIsLoading(false);
+          });
         } else {
           setUser(null);
           setIsLoggedIn(false);
+          setIsLoading(false);
         }
-        
-        setIsLoading(false);
       }
     );
 
-    // Check for existing session
+    // Initial session check
     const checkSession = async () => {
-      setIsLoading(true);
-      const session = await getCurrentSession();
-      
-      if (session) {
-        const userData = await getCurrentUser();
-        setUser(userData);
-        setIsLoggedIn(true);
-      } else {
-        setUser(null);
-        setIsLoggedIn(false);
+      try {
+        const session = await getCurrentSession();
+        
+        if (session) {
+          const userData = await getCurrentUser();
+          setUser(userData);
+          setIsLoggedIn(true);
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
     
     checkSession();
@@ -60,22 +60,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  // Memoize auth functions to prevent unnecessary re-renders
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     const user = await loginUser(email, password);
     return !!user;
-  };
+  }, []);
 
-  const register = async (userData: RegisterData): Promise<boolean> => {
+  const register = useCallback(async (userData: RegisterData): Promise<boolean> => {
     const newUser = await registerUser(userData);
     return !!newUser;
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await supabase.auth.signOut();
-  };
+  }, []);
+
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    user,
+    isLoggedIn,
+    isLoading,
+    login,
+    logout,
+    register
+  }), [user, isLoggedIn, isLoading, login, logout, register]);
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, login, logout, register, isLoading }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,14 +1,14 @@
 
 import React from 'react';
-import { Dog } from '@/context/DogsContext';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Heart, Image } from 'lucide-react';
+import { Calendar, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dog } from '@/types/dogs';
 
 interface DogCardProps {
   dog: Dog;
-  onClick: (dog: Dog) => void;
+  onClick: () => void;
 }
 
 const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
@@ -25,8 +25,8 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
   const PLACEHOLDER_IMAGE_PATH = '/placeholder.svg';
   
   // Determine which image to show (dog's image or placeholder)
-  const imageSrc = dog.image || PLACEHOLDER_IMAGE_PATH;
-  const isPlaceholder = !dog.image || dog.image === PLACEHOLDER_IMAGE_PATH;
+  const imageSrc = dog.image_url || PLACEHOLDER_IMAGE_PATH;
+  const isPlaceholder = !dog.image_url;
 
   // Handle image loading error
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -37,7 +37,7 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
   };
 
   return (
-    <Card className="dog-card w-full h-full overflow-hidden" onClick={() => onClick(dog)}>
+    <Card className="dog-card w-full h-full overflow-hidden" onClick={onClick}>
       <CardHeader className="p-0">
         <div className="aspect-[4/3] w-full relative">
           <img 
@@ -45,6 +45,7 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
             alt={dog.name} 
             className="object-cover w-full h-full"
             onError={handleImageError}
+            loading="lazy"
           />
           {isPlaceholder && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/5">
@@ -65,17 +66,11 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
           <Calendar className="h-3 w-3" />
           <span>Age: {calculateAge(dog.dateOfBirth)}</span>
         </div>
-        {dog.breedingHistory?.litters && dog.breedingHistory.litters.length > 0 && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-            <Heart className="h-3 w-3" />
-            <span>Litters: {dog.breedingHistory.litters.length}</span>
-          </div>
-        )}
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button variant="outline" className="w-full text-sm" onClick={(e) => {
           e.stopPropagation();
-          onClick(dog);
+          onClick();
         }}>
           View Profile
         </Button>
@@ -84,4 +79,4 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
   );
 };
 
-export default DogCard;
+export default React.memo(DogCard);
