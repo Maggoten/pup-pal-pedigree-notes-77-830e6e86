@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Dog, Heart, PieChart, Baby, ChevronLeft, ChevronRight } from 'lucide-react';

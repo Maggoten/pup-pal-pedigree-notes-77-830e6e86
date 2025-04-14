@@ -19,12 +19,11 @@ import DogFormFields, { dogFormSchema } from './DogFormFields';
 import HeatRecordsField from './HeatRecordsField';
 import { toast } from '@/components/ui/use-toast';
 import { Dog } from '@/context/DogsContext';
-import { useAuth } from '@/hooks/useAuth';
 
 interface AddDogDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddDog: (dog: Omit<Dog, 'id' | 'user_id'>) => void;
+  onAddDog: (dog: Dog) => void;
 }
 
 const AddDogDialog: React.FC<AddDogDialogProps> = ({ 
@@ -32,8 +31,6 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
   onOpenChange,
   onAddDog 
 }) => {
-  const { user } = useAuth();
-  
   const form = useForm<z.infer<typeof dogFormSchema>>({
     resolver: zodResolver(dogFormSchema),
     defaultValues: {
@@ -51,7 +48,8 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
 
   const handleSubmit = (data: z.infer<typeof dogFormSchema>) => {
     // Convert dates to ISO strings for storage
-    const newDog: Omit<Dog, 'id' | 'user_id'> = {
+    const newDog: Dog = {
+      id: uuidv4(),
       name: data.name,
       breed: data.breed,
       gender: data.gender,
@@ -63,8 +61,7 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
       heatHistory: data.heatHistory?.map(heat => ({ 
         date: heat.date.toISOString() 
       })) || [],
-      heatInterval: data.heatInterval,
-      breedingHistory: { litters: [] }
+      heatInterval: data.heatInterval
     };
 
     onAddDog(newDog);

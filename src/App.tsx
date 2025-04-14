@@ -29,57 +29,29 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/" element={
-                <AuthGuard>
-                  <DogsProvider>
-                    <Index />
-                  </DogsProvider>
-                </AuthGuard>
-              } />
-              <Route path="/my-dogs" element={
-                <AuthGuard>
-                  <DogsProvider>
-                    <MyDogs />
-                  </DogsProvider>
-                </AuthGuard>
-              } />
-              <Route path="/planned-litters" element={
-                <AuthGuard>
-                  <DogsProvider>
-                    <PlannedLitters />
-                  </DogsProvider>
-                </AuthGuard>
-              } />
-              {/* Add a generic pregnancy route that redirects to the first active pregnancy or shows a message */}
-              <Route path="/pregnancy" element={
-                <AuthGuard>
-                  <DogsProvider>
-                    {firstPregnancyId !== "none" ? 
-                      <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
-                      <PregnancyDetails />
-                    }
-                  </DogsProvider>
-                </AuthGuard>
-              } />
-              <Route path="/pregnancy/:id" element={
-                <AuthGuard>
-                  <DogsProvider>
-                    <PregnancyDetails />
-                  </DogsProvider>
-                </AuthGuard>
-              } />
-              <Route path="/my-litters" element={
-                <AuthGuard>
-                  <DogsProvider>
-                    <MyLitters />
-                  </DogsProvider>
-                </AuthGuard>
-              } />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AuthGuard>
+              <DogsProvider>
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/" element={<Index />} />
+                  <Route path="/my-dogs" element={<MyDogs />} />
+                  <Route path="/planned-litters" element={<PlannedLitters />} />
+                  {/* Add a generic pregnancy route that redirects to the first active pregnancy or shows a message */}
+                  <Route 
+                    path="/pregnancy" 
+                    element={
+                      firstPregnancyId !== "none" ? 
+                        <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
+                        <PregnancyDetails />
+                    } 
+                  />
+                  <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
+                  <Route path="/my-litters" element={<MyLitters />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </DogsProvider>
+            </AuthGuard>
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>

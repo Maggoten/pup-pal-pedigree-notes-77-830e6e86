@@ -121,32 +121,6 @@ const EventForm: React.FC<EventFormProps> = ({
         
         <FormField
           control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Event Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value || 'custom'}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an event type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="custom">Custom</SelectItem>
-                  <SelectItem value="heat">Heat</SelectItem>
-                  <SelectItem value="mating">Mating</SelectItem>
-                  <SelectItem value="planned-mating">Planned Mating</SelectItem>
-                  <SelectItem value="due-date">Due Date</SelectItem>
-                  <SelectItem value="vet-visit">Vet Visit</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
           name="dogId"
           render={({ field }) => (
             <FormItem>
