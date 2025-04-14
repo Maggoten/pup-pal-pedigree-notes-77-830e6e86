@@ -3,11 +3,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-// Define valid table names with literal types
+// Define valid table names with literal types that match exactly what's in the Supabase database
 type TableName = 'dogs' | 'heat_records' | 'calendar_events' | 'litters' | 
-                'planned_litters' | 'puppies' | 'puppy_weight_records' | 
-                'puppy_height_records' | 'puppy_notes' | 'mating_dates' | 
-                'profiles' | 'reminders' | 'reminder_status' | 'shared_users' | 
+                'reminders' | 'profiles' | 'reminder_status' | 'shared_users' | 
                 'vaccinations' | 'matings' | 'medical_issues';
 
 interface UseSupabaseDataProps<T> {
@@ -32,6 +30,7 @@ export function useSupabaseData<T>({ tableName, initialData = [] }: UseSupabaseD
     const fetchData = async () => {
       try {
         setLoading(true);
+        // Now the tableName is properly typed to match only valid Supabase tables
         const { data: fetchedData, error } = await supabase
           .from(tableName)
           .select('*');
@@ -63,6 +62,7 @@ export function useSupabaseData<T>({ tableName, initialData = [] }: UseSupabaseD
         user_id: user.id
       };
       
+      // Now the tableName is properly typed to match only valid Supabase tables
       const { data: createdData, error } = await supabase
         .from(tableName)
         .insert(dataWithUserId as any)
@@ -87,6 +87,7 @@ export function useSupabaseData<T>({ tableName, initialData = [] }: UseSupabaseD
     try {
       if (!user) throw new Error('User must be logged in to update data');
       
+      // Now the tableName is properly typed to match only valid Supabase tables
       const { data: updatedData, error } = await supabase
         .from(tableName)
         .update(updates as any)
@@ -114,6 +115,7 @@ export function useSupabaseData<T>({ tableName, initialData = [] }: UseSupabaseD
     try {
       if (!user) throw new Error('User must be logged in to delete data');
       
+      // Now the tableName is properly typed to match only valid Supabase tables
       const { error } = await supabase
         .from(tableName)
         .delete()
