@@ -1,147 +1,139 @@
 
-import React, { useState } from 'react';
-import { UseFormReturn } from 'react-hook-form';
+import React from 'react';
+import { format, parseISO } from 'date-fns';
+import { CalendarIcon, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, Trash, Plus, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { format } from 'date-fns';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { 
-  Popover, 
-  PopoverContent, 
-  PopoverTrigger 
-} from '@/components/ui/popover';
-import { DogFormValues } from './schema/dogFormSchema';
-import { useDogs } from '@/hooks/useDogs';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { UseFormReturn } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 
-interface HeatRecordsFieldProps {
-  form: UseFormReturn<DogFormValues>;
+interface HeatDate {
+  date: Date;
 }
 
-const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form }) => {
-  const { addHeatRecord, deleteHeatRecord, fetchDogHeatRecords } = useDogs();
-  const [newDate, setNewDate] = useState<Date | undefined>(undefined);
-  const [isAddingRecord, setIsAddingRecord] = useState(false);
-  const [isRemovingRecord, setIsRemovingRecord] = useState<string | null>(null);
+interface HeatRecordsFieldProps {
+  form: UseFormReturn<any>;
+  disabled?: boolean;
+}
+
+const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) => {
+  // Skip rendering for male dogs
+  if (form.getValues('gender') === 'male') {
+    return null;
+  }
   
-  // Instead of trying to get a non-existent 'id' from the form values,
-  // we'll pass the active dog ID as a prop when needed or store it in state
-  // For now, we'll use a placeholder string for new dogs
-  const activeDogId = form.getValues().id as string || '';
+  // Get heat history from form or initialize empty array
+  const heatHistory = form.watch('heatHistory') || [];
   
-  const { data: heatRecords = [], isLoading: isLoadingRecords } = 
-    fetchDogHeatRecords(activeDogId || '');
-  
-  const handleAddRecord = async () => {
-    if (!newDate || !activeDogId) return;
-    
-    try {
-      setIsAddingRecord(true);
-      await addHeatRecord(activeDogId, newDate);
-      setNewDate(undefined);
-    } catch (error) {
-      console.error("Error adding heat record:", error);
-    } finally {
-      setIsAddingRecord(false);
-    }
+  // Add a new heat date record
+  const addHeatDate = () => {
+    const newHeatHistory = [...heatHistory, { date: new Date() }];
+    form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
   };
   
-  const handleRemoveRecord = async (id: string) => {
-    try {
-      setIsRemovingRecord(id);
-      await deleteHeatRecord(id);
-    } catch (error) {
-      console.error("Error removing heat record:", error);
-    } finally {
-      setIsRemovingRecord(null);
-    }
+  // Remove a heat date record
+  const removeHeatDate = (index: number) => {
+    const newHeatHistory = [...heatHistory];
+    newHeatHistory.splice(index, 1);
+    form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
+  };
+  
+  // Update a heat date
+  const updateHeatDate = (index: number, date: Date) => {
+    const newHeatHistory = [...heatHistory];
+    newHeatHistory[index] = { date };
+    form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
   };
   
   return (
     <div className="space-y-4">
-      <div>
-        <h3 className="text-sm font-medium mb-2">Heat Interval (days)</h3>
-        <Input
-          type="number"
-          {...form.register('heatInterval')}
-          placeholder="e.g., 180"
-        />
-        <p className="text-xs text-muted-foreground mt-1">
-          Average number of days between heat cycles
-        </p>
-      </div>
-      
-      <div>
-        <h3 className="text-sm font-medium mb-2">Heat Records</h3>
+      <div className="flex flex-col space-y-1.5">
+        <Label>Heat Cycles History</Label>
         
-        {isLoadingRecords ? (
-          <div className="flex items-center justify-center py-4">
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            <span>Loading records...</span>
-          </div>
-        ) : heatRecords.length > 0 ? (
-          <ul className="space-y-2">
-            {heatRecords.map((record) => (
-              <li key={record.id} className="flex items-center justify-between border p-2 rounded-md">
-                <span>{format(new Date(record.date), 'PPP')}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemoveRecord(record.id)}
-                  disabled={isRemovingRecord === record.id}
-                >
-                  {isRemovingRecord === record.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash className="h-4 w-4 text-destructive" />
-                  )}
-                </Button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-muted-foreground text-sm mb-4">No heat records added yet</p>
-        )}
-        
-        <div className="flex gap-2 mt-4">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !newDate && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {newDate ? format(newDate, 'PPP') : "Select Date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={newDate}
-                onSelect={setNewDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+        <div className="space-y-2">
+          {heatHistory.length > 0 ? (
+            <div className="space-y-2">
+              {heatHistory.map((heat: HeatDate, index: number) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !heat.date && "text-muted-foreground"
+                        )}
+                        disabled={disabled}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {heat.date ? format(heat.date, 'PPP') : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={heat.date}
+                        onSelect={(date) => date && updateHeatDate(index, date)}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeHeatDate(index)}
+                    disabled={disabled}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">No heat cycles recorded</div>
+          )}
           
-          <Button 
-            variant="secondary" 
-            onClick={handleAddRecord} 
-            disabled={!newDate || isAddingRecord || !activeDogId}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addHeatDate}
+            className="mt-2"
+            disabled={disabled}
           >
-            {isAddingRecord ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Plus className="h-4 w-4 mr-2" />
-            )}
-            Add Record
+            <Plus className="mr-2 h-4 w-4" />
+            Add Heat Date
           </Button>
         </div>
       </div>
+      
+      <FormField
+        control={form.control}
+        name="heatInterval"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Heat Interval (days)</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                placeholder="180"
+                {...field}
+                value={field.value || ''}
+                onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                disabled={disabled}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   );
 };

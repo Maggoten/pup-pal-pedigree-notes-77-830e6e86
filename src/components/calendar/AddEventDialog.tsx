@@ -5,14 +5,13 @@ import { Dog } from '@/context/DogsContext';
 
 interface AddEventDialogProps {
   dogs: Dog[];
-  onSubmit: (data: AddEventFormValues) => Promise<boolean>;
-  isLoading?: boolean;
+  onSubmit: (data: AddEventFormValues) => void;
 }
 
-const AddEventDialog: React.FC<AddEventDialogProps> = ({ dogs, onSubmit, isLoading = false }) => {
+const AddEventDialog: React.FC<AddEventDialogProps> = ({ dogs, onSubmit }) => {
   return (
     <div className="bg-cream-50 p-1">
-      <EventForm dogs={dogs} onSubmit={onSubmit} isLoading={isLoading} />
+      <EventForm dogs={dogs} onSubmit={onSubmit} />
     </div>
   );
 };

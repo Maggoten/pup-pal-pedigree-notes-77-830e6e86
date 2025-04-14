@@ -1,95 +1,84 @@
 
 import React, { useState } from 'react';
-import { Dog } from '@/types/dogs';
-import { useDogs } from '@/hooks/useDogs';
-import { DogFormValues } from './schema/dogFormSchema';
-import DogDetailsHeader from './components/DogDetailsHeader';
-import DogDetailsCard from './components/DogDetailsCard';
-import DeleteDogDialog from './components/DeleteDogDialog';
-import { toast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { Dog as DogIcon, ArrowLeft } from 'lucide-react';
+import { Dog, useDogs } from '@/context/DogsContext';
+import DogInfoDisplay from './DogInfoDisplay';
+import DogEditForm from './DogEditForm';
+import { DogFormValues } from './DogFormFields';
 
 interface DogDetailsProps {
   dog: Dog;
-  onBack: () => void;
 }
 
-const DogDetails: React.FC<DogDetailsProps> = ({ dog, onBack }) => {
-  const { updateDog, deleteDog, isUpdatingDog, isDeletingDog, refreshDogs } = useDogs();
+const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
+  const { setActiveDog, updateDog } = useDogs();
   const [isEditing, setIsEditing] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
-  const handleSave = async (values: DogFormValues) => {
-    try {
-      console.log("Saving dog with values:", values);
-      
-      // Format dates for database
-      const formattedValues = {
-        name: values.name,
-        breed: values.breed,
-        dateOfBirth: values.dateOfBirth ? format(values.dateOfBirth, 'yyyy-MM-dd') : '',
-        gender: values.gender,
-        color: values.color,
-        registrationNumber: values.registrationNumber,
-        dewormingDate: values.dewormingDate ? format(values.dewormingDate, 'yyyy-MM-dd') : null,
-        vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : null,
-        notes: values.notes,
-        image_url: values.image, // Pass the image URL to be handled in the service
-        heatInterval: values.heatInterval,
-      };
-      
-      await updateDog(dog.id, formattedValues);
-      await refreshDogs();
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error saving dog information:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update dog information",
-        variant: "destructive",
-      });
-    }
+  const handleBack = () => {
+    setActiveDog(null);
   };
 
-  const handleDelete = async () => {
-    try {
-      await deleteDog(dog.id, dog.name);
-      onBack();
-    } catch (error) {
-      console.error("Error deleting dog:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete dog",
-        variant: "destructive",
-      });
-    }
+  const handleSave = (values: DogFormValues) => {
+    const formattedValues = {
+      ...values,
+      dateOfBirth: format(values.dateOfBirth, 'yyyy-MM-dd'),
+      dewormingDate: values.dewormingDate ? format(values.dewormingDate, 'yyyy-MM-dd') : undefined,
+      vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : undefined,
+      heatHistory: values.heatHistory ? values.heatHistory.map(heat => ({
+        date: format(heat.date, 'yyyy-MM-dd')
+      })) : undefined,
+    };
+    
+    updateDog(dog.id, formattedValues);
+    setIsEditing(false);
   };
 
   return (
     <div className="space-y-6">
-      <DogDetailsHeader 
-        onBack={onBack} 
-        isEditing={isEditing} 
-      />
+      <Button variant="outline" onClick={handleBack} className="flex items-center gap-2">
+        <ArrowLeft className="h-4 w-4" />
+        Back to list
+      </Button>
       
-      <DogDetailsCard
-        dog={dog}
-        isEditing={isEditing}
-        isDeletingDog={isDeletingDog}
-        isUpdatingDog={isUpdatingDog}
-        onEdit={() => setIsEditing(true)}
-        onCancelEdit={() => setIsEditing(false)}
-        onSave={handleSave}
-        onDelete={() => setIsDeleteDialogOpen(true)}
-      />
-
-      <DeleteDogDialog
-        dogName={dog.name}
-        isOpen={isDeleteDialogOpen}
-        isDeleting={isDeletingDog}
-        onOpenChange={setIsDeleteDialogOpen}
-        onConfirmDelete={handleDelete}
-      />
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DogIcon className="h-5 w-5" />
+            {isEditing ? 'Edit Dog' : dog.name}
+          </CardTitle>
+          <CardDescription>
+            {isEditing ? 'Update dog information' : `${dog.breed} • ${dog.gender === 'male' ? 'Male' : 'Female'}`}
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent>
+          {isEditing ? (
+            <DogEditForm 
+              dog={dog} 
+              onCancel={() => setIsEditing(false)} 
+              onSave={handleSave} 
+            />
+          ) : (
+            <DogInfoDisplay dog={dog} />
+          )}
+        </CardContent>
+        
+        <CardFooter className="flex justify-end">
+          {!isEditing && (
+            <Button onClick={() => setIsEditing(true)}>Edit</Button>
+          )}
+        </CardFooter>
+      </Card>
     </div>
   );
 };
