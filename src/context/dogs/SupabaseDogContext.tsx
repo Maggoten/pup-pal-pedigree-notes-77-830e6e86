@@ -1,5 +1,5 @@
 
-import React, { createContext, useReducer, ReactNode, useEffect, useCallback } from 'react';
+import React, { createContext, useReducer, ReactNode, useEffect, useCallback, useState } from 'react';
 import { Dog } from '@/types/dogs';
 import { supabase } from '@/integrations/supabase/client';
 import { SupabaseDogContextType } from './types';
@@ -20,6 +20,9 @@ export const SupabaseDogContext = createContext<SupabaseDogContextType | undefin
 
 export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(dogsReducer, initialDogsState);
+  const [isAddingDog, setIsAddingDog] = useState(false);
+  const [isUpdatingDog, setIsUpdatingDog] = useState(false);
+  const [isDeletingDog, setIsDeletingDog] = useState(false);
   
   // Check for authentication state changes
   useEffect(() => {
@@ -75,39 +78,59 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
     if (result.success) {
       dispatch({ type: 'SET_HEAT_RECORDS', payload: result.records });
     }
+    
+    return {
+      data: result.success ? result.records : [],
+      isLoading: false
+    };
   };
 
   const addDog = async (dog: Omit<Dog, "id">) => {
-    const result = await addNewDog(dog);
-    
-    if (result.success && result.dog) {
-      dispatch({ type: 'ADD_DOG', payload: result.dog });
+    setIsAddingDog(true);
+    try {
+      const result = await addNewDog(dog);
+      
+      if (result.success && result.dog) {
+        dispatch({ type: 'ADD_DOG', payload: result.dog });
+      }
+      
+      return result.dog;
+    } finally {
+      setIsAddingDog(false);
     }
-    
-    return result.dog;
   };
 
   const removeExistingDog = async (id: string, dogName: string) => {
-    const result = await removeDog(id, dogName);
-    
-    if (result.success) {
-      dispatch({ type: 'REMOVE_DOG', payload: id });
+    setIsDeletingDog(true);
+    try {
+      const result = await removeDog(id, dogName);
+      
+      if (result.success) {
+        dispatch({ type: 'REMOVE_DOG', payload: id });
+      }
+      
+      return result.success;
+    } finally {
+      setIsDeletingDog(false);
     }
-    
-    return result.success;
   };
 
   const updateDogData = async (id: string, data: Partial<Dog>) => {
-    const result = await updateDogInfo(id, data);
-    
-    if (result.success && result.dog) {
-      dispatch({ 
-        type: 'UPDATE_DOG', 
-        payload: { id, dog: result.dog } 
-      });
+    setIsUpdatingDog(true);
+    try {
+      const result = await updateDogInfo(id, data);
+      
+      if (result.success && result.dog) {
+        dispatch({ 
+          type: 'UPDATE_DOG', 
+          payload: { id, dog: result.dog } 
+        });
+      }
+      
+      return result.dog;
+    } finally {
+      setIsUpdatingDog(false);
     }
-    
-    return result.dog;
   };
 
   const addHeatDateRecord = async (dogId: string, date: Date) => {
@@ -151,7 +174,18 @@ export const SupabaseDogProvider: React.FC<{ children: ReactNode }> = ({ childre
       loadHeatRecords: fetchDogHeatRecords,
       addHeatDate: addHeatDateRecord,
       removeHeatDate: removeHeatDateRecord,
-      refreshDogs
+      refreshDogs,
+      // Add aliases for existing functions to match component usage
+      updateDog: updateDogData,
+      deleteDog: removeExistingDog,
+      fetchDogHeatRecords,
+      addHeatRecord: addHeatDateRecord,
+      deleteHeatRecord: removeHeatDateRecord,
+      // Add state variables for loading states
+      isAddingDog,
+      isUpdatingDog,
+      isDeletingDog,
+      isLoading: state.loading
     }}>
       {children}
     </SupabaseDogContext.Provider>

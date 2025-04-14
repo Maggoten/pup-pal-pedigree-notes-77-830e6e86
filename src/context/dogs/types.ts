@@ -16,4 +16,15 @@ export interface SupabaseDogContextType {
   addHeatDate: (dogId: string, date: Date) => Promise<boolean>;
   removeHeatDate: (id: string) => Promise<boolean>;
   refreshDogs: () => Promise<boolean>;
+  
+  // Adding the missing properties to align with component usage
+  isUpdatingDog: boolean;
+  isDeletingDog: boolean;
+  isAddingDog: boolean;
+  updateDog: (id: string, data: Partial<Dog>) => Promise<Dog | null>;
+  deleteDog: (id: string, dogName: string) => Promise<boolean>;
+  fetchDogHeatRecords: (dogId: string) => any;
+  addHeatRecord: (dogId: string, date: Date) => Promise<boolean>;
+  deleteHeatRecord: (id: string) => Promise<boolean>;
+  isLoading: boolean;
 }
