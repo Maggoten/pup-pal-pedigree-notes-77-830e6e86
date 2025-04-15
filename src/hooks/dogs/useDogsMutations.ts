@@ -36,7 +36,7 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
     }
   });
 
-  // Update dog mutation
+  // Update dog mutation - optimized for speed
   const updateDogMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Dog> }) => {
       return await dogService.updateDog(id, updates);
@@ -58,7 +58,13 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       // Return a context object with the snapshot
       return { previousDogs };
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      // Immediately invalidate the query to get fresh data, but don't refetch if we just did
+      queryClient.invalidateQueries({ 
+        queryKey: ['dogs', userId],
+        refetchActive: false
+      });
+      
       toast({
         title: "Dog updated",
         description: "Dog information has been updated successfully.",
@@ -76,10 +82,6 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
         description: errorMessage,
         variant: "destructive"
       });
-    },
-    onSettled: () => {
-      // Refetch to ensure data is consistent (but not immediately)
-      setTimeout(() => queryClient.invalidateQueries({ queryKey: ['dogs', userId] }), 1000);
     }
   });
 
@@ -104,6 +106,12 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       return { previousDogs };
     },
     onSuccess: () => {
+      // Immediately invalidate the query but don't force a refetch
+      queryClient.invalidateQueries({ 
+        queryKey: ['dogs', userId],
+        refetchActive: false
+      });
+      
       toast({
         title: "Dog removed",
         description: "Dog has been removed successfully.",

@@ -39,15 +39,15 @@ export const useDogsQueries = (userId: string | undefined): UseDogsQueries => {
       }
     },
     enabled: !!userId,
-    staleTime: 3 * 60 * 1000, // Consider data fresh for 3 minutes
-    gcTime: 10 * 60 * 1000, // Keep unused data in cache for 10 minutes
-    retry: 1 // Only retry once on failure
+    staleTime: 60 * 1000, // Consider data fresh for 1 minute (reduced from 3)
+    gcTime: 5 * 60 * 1000, // Keep unused data in cache for 5 minutes (reduced from 10)
   });
 
   // fetchDogs is now refetch, renamed for compatibility
   const fetchDogs = useCallback(async (skipCache = false) => {
     if (skipCache) {
-      queryClient.removeQueries({ queryKey: ['dogs', userId] });
+      // Use direct invalidation instead of removing the query
+      await queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
     }
     const result = await refetch();
     return result.data || [];

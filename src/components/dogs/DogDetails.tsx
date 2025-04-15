@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { 
   Card, 
@@ -33,6 +32,7 @@ interface DogDetailsProps {
 const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
   const { setActiveDog, updateDog, removeDog, loading } = useDogs();
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   const handleBack = () => {
@@ -40,27 +40,36 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
   };
 
   const handleSave = async (values: DogFormValues) => {
-    // Convert date objects to ISO strings for storage
-    const formattedValues = {
-      name: values.name,
-      breed: values.breed,
-      gender: values.gender,
-      dateOfBirth: values.dateOfBirth.toISOString().split('T')[0],
-      color: values.color,
-      registrationNumber: values.registrationNumber,
-      notes: values.notes,
-      image: dog.image, // Preserve existing image if not changed
-      dewormingDate: values.dewormingDate ? values.dewormingDate.toISOString().split('T')[0] : undefined,
-      vaccinationDate: values.vaccinationDate ? values.vaccinationDate.toISOString().split('T')[0] : undefined,
-      heatHistory: values.heatHistory ? values.heatHistory.map(heat => ({
-        date: heat.date.toISOString().split('T')[0]
-      })) : undefined,
-      heatInterval: values.heatInterval
-    };
+    // Set local saving state to provide immediate feedback
+    setIsSaving(true);
     
-    const success = await updateDog(dog.id, formattedValues);
-    if (success) {
-      setIsEditing(false);
+    try {
+      // Convert date objects to ISO strings for storage
+      const formattedValues = {
+        name: values.name,
+        breed: values.breed,
+        gender: values.gender,
+        dateOfBirth: values.dateOfBirth.toISOString().split('T')[0],
+        color: values.color,
+        registrationNumber: values.registrationNumber,
+        notes: values.notes,
+        image: values.image, // Use the updated image from the form
+        dewormingDate: values.dewormingDate ? values.dewormingDate.toISOString().split('T')[0] : undefined,
+        vaccinationDate: values.vaccinationDate ? values.vaccinationDate.toISOString().split('T')[0] : undefined,
+        heatHistory: values.heatHistory ? values.heatHistory.map(heat => ({
+          date: heat.date.toISOString().split('T')[0]
+        })) : undefined,
+        heatInterval: values.heatInterval
+      };
+      
+      const success = await updateDog(dog.id, formattedValues);
+      if (success) {
+        setIsEditing(false);
+      }
+    } catch (error) {
+      console.error("Error saving dog:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -95,7 +104,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
               dog={dog} 
               onCancel={() => setIsEditing(false)} 
               onSave={handleSave}
-              isLoading={loading}
+              isLoading={isSaving || loading}
             />
           ) : (
             <DogInfoDisplay dog={dog} />
@@ -106,14 +115,14 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
           <Button
             variant="destructive"
             onClick={() => setShowDeleteDialog(true)}
-            disabled={loading}
+            disabled={loading || isSaving}
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Delete
           </Button>
           
           {!isEditing ? (
-            <Button onClick={() => setIsEditing(true)} disabled={loading}>Edit</Button>
+            <Button onClick={() => setIsEditing(true)} disabled={loading || isSaving}>Edit</Button>
           ) : null}
         </CardFooter>
       </Card>

@@ -4,8 +4,8 @@ import { Dog } from '@/types/dogs';
 import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
 import { PostgrestSingleResponse, PostgrestResponse } from '@supabase/supabase-js';
 
-const MAX_RETRIES = 2; // Reduced from 3
-const RETRY_DELAY = 800; // Reduced from 1000ms for faster recovery
+const MAX_RETRIES = 1; // Reduced from 2
+const RETRY_DELAY = 500; // Reduced from 800ms for faster recovery
 
 /**
  * Helper function to implement retry logic for Supabase requests
@@ -103,7 +103,7 @@ export async function addDog(
 }
 
 /**
- * Updates an existing dog in the database
+ * Updates an existing dog in the database - Optimized for performance
  */
 export async function updateDog(id: string, updates: Partial<Dog>) {
   if (!id) {
@@ -114,21 +114,19 @@ export async function updateDog(id: string, updates: Partial<Dog>) {
   const dbUpdates = sanitizeDogForDb(updates);
   
   try {
-    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
-      supabase
-        .from('dogs')
-        .update(dbUpdates)
-        .eq('id', id)
-        .select()
-    );
+    // Only select essential fields to reduce response size and improve performance
+    const response = await supabase
+      .from('dogs')
+      .update(dbUpdates)
+      .eq('id', id)
+      .select('id, name, updated_at');
 
     if (response.error) {
       console.error('Error updating dog:', response.error.message);
       throw new Error(response.error.message);
     }
     
-    // Return the updated dog data if available
-    return response.data?.[0] ? enrichDog(response.data[0]) : true;
+    return true;
   } catch (error) {
     console.error('Failed to update dog:', error);
     throw new Error(error instanceof Error ? error.message : 'Failed to update dog');
@@ -145,12 +143,10 @@ export async function deleteDog(id: string) {
   }
 
   try {
-    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
-      supabase
-        .from('dogs')
-        .delete()
-        .eq('id', id)
-    );
+    const response = await supabase
+      .from('dogs')
+      .delete()
+      .eq('id', id);
 
     if (response.error) {
       console.error('Error deleting dog:', response.error.message);
