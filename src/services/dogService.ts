@@ -39,13 +39,15 @@ export async function fetchDogs(userId: string) {
   }
 
   try {
-    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
-      supabase
-        .from('dogs')
-        .select('*')
-        .eq('owner_id', userId)
-        .order('created_at', { ascending: false })
-    );
+    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => {
+      return Promise.resolve(
+        supabase
+          .from('dogs')
+          .select('*')
+          .eq('owner_id', userId)
+          .order('created_at', { ascending: false })
+      );
+    });
 
     console.log("🐶 FETCHED DOGS:", response.data);
 
@@ -82,13 +84,15 @@ export async function addDog(
   
   try {
     // The insert method expects an array of objects
-    const response = await executeWithRetry<PostgrestSingleResponse<DbDog>>(() => 
-      supabase
-        .from('dogs')
-        .insert([dogForDb as DbDog])
-        .select()
-        .single()
-    );
+    const response = await executeWithRetry<PostgrestSingleResponse<DbDog>>(() => {
+      return Promise.resolve(
+        supabase
+          .from('dogs')
+          .insert([dogForDb as DbDog])
+          .select()
+          .single()
+      );
+    });
 
     if (response.error) {
       console.error('Error adding dog:', response.error.message);
@@ -116,12 +120,14 @@ export async function updateDog(id: string, updates: Partial<Dog>) {
   const dbUpdates = sanitizeDogForDb(updates);
   
   try {
-    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
-      supabase
-        .from('dogs')
-        .update(dbUpdates)
-        .eq('id', id)
-    );
+    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => {
+      return Promise.resolve(
+        supabase
+          .from('dogs')
+          .update(dbUpdates)
+          .eq('id', id)
+      );
+    });
 
     if (response.error) {
       console.error('Error updating dog:', response.error.message);
@@ -145,12 +151,14 @@ export async function deleteDog(id: string) {
   }
 
   try {
-    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
-      supabase
-        .from('dogs')
-        .delete()
-        .eq('id', id)
-    );
+    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => {
+      return Promise.resolve(
+        supabase
+          .from('dogs')
+          .delete()
+          .eq('id', id)
+      );
+    });
 
     if (response.error) {
       console.error('Error deleting dog:', response.error.message);
