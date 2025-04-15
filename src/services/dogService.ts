@@ -36,8 +36,7 @@ export async function addDog(
     owner_id: userId
   });
   
-  // The insert method expects either a complete DbDog object or an array of them
-  // We'll use an array with a single object to ensure name is included
+  // The insert method expects an array of objects
   const { data, error } = await supabase
     .from('dogs')
     .insert([dogForDb as DbDog])

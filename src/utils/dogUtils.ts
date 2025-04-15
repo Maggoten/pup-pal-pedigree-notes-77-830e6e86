@@ -69,25 +69,25 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
     dbDog.image_url = dog.image;
   }
   
-  // For JSON fields that do exist in the database, we need to handle them specially
+  // JSON and date fields that exist in the database
   if ('heatHistory' in dog) {
-    (dbDog as any).heatHistory = dog.heatHistory;
+    dbDog.heatHistory = dog.heatHistory;
   }
   
   if ('breedingHistory' in dog) {
-    (dbDog as any).breedingHistory = dog.breedingHistory;
+    dbDog.breedingHistory = dog.breedingHistory;
   }
   
   if ('heatInterval' in dog) {
-    (dbDog as any).heatInterval = dog.heatInterval;
+    dbDog.heatInterval = dog.heatInterval;
   }
   
   if ('dewormingDate' in dog) {
-    (dbDog as any).dewormingDate = dog.dewormingDate;
+    dbDog.dewormingDate = dog.dewormingDate;
   }
   
   if ('vaccinationDate' in dog) {
-    (dbDog as any).vaccinationDate = dog.vaccinationDate;
+    dbDog.vaccinationDate = dog.vaccinationDate;
   }
   
   return dbDog;

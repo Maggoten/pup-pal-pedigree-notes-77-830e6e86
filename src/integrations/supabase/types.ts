@@ -13,10 +13,14 @@ export type Database = {
         Row: {
           birthdate: string | null
           breed: string | null
+          breedingHistory: Json | null
           chip_number: string | null
           color: string | null
           created_at: string | null
+          dewormingDate: string | null
           gender: string | null
+          heatHistory: Json | null
+          heatInterval: number | null
           id: string
           image_url: string | null
           name: string
@@ -24,14 +28,19 @@ export type Database = {
           owner_id: string | null
           registration_number: string | null
           updated_at: string | null
+          vaccinationDate: string | null
         }
         Insert: {
           birthdate?: string | null
           breed?: string | null
+          breedingHistory?: Json | null
           chip_number?: string | null
           color?: string | null
           created_at?: string | null
+          dewormingDate?: string | null
           gender?: string | null
+          heatHistory?: Json | null
+          heatInterval?: number | null
           id?: string
           image_url?: string | null
           name: string
@@ -39,14 +48,19 @@ export type Database = {
           owner_id?: string | null
           registration_number?: string | null
           updated_at?: string | null
+          vaccinationDate?: string | null
         }
         Update: {
           birthdate?: string | null
           breed?: string | null
+          breedingHistory?: Json | null
           chip_number?: string | null
           color?: string | null
           created_at?: string | null
+          dewormingDate?: string | null
           gender?: string | null
+          heatHistory?: Json | null
+          heatInterval?: number | null
           id?: string
           image_url?: string | null
           name?: string
@@ -54,6 +68,7 @@ export type Database = {
           owner_id?: string | null
           registration_number?: string | null
           updated_at?: string | null
+          vaccinationDate?: string | null
         }
         Relationships: []
       }
