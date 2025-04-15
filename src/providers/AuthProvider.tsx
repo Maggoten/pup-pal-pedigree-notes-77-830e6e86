@@ -1,7 +1,7 @@
 
 import { useState, useEffect, ReactNode } from 'react';
 import { User } from '@/types/auth';
-import { Session } from '@supabase/supabase-js';
+import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import AuthContext from '@/context/AuthContext';
@@ -13,6 +13,7 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
+  const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -30,6 +31,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         if (currentSession?.user) {
           console.log('User authenticated:', currentSession.user.id);
+          setSupabaseUser(currentSession.user);
           
           // Use setTimeout to prevent potential deadlocks
           setTimeout(async () => {
@@ -54,10 +56,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }, 0);
         } else {
           setUser(null);
+          setSupabaseUser(null);
         }
         
         if (event === 'SIGNED_OUT') {
           setUser(null);
+          setSupabaseUser(null);
           setIsLoggedIn(false);
         }
       }
@@ -72,6 +76,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         if (initialSession?.user) {
           setSession(initialSession);
+          setSupabaseUser(initialSession.user);
           setIsLoggedIn(true);
           
           // Get user profile from database
@@ -137,6 +142,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       await logout();
       setSession(null);
       setUser(null);
+      setSupabaseUser(null);
       setIsLoggedIn(false);
     } finally {
       setIsLoading(false);
@@ -147,6 +153,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     <AuthContext.Provider 
       value={{ 
         user, 
+        supabaseUser,
         session,
         isLoggedIn, 
         isLoading,

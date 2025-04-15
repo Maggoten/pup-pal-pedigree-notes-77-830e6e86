@@ -20,6 +20,7 @@ export interface RegisterData {
 
 export interface AuthContextType {
   user: User | null;
+  supabaseUser: SupabaseUser | null;
   session: Session | null;
   isLoggedIn: boolean;
   isLoading: boolean;
