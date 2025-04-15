@@ -11,12 +11,13 @@ const RETRY_DELAY = 1000; // milliseconds
  * Helper function to implement retry logic for Supabase requests
  */
 async function executeWithRetry<T>(
-  operation: () => Promise<T>,
+  operation: () => Promise<T> | any,
   retries = MAX_RETRIES,
   delay = RETRY_DELAY
 ): Promise<T> {
   try {
-    return await operation();
+    // Convert the result to a proper promise to handle Supabase query builders
+    return await Promise.resolve(operation());
   } catch (error) {
     if (retries <= 0) {
       console.error('Max retries reached, operation failed:', error);
