@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { useDogs as useDogsHook } from '@/hooks/useDogs';
+import { useDogs as useDogsHook } from '@/hooks/dogs';
 import { useAuth } from '@/hooks/useAuth';
 import { Dog } from '@/types/dogs';
 
