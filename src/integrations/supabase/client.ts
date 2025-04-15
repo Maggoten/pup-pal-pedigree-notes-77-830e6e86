@@ -10,17 +10,6 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // import { supabase } from "@/integrations/supabase/client";
 
 // Define profile type that can be used in the app
-export type Profile = {
-  id: string;
-  email: string;
-  first_name?: string;
-  last_name?: string;
-  address?: string;
-  kennel_name?: string;
-  phone?: string;
-  subscription_status?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+export type Profile = Database['public']['Tables']['profiles']['Row'];
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
