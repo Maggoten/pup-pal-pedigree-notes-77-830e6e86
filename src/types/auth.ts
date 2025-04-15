@@ -1,5 +1,8 @@
 
+import { User as SupabaseUser } from '@supabase/supabase-js';
+
 export interface User {
+  id: string;
   email: string;
   firstName?: string;
   lastName?: string;
@@ -16,8 +19,9 @@ export interface RegisterData {
 
 export interface AuthContextType {
   user: User | null;
+  supabaseUser: SupabaseUser | null;
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   register: (userData: RegisterData) => Promise<boolean>;
 }

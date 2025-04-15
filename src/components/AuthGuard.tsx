@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/components/ui/use-toast';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -9,10 +10,21 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, supabaseUser } = useAuth();
+  const { toast } = useToast();
 
   // Check if user is on the login page
   const isLoginPage = location.pathname === '/login';
+
+  useEffect(() => {
+    if (!isLoggedIn && !isLoginPage && !supabaseUser) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to access this page",
+        variant: "destructive"
+      });
+    }
+  }, [isLoggedIn, isLoginPage, supabaseUser, toast]);
 
   // If not logged in and not on login page, redirect to login
   if (!isLoggedIn && !isLoginPage) {
