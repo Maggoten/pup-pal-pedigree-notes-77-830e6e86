@@ -22,6 +22,8 @@ export const useDogs = (userId: string | undefined) => {
         .eq('owner_id', userId)
         .order('created_at', { ascending: false });
 
+      console.log("🐶 FETCHED DOGS:", data);
+
       if (error) {
         setError(error.message);
         toast({

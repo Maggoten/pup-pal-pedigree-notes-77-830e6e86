@@ -11,7 +11,7 @@ import { PlusCircle, RefreshCw } from 'lucide-react';
 import AddDogDialog from '@/components/dogs/AddDogDialog';
 
 const MyDogsContent: React.FC = () => {
-  const { dogs, activeDog, refreshDogs, loading } = useDogs();
+  const { dogs, activeDog, refreshDogs, loading, error } = useDogs();
   const [showAddDogDialog, setShowAddDogDialog] = useState(false);
   
   const females = dogs.filter(dog => dog.gender === 'female');
@@ -20,6 +20,20 @@ const MyDogsContent: React.FC = () => {
   const handleRefresh = () => {
     refreshDogs();
   };
+
+  if (error) {
+    return (
+      <PageLayout title="My Dogs">
+        <Card className="p-6">
+          <div className="text-center space-y-4">
+            <h3 className="text-lg font-medium">Something went wrong</h3>
+            <p className="text-muted-foreground">{error}</p>
+            <Button onClick={handleRefresh}>Try Again</Button>
+          </div>
+        </Card>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout 
