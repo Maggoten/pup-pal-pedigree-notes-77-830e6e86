@@ -4,6 +4,36 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dog, BreedingHistory } from '@/types/dogs';
 import { useToast } from '@/components/ui/use-toast';
 
+/**
+ * Enriches a dog record from Supabase with UI-specific fields and defaults
+ */
+const enrichDog = (dog: any): Dog => {
+  // Create default breeding history structure if missing
+  const defaultBreedingHistory: BreedingHistory = {
+    breedings: [],
+    litters: [],
+    matings: [] // Include matings for compatibility with ReminderService
+  };
+
+  return {
+    ...dog,
+    // Alias fields for UI
+    dateOfBirth: dog.birthdate || '',
+    image: dog.image_url || '',
+    registrationNumber: dog.registration_number || '',
+
+    // Fallbacks for frontend-only fields
+    heatHistory: dog.heatHistory || [],
+    breedingHistory: dog.breedingHistory || defaultBreedingHistory,
+    heatInterval: dog.heatInterval || undefined,
+
+    // Normalize gender just in case
+    gender: dog.gender === 'male' || dog.gender === 'female'
+      ? dog.gender
+      : (dog.gender?.toLowerCase() === 'male' ? 'male' : 'female')
+  };
+};
+
 export const useDogs = (userId: string | undefined) => {
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,36 +62,9 @@ export const useDogs = (userId: string | undefined) => {
           variant: "destructive"
         });
       } else {
-        // Normalize gender field
-        const normalized = (data || []).map((dog): Dog => {
-          // Create default breeding history structure if missing
-          const defaultBreedingHistory: BreedingHistory = {
-            breedings: [],
-            litters: [],
-            matings: [] // Include matings for compatibility with ReminderService
-          };
-
-          return {
-            ...dog,
-
-            // Aliases for UI
-            dateOfBirth: dog.birthdate || '',
-            image: dog.image_url || '',
-            registrationNumber: dog.registration_number || '',
-
-            // Fallbacks for frontend-only fields
-            heatHistory: dog.heatHistory || [],
-            breedingHistory: dog.breedingHistory || defaultBreedingHistory,
-            heatInterval: dog.heatInterval || undefined,
-
-            // Normalize gender just in case
-            gender: dog.gender === 'male' || dog.gender === 'female'
-              ? dog.gender
-              : (dog.gender?.toLowerCase() === 'male' ? 'male' : 'female')
-          };
-        });
-
-        setDogs(normalized);
+        // Apply enrichDog to normalize each dog record
+        const normalizedDogs = (data || []).map(enrichDog);
+        setDogs(normalizedDogs);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -110,7 +113,8 @@ export const useDogs = (userId: string | undefined) => {
       });
       
       await fetchDogs();
-      return data;
+      // Return the enriched dog to ensure all UI fields are present
+      return enrichDog(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       toast({
@@ -127,9 +131,29 @@ export const useDogs = (userId: string | undefined) => {
   const updateDog = async (id: string, updates: Partial<Dog>) => {
     try {
       setIsLoading(true);
+      
+      // Convert UI field names to DB field names for update
+      const dbUpdates: any = { ...updates };
+      
+      // Handle field name mappings
+      if ('dateOfBirth' in updates) {
+        dbUpdates.birthdate = updates.dateOfBirth;
+        delete dbUpdates.dateOfBirth;
+      }
+      
+      if ('registrationNumber' in updates) {
+        dbUpdates.registration_number = updates.registrationNumber;
+        delete dbUpdates.registrationNumber;
+      }
+      
+      if ('image' in updates) {
+        dbUpdates.image_url = updates.image;
+        delete dbUpdates.image;
+      }
+      
       const { error } = await supabase
         .from('dogs')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', id);
 
       if (error) throw new Error(error.message);
