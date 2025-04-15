@@ -1,5 +1,5 @@
 
-import { User as SupabaseUser } from '@supabase/supabase-js';
+import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { Profile } from '@/integrations/supabase/client';
 
 export interface User {
@@ -20,8 +20,9 @@ export interface RegisterData {
 
 export interface AuthContextType {
   user: User | null;
-  supabaseUser: SupabaseUser | null;
+  session: Session | null;
   isLoggedIn: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   register: (userData: RegisterData) => Promise<boolean>;

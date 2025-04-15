@@ -11,7 +11,7 @@ import { RegisterData } from '@/types/auth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login, register } = useAuth();
+  const { login, register, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
@@ -19,22 +19,22 @@ const Login: React.FC = () => {
   const handleLogin = async (values: LoginFormValues) => {
     setIsLoading(true);
     try {
+      console.log('Login page: Attempting login for:', values.email);
       const success = await login(values.email, values.password);
       
       if (success) {
+        console.log('Login page: Login successful, redirecting');
         toast({
           title: "Login successful",
           description: "Welcome back to your breeding journal!"
         });
         navigate('/');
       } else {
-        toast({
-          variant: "destructive",
-          title: "Login failed",
-          description: "Please check your credentials and try again."
-        });
+        console.log('Login page: Login failed');
+        // Toast is handled in useAuthActions
       }
     } catch (error) {
+      console.error("Login page: Login error:", error);
       toast({
         variant: "destructive",
         title: "Login error",
@@ -63,24 +63,30 @@ const Login: React.FC = () => {
           address: registrationData.address
         };
         
+        console.log('Login page: Attempting registration');
         const success = await register(registerData);
         
         if (success) {
+          console.log('Login page: Registration successful');
           toast({
             title: "Registration successful",
-            description: "Welcome to Breeding Journey! Your account has been created."
+            description: "Your account has been created. Please check your email for confirmation instructions."
           });
           
-          navigate('/');
+          // Navigate but only if email confirmation is not required
+          if (document.cookie.includes('supabase-auth-token')) {
+            navigate('/');
+          } else {
+            // Stay on login page so user can log in after confirming email
+            setShowPayment(false);
+          }
         } else {
-          toast({
-            variant: "destructive",
-            title: "Registration failed",
-            description: "Please try again."
-          });
+          console.log('Login page: Registration failed');
+          // Toast is handled in useAuthActions
           setShowPayment(false);
         }
       } catch (error) {
+        console.error("Login page: Registration error:", error);
         toast({
           variant: "destructive",
           title: "Registration error",
@@ -93,6 +99,8 @@ const Login: React.FC = () => {
     }
   };
 
+  const effectiveLoading = isLoading || authLoading;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-greige-50 p-4">
       <div className="text-center mb-8">
@@ -102,13 +110,13 @@ const Login: React.FC = () => {
         <AuthTabs 
           onLogin={handleLogin}
           onRegister={handleRegistration}
-          isLoading={isLoading}
+          isLoading={effectiveLoading}
         />
       ) : (
         <PaymentForm
           onSubmit={handlePayment}
           onBack={() => setShowPayment(false)}
-          isLoading={isLoading}
+          isLoading={effectiveLoading}
         />
       )}
     </div>
