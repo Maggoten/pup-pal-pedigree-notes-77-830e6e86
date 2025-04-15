@@ -30,7 +30,15 @@ export const useDogs = (userId: string | undefined) => {
           variant: "destructive"
         });
       } else {
-        setDogs(data || []);
+        // Normalize gender field
+        const normalized = (data || []).map((dog) => ({
+          ...dog,
+          gender: dog.gender === 'male' || dog.gender === 'female'
+            ? dog.gender
+            : (dog.gender?.toLowerCase() === 'male' ? 'male' : 'female')
+        })) as Dog[];
+
+        setDogs(normalized);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
