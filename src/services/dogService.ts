@@ -39,7 +39,7 @@ export async function fetchDogs(userId: string) {
   }
 
   try {
-    const response = await executeWithRetry(() => 
+    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
       supabase
         .from('dogs')
         .select('*')
@@ -82,7 +82,7 @@ export async function addDog(
   
   try {
     // The insert method expects an array of objects
-    const response = await executeWithRetry(() => 
+    const response = await executeWithRetry<PostgrestSingleResponse<DbDog>>(() => 
       supabase
         .from('dogs')
         .insert([dogForDb as DbDog])
@@ -116,7 +116,7 @@ export async function updateDog(id: string, updates: Partial<Dog>) {
   const dbUpdates = sanitizeDogForDb(updates);
   
   try {
-    const response = await executeWithRetry(() => 
+    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
       supabase
         .from('dogs')
         .update(dbUpdates)
@@ -145,7 +145,7 @@ export async function deleteDog(id: string) {
   }
 
   try {
-    const response = await executeWithRetry(() => 
+    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
       supabase
         .from('dogs')
         .delete()
