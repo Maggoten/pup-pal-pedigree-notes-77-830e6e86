@@ -1,4 +1,4 @@
-
+import { useAuth } from '@/context/AuthContext';
 import React, { useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
