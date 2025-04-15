@@ -1,38 +1,8 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Dog, BreedingHistory } from '@/types/dogs';
+import { Dog } from '@/types/dogs';
 import { useToast } from '@/components/ui/use-toast';
-
-/**
- * Enriches a dog record from Supabase with UI-specific fields and defaults
- */
-const enrichDog = (dog: any): Dog => {
-  // Create default breeding history structure if missing
-  const defaultBreedingHistory: BreedingHistory = {
-    breedings: [],
-    litters: [],
-    matings: [] // Include matings for compatibility with ReminderService
-  };
-
-  return {
-    ...dog,
-    // Alias fields for UI
-    dateOfBirth: dog.birthdate || '',
-    image: dog.image_url || '',
-    registrationNumber: dog.registration_number || '',
-
-    // Fallbacks for frontend-only fields
-    heatHistory: dog.heatHistory || [],
-    breedingHistory: dog.breedingHistory || defaultBreedingHistory,
-    heatInterval: dog.heatInterval || undefined,
-
-    // Normalize gender just in case
-    gender: dog.gender === 'male' || dog.gender === 'female'
-      ? dog.gender
-      : (dog.gender?.toLowerCase() === 'male' ? 'male' : 'female')
-  };
-};
+import * as dogService from '@/services/dogService';
 
 export const useDogs = (userId: string | undefined) => {
   const [dogs, setDogs] = useState<Dog[]>([]);
@@ -46,26 +16,8 @@ export const useDogs = (userId: string | undefined) => {
     setError(null);
     
     try {
-      const { data, error } = await supabase
-        .from('dogs')
-        .select('*')
-        .eq('owner_id', userId)
-        .order('created_at', { ascending: false });
-
-      console.log("🐶 FETCHED DOGS:", data);
-
-      if (error) {
-        setError(error.message);
-        toast({
-          title: "Error fetching dogs",
-          description: error.message,
-          variant: "destructive"
-        });
-      } else {
-        // Apply enrichDog to normalize each dog record
-        const normalizedDogs = (data || []).map(enrichDog);
-        setDogs(normalizedDogs);
-      }
+      const fetchedDogs = await dogService.fetchDogs(userId);
+      setDogs(fetchedDogs);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
@@ -83,29 +35,7 @@ export const useDogs = (userId: string | undefined) => {
     try {
       setIsLoading(true);
       
-      // Prepare dog data for Supabase by mapping UI field names to DB field names
-      const dogForDb = {
-        ...dog,
-        birthdate: dog.dateOfBirth,
-        registration_number: dog.registrationNumber,
-        image_url: dog.image,
-        // Initialize these fields with empty arrays if they don't exist
-        heatHistory: dog.heatHistory || [],
-        breedingHistory: dog.breedingHistory || {
-          breedings: [],
-          litters: [],
-          matings: []
-        },
-        owner_id: userId
-      };
-      
-      const { data, error } = await supabase
-        .from('dogs')
-        .insert([dogForDb])
-        .select()
-        .single();
-
-      if (error) throw new Error(error.message);
+      const newDog = await dogService.addDog(dog, userId!);
       
       toast({
         title: "Dog added",
@@ -113,8 +43,7 @@ export const useDogs = (userId: string | undefined) => {
       });
       
       await fetchDogs();
-      // Return the enriched dog to ensure all UI fields are present
-      return enrichDog(data);
+      return newDog;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       toast({
@@ -132,31 +61,7 @@ export const useDogs = (userId: string | undefined) => {
     try {
       setIsLoading(true);
       
-      // Convert UI field names to DB field names for update
-      const dbUpdates: any = { ...updates };
-      
-      // Handle field name mappings
-      if ('dateOfBirth' in updates) {
-        dbUpdates.birthdate = updates.dateOfBirth;
-        delete dbUpdates.dateOfBirth;
-      }
-      
-      if ('registrationNumber' in updates) {
-        dbUpdates.registration_number = updates.registrationNumber;
-        delete dbUpdates.registrationNumber;
-      }
-      
-      if ('image' in updates) {
-        dbUpdates.image_url = updates.image;
-        delete dbUpdates.image;
-      }
-      
-      const { error } = await supabase
-        .from('dogs')
-        .update(dbUpdates)
-        .eq('id', id);
-
-      if (error) throw new Error(error.message);
+      await dogService.updateDog(id, updates);
       
       toast({
         title: "Dog updated",
@@ -181,12 +86,8 @@ export const useDogs = (userId: string | undefined) => {
   const deleteDog = async (id: string) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase
-        .from('dogs')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw new Error(error.message);
+      
+      await dogService.deleteDog(id);
       
       toast({
         title: "Dog removed",
