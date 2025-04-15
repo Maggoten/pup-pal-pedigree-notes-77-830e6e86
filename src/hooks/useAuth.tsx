@@ -2,7 +2,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, RegisterData, AuthContextType } from '@/types/auth';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, Profile } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,12 +28,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .single();
         
         if (profile) {
+          const typedProfile = profile as unknown as Profile;
           setUser({
             id: session.user.id,
             email: session.user.email || '',
-            firstName: profile.first_name,
-            lastName: profile.last_name,
-            address: profile.address
+            firstName: typedProfile.first_name,
+            lastName: typedProfile.last_name,
+            address: typedProfile.address
           });
           setIsLoggedIn(true);
         }
@@ -55,12 +56,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .single();
         
         if (profile) {
+          const typedProfile = profile as unknown as Profile;
           setUser({
             id: session.user.id,
             email: session.user.email || '',
-            firstName: profile.first_name,
-            lastName: profile.last_name,
-            address: profile.address
+            firstName: typedProfile.first_name,
+            lastName: typedProfile.last_name,
+            address: typedProfile.address
           });
           setIsLoggedIn(true);
         }
@@ -101,12 +103,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .single();
         
         if (profile) {
+          const typedProfile = profile as unknown as Profile;
           setUser({
             id: data.user.id,
             email: data.user.email || '',
-            firstName: profile.first_name,
-            lastName: profile.last_name,
-            address: profile.address
+            firstName: typedProfile.first_name,
+            lastName: typedProfile.last_name,
+            address: typedProfile.address
           });
           setIsLoggedIn(true);
           return true;
@@ -125,7 +128,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Register the user with Supabase auth
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
-        password: userData.password
+        password: userData.password,
+        options: {
+          data: {
+            firstName: userData.firstName,
+            lastName: userData.lastName, 
+            address: userData.address
+          }
+        }
       });
       
       if (error) {
@@ -150,7 +160,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             subscription_status: 'active', // Default value for new users
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
-          });
+          } as unknown as Record<string, any>);
         
         if (profileError) {
           toast({

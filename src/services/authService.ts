@@ -1,5 +1,5 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
 
 // Handle login functionality
@@ -22,12 +22,13 @@ export const loginUser = async (email: string, password: string): Promise<User |
     .single();
   
   if (profile) {
+    const typedProfile = profile as unknown as Profile;
     return {
       id: data.user.id,
       email: data.user.email || '',
-      firstName: profile.first_name,
-      lastName: profile.last_name,
-      address: profile.address
+      firstName: typedProfile.first_name,
+      lastName: typedProfile.last_name,
+      address: typedProfile.address
     };
   }
   
@@ -60,7 +61,7 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
         subscription_status: 'active', // Default value for new users
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      });
+      } as unknown as Record<string, any>);
     
     if (profileError) {
       console.error("Profile creation error:", profileError);
