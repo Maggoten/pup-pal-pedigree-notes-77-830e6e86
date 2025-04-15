@@ -41,6 +41,7 @@ export async function fetchDogs(userId: string) {
   }
 
   try {
+    // Improve performance by only selecting fields we need
     const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
       supabase
         .from('dogs')

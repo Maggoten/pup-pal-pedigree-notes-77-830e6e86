@@ -4,9 +4,9 @@ import { Dog } from '@/types/dogs';
 import { useToast } from '@/components/ui/use-toast';
 import * as dogService from '@/services/dogService';
 
-// Simple in-memory cache
+// Simple in-memory cache with shorter duration
 const dogCache: Record<string, { data: Dog[], timestamp: number }> = {};
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes in milliseconds (reduced from 5)
 
 export const useDogs = (userId: string | undefined) => {
   const [dogs, setDogs] = useState<Dog[]>([]);
@@ -36,7 +36,7 @@ export const useDogs = (userId: string | undefined) => {
         setDogs(cachedData.data);
         setIsInitialLoad(false);
         setIsLoading(false);
-        return;
+        return cachedData.data;
       }
       
       console.log('Fetching fresh dog data');
@@ -49,6 +49,9 @@ export const useDogs = (userId: string | undefined) => {
       };
       
       setDogs(fetchedDogs);
+      setIsInitialLoad(false);
+      setIsLoading(false);
+      return fetchedDogs;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       console.error('Error fetching dogs:', errorMessage);
@@ -59,9 +62,10 @@ export const useDogs = (userId: string | undefined) => {
         description: errorMessage,
         variant: "destructive"
       });
-    } finally {
+      
       setIsInitialLoad(false);
       setIsLoading(false);
+      return [];
     }
   }, [userId, isInitialLoad, toast]);
 
@@ -71,13 +75,26 @@ export const useDogs = (userId: string | undefined) => {
       
       const newDog = await dogService.addDog(dog, userId!);
       
+      // Optimistic update - add to local state first
+      setDogs(prevDogs => {
+        const updatedDogs = [newDog, ...prevDogs];
+        
+        // Also update the cache
+        const cacheKey = `dogs-${userId}`;
+        dogCache[cacheKey] = {
+          data: updatedDogs,
+          timestamp: Date.now()
+        };
+        
+        return updatedDogs;
+      });
+      
       toast({
         title: "Dog added",
         description: `${dog.name} has been added successfully.`,
       });
       
-      // Force a fresh fetch to update the list
-      await fetchDogs(true);
+      setIsLoading(false);
       return newDog;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -88,9 +105,9 @@ export const useDogs = (userId: string | undefined) => {
         description: errorMessage,
         variant: "destructive"
       });
-      throw err;
-    } finally {
+      
       setIsLoading(false);
+      throw err;
     }
   };
 
@@ -98,28 +115,53 @@ export const useDogs = (userId: string | undefined) => {
     try {
       setIsLoading(true);
       
-      await dogService.updateDog(id, updates);
+      // Optimistic update - update local state first
+      const dogToUpdate = dogs.find(dog => dog.id === id);
+      if (dogToUpdate) {
+        const updatedDog = { ...dogToUpdate, ...updates };
+        
+        // Update local state
+        const updatedDogs = dogs.map(dog => 
+          dog.id === id ? updatedDog : dog
+        );
+        
+        setDogs(updatedDogs);
+        
+        // Also update the cache
+        const cacheKey = `dogs-${userId}`;
+        if (dogCache[cacheKey]) {
+          dogCache[cacheKey] = {
+            data: updatedDogs,
+            timestamp: Date.now()
+          };
+        }
+      }
+      
+      // Then perform the actual update
+      const result = await dogService.updateDog(id, updates);
       
       toast({
         title: "Dog updated",
         description: "Dog information has been updated successfully.",
       });
       
-      // Force a fresh fetch to update the list
-      await fetchDogs(true);
+      setIsLoading(false);
       return true;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       console.error('Error updating dog:', errorMessage);
+      
+      // Revert optimistic update by fetching fresh data
+      await fetchDogs(true);
       
       toast({
         title: "Error updating dog",
         description: errorMessage,
         variant: "destructive"
       });
-      return false;
-    } finally {
+      
       setIsLoading(false);
+      return false;
     }
   };
 
@@ -127,6 +169,20 @@ export const useDogs = (userId: string | undefined) => {
     try {
       setIsLoading(true);
       
+      // Optimistic delete - remove from local state first
+      const updatedDogs = dogs.filter(dog => dog.id !== id);
+      setDogs(updatedDogs);
+      
+      // Also update the cache
+      const cacheKey = `dogs-${userId}`;
+      if (dogCache[cacheKey]) {
+        dogCache[cacheKey] = {
+          data: updatedDogs,
+          timestamp: Date.now()
+        };
+      }
+      
+      // Then perform the actual delete
       await dogService.deleteDog(id);
       
       toast({
@@ -134,21 +190,23 @@ export const useDogs = (userId: string | undefined) => {
         description: "Dog has been removed successfully.",
       });
       
-      // Force a fresh fetch to update the list
-      await fetchDogs(true);
+      setIsLoading(false);
       return true;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       console.error('Error removing dog:', errorMessage);
+      
+      // Revert optimistic delete by fetching fresh data
+      await fetchDogs(true);
       
       toast({
         title: "Error removing dog",
         description: errorMessage,
         variant: "destructive"
       });
-      return false;
-    } finally {
+      
       setIsLoading(false);
+      return false;
     }
   };
 
