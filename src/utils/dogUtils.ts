@@ -7,6 +7,8 @@ export type DbDog = Database['public']['Tables']['dogs']['Insert'];
 
 /**
  * Enriches a dog record from Supabase with UI-specific fields and defaults
+ * @param dog - The raw dog data from Supabase
+ * @returns A fully-formed Dog object with all UI fields
  */
 export const enrichDog = (dog: any): Dog => {
   // Create default breeding history structure if missing
@@ -39,20 +41,24 @@ export const enrichDog = (dog: any): Dog => {
  * Sanitizes a dog object for database insertion/update by:
  * 1. Mapping UI field names to database field names
  * 2. Removing fields that don't exist in the database schema
+ * 
+ * @param dog - The Dog object from the UI
+ * @returns A database-compatible dog object ready for Supabase
  */
 export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   // Create a new object with only the fields that exist in the database
   const dbDog: Partial<DbDog> = {};
   
-  // Copy allowed fields directly
-  const allowedFields = [
+  // Define explicitly typed array of allowed fields
+  const allowedFields: (keyof DbDog)[] = [
     'id', 'owner_id', 'name', 'breed', 'gender', 
     'color', 'chip_number', 'notes', 'created_at', 'updated_at'
   ];
   
+  // Copy allowed fields directly
   allowedFields.forEach(field => {
     if (field in dog) {
-      dbDog[field as keyof DbDog] = dog[field as keyof Dog] as any;
+      dbDog[field] = dog[field as keyof Dog] as any;
     }
   });
   
