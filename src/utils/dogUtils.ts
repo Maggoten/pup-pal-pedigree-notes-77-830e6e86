@@ -58,8 +58,9 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   // Copy allowed fields directly
   allowedFields.forEach(field => {
     if (field in dog) {
-      // Use proper type assertion to ensure type safety
-      dbDog[field] = dog[field as keyof typeof dog] as any;
+      // Fix: explicitly cast the field value to the appropriate type
+      const value = dog[field as keyof typeof dog];
+      (dbDog[field] as typeof value) = value;
     }
   });
   
