@@ -22,6 +22,7 @@ export type Litter = {
 export type BreedingHistory = {
   litters?: Litter[];
   breedings?: Breeding[];
+  matings?: Breeding[]; // Adding matings for compatibility with ReminderService.ts
 };
 
 export interface Dog {

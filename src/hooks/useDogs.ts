@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Dog } from '@/types/dogs';
+import { Dog, BreedingHistory } from '@/types/dogs';
 import { useToast } from '@/components/ui/use-toast';
 
 export const useDogs = (userId: string | undefined) => {
@@ -33,24 +33,33 @@ export const useDogs = (userId: string | undefined) => {
         });
       } else {
         // Normalize gender field
-    const normalized = (data || []).map((dog): Dog => ({
-  ...dog,
+        const normalized = (data || []).map((dog): Dog => {
+          // Create default breeding history structure if missing
+          const defaultBreedingHistory: BreedingHistory = {
+            breedings: [],
+            litters: [],
+            matings: [] // Include matings for compatibility with ReminderService
+          };
 
-  // Aliases for UI
-  dateOfBirth: dog.birthdate,
-  image: dog.image_url,
+          return {
+            ...dog,
 
-  // Fallbacks for frontend-only fields
-  heatHistory: dog.heatHistory ?? [],
-  breedingHistory: dog.breedingHistory ?? [],
-  heatInterval: dog.heatInterval ?? undefined,
+            // Aliases for UI
+            dateOfBirth: dog.birthdate || '',
+            image: dog.image_url || '',
+            registrationNumber: dog.registration_number || '',
 
-  // Normalize gender just in case
-  gender: dog.gender === 'male' || dog.gender === 'female'
-    ? dog.gender
-    : (dog.gender?.toLowerCase() === 'male' ? 'male' : 'female')
-}));
+            // Fallbacks for frontend-only fields
+            heatHistory: dog.heatHistory || [],
+            breedingHistory: dog.breedingHistory || defaultBreedingHistory,
+            heatInterval: dog.heatInterval || undefined,
 
+            // Normalize gender just in case
+            gender: dog.gender === 'male' || dog.gender === 'female'
+              ? dog.gender
+              : (dog.gender?.toLowerCase() === 'male' ? 'male' : 'female')
+          };
+        });
 
         setDogs(normalized);
       }
@@ -70,9 +79,26 @@ export const useDogs = (userId: string | undefined) => {
   const addDog = async (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       setIsLoading(true);
+      
+      // Prepare dog data for Supabase by mapping UI field names to DB field names
+      const dogForDb = {
+        ...dog,
+        birthdate: dog.dateOfBirth,
+        registration_number: dog.registrationNumber,
+        image_url: dog.image,
+        // Initialize these fields with empty arrays if they don't exist
+        heatHistory: dog.heatHistory || [],
+        breedingHistory: dog.breedingHistory || {
+          breedings: [],
+          litters: [],
+          matings: []
+        },
+        owner_id: userId
+      };
+      
       const { data, error } = await supabase
         .from('dogs')
-        .insert([{ ...dog, owner_id: userId }])
+        .insert([dogForDb])
         .select()
         .single();
 
