@@ -19,16 +19,15 @@ export const loginUser = async (email: string, password: string): Promise<User |
     .from('profiles')
     .select('*')
     .eq('id', data.user.id)
-    .single();
+    .single() as { data: Profile | null };
   
   if (profile) {
-    const typedProfile = profile as unknown as Profile;
     return {
       id: data.user.id,
       email: data.user.email || '',
-      firstName: typedProfile.first_name,
-      lastName: typedProfile.last_name,
-      address: typedProfile.address
+      firstName: profile.first_name,
+      lastName: profile.last_name,
+      address: profile.address
     };
   }
   
