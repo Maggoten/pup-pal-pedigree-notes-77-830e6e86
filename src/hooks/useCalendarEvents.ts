@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
-import { Dog } from '@/context/DogsContext';
+import { Dog } from '@/types/dogs';
 import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
 import { getSampleEvents } from '@/data/sampleCalendarEvents';
 import { 

@@ -68,3 +68,6 @@ export const useDogs = () => {
   }
   return context;
 };
+
+// Export the Dog type from @/types/dogs
+export type { Dog } from '@/types/dogs';

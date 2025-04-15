@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Dog } from '@/context/DogsContext';
+import { Dog } from '@/types/dogs';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Heart, Image } from 'lucide-react';

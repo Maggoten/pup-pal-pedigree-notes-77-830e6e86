@@ -17,7 +17,8 @@ import { Form } from '@/components/ui/form';
 import DogFormFields, { dogFormSchema } from './DogFormFields';
 import HeatRecordsField from './HeatRecordsField';
 import { toast } from '@/components/ui/use-toast';
-import { useDogs, Dog } from '@/context/DogsContext';
+import { useDogs } from '@/context/DogsContext';
+import { Dog } from '@/types/dogs';
 
 interface AddDogDialogProps {
   open: boolean;
@@ -51,15 +52,18 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
       name: data.name,
       breed: data.breed,
       gender: data.gender,
-      dateOfBirth: data.dateOfBirth.toISOString(),
+      dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
       color: data.color,
       registrationNumber: data.registrationNumber,
       notes: data.notes || '',
       image: '/placeholder.svg', // Default image
       heatHistory: data.heatHistory?.map(heat => ({ 
-        date: heat.date.toISOString() 
+        date: heat.date.toISOString().split('T')[0] 
       })) || [],
-      heatInterval: data.heatInterval
+      heatInterval: data.heatInterval,
+      // Fields not in form but required by Dog type
+      owner_id: '', // Will be set by useDogs hook
+      breedingHistory: { litters: [], breedings: [] }
     };
 
     const result = await addDog(newDog);
