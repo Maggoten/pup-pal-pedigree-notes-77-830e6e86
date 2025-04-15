@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dogs';
 import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
+import { PostgrestSingleResponse, PostgrestResponse } from '@supabase/supabase-js';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // milliseconds
@@ -38,7 +39,7 @@ export async function fetchDogs(userId: string) {
   }
 
   try {
-    const { data, error } = await executeWithRetry(() => 
+    const response = await executeWithRetry(() => 
       supabase
         .from('dogs')
         .select('*')
@@ -46,15 +47,15 @@ export async function fetchDogs(userId: string) {
         .order('created_at', { ascending: false })
     );
 
-    console.log("🐶 FETCHED DOGS:", data);
+    console.log("🐶 FETCHED DOGS:", response.data);
 
-    if (error) {
-      console.error('Error fetching dogs:', error.message);
-      throw new Error(error.message);
+    if (response.error) {
+      console.error('Error fetching dogs:', response.error.message);
+      throw new Error(response.error.message);
     }
     
     // Apply enrichDog to normalize each dog record
-    return (data || []).map(enrichDog);
+    return (response.data || []).map(enrichDog);
   } catch (error) {
     console.error('Failed to fetch dogs:', error);
     throw new Error(error instanceof Error ? error.message : 'Failed to fetch dogs');
@@ -81,7 +82,7 @@ export async function addDog(
   
   try {
     // The insert method expects an array of objects
-    const { data, error } = await executeWithRetry(() => 
+    const response = await executeWithRetry(() => 
       supabase
         .from('dogs')
         .insert([dogForDb as DbDog])
@@ -89,13 +90,13 @@ export async function addDog(
         .single()
     );
 
-    if (error) {
-      console.error('Error adding dog:', error.message);
-      throw new Error(error.message);
+    if (response.error) {
+      console.error('Error adding dog:', response.error.message);
+      throw new Error(response.error.message);
     }
     
     // Return the enriched dog to ensure all UI fields are present
-    return enrichDog(data);
+    return enrichDog(response.data);
   } catch (error) {
     console.error('Failed to add dog:', error);
     throw new Error(error instanceof Error ? error.message : 'Failed to add dog');
@@ -115,16 +116,16 @@ export async function updateDog(id: string, updates: Partial<Dog>) {
   const dbUpdates = sanitizeDogForDb(updates);
   
   try {
-    const { error } = await executeWithRetry(() => 
+    const response = await executeWithRetry(() => 
       supabase
         .from('dogs')
         .update(dbUpdates)
         .eq('id', id)
     );
 
-    if (error) {
-      console.error('Error updating dog:', error.message);
-      throw new Error(error.message);
+    if (response.error) {
+      console.error('Error updating dog:', response.error.message);
+      throw new Error(response.error.message);
     }
     
     return true;
@@ -144,16 +145,16 @@ export async function deleteDog(id: string) {
   }
 
   try {
-    const { error } = await executeWithRetry(() => 
+    const response = await executeWithRetry(() => 
       supabase
         .from('dogs')
         .delete()
         .eq('id', id)
     );
 
-    if (error) {
-      console.error('Error deleting dog:', error.message);
-      throw new Error(error.message);
+    if (response.error) {
+      console.error('Error deleting dog:', response.error.message);
+      throw new Error(response.error.message);
     }
     
     return true;
