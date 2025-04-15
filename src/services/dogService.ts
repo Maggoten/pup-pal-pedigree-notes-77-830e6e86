@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dogs';
-import { enrichDog, sanitizeDogForDb } from '@/utils/dogUtils';
+import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
 
 /**
  * Fetches all dogs for a specific user
@@ -38,7 +38,7 @@ export async function addDog(
   
   const { data, error } = await supabase
     .from('dogs')
-    .insert([dogForDb])
+    .insert(dogForDb)
     .select()
     .single();
 

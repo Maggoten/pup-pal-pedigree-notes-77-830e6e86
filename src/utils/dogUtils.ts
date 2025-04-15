@@ -1,5 +1,9 @@
 
 import { Dog, BreedingHistory } from '@/types/dogs';
+import { Database } from '@/integrations/supabase/types';
+
+// Define a type for dogs in the database format
+export type DbDog = Database['public']['Tables']['dogs']['Insert'];
 
 /**
  * Enriches a dog record from Supabase with UI-specific fields and defaults
@@ -36,9 +40,9 @@ export const enrichDog = (dog: any): Dog => {
  * 1. Mapping UI field names to database field names
  * 2. Removing fields that don't exist in the database schema
  */
-export const sanitizeDogForDb = (dog: Partial<Dog>): Record<string, any> => {
+export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   // Create a new object with only the fields that exist in the database
-  const dbDog: Record<string, any> = {};
+  const dbDog: Partial<DbDog> = {};
   
   // Copy allowed fields directly
   const allowedFields = [
@@ -48,7 +52,7 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Record<string, any> => {
   
   allowedFields.forEach(field => {
     if (field in dog) {
-      dbDog[field] = dog[field as keyof Dog];
+      dbDog[field as keyof DbDog] = dog[field as keyof Dog] as any;
     }
   });
   
@@ -67,23 +71,23 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Record<string, any> => {
   
   // For JSON fields that do exist in the database, we need to handle them specially
   if ('heatHistory' in dog) {
-    dbDog.heatHistory = dog.heatHistory;
+    (dbDog as any).heatHistory = dog.heatHistory;
   }
   
   if ('breedingHistory' in dog) {
-    dbDog.breedingHistory = dog.breedingHistory;
+    (dbDog as any).breedingHistory = dog.breedingHistory;
   }
   
   if ('heatInterval' in dog) {
-    dbDog.heatInterval = dog.heatInterval;
+    (dbDog as any).heatInterval = dog.heatInterval;
   }
   
   if ('dewormingDate' in dog) {
-    dbDog.dewormingDate = dog.dewormingDate;
+    (dbDog as any).dewormingDate = dog.dewormingDate;
   }
   
   if ('vaccinationDate' in dog) {
-    dbDog.vaccinationDate = dog.vaccinationDate;
+    (dbDog as any).vaccinationDate = dog.vaccinationDate;
   }
   
   return dbDog;
