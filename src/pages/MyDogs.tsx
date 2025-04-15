@@ -7,18 +7,18 @@ import { Button } from '@/components/ui/button';
 import { useDogs, DogsProvider } from '@/context/DogsContext';
 import DogList from '@/components/DogList';
 import DogDetails from '@/components/dogs/DogDetails';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, RefreshCw } from 'lucide-react';
 import AddDogDialog from '@/components/dogs/AddDogDialog';
 
 const MyDogsContent: React.FC = () => {
-  const { dogs, activeDog, addDog } = useDogs();
+  const { dogs, activeDog, refreshDogs, loading } = useDogs();
   const [showAddDogDialog, setShowAddDogDialog] = useState(false);
   
   const females = dogs.filter(dog => dog.gender === 'female');
   const males = dogs.filter(dog => dog.gender === 'male');
 
-  const handleAddDog = (dog: any) => {
-    addDog(dog);
+  const handleRefresh = () => {
+    refreshDogs();
   };
 
   return (
@@ -30,8 +30,22 @@ const MyDogsContent: React.FC = () => {
         <DogDetails dog={activeDog} />
       ) : (
         <>
-          <div className="flex justify-end items-center mb-4">
-            <Button onClick={() => setShowAddDogDialog(true)} className="flex items-center gap-1.5">
+          <div className="flex justify-between items-center mb-4">
+            <Button 
+              variant="outline" 
+              onClick={handleRefresh} 
+              className="flex items-center gap-1.5"
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            
+            <Button 
+              onClick={() => setShowAddDogDialog(true)} 
+              className="flex items-center gap-1.5"
+              disabled={loading}
+            >
               <PlusCircle className="h-4 w-4" />
               Add New Dog
             </Button>
@@ -77,7 +91,6 @@ const MyDogsContent: React.FC = () => {
       <AddDogDialog 
         open={showAddDogDialog} 
         onOpenChange={setShowAddDogDialog} 
-        onAddDog={handleAddDog} 
       />
     </PageLayout>
   );

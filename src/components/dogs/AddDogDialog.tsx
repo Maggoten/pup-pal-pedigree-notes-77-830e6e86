@@ -3,7 +3,6 @@ import React from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { v4 as uuidv4 } from 'uuid';
 import { 
   Dialog,
   DialogContent,
@@ -18,19 +17,19 @@ import { Form } from '@/components/ui/form';
 import DogFormFields, { dogFormSchema } from './DogFormFields';
 import HeatRecordsField from './HeatRecordsField';
 import { toast } from '@/components/ui/use-toast';
-import { Dog } from '@/context/DogsContext';
+import { useDogs, Dog } from '@/context/DogsContext';
 
 interface AddDogDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddDog: (dog: Dog) => void;
 }
 
 const AddDogDialog: React.FC<AddDogDialogProps> = ({ 
   open, 
-  onOpenChange,
-  onAddDog 
+  onOpenChange
 }) => {
+  const { addDog, loading } = useDogs();
+  
   const form = useForm<z.infer<typeof dogFormSchema>>({
     resolver: zodResolver(dogFormSchema),
     defaultValues: {
@@ -46,10 +45,9 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
     }
   });
 
-  const handleSubmit = (data: z.infer<typeof dogFormSchema>) => {
-    // Convert dates to ISO strings for storage
-    const newDog: Dog = {
-      id: uuidv4(),
+  const handleSubmit = async (data: z.infer<typeof dogFormSchema>) => {
+    // Convert form data to Dog model
+    const newDog = {
       name: data.name,
       breed: data.breed,
       gender: data.gender,
@@ -64,14 +62,12 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
       heatInterval: data.heatInterval
     };
 
-    onAddDog(newDog);
-    onOpenChange(false);
-    form.reset();
+    const result = await addDog(newDog);
     
-    toast({
-      title: "Dog Added",
-      description: `${data.name} has been added to your dogs.`
-    });
+    if (result) {
+      onOpenChange(false);
+      form.reset();
+    }
   };
 
   return (
@@ -97,9 +93,11 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
             
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="button" variant="outline">Cancel</Button>
+                <Button type="button" variant="outline" disabled={loading}>Cancel</Button>
               </DialogClose>
-              <Button type="submit">Add Dog</Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? 'Adding...' : 'Add Dog'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

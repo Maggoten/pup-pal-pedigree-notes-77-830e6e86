@@ -10,37 +10,65 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Dog as DogIcon, ArrowLeft } from 'lucide-react';
+import { Dog as DogIcon, ArrowLeft, Trash2 } from 'lucide-react';
 import { Dog, useDogs } from '@/context/DogsContext';
 import DogInfoDisplay from './DogInfoDisplay';
 import DogEditForm from './DogEditForm';
 import { DogFormValues } from './DogFormFields';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface DogDetailsProps {
   dog: Dog;
 }
 
 const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
-  const { setActiveDog, updateDog } = useDogs();
+  const { setActiveDog, updateDog, removeDog, loading } = useDogs();
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   const handleBack = () => {
     setActiveDog(null);
   };
 
-  const handleSave = (values: DogFormValues) => {
+  const handleSave = async (values: DogFormValues) => {
+    // Convert date objects to ISO strings for storage
     const formattedValues = {
-      ...values,
-      dateOfBirth: format(values.dateOfBirth, 'yyyy-MM-dd'),
-      dewormingDate: values.dewormingDate ? format(values.dewormingDate, 'yyyy-MM-dd') : undefined,
-      vaccinationDate: values.vaccinationDate ? format(values.vaccinationDate, 'yyyy-MM-dd') : undefined,
+      name: values.name,
+      breed: values.breed,
+      gender: values.gender,
+      dateOfBirth: values.dateOfBirth.toISOString().split('T')[0],
+      color: values.color,
+      registrationNumber: values.registrationNumber,
+      notes: values.notes,
+      image: dog.image, // Preserve existing image if not changed
+      dewormingDate: values.dewormingDate ? values.dewormingDate.toISOString().split('T')[0] : undefined,
+      vaccinationDate: values.vaccinationDate ? values.vaccinationDate.toISOString().split('T')[0] : undefined,
       heatHistory: values.heatHistory ? values.heatHistory.map(heat => ({
-        date: format(heat.date, 'yyyy-MM-dd')
+        date: heat.date.toISOString().split('T')[0]
       })) : undefined,
+      heatInterval: values.heatInterval
     };
     
-    updateDog(dog.id, formattedValues);
-    setIsEditing(false);
+    const success = await updateDog(dog.id, formattedValues);
+    if (success) {
+      setIsEditing(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    const success = await removeDog(dog.id);
+    if (success) {
+      setActiveDog(null);
+    }
   };
 
   return (
@@ -66,19 +94,49 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
             <DogEditForm 
               dog={dog} 
               onCancel={() => setIsEditing(false)} 
-              onSave={handleSave} 
+              onSave={handleSave}
+              isLoading={loading}
             />
           ) : (
             <DogInfoDisplay dog={dog} />
           )}
         </CardContent>
         
-        <CardFooter className="flex justify-end">
-          {!isEditing && (
-            <Button onClick={() => setIsEditing(true)}>Edit</Button>
-          )}
+        <CardFooter className="flex justify-between">
+          <Button
+            variant="destructive"
+            onClick={() => setShowDeleteDialog(true)}
+            disabled={loading}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </Button>
+          
+          {!isEditing ? (
+            <Button onClick={() => setIsEditing(true)} disabled={loading}>Edit</Button>
+          ) : null}
         </CardFooter>
       </Card>
+      
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete {dog.name} from your records.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

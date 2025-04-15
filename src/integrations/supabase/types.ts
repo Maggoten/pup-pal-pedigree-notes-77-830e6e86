@@ -9,6 +9,54 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      dogs: {
+        Row: {
+          birthdate: string | null
+          breed: string | null
+          chip_number: string | null
+          color: string | null
+          created_at: string | null
+          gender: string | null
+          id: string
+          image_url: string | null
+          name: string
+          notes: string | null
+          owner_id: string | null
+          registration_number: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          birthdate?: string | null
+          breed?: string | null
+          chip_number?: string | null
+          color?: string | null
+          created_at?: string | null
+          gender?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          notes?: string | null
+          owner_id?: string | null
+          registration_number?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          birthdate?: string | null
+          breed?: string | null
+          chip_number?: string | null
+          color?: string | null
+          created_at?: string | null
+          gender?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          notes?: string | null
+          owner_id?: string | null
+          registration_number?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null

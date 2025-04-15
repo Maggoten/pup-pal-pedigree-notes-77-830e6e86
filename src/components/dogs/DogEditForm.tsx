@@ -5,19 +5,20 @@ import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from '@/components/ui/use-toast';
 import { Dog } from '@/context/DogsContext';
 import DogFormFields, { dogFormSchema, DogFormValues } from './DogFormFields';
 import DogImageField from './DogImageField';
 import HeatRecordsField from './HeatRecordsField';
+import { Loader2 } from 'lucide-react';
 
 interface DogEditFormProps {
   dog: Dog;
   onCancel: () => void;
   onSave: (values: DogFormValues) => void;
+  isLoading?: boolean;
 }
 
-const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
+const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isLoading = false }) => {
   // Transform date strings to Date objects for form
   const transformHeatHistory = dog.heatHistory 
     ? dog.heatHistory.map(heat => ({ date: new Date(heat.date) }))
@@ -43,11 +44,6 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
   
   const handleSubmit = (values: DogFormValues) => {
     onSave(values);
-    
-    toast({
-      title: "Dog updated",
-      description: `${values.name}'s information has been updated.`,
-    });
   };
 
   const handleImageChange = (imageBase64: string) => {
@@ -79,10 +75,20 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave }) => {
             type="button" 
             variant="outline" 
             onClick={onCancel}
+            disabled={isLoading}
           >
             Cancel
           </Button>
-          <Button type="submit">Save Changes</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Save Changes'
+            )}
+          </Button>
         </div>
       </form>
     </Form>
