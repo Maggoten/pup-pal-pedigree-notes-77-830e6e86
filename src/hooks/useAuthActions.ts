@@ -62,8 +62,9 @@ export const useAuthActions = () => {
       
       if (data && data.user) {
         // Insert the user's profile information
-        const { error: profileError } = await supabase
-          .from('profiles')
+        // Use type assertion to fix the TypeScript error
+        const { error: profileError } = await (supabase
+          .from('profiles') as any)
           .insert({
             id: data.user.id,
             email: userData.email,
@@ -73,7 +74,7 @@ export const useAuthActions = () => {
             subscription_status: 'active', // Default value for new users
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
-          } as unknown as Record<string, any>);
+          } as Profile);
         
         if (profileError) {
           toast({
@@ -119,13 +120,14 @@ export const useAuthActions = () => {
   // Get user profile from database
   const getUserProfile = async (userId: string): Promise<Profile | null> => {
     try {
-      const { data } = await supabase
-        .from('profiles')
+      // Use type assertion to fix the TypeScript error
+      const { data } = await (supabase
+        .from('profiles') as any)
         .select('*')
         .eq('id', userId)
-        .single() as { data: Profile | null };
+        .single();
       
-      return data;
+      return data as Profile | null;
     } catch (error) {
       console.error("Error fetching user profile:", error);
       return null;

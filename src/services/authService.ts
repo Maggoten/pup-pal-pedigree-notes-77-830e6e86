@@ -15,8 +15,9 @@ export const loginUser = async (email: string, password: string): Promise<User |
   }
   
   // Get user profile from database
-  const { data: profile } = await supabase
-    .from('profiles')
+  // Use type assertion to fix the TypeScript error
+  const { data: profile } = await (supabase
+    .from('profiles') as any)
     .select('*')
     .eq('id', data.user.id)
     .single() as { data: Profile | null };
@@ -49,8 +50,9 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
     }
     
     // Insert the user's profile information
-    const { error: profileError } = await supabase
-      .from('profiles')
+    // Use type assertion to fix the TypeScript error
+    const { error: profileError } = await (supabase
+      .from('profiles') as any)
       .insert({
         id: data.user.id,
         email: userData.email,
@@ -60,7 +62,7 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
         subscription_status: 'active', // Default value for new users
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      } as unknown as Record<string, any>);
+      } as Profile);
     
     if (profileError) {
       console.error("Profile creation error:", profileError);
