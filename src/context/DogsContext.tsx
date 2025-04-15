@@ -34,11 +34,18 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     dogs, 
     isLoading: loading, 
     error, 
-    fetchDogs: refreshDogs, 
+    fetchDogs, 
     addDog,
     updateDog,
     deleteDog: removeDog 
   } = useDogsHook(user?.id);
+
+  // Create a wrapped function that doesn't return the dogs array
+  const wrappedRefreshDogs = async (): Promise<void> => {
+    await fetchDogs();
+    // Explicitly return void
+    return;
+  };
 
   // Reset active dog if it no longer exists in the list
   useEffect(() => {
@@ -54,7 +61,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     error,
     activeDog,
     setActiveDog,
-    refreshDogs,
+    refreshDogs: wrappedRefreshDogs,
     addDog,
     updateDog,
     removeDog
