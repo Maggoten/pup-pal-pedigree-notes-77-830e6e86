@@ -39,15 +39,13 @@ export async function fetchDogs(userId: string) {
   }
 
   try {
-    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => {
-      return Promise.resolve(
-        supabase
-          .from('dogs')
-          .select('*')
-          .eq('owner_id', userId)
-          .order('created_at', { ascending: false })
-      );
-    });
+    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
+      supabase
+        .from('dogs')
+        .select('*')
+        .eq('owner_id', userId)
+        .order('created_at', { ascending: false })
+    );
 
     console.log("🐶 FETCHED DOGS:", response.data);
 
@@ -56,7 +54,6 @@ export async function fetchDogs(userId: string) {
       throw new Error(response.error.message);
     }
     
-    // Apply enrichDog to normalize each dog record
     return (response.data || []).map(enrichDog);
   } catch (error) {
     console.error('Failed to fetch dogs:', error);
@@ -76,30 +73,25 @@ export async function addDog(
     throw new Error('User ID is required');
   }
 
-  // Sanitize dog data for database by removing UI-only fields and mapping field names
   const dogForDb = sanitizeDogForDb({
     ...dog,
     owner_id: userId
   });
   
   try {
-    // The insert method expects an array of objects
-    const response = await executeWithRetry<PostgrestSingleResponse<DbDog>>(() => {
-      return Promise.resolve(
-        supabase
-          .from('dogs')
-          .insert([dogForDb as DbDog])
-          .select()
-          .single()
-      );
-    });
+    const response = await executeWithRetry<PostgrestSingleResponse<DbDog>>(() => 
+      supabase
+        .from('dogs')
+        .insert([dogForDb as DbDog])
+        .select()
+        .single()
+    );
 
     if (response.error) {
       console.error('Error adding dog:', response.error.message);
       throw new Error(response.error.message);
     }
     
-    // Return the enriched dog to ensure all UI fields are present
     return enrichDog(response.data);
   } catch (error) {
     console.error('Failed to add dog:', error);
@@ -116,18 +108,15 @@ export async function updateDog(id: string, updates: Partial<Dog>) {
     throw new Error('Dog ID is required');
   }
 
-  // Sanitize updates for database
   const dbUpdates = sanitizeDogForDb(updates);
   
   try {
-    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => {
-      return Promise.resolve(
-        supabase
-          .from('dogs')
-          .update(dbUpdates)
-          .eq('id', id)
-      );
-    });
+    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
+      supabase
+        .from('dogs')
+        .update(dbUpdates)
+        .eq('id', id)
+    );
 
     if (response.error) {
       console.error('Error updating dog:', response.error.message);
@@ -151,14 +140,12 @@ export async function deleteDog(id: string) {
   }
 
   try {
-    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => {
-      return Promise.resolve(
-        supabase
-          .from('dogs')
-          .delete()
-          .eq('id', id)
-      );
-    });
+    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
+      supabase
+        .from('dogs')
+        .delete()
+        .eq('id', id)
+    );
 
     if (response.error) {
       console.error('Error deleting dog:', response.error.message);
