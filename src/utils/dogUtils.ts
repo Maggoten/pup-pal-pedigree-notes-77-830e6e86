@@ -30,3 +30,61 @@ export const enrichDog = (dog: any): Dog => {
       : (dog.gender?.toLowerCase() === 'male' ? 'male' : 'female')
   };
 };
+
+/**
+ * Sanitizes a dog object for database insertion/update by:
+ * 1. Mapping UI field names to database field names
+ * 2. Removing fields that don't exist in the database schema
+ */
+export const sanitizeDogForDb = (dog: Partial<Dog>): Record<string, any> => {
+  // Create a new object with only the fields that exist in the database
+  const dbDog: Record<string, any> = {};
+  
+  // Copy allowed fields directly
+  const allowedFields = [
+    'id', 'owner_id', 'name', 'breed', 'gender', 
+    'color', 'chip_number', 'notes', 'created_at', 'updated_at'
+  ];
+  
+  allowedFields.forEach(field => {
+    if (field in dog) {
+      dbDog[field] = dog[field as keyof Dog];
+    }
+  });
+  
+  // Map UI field names to database field names
+  if ('dateOfBirth' in dog) {
+    dbDog.birthdate = dog.dateOfBirth;
+  }
+  
+  if ('registrationNumber' in dog) {
+    dbDog.registration_number = dog.registrationNumber;
+  }
+  
+  if ('image' in dog) {
+    dbDog.image_url = dog.image;
+  }
+  
+  // For JSON fields that do exist in the database, we need to handle them specially
+  if ('heatHistory' in dog) {
+    dbDog.heatHistory = dog.heatHistory;
+  }
+  
+  if ('breedingHistory' in dog) {
+    dbDog.breedingHistory = dog.breedingHistory;
+  }
+  
+  if ('heatInterval' in dog) {
+    dbDog.heatInterval = dog.heatInterval;
+  }
+  
+  if ('dewormingDate' in dog) {
+    dbDog.dewormingDate = dog.dewormingDate;
+  }
+  
+  if ('vaccinationDate' in dog) {
+    dbDog.vaccinationDate = dog.vaccinationDate;
+  }
+  
+  return dbDog;
+};

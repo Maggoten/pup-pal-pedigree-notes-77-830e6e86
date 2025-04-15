@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dogs';
-import { enrichDog } from '@/utils/dogUtils';
+import { enrichDog, sanitizeDogForDb } from '@/utils/dogUtils';
 
 /**
  * Fetches all dogs for a specific user
@@ -30,21 +30,11 @@ export async function addDog(
   dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>, 
   userId: string
 ) {
-  // Prepare dog data for Supabase by mapping UI field names to DB field names
-  const dogForDb = {
+  // Sanitize dog data for database by removing UI-only fields and mapping field names
+  const dogForDb = sanitizeDogForDb({
     ...dog,
-    birthdate: dog.dateOfBirth,
-    registration_number: dog.registrationNumber,
-    image_url: dog.image,
-    // Initialize these fields with empty arrays if they don't exist
-    heatHistory: dog.heatHistory || [],
-    breedingHistory: dog.breedingHistory || {
-      breedings: [],
-      litters: [],
-      matings: []
-    },
     owner_id: userId
-  };
+  });
   
   const { data, error } = await supabase
     .from('dogs')
@@ -62,24 +52,8 @@ export async function addDog(
  * Updates an existing dog in the database
  */
 export async function updateDog(id: string, updates: Partial<Dog>) {
-  // Convert UI field names to DB field names for update
-  const dbUpdates: any = { ...updates };
-  
-  // Handle field name mappings
-  if ('dateOfBirth' in updates) {
-    dbUpdates.birthdate = updates.dateOfBirth;
-    delete dbUpdates.dateOfBirth;
-  }
-  
-  if ('registrationNumber' in updates) {
-    dbUpdates.registration_number = updates.registrationNumber;
-    delete dbUpdates.registrationNumber;
-  }
-  
-  if ('image' in updates) {
-    dbUpdates.image_url = updates.image;
-    delete dbUpdates.image;
-  }
+  // Sanitize updates for database
+  const dbUpdates = sanitizeDogForDb(updates);
   
   const { error } = await supabase
     .from('dogs')
