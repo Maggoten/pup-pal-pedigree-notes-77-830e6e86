@@ -4,8 +4,8 @@ import { Dog } from '@/types/dogs';
 import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
 import { PostgrestSingleResponse, PostgrestResponse } from '@supabase/supabase-js';
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // milliseconds
+const MAX_RETRIES = 2; // Reduced from 3
+const RETRY_DELAY = 800; // Reduced from 1000ms for faster recovery
 
 /**
  * Helper function to implement retry logic for Supabase requests
@@ -41,7 +41,8 @@ export async function fetchDogs(userId: string) {
   }
 
   try {
-    // Improve performance by only selecting fields we need
+    console.log(`Fetching dogs for user ${userId}`);
+    // Improve performance by only selecting fields we need and using an index on owner_id
     const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
       supabase
         .from('dogs')
@@ -55,6 +56,7 @@ export async function fetchDogs(userId: string) {
       throw new Error(response.error.message);
     }
     
+    console.log(`Retrieved ${response.data?.length || 0} dogs from database`);
     return (response.data || []).map(enrichDog);
   } catch (error) {
     console.error('Failed to fetch dogs:', error);
