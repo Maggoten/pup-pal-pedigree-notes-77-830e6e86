@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useDogs as useDogsHook } from '@/hooks/useDogs';
 import { useAuth } from '@/hooks/useAuth';
 import { Dog } from '@/types/dogs';
@@ -39,6 +39,13 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     updateDog,
     deleteDog: removeDog 
   } = useDogsHook(user?.id);
+
+  // Reset active dog if it no longer exists in the list
+  useEffect(() => {
+    if (activeDog && !dogs.some(dog => dog.id === activeDog.id)) {
+      setActiveDog(null);
+    }
+  }, [dogs, activeDog]);
 
   // Create the context value object
   const value: DogsContextType = {
