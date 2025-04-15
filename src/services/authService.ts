@@ -33,13 +33,20 @@ export const loginUser = async (email: string, password: string): Promise<User |
   return null;
 };
 
-// Handle registration functionality
+// Handle registration functionality with improved implementation
 export const registerUser = async (userData: RegisterData): Promise<User | null> => {
   try {
     // Register the user with Supabase auth
     const { data, error } = await supabase.auth.signUp({
       email: userData.email,
-      password: userData.password
+      password: userData.password,
+      options: {
+        data: {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          address: userData.address
+        }
+      }
     });
     
     if (error || !data.user) {
@@ -47,25 +54,7 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
       return null;
     }
     
-    // Insert the user's profile information
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: data.user.id,
-        email: userData.email,
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        address: userData.address,
-        subscription_status: 'active', // Default value for new users
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
-    
-    if (profileError) {
-      console.error("Profile creation error:", profileError);
-      return null;
-    }
-    
+    // The profile is created automatically via database trigger
     return {
       id: data.user.id,
       email: userData.email,

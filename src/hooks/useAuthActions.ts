@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
@@ -34,23 +33,22 @@ export const useAuthActions = () => {
     }
   };
 
-  // Register function
+  // Register function with improved implementation
   const register = async (userData: RegisterData): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Register the user with Supabase auth
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
         options: {
           data: {
             firstName: userData.firstName,
-            lastName: userData.lastName, 
+            lastName: userData.lastName,
             address: userData.address
           }
         }
       });
-      
+
       if (error) {
         toast({
           title: "Registration failed",
@@ -59,35 +57,14 @@ export const useAuthActions = () => {
         });
         return false;
       }
-      
-      if (data && data.user) {
-        // Insert the user's profile information
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            email: userData.email,
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-            address: userData.address,
-            subscription_status: 'active', // Default value for new users
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
-        
-        if (profileError) {
-          toast({
-            title: "Profile creation failed",
-            description: profileError.message,
-            variant: "destructive"
-          });
-          return false;
-        }
-        
-        return true;
-      }
-      
-      return false;
+
+      toast({
+        title: "Almost done!",
+        description: "Check your inbox to confirm your email.",
+        variant: "default"
+      });
+
+      return true;
     } catch (error) {
       console.error("Registration error:", error);
       return false;
