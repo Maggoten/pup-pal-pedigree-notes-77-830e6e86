@@ -11,13 +11,14 @@ const RETRY_DELAY = 1000; // milliseconds
  * Helper function to implement retry logic for Supabase requests
  */
 async function executeWithRetry<T>(
-  operation: () => Promise<T> | any,
+  operation: () => any,
   retries = MAX_RETRIES,
   delay = RETRY_DELAY
 ): Promise<T> {
   try {
-    // Convert the result to a proper promise to handle Supabase query builders
-    return await Promise.resolve(operation());
+    // Execute the operation directly - Supabase query builders already return Promise-like objects
+    const result = await operation();
+    return result;
   } catch (error) {
     if (retries <= 0) {
       console.error('Max retries reached, operation failed:', error);
@@ -47,8 +48,6 @@ export async function fetchDogs(userId: string) {
         .eq('owner_id', userId)
         .order('created_at', { ascending: false })
     );
-
-    console.log("🐶 FETCHED DOGS:", response.data);
 
     if (response.error) {
       console.error('Error fetching dogs:', response.error.message);
@@ -117,6 +116,7 @@ export async function updateDog(id: string, updates: Partial<Dog>) {
         .from('dogs')
         .update(dbUpdates)
         .eq('id', id)
+        .select()
     );
 
     if (response.error) {
@@ -124,7 +124,8 @@ export async function updateDog(id: string, updates: Partial<Dog>) {
       throw new Error(response.error.message);
     }
     
-    return true;
+    // Return the updated dog data if available
+    return response.data?.[0] ? enrichDog(response.data[0]) : true;
   } catch (error) {
     console.error('Failed to update dog:', error);
     throw new Error(error instanceof Error ? error.message : 'Failed to update dog');
