@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { Dog } from '@/types/dogs';
 import { useToast } from '@/components/ui/use-toast';
@@ -59,10 +58,9 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       return { previousDogs };
     },
     onSuccess: (data, variables) => {
-      // Immediately invalidate the query to get fresh data, but don't refetch if we just did
+      // Immediately invalidate the query to get fresh data
       queryClient.invalidateQueries({ 
-        queryKey: ['dogs', userId],
-        refetchActive: false
+        queryKey: ['dogs', userId]
       });
       
       toast({
@@ -106,10 +104,9 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       return { previousDogs };
     },
     onSuccess: () => {
-      // Immediately invalidate the query but don't force a refetch
+      // Immediately invalidate the query
       queryClient.invalidateQueries({ 
-        queryKey: ['dogs', userId],
-        refetchActive: false
+        queryKey: ['dogs', userId]
       });
       
       toast({
