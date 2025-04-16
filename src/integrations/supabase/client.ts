@@ -6,10 +6,32 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://yqcgqriecxtppuvcguyj.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2dxcmllY3h0cHB1dmNndXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTI4NjksImV4cCI6MjA2MDI2ODg2OX0.PD0W-rLpQBHUGm9--nv4-3PVYQFMAsRujmExBDuP5oA";
 
+// Log configuration details for debugging
+console.log('Supabase client configuration:', { 
+  url: SUPABASE_URL,
+  keyLength: SUPABASE_PUBLISHABLE_KEY?.length ?? 0,
+  isConfigured: !!SUPABASE_URL && !!SUPABASE_PUBLISHABLE_KEY
+});
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 // Define profile type that can be used in the app
 export type Profile = Database['public']['Tables']['profiles']['Row'];
 
+// Create and export the supabase client
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+// Setup a health check for the Supabase connection
+(async () => {
+  try {
+    const { error } = await supabase.auth.getSession();
+    if (error) {
+      console.error('Supabase connection check failed:', error.message);
+    } else {
+      console.log('Supabase connection check successful');
+    }
+  } catch (err) {
+    console.error('Supabase client initialization error:', err);
+  }
+})();

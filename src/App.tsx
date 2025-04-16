@@ -15,47 +15,60 @@ import AuthGuard from "./components/AuthGuard";
 import { AuthProvider } from "./hooks/useAuth";
 import { DogsProvider } from "./context/DogsContext";
 import { getFirstActivePregnancy } from "./services/PregnancyService";
+import ErrorBoundary from "./components/ErrorBoundary";
 
-const queryClient = new QueryClient();
+// Configure React Query with error handling
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      onError: (error) => {
+        console.error('React Query error:', error);
+      }
+    }
+  }
+});
 
 const App = () => {
   // Get the first active pregnancy ID for the pregnancy link
   const firstPregnancyId = getFirstActivePregnancy() || "none";
   
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AuthGuard>
-              <DogsProvider>
-                <Routes>
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/" element={<Index />} />
-                  <Route path="/my-dogs" element={<MyDogs />} />
-                  <Route path="/planned-litters" element={<PlannedLitters />} />
-                  {/* Add a generic pregnancy route that redirects to the first active pregnancy or shows a message */}
-                  <Route 
-                    path="/pregnancy" 
-                    element={
-                      firstPregnancyId !== "none" ? 
-                        <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
-                        <PregnancyDetails />
-                    } 
-                  />
-                  <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
-                  <Route path="/my-litters" element={<MyLitters />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </DogsProvider>
-            </AuthGuard>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AuthGuard>
+                <DogsProvider>
+                  <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/" element={<Index />} />
+                    <Route path="/my-dogs" element={<MyDogs />} />
+                    <Route path="/planned-litters" element={<PlannedLitters />} />
+                    {/* Add a generic pregnancy route that redirects to the first active pregnancy or shows a message */}
+                    <Route 
+                      path="/pregnancy" 
+                      element={
+                        firstPregnancyId !== "none" ? 
+                          <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
+                          <PregnancyDetails />
+                      } 
+                    />
+                    <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
+                    <Route path="/my-litters" element={<MyLitters />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </DogsProvider>
+              </AuthGuard>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 
