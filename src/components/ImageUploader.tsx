@@ -3,10 +3,12 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ImageIcon, UploadIcon, XIcon } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ImageUploaderProps {
   currentImage?: string;
-  onImageChange: (imageBase64: string) => void;
+  onImageChange: (imageUrl: string) => void;
   className?: string;
 }
 
@@ -15,6 +17,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   onImageChange,
   className = ''
 }) => {
+  const { user } = useAuth();
   const [previewImage, setPreviewImage] = useState<string | null>(currentImage || null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -22,9 +25,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const PLACEHOLDER_IMAGE_PATH = '/placeholder.svg';
   const isPlaceholder = !currentImage || currentImage === PLACEHOLDER_IMAGE_PATH;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !user) return;
     
     // Check file size (limit to 2MB)
     if (file.size > 2 * 1024 * 1024) {
@@ -48,35 +51,85 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     
     setIsUploading(true);
     
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64String = event.target?.result as string;
-      setPreviewImage(base64String);
-      onImageChange(base64String);
-      setIsUploading(false);
-    };
-    
-    reader.onerror = () => {
+    try {
+      // Generate a unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      // Upload to Supabase storage
+      const { data, error } = await supabase.storage
+        .from('dog-photos')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Construct public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('dog-photos')
+        .getPublicUrl(fileName);
+      
+      setPreviewImage(publicUrl);
+      onImageChange(publicUrl);
+      
       toast({
-        title: "Error",
-        description: "Failed to read the image file",
+        title: "Image Uploaded",
+        description: "Your image has been successfully uploaded"
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload image",
         variant: "destructive"
       });
+    } finally {
       setIsUploading(false);
-    };
-    
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
   
-  const handleRemoveImage = () => {
-    setPreviewImage(null);
-    onImageChange('');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const handleRemoveImage = async () => {
+    if (!previewImage || !user) return;
+
+    try {
+      // Extract filename from URL
+      const fileName = previewImage.split('/').slice(-2).join('/');
+      
+      // Delete from Supabase storage
+      const { error } = await supabase.storage
+        .from('dog-photos')
+        .remove([fileName]);
+      
+      if (error) {
+        throw error;
+      }
+      
+      setPreviewImage(null);
+      onImageChange('');
+      
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      
+      toast({
+        title: "Image Removed",
+        description: "Your image has been successfully removed"
+      });
+    } catch (error) {
+      console.error('Error removing image:', error);
+      toast({
+        title: "Remove Failed",
+        description: "Failed to remove image",
+        variant: "destructive"
+      });
     }
   };
 
