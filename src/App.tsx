@@ -22,8 +22,11 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      onError: (error) => {
-        console.error('React Query error:', error);
+      // Use onSettled instead of onError for error handling in newer versions of React Query
+      onSettled: (data, error) => {
+        if (error) {
+          console.error('React Query error:', error);
+        }
       }
     }
   }
