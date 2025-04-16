@@ -36,7 +36,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     error, 
     fetchDogs, 
     addDog,
-    updateDog,
+    updateDog: updateDogBase,
     deleteDog: removeDog 
   } = useDogsHook(user?.id);
 
@@ -45,6 +45,19 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     await fetchDogs();
     // Explicitly return void
     return;
+  };
+
+  // Create a wrapped updateDog function that updates activeDog state
+  const updateDog = async (id: string, updates: Partial<Dog>): Promise<boolean> => {
+    const result = await updateDogBase(id, updates);
+    
+    // Check if we have an active dog and if its id matches the updated dog
+    if (result.success && activeDog && activeDog.id === id && result.updatedDog) {
+      // Update the active dog with the updated data
+      setActiveDog(result.updatedDog);
+    }
+    
+    return result.success;
   };
 
   // Reset active dog if it no longer exists in the list
