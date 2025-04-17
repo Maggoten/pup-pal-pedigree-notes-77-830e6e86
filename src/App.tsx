@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,9 +21,9 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      // Use onSettled instead of onError for error handling in newer versions of React Query
-      onSettled: (data, error) => {
-        if (error) {
+      // Use meta for error handling in newer versions of React Query
+      meta: {
+        onError: (error: Error) => {
           console.error('React Query error:', error);
         }
       }
