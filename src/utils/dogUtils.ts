@@ -52,7 +52,9 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   // Define explicitly typed array of allowed fields
   const allowedFields: (keyof DbDog)[] = [
     'id', 'owner_id', 'name', 'breed', 'gender', 
-    'color', 'chip_number', 'notes', 'created_at', 'updated_at'
+    'color', 'chip_number', 'notes', 'created_at', 'updated_at',
+    'image_url', // Add image_url to allowed fields
+    'heatHistory', 'breedingHistory', 'heatInterval'
   ];
   
   // Copy allowed fields directly
@@ -75,27 +77,6 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   
   if ('image' in dog) {
     dbDog.image_url = dog.image;
-  }
-  
-  // JSON and date fields that exist in the database
-  if ('heatHistory' in dog) {
-    dbDog.heatHistory = dog.heatHistory;
-  }
-  
-  if ('breedingHistory' in dog) {
-    dbDog.breedingHistory = dog.breedingHistory;
-  }
-  
-  if ('heatInterval' in dog) {
-    dbDog.heatInterval = dog.heatInterval;
-  }
-  
-  if ('dewormingDate' in dog) {
-    dbDog.dewormingDate = dog.dewormingDate;
-  }
-  
-  if ('vaccinationDate' in dog) {
-    dbDog.vaccinationDate = dog.vaccinationDate;
   }
   
   return dbDog;
