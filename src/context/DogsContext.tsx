@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useDogs as useDogsHook } from '@/hooks/dogs';
 import { useAuth } from '@/hooks/useAuth';
@@ -47,17 +46,16 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     return;
   };
 
-  // Create a wrapped updateDog function that updates activeDog state
+  // Optimize updateDog to avoid unnecessary state updates
   const updateDog = async (id: string, updates: Partial<Dog>): Promise<boolean> => {
     const result = await updateDogBase(id, updates);
     
-    // Check if we have an active dog and if its id matches the updated dog
-    if (result.success && activeDog && activeDog.id === id && result.updatedDog) {
-      // Update the active dog with the updated data
-      setActiveDog(result.updatedDog);
+    // Only update active dog if necessary and successful
+    if (result && activeDog?.id === id) {
+      setActiveDog(prev => prev ? { ...prev, ...updates } : null);
     }
     
-    return result.success;
+    return result;
   };
 
   // Reset active dog if it no longer exists in the list

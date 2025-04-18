@@ -1,33 +1,15 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dogs';
 import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
 import { PostgrestSingleResponse, PostgrestResponse } from '@supabase/supabase-js';
 
-const MAX_RETRIES = 1; // Reduced from 2
-const RETRY_DELAY = 500; // Reduced from 800ms for faster recovery
-
-/**
- * Helper function to implement retry logic for Supabase requests
- */
-async function executeWithRetry<T>(
-  operation: () => any,
-  retries = MAX_RETRIES,
-  delay = RETRY_DELAY
-): Promise<T> {
+// Remove retry mechanism since it's causing delays
+async function executeOperation<T>(operation: () => Promise<T>): Promise<T> {
   try {
-    // Execute the operation directly - Supabase query builders already return Promise-like objects
-    const result = await operation();
-    return result;
+    return await operation();
   } catch (error) {
-    if (retries <= 0) {
-      console.error('Max retries reached, operation failed:', error);
-      throw error;
-    }
-    
-    console.log(`Retrying operation, ${retries} attempts left...`);
-    await new Promise(resolve => setTimeout(resolve, delay));
-    return executeWithRetry(operation, retries - 1, delay);
+    console.error('Operation failed:', error);
+    throw error;
   }
 }
 
@@ -42,8 +24,7 @@ export async function fetchDogs(userId: string) {
 
   try {
     console.log(`Fetching dogs for user ${userId}`);
-    // Improve performance by only selecting fields we need and using an index on owner_id
-    const response = await executeWithRetry<PostgrestResponse<DbDog>>(() => 
+    const response = await executeOperation<PostgrestResponse<DbDog>>(() => 
       supabase
         .from('dogs')
         .select('*')
@@ -82,7 +63,7 @@ export async function addDog(
   });
   
   try {
-    const response = await executeWithRetry<PostgrestSingleResponse<DbDog>>(() => 
+    const response = await executeOperation<PostgrestSingleResponse<DbDog>>(() => 
       supabase
         .from('dogs')
         .insert([dogForDb as DbDog])
@@ -114,12 +95,13 @@ export async function updateDog(id: string, updates: Partial<Dog>) {
   const dbUpdates = sanitizeDogForDb(updates);
   
   try {
-    // Only select essential fields to reduce response size and improve performance
+    // Only update changed fields and return minimal data
     const response = await supabase
       .from('dogs')
       .update(dbUpdates)
       .eq('id', id)
-      .select('id, name, updated_at');
+      .select('id, name, updated_at')
+      .single();
 
     if (response.error) {
       console.error('Error updating dog:', response.error.message);

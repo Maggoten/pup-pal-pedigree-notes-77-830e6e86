@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { Dog } from '@/types/dogs';
 import { useToast } from '@/components/ui/use-toast';
@@ -9,7 +8,7 @@ import { UseDogsMutations } from './types';
 export const useDogsMutations = (userId: string | undefined): UseDogsMutations => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   // Add dog mutation
   const addDogMutation = useMutation({
     mutationFn: async (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>) => {
@@ -55,14 +54,15 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
         );
       });
       
-      // Return a context object with the snapshot
       return { previousDogs };
     },
     onSuccess: (data, variables) => {
-      // Immediately invalidate the query to get fresh data
-      queryClient.invalidateQueries({ 
-        queryKey: ['dogs', userId]
-      });
+      // Only invalidate if strictly necessary
+      if (variables.updates.image) {
+        queryClient.invalidateQueries({ 
+          queryKey: ['dogs', userId]
+        });
+      }
       
       toast({
         title: "Dog updated",
