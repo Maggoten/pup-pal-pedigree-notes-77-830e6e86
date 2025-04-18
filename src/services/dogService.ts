@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dogs';
 import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
@@ -24,13 +25,11 @@ export async function fetchDogs(userId: string) {
 
   try {
     console.log(`Fetching dogs for user ${userId}`);
-    const response = await executeOperation<PostgrestResponse<DbDog>>(() => 
-      supabase
-        .from('dogs')
-        .select('*')
-        .eq('owner_id', userId)
-        .order('created_at', { ascending: false })
-    );
+    const response = await supabase
+      .from('dogs')
+      .select('*')
+      .eq('owner_id', userId)
+      .order('created_at', { ascending: false });
 
     if (response.error) {
       console.error('Error fetching dogs:', response.error.message);
@@ -63,13 +62,11 @@ export async function addDog(
   });
   
   try {
-    const response = await executeOperation<PostgrestSingleResponse<DbDog>>(() => 
-      supabase
-        .from('dogs')
-        .insert([dogForDb as DbDog])
-        .select()
-        .single()
-    );
+    const response = await supabase
+      .from('dogs')
+      .insert([dogForDb as DbDog])
+      .select()
+      .single();
 
     if (response.error) {
       console.error('Error adding dog:', response.error.message);

@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { Dog } from '@/types/dogs';
 import { useToast } from '@/components/ui/use-toast';
@@ -142,18 +143,13 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
 
   const updateDog = useCallback(async (id: string, updates: Partial<Dog>) => {
     try {
-      await updateDogMutation.mutateAsync({ id, updates });
-      
-      // Get the updated dog information from the cache to return
-      const allDogs = queryClient.getQueryData(['dogs', userId]) as Dog[] || [];
-      const updatedDog = allDogs.find(dog => dog.id === id);
-      
-      return { success: true, updatedDog };
+      const result = await updateDogMutation.mutateAsync({ id, updates });
+      return result; // Now returning the raw boolean result from the service
     } catch (error) {
       console.error('Error in updateDog:', error);
-      return { success: false };
+      return false;
     }
-  }, [updateDogMutation, queryClient, userId]);
+  }, [updateDogMutation]);
 
   const deleteDog = useCallback(async (id: string) => {
     try {
