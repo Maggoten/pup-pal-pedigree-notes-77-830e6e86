@@ -2,9 +2,11 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dogs';
 import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
+import { PostgrestResponse, PostgrestSingleResponse } from '@supabase/supabase-js';
 
 const TIMEOUT = 30000; // 30 second timeout
 
+// Updated withTimeout to preserve types
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   const timeoutPromise = new Promise<T>((_, reject) => {
     setTimeout(() => reject(new Error('Request timed out')), timeoutMs);
@@ -104,7 +106,8 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<bool
       supabase
         .from('dogs')
         .update(dbUpdates)
-        .eq('id', id),
+        .eq('id', id)
+        .select(),
       TIMEOUT
     );
 
@@ -151,7 +154,8 @@ export async function deleteDog(id: string) {
       supabase
         .from('dogs')
         .delete()
-        .eq('id', id),
+        .eq('id', id)
+        .select(),
       TIMEOUT
     );
 
@@ -167,3 +171,4 @@ export async function deleteDog(id: string) {
     throw new Error(error instanceof Error ? error.message : 'Failed to delete dog');
   }
 }
+
