@@ -6,12 +6,16 @@ import { PostgrestResponse, PostgrestSingleResponse } from '@supabase/supabase-j
 
 const TIMEOUT = 30000; // 30 second timeout
 
-// Updated withTimeout to preserve types
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+// Updated withTimeout to preserve types and properly handle Supabase query builders
+async function withTimeout<T>(promise: Promise<T> | { then(onfulfilled: (value: T) => any): any }, timeoutMs: number): Promise<T> {
+  // For Supabase query builders, we need to convert them to promises first
+  const actualPromise = (promise instanceof Promise) ? promise : Promise.resolve(promise);
+  
   const timeoutPromise = new Promise<T>((_, reject) => {
     setTimeout(() => reject(new Error('Request timed out')), timeoutMs);
   });
-  return Promise.race([promise, timeoutPromise]);
+  
+  return Promise.race([actualPromise, timeoutPromise]);
 }
 
 /**
@@ -25,7 +29,7 @@ export async function fetchDogs(userId: string) {
 
   try {
     console.log(`Fetching dogs for user ${userId}`);
-    const response = await withTimeout(
+    const response = await withTimeout<PostgrestResponse<DbDog>>(
       supabase
         .from('dogs')
         .select('*')
@@ -66,7 +70,7 @@ export async function addDog(
   
   try {
     console.log('Adding new dog to database');
-    const response = await withTimeout(
+    const response = await withTimeout<PostgrestSingleResponse<DbDog>>(
       supabase
         .from('dogs')
         .insert([dogForDb as DbDog])
@@ -102,7 +106,7 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<bool
   try {
     console.log('Updating dog:', id);
     // Step 1: Update the dog
-    const updateResponse = await withTimeout(
+    const updateResponse = await withTimeout<PostgrestResponse<DbDog>>(
       supabase
         .from('dogs')
         .update(dbUpdates)
@@ -117,7 +121,7 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<bool
     }
 
     // Step 2: Verify the update (separate call with minimal data)
-    const verifyResponse = await withTimeout(
+    const verifyResponse = await withTimeout<PostgrestSingleResponse<{ id: string }>>(
       supabase
         .from('dogs')
         .select('id')
@@ -150,7 +154,7 @@ export async function deleteDog(id: string) {
 
   try {
     console.log('Deleting dog:', id);
-    const response = await withTimeout(
+    const response = await withTimeout<PostgrestResponse<DbDog>>(
       supabase
         .from('dogs')
         .delete()
@@ -171,4 +175,3 @@ export async function deleteDog(id: string) {
     throw new Error(error instanceof Error ? error.message : 'Failed to delete dog');
   }
 }
-
