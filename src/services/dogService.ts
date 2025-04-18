@@ -167,4 +167,3 @@ export async function deleteDog(id: string) {
     throw new Error(error instanceof Error ? error.message : 'Failed to delete dog');
   }
 }
-
