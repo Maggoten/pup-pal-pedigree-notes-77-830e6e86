@@ -13,10 +13,10 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
   // Add dog mutation
   const addDogMutation = useMutation({
     mutationFn: async (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>) => {
-      return await dogService.addDog(dog, userId!);
+      if (!userId) throw new Error('User ID is required');
+      return await dogService.addDog(dog, userId);
     },
     onSuccess: (newDog) => {
-      // Update cache with new dog
       queryClient.setQueryData(['dogs', userId], (oldData: Dog[] = []) => {
         return [newDog, ...oldData];
       });
@@ -27,7 +27,7 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       });
     },
     onError: (err) => {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add dog';
       toast({
         title: "Error adding dog",
         description: errorMessage,
@@ -36,19 +36,17 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
     }
   });
 
-  // Update dog mutation - optimized for speed
+  // Update dog mutation - optimized with retries
   const updateDogMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Dog> }) => {
       return await dogService.updateDog(id, updates);
     },
+    retry: 2,
+    retryDelay: 1000,
     onMutate: async ({ id, updates }) => {
-      // Cancel any outgoing refetches to avoid overwriting optimistic update
       await queryClient.cancelQueries({ queryKey: ['dogs', userId] });
-      
-      // Snapshot the previous value
       const previousDogs = queryClient.getQueryData(['dogs', userId]) as Dog[];
       
-      // Optimistically update to the new value
       queryClient.setQueryData(['dogs', userId], (oldData: Dog[] = []) => {
         return oldData.map(dog => 
           dog.id === id ? { ...dog, ...updates } : dog
@@ -57,13 +55,19 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       
       return { previousDogs };
     },
-    onSuccess: (data, variables) => {
-      // Only invalidate if strictly necessary
-      if (variables.updates.image) {
-        queryClient.invalidateQueries({ 
-          queryKey: ['dogs', userId]
+    onSuccess: (success, variables) => {
+      if (!success) {
+        toast({
+          title: "Update failed",
+          description: "Failed to update dog information. Please try again.",
+          variant: "destructive"
         });
+        return;
       }
+      
+      queryClient.invalidateQueries({ 
+        queryKey: ['dogs', userId]
+      });
       
       toast({
         title: "Dog updated",
@@ -71,12 +75,11 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       });
     },
     onError: (err, variables, context) => {
-      // If there was an error, revert back to previous dogs
       if (context?.previousDogs) {
         queryClient.setQueryData(['dogs', userId], context.previousDogs);
       }
       
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update dog';
       toast({
         title: "Error updating dog",
         description: errorMessage,
@@ -91,22 +94,16 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       return await dogService.deleteDog(id);
     },
     onMutate: async (id) => {
-      // Cancel any outgoing refetches to avoid overwriting optimistic update
       await queryClient.cancelQueries({ queryKey: ['dogs', userId] });
-      
-      // Snapshot the previous value
       const previousDogs = queryClient.getQueryData(['dogs', userId]) as Dog[];
       
-      // Optimistically remove the dog
       queryClient.setQueryData(['dogs', userId], (oldData: Dog[] = []) => {
         return oldData.filter(dog => dog.id !== id);
       });
       
-      // Return a context object with the snapshot
       return { previousDogs };
     },
     onSuccess: () => {
-      // Immediately invalidate the query
       queryClient.invalidateQueries({ 
         queryKey: ['dogs', userId]
       });
@@ -117,12 +114,11 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       });
     },
     onError: (err, id, context) => {
-      // If there was an error, revert back to previous dogs
       if (context?.previousDogs) {
         queryClient.setQueryData(['dogs', userId], context.previousDogs);
       }
       
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to remove dog';
       toast({
         title: "Error removing dog",
         description: errorMessage,
@@ -131,39 +127,30 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
     }
   });
 
-  // Wrapper functions to expose the same API as before
-  const addDog = useCallback(async (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>) => {
-    try {
-      return await addDogMutation.mutateAsync(dog);
-    } catch (error) {
-      console.error('Error in addDog:', error);
-      throw error;
-    }
-  }, [addDogMutation]);
-
-  const updateDog = useCallback(async (id: string, updates: Partial<Dog>) => {
-    try {
-      const result = await updateDogMutation.mutateAsync({ id, updates });
-      return result; // Now returning the raw boolean result from the service
-    } catch (error) {
-      console.error('Error in updateDog:', error);
-      return false;
-    }
-  }, [updateDogMutation]);
-
-  const deleteDog = useCallback(async (id: string) => {
-    try {
-      await deleteDogMutation.mutateAsync(id);
-      return true;
-    } catch (error) {
-      console.error('Error in deleteDog:', error);
-      return false;
-    }
-  }, [deleteDogMutation]);
-
   return {
-    addDog,
-    updateDog,
-    deleteDog
+    addDog: useCallback(async (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>) => {
+      return await addDogMutation.mutateAsync(dog);
+    }, [addDogMutation]),
+
+    updateDog: useCallback(async (id: string, updates: Partial<Dog>) => {
+      try {
+        const result = await updateDogMutation.mutateAsync({ id, updates });
+        return result;
+      } catch (error) {
+        console.error('Error in updateDog:', error);
+        return false;
+      }
+    }, [updateDogMutation]),
+
+    deleteDog: useCallback(async (id: string) => {
+      try {
+        await deleteDogMutation.mutateAsync(id);
+        return true;
+      } catch (error) {
+        console.error('Error in deleteDog:', error);
+        return false;
+      }
+    }, [deleteDogMutation])
   };
 };
+
