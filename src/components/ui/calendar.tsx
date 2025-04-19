@@ -1,6 +1,6 @@
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
@@ -23,8 +23,18 @@ function Calendar({
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center",
+        caption: "flex justify-center relative items-center px-8 py-1",
         caption_label: "text-sm font-medium",
+        caption_dropdowns: "flex gap-1 items-center",
+        dropdown: cn(
+          "relative inline-flex items-center justify-between",
+          "text-sm border rounded-md px-3 py-1 bg-white",
+          "hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+          "cursor-pointer select-none transition-colors"
+        ),
+        dropdown_month: "min-w-[120px]",
+        dropdown_year: "min-w-[80px]",
+        dropdown_icon: "absolute right-2 h-4 w-4 opacity-50",
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
@@ -52,15 +62,20 @@ function Calendar({
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
-        // Add styles for dropdown elements
-        dropdown: "p-1 bg-white rounded-md border border-input shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring",
-        dropdown_month: "mr-1",
-        dropdown_year: "ml-1",
         ...classNames,
       }}
       components={{
         IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
+        Dropdown: ({ value, onChange, children, ...props }) => {
+          return (
+            <div {...props} onClick={onChange} role="button" tabIndex={0}>
+              <span>{value}</span>
+              <ChevronDown className="absolute right-2 h-4 w-4 opacity-50" />
+              {children}
+            </div>
+          );
+        },
       }}
       captionLayout="dropdown"
       fromYear={1950}
