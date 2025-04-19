@@ -24,8 +24,8 @@ function Calendar({
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
         caption: "flex justify-center relative items-center px-8 py-1",
-        caption_label: "text-sm font-medium",
-        caption_dropdowns: "flex gap-1 items-center",
+        caption_label: "hidden", // Hide the default caption text
+        caption_dropdowns: "flex gap-2 items-center mb-2", // Improved spacing
         dropdown: cn(
           "relative inline-flex items-center justify-between",
           "text-sm border rounded-md px-3 py-1 bg-white",
