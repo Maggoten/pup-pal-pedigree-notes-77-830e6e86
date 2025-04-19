@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { Dog } from '@/types/dogs';
 import { useToast } from '@/components/ui/use-toast';
@@ -39,7 +38,11 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
   // Update dog mutation - optimized with retries
   const updateDogMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Dog> }) => {
-      return await dogService.updateDog(id, updates);
+      const updatedDog = await dogService.updateDog(id, updates);
+      if (!updatedDog) {
+        throw new Error('Failed to update dog');
+      }
+      return updatedDog;
     },
     retry: 2,
     retryDelay: 1000,
@@ -47,6 +50,7 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       await queryClient.cancelQueries({ queryKey: ['dogs', userId] });
       const previousDogs = queryClient.getQueryData(['dogs', userId]) as Dog[];
       
+      // Optimistically update both the list and the individual dog
       queryClient.setQueryData(['dogs', userId], (oldData: Dog[] = []) => {
         return oldData.map(dog => 
           dog.id === id ? { ...dog, ...updates } : dog
@@ -55,18 +59,12 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       
       return { previousDogs };
     },
-    onSuccess: (success, variables) => {
-      if (!success) {
-        toast({
-          title: "Update failed",
-          description: "Failed to update dog information. Please try again.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      queryClient.invalidateQueries({ 
-        queryKey: ['dogs', userId]
+    onSuccess: (updatedDog, variables) => {
+      // Update both the list and individual dog cache with the server response
+      queryClient.setQueryData(['dogs', userId], (oldData: Dog[] = []) => {
+        return oldData.map(dog => 
+          dog.id === updatedDog.id ? updatedDog : dog
+        );
       });
       
       toast({
@@ -153,4 +151,3 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
     }, [deleteDogMutation])
   };
 };
-

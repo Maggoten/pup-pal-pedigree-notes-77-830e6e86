@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dogs';
 import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
@@ -93,9 +92,9 @@ export async function addDog(
 }
 
 /**
- * Updates an existing dog in the database - Split into update and verify steps
+ * Updates an existing dog in the database and returns the updated dog data
  */
-export async function updateDog(id: string, updates: Partial<Dog>): Promise<boolean> {
+export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog | null> {
   if (!id) {
     console.error('updateDog called without id');
     throw new Error('Dog ID is required');
@@ -105,13 +104,12 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<bool
   
   try {
     console.log('Updating dog:', id);
-    // Step 1: Update the dog
     const updateResponse = await withTimeout<PostgrestResponse<DbDog>>(
       supabase
         .from('dogs')
         .update(dbUpdates)
         .eq('id', id)
-        .select(),
+        .select('*'), // Get the complete updated record
       TIMEOUT
     );
 
@@ -120,26 +118,17 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<bool
       throw new Error(updateResponse.error.message);
     }
 
-    // Step 2: Verify the update (separate call with minimal data)
-    const verifyResponse = await withTimeout<PostgrestSingleResponse<{ id: string }>>(
-      supabase
-        .from('dogs')
-        .select('id')
-        .eq('id', id)
-        .single(),
-      TIMEOUT
-    );
-
-    if (verifyResponse.error) {
-      console.error('Error verifying dog update:', verifyResponse.error.message);
-      return false;
+    if (!updateResponse.data?.[0]) {
+      console.error('No dog data returned after update');
+      return null;
     }
 
-    console.log('Successfully updated and verified dog:', id);
-    return true;
+    const updatedDog = enrichDog(updateResponse.data[0]);
+    console.log('Successfully updated and verified dog:', updatedDog);
+    return updatedDog;
   } catch (error) {
     console.error('Failed to update dog:', error);
-    return false;
+    throw new Error(error instanceof Error ? error.message : 'Failed to update dog');
   }
 }
 
