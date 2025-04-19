@@ -1,6 +1,6 @@
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
@@ -30,11 +30,10 @@ function Calendar({
           "relative inline-flex items-center justify-between",
           "text-sm border rounded-md px-3 py-1 bg-white",
           "hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-          "cursor-pointer select-none transition-colors"
+          "cursor-pointer select-none transition-colors appearance-none"
         ),
         dropdown_month: "min-w-[120px]",
         dropdown_year: "min-w-[80px]",
-        dropdown_icon: "absolute right-2 h-4 w-4 opacity-50",
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
@@ -67,15 +66,6 @@ function Calendar({
       components={{
         IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
-        Dropdown: ({ value, onChange, children, ...props }) => {
-          return (
-            <div {...props} onClick={onChange} role="button" tabIndex={0}>
-              <span>{value}</span>
-              <ChevronDown className="absolute right-2 h-4 w-4 opacity-50" />
-              {children}
-            </div>
-          );
-        },
       }}
       captionLayout="dropdown"
       fromYear={1950}
