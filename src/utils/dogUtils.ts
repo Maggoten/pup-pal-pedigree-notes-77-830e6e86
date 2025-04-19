@@ -45,36 +45,31 @@ export const enrichDog = (dog: any): Dog => {
  * @returns A database-compatible dog object ready for Supabase
  */
 export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
+  // First, create a DB-compatible version of the dog object
+  const dbCompatibleDog = {
+    ...dog,
+    birthdate: dog.dateOfBirth,
+    registration_number: dog.registrationNumber,
+    image_url: dog.image,
+  };
+
   const dbDog: Partial<DbDog> = {};
   
   // Define explicitly typed array of allowed fields
   const allowedFields: (keyof DbDog)[] = [
     'id', 'owner_id', 'name', 'breed', 'gender', 
     'color', 'chip_number', 'notes', 'created_at', 'updated_at',
-    'image_url', 'birthdate', // Added birthdate to allowed fields
+    'image_url', 'birthdate', 'registration_number',
     'heatHistory', 'breedingHistory', 'heatInterval'
   ];
   
-  // Copy allowed fields directly
+  // Copy allowed fields from the DB-compatible object
   allowedFields.forEach(field => {
-    if (field in dog) {
-      const value = dog[field as keyof typeof dog];
+    if (field in dbCompatibleDog) {
+      const value = dbCompatibleDog[field as keyof typeof dbCompatibleDog];
       (dbDog[field] as typeof value) = value;
     }
   });
-  
-  // Map UI field names to database field names
-  if ('dateOfBirth' in dog) {
-    dbDog.birthdate = dog.dateOfBirth;
-  }
-  
-  if ('registrationNumber' in dog) {
-    dbDog.registration_number = dog.registrationNumber;
-  }
-  
-  if ('image' in dog) {
-    dbDog.image_url = dog.image;
-  }
   
   return dbDog;
 };
