@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { Dog } from '@/types/dogs';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import * as dogService from '@/services/dogService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { UseDogsMutations } from './types';
@@ -86,7 +86,7 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
     }
   });
 
-  // Delete dog mutation
+  // Delete dog mutation - improved with optimistic updates
   const deleteDogMutation = useMutation({
     mutationFn: async (id: string) => {
       return await dogService.deleteDog(id);
@@ -95,23 +95,21 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       await queryClient.cancelQueries({ queryKey: ['dogs', userId] });
       const previousDogs = queryClient.getQueryData(['dogs', userId]) as Dog[];
       
+      // Optimistically remove the dog from the cache
       queryClient.setQueryData(['dogs', userId], (oldData: Dog[] = []) => {
         return oldData.filter(dog => dog.id !== id);
       });
       
       return { previousDogs };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['dogs', userId]
-      });
-      
+    onSuccess: (_, id) => {
       toast({
         title: "Dog removed",
         description: "Dog has been removed successfully.",
       });
     },
     onError: (err, id, context) => {
+      // Rollback to previous state if there was an error
       if (context?.previousDogs) {
         queryClient.setQueryData(['dogs', userId], context.previousDogs);
       }
@@ -122,6 +120,10 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
         description: errorMessage,
         variant: "destructive"
       });
+    },
+    onSettled: () => {
+      // Always refetch after a delete operation to ensure cache consistency
+      queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
     }
   });
 

@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import DogFormFields, { dogFormSchema } from './DogFormFields';
 import HeatRecordsField from './HeatRecordsField';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { useDogs } from '@/context/DogsContext';
 import { Dog } from '@/types/dogs';
 
@@ -47,6 +47,8 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
   });
 
   const handleSubmit = async (data: z.infer<typeof dogFormSchema>) => {
+    if (loading) return; // Prevent duplicate submissions
+    
     // Convert form data to Dog model
     const newDog = {
       name: data.name,

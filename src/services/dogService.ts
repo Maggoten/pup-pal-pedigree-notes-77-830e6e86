@@ -147,8 +147,7 @@ export async function deleteDog(id: string) {
       supabase
         .from('dogs')
         .delete()
-        .eq('id', id)
-        .select(),
+        .eq('id', id),
       TIMEOUT
     );
 
