@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { Dog } from '@/types/dogs';
 import { useToast } from '@/components/ui/use-toast';
@@ -133,7 +134,7 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
     updateDog: useCallback(async (id: string, updates: Partial<Dog>) => {
       try {
         const result = await updateDogMutation.mutateAsync({ id, updates });
-        return result;
+        return result !== null; // Convert the Dog object or null to a boolean
       } catch (error) {
         console.error('Error in updateDog:', error);
         return false;
