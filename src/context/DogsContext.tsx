@@ -1,98 +1,114 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { useDogs as useDogsHook } from '@/hooks/dogs';
-import { useAuth } from '@/hooks/useAuth';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Dog } from '@/types/dogs';
+import * as dogService from '@/services/dogService';
+import { useUser } from '@/hooks/useUser';
 
-// Define the shape of our Dogs context
 interface DogsContextType {
   dogs: Dog[];
   loading: boolean;
   error: string | null;
-  activeDog: Dog | null;
-  setActiveDog: (dog: Dog | null) => void;
-  refreshDogs: () => Promise<void>;
-  addDog: (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>) => Promise<Dog | undefined>;
+  addDog: (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>) => Promise<Dog | null>;
   updateDog: (id: string, updates: Partial<Dog>) => Promise<Dog | null>;
-  removeDog: (id: string) => Promise<boolean>;
+  deleteDog: (id: string) => Promise<boolean>;
+  refreshDogs: () => Promise<void>;
 }
 
-// Create the context with an undefined default value
 const DogsContext = createContext<DogsContextType | undefined>(undefined);
 
-// Define the provider component
-interface DogsProviderProps {
-  children: ReactNode;
-}
+export const DogsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [dogs, setDogs] = useState<Dog[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useUser();
 
-export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
-  const { user } = useAuth();
-  const [activeDog, setActiveDog] = useState<Dog | null>(null);
-  
-  // Use the useDogs hook with the authenticated user ID
-  const { 
-    dogs, 
-    isLoading: loading, 
-    error, 
-    fetchDogs, 
-    addDog,
-    updateDog: updateDogBase,
-    deleteDog: removeDog 
-  } = useDogsHook(user?.id);
-
-  // Create a wrapped function that doesn't return the dogs array
-  const wrappedRefreshDogs = async (): Promise<void> => {
-    await fetchDogs();
-    // Explicitly return void
-    return;
-  };
-
-  // Optimize updateDog to handle the full Dog object
-  const updateDog = async (id: string, updates: Partial<Dog>): Promise<Dog | null> => {
-    const updatedDog = await updateDogBase(id, updates);
-    
-    // Update active dog if necessary and successful
-    if (updatedDog && activeDog?.id === id) {
-      setActiveDog(updatedDog);
+  const fetchDogs = async () => {
+    if (!user?.id) return;
+    setLoading(true);
+    try {
+      const result = await dogService.fetchDogs(user.id);
+      setDogs(result);
+      setError(null);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
     }
-    
-    return updatedDog;
   };
 
-  // Reset active dog if it no longer exists in the list
   useEffect(() => {
-    if (activeDog && !dogs.some(dog => dog.id === activeDog.id)) {
-      setActiveDog(null);
-    }
-  }, [dogs, activeDog]);
+    fetchDogs();
+  }, [user?.id]);
 
-  // Create the context value object
-  const value: DogsContextType = {
-    dogs,
-    loading,
-    error,
-    activeDog,
-    setActiveDog,
-    refreshDogs: wrappedRefreshDogs,
-    addDog,
-    updateDog,
-    removeDog
+  const addDog = async (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>): Promise<Dog | null> => {
+    if (!user?.id) return null;
+    setLoading(true);
+    try {
+      const newDog = await dogService.addDog(dog, user.id);
+      setDogs((prev) => [newDog, ...prev]);
+      return newDog;
+    } catch (err) {
+      setError((err as Error).message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateDog = async (id: string, updates: Partial<Dog>): Promise<Dog | null> => {
+    setLoading(true);
+    try {
+      const updated = await dogService.updateDog(id, updates);
+      if (updated) {
+        setDogs((prev) =>
+          prev.map((dog) => (dog.id === id ? updated : dog))
+        );
+      }
+      return updated;
+    } catch (err) {
+      setError((err as Error).message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteDog = async (id: string): Promise<boolean> => {
+    setLoading(true);
+    try {
+      const success = await dogService.deleteDog(id);
+      if (success) {
+        setDogs((prev) => prev.filter((dog) => dog.id !== id));
+      }
+      return success;
+    } catch (err) {
+      setError((err as Error).message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <DogsContext.Provider value={value}>
+    <DogsContext.Provider
+      value={{
+        dogs,
+        loading,
+        error,
+        addDog,
+        updateDog,
+        deleteDog,
+        refreshDogs: fetchDogs,
+      }}
+    >
       {children}
     </DogsContext.Provider>
   );
 };
 
-// Custom hook to use the dogs context
-export const useDogs = () => {
+export const useDogs = (): DogsContextType => {
   const context = useContext(DogsContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useDogs must be used within a DogsProvider');
   }
   return context;
 };
-
-// Export the Dog type from @/types/dogs
-export type { Dog } from '@/types/dogs';
