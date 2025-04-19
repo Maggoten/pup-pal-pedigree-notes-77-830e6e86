@@ -1,3 +1,4 @@
+
 import { Dog } from '@/types/dogs';
 
 export interface UseDogsMutations {

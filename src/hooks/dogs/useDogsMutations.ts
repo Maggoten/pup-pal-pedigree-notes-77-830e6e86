@@ -17,7 +17,7 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
     return await updateDogMutation.mutateAsync({ id, updates });
   }, [updateDogMutation]);
 
-  const removeDog = useCallback(async (id: string) => {
+  const deleteDog = useCallback(async (id: string) => {
     try {
       await deleteDogMutation.mutateAsync(id);
       return true;
@@ -29,6 +29,6 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
   return {
     addDog,
     updateDog,
-    removeDog
+    deleteDog
   };
 };

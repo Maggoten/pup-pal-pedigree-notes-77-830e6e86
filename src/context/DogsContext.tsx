@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useDogs as useDogsHook } from '@/hooks/dogs';
 import { useAuth } from '@/hooks/useAuth';
@@ -36,7 +37,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     fetchDogs, 
     addDog,
     updateDog: updateDogBase,
-    deleteDog: removeDog 
+    deleteDog 
   } = useDogsHook(user?.id);
 
   // Create a wrapped function that doesn't return the dogs array
@@ -57,6 +58,9 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     
     return updatedDog;
   };
+
+  // For backward compatibility, rename deleteDog to removeDog
+  const removeDog = deleteDog;
 
   // Reset active dog if it no longer exists in the list
   useEffect(() => {

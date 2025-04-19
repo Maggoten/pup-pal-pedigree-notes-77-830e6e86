@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Dog } from '@/types/dogs';
 import { useToast } from '@/components/ui/use-toast';
-import * as dogService from '@/services/dogService';
+import { fetchDogs } from '@/services/dogs';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { UseDogsQueries } from './types';
 
@@ -23,7 +23,7 @@ export const useDogsQueries = (userId: string | undefined): UseDogsQueries => {
       if (!userId) return [];
       try {
         console.log('Fetching dogs from service...');
-        const data = await dogService.fetchDogs(userId);
+        const data = await fetchDogs(userId);
         console.log(`Retrieved ${data.length} dogs`);
         return data;
       } catch (err) {
