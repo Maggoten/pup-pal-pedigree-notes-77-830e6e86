@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useDogs as useDogsHook } from '@/hooks/dogs';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,7 +12,7 @@ interface DogsContextType {
   setActiveDog: (dog: Dog | null) => void;
   refreshDogs: () => Promise<void>;
   addDog: (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>) => Promise<Dog | undefined>;
-  updateDog: (id: string, updates: Partial<Dog>) => Promise<boolean>;
+  updateDog: (id: string, updates: Partial<Dog>) => Promise<Dog | null>;
   removeDog: (id: string) => Promise<boolean>;
 }
 
@@ -47,16 +46,16 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     return;
   };
 
-  // Optimize updateDog to avoid unnecessary state updates
-  const updateDog = async (id: string, updates: Partial<Dog>): Promise<boolean> => {
-    const result = await updateDogBase(id, updates);
+  // Optimize updateDog to handle the full Dog object
+  const updateDog = async (id: string, updates: Partial<Dog>): Promise<Dog | null> => {
+    const updatedDog = await updateDogBase(id, updates);
     
-    // Only update active dog if necessary and successful
-    if (result && activeDog?.id === id) {
-      setActiveDog(prev => prev ? { ...prev, ...updates } : null);
+    // Update active dog if necessary and successful
+    if (updatedDog && activeDog?.id === id) {
+      setActiveDog(updatedDog);
     }
     
-    return result;
+    return updatedDog;
   };
 
   // Reset active dog if it no longer exists in the list

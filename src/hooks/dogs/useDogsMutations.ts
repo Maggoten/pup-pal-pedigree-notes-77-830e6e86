@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { Dog } from '@/types/dogs';
 import { useToast } from '@/components/ui/use-toast';
@@ -60,7 +59,7 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       
       return { previousDogs };
     },
-    onSuccess: (updatedDog, variables) => {
+    onSuccess: (updatedDog) => {
       // Update both the list and individual dog cache with the server response
       queryClient.setQueryData(['dogs', userId], (oldData: Dog[] = []) => {
         return oldData.map(dog => 
@@ -133,11 +132,10 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
 
     updateDog: useCallback(async (id: string, updates: Partial<Dog>) => {
       try {
-        const result = await updateDogMutation.mutateAsync({ id, updates });
-        return result !== null; // Convert the Dog object or null to a boolean
+        return await updateDogMutation.mutateAsync({ id, updates });
       } catch (error) {
         console.error('Error in updateDog:', error);
-        return false;
+        return null;
       }
     }, [updateDogMutation]),
 
