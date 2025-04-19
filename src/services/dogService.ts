@@ -51,7 +51,7 @@ export async function fetchDogs(userId: string) {
 }
 
 /**
- * Adds a new dog to the database
+ * Adds a new dog to the database with enhanced error logging
  */
 export async function addDog(
   dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>, 
@@ -62,32 +62,83 @@ export async function addDog(
     throw new Error('User ID is required');
   }
 
-  const dogForDb = sanitizeDogForDb({
-    ...dog,
-    owner_id: userId
-  });
-  
   try {
-    console.log('Adding new dog to database');
+    // Pre-validation logging
+    console.log('Adding new dog with input:', { ...dog, owner_id: userId });
+    
+    const dogForDb = sanitizeDogForDb({
+      ...dog,
+      owner_id: userId
+    });
+    
+    // Log sanitized object before insert
+    console.log('Sanitized dog object for DB:', dogForDb);
+    
+    // Try minimal insert first with required fields
+    const minimalDog = {
+      name: dogForDb.name,
+      owner_id: userId,
+      birthdate: dogForDb.birthdate,
+      breed: dogForDb.breed,
+      gender: dogForDb.gender,
+    };
+    
+    console.log('Attempting minimal insert with:', minimalDog);
+    
     const response = await withTimeout<PostgrestSingleResponse<DbDog>>(
       supabase
         .from('dogs')
-        .insert([dogForDb as DbDog])
+        .insert([minimalDog])
         .select()
         .single(),
       TIMEOUT
     );
 
     if (response.error) {
-      console.error('Error adding dog:', response.error.message);
-      throw new Error(response.error.message);
+      // Enhanced error logging
+      console.error('Supabase error details:', {
+        code: response.error.code,
+        message: response.error.message,
+        details: response.error.details,
+        hint: response.error.hint
+      });
+      throw new Error(`Database error: ${response.error.message}`);
     }
     
-    console.log('Successfully added new dog');
+    // If minimal insert succeeds, update with full data
+    if (response.data) {
+      const fullDog = { ...dogForDb };
+      console.log('Updating with full dog data:', fullDog);
+      
+      const updateResponse = await withTimeout<PostgrestResponse<DbDog>>(
+        supabase
+          .from('dogs')
+          .update(fullDog)
+          .eq('id', response.data.id)
+          .select()
+          .single(),
+        TIMEOUT
+      );
+      
+      if (updateResponse.error) {
+        console.error('Error updating with full data:', updateResponse.error);
+        // Return minimal dog data if update fails
+        return enrichDog(response.data);
+      }
+      
+      console.log('Successfully added dog with full data');
+      return enrichDog(updateResponse.data);
+    }
+    
+    console.log('Successfully added dog with minimal data');
     return enrichDog(response.data);
   } catch (error) {
     console.error('Failed to add dog:', error);
-    throw new Error(error instanceof Error ? error.message : 'Failed to add dog');
+    if (error instanceof Error) {
+      // Include any additional context in the error
+      throw new Error(`Failed to add dog: ${error.message}`);
+    }
+    throw new Error('Failed to add dog: Unknown error');
   }
 }
 
