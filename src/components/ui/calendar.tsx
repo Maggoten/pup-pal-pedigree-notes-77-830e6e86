@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
@@ -13,6 +14,8 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+  const currentYear = new Date().getFullYear();
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -49,12 +52,19 @@ function Calendar({
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
+        // Add styles for dropdown elements
+        dropdown: "p-1 bg-white rounded-md border border-input shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring",
+        dropdown_month: "mr-1",
+        dropdown_year: "ml-1",
         ...classNames,
       }}
       components={{
         IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
       }}
+      captionLayout="dropdown"
+      fromYear={1950}
+      toYear={currentYear}
       {...props}
     />
   );
