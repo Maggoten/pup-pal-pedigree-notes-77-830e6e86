@@ -47,32 +47,32 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
   });
 
   const handleSubmit = async (data: z.infer<typeof dogFormSchema>) => {
-    if (loading) return; // Prevent duplicate submissions
+    if (loading) return;
     
-    // Convert form data to Dog model
-    const newDog = {
-      name: data.name,
-      breed: data.breed,
-      gender: data.gender,
-      dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
-      color: data.color,
-      registrationNumber: data.registrationNumber,
-      notes: data.notes || '',
-      image: '/placeholder.svg', // Default image
-      heatHistory: data.heatHistory?.map(heat => ({ 
-        date: heat.date.toISOString().split('T')[0] 
-      })) || [],
-      heatInterval: data.heatInterval,
-      // Fields not in form but required by Dog type
-      owner_id: '', // Will be set by useDogs hook
-      breedingHistory: { litters: [], breedings: [] }
-    };
-
-    const result = await addDog(newDog);
-    
-    if (result) {
-      onOpenChange(false);
-      form.reset();
+    try {
+      const result = await addDog({
+        name: data.name,
+        breed: data.breed,
+        gender: data.gender,
+        dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
+        color: data.color,
+        registrationNumber: data.registrationNumber,
+        notes: data.notes || '',
+        image: '/placeholder.svg',
+        heatHistory: data.heatHistory?.map(heat => ({ 
+          date: heat.date.toISOString().split('T')[0] 
+        })) || [],
+        heatInterval: data.heatInterval,
+        owner_id: '', // Will be set by backend
+        breedingHistory: { litters: [], breedings: [] }
+      });
+      
+      if (result) {
+        form.reset();
+        onOpenChange(false);
+      }
+    } catch (error) {
+      console.error('Error adding dog:', error);
     }
   };
 

@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { Dog } from '@/types/dogs';
 import { useToast } from '@/hooks/use-toast';
@@ -16,13 +17,12 @@ export const useDogsMutations = (userId: string | undefined): UseDogsMutations =
       return await dogService.addDog(dog, userId);
     },
     onSuccess: (newDog) => {
-      queryClient.setQueryData(['dogs', userId], (oldData: Dog[] = []) => {
-        return [newDog, ...oldData];
-      });
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
       
       toast({
-        title: "Dog added",
-        description: `${newDog.name} has been added successfully.`,
+        title: "Success",
+        description: `${newDog.name} has been added to your dogs`,
       });
     },
     onError: (err) => {
