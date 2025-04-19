@@ -1,4 +1,3 @@
-
 import { Dog, BreedingHistory } from '@/types/dogs';
 import { Database } from '@/integrations/supabase/types';
 
@@ -46,21 +45,19 @@ export const enrichDog = (dog: any): Dog => {
  * @returns A database-compatible dog object ready for Supabase
  */
 export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
-  // Create a new object with only the fields that exist in the database
   const dbDog: Partial<DbDog> = {};
   
   // Define explicitly typed array of allowed fields
   const allowedFields: (keyof DbDog)[] = [
     'id', 'owner_id', 'name', 'breed', 'gender', 
     'color', 'chip_number', 'notes', 'created_at', 'updated_at',
-    'image_url', // Add image_url to allowed fields
+    'image_url', 'birthdate', // Added birthdate to allowed fields
     'heatHistory', 'breedingHistory', 'heatInterval'
   ];
   
   // Copy allowed fields directly
   allowedFields.forEach(field => {
     if (field in dog) {
-      // Fix: explicitly cast the field value to the appropriate type
       const value = dog[field as keyof typeof dog];
       (dbDog[field] as typeof value) = value;
     }
