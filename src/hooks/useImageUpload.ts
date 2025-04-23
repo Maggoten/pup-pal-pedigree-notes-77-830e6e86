@@ -15,7 +15,6 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const UPLOAD_TIMEOUT = 30000; // 30 seconds
-  const BUCKET_NAME = 'dog-photos';
 
   const validateFile = (file: File) => {
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
@@ -39,72 +38,12 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     return true;
   };
 
-  const getFilePathFromUrl = (url: string): string | null => {
-    try {
-      // Skip processing for empty URLs or non-Supabase URLs
-      if (!url || !url.includes(BUCKET_NAME)) return null;
-      
-      const { data: { publicUrl } } = supabase.storage
-        .from(BUCKET_NAME)
-        .getPublicUrl('');
-      
-      const baseUrl = publicUrl.split('/' + BUCKET_NAME)[0] + '/' + BUCKET_NAME + '/';
-      
-      // Only extract path if it's a valid Supabase URL
-      if (url.startsWith(baseUrl)) {
-        return url.replace(baseUrl, '');
-      }
-      return null;
-    } catch (error) {
-      console.error('Error extracting file path from URL:', error);
-      return null;
-    }
-  };
-
-  const deleteOldImage = async (oldImageUrl: string): Promise<boolean> => {
-    try {
-      if (!oldImageUrl) return true;
-      
-      const filePath = getFilePathFromUrl(oldImageUrl);
-      if (!filePath) {
-        console.log('No valid file path to delete, possibly not a Supabase URL:', oldImageUrl);
-        return true; // Not an error if we can't extract the path - might be an external URL
-      }
-
-      console.log('Attempting to delete image at path:', filePath);
-      
-      const { error } = await supabase.storage
-        .from(BUCKET_NAME)
-        .remove([filePath]);
-
-      if (error) {
-        console.error('Error deleting old image:', error);
-        return false;
-      }
-
-      console.log('Successfully deleted old image:', filePath);
-      return true;
-    } catch (error) {
-      console.error('Error in deleteOldImage:', error);
-      return false;
-    }
-  };
-
-  const uploadImage = async (file: File, oldImageUrl?: string) => {
+  const uploadImage = async (file: File) => {
     if (!user_id || !validateFile(file)) return;
     
     setIsUploading(true);
     
     try {
-      // Only try to delete if there's an old image AND it's different from placeholder
-      if (oldImageUrl && !oldImageUrl.includes('placeholder')) {
-        console.log('Deleting old image before upload:', oldImageUrl);
-        const deleted = await deleteOldImage(oldImageUrl);
-        if (!deleted) {
-          console.warn('Failed to delete old image, but continuing with upload');
-        }
-      }
-      
       const fileExt = file.name.split('.').pop();
       const fileName = `${user_id}/${Date.now()}.${fileExt}`;
       
@@ -118,10 +57,10 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       }, UPLOAD_TIMEOUT);
 
       const { data, error } = await supabase.storage
-        .from(BUCKET_NAME)
+        .from('dog-photos')
         .upload(fileName, file, {
           cacheControl: '3600',
-          upsert: false // Don't use upsert to avoid overwriting
+          upsert: true
         });
       
       clearTimeout(uploadTimeoutRef.current);
@@ -129,7 +68,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       if (error) throw error;
       
       const { data: { publicUrl } } = supabase.storage
-        .from(BUCKET_NAME)
+        .from('dog-photos')
         .getPublicUrl(fileName);
       
       onImageChange(publicUrl);
@@ -152,14 +91,14 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   };
 
   const removeImage = async (imageUrl: string, userId: string) => {
-    if (!imageUrl || !userId || imageUrl.includes('placeholder')) return;
-    
     try {
-      const deleted = await deleteOldImage(imageUrl);
+      const fileName = imageUrl.split('/').slice(-2).join('/');
       
-      if (!deleted) {
-        throw new Error('Failed to delete image');
-      }
+      const { error } = await supabase.storage
+        .from('dog-photos')
+        .remove([fileName]);
+      
+      if (error) throw error;
       
       onImageChange('');
       

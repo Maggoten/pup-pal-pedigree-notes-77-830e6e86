@@ -32,8 +32,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     const file = e.target.files?.[0];
     if (!file || !user) return;
     
-    // We're explicitly uploading a new image, so pass the current image to be deleted if needed
-    await uploadImage(file, currentImage);
+    await uploadImage(file);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
