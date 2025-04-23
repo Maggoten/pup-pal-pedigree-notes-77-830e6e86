@@ -81,7 +81,7 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   if ('heatHistory' in dog && dog.heatHistory) {
     const processedHeatHistory = dog.heatHistory.map((heat: Heat) => ({
       date: typeof heat.date === 'string' ? heat.date : 
-            heat.date instanceof Date ? heat.date.toISOString().split('T')[0] : ''
+            (heat.date && typeof heat.date.toISOString === 'function') ? heat.date.toISOString().split('T')[0] : ''
     }));
     
     dbDog.heatHistory = processedHeatHistory;
