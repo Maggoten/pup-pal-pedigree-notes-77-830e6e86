@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { useDogs as useDogsHook } from '@/hooks/dogs';
 import { useAuth } from '@/hooks/useAuth';
 import { Dog } from '@/types/dogs';
+import { useToast } from '@/components/ui/use-toast';
 
 // Define the shape of our Dogs context
 interface DogsContextType {
@@ -26,54 +27,144 @@ interface DogsProviderProps {
 }
 
 export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
-  const { user } = useAuth();
+  const { toast } = useToast();
+  const { user, isLoggedIn, isLoading: authLoading } = useAuth();
   const [activeDog, setActiveDog] = useState<Dog | null>(null);
+  const [dogLoadingAttempted, setDogLoadingAttempted] = useState(false);
+  
+  // Add detailed logging for user authentication status
+  useEffect(() => {
+    console.log('Auth state in DogsProvider: isLoggedIn=', isLoggedIn, 
+                'authLoading=', authLoading, 
+                'userId=', user?.id || 'undefined');
+  }, [isLoggedIn, authLoading, user]);
   
   // Use the useDogs hook with the authenticated user ID
   const { 
     dogs, 
-    isLoading: loading, 
+    isLoading: dogsLoading, 
     error, 
     fetchDogs, 
     addDog,
     updateDog: updateDogBase,
     deleteDog 
   } = useDogsHook(user?.id);
+  
+  // Implement force reload capability for recovery from errors
+  const forceReload = async () => {
+    setDogLoadingAttempted(false);
+    if (user?.id) {
+      try {
+        console.log('Forcing complete reload of dogs data');
+        await fetchDogs(true); // Skip cache to force fresh data
+        toast({
+          title: "Refreshed",
+          description: "Dog data has been refreshed from the server."
+        });
+      } catch (e) {
+        console.error('Force reload failed:', e);
+        toast({
+          title: "Refresh failed",
+          description: "Could not refresh data. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
 
   // Create a wrapped function that doesn't return the dogs array
   const wrappedRefreshDogs = async (): Promise<void> => {
-    await fetchDogs();
+    try {
+      console.log('Refreshing dogs data');
+      await fetchDogs();
+      console.log('Dogs data refreshed successfully');
+    } catch (e) {
+      console.error('Error refreshing dogs:', e);
+      toast({
+        title: "Refresh failed",
+        description: "Could not refresh data. Please try again.",
+        variant: "destructive"
+      });
+    }
     // Explicitly return void
     return;
   };
 
+  // Track when we attempt to load dogs
+  useEffect(() => {
+    if (!authLoading && isLoggedIn && user?.id && !dogLoadingAttempted) {
+      console.log('Auth finished loading, attempting to fetch dogs');
+      setDogLoadingAttempted(true);
+      fetchDogs().catch(err => {
+        console.error('Initial dogs fetch failed:', err);
+      });
+    }
+  }, [authLoading, isLoggedIn, user?.id, dogLoadingAttempted, fetchDogs]);
+
   // Optimize updateDog to handle the full Dog object
   const updateDog = async (id: string, updates: Partial<Dog>): Promise<Dog | null> => {
-    const updatedDog = await updateDogBase(id, updates);
-    
-    // Update active dog if necessary and successful
-    if (updatedDog && activeDog?.id === id) {
-      setActiveDog(updatedDog);
+    try {
+      console.log('Updating dog:', id, updates);
+      const updatedDog = await updateDogBase(id, updates);
+      
+      // Update active dog if necessary and successful
+      if (updatedDog && activeDog?.id === id) {
+        console.log('Updating active dog');
+        setActiveDog(updatedDog);
+      }
+      
+      return updatedDog;
+    } catch (e) {
+      console.error('Error updating dog:', e);
+      toast({
+        title: "Update failed",
+        description: "Could not update dog information. Please try again.",
+        variant: "destructive"
+      });
+      return null;
     }
-    
-    return updatedDog;
   };
 
   // For backward compatibility, rename deleteDog to removeDog
-  const removeDog = deleteDog;
+  const removeDog = async (id: string): Promise<boolean> => {
+    try {
+      console.log('Removing dog:', id);
+      await deleteDog(id);
+      
+      // Reset active dog if it's the one being removed
+      if (activeDog?.id === id) {
+        console.log('Removing active dog');
+        setActiveDog(null);
+      }
+      
+      return true;
+    } catch (e) {
+      console.error('Error removing dog:', e);
+      toast({
+        title: "Remove failed",
+        description: "Could not remove dog. Please try again.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
 
   // Reset active dog if it no longer exists in the list
   useEffect(() => {
     if (activeDog && !dogs.some(dog => dog.id === activeDog.id)) {
+      console.log('Active dog no longer exists, resetting');
       setActiveDog(null);
     }
   }, [dogs, activeDog]);
 
+  // Calculate loading state by combining auth and data loading
+  const isLoading = authLoading || (isLoggedIn && dogsLoading && !dogLoadingAttempted);
+
   // Create the context value object
   const value: DogsContextType = {
     dogs,
-    loading,
-    error,
+    loading: isLoading,
+    error: error ? error : (authLoading ? null : (!isLoggedIn && !user?.id && dogLoadingAttempted ? 'Authentication required' : null)),
     activeDog,
     setActiveDog,
     refreshDogs: wrappedRefreshDogs,
