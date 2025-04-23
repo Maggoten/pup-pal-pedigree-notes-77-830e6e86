@@ -11,11 +11,17 @@ export function useUpdateDog(userId: string | undefined) {
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Dog> }) => {
       console.log('useUpdateDog mutation called with:', { id, updates });
-      const updatedDog = await updateDog(id, updates);
-      if (!updatedDog) {
-        throw new Error('Failed to update dog');
+      
+      try {
+        const updatedDog = await updateDog(id, updates);
+        if (!updatedDog) {
+          throw new Error('Failed to update dog: No data returned');
+        }
+        return updatedDog;
+      } catch (error) {
+        console.error('Error in updateDog service call:', error);
+        throw error; // Re-throw to trigger onError
       }
-      return updatedDog;
     },
     onSuccess: (updatedDog) => {
       console.log('Dog update successful:', updatedDog);
@@ -37,8 +43,22 @@ export function useUpdateDog(userId: string | undefined) {
       });
     },
     onError: (err) => {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update dog';
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'Failed to update dog';
+      
       console.error('Error in updateDog mutation:', errorMessage);
+      
+      // More detailed error logging
+      if (err instanceof Error) {
+        console.error('Error details:', err.stack);
+        
+        // Check for network-related errors
+        if (errorMessage.includes('Failed to fetch')) {
+          console.error('Network issue detected. Check Supabase connection.');
+        }
+      }
+      
       toast({
         title: "Error updating dog",
         description: errorMessage,

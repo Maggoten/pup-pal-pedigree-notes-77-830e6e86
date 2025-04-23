@@ -46,24 +46,38 @@ export const enrichDog = (dog: any): Dog => {
  * @returns A database-compatible dog object ready for Supabase
  */
 export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
+  console.log('Original dog object for DB sanitization:', dog);
+  
   // Create a new object to avoid mutation
   const dbDog: Partial<DbDog> = {};
   
   // Explicitly map UI field names to DB field names
-  if ('dateOfBirth' in dog) dbDog.birthdate = dog.dateOfBirth;
-  if ('registrationNumber' in dog) dbDog.registration_number = dog.registrationNumber;
-  if ('image' in dog) dbDog.image_url = dog.image;
+  if ('dateOfBirth' in dog && dog.dateOfBirth !== undefined) {
+    dbDog.birthdate = dog.dateOfBirth;
+    console.log('Mapped dateOfBirth to birthdate:', dog.dateOfBirth);
+  }
+  
+  if ('registrationNumber' in dog && dog.registrationNumber !== undefined) {
+    dbDog.registration_number = dog.registrationNumber;
+    console.log('Mapped registrationNumber to registration_number:', dog.registrationNumber);
+  }
+  
+  if ('image' in dog && dog.image !== undefined) {
+    dbDog.image_url = dog.image;
+    console.log('Mapped image to image_url:', dog.image);
+  }
   
   // Copy direct fields that have the same name
   const directFields: (keyof Dog & keyof DbDog)[] = [
     'id', 'owner_id', 'name', 'breed', 'gender', 
     'color', 'chip_number', 'notes', 'created_at', 'updated_at',
-    'heatHistory', 'breedingHistory', 'heatInterval'
+    'heatHistory', 'breedingHistory', 'heatInterval', 'dewormingDate', 'vaccinationDate'
   ];
   
   directFields.forEach(field => {
-    if (field in dog) {
+    if (field in dog && dog[field] !== undefined) {
       (dbDog[field] as any) = dog[field];
+      console.log(`Copied field ${field}:`, dog[field]);
     }
   });
   

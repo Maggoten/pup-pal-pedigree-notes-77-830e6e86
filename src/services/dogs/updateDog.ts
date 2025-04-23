@@ -15,21 +15,35 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
   
   try {
     console.log('Updating dog with ID:', id, 'Updates:', dbUpdates);
+    
+    // Remove undefined values from dbUpdates to prevent Supabase errors
+    const cleanUpdates: Record<string, any> = {};
+    Object.entries(dbUpdates).forEach(([key, value]) => {
+      if (value !== undefined) {
+        cleanUpdates[key] = value;
+      }
+    });
+    
+    console.log('Cleaned updates for Supabase:', cleanUpdates);
+    
+    // Add explicit updated_at timestamp to force update detection
+    cleanUpdates.updated_at = new Date().toISOString();
+    
     const updateResponse = await withTimeout<PostgrestResponse<DbDog>>(
       supabase
         .from('dogs')
-        .update(dbUpdates)
+        .update(cleanUpdates)
         .eq('id', id)
         .select('*'),
       TIMEOUT
     );
 
     if (updateResponse.error) {
-      console.error('Error updating dog:', updateResponse.error.message);
+      console.error('Error updating dog:', updateResponse.error.message, updateResponse.error.details);
       throw new Error(updateResponse.error.message);
     }
 
-    if (!updateResponse.data?.[0]) {
+    if (!updateResponse.data || updateResponse.data.length === 0) {
       console.error('No dog data returned after update');
       return null;
     }
@@ -39,6 +53,8 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
     return updatedDog;
   } catch (error) {
     console.error('Failed to update dog:', error);
-    throw new Error(error instanceof Error ? error.message : 'Failed to update dog');
+    throw error instanceof Error 
+      ? error 
+      : new Error('Failed to update dog: Unknown error');
   }
 }

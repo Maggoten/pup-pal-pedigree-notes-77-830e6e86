@@ -35,12 +35,16 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [lastError, setLastError] = useState<string | null>(null);
   
   const handleBack = () => {
     setActiveDog(null);
   };
 
   const handleSave = async (values: DogFormValues) => {
+    // Clear any previous errors
+    setLastError(null);
+    
     // Set local saving state to provide immediate feedback
     setIsSaving(true);
     
@@ -66,7 +70,14 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       };
       
       console.log('Calling updateDog with:', dog.id, formattedValues);
-      const result = await updateDog(dog.id, formattedValues);
+      
+      // Add a timeout to detect hanging requests
+      const updatePromise = updateDog(dog.id, formattedValues);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Update request timed out")), 10000)
+      );
+      
+      const result = await Promise.race([updatePromise, timeoutPromise]);
       
       if (result) {
         console.log('Dog updated successfully:', result);
@@ -77,6 +88,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         setIsEditing(false);
       } else {
         console.error('Update returned null result');
+        setLastError("The update may not have been saved. Please try again.");
         toast({
           title: "Update Issue",
           description: "The update may not have been saved. Please try again.",
@@ -84,10 +96,12 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         });
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       console.error("Error saving dog:", error);
+      setLastError(errorMessage);
       toast({
         title: "Error",
-        description: "Failed to update dog information.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -130,6 +144,12 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
             />
           ) : (
             <DogInfoDisplay dog={dog} />
+          )}
+          
+          {lastError && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-md text-sm">
+              <strong>Error:</strong> {lastError}
+            </div>
           )}
         </CardContent>
         
