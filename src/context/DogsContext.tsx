@@ -101,17 +101,26 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     }
   }, [authLoading, isLoggedIn, user?.id, dogLoadingAttempted, fetchDogs]);
 
-  // Optimize updateDog to handle the full Dog object
+  // Implement updateDog with better logging and error handling
   const updateDog = async (id: string, updates: Partial<Dog>): Promise<Dog | null> => {
     try {
-      console.log('Updating dog:', id, updates);
+      console.log('DogsContext.updateDog called with:', { id, updates });
+      
+      if (!id) {
+        throw new Error("Invalid dog ID provided");
+      }
+      
       const updatedDog = await updateDogBase(id, updates);
+      console.log('Update result:', updatedDog);
       
       // Update active dog if necessary and successful
       if (updatedDog && activeDog?.id === id) {
-        console.log('Updating active dog');
+        console.log('Updating active dog in state');
         setActiveDog(updatedDog);
       }
+      
+      // Force a refresh to ensure UI is in sync
+      await wrappedRefreshDogs();
       
       return updatedDog;
     } catch (e) {

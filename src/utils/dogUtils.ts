@@ -1,3 +1,4 @@
+
 import { Dog, BreedingHistory } from '@/types/dogs';
 import { Database } from '@/integrations/supabase/types';
 
@@ -45,31 +46,27 @@ export const enrichDog = (dog: any): Dog => {
  * @returns A database-compatible dog object ready for Supabase
  */
 export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
-  // First, create a DB-compatible version of the dog object
-  const dbCompatibleDog = {
-    ...dog,
-    birthdate: dog.dateOfBirth,
-    registration_number: dog.registrationNumber,
-    image_url: dog.image,
-  };
-
+  // Create a new object to avoid mutation
   const dbDog: Partial<DbDog> = {};
   
-  // Define explicitly typed array of allowed fields
-  const allowedFields: (keyof DbDog)[] = [
+  // Explicitly map UI field names to DB field names
+  if ('dateOfBirth' in dog) dbDog.birthdate = dog.dateOfBirth;
+  if ('registrationNumber' in dog) dbDog.registration_number = dog.registrationNumber;
+  if ('image' in dog) dbDog.image_url = dog.image;
+  
+  // Copy direct fields that have the same name
+  const directFields: (keyof Dog & keyof DbDog)[] = [
     'id', 'owner_id', 'name', 'breed', 'gender', 
     'color', 'chip_number', 'notes', 'created_at', 'updated_at',
-    'image_url', 'birthdate', 'registration_number',
     'heatHistory', 'breedingHistory', 'heatInterval'
   ];
   
-  // Copy allowed fields from the DB-compatible object
-  allowedFields.forEach(field => {
-    if (field in dbCompatibleDog) {
-      const value = dbCompatibleDog[field as keyof typeof dbCompatibleDog];
-      (dbDog[field] as typeof value) = value;
+  directFields.forEach(field => {
+    if (field in dog) {
+      (dbDog[field] as any) = dog[field];
     }
   });
   
+  console.log('Sanitized dog object for DB:', dbDog);
   return dbDog;
 };

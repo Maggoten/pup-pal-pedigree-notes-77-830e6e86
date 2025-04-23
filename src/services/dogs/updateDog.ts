@@ -14,7 +14,7 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
   const dbUpdates = sanitizeDogForDb(updates);
   
   try {
-    console.log('Updating dog:', id);
+    console.log('Updating dog with ID:', id, 'Updates:', dbUpdates);
     const updateResponse = await withTimeout<PostgrestResponse<DbDog>>(
       supabase
         .from('dogs')
@@ -35,7 +35,7 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
     }
 
     const updatedDog = enrichDog(updateResponse.data[0]);
-    console.log('Successfully updated and verified dog:', updatedDog);
+    console.log('Successfully updated dog:', updatedDog);
     return updatedDog;
   } catch (error) {
     console.error('Failed to update dog:', error);

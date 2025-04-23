@@ -10,6 +10,7 @@ export function useUpdateDog(userId: string | undefined) {
 
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Dog> }) => {
+      console.log('useUpdateDog mutation called with:', { id, updates });
       const updatedDog = await updateDog(id, updates);
       if (!updatedDog) {
         throw new Error('Failed to update dog');
@@ -17,11 +18,18 @@ export function useUpdateDog(userId: string | undefined) {
       return updatedDog;
     },
     onSuccess: (updatedDog) => {
+      console.log('Dog update successful:', updatedDog);
+      
+      // Update the cache with the new data
       queryClient.setQueryData(['dogs', userId], (oldData: Dog[] = []) => {
+        console.log('Updating query cache with new dog data');
         return oldData.map(dog => 
           dog.id === updatedDog.id ? updatedDog : dog
         );
       });
+      
+      // Force a refetch to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
       
       toast({
         title: "Dog updated",
@@ -30,6 +38,7 @@ export function useUpdateDog(userId: string | undefined) {
     },
     onError: (err) => {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update dog';
+      console.error('Error in updateDog mutation:', errorMessage);
       toast({
         title: "Error updating dog",
         description: errorMessage,

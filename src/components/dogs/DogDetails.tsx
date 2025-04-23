@@ -9,7 +9,7 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Dog as DogIcon, ArrowLeft, Trash2 } from 'lucide-react';
+import { Dog as DogIcon, ArrowLeft, Trash2, Save, Loader2 } from 'lucide-react';
 import { Dog, useDogs } from '@/context/DogsContext';
 import DogInfoDisplay from './DogInfoDisplay';
 import DogEditForm from './DogEditForm';
@@ -24,6 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { toast } from '@/hooks/use-toast';
 
 interface DogDetailsProps {
   dog: Dog;
@@ -44,6 +45,8 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
     setIsSaving(true);
     
     try {
+      console.log('Preparing to save dog with values:', values);
+      
       // Convert date objects to ISO strings for storage
       const formattedValues = {
         name: values.name,
@@ -62,12 +65,31 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         heatInterval: values.heatInterval
       };
       
-      const success = await updateDog(dog.id, formattedValues);
-      if (success) {
+      console.log('Calling updateDog with:', dog.id, formattedValues);
+      const result = await updateDog(dog.id, formattedValues);
+      
+      if (result) {
+        console.log('Dog updated successfully:', result);
+        toast({
+          title: "Success",
+          description: `${values.name} has been updated successfully.`,
+        });
         setIsEditing(false);
+      } else {
+        console.error('Update returned null result');
+        toast({
+          title: "Update Issue",
+          description: "The update may not have been saved. Please try again.",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error("Error saving dog:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update dog information.",
+        variant: "destructive"
+      });
     } finally {
       setIsSaving(false);
     }
@@ -122,7 +144,10 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
           </Button>
           
           {!isEditing ? (
-            <Button onClick={() => setIsEditing(true)} disabled={loading || isSaving}>Edit</Button>
+            <Button onClick={() => setIsEditing(true)} disabled={loading || isSaving}>
+              <Save className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
           ) : null}
         </CardFooter>
       </Card>
