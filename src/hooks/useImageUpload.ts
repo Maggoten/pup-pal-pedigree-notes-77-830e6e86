@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -15,6 +14,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const UPLOAD_TIMEOUT = 30000; // 30 seconds
+  const BUCKET_NAME = 'dog-photos';
 
   const validateFile = (file: File) => {
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
@@ -38,12 +38,61 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     return true;
   };
 
-  const uploadImage = async (file: File) => {
+  const getFilePathFromUrl = (url: string): string | null => {
+    try {
+      const { data: { publicUrl } } = supabase.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl('');
+      
+      const baseUrl = publicUrl.split('/' + BUCKET_NAME)[0] + '/' + BUCKET_NAME + '/';
+      return url.replace(baseUrl, '');
+    } catch (error) {
+      console.error('Error extracting file path from URL:', error);
+      return null;
+    }
+  };
+
+  const deleteOldImage = async (oldImageUrl: string): Promise<boolean> => {
+    try {
+      if (!oldImageUrl) return true;
+      
+      const filePath = getFilePathFromUrl(oldImageUrl);
+      if (!filePath) {
+        console.error('Could not extract file path from URL:', oldImageUrl);
+        return false;
+      }
+
+      const { error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .remove([filePath]);
+
+      if (error) {
+        console.error('Error deleting old image:', error);
+        return false;
+      }
+
+      console.log('Successfully deleted old image:', filePath);
+      return true;
+    } catch (error) {
+      console.error('Error in deleteOldImage:', error);
+      return false;
+    }
+  };
+
+  const uploadImage = async (file: File, oldImageUrl?: string) => {
     if (!user_id || !validateFile(file)) return;
     
     setIsUploading(true);
     
     try {
+      // If there's an old image, try to delete it first
+      if (oldImageUrl) {
+        const deleted = await deleteOldImage(oldImageUrl);
+        if (!deleted) {
+          console.warn('Failed to delete old image, but continuing with upload');
+        }
+      }
+      
       const fileExt = file.name.split('.').pop();
       const fileName = `${user_id}/${Date.now()}.${fileExt}`;
       
@@ -57,10 +106,10 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       }, UPLOAD_TIMEOUT);
 
       const { data, error } = await supabase.storage
-        .from('dog-photos')
+        .from(BUCKET_NAME)
         .upload(fileName, file, {
           cacheControl: '3600',
-          upsert: true
+          upsert: false // Don't use upsert to avoid overwriting
         });
       
       clearTimeout(uploadTimeoutRef.current);
@@ -68,7 +117,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       if (error) throw error;
       
       const { data: { publicUrl } } = supabase.storage
-        .from('dog-photos')
+        .from(BUCKET_NAME)
         .getPublicUrl(fileName);
       
       onImageChange(publicUrl);
@@ -91,14 +140,14 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   };
 
   const removeImage = async (imageUrl: string, userId: string) => {
+    if (!imageUrl || !userId) return;
+    
     try {
-      const fileName = imageUrl.split('/').slice(-2).join('/');
+      const deleted = await deleteOldImage(imageUrl);
       
-      const { error } = await supabase.storage
-        .from('dog-photos')
-        .remove([fileName]);
-      
-      if (error) throw error;
+      if (!deleted) {
+        throw new Error('Failed to delete image');
+      }
       
       onImageChange('');
       

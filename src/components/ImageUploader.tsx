@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { UploadIcon, XIcon } from 'lucide-react';
@@ -32,7 +31,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     const file = e.target.files?.[0];
     if (!file || !user) return;
     
-    await uploadImage(file);
+    await uploadImage(file, currentImage);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
