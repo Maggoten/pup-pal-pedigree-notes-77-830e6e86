@@ -1,8 +1,7 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ImageIcon, UploadIcon, XIcon } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -21,29 +20,32 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [previewImage, setPreviewImage] = useState<string | null>(currentImage || null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadTimeoutRef = useRef<NodeJS.Timeout>();
   
   const PLACEHOLDER_IMAGE_PATH = '/placeholder.svg';
   const isPlaceholder = !currentImage || currentImage === PLACEHOLDER_IMAGE_PATH;
+
+  const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  const UPLOAD_TIMEOUT = 30000; // 30 seconds
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     
-    // Check file size (limit to 2MB)
-    if (file.size > 2 * 1024 * 1024) {
+    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
       toast({
-        title: "File too large",
-        description: "Please select an image under 2MB",
+        title: "Invalid file type",
+        description: "Please upload a JPEG, PNG, WebP, or HEIC image",
         variant: "destructive"
       });
       return;
     }
     
-    // Check file type
-    if (!file.type.startsWith('image/')) {
+    if (file.size > MAX_FILE_SIZE) {
       toast({
-        title: "Invalid file type",
-        description: "Please select an image file",
+        title: "File too large",
+        description: "Please select an image under 5MB",
         variant: "destructive"
       });
       return;
@@ -52,11 +54,18 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     setIsUploading(true);
     
     try {
-      // Generate a unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
-      // Upload to Supabase storage
+      uploadTimeoutRef.current = setTimeout(() => {
+        setIsUploading(false);
+        toast({
+          title: "Upload timeout",
+          description: "The upload took too long. Please try again.",
+          variant: "destructive"
+        });
+      }, UPLOAD_TIMEOUT);
+
       const { data, error } = await supabase.storage
         .from('dog-photos')
         .upload(fileName, file, {
@@ -64,11 +73,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           upsert: true
         });
       
+      clearTimeout(uploadTimeoutRef.current);
+      
       if (error) {
         throw error;
       }
       
-      // Construct public URL
       const { data: { publicUrl } } = supabase.storage
         .from('dog-photos')
         .getPublicUrl(fileName);
@@ -77,18 +87,22 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       onImageChange(publicUrl);
       
       toast({
-        title: "Image Uploaded",
-        description: "Your image has been successfully uploaded"
+        title: "Success",
+        description: "Image uploaded successfully"
       });
     } catch (error) {
       console.error('Error uploading image:', error);
       toast({
         title: "Upload Failed",
-        description: "Failed to upload image",
+        description: error instanceof Error ? error.message : "Failed to upload image",
         variant: "destructive"
       });
     } finally {
       setIsUploading(false);
+      clearTimeout(uploadTimeoutRef.current);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -100,10 +114,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     if (!previewImage || !user) return;
 
     try {
-      // Extract filename from URL
       const fileName = previewImage.split('/').slice(-2).join('/');
       
-      // Delete from Supabase storage
       const { error } = await supabase.storage
         .from('dog-photos')
         .remove([fileName]);
@@ -135,9 +147,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      <div 
-        className="relative aspect-square w-full overflow-hidden rounded-lg border border-border"
-      >
+      <div className="relative aspect-square w-full overflow-hidden rounded-lg border border-border">
         {previewImage ? (
           <img 
             src={previewImage} 
@@ -160,7 +170,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           disabled={isUploading}
         >
           <UploadIcon className="mr-2 h-4 w-4" />
-          {previewImage && !isPlaceholder ? 'Change' : 'Upload'}
+          {isUploading ? 'Uploading...' : (previewImage && !isPlaceholder ? 'Change' : 'Upload')}
         </Button>
         
         {previewImage && !isPlaceholder && (
@@ -169,6 +179,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             variant="outline"
             onClick={handleRemoveImage}
             size="icon"
+            disabled={isUploading}
           >
             <XIcon className="h-4 w-4" />
           </Button>
@@ -179,7 +190,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
-        accept="image/*"
+        accept={ALLOWED_FILE_TYPES.join(',')}
         className="hidden"
       />
     </div>
