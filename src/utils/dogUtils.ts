@@ -111,7 +111,7 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
  */
 export const convertFormHeatHistoryToDbFormat = (formHeatHistory: { date: Date }[]): Heat[] => {
   return formHeatHistory.map(heat => ({
-    date: heat.date ? heat.date.toISOString().split('T')[0] : ''
+    date: heat.date.toISOString().split('T')[0]
   }));
 };
 

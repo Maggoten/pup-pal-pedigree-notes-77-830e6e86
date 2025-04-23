@@ -1,6 +1,12 @@
+
 import * as z from "zod";
+import { UseFormReturn } from "react-hook-form";
 import { Dog } from '@/context/DogsContext';
 import { Gender } from '@/types/dogs';
+import BasicInfoFields from './form-fields/BasicInfoFields';
+import RegistrationFields from './form-fields/RegistrationFields';
+import HealthFields from './form-fields/HealthFields';
+import NotesField from './form-fields/NotesField';
 
 export const dogFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
