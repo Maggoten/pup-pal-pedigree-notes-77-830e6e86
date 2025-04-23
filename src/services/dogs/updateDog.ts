@@ -29,6 +29,11 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
     // Add explicit updated_at timestamp to force update detection
     cleanUpdates.updated_at = new Date().toISOString();
     
+    // Log if we're updating the image URL
+    if (cleanUpdates.image_url !== undefined) {
+      console.log('Image URL is being updated to:', cleanUpdates.image_url);
+    }
+    
     const updateResponse = await withTimeout<PostgrestResponse<DbDog>>(
       supabase
         .from('dogs')

@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { UploadIcon, XIcon } from 'lucide-react';
@@ -31,6 +32,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     const file = e.target.files?.[0];
     if (!file || !user) return;
     
+    // We're explicitly uploading a new image, so pass the current image to be deleted if needed
     await uploadImage(file, currentImage);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';

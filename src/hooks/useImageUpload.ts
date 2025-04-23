@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -40,12 +41,20 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
 
   const getFilePathFromUrl = (url: string): string | null => {
     try {
+      // Skip processing for empty URLs or non-Supabase URLs
+      if (!url || !url.includes(BUCKET_NAME)) return null;
+      
       const { data: { publicUrl } } = supabase.storage
         .from(BUCKET_NAME)
         .getPublicUrl('');
       
       const baseUrl = publicUrl.split('/' + BUCKET_NAME)[0] + '/' + BUCKET_NAME + '/';
-      return url.replace(baseUrl, '');
+      
+      // Only extract path if it's a valid Supabase URL
+      if (url.startsWith(baseUrl)) {
+        return url.replace(baseUrl, '');
+      }
+      return null;
     } catch (error) {
       console.error('Error extracting file path from URL:', error);
       return null;
@@ -58,10 +67,12 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       
       const filePath = getFilePathFromUrl(oldImageUrl);
       if (!filePath) {
-        console.error('Could not extract file path from URL:', oldImageUrl);
-        return false;
+        console.log('No valid file path to delete, possibly not a Supabase URL:', oldImageUrl);
+        return true; // Not an error if we can't extract the path - might be an external URL
       }
 
+      console.log('Attempting to delete image at path:', filePath);
+      
       const { error } = await supabase.storage
         .from(BUCKET_NAME)
         .remove([filePath]);
@@ -85,8 +96,9 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     setIsUploading(true);
     
     try {
-      // If there's an old image, try to delete it first
-      if (oldImageUrl) {
+      // Only try to delete if there's an old image AND it's different from placeholder
+      if (oldImageUrl && !oldImageUrl.includes('placeholder')) {
+        console.log('Deleting old image before upload:', oldImageUrl);
         const deleted = await deleteOldImage(oldImageUrl);
         if (!deleted) {
           console.warn('Failed to delete old image, but continuing with upload');
@@ -140,7 +152,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   };
 
   const removeImage = async (imageUrl: string, userId: string) => {
-    if (!imageUrl || !userId) return;
+    if (!imageUrl || !userId || imageUrl.includes('placeholder')) return;
     
     try {
       const deleted = await deleteOldImage(imageUrl);

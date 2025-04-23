@@ -52,7 +52,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       console.log('Preparing to save dog with values:', values);
       
       // Convert date objects to ISO strings for storage
-      const formattedValues = {
+      const formattedValues: Partial<Dog> = {
         name: values.name,
         breed: values.breed,
         gender: values.gender,
@@ -60,7 +60,6 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         color: values.color,
         registrationNumber: values.registrationNumber,
         notes: values.notes,
-        image: values.image, // Use the updated image from the form
         dewormingDate: values.dewormingDate ? values.dewormingDate.toISOString().split('T')[0] : undefined,
         vaccinationDate: values.vaccinationDate ? values.vaccinationDate.toISOString().split('T')[0] : undefined,
         heatHistory: values.heatHistory ? values.heatHistory.map(heat => ({
@@ -68,6 +67,14 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         })) : undefined,
         heatInterval: values.heatInterval
       };
+      
+      // Only include the image if it has actually changed
+      if (values.image !== dog.image) {
+        formattedValues.image = values.image;
+        console.log('Image has changed, including in update');
+      } else {
+        console.log('Image has not changed, excluding from update');
+      }
       
       console.log('Calling updateDog with:', dog.id, formattedValues);
       
