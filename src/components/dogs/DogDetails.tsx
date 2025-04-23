@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
+import { Heat } from '@/types/dogs';
 
 interface DogDetailsProps {
   dog: Dog;
@@ -100,12 +101,19 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       
       // Handle heat-related fields for female dogs
       if (values.gender === 'female') {
-        // Check if heat history has changed
-        const currentHeatDates = JSON.stringify(dog.heatHistory || []);
-        const newHeatDates = JSON.stringify(values.heatHistory || []);
-        
-        if (currentHeatDates !== newHeatDates) {
-          updates.heatHistory = values.heatHistory;
+        // Convert Date objects to ISO string dates for heat history
+        if (values.heatHistory) {
+          const currentHeatDates = JSON.stringify(dog.heatHistory || []);
+          // Convert each Date object to string format
+          const convertedHeatHistory: Heat[] = values.heatHistory.map(heat => ({
+            date: heat.date ? heat.date.toISOString().split('T')[0] : ''
+          }));
+          
+          const newHeatDates = JSON.stringify(convertedHeatHistory);
+          
+          if (currentHeatDates !== newHeatDates) {
+            updates.heatHistory = convertedHeatHistory;
+          }
         }
         
         // Check if heat interval has changed

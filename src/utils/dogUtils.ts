@@ -1,5 +1,5 @@
 
-import { Dog, BreedingHistory } from '@/types/dogs';
+import { Dog, BreedingHistory, Heat } from '@/types/dogs';
 import { Database } from '@/integrations/supabase/types';
 
 // Define a type for dogs in the database format
@@ -18,6 +18,16 @@ export const enrichDog = (dog: any): Dog => {
     matings: [] // Include matings for compatibility with ReminderService
   };
 
+  // If heatHistory is present, ensure it has the correct structure
+  let processedHeatHistory: Heat[] = [];
+  
+  if (dog.heatHistory && Array.isArray(dog.heatHistory)) {
+    processedHeatHistory = dog.heatHistory.map((heat: any) => ({
+      date: typeof heat.date === 'string' ? heat.date : 
+            heat.date instanceof Date ? heat.date.toISOString().split('T')[0] : ''
+    }));
+  }
+
   return {
     ...dog,
     // Alias fields for UI
@@ -25,8 +35,8 @@ export const enrichDog = (dog: any): Dog => {
     image: dog.image_url || '',
     registrationNumber: dog.registration_number || '',
 
-    // Fallbacks for frontend-only fields
-    heatHistory: dog.heatHistory || [],
+    // Processed fields
+    heatHistory: processedHeatHistory,
     breedingHistory: dog.breedingHistory || defaultBreedingHistory,
     heatInterval: dog.heatInterval || undefined,
 
@@ -67,11 +77,22 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
     console.log('Mapped image to image_url:', dog.image);
   }
   
+  // Process heat history if present, ensuring dates are strings
+  if ('heatHistory' in dog && dog.heatHistory) {
+    const processedHeatHistory = dog.heatHistory.map((heat: Heat) => ({
+      date: typeof heat.date === 'string' ? heat.date : 
+            heat.date instanceof Date ? heat.date.toISOString().split('T')[0] : ''
+    }));
+    
+    dbDog.heatHistory = processedHeatHistory;
+    console.log('Processed heatHistory for DB:', processedHeatHistory);
+  }
+  
   // Copy direct fields that have the same name
   const directFields: (keyof Dog & keyof DbDog)[] = [
     'id', 'owner_id', 'name', 'breed', 'gender', 
     'color', 'chip_number', 'notes', 'created_at', 'updated_at',
-    'heatHistory', 'breedingHistory', 'heatInterval', 'dewormingDate', 'vaccinationDate'
+    'breedingHistory', 'heatInterval', 'dewormingDate', 'vaccinationDate'
   ];
   
   directFields.forEach(field => {
@@ -83,4 +104,22 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   
   console.log('Sanitized dog object for DB:', dbDog);
   return dbDog;
+};
+
+/**
+ * Convert form heat history (with Date objects) to database heat history (with string dates)
+ */
+export const convertFormHeatHistoryToDbFormat = (formHeatHistory: { date: Date }[]): Heat[] => {
+  return formHeatHistory.map(heat => ({
+    date: heat.date ? heat.date.toISOString().split('T')[0] : ''
+  }));
+};
+
+/**
+ * Convert database heat history (with string dates) to form heat history (with Date objects)
+ */
+export const convertDbHeatHistoryToFormFormat = (dbHeatHistory: Heat[]): { date: Date }[] => {
+  return dbHeatHistory.map(heat => ({
+    date: new Date(heat.date)
+  }));
 };

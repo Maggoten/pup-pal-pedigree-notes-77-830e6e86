@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { format } from 'date-fns';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
@@ -10,6 +9,7 @@ import DogFormFields, { dogFormSchema, DogFormValues } from './DogFormFields';
 import DogImageField from './DogImageField';
 import HeatRecordsField from './HeatRecordsField';
 import { Loader2 } from 'lucide-react';
+import { Heat } from '@/types/dogs';
 
 interface DogEditFormProps {
   dog: Dog;

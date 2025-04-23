@@ -1,30 +1,21 @@
-
-import React from 'react';
-import { z } from 'zod';
-import { UseFormReturn } from 'react-hook-form';
-import BasicInfoFields from './form-fields/BasicInfoFields';
-import RegistrationFields from './form-fields/RegistrationFields';
-import HealthFields from './form-fields/HealthFields';
-import NotesField from './form-fields/NotesField';
+import * as z from "zod";
+import { Dog } from '@/context/DogsContext';
+import { Gender } from '@/types/dogs';
 
 export const dogFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   breed: z.string().min(1, "Breed is required"),
-  gender: z.enum(["male", "female"], {
-    required_error: "Gender is required",
-  }),
-  dateOfBirth: z.date({
-    required_error: "Date of birth is required",
-  }),
-  color: z.string().min(1, "Color is required"),
+  dateOfBirth: z.instanceof(Date, { message: "Date of birth is required" }),
+  gender: z.enum(["male", "female"] as const),
+  color: z.string().optional(),
   registrationNumber: z.string().optional(),
-  dewormingDate: z.date().optional(),
-  vaccinationDate: z.date().optional(),
+  dewormingDate: z.instanceof(Date).optional().nullable(),
+  vaccinationDate: z.instanceof(Date).optional().nullable(),
   notes: z.string().optional(),
   image: z.string().optional(),
   heatHistory: z.array(
     z.object({
-      date: z.date()
+      date: z.instanceof(Date)
     })
   ).optional(),
   heatInterval: z.number().positive().optional(),
