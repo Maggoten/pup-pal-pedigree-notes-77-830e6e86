@@ -90,13 +90,35 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     }
   };
 
+  // IMPORTANT: Only attempt to remove an image if it's a file from storage
+  // and not just an empty string or placeholder
   const removeImage = async (imageUrl: string, userId: string) => {
+    // Skip removal if URL doesn't contain the storage path pattern
+    if (!imageUrl || !imageUrl.includes('dog-photos') || !userId) {
+      console.log('Skipping image removal: Invalid image URL or user ID');
+      onImageChange('');
+      return;
+    }
+    
     try {
-      const fileName = imageUrl.split('/').slice(-2).join('/');
+      // Extract the storage path from the URL
+      // The format is typically: https://[storage-url]/storage/v1/object/public/dog-photos/[userId]/[filename]
+      const urlParts = imageUrl.split('/');
+      const storageIndex = urlParts.findIndex(part => part === 'dog-photos');
+      
+      if (storageIndex === -1) {
+        console.log('No valid storage path found in URL:', imageUrl);
+        onImageChange('');
+        return;
+      }
+      
+      // Reconstruct the storage path
+      const storagePath = urlParts.slice(storageIndex).join('/');
+      console.log('Removing image from storage path:', storagePath);
       
       const { error } = await supabase.storage
         .from('dog-photos')
-        .remove([fileName]);
+        .remove([storagePath]);
       
       if (error) throw error;
       
@@ -110,9 +132,11 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       console.error('Error removing image:', error);
       toast({
         title: "Remove Failed",
-        description: "Failed to remove image",
+        description: "Failed to remove image. The update will continue without removing the old image.",
         variant: "destructive"
       });
+      // Still proceed with the form update even if image removal fails
+      onImageChange('');
     }
   };
 

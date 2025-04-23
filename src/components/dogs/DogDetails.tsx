@@ -51,28 +51,85 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
     try {
       console.log('Preparing to save dog with values:', values);
       
-      // Convert date objects to ISO strings for storage
-      const formattedValues = {
-        name: values.name,
-        breed: values.breed,
-        gender: values.gender,
-        dateOfBirth: values.dateOfBirth.toISOString().split('T')[0],
-        color: values.color,
-        registrationNumber: values.registrationNumber,
-        notes: values.notes,
-        image: values.image, // Use the updated image from the form
-        dewormingDate: values.dewormingDate ? values.dewormingDate.toISOString().split('T')[0] : undefined,
-        vaccinationDate: values.vaccinationDate ? values.vaccinationDate.toISOString().split('T')[0] : undefined,
-        heatHistory: values.heatHistory ? values.heatHistory.map(heat => ({
-          date: heat.date.toISOString().split('T')[0]
-        })) : undefined,
-        heatInterval: values.heatInterval
-      };
+      // Create a minimal update object with only the fields that have changed
+      const updates: Partial<Dog> = {};
       
-      console.log('Calling updateDog with:', dog.id, formattedValues);
+      // Check each field and only include it if it has changed
+      if (values.name !== dog.name) updates.name = values.name;
+      if (values.breed !== dog.breed) updates.breed = values.breed;
+      if (values.gender !== dog.gender) updates.gender = values.gender;
+      if (values.color !== dog.color) updates.color = values.color;
+      if (values.notes !== dog.notes) updates.notes = values.notes;
+      
+      // Format dates for storage if they've changed
+      const newDateOfBirth = values.dateOfBirth.toISOString().split('T')[0];
+      if (newDateOfBirth !== dog.dateOfBirth) {
+        updates.dateOfBirth = newDateOfBirth;
+      }
+      
+      // Handle optional dates
+      if (values.dewormingDate) {
+        const newDewormingDate = values.dewormingDate.toISOString().split('T')[0];
+        if (newDewormingDate !== dog.dewormingDate) {
+          updates.dewormingDate = newDewormingDate;
+        }
+      } else if (dog.dewormingDate) {
+        // Clear the date if it was removed
+        updates.dewormingDate = null as any;
+      }
+      
+      if (values.vaccinationDate) {
+        const newVaccinationDate = values.vaccinationDate.toISOString().split('T')[0];
+        if (newVaccinationDate !== dog.vaccinationDate) {
+          updates.vaccinationDate = newVaccinationDate;
+        }
+      } else if (dog.vaccinationDate) {
+        // Clear the date if it was removed
+        updates.vaccinationDate = null as any;
+      }
+      
+      // Only update registration number if changed
+      if (values.registrationNumber !== dog.registrationNumber) {
+        updates.registrationNumber = values.registrationNumber;
+      }
+      
+      // Only include image if it has changed
+      if (values.image !== dog.image) {
+        updates.image = values.image;
+      }
+      
+      // Handle heat-related fields for female dogs
+      if (values.gender === 'female') {
+        // Check if heat history has changed
+        const currentHeatDates = JSON.stringify(dog.heatHistory || []);
+        const newHeatDates = JSON.stringify(values.heatHistory || []);
+        
+        if (currentHeatDates !== newHeatDates) {
+          updates.heatHistory = values.heatHistory;
+        }
+        
+        // Check if heat interval has changed
+        if (values.heatInterval !== dog.heatInterval) {
+          updates.heatInterval = values.heatInterval;
+        }
+      }
+      
+      // If no changes detected, show a message and return early
+      if (Object.keys(updates).length === 0) {
+        console.log('No changes detected, skipping update');
+        toast({
+          title: "No Changes",
+          description: "No changes were detected to save."
+        });
+        setIsEditing(false);
+        setIsSaving(false);
+        return;
+      }
+      
+      console.log('Sending update with changes:', updates);
       
       // Add a timeout to detect hanging requests
-      const updatePromise = updateDog(dog.id, formattedValues);
+      const updatePromise = updateDog(dog.id, updates);
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error("Update request timed out")), 10000)
       );

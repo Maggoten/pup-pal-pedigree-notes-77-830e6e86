@@ -23,6 +23,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const PLACEHOLDER_IMAGE_PATH = '/placeholder.svg';
   const isPlaceholder = !currentImage || currentImage === PLACEHOLDER_IMAGE_PATH;
 
+  // Pass the current user ID to useImageUpload
   const { isUploading, uploadImage, removeImage } = useImageUpload({
     user_id: user?.id,
     onImageChange
@@ -43,7 +44,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
   
   const handleRemoveImage = async () => {
+    // Only proceed if there's a valid image to remove
     if (!currentImage || !user || isPlaceholder) return;
+    
+    console.log('Removing image:', currentImage);
     await removeImage(currentImage, user.id);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
