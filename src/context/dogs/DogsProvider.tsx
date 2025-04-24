@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -32,11 +31,10 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   const { activeDog, setActiveDog } = useActiveDog(dogs);
   const forceReload = useForceReload(user?.id, fetchDogs);
   
-  // Update useDogOperations with the correct types
   const { updateDog, removeDog } = useDogOperations({
     updateDogBase,
     deleteDog,
-    refreshDogs: async () => { await fetchDogs(); }, // Convert to void return type
+    refreshDogs: async () => { await fetchDogs(); },
     activeDog,
     setActiveDog
   });
