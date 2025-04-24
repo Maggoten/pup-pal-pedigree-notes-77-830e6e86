@@ -12,7 +12,7 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       return [];
     }
 
-    // Using the proper syntax to disambiguate relationships with dogs table
+    // Using a more explicit query structure to avoid ambiguity
     const { data: pregnancies, error } = await supabase
       .from('pregnancies')
       .select(`
@@ -23,8 +23,8 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
         user_id,
         female_dog_id,
         male_dog_id,
-        dogs!female_dog_id(id, name),
-        dogs!male_dog_id(id, name)
+        femaleDog:dogs!female_dog_id(id, name),
+        maleDog:dogs!male_dog_id(id, name)
       `)
       .eq('status', 'active')
       .eq('user_id', sessionData.session.user.id);
@@ -38,9 +38,9 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       const expectedDueDate = new Date(pregnancy.expected_due_date);
       const daysLeft = differenceInDays(expectedDueDate, new Date());
       
-      // Access dog names from the correctly hinted relationships
-      const femaleDog = pregnancy["dogs!female_dog_id"];
-      const maleDog = pregnancy["dogs!male_dog_id"];
+      // Access dog names using the explicit aliases we defined in the query
+      const femaleDog = pregnancy.femaleDog;
+      const maleDog = pregnancy.maleDog;
 
       return {
         id: pregnancy.id,
