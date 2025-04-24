@@ -24,10 +24,22 @@ const PregnancyDetails: React.FC = () => {
   const navigate = useNavigate();
   const { pregnancy, loading } = usePregnancyDetails(id);
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
+  const [isLoadingPregnancies, setIsLoadingPregnancies] = useState(true);
   
   useEffect(() => {
-    const pregnancies = getActivePregnancies();
-    setActivePregnancies(pregnancies);
+    const fetchPregnancies = async () => {
+      try {
+        setIsLoadingPregnancies(true);
+        const pregnancies = await getActivePregnancies();
+        setActivePregnancies(pregnancies);
+      } catch (error) {
+        console.error("Error fetching pregnancies:", error);
+      } finally {
+        setIsLoadingPregnancies(false);
+      }
+    };
+    
+    fetchPregnancies();
   }, []);
   
   const handlePregnancyChange = (pregnancyId: string) => {

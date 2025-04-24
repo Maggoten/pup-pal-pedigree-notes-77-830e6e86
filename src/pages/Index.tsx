@@ -9,11 +9,23 @@ import DashboardLayout from '@/components/home/DashboardLayout';
 const Index = () => {
   const { user } = useAuth();
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     // Get active pregnancies from the service
-    const pregnancies = getActivePregnancies();
-    setActivePregnancies(pregnancies);
+    const fetchPregnancies = async () => {
+      try {
+        setIsLoading(true);
+        const pregnancies = await getActivePregnancies();
+        setActivePregnancies(pregnancies);
+      } catch (error) {
+        console.error("Error fetching pregnancies:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchPregnancies();
   }, []);
   
   const handleAddDogClick = () => {

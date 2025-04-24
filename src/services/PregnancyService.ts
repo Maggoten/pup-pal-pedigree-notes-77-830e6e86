@@ -56,6 +56,11 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
 };
 
 export const getFirstActivePregnancy = async (): Promise<string | null> => {
-  const pregnancies = await getActivePregnancies();
-  return pregnancies.length > 0 ? pregnancies[0].id : null;
+  try {
+    const pregnancies = await getActivePregnancies();
+    return pregnancies.length > 0 ? pregnancies[0].id : null;
+  } catch (error) {
+    console.error('Error in getFirstActivePregnancy:', error);
+    return null;
+  }
 };

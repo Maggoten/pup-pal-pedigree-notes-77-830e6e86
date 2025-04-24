@@ -1,8 +1,10 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MyDogs from "./pages/MyDogs";
@@ -15,6 +17,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import { DogsProvider } from "./context/DogsContext";
 import { getFirstActivePregnancy } from "./services/PregnancyService";
 import ErrorBoundary from "./components/ErrorBoundary";
+import Pregnancy from "./pages/Pregnancy";
 
 // Configure React Query with error handling
 const queryClient = new QueryClient({
@@ -32,8 +35,23 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Get the first active pregnancy ID for the pregnancy link
-  const firstPregnancyId = getFirstActivePregnancy() || "none";
+  const [firstPregnancyId, setFirstPregnancyId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchFirstPregnancy = async () => {
+      try {
+        const id = await getFirstActivePregnancy();
+        setFirstPregnancyId(id);
+      } catch (error) {
+        console.error("Error fetching first pregnancy:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchFirstPregnancy();
+  }, []);
   
   return (
     <ErrorBoundary>
@@ -50,15 +68,12 @@ const App = () => {
                     <Route path="/" element={<Index />} />
                     <Route path="/my-dogs" element={<MyDogs />} />
                     <Route path="/planned-litters" element={<PlannedLitters />} />
-                    {/* Add a generic pregnancy route that redirects to the first active pregnancy or shows a message */}
-                    <Route 
-                      path="/pregnancy" 
-                      element={
-                        firstPregnancyId !== "none" ? 
-                          <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
-                          <PregnancyDetails />
-                      } 
-                    />
+                    {/* Handle pregnancy routes with loading state */}
+                    <Route path="/pregnancy" element={loading ? <div>Loading...</div> : 
+                      firstPregnancyId ? 
+                        <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
+                        <Pregnancy />
+                    } />
                     <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
                     <Route path="/my-litters" element={<MyLitters />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

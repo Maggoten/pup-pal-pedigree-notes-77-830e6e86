@@ -18,10 +18,22 @@ const Pregnancy: React.FC = () => {
   const navigate = useNavigate();
   const { dogs } = useDogs();
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const pregnancies = getActivePregnancies();
-    setActivePregnancies(pregnancies);
+    const fetchPregnancies = async () => {
+      try {
+        setIsLoading(true);
+        const pregnancies = await getActivePregnancies();
+        setActivePregnancies(pregnancies);
+      } catch (error) {
+        console.error("Error fetching pregnancies:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchPregnancies();
   }, [dogs]);
 
   const handleAddPregnancyClick = () => {
