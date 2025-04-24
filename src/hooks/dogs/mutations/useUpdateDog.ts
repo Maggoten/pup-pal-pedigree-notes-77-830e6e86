@@ -19,8 +19,11 @@ export function useUpdateDog(userId: string | undefined) {
         }
         return updatedDog;
       } catch (error) {
+        if (error instanceof Error && error.message.includes('timeout')) {
+          throw new Error('Update timed out. Please try again.');
+        }
         console.error('Error in updateDog service call:', error);
-        throw error; // Re-throw to trigger onError
+        throw error;
       }
     },
     onSuccess: (updatedDog) => {
@@ -28,17 +31,16 @@ export function useUpdateDog(userId: string | undefined) {
       
       // Update the cache with the new data
       queryClient.setQueryData(['dogs', userId], (oldData: Dog[] = []) => {
-        console.log('Updating query cache with new dog data');
         return oldData.map(dog => 
           dog.id === updatedDog.id ? updatedDog : dog
         );
       });
       
-      // Force a refetch to ensure we have the latest data
-      queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
+      // Remove the redundant refetch
+      // queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
       
       toast({
-        title: "Dog updated",
+        title: "Success",
         description: "Dog information has been updated successfully.",
       });
     },
@@ -48,16 +50,6 @@ export function useUpdateDog(userId: string | undefined) {
         : 'Failed to update dog';
       
       console.error('Error in updateDog mutation:', errorMessage);
-      
-      // More detailed error logging
-      if (err instanceof Error) {
-        console.error('Error details:', err.stack);
-        
-        // Check for network-related errors
-        if (errorMessage.includes('Failed to fetch')) {
-          console.error('Network issue detected. Check Supabase connection.');
-        }
-      }
       
       toast({
         title: "Error updating dog",

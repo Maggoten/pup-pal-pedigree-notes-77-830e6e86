@@ -9,7 +9,6 @@ import DogFormFields, { dogFormSchema, DogFormValues } from './DogFormFields';
 import DogImageField from './DogImageField';
 import HeatRecordsField from './HeatRecordsField';
 import { Loader2 } from 'lucide-react';
-import { Heat } from '@/types/dogs';
 
 interface DogEditFormProps {
   dog: Dog;
@@ -46,25 +45,22 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isLoad
     onSave(values);
   };
 
-  const handleImageChange = (imageBase64: string) => {
-    form.setValue('image', imageBase64);
-  };
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr]">
           <DogImageField 
             form={form} 
-            handleImageChange={handleImageChange} 
+            handleImageChange={(imageBase64: string) => form.setValue('image', imageBase64)} 
+            disabled={isLoading}
           />
           <div className="space-y-6">
-            <DogFormFields form={form} />
+            <DogFormFields form={form} disabled={isLoading} />
             
             {form.watch('gender') === 'female' && (
               <div className="border-t pt-4">
                 <h3 className="text-lg font-medium mb-4">Heat Cycle Information</h3>
-                <HeatRecordsField form={form} />
+                <HeatRecordsField form={form} disabled={isLoading} />
               </div>
             )}
           </div>
@@ -79,7 +75,11 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isLoad
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            className="min-w-[100px]"
+          >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

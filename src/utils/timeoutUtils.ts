@@ -1,7 +1,6 @@
-
 import { PostgrestResponse } from '@supabase/supabase-js';
 
-const TIMEOUT = 30000; // 30 second timeout
+const TIMEOUT = 15000; // Reduced from 30s to 15s for faster failure detection
 
 export async function withTimeout<T>(promise: Promise<T> | { then(onfulfilled: (value: T) => any): any }, timeoutMs: number): Promise<T> {
   // For Supabase query builders, we need to convert them to promises first

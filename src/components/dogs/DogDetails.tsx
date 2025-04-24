@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -25,7 +24,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
-import { Heat } from '@/types/dogs';
 
 interface DogDetailsProps {
   dog: Dog;
@@ -43,39 +41,35 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
   };
 
   const handleSave = async (values: DogFormValues) => {
-    // Clear any previous errors
     setLastError(null);
-    
-    // Set local saving state to provide immediate feedback
     setIsSaving(true);
     
     try {
-      console.log('Preparing to save dog with values:', values);
-      
-      // Create a minimal update object with only the fields that have changed
       const updates: Partial<Dog> = {};
       
-      // Check each field and only include it if it has changed
+      // Only include fields that have changed
       if (values.name !== dog.name) updates.name = values.name;
       if (values.breed !== dog.breed) updates.breed = values.breed;
       if (values.gender !== dog.gender) updates.gender = values.gender;
       if (values.color !== dog.color) updates.color = values.color;
       if (values.notes !== dog.notes) updates.notes = values.notes;
+      if (values.registrationNumber !== dog.registrationNumber) {
+        updates.registrationNumber = values.registrationNumber;
+      }
+      if (values.image !== dog.image) updates.image = values.image;
       
-      // Format dates for storage if they've changed
+      // Format dates for comparison
       const newDateOfBirth = values.dateOfBirth.toISOString().split('T')[0];
       if (newDateOfBirth !== dog.dateOfBirth) {
         updates.dateOfBirth = newDateOfBirth;
       }
       
-      // Handle optional dates
       if (values.dewormingDate) {
         const newDewormingDate = values.dewormingDate.toISOString().split('T')[0];
         if (newDewormingDate !== dog.dewormingDate) {
           updates.dewormingDate = newDewormingDate;
         }
       } else if (dog.dewormingDate) {
-        // Clear the date if it was removed
         updates.dewormingDate = null as any;
       }
       
@@ -85,46 +79,30 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
           updates.vaccinationDate = newVaccinationDate;
         }
       } else if (dog.vaccinationDate) {
-        // Clear the date if it was removed
         updates.vaccinationDate = null as any;
       }
       
-      // Only update registration number if changed
-      if (values.registrationNumber !== dog.registrationNumber) {
-        updates.registrationNumber = values.registrationNumber;
-      }
-      
-      // Only include image if it has changed
-      if (values.image !== dog.image) {
-        updates.image = values.image;
-      }
-      
-      // Handle heat-related fields for female dogs
+      // Only update heat-related fields for female dogs
       if (values.gender === 'female') {
-        // Convert Date objects to ISO string dates for heat history
         if (values.heatHistory) {
           const currentHeatDates = JSON.stringify(dog.heatHistory || []);
-          // Convert each Date object to string format
-          const convertedHeatHistory: Heat[] = values.heatHistory.map(heat => ({
+          const convertedHeatHistory = values.heatHistory.map(heat => ({
             date: heat.date ? heat.date.toISOString().split('T')[0] : ''
           }));
           
           const newHeatDates = JSON.stringify(convertedHeatHistory);
-          
           if (currentHeatDates !== newHeatDates) {
             updates.heatHistory = convertedHeatHistory;
           }
         }
         
-        // Check if heat interval has changed
         if (values.heatInterval !== dog.heatInterval) {
           updates.heatInterval = values.heatInterval;
         }
       }
       
-      // If no changes detected, show a message and return early
+      // If no changes detected, return early
       if (Object.keys(updates).length === 0) {
-        console.log('No changes detected, skipping update');
         toast({
           title: "No Changes",
           description: "No changes were detected to save."
@@ -134,35 +112,17 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         return;
       }
       
-      console.log('Sending update with changes:', updates);
-      
-      // Add a timeout to detect hanging requests
-      const updatePromise = updateDog(dog.id, updates);
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("Update request timed out")), 10000)
-      );
-      
-      const result = await Promise.race([updatePromise, timeoutPromise]);
+      const result = await updateDog(dog.id, updates);
       
       if (result) {
-        console.log('Dog updated successfully:', result);
+        setIsEditing(false);
         toast({
           title: "Success",
           description: `${values.name} has been updated successfully.`,
         });
-        setIsEditing(false);
-      } else {
-        console.error('Update returned null result');
-        setLastError("The update may not have been saved. Please try again.");
-        toast({
-          title: "Update Issue",
-          description: "The update may not have been saved. Please try again.",
-          variant: "destructive"
-        });
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      console.error("Error saving dog:", error);
       setLastError(errorMessage);
       toast({
         title: "Error",
