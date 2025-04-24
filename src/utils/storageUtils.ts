@@ -90,7 +90,7 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
         error: deleteError,
         message: errorMessage,
         details: deleteError instanceof StorageError ? deleteError.message : 'Unknown error',
-        status: deleteError instanceof StorageError ? deleteError.statusCode : 'unknown'
+        status: deleteError instanceof Error ? deleteError.name : 'unknown'
       });
 
       toast({
@@ -114,7 +114,7 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
     console.error('Cleanup error:', {
       error,
       message: errorMessage,
-      status: error instanceof Error && 'statusCode' in error ? (error as any).statusCode : 'unknown'
+      status: error instanceof Error && 'name' in error ? (error as any).name : 'unknown'
     });
 
     toast({

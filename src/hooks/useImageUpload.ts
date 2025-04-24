@@ -121,7 +121,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
           error,
           message: errorMessage,
           details: error instanceof StorageError ? error.message : 'Unknown error',
-          status: error instanceof StorageError ? error.statusCode : 'unknown'
+          status: error instanceof Error ? error.name : 'unknown'
         });
 
         toast({
@@ -213,7 +213,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         console.error('Error details:', {
           error,
           message: errorMessage,
-          status: error instanceof StorageError ? error.statusCode : 'unknown'
+          status: error instanceof Error ? error.name : 'unknown'
         });
         
         throw error;
