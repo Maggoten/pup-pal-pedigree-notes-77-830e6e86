@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { parseISO, addDays, differenceInDays } from 'date-fns';
@@ -21,7 +20,7 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       return [];
     }
 
-    // Using a more explicit query structure to avoid ambiguity
+    // Using a more explicit query structure with proper joins
     const { data: pregnancies, error } = await supabase
       .from('pregnancies')
       .select(`
@@ -43,16 +42,29 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       throw error;
     }
 
-    return pregnancies.map((pregnancy) => {
+    // Filter out pregnancies where both dog names are unknown
+    const validPregnancies = pregnancies.filter(pregnancy => {
+      const femaleDog = pregnancy.femaleDog?.[0];
+      const maleDog = pregnancy.maleDog?.[0];
+      
+      const femaleName = femaleDog?.name;
+      const maleName = maleDog?.name || pregnancy.external_male_name;
+      
+      // Only include pregnancies where at least one dog name is known
+      return femaleName || maleName;
+    });
+
+    return validPregnancies.map((pregnancy) => {
       const matingDate = new Date(pregnancy.mating_date);
       const expectedDueDate = new Date(pregnancy.expected_due_date);
       const daysLeft = differenceInDays(expectedDueDate, new Date());
       
       // Get dog names with proper null checking
-      const femaleDog = pregnancy.femaleDog || [];
-      const maleDog = pregnancy.maleDog || [];
-      const femaleName = femaleDog[0]?.name || "Unknown Female";
-      const maleName = maleDog[0]?.name || pregnancy.external_male_name || "Unknown Male";
+      const femaleDog = pregnancy.femaleDog?.[0];
+      const maleDog = pregnancy.maleDog?.[0];
+      
+      const femaleName = femaleDog?.name || "Unknown Female";
+      const maleName = maleDog?.name || pregnancy.external_male_name || "Unknown Male";
 
       return {
         id: pregnancy.id,

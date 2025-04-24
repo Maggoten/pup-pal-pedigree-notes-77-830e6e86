@@ -11,15 +11,35 @@ class MatingDatesService {
 
     const userId = sessionData.session.user.id;
 
+    // Get detailed information about the planned litter
     const { data: litter, error: litterError } = await supabase
       .from('planned_litters')
-      .select('*')
+      .select(`
+        id, 
+        female_id, 
+        male_id, 
+        female_name, 
+        male_name, 
+        external_male, 
+        external_male_name
+      `)
       .eq('id', litterId)
       .single();
 
     if (litterError || !litter) {
       console.error('Error fetching planned litter:', litterError);
-      return;
+      throw new Error('Failed to fetch planned litter details');
+    }
+
+    console.log("Creating pregnancy from litter:", litter);
+
+    // Validate that we have either dog IDs or names
+    if (!litter.female_id && !litter.female_name) {
+      throw new Error('Missing female dog information');
+    }
+
+    if (litter.external_male && !litter.male_name && !litter.external_male_name) {
+      throw new Error('Missing male dog information');
     }
 
     // Calculate expected due date (63 days from mating)
@@ -35,16 +55,17 @@ class MatingDatesService {
         user_id: userId,
         female_dog_id: litter.female_id,
         male_dog_id: litter.external_male ? null : litter.male_id,
-        external_male_name: litter.external_male ? litter.male_name : null
+        external_male_name: litter.external_male ? (litter.male_name || litter.external_male_name) : null
       })
       .select()
       .single();
 
     if (pregnancyError) {
       console.error('Error creating pregnancy:', pregnancyError);
-      return;
+      throw new Error('Failed to create pregnancy');
     }
 
+    // Add the mating date and link it to the pregnancy
     const { error: matingError } = await supabase
       .from('mating_dates')
       .insert({
@@ -56,7 +77,7 @@ class MatingDatesService {
 
     if (matingError) {
       console.error('Error adding mating date:', matingError);
-      return;
+      throw new Error('Failed to add mating date');
     }
   }
 
@@ -138,4 +159,3 @@ class MatingDatesService {
 }
 
 export const matingDatesService = new MatingDatesService();
-
