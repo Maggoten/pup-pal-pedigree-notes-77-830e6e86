@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { StorageError } from '@supabase/storage-js';
@@ -10,7 +9,6 @@ interface StorageCleanupOptions {
 }
 
 export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }: StorageCleanupOptions) => {
-  // Confirm we're working with the internal bucket ID
   const BUCKET_NAME = 'dog-photos';
   
   if (!oldImageUrl || !oldImageUrl.includes(BUCKET_NAME)) {
@@ -19,14 +17,12 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
   }
 
   try {
-    // Check Supabase auth status first
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
       console.error('Storage cleanup failed: No active session');
       return;
     }
     
-    // First check if any other dogs are using this image
     const { data: dogsUsingImage, error: searchError } = await supabase
       .from('dogs')
       .select('id')
@@ -44,14 +40,11 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
       return;
     }
 
-    // If other dogs are using this image, don't delete it
     if (dogsUsingImage && dogsUsingImage.length > 0) {
       console.log('Image is still in use by other dogs, skipping deletion');
       return;
     }
 
-    // Extract the path from the URL
-    // URL format: https://[storage-url]/storage/v1/object/public/dog-photos/[userId]/[filename]
     const urlParts = oldImageUrl.split('/');
     const bucketIndex = urlParts.findIndex(part => part === BUCKET_NAME);
     
@@ -72,22 +65,15 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
       .remove([storagePath]);
 
     if (deleteError) {
-      console.error('Error deleting unused image:', deleteError);
-      
-      // Get error message safely
-      const errorMessage = deleteError instanceof Error 
+      const errorMessage = deleteError instanceof StorageError 
         ? deleteError.message 
         : "Could not delete the unused image";
-      
-      // Improved error logging for StorageError
-      console.error('Error details:', deleteError instanceof Error ? {
-        message: deleteError.message,
-        name: deleteError.name,
-        ...(deleteError instanceof StorageError && { 
-          // Add any specific StorageError properties if needed
-          error: JSON.stringify(deleteError)
-        })
-      } : { deleteError });
+
+      console.error('Delete error:', {
+        error: deleteError,
+        message: errorMessage,
+        details: deleteError instanceof StorageError ? deleteError.message : 'Unknown error'
+      });
 
       toast({
         title: "Error removing image",
@@ -103,18 +89,14 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
       description: "Unused image was successfully removed",
     });
   } catch (error) {
-    console.error('Error in storage cleanup:', error);
-    
-    // Get error message safely
     const errorMessage = error instanceof Error 
       ? error.message 
       : "An unexpected error occurred while cleaning up storage";
-    
-    // Improved error handling for catches
-    console.error('Error details:', error instanceof Error ? {
-      message: error.message,
-      name: error.name
-    } : { error });
+
+    console.error('Cleanup error:', {
+      error,
+      message: errorMessage
+    });
 
     toast({
       title: "Error",

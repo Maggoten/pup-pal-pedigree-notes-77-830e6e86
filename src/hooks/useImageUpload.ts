@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -107,17 +106,15 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       clearTimeout(uploadTimeoutRef.current);
       
       if (error) {
-        console.error('Supabase storage upload error:', error);
+        const errorMessage = error instanceof StorageError 
+          ? error.message 
+          : "Could not upload the image";
         
-        const errorMessage = error instanceof Error ? error.message : "Could not upload the image";
-        
-        console.error('Error details:', error instanceof Error ? {
-          message: error.message,
-          name: error.name,
-          ...(error instanceof StorageError && { 
-            error: JSON.stringify(error)
-          })
-        } : { error });
+        console.error('Upload error:', {
+          error,
+          message: errorMessage,
+          details: error instanceof StorageError ? error.message : 'Unknown error'
+        });
 
         toast({
           title: "Upload Failed",
@@ -144,12 +141,9 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     } catch (error) {
       console.error('Error uploading image:', error);
       
-      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
-      
-      console.error('Error details:', error instanceof Error ? {
-        message: error.message,
-        name: error.name
-      } : { error });
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "An unexpected error occurred";
       
       toast({
         title: "Upload Failed",
