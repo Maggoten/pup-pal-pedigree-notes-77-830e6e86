@@ -14,7 +14,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const UPLOAD_TIMEOUT = 30000; // 30 seconds
-  const BUCKET_NAME = 'dog-photos'; // Corrected to use the internal bucket ID
+  const BUCKET_NAME = 'dog-photos'; // Using the internal bucket ID
 
   const validateFile = (file: File) => {
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
@@ -39,12 +39,28 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   };
 
   const uploadImage = async (file: File) => {
-    if (!user_id || !validateFile(file)) return;
+    if (!user_id) {
+      console.error('Upload failed: No user ID provided');
+      toast({
+        title: "Authentication Error",
+        description: "Please login again to upload images",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!validateFile(file)) return;
     
     setIsUploading(true);
     console.log('Starting image upload to bucket:', BUCKET_NAME);
     
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        throw new Error('No active session. User authentication is required for uploads.');
+      }
+      console.log('Active session found for user:', sessionData.session.user.id);
+      
       const fileExt = file.name.split('.').pop();
       const fileName = `${user_id}/${Date.now()}.${fileExt}`;
       
@@ -59,7 +75,6 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
 
       console.log('Attempting to upload file:', fileName);
       
-      // Check if the bucket exists before uploading
       const { data: buckets, error: bucketError } = await supabase
         .storage
         .listBuckets();
@@ -69,13 +84,16 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         throw bucketError;
       }
       
-      console.log('Available buckets:', buckets.map(b => b.name));
+      console.log('Available buckets:', buckets.map(b => `${b.name} (id: ${b.id})`));
       
-      const bucketExists = buckets.some(bucket => bucket.name === BUCKET_NAME);
+      const bucketExists = buckets.some(bucket => bucket.id === BUCKET_NAME);
       if (!bucketExists) {
-        console.error(`Bucket "${BUCKET_NAME}" does not exist!`);
+        console.error(`Bucket "${BUCKET_NAME}" does not exist in available buckets:`, 
+          buckets.map(b => `${b.name} (id: ${b.id})`));
         throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist`);
       }
+      
+      console.log(`Found bucket "${BUCKET_NAME}", proceeding with upload`);
       
       const { data, error } = await supabase.storage
         .from(BUCKET_NAME)
@@ -88,6 +106,12 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       
       if (error) {
         console.error('Supabase storage upload error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          statusCode: error.statusCode,
+          name: error.name,
+          error
+        });
         throw error;
       }
       
@@ -106,9 +130,26 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       });
     } catch (error) {
       console.error('Error uploading image:', error);
+      
+      if (error instanceof Error) {
+        console.error('Error details:', {
+          message: error.message,
+          name: error.name,
+          stack: error.stack
+        });
+      }
+      
+      let errorMessage = error instanceof Error ? error.message : "Failed to upload image";
+      
+      if (errorMessage.includes('bucket') && errorMessage.includes('not exist')) {
+        errorMessage = `The storage bucket "${BUCKET_NAME}" does not exist or is not accessible.`;
+      } else if (errorMessage.includes('auth') || errorMessage.includes('session')) {
+        errorMessage = "Authentication error. Please log out and log back in.";
+      }
+      
       toast({
         title: "Upload Failed",
-        description: error instanceof Error ? error.message : "Failed to upload image",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -118,15 +159,22 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   };
 
   const removeImage = async (imageUrl: string, userId: string) => {
-    // Skip removal if URL doesn't contain the storage path pattern
     if (!imageUrl || !imageUrl.includes(BUCKET_NAME) || !userId) {
-      console.log('Skipping image removal: Invalid image URL or user ID');
+      console.log('Skipping image removal: Invalid image URL or user ID', {
+        imageUrl,
+        userId,
+        bucketInUrl: imageUrl ? imageUrl.includes(BUCKET_NAME) : false
+      });
       onImageChange('');
       return;
     }
     
     try {
-      // Extract the storage path from the URL
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        throw new Error('No active session. User authentication is required.');
+      }
+      
       const urlParts = imageUrl.split('/');
       const storageIndex = urlParts.findIndex(part => part === BUCKET_NAME);
       
@@ -136,7 +184,6 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         return;
       }
       
-      // Reconstruct the storage path
       const storagePath = urlParts.slice(storageIndex + 1).join('/');
       console.log('Removing image from storage path:', storagePath);
       
@@ -144,7 +191,15 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         .from(BUCKET_NAME)
         .remove([storagePath]);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error removing image:', error);
+        console.error('Error details:', {
+          message: error.message,
+          statusCode: error.statusCode,
+          name: error.name
+        });
+        throw error;
+      }
       
       onImageChange('');
       

@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { UploadIcon, XIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,10 +30,29 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     onImageChange
   });
 
+  // Log user authentication status when component mounts
+  useEffect(() => {
+    console.log('ImageUploader: User authentication status:', {
+      isAuthenticated: !!user,
+      userId: user?.id,
+      currentImage: currentImage || 'none'
+    });
+  }, [user, currentImage]);
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) {
-      console.log('No file selected or user not logged in');
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+    
+    if (!user) {
+      console.error('Upload attempt without authentication');
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to upload images",
+        variant: "destructive"
+      });
       return;
     }
     
@@ -59,7 +78,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   
   const handleRemoveImage = async () => {
     // Only proceed if there's a valid image to remove
-    if (!currentImage || !user || isPlaceholder) return;
+    if (!currentImage || !user || isPlaceholder) {
+      console.log('Cannot remove image: missing image URL or user ID', {
+        currentImage: currentImage || 'none',
+        userId: user?.id || 'not logged in',
+        isPlaceholder
+      });
+      return;
+    }
     
     console.log('Removing image:', currentImage);
     await removeImage(currentImage, user.id);

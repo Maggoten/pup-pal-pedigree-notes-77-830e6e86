@@ -9,13 +9,22 @@ interface StorageCleanupOptions {
 }
 
 export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }: StorageCleanupOptions) => {
-  // Use the correct bucket name in the check
-  if (!oldImageUrl || !oldImageUrl.includes('dog-photos')) {
+  // Confirm we're working with the internal bucket ID
+  const BUCKET_NAME = 'dog-photos';
+  
+  if (!oldImageUrl || !oldImageUrl.includes(BUCKET_NAME)) {
     console.log('No valid image URL to cleanup:', oldImageUrl);
     return;
   }
 
   try {
+    // Check Supabase auth status first
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.error('Storage cleanup failed: No active session');
+      return;
+    }
+    
     // First check if any other dogs are using this image
     const { data: dogsUsingImage, error: searchError } = await supabase
       .from('dogs')
@@ -43,18 +52,31 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
     // Extract the path from the URL
     // URL format: https://[storage-url]/storage/v1/object/public/dog-photos/[userId]/[filename]
     const urlParts = oldImageUrl.split('/');
+    const bucketIndex = urlParts.findIndex(part => part === BUCKET_NAME);
+    
+    if (bucketIndex === -1) {
+      console.error('Could not find bucket name in URL:', oldImageUrl);
+      return;
+    }
+    
     const storagePath = urlParts
-      .slice(urlParts.findIndex(part => part === 'dog-photos'))
+      .slice(bucketIndex + 1)
       .join('/');
 
     console.log('Deleting unused image:', storagePath);
+    console.log('Bucket name:', BUCKET_NAME);
     
     const { error: deleteError } = await supabase.storage
-      .from('dog-photos')
+      .from(BUCKET_NAME)
       .remove([storagePath]);
 
     if (deleteError) {
       console.error('Error deleting unused image:', deleteError);
+      console.error('Error details:', {
+        message: deleteError.message,
+        statusCode: deleteError.statusCode,
+        name: deleteError.name
+      });
       toast({
         title: "Error removing image",
         description: "Could not delete the unused image",
