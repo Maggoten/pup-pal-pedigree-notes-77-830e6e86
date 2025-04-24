@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { addDays } from 'date-fns';
 
@@ -33,25 +32,16 @@ class MatingDatesService {
 
     console.log("Creating pregnancy from litter:", litter);
 
-    // Validate that we have either dog IDs or names
-    if (!litter.female_id && !litter.female_name) {
-      throw new Error('Missing female dog information');
-    }
-
-    if (litter.external_male && !litter.male_name && !litter.external_male_name) {
-      throw new Error('Missing male dog information');
-    }
-
     // Calculate expected due date (63 days from mating)
     const expectedDueDate = addDays(date, 63);
 
-    // Create a new pregnancy record
+    // Create a new pregnancy record with explicit active status
     const { data: pregnancy, error: pregnancyError } = await supabase
       .from('pregnancies')
       .insert({
         mating_date: date.toISOString(),
         expected_due_date: expectedDueDate.toISOString(),
-        status: 'active',
+        status: 'active',  // Explicitly set status to active
         user_id: userId,
         female_dog_id: litter.female_id,
         male_dog_id: litter.external_male ? null : litter.male_id,
@@ -64,6 +54,8 @@ class MatingDatesService {
       console.error('Error creating pregnancy:', pregnancyError);
       throw new Error('Failed to create pregnancy');
     }
+
+    console.log("Successfully created pregnancy:", pregnancy);
 
     // Add the mating date and link it to the pregnancy
     const { error: matingError } = await supabase
@@ -79,6 +71,8 @@ class MatingDatesService {
       console.error('Error adding mating date:', matingError);
       throw new Error('Failed to add mating date');
     }
+
+    console.log("Successfully added mating date");
   }
 
   async deleteMatingDate(litterId: string, dateIndex: number): Promise<void> {

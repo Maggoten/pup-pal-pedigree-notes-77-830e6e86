@@ -21,7 +21,6 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
 
     console.log("Fetching active pregnancies for user:", sessionData.session.user.id);
 
-    // Using a more explicit query structure with proper joins
     const { data: pregnancies, error } = await supabase
       .from('pregnancies')
       .select(`
@@ -46,7 +45,6 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
 
     console.log("Raw pregnancies data:", pregnancies);
 
-    // Map pregnancies to the correct format
     const activePregnancies = pregnancies.map((pregnancy) => {
       const matingDate = new Date(pregnancy.mating_date);
       const expectedDueDate = new Date(pregnancy.expected_due_date);
@@ -57,6 +55,8 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       
       const femaleName = femaleDog?.name || "Unknown Female";
       const maleName = maleDog?.name || pregnancy.external_male_name || "Unknown Male";
+
+      console.log(`Processing pregnancy: Female: ${femaleName}, Male: ${maleName}`);
 
       return {
         id: pregnancy.id,
