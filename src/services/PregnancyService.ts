@@ -13,7 +13,7 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
     }
 
     // Fetch active pregnancies with related dog names
-    // Updated to use explicit column references for the relationships
+    // Using explicit foreign key references to avoid type errors
     const { data: pregnancies, error } = await supabase
       .from('pregnancies')
       .select(`
@@ -23,8 +23,8 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
         female_dog_id,
         male_dog_id,
         external_male_name,
-        female_dog:female_dog_id(name),
-        male_dog:male_dog_id(name)
+        dogs!female_dog_id(name),
+        dogs!male_dog_id(name)
       `)
       .eq('status', 'active')
       .eq('user_id', sessionData.session.user.id);
@@ -37,11 +37,15 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       const matingDate = new Date(pregnancy.mating_date);
       const expectedDueDate = new Date(pregnancy.expected_due_date);
       const daysLeft = differenceInDays(expectedDueDate, new Date());
+      
+      // Access the dog names from the properly referenced relationships
+      const femaleDog = pregnancy.dogs?.find(dog => dog.id === pregnancy.female_dog_id);
+      const maleDog = pregnancy.dogs?.find(dog => dog.id === pregnancy.male_dog_id);
 
       return {
         id: pregnancy.id,
-        maleName: pregnancy.male_dog?.name || pregnancy.external_male_name,
-        femaleName: pregnancy.female_dog?.name,
+        maleName: maleDog?.name || pregnancy.external_male_name,
+        femaleName: femaleDog?.name,
         matingDate,
         expectedDueDate,
         daysLeft: daysLeft > 0 ? daysLeft : 0
