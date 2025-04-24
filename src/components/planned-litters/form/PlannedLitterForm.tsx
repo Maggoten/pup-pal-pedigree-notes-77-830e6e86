@@ -28,9 +28,35 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
 }) => {
   const isExternalMale = form.watch("externalMale");
   
+  const handleSubmit = (values: PlannedLitterFormValues) => {
+    // Find the selected female to get the name
+    const selectedFemale = females.find(female => female.id === values.femaleId);
+    if (!selectedFemale) {
+      console.error('Selected female not found');
+      return;
+    }
+
+    // If it's not an external male, find the selected male to get the name
+    let maleName = values.externalMaleName;
+    if (!isExternalMale && values.maleId) {
+      const selectedMale = males.find(male => male.id === values.maleId);
+      maleName = selectedMale?.name;
+    }
+
+    // Add female name to the form values
+    const enrichedValues = {
+      ...values,
+      femaleName: selectedFemale.name,
+      maleName: maleName || ''
+    };
+
+    console.log('Submitting form with values:', enrichedValues);
+    onSubmit(enrichedValues);
+  };
+  
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <DamSelector form={form} females={females} />
         
         <ExternalSireToggle form={form} />

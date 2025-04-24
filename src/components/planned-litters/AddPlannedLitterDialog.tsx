@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Dog } from '@/context/DogsContext';
 import { plannedLitterFormSchema, PlannedLitterFormValues } from '@/services/PlannedLitterService';
 import PlannedLitterForm from './form/PlannedLitterForm';
+import { useToast } from '@/hooks/use-toast';
 
 interface AddPlannedLitterDialogProps {
   males: Dog[];
@@ -18,6 +19,7 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
   females,
   onSubmit
 }) => {
+  const { toast } = useToast();
   const form = useForm<PlannedLitterFormValues>({
     resolver: zodResolver(plannedLitterFormSchema),
     defaultValues: {
@@ -25,10 +27,33 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
       femaleId: "",
       notes: "",
       externalMale: false,
+      externalMaleName: "",
       externalMaleBreed: "",
       externalMaleRegistration: ""
     }
   });
+
+  const handleSubmit = async (values: PlannedLitterFormValues) => {
+    try {
+      console.log('Handling form submission with values:', values);
+      await onSubmit(values);
+      
+      // Reset form after successful submission
+      form.reset();
+      
+      toast({
+        title: "Success",
+        description: "Planned litter has been added successfully.",
+      });
+    } catch (error) {
+      console.error('Error submitting planned litter:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add planned litter. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
   
   return (
     <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto bg-greige-100 border-greige-300">
@@ -44,7 +69,7 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
           form={form}
           males={males}
           females={females}
-          onSubmit={onSubmit}
+          onSubmit={handleSubmit}
         />
       </div>
     </DialogContent>
