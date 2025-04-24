@@ -1,6 +1,6 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { StorageError } from '@supabase/storage-js';
 
 interface StorageCleanupOptions {
   oldImageUrl: string;
@@ -72,13 +72,22 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
 
     if (deleteError) {
       console.error('Error deleting unused image:', deleteError);
-      console.error('Error details:', {
+      
+      // Improved error logging for StorageError
+      const errorDetails = deleteError instanceof Error ? {
         message: deleteError.message,
-        name: deleteError.name
-      });
+        name: deleteError.name,
+        ...(deleteError instanceof StorageError && { 
+          // Add any specific StorageError properties if needed
+          error: JSON.stringify(deleteError)
+        })
+      } : { deleteError };
+
+      console.error('Error details:', errorDetails);
+
       toast({
         title: "Error removing image",
-        description: "Could not delete the unused image",
+        description: errorDetails.message || "Could not delete the unused image",
         variant: "destructive"
       });
       return;
@@ -91,9 +100,16 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
     });
   } catch (error) {
     console.error('Error in storage cleanup:', error);
+    
+    // Improved error handling for catches
+    const errorDetails = error instanceof Error ? {
+      message: error.message,
+      name: error.name
+    } : { error };
+
     toast({
       title: "Error",
-      description: "An unexpected error occurred while cleaning up storage",
+      description: errorDetails.message || "An unexpected error occurred while cleaning up storage",
       variant: "destructive"
     });
   }

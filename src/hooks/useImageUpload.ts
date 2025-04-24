@@ -1,7 +1,7 @@
-
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { StorageError } from '@supabase/storage-js';
 
 interface UseImageUploadProps {
   user_id: string | undefined;
@@ -107,11 +107,23 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       
       if (error) {
         console.error('Supabase storage upload error:', error);
-        console.error('Error details:', {
+        
+        const errorDetails = error instanceof Error ? {
           message: error.message,
           name: error.name,
-          error
+          ...(error instanceof StorageError && { 
+            error: JSON.stringify(error)
+          })
+        } : { error };
+
+        console.error('Error details:', errorDetails);
+
+        toast({
+          title: "Upload Failed",
+          description: errorDetails.message || "Could not upload the image",
+          variant: "destructive"
         });
+
         throw error;
       }
       
@@ -131,25 +143,16 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     } catch (error) {
       console.error('Error uploading image:', error);
       
-      if (error instanceof Error) {
-        console.error('Error details:', {
-          message: error.message,
-          name: error.name,
-          stack: error.stack
-        });
-      }
-      
-      let errorMessage = error instanceof Error ? error.message : "Failed to upload image";
-      
-      if (errorMessage.includes('bucket') && errorMessage.includes('not exist')) {
-        errorMessage = `The storage bucket "${BUCKET_NAME}" does not exist or is not accessible.`;
-      } else if (errorMessage.includes('auth') || errorMessage.includes('session')) {
-        errorMessage = "Authentication error. Please log out and log back in.";
-      }
+      const errorDetails = error instanceof Error ? {
+        message: error.message,
+        name: error.name
+      } : { error };
+
+      console.error('Error details:', errorDetails);
       
       toast({
         title: "Upload Failed",
-        description: errorMessage,
+        description: errorDetails.message || "An unexpected error occurred",
         variant: "destructive"
       });
     } finally {
