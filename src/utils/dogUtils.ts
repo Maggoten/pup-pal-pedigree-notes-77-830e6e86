@@ -79,10 +79,20 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   
   // Process heat history if present, ensuring dates are strings
   if ('heatHistory' in dog && dog.heatHistory) {
-    const processedHeatHistory = dog.heatHistory.map((heat: Heat) => ({
-      date: typeof heat.date === 'string' ? heat.date : 
-            (heat.date && typeof heat.date.toISOString === 'function') ? heat.date.toISOString().split('T')[0] : ''
-    }));
+    const processedHeatHistory = dog.heatHistory.map((heat: Heat) => {
+      // First check if heat.date exists, then check its type
+      if (typeof heat.date === 'string') {
+        return { date: heat.date };
+      } else if (heat.date) {
+        // Check if it's a Date object by seeing if it has toISOString method
+        const dateObj = heat.date as unknown as Date;
+        if (typeof dateObj.toISOString === 'function') {
+          return { date: dateObj.toISOString().split('T')[0] };
+        }
+      }
+      // Fallback
+      return { date: '' };
+    });
     
     dbDog.heatHistory = processedHeatHistory;
     console.log('Processed heatHistory for DB:', processedHeatHistory);
