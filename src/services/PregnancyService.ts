@@ -13,6 +13,7 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
     }
 
     // Fetch active pregnancies with related dog names
+    // Updated to use explicit column references for the relationships
     const { data: pregnancies, error } = await supabase
       .from('pregnancies')
       .select(`
@@ -22,8 +23,8 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
         female_dog_id,
         male_dog_id,
         external_male_name,
-        dogs:female_dog_id (name),
-        male:male_dog_id (name)
+        female_dog:female_dog_id(name),
+        male_dog:male_dog_id(name)
       `)
       .eq('status', 'active')
       .eq('user_id', sessionData.session.user.id);
@@ -39,8 +40,8 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
 
       return {
         id: pregnancy.id,
-        maleName: pregnancy.male?.name || pregnancy.external_male_name,
-        femaleName: pregnancy.dogs?.name,
+        maleName: pregnancy.male_dog?.name || pregnancy.external_male_name,
+        femaleName: pregnancy.female_dog?.name,
         matingDate,
         expectedDueDate,
         daysLeft: daysLeft > 0 ? daysLeft : 0
@@ -61,4 +62,3 @@ export const getFirstActivePregnancy = async (): Promise<string | null> => {
     return null;
   }
 };
-
