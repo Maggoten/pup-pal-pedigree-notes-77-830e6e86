@@ -12,10 +12,18 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       return [];
     }
 
-    // Using a simpler query approach to avoid relationship conflicts
+    // Using explicit column references in the relationship to avoid ambiguity
     const { data: pregnancies, error } = await supabase
       .from('pregnancies')
-      .select('*, female:dogs(id, name), male:dogs(id, name)')
+      .select(`
+        id,
+        mating_date,
+        expected_due_date,
+        external_male_name,
+        user_id,
+        female_dog:female_dog_id(id, name),
+        male_dog:male_dog_id(id, name)
+      `)
       .eq('status', 'active')
       .eq('user_id', sessionData.session.user.id);
 
@@ -23,15 +31,14 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       throw error;
     }
 
-    // Fetch all related dogs in a single query to join with pregnancies
     return pregnancies.map((pregnancy) => {
       const matingDate = new Date(pregnancy.mating_date);
       const expectedDueDate = new Date(pregnancy.expected_due_date);
       const daysLeft = differenceInDays(expectedDueDate, new Date());
       
-      // Get female and male dogs using the explicit relationships
-      const femaleDog = pregnancy.female;
-      const maleDog = pregnancy.male;
+      // Access dog names from the explicitly named relationships
+      const femaleDog = pregnancy.female_dog;
+      const maleDog = pregnancy.male_dog;
 
       return {
         id: pregnancy.id,
