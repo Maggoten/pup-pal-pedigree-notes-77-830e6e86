@@ -74,7 +74,6 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
       console.error('Error deleting unused image:', deleteError);
       console.error('Error details:', {
         message: deleteError.message,
-        statusCode: deleteError.statusCode,
         name: deleteError.name
       });
       toast({

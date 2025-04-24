@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -108,7 +109,6 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         console.error('Supabase storage upload error:', error);
         console.error('Error details:', {
           message: error.message,
-          statusCode: error.statusCode,
           name: error.name,
           error
         });
@@ -195,7 +195,6 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         console.error('Error removing image:', error);
         console.error('Error details:', {
           message: error.message,
-          statusCode: error.statusCode,
           name: error.name
         });
         throw error;
