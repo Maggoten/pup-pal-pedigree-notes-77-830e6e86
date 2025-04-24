@@ -1,8 +1,11 @@
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { StorageError } from '@supabase/storage-js';
+import { validateImageFile } from '@/utils/imageValidation';
+import { checkBucketExists, uploadToStorage, getPublicUrl, removeFromStorage, BUCKET_NAME } from '@/utils/storageOperations';
+import { useUploadTimeout } from '@/hooks/useUploadTimeout';
 
 interface UseImageUploadProps {
   user_id: string | undefined;
@@ -11,63 +14,7 @@ interface UseImageUploadProps {
 
 export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
-  const uploadTimeoutRef = useRef<NodeJS.Timeout>();
-
-  const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-  const UPLOAD_TIMEOUT = 30000; // 30 seconds
-  const BUCKET_NAME = 'dog-photos'; // Bucket name
-
-  const validateFile = (file: File) => {
-    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a JPEG, PNG, WebP, or HEIC image",
-        variant: "destructive"
-      });
-      return false;
-    }
-    
-    if (file.size > MAX_FILE_SIZE) {
-      toast({
-        title: "File too large",
-        description: "Please select an image under 5MB",
-        variant: "destructive"
-      });
-      return false;
-    }
-
-    return true;
-  };
-
-  const checkBucketExists = async (): Promise<boolean> => {
-    try {
-      // First check if user has a valid session
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !sessionData.session) {
-        console.error('Storage bucket check failed: No active session', sessionError);
-        return false;
-      }
-
-      console.log('Checking if bucket exists:', BUCKET_NAME);
-      
-      // Check if the bucket exists by trying to list files in it
-      const { data, error } = await supabase.storage
-        .from(BUCKET_NAME)
-        .list('', { limit: 1 });
-      
-      if (error) {
-        console.error('Error checking bucket existence:', error);
-        return false;
-      }
-      
-      console.log('Bucket exists, can list files:', BUCKET_NAME, data);
-      return true;
-    } catch (err) {
-      console.error('Error in bucket verification:', err);
-      return false;
-    }
-  };
+  const { startTimeout, clearTimeout } = useUploadTimeout(() => setIsUploading(false));
 
   const uploadImage = async (file: File) => {
     if (!user_id) {
@@ -80,7 +27,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       return;
     }
     
-    if (!validateFile(file)) return;
+    if (!validateImageFile(file)) return;
     
     setIsUploading(true);
     console.log('Starting image upload to bucket:', BUCKET_NAME);
@@ -92,7 +39,6 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       }
       console.log('Active session found for user:', sessionData.session.user.id);
       
-      // Verify bucket exists before attempting upload
       const bucketExists = await checkBucketExists();
       if (!bucketExists) {
         throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
@@ -101,25 +47,11 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       const fileExt = file.name.split('.').pop();
       const fileName = `${user_id}/${Date.now()}.${fileExt}`;
       
-      uploadTimeoutRef.current = setTimeout(() => {
-        setIsUploading(false);
-        toast({
-          title: "Upload timeout",
-          description: "The upload took too long. Please try again.",
-          variant: "destructive"
-        });
-      }, UPLOAD_TIMEOUT);
+      startTimeout();
 
-      console.log(`Attempting to upload file to bucket "${BUCKET_NAME}": ${fileName}`);
+      const { data, error } = await uploadToStorage(fileName, file);
       
-      const { data, error } = await supabase.storage
-        .from(BUCKET_NAME)
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-      
-      clearTimeout(uploadTimeoutRef.current);
+      clearTimeout();
       
       if (error) {
         const errorMessage = error instanceof StorageError 
@@ -129,14 +61,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         console.error('Upload error:', {
           error,
           message: errorMessage,
-          details: error instanceof StorageError ? error.message : 'Unknown error',
-          status: error instanceof Error ? error.name : 'unknown'
-        });
-
-        toast({
-          title: "Upload Failed",
-          description: errorMessage,
-          variant: "destructive"
+          details: error instanceof StorageError ? error.message : 'Unknown error'
         });
 
         throw error;
@@ -144,9 +69,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       
       console.log('Upload successful, getting public URL');
       
-      const { data: { publicUrl } } = supabase.storage
-        .from(BUCKET_NAME)
-        .getPublicUrl(fileName);
+      const { data: { publicUrl } } = getPublicUrl(fileName);
       
       console.log('Generated public URL:', publicUrl);
       onImageChange(publicUrl);
@@ -169,7 +92,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       });
     } finally {
       setIsUploading(false);
-      clearTimeout(uploadTimeoutRef.current);
+      clearTimeout();
     }
   };
 
@@ -190,7 +113,6 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         throw new Error('No active session. User authentication is required.');
       }
       
-      // Verify bucket exists before attempting deletion
       const bucketExists = await checkBucketExists();
       if (!bucketExists) {
         throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
@@ -208,9 +130,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       const storagePath = urlParts.slice(storageIndex + 1).join('/');
       console.log('Removing image from storage path:', storagePath);
       
-      const { error } = await supabase.storage
-        .from(BUCKET_NAME)
-        .remove([storagePath]);
+      const { error } = await removeFromStorage(storagePath);
       
       if (error) {
         console.error('Error removing image:', error);
@@ -221,8 +141,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         
         console.error('Error details:', {
           error,
-          message: errorMessage,
-          status: error instanceof Error ? error.name : 'unknown'
+          message: errorMessage
         });
         
         throw error;
