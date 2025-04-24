@@ -13,7 +13,6 @@ export interface PregnancyDetails {
 
 export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
   try {
-    // Get current session to check authentication
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
       console.log("No active session found for pregnancy data");
@@ -31,6 +30,7 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
         user_id,
         female_dog_id,
         male_dog_id,
+        status,
         femaleDog:dogs!female_dog_id(id, name),
         maleDog:dogs!male_dog_id(id, name)
       `)
@@ -42,16 +42,10 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       throw error;
     }
 
-    // Filter out pregnancies where both dog names are unknown
+    // Filter out pregnancies where female dog is unknown
     const validPregnancies = pregnancies.filter(pregnancy => {
       const femaleDog = pregnancy.femaleDog?.[0];
-      const maleDog = pregnancy.maleDog?.[0];
-      
-      const femaleName = femaleDog?.name;
-      const maleName = maleDog?.name || pregnancy.external_male_name;
-      
-      // Only include pregnancies where at least one dog name is known
-      return femaleName || maleName;
+      return femaleDog?.name;
     });
 
     return validPregnancies.map((pregnancy) => {
@@ -59,17 +53,16 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       const expectedDueDate = new Date(pregnancy.expected_due_date);
       const daysLeft = differenceInDays(expectedDueDate, new Date());
       
-      // Get dog names with proper null checking
       const femaleDog = pregnancy.femaleDog?.[0];
       const maleDog = pregnancy.maleDog?.[0];
       
-      const femaleName = femaleDog?.name || "Unknown Female";
-      const maleName = maleDog?.name || pregnancy.external_male_name || "Unknown Male";
+      const femaleName = femaleDog?.name;
+      const maleName = maleDog?.name || pregnancy.external_male_name;
 
       return {
         id: pregnancy.id,
-        maleName,
-        femaleName,
+        maleName: maleName || "Unknown Male",
+        femaleName: femaleName || "Unknown Female",
         matingDate,
         expectedDueDate,
         daysLeft: daysLeft > 0 ? daysLeft : 0
@@ -118,7 +111,6 @@ export const getPregnancyDetails = async (pregnancyId: string): Promise<Pregnanc
     const expectedDueDate = new Date(pregnancy.expected_due_date);
     const daysLeft = differenceInDays(expectedDueDate, new Date());
     
-    // Get dog names with proper null checking
     const femaleDog = pregnancy.femaleDog || [];
     const maleDog = pregnancy.maleDog || [];
     const femaleName = femaleDog[0]?.name || "Unknown Female";
@@ -126,8 +118,8 @@ export const getPregnancyDetails = async (pregnancyId: string): Promise<Pregnanc
 
     return {
       id: pregnancy.id,
-      maleName,
-      femaleName,
+      maleName: maleName || "Unknown Male",
+      femaleName: femaleName || "Unknown Female",
       matingDate,
       expectedDueDate,
       daysLeft: daysLeft > 0 ? daysLeft : 0
