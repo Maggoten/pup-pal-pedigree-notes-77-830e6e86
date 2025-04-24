@@ -7,9 +7,10 @@ import { DogFormValues } from '../DogFormFields';
 
 interface NotesFieldProps {
   form: UseFormReturn<DogFormValues>;
+  disabled?: boolean;
 }
 
-const NotesField: React.FC<NotesFieldProps> = ({ form }) => {
+const NotesField: React.FC<NotesFieldProps> = ({ form, disabled }) => {
   return (
     <FormField
       control={form.control}
@@ -22,6 +23,7 @@ const NotesField: React.FC<NotesFieldProps> = ({ form }) => {
               placeholder="Any additional information..."
               className="resize-none"
               {...field}
+              disabled={disabled}
             />
           </FormControl>
           <FormDescription>

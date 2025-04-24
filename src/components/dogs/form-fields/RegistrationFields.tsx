@@ -7,9 +7,10 @@ import { DogFormValues } from '../DogFormFields';
 
 interface RegistrationFieldsProps {
   form: UseFormReturn<DogFormValues>;
+  disabled?: boolean;
 }
 
-const RegistrationFields: React.FC<RegistrationFieldsProps> = ({ form }) => {
+const RegistrationFields: React.FC<RegistrationFieldsProps> = ({ form, disabled }) => {
   return (
     <FormField
       control={form.control}
@@ -18,7 +19,7 @@ const RegistrationFields: React.FC<RegistrationFieldsProps> = ({ form }) => {
         <FormItem>
           <FormLabel>Registration Number</FormLabel>
           <FormControl>
-            <Input placeholder="AKC123456" {...field} />
+            <Input placeholder="AKC123456" {...field} disabled={disabled} />
           </FormControl>
           <FormDescription>
             Optional registration or license number

@@ -8,9 +8,10 @@ import { DogFormValues } from './DogFormFields';
 interface DogImageFieldProps {
   form: UseFormReturn<DogFormValues>;
   handleImageChange: (imageBase64: string) => void;
+  disabled?: boolean; // Added disabled prop
 }
 
-const DogImageField: React.FC<DogImageFieldProps> = ({ form, handleImageChange }) => {
+const DogImageField: React.FC<DogImageFieldProps> = ({ form, handleImageChange, disabled }) => {
   return (
     <FormField
       control={form.control}
@@ -22,6 +23,7 @@ const DogImageField: React.FC<DogImageFieldProps> = ({ form, handleImageChange }
             <ImageUploader 
               currentImage={field.value} 
               onImageChange={handleImageChange}
+              className={disabled ? "opacity-70 pointer-events-none" : ""}
             />
           </FormControl>
           <FormMessage />

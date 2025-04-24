@@ -31,15 +31,16 @@ export type DogFormValues = z.infer<typeof dogFormSchema>;
 
 interface DogFormFieldsProps {
   form: UseFormReturn<DogFormValues>;
+  disabled?: boolean; // Added disabled prop
 }
 
-const DogFormFields: React.FC<DogFormFieldsProps> = ({ form }) => {
+const DogFormFields: React.FC<DogFormFieldsProps> = ({ form, disabled }) => {
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <BasicInfoFields form={form} />
-      <RegistrationFields form={form} />
-      <HealthFields form={form} />
-      <NotesField form={form} />
+      <BasicInfoFields form={form} disabled={disabled} />
+      <RegistrationFields form={form} disabled={disabled} />
+      <HealthFields form={form} disabled={disabled} />
+      <NotesField form={form} disabled={disabled} />
     </div>
   );
 };

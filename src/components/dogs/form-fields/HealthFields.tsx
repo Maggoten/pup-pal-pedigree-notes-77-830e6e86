@@ -12,9 +12,10 @@ import { DogFormValues } from '../DogFormFields';
 
 interface HealthFieldsProps {
   form: UseFormReturn<DogFormValues>;
+  disabled?: boolean;
 }
 
-const HealthFields: React.FC<HealthFieldsProps> = ({ form }) => {
+const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
   return (
     <>
       <FormField
@@ -32,6 +33,7 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form }) => {
                       "pl-3 text-left font-normal bg-white border-input shadow-sm",
                       !field.value && "text-muted-foreground"
                     )}
+                    disabled={disabled}
                   >
                     {field.value ? (
                       format(field.value, "PPP")
@@ -47,7 +49,7 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form }) => {
                   mode="single"
                   selected={field.value}
                   onSelect={field.onChange}
-                  disabled={(date) => date > new Date()}
+                  disabled={(date) => date > new Date() || !!disabled}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
                 />
@@ -74,6 +76,7 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form }) => {
                       "pl-3 text-left font-normal bg-white border-input shadow-sm",
                       !field.value && "text-muted-foreground"
                     )}
+                    disabled={disabled}
                   >
                     {field.value ? (
                       format(field.value, "PPP")
@@ -89,7 +92,7 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form }) => {
                   mode="single"
                   selected={field.value}
                   onSelect={field.onChange}
-                  disabled={(date) => date > new Date()}
+                  disabled={(date) => date > new Date() || !!disabled}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
                 />

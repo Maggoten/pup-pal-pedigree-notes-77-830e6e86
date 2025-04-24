@@ -15,9 +15,10 @@ import {
 
 interface BasicInfoFieldsProps {
   form: UseFormReturn<DogFormValues>;
+  disabled?: boolean;
 }
 
-const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form }) => {
+const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form, disabled }) => {
   return (
     <>
       <FormField
@@ -27,7 +28,7 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form }) => {
           <FormItem>
             <FormLabel>Name</FormLabel>
             <FormControl>
-              <Input placeholder="Bella" {...field} />
+              <Input placeholder="Bella" {...field} disabled={disabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -44,6 +45,7 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form }) => {
               <BreedDropdown
                 value={field.value}
                 onChange={field.onChange}
+                disabled={disabled}
               />
             </FormControl>
             <FormMessage />
@@ -60,6 +62,7 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form }) => {
             <Select 
               onValueChange={field.onChange} 
               defaultValue={field.value}
+              disabled={disabled}
             >
               <FormControl>
                 <SelectTrigger>
@@ -83,7 +86,7 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form }) => {
           <FormItem>
             <FormLabel>Color</FormLabel>
             <FormControl>
-              <Input placeholder="Golden" {...field} />
+              <Input placeholder="Golden" {...field} disabled={disabled} />
             </FormControl>
             <FormMessage />
           </FormItem>

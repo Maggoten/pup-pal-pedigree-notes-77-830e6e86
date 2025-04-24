@@ -1,33 +1,34 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { commonDogBreeds } from '@/utils/dogBreeds';
-import CustomBreedDialog from './CustomBreedDialog';
-import BreedSearchResults from './BreedSearchResults';
-import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Search, Plus } from 'lucide-react';
 
 interface BreedDropdownProps {
   value: string;
   onChange: (value: string) => void;
-  className?: string;
+  disabled?: boolean;
 }
 
-const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange, className }) => {
+const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange, disabled }) => {
   const [customBreedDialogOpen, setCustomBreedDialogOpen] = useState(false);
   const [customBreed, setCustomBreed] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const isMobile = useIsMobile();
-  
-  // Show selected breed in the input if available
-  useEffect(() => {
-    if (value && !searchTerm) {
-      setSearchTerm(value);
-    }
-  }, [value]);
   
   // Filter breeds based on search term
   const filteredBreeds = searchTerm 
@@ -48,52 +49,21 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange, classNam
     }
   }, [customBreedDialogOpen, searchTerm]);
 
-  // Handle selection from the dropdown
-  const handleBreedSelect = (selectedBreed: string) => {
-    onChange(selectedBreed);
-    setSearchTerm(selectedBreed);
-    setIsDropdownOpen(false);
+  // Handle value selection
+  const handleValueChange = (selectedValue: string) => {
+    if (selectedValue === 'custom') {
+      setCustomBreedDialogOpen(true);
+    } else {
+      onChange(selectedValue);
+    }
   };
 
   // Handle custom breed submission
   const handleCustomBreedSubmit = () => {
     if (customBreed.trim()) {
       onChange(customBreed.trim());
-      setSearchTerm(customBreed.trim());
       setCustomBreedDialogOpen(false);
-      setIsDropdownOpen(false);
-    }
-  };
-
-  // Handle input focus
-  const handleInputFocus = () => {
-    setIsDropdownOpen(true);
-  };
-
-  // Handle input blur - with longer delay for mobile
-  const handleInputBlur = (e: React.FocusEvent) => {
-    // Use longer delay on mobile for more reliable touch interaction
-    const delay = isMobile ? 300 : 200;
-    
-    setTimeout(() => {
-      if (document.activeElement !== inputRef.current) {
-        setIsDropdownOpen(false);
-      }
-    }, delay);
-  };
-
-  // Handle input change
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setIsDropdownOpen(true);
-  };
-
-  // Handle input click/tap for mobile - to better handle touch events
-  const handleInputClick = () => {
-    if (isMobile && !isDropdownOpen) {
-      setIsDropdownOpen(true);
-      // Set focus after opening dropdown
-      inputRef.current?.focus();
+      setSearchTerm('');
     }
   };
 
@@ -102,42 +72,94 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange, classNam
       <div className="relative w-full">
         <div className="relative">
           <Input
-            ref={inputRef}
             placeholder="Search breeds..."
             value={searchTerm}
-            onChange={handleInputChange}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-            onClick={handleInputClick}
-            className={cn(
-              "w-full pr-10 bg-white border-greige-300", 
-              isMobile && "py-3", // Larger touch target on mobile
-              className
-            )}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pr-10 bg-white"
+            disabled={disabled}
           />
           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         </div>
         
-        {isDropdownOpen && (
-          <BreedSearchResults 
-            searchTerm={searchTerm}
-            filteredBreeds={filteredBreeds}
-            currentValue={value}
-            onSelectBreed={handleBreedSelect}
-            onAddCustomBreed={() => setCustomBreedDialogOpen(true)}
-            hasExactMatch={hasExactMatch}
-            isMobile={isMobile}
-          />
+        {searchTerm && !disabled && (
+          <div className="absolute w-full mt-1 max-h-60 overflow-auto z-50 bg-white border border-gray-200 rounded-md shadow-lg">
+            {filteredBreeds.length > 0 ? (
+              <ul className="py-1">
+                {filteredBreeds.map((breed) => (
+                  <li 
+                    key={breed} 
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                    onClick={() => {
+                      onChange(breed);
+                      setSearchTerm('');
+                    }}
+                  >
+                    {breed}
+                    {breed === value && (
+                      <span className="text-primary">✓</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="p-3">
+                <p className="text-sm text-gray-500 mb-2">No breed found. Add a custom breed:</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start flex items-center gap-2"
+                  onClick={() => setCustomBreedDialogOpen(true)}
+                  disabled={disabled}
+                >
+                  <Plus className="h-4 w-4" /> 
+                  Add "{searchTerm}" as custom breed
+                </Button>
+              </div>
+            )}
+            
+            {!hasExactMatch && filteredBreeds.length > 0 && (
+              <div className="px-3 py-2 border-t">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start flex items-center gap-2"
+                  onClick={() => setCustomBreedDialogOpen(true)}
+                  disabled={disabled}
+                >
+                  <Plus className="h-4 w-4" /> 
+                  Add "{searchTerm}" as custom breed
+                </Button>
+              </div>
+            )}
+          </div>
         )}
       </div>
       
-      <CustomBreedDialog 
-        open={customBreedDialogOpen}
-        onOpenChange={setCustomBreedDialogOpen}
-        breedName={customBreed}
-        onBreedNameChange={setCustomBreed}
-        onSubmit={handleCustomBreedSubmit}
-      />
+      {/* Custom Breed Dialog */}
+      <Dialog open={customBreedDialogOpen} onOpenChange={setCustomBreedDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Custom Breed</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              placeholder="Enter custom breed name"
+              value={customBreed}
+              onChange={(e) => setCustomBreed(e.target.value)}
+              className="w-full"
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCustomBreedDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCustomBreedSubmit} disabled={!customBreed.trim()}>
+              Add Breed
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
