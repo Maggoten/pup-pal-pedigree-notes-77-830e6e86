@@ -56,3 +56,22 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
     console.error('Error in storage cleanup:', error);
   }
 };
+
+export const cleanupAllUnusedPhotos = async () => {
+  try {
+    const { data, error } = await supabase.functions.invoke('cleanup-photos', {
+      method: 'POST'
+    });
+
+    if (error) {
+      console.error('Error cleaning up photos:', error);
+      throw error;
+    }
+
+    console.log('Photos cleanup completed:', data);
+    return data;
+  } catch (error) {
+    console.error('Error in cleanupAllUnusedPhotos:', error);
+    throw error;
+  }
+};
