@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { toast } from '@/components/ui/use-toast';
 import { format, parseISO, isBefore } from 'date-fns';
 import { useDogs } from '@/context/DogsContext';
 import { PlannedLitter } from '@/types/breeding';
-import { plannedLitterService, PlannedLitterFormValues } from '@/services/PlannedLitterService';
+import { plannedLittersService, PlannedLitterFormValues } from '@/services/PlannedLitterService';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { UpcomingHeat } from '@/types/reminders';
 import PlannedLittersList from '@/components/planned-litters/PlannedLittersList';
@@ -32,7 +31,7 @@ const PlannedLittersContent: React.FC = () => {
   useEffect(() => {
     const loadLitters = async () => {
       try {
-        const litters = await plannedLitterService.loadPlannedLitters();
+        const litters = await plannedLittersService.loadPlannedLitters();
         setPlannedLitters(litters);
         
         // Extract mating dates for Recent Matings section
@@ -76,7 +75,7 @@ const PlannedLittersContent: React.FC = () => {
   
   const handleAddPlannedLitter = async (values: PlannedLitterFormValues) => {
     try {
-      const newLitter = await plannedLitterService.createPlannedLitter(values);
+      const newLitter = await plannedLittersService.createPlannedLitter(values);
       if (newLitter) {
         setPlannedLitters(prev => [...prev, newLitter]);
         
@@ -96,10 +95,10 @@ const PlannedLittersContent: React.FC = () => {
   
   const handleAddMatingDate = async (litterId: string, date: Date) => {
     try {
-      await plannedLitterService.addMatingDate(litterId, date);
+      await plannedLittersService.addMatingDate(litterId, date);
       
       // Refresh litters to get the updated data
-      const updatedLitters = await plannedLitterService.loadPlannedLitters();
+      const updatedLitters = await plannedLittersService.loadPlannedLitters();
       setPlannedLitters(updatedLitters);
       
       toast({
@@ -128,10 +127,10 @@ const PlannedLittersContent: React.FC = () => {
 
   const handleEditMatingDate = async (litterId: string, dateIndex: number, newDate: Date) => {
     try {
-      await plannedLitterService.editMatingDate(litterId, dateIndex, newDate);
+      await plannedLittersService.editMatingDate(litterId, dateIndex, newDate);
       
       // Refresh litters to get the updated data
-      const updatedLitters = await plannedLitterService.loadPlannedLitters();
+      const updatedLitters = await plannedLittersService.loadPlannedLitters();
       setPlannedLitters(updatedLitters);
       
       toast({
@@ -152,10 +151,10 @@ const PlannedLittersContent: React.FC = () => {
   
   const handleDeleteMatingDate = async (litterId: string, dateIndex: number) => {
     try {
-      await plannedLitterService.deleteMatingDate(litterId, dateIndex);
+      await plannedLittersService.deleteMatingDate(litterId, dateIndex);
       
       // Refresh litters to get the updated data
-      const updatedLitters = await plannedLitterService.loadPlannedLitters();
+      const updatedLitters = await plannedLittersService.loadPlannedLitters();
       setPlannedLitters(updatedLitters);
       
       toast({
@@ -176,7 +175,7 @@ const PlannedLittersContent: React.FC = () => {
   
   const updateRecentMatings = async () => {
     try {
-      const litters = await plannedLitterService.loadPlannedLitters();
+      const litters = await plannedLittersService.loadPlannedLitters();
       const matings: RecentMating[] = [];
       
       litters.forEach(litter => {

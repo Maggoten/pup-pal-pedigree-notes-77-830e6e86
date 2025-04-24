@@ -1,3 +1,3 @@
 
-export * from './planned-litters';
-
+export { plannedLittersService } from './planned-litters/plannedLittersService';
+export * from './planned-litters/types';
