@@ -19,6 +19,8 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       return [];
     }
 
+    console.log("Fetching active pregnancies for user:", sessionData.session.user.id);
+
     // Using a more explicit query structure with proper joins
     const { data: pregnancies, error } = await supabase
       .from('pregnancies')
@@ -42,13 +44,10 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       throw error;
     }
 
-    // Filter out pregnancies where female dog is unknown
-    const validPregnancies = pregnancies.filter(pregnancy => {
-      const femaleDog = pregnancy.femaleDog?.[0];
-      return femaleDog?.name;
-    });
+    console.log("Raw pregnancies data:", pregnancies);
 
-    return validPregnancies.map((pregnancy) => {
+    // Map pregnancies to the correct format
+    const activePregnancies = pregnancies.map((pregnancy) => {
       const matingDate = new Date(pregnancy.mating_date);
       const expectedDueDate = new Date(pregnancy.expected_due_date);
       const daysLeft = differenceInDays(expectedDueDate, new Date());
@@ -56,18 +55,22 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       const femaleDog = pregnancy.femaleDog?.[0];
       const maleDog = pregnancy.maleDog?.[0];
       
-      const femaleName = femaleDog?.name;
-      const maleName = maleDog?.name || pregnancy.external_male_name;
+      const femaleName = femaleDog?.name || "Unknown Female";
+      const maleName = maleDog?.name || pregnancy.external_male_name || "Unknown Male";
 
       return {
         id: pregnancy.id,
-        maleName: maleName || "Unknown Male",
-        femaleName: femaleName || "Unknown Female",
+        maleName,
+        femaleName,
         matingDate,
         expectedDueDate,
         daysLeft: daysLeft > 0 ? daysLeft : 0
       };
     });
+
+    console.log("Processed active pregnancies:", activePregnancies);
+    return activePregnancies;
+
   } catch (err) {
     console.error('Error in getActivePregnancies:', err);
     return [];

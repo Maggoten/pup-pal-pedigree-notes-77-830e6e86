@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,6 @@ import { getActivePregnancies } from '@/services/PregnancyService';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-// Import the refactored components
 import ActivePregnanciesList from '@/components/pregnancy/ActivePregnanciesList';
 import TemperatureLogOverview from '@/components/pregnancy/TemperatureLogOverview';
 import WeeklyDevelopmentGuide from '@/components/pregnancy/WeeklyDevelopmentGuide';
@@ -29,15 +27,9 @@ const Pregnancy: React.FC = () => {
         setHasError(false);
         
         const pregnancies = await getActivePregnancies();
-        console.log("Fetched pregnancies:", pregnancies);
+        console.log("Fetched pregnancies on Pregnancy page:", pregnancies);
         
-        // Filter out pregnancies with unknown dogs
-        const validPregnancies = pregnancies.filter(pregnancy => 
-          pregnancy.femaleName !== "Unknown Female" || 
-          pregnancy.maleName !== "Unknown Male"
-        );
-        
-        setActivePregnancies(validPregnancies);
+        setActivePregnancies(pregnancies);
       } catch (error) {
         console.error("Error fetching pregnancies:", error);
         setHasError(true);
