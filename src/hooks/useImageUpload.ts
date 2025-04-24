@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -108,19 +109,19 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       if (error) {
         console.error('Supabase storage upload error:', error);
         
-        const errorDetails = error instanceof Error ? {
+        const errorMessage = error instanceof Error ? error.message : "Could not upload the image";
+        
+        console.error('Error details:', error instanceof Error ? {
           message: error.message,
           name: error.name,
           ...(error instanceof StorageError && { 
             error: JSON.stringify(error)
           })
-        } : { error };
-
-        console.error('Error details:', errorDetails);
+        } : { error });
 
         toast({
           title: "Upload Failed",
-          description: errorDetails.message || "Could not upload the image",
+          description: errorMessage,
           variant: "destructive"
         });
 
@@ -143,16 +144,16 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     } catch (error) {
       console.error('Error uploading image:', error);
       
-      const errorDetails = error instanceof Error ? {
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      
+      console.error('Error details:', error instanceof Error ? {
         message: error.message,
         name: error.name
-      } : { error };
-
-      console.error('Error details:', errorDetails);
+      } : { error });
       
       toast({
         title: "Upload Failed",
-        description: errorDetails.message || "An unexpected error occurred",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -196,10 +197,14 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       
       if (error) {
         console.error('Error removing image:', error);
-        console.error('Error details:', {
+        
+        const errorMessage = error instanceof Error ? error.message : "Failed to remove image";
+        
+        console.error('Error details:', error instanceof Error ? {
           message: error.message,
           name: error.name
-        });
+        } : { error });
+        
         throw error;
       }
       
@@ -211,6 +216,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       });
     } catch (error) {
       console.error('Error removing image:', error);
+      
       toast({
         title: "Remove Failed",
         description: "Failed to remove image. The update will continue without removing the old image.",
