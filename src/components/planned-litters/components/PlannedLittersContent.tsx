@@ -1,7 +1,7 @@
 
 import React from 'react';
 import PlannedLittersList from '@/components/planned-litters/PlannedLittersList';
-import MatingSection from '@/components/planned-litters/MatingSection';
+import MatingSection from '@/components/planned-litters/mating/MatingSection';
 import { usePlannedLitters } from '../hooks/usePlannedLitters';
 import { RecentMating } from '../types';
 

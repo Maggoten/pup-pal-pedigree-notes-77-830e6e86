@@ -2,7 +2,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PawPrint, Calendar } from 'lucide-react';
+import { Calendar, Info } from 'lucide-react';
 import { UpcomingHeat } from '@/types/reminders';
 
 interface UpcomingHeatCardProps {
@@ -25,7 +25,7 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ upcomingHeats }) =>
                 className="flex items-start gap-3 p-3 rounded-lg border bg-rose-50 border-rose-200"
               >
                 <div className="mt-0.5">
-                  <PawPrint className="h-5 w-5 text-rose-500" />
+                  <Calendar className="h-5 w-5 text-rose-500" />
                 </div>
                 <div>
                   <h4 className="font-medium">{heat.dogName}'s Heat Cycle</h4>
@@ -38,7 +38,7 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ upcomingHeats }) =>
           </div>
         ) : (
           <div className="text-center py-8">
-            <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <Info className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No Upcoming Heat Cycles</h3>
             <p className="text-muted-foreground mb-4">Add heat information to your female dogs to track cycles</p>
           </div>

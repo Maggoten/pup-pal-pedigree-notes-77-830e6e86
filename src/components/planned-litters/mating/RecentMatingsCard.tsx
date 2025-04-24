@@ -3,13 +3,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Heart, Info } from 'lucide-react';
-
-interface RecentMating {
-  id: string;
-  maleName: string;
-  femaleName: string;
-  date: Date;
-}
+import { RecentMating } from '../types';
 
 interface RecentMatingsCardProps {
   recentMatings: RecentMating[];
