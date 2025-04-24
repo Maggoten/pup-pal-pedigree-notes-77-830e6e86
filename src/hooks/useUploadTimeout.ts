@@ -18,7 +18,7 @@ export const useUploadTimeout = (onTimeout: () => void) => {
     }, UPLOAD_TIMEOUT);
   };
 
-  const clearTimeout = () => {
+  const clearUploadTimeout = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
@@ -26,6 +26,6 @@ export const useUploadTimeout = (onTimeout: () => void) => {
 
   return {
     startTimeout,
-    clearTimeout
+    clearTimeout: clearUploadTimeout
   };
 };
