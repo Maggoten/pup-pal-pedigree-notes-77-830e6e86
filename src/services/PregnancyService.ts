@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { parseISO, addDays, differenceInDays } from 'date-fns';
@@ -21,6 +22,7 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
 
     console.log("Fetching active pregnancies for user:", sessionData.session.user.id);
 
+    // First get all active pregnancies
     const { data: pregnancies, error } = await supabase
       .from('pregnancies')
       .select(`
@@ -44,6 +46,11 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
     }
 
     console.log("Raw pregnancies data:", pregnancies);
+    
+    if (pregnancies.length === 0) {
+      console.log("No active pregnancies found for this user");
+      return [];
+    }
 
     const activePregnancies = pregnancies.map((pregnancy) => {
       const matingDate = new Date(pregnancy.mating_date);
@@ -56,7 +63,9 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       const femaleName = femaleDog?.name || "Unknown Female";
       const maleName = maleDog?.name || pregnancy.external_male_name || "Unknown Male";
 
-      console.log(`Processing pregnancy: Female: ${femaleName}, Male: ${maleName}`);
+      console.log(`Processing pregnancy ${pregnancy.id}: Female: ${femaleName} (ID: ${pregnancy.female_dog_id}), Male: ${maleName}`);
+      console.log(`Female dog data:`, femaleDog);
+      console.log(`Male dog data:`, maleDog);
 
       return {
         id: pregnancy.id,

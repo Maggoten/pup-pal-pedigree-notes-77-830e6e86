@@ -20,7 +20,8 @@ class MatingDatesService {
         female_name, 
         male_name, 
         external_male, 
-        external_male_name
+        external_male_name,
+        external_male_breed
       `)
       .eq('id', litterId)
       .single();
@@ -31,6 +32,25 @@ class MatingDatesService {
     }
 
     console.log("Creating pregnancy from litter:", litter);
+    
+    // Validate female dog
+    if (!litter.female_id) {
+      console.error('Missing female dog ID in planned litter');
+      throw new Error('Invalid planned litter: missing female dog');
+    }
+    
+    // Get the female dog details to ensure we have the correct name
+    const { data: femaleDog, error: femaleDogError } = await supabase
+      .from('dogs')
+      .select('name')
+      .eq('id', litter.female_id)
+      .single();
+      
+    if (femaleDogError) {
+      console.error('Error fetching female dog details:', femaleDogError);
+    } else {
+      console.log(`Female dog name for ID ${litter.female_id}:`, femaleDog?.name);
+    }
 
     // Calculate expected due date (63 days from mating)
     const expectedDueDate = addDays(date, 63);
@@ -72,7 +92,7 @@ class MatingDatesService {
       throw new Error('Failed to add mating date');
     }
 
-    console.log("Successfully added mating date");
+    console.log("Successfully added mating date and linked to pregnancy");
   }
 
   async deleteMatingDate(litterId: string, dateIndex: number): Promise<void> {

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,7 @@ const Pregnancy: React.FC = () => {
         setIsLoading(true);
         setHasError(false);
         
+        console.log("Fetching active pregnancies...");
         const pregnancies = await getActivePregnancies();
         console.log("Fetched pregnancies on Pregnancy page:", pregnancies);
         
