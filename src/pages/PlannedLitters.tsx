@@ -29,51 +29,61 @@ const PlannedLittersContent: React.FC = () => {
   
   // Load planned litters and calculate heats on component mount
   useEffect(() => {
-    const litters = plannedLitterService.loadPlannedLitters();
-    setPlannedLitters(litters);
-    
-    // Calculate upcoming heats
-    setUpcomingHeats(calculateUpcomingHeats(dogs));
-    
-    // Extract mating dates for Recent Matings section
-    const matings: RecentMating[] = [];
-    
-    litters.forEach(litter => {
-      if (litter.matingDates && litter.matingDates.length > 0) {
-        litter.matingDates.forEach(dateStr => {
-          const matingDate = parseISO(dateStr);
-          // Only include matings that have already occurred
-          if (isBefore(matingDate, new Date())) {
-            matings.push({
-              id: `${litter.id}-${dateStr}`,
-              maleName: litter.maleName,
-              femaleName: litter.femaleName,
-              date: matingDate
+    const loadLitters = async () => {
+      try {
+        const litters = await plannedLitterService.loadPlannedLitters();
+        setPlannedLitters(litters);
+        
+        // Extract mating dates for Recent Matings section
+        const matings: RecentMating[] = [];
+        
+        litters.forEach(litter => {
+          if (litter.matingDates && litter.matingDates.length > 0) {
+            litter.matingDates.forEach(dateStr => {
+              const matingDate = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
+              // Only include matings that have already occurred
+              if (isBefore(matingDate, new Date())) {
+                matings.push({
+                  id: `${litter.id}-${dateStr}`,
+                  maleName: litter.maleName || 'Unknown',
+                  femaleName: litter.femaleName,
+                  date: matingDate
+                });
+              }
             });
           }
         });
+        
+        // Sort by date, most recent first
+        matings.sort((a, b) => b.date.getTime() - a.date.getTime());
+        setRecentMatings(matings);
+      } catch (error) {
+        console.error('Error loading planned litters:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load planned litters",
+          variant: "destructive"
+        });
       }
-    });
+    };
+
+    loadLitters();
     
-    // Sort by date, most recent first
-    matings.sort((a, b) => b.date.getTime() - a.date.getTime());
-    setRecentMatings(matings);
+    // Calculate upcoming heats
+    setUpcomingHeats(calculateUpcomingHeats(dogs));
   }, [dogs]);
   
-  // Save planned litters to localStorage whenever they change
-  useEffect(() => {
-    plannedLitterService.savePlannedLitters(plannedLitters);
-  }, [plannedLitters]);
-  
-  const handleAddPlannedLitter = (values: PlannedLitterFormValues) => {
+  const handleAddPlannedLitter = async (values: PlannedLitterFormValues) => {
     try {
-      const newLitter = plannedLitterService.createPlannedLitter(values, dogs);
-      setPlannedLitters([...plannedLitters, newLitter]);
-      
-      toast({
-        title: "Planned Litter Added",
-        description: `${newLitter.maleName} × ${newLitter.femaleName} planned breeding added successfully.`
-      });
+      const newLitter = await plannedLitterService.createPlannedLitter(values);
+      if (newLitter) {
+        setPlannedLitters(prev => [...prev, newLitter]);
+        
+        toast({
+          title: "Planned Litter Added",
+          description: `${newLitter.maleName || values.externalMaleName || 'Male'} × ${newLitter.femaleName} planned breeding added successfully.`
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -83,90 +93,148 @@ const PlannedLittersContent: React.FC = () => {
     }
   };
   
-  const handleAddMatingDate = (litterId: string, date: Date) => {
-    const updatedLitters = plannedLitterService.addMatingDate(plannedLitters, litterId, date);
-    setPlannedLitters(updatedLitters);
-    
-    toast({
-      title: "Mating Date Added",
-      description: `Mating date ${format(date, 'PPP')} added successfully. A pregnancy has been created.`
-    });
+  const handleAddMatingDate = async (litterId: string, date: Date) => {
+    try {
+      await plannedLitterService.addMatingDate(litterId, date);
+      
+      // Refresh litters to get the updated data
+      const updatedLitters = await plannedLitterService.loadPlannedLitters();
+      setPlannedLitters(updatedLitters);
+      
+      toast({
+        title: "Mating Date Added",
+        description: `Mating date ${format(date, 'PPP')} added successfully. A pregnancy has been created.`
+      });
 
-    // Add new mating to recent matings
-    const litter = plannedLitters.find(l => l.id === litterId);
-    if (litter) {
-      setRecentMatings([{
-        id: `${litter.id}-${format(date, 'yyyy-MM-dd')}`,
-        maleName: litter.maleName,
-        femaleName: litter.femaleName,
-        date: date
-      }, ...recentMatings]);
+      // Add new mating to recent matings
+      const litter = plannedLitters.find(l => l.id === litterId);
+      if (litter) {
+        setRecentMatings(prev => [{
+          id: `${litter.id}-${format(date, 'yyyy-MM-dd')}`,
+          maleName: litter.maleName || 'Unknown',
+          femaleName: litter.femaleName,
+          date: date
+        }, ...prev]);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add mating date",
+        variant: "destructive"
+      });
     }
   };
 
-  const handleEditMatingDate = (litterId: string, dateIndex: number, newDate: Date) => {
-    const updatedLitters = plannedLitterService.editMatingDate(plannedLitters, litterId, dateIndex, newDate);
-    setPlannedLitters(updatedLitters);
-    
-    toast({
-      title: "Mating Date Updated",
-      description: `Mating date updated to ${format(newDate, 'PPP')} successfully.`
-    });
-    
-    // Update recent matings list
-    updateRecentMatings();
+  const handleEditMatingDate = async (litterId: string, dateIndex: number, newDate: Date) => {
+    try {
+      await plannedLitterService.editMatingDate(litterId, dateIndex, newDate);
+      
+      // Refresh litters to get the updated data
+      const updatedLitters = await plannedLitterService.loadPlannedLitters();
+      setPlannedLitters(updatedLitters);
+      
+      toast({
+        title: "Mating Date Updated",
+        description: `Mating date updated to ${format(newDate, 'PPP')} successfully.`
+      });
+      
+      // Update recent matings list
+      updateRecentMatings();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update mating date",
+        variant: "destructive"
+      });
+    }
   };
   
-  const handleDeleteMatingDate = (litterId: string, dateIndex: number) => {
-    const updatedLitters = plannedLitterService.deleteMatingDate(plannedLitters, litterId, dateIndex);
-    setPlannedLitters(updatedLitters);
-    
-    toast({
-      title: "Mating Date Deleted",
-      description: "The mating date has been removed successfully."
-    });
-    
-    // Update recent matings list
-    updateRecentMatings();
+  const handleDeleteMatingDate = async (litterId: string, dateIndex: number) => {
+    try {
+      await plannedLitterService.deleteMatingDate(litterId, dateIndex);
+      
+      // Refresh litters to get the updated data
+      const updatedLitters = await plannedLitterService.loadPlannedLitters();
+      setPlannedLitters(updatedLitters);
+      
+      toast({
+        title: "Mating Date Deleted",
+        description: "The mating date has been removed successfully."
+      });
+      
+      // Update recent matings list
+      updateRecentMatings();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete mating date",
+        variant: "destructive"
+      });
+    }
   };
   
-  const updateRecentMatings = () => {
-    const matings: RecentMating[] = [];
-    
-    plannedLitters.forEach(litter => {
-      if (litter.matingDates && litter.matingDates.length > 0) {
-        litter.matingDates.forEach(dateStr => {
-          const matingDate = parseISO(dateStr);
-          if (isBefore(matingDate, new Date())) {
-            matings.push({
-              id: `${litter.id}-${dateStr}`,
-              maleName: litter.maleName,
-              femaleName: litter.femaleName,
-              date: matingDate
-            });
-          }
-        });
-      }
-    });
-    
-    matings.sort((a, b) => b.date.getTime() - a.date.getTime());
-    setRecentMatings(matings);
+  const updateRecentMatings = async () => {
+    try {
+      const litters = await plannedLitterService.loadPlannedLitters();
+      const matings: RecentMating[] = [];
+      
+      litters.forEach(litter => {
+        if (litter.matingDates && litter.matingDates.length > 0) {
+          litter.matingDates.forEach(dateStr => {
+            const matingDate = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
+            if (isBefore(matingDate, new Date())) {
+              matings.push({
+                id: `${litter.id}-${dateStr}`,
+                maleName: litter.maleName || 'Unknown',
+                femaleName: litter.femaleName,
+                date: matingDate
+              });
+            }
+          });
+        }
+      });
+      
+      matings.sort((a, b) => b.date.getTime() - a.date.getTime());
+      setRecentMatings(matings);
+    } catch (error) {
+      console.error('Error updating recent matings:', error);
+    }
   };
 
-  const handleDeleteLitter = (litterId: string) => {
-    const updatedLitters = plannedLitterService.deletePlannedLitter(plannedLitters, litterId);
-    setPlannedLitters(updatedLitters);
-    
-    // Also filter out any recent matings associated with this litter
-    const updatedMatings = recentMatings.filter(
-      mating => !mating.id.startsWith(`${litterId}-`)
-    );
-    setRecentMatings(updatedMatings);
-    
-    toast({
-      title: "Planned Litter Deleted",
-      description: "The planned litter has been removed successfully."
-    });
+  const handleDeleteLitter = async (litterId: string) => {
+    try {
+      // Get the litter to be deleted first
+      const litterToDelete = plannedLitters.find(litter => litter.id === litterId);
+      
+      // Delete from Supabase (this will cascade delete mating_dates)
+      const { error } = await supabase
+        .from('planned_litters')
+        .delete()
+        .eq('id', litterId);
+        
+      if (error) throw error;
+      
+      // Update local state
+      setPlannedLitters(plannedLitters.filter(litter => litter.id !== litterId));
+      
+      // Also filter out any recent matings associated with this litter
+      const updatedMatings = recentMatings.filter(
+        mating => !mating.id.startsWith(`${litterId}-`)
+      );
+      setRecentMatings(updatedMatings);
+      
+      toast({
+        title: "Planned Litter Deleted",
+        description: "The planned litter has been removed successfully."
+      });
+    } catch (error) {
+      console.error('Error deleting litter:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete planned litter",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
