@@ -1,5 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface StorageCleanupOptions {
   oldImageUrl: string;
@@ -24,6 +24,11 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
 
     if (searchError) {
       console.error('Error checking for image usage:', searchError);
+      toast({
+        title: "Error checking image usage",
+        description: "Could not verify if the image is still in use",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -48,12 +53,26 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
 
     if (deleteError) {
       console.error('Error deleting unused image:', deleteError);
+      toast({
+        title: "Error removing image",
+        description: "Could not delete the unused image",
+        variant: "destructive"
+      });
       return;
     }
 
     console.log('Successfully deleted unused image');
+    toast({
+      title: "Success",
+      description: "Unused image was successfully removed",
+    });
   } catch (error) {
     console.error('Error in storage cleanup:', error);
+    toast({
+      title: "Error",
+      description: "An unexpected error occurred while cleaning up storage",
+      variant: "destructive"
+    });
   }
 };
 
