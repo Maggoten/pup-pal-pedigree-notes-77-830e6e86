@@ -1,29 +1,14 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { Dog as DogIcon, ArrowLeft, Trash2, Save, Loader2 } from 'lucide-react';
-import { Dog, useDogs } from '@/context/DogsContext';
-import DogInfoDisplay from './DogInfoDisplay';
-import DogEditForm from './DogEditForm';
+import { ArrowLeft } from 'lucide-react';
+import { Dog } from '@/types/dogs';
+import { useDogs } from '@/context/DogsContext';
 import { DogFormValues } from './DogFormFields';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
+import DeleteDogDialog from './delete-dialog/DeleteDogDialog';
+import DogDetailsCard from './details/DogDetailsCard';
+import DogActions from './actions/DogActions';
 
 interface DogDetailsProps {
   dog: Dog;
@@ -47,7 +32,6 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
     try {
       const updates: Partial<Dog> = {};
       
-      // Only include fields that have changed
       if (values.name !== dog.name) updates.name = values.name;
       if (values.breed !== dog.breed) updates.breed = values.breed;
       if (values.gender !== dog.gender) updates.gender = values.gender;
@@ -58,7 +42,6 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       }
       if (values.image !== dog.image) updates.image = values.image;
       
-      // Format dates for comparison
       const newDateOfBirth = values.dateOfBirth.toISOString().split('T')[0];
       if (newDateOfBirth !== dog.dateOfBirth) {
         updates.dateOfBirth = newDateOfBirth;
@@ -82,7 +65,6 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         updates.vaccinationDate = null as any;
       }
       
-      // Only update heat-related fields for female dogs
       if (values.gender === 'female') {
         if (values.heatHistory) {
           const currentHeatDates = JSON.stringify(dog.heatHistory || []);
@@ -101,7 +83,6 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         }
       }
       
-      // If no changes detected, return early
       if (Object.keys(updates).length === 0) {
         toast({
           title: "No Changes",
@@ -148,74 +129,30 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         Back to list
       </Button>
       
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DogIcon className="h-5 w-5" />
-            {isEditing ? 'Edit Dog' : dog.name}
-          </CardTitle>
-          <CardDescription>
-            {isEditing ? 'Update dog information' : `${dog.breed} • ${dog.gender === 'male' ? 'Male' : 'Female'}`}
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent>
-          {isEditing ? (
-            <DogEditForm 
-              dog={dog} 
-              onCancel={() => setIsEditing(false)} 
-              onSave={handleSave}
-              isLoading={isSaving || loading}
-            />
-          ) : (
-            <DogInfoDisplay dog={dog} />
-          )}
-          
-          {lastError && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-md text-sm">
-              <strong>Error:</strong> {lastError}
-            </div>
-          )}
-        </CardContent>
-        
-        <CardFooter className="flex justify-between">
-          <Button
-            variant="destructive"
-            onClick={() => setShowDeleteDialog(true)}
-            disabled={loading || isSaving}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
-          </Button>
-          
-          {!isEditing ? (
-            <Button onClick={() => setIsEditing(true)} disabled={loading || isSaving}>
-              <Save className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-          ) : null}
-        </CardFooter>
-      </Card>
+      <DogDetailsCard
+        dog={dog}
+        isEditing={isEditing}
+        isSaving={isSaving}
+        loading={loading}
+        lastError={lastError}
+        onSave={handleSave}
+        onCancelEdit={() => setIsEditing(false)}
+      />
       
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete {dog.name} from your records.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DogActions
+        isEditing={isEditing}
+        onDelete={() => setShowDeleteDialog(true)}
+        onEdit={() => setIsEditing(true)}
+        loading={loading}
+        isSaving={isSaving}
+      />
+      
+      <DeleteDogDialog
+        dogName={dog.name}
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 };
