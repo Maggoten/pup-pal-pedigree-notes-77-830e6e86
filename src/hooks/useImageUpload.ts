@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -15,7 +14,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const UPLOAD_TIMEOUT = 30000; // 30 seconds
-  const BUCKET_NAME = 'dog_photos'; // Changed to use underscores instead of spaces
+  const BUCKET_NAME = 'Dog Photos'; // Exact match with Supabase bucket name
 
   const validateFile = (file: File) => {
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
