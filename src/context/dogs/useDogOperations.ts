@@ -5,7 +5,7 @@ import { Dog } from '@/types/dogs';
 
 interface UseDogOperationsProps {
   updateDogBase: (id: string, updates: Partial<Dog>) => Promise<Dog | null>;
-  deleteDog: (id: string) => Promise<void>;
+  deleteDog: (id: string) => Promise<boolean>; // Updated from Promise<void> to Promise<boolean>
   refreshDogs: () => Promise<void>;
   activeDog: Dog | null;
   setActiveDog: (dog: Dog | null) => void;
