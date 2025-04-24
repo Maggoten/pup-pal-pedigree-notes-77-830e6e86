@@ -18,14 +18,21 @@ import {
 } from '@/components/ui/dialog';
 import { commonDogBreeds } from '@/utils/dogBreeds';
 import { Search, Plus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface BreedDropdownProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  className?: string; // Add className prop
 }
 
-const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange, disabled }) => {
+const BreedDropdown: React.FC<BreedDropdownProps> = ({ 
+  value, 
+  onChange, 
+  disabled = false, 
+  className 
+}) => {
   const [customBreedDialogOpen, setCustomBreedDialogOpen] = useState(false);
   const [customBreed, setCustomBreed] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -69,7 +76,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange, disabled
 
   return (
     <>
-      <div className="relative w-full">
+      <div className={cn("relative w-full", className)}>
         <div className="relative">
           <Input
             placeholder="Search breeds..."
@@ -165,3 +172,4 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({ value, onChange, disabled
 };
 
 export default BreedDropdown;
+
