@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Litter, Puppy } from '@/types/breeding';
 import { litterService } from '@/services/LitterService';
@@ -38,8 +37,17 @@ export function useLitterManagement() {
     
     loadLitters();
     
-    const loadedPlannedLitters = plannedLitterService.loadPlannedLitters();
-    setPlannedLitters(loadedPlannedLitters);
+    // Load planned litters properly handling the async function
+    const loadPlannedLitters = async () => {
+      try {
+        const loadedPlannedLitters = await plannedLitterService.loadPlannedLitters();
+        setPlannedLitters(loadedPlannedLitters);
+      } catch (error) {
+        console.error('Error loading planned litters:', error);
+      }
+    };
+    
+    loadPlannedLitters();
   }, []);
   
   // Handlers for litter operations

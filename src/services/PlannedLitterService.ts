@@ -41,8 +41,17 @@ class PlannedLitterService {
     }
 
     return litters.map(litter => ({
-      ...litter,
-      matingDates: litter.mating_dates?.map(date => date.mating_date) || []
+      id: litter.id,
+      maleId: litter.male_id || '',
+      femaleId: litter.female_id,
+      maleName: litter.male_name || '',
+      femaleName: litter.female_name,
+      expectedHeatDate: litter.expected_heat_date,
+      notes: litter.notes,
+      matingDates: litter.mating_dates?.map(date => date.mating_date) || [],
+      externalMale: litter.external_male || false,
+      externalMaleBreed: litter.external_male_breed || '',
+      externalMaleRegistration: litter.external_male_registration || ''
     }));
   }
 
@@ -57,7 +66,7 @@ class PlannedLitterService {
       .insert({
         male_id: formValues.externalMale ? null : formValues.maleId,
         female_id: formValues.femaleId,
-        male_name: formValues.externalMale ? formValues.externalMaleName : undefined,
+        male_name: formValues.externalMale ? formValues.externalMaleName : formValues.maleName,
         female_name: formValues.femaleName,
         expected_heat_date: formValues.expectedHeatDate.toISOString(),
         notes: formValues.notes,
@@ -75,8 +84,17 @@ class PlannedLitterService {
     }
 
     return {
-      ...litter,
-      matingDates: []
+      id: litter.id,
+      maleId: litter.male_id || '',
+      femaleId: litter.female_id,
+      maleName: litter.male_name || '',
+      femaleName: litter.female_name,
+      expectedHeatDate: litter.expected_heat_date,
+      notes: litter.notes,
+      matingDates: [],
+      externalMale: litter.external_male || false,
+      externalMaleBreed: litter.external_male_breed || '',
+      externalMaleRegistration: litter.external_male_registration || ''
     };
   }
 

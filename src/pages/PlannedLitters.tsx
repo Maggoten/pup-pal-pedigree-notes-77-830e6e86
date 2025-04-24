@@ -10,6 +10,7 @@ import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { UpcomingHeat } from '@/types/reminders';
 import PlannedLittersList from '@/components/planned-litters/PlannedLittersList';
 import MatingSection from '@/components/planned-litters/MatingSection';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RecentMating {
   id: string;
