@@ -72,6 +72,117 @@ export type Database = {
         }
         Relationships: []
       }
+      mating_dates: {
+        Row: {
+          created_at: string
+          id: string
+          mating_date: string
+          planned_litter_id: string
+          pregnancy_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mating_date: string
+          planned_litter_id: string
+          pregnancy_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mating_date?: string
+          planned_litter_id?: string
+          pregnancy_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mating_dates_planned_litter_id_fkey"
+            columns: ["planned_litter_id"]
+            isOneToOne: false
+            referencedRelation: "planned_litters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mating_dates_pregnancy_id_fkey"
+            columns: ["pregnancy_id"]
+            isOneToOne: false
+            referencedRelation: "pregnancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planned_litters: {
+        Row: {
+          created_at: string
+          expected_heat_date: string
+          external_male: boolean | null
+          external_male_breed: string | null
+          external_male_name: string | null
+          external_male_registration: string | null
+          female_id: string
+          female_name: string
+          id: string
+          male_id: string | null
+          male_name: string | null
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expected_heat_date: string
+          external_male?: boolean | null
+          external_male_breed?: string | null
+          external_male_name?: string | null
+          external_male_registration?: string | null
+          female_id: string
+          female_name: string
+          id?: string
+          male_id?: string | null
+          male_name?: string | null
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expected_heat_date?: string
+          external_male?: boolean | null
+          external_male_breed?: string | null
+          external_male_name?: string | null
+          external_male_registration?: string | null
+          female_id?: string
+          female_name?: string
+          id?: string
+          male_id?: string | null
+          male_name?: string | null
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planned_litters_female_id_fkey"
+            columns: ["female_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planned_litters_male_id_fkey"
+            columns: ["male_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pregnancies: {
         Row: {
           created_at: string
