@@ -15,6 +15,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const UPLOAD_TIMEOUT = 30000; // 30 seconds
+  const BUCKET_NAME = 'Dog Photos'; // Updated bucket name to match Supabase
 
   const validateFile = (file: File) => {
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
@@ -42,6 +43,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     if (!user_id || !validateFile(file)) return;
     
     setIsUploading(true);
+    console.log('Starting image upload to bucket:', BUCKET_NAME);
     
     try {
       const fileExt = file.name.split('.').pop();
@@ -56,8 +58,10 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         });
       }, UPLOAD_TIMEOUT);
 
+      console.log('Attempting to upload file:', fileName);
+      
       const { data, error } = await supabase.storage
-        .from('dog-photos')
+        .from(BUCKET_NAME)
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: true
@@ -65,12 +69,18 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       
       clearTimeout(uploadTimeoutRef.current);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase storage upload error:', error);
+        throw error;
+      }
+      
+      console.log('Upload successful, getting public URL');
       
       const { data: { publicUrl } } = supabase.storage
-        .from('dog-photos')
+        .from(BUCKET_NAME)
         .getPublicUrl(fileName);
       
+      console.log('Generated public URL:', publicUrl);
       onImageChange(publicUrl);
       
       toast({
@@ -90,11 +100,9 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     }
   };
 
-  // IMPORTANT: Only attempt to remove an image if it's a file from storage
-  // and not just an empty string or placeholder
   const removeImage = async (imageUrl: string, userId: string) => {
     // Skip removal if URL doesn't contain the storage path pattern
-    if (!imageUrl || !imageUrl.includes('dog-photos') || !userId) {
+    if (!imageUrl || !imageUrl.includes(BUCKET_NAME) || !userId) {
       console.log('Skipping image removal: Invalid image URL or user ID');
       onImageChange('');
       return;
@@ -102,9 +110,8 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     
     try {
       // Extract the storage path from the URL
-      // The format is typically: https://[storage-url]/storage/v1/object/public/dog-photos/[userId]/[filename]
       const urlParts = imageUrl.split('/');
-      const storageIndex = urlParts.findIndex(part => part === 'dog-photos');
+      const storageIndex = urlParts.findIndex(part => part === BUCKET_NAME);
       
       if (storageIndex === -1) {
         console.log('No valid storage path found in URL:', imageUrl);
@@ -113,11 +120,11 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       }
       
       // Reconstruct the storage path
-      const storagePath = urlParts.slice(storageIndex).join('/');
+      const storagePath = urlParts.slice(storageIndex + 1).join('/');
       console.log('Removing image from storage path:', storagePath);
       
       const { error } = await supabase.storage
-        .from('dog-photos')
+        .from(BUCKET_NAME)
         .remove([storagePath]);
       
       if (error) throw error;
@@ -135,7 +142,6 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         description: "Failed to remove image. The update will continue without removing the old image.",
         variant: "destructive"
       });
-      // Still proceed with the form update even if image removal fails
       onImageChange('');
     }
   };
