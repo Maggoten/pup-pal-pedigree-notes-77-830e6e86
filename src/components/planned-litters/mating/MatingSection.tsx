@@ -1,8 +1,8 @@
 
 import React from 'react';
-import UpcomingHeatCard from '../UpcomingHeatCard';
-import RecentMatingsCard from '../RecentMatingsCard';
-import MatingTipsCard from '../MatingTipsCard';
+import UpcomingHeatCard from './UpcomingHeatCard';
+import RecentMatingsCard from './RecentMatingsCard';
+import MatingTipsCard from './MatingTipsCard';
 import { MatingProps } from '../types';
 
 const MatingSection: React.FC<MatingProps> = ({ upcomingHeats, recentMatings }) => {
