@@ -4,6 +4,7 @@ import { Dog } from '@/types/dogs';
 import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
 import { PostgrestResponse } from '@supabase/supabase-js';
 import { withTimeout, TIMEOUT, isTimeoutError } from '@/utils/timeoutUtils';
+import { cleanupStorageImage } from '@/utils/storageUtils';
 
 export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog | null> {
   if (!id) {
@@ -14,6 +15,18 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
   try {
     console.log('Starting dog update process for ID:', id);
     
+    // First fetch the current dog data to check for image changes
+    const { data: currentDog, error: fetchError } = await supabase
+      .from('dogs')
+      .select('*')
+      .eq('id', id)
+      .single();
+      
+    if (fetchError) {
+      console.error('Error fetching current dog data:', fetchError);
+      throw new Error('Could not fetch current dog data');
+    }
+
     // Convert Dog object to database format
     const dbUpdates = sanitizeDogForDb(updates);
     
@@ -28,19 +41,6 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
     // Only proceed with update if there are actual changes
     if (Object.keys(cleanUpdates).length === 0) {
       console.log('No changes detected, skipping update');
-      
-      // If no changes, fetch the current dog data to return
-      const { data: currentDog, error: fetchError } = await supabase
-        .from('dogs')
-        .select('*')
-        .eq('id', id)
-        .single();
-        
-      if (fetchError) {
-        console.error('Error fetching current dog data:', fetchError);
-        return null;
-      }
-      
       return enrichDog(currentDog);
     }
     
@@ -65,7 +65,7 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
 
       // Handle Supabase error
       if (updateResponse.error) {
-        console.error('Supabase error updating dog:', updateResponse.error.message, updateResponse.error.details);
+        console.error('Supabase error updating dog:', updateResponse.error.message);
         throw new Error(`Database error: ${updateResponse.error.message}`);
       }
 
@@ -73,6 +73,16 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
       if (!updateResponse.data || updateResponse.data.length === 0) {
         console.error('No dog data returned after update');
         throw new Error('Update succeeded but no data was returned');
+      }
+
+      // Check if the image was changed and cleanup old image if needed
+      if (cleanUpdates.image_url && currentDog.image_url !== cleanUpdates.image_url) {
+        console.log('Image changed, cleaning up old image');
+        await cleanupStorageImage({
+          oldImageUrl: currentDog.image_url,
+          userId: currentDog.owner_id,
+          excludeDogId: id
+        });
       }
 
       // Convert DB response to Dog object
