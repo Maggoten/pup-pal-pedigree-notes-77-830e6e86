@@ -21,10 +21,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Set up auth state listener and check for existing session
   useEffect(() => {
+    let isSubscribed = true;
+    
     // First set up the auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         console.log('Auth state change event:', event);
+        
+        if (!isSubscribed) return;
         
         setSession(currentSession);
         setIsLoggedIn(!!currentSession);
@@ -36,8 +40,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           // Use setTimeout to prevent potential deadlocks
           setTimeout(async () => {
             try {
-              // Get user profile from database
-              const profile = await getUserProfile(currentSession.user.id);
+              if (!isSubscribed) return;
+              
+              // Get user profile from database with retry logic
+              let retryCount = 0;
+              let profile = null;
+              
+              while (retryCount < 3 && !profile) {
+                try {
+                  profile = await getUserProfile(currentSession.user.id);
+                  if (profile) break;
+                } catch (err) {
+                  console.log(`Profile fetch attempt ${retryCount + 1} failed:`, err);
+                  await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between retries
+                }
+                retryCount++;
+              }
               
               if (profile) {
                 setUser({
@@ -48,21 +66,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                   address: profile.address
                 });
               } else {
-                console.warn('No profile found for authenticated user');
+                console.error('Failed to fetch profile after retries');
+                toast({
+                  variant: "destructive",
+                  title: "Error loading profile",
+                  description: "Please try refreshing the page"
+                });
               }
             } catch (error) {
-              console.error('Error fetching user profile:', error);
+              console.error('Error in auth state change handler:', error);
             }
           }, 0);
         } else {
-          setUser(null);
-          setSupabaseUser(null);
+          if (isSubscribed) {
+            setUser(null);
+            setSupabaseUser(null);
+          }
         }
         
         if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setSupabaseUser(null);
-          setIsLoggedIn(false);
+          if (isSubscribed) {
+            setUser(null);
+            setSupabaseUser(null);
+            setIsLoggedIn(false);
+          }
         }
       }
     );
@@ -74,21 +101,40 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         console.log('Initial session check:', initialSession ? 'Session exists' : 'No session');
         
-        if (initialSession?.user) {
+        if (initialSession?.user && isSubscribed) {
           setSession(initialSession);
           setSupabaseUser(initialSession.user);
           setIsLoggedIn(true);
           
-          // Get user profile from database
-          const profile = await getUserProfile(initialSession.user.id);
+          // Get user profile from database with retry logic
+          let retryCount = 0;
+          let profile = null;
           
-          if (profile) {
+          while (retryCount < 3 && !profile) {
+            try {
+              profile = await getUserProfile(initialSession.user.id);
+              if (profile) break;
+            } catch (err) {
+              console.log(`Initial profile fetch attempt ${retryCount + 1} failed:`, err);
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            retryCount++;
+          }
+          
+          if (profile && isSubscribed) {
             setUser({
               id: initialSession.user.id,
               email: initialSession.user.email || '',
               firstName: profile.first_name,
               lastName: profile.last_name,
               address: profile.address
+            });
+          } else if (isSubscribed) {
+            console.error('Failed to fetch initial profile after retries');
+            toast({
+              variant: "destructive",
+              title: "Error loading profile",
+              description: "Please try refreshing the page"
             });
           }
         }
@@ -102,6 +148,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     initializeAuth();
     
     return () => {
+      isSubscribed = false;
       subscription.unsubscribe();
     };
   }, [getUserProfile]);

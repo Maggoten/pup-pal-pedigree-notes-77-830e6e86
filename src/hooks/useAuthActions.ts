@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
@@ -126,22 +125,27 @@ export const useAuthActions = () => {
   const getUserProfile = async (userId: string): Promise<Profile | null> => {
     try {
       console.log('Fetching profile for user:', userId);
+      if (!userId) {
+        console.error('getUserProfile called with no userId');
+        return null;
+      }
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error('Error fetching user profile:', error);
-        return null;
+        throw error;
       }
       
       console.log('Profile retrieved:', data ? 'success' : 'not found');
       return data;
     } catch (error) {
       console.error("Error fetching user profile:", error);
-      return null;
+      throw error;
     }
   };
 
