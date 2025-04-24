@@ -1,7 +1,22 @@
+
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 export const migratePregnancyData = async () => {
   try {
+    // Check if user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      toast({
+        title: "Authentication required",
+        description: "You need to be logged in to migrate pregnancy data.",
+        variant: "destructive"
+      });
+      return { success: false, error: "Authentication required" };
+    }
+    
+    const userId = sessionData.session.user.id;
+    
     // Migrate planned litters with mating dates to pregnancies
     const plannedLittersJSON = localStorage.getItem('plannedLitters');
     if (plannedLittersJSON) {
@@ -12,10 +27,12 @@ export const migratePregnancyData = async () => {
 
       for (const litter of activeLitters) {
         const { error } = await supabase.from('pregnancies').insert({
+          user_id: userId,
           female_dog_id: litter.femaleId,
           male_dog_id: litter.maleId,
           external_male_name: !litter.maleId ? litter.maleName : null,
           mating_date: litter.matingDates[0],
+          expected_due_date: addDays(new Date(litter.matingDates[0]), 63).toISOString(),
           status: 'active'
         });
 
@@ -24,16 +41,29 @@ export const migratePregnancyData = async () => {
           continue;
         }
 
+        // Get the newly created pregnancy ID
+        const { data: newPregnancy } = await supabase
+          .from('pregnancies')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('female_dog_id', litter.femaleId)
+          .eq('mating_date', litter.matingDates[0])
+          .single();
+          
+        if (!newPregnancy) continue;
+        const newPregnancyId = newPregnancy.id;
+
         // Migrate temperature logs
         const tempLogsJSON = localStorage.getItem(`temperature_${litter.id}`);
         if (tempLogsJSON) {
           const tempLogs = JSON.parse(tempLogsJSON);
           for (const temp of tempLogs) {
             await supabase.from('temperature_logs').insert({
-              pregnancy_id: litter.id,
+              pregnancy_id: newPregnancyId,
+              user_id: userId,
               temperature: temp.temperature,
               date: temp.date,
-              notes: temp.notes
+              notes: temp.notes || null
             });
           }
         }
@@ -44,7 +74,8 @@ export const migratePregnancyData = async () => {
           const symptomLogs = JSON.parse(symptomLogsJSON);
           for (const symptom of symptomLogs) {
             await supabase.from('symptom_logs').insert({
-              pregnancy_id: litter.id,
+              pregnancy_id: newPregnancyId,
+              user_id: userId,
               title: symptom.title,
               description: symptom.description,
               date: symptom.date
@@ -54,13 +85,26 @@ export const migratePregnancyData = async () => {
       }
     }
 
-    // Clear migrated data from localStorage
-    // Keep this commented out until we're sure the migration was successful
-    // localStorage.removeItem('plannedLitters');
+    toast({
+      title: "Migration successful",
+      description: "Your pregnancy data has been successfully migrated to the database."
+    });
     
     return { success: true };
   } catch (error) {
     console.error('Migration error:', error);
+    toast({
+      title: "Migration failed",
+      description: "There was an error migrating your pregnancy data.",
+      variant: "destructive"
+    });
     return { success: false, error };
   }
+};
+
+// Helper function to add days to a date
+const addDays = (date: Date, days: number): Date => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
 };
