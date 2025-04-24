@@ -1,8 +1,10 @@
 
 import { useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { Dog } from '@/types/dogs';
 
-export const useForceReload = (userId: string | undefined, fetchDogs: (skipCache?: boolean) => Promise<void>) => {
+// Update parameter type to match the fetchDogs function with correct return type
+export const useForceReload = (userId: string | undefined, fetchDogs: (skipCache?: boolean) => Promise<Dog[]>) => {
   const { toast } = useToast();
 
   return useCallback(async () => {

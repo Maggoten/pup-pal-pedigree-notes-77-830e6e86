@@ -17,6 +17,7 @@ interface DogsProviderProps {
 export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   const { user, isLoggedIn, isLoading: authLoading } = useAuth();
   const [dogLoadingAttempted, setDogLoadingAttempted] = useState(false);
+  const { toast } = useToast();
   
   const { 
     dogs, 
@@ -31,10 +32,11 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   const { activeDog, setActiveDog } = useActiveDog(dogs);
   const forceReload = useForceReload(user?.id, fetchDogs);
   
+  // Update useDogOperations with the correct types
   const { updateDog, removeDog } = useDogOperations({
     updateDogBase,
     deleteDog,
-    refreshDogs: () => fetchDogs(),
+    refreshDogs: async () => { await fetchDogs(); }, // Convert to void return type
     activeDog,
     setActiveDog
   });
