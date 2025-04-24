@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -8,7 +9,7 @@ interface StorageCleanupOptions {
 }
 
 export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }: StorageCleanupOptions) => {
-  if (!oldImageUrl || !oldImageUrl.includes('dog-photos')) {
+  if (!oldImageUrl || !oldImageUrl.includes('dog_photos')) {
     console.log('No valid image URL to cleanup:', oldImageUrl);
     return;
   }
@@ -39,16 +40,16 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
     }
 
     // Extract the path from the URL
-    // URL format: https://[storage-url]/storage/v1/object/public/dog-photos/[userId]/[filename]
+    // URL format: https://[storage-url]/storage/v1/object/public/dog_photos/[userId]/[filename]
     const urlParts = oldImageUrl.split('/');
     const storagePath = urlParts
-      .slice(urlParts.findIndex(part => part === 'dog-photos'))
+      .slice(urlParts.findIndex(part => part === 'dog_photos'))
       .join('/');
 
     console.log('Deleting unused image:', storagePath);
     
     const { error: deleteError } = await supabase.storage
-      .from('dog-photos')
+      .from('dog_photos')
       .remove([storagePath]);
 
     if (deleteError) {

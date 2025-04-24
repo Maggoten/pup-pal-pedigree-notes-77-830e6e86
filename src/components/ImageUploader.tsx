@@ -5,6 +5,7 @@ import { UploadIcon, XIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import ImagePreviewDisplay from './image-upload/ImagePreviewDisplay';
+import { toast } from '@/hooks/use-toast';
 
 interface ImageUploaderProps {
   currentImage?: string;
@@ -31,8 +32,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file || !user) {
+      console.log('No file selected or user not logged in');
+      return;
+    }
     
+    console.log('File selected:', file.name, 'size:', file.size, 'type:', file.type);
     await uploadImage(file);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -40,6 +45,15 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   const handleUploadClick = () => {
+    if (!user) {
+      console.log('User not logged in, cannot upload');
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to upload images",
+        variant: "destructive"
+      });
+      return;
+    }
     fileInputRef.current?.click();
   };
   

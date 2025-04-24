@@ -15,7 +15,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const UPLOAD_TIMEOUT = 30000; // 30 seconds
-  const BUCKET_NAME = 'Dog Photos'; // Updated bucket name to match Supabase
+  const BUCKET_NAME = 'dog_photos'; // Changed to use underscores instead of spaces
 
   const validateFile = (file: File) => {
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
@@ -59,6 +59,24 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       }, UPLOAD_TIMEOUT);
 
       console.log('Attempting to upload file:', fileName);
+      
+      // Check if the bucket exists before uploading
+      const { data: buckets, error: bucketError } = await supabase
+        .storage
+        .listBuckets();
+      
+      if (bucketError) {
+        console.error('Error listing buckets:', bucketError);
+        throw bucketError;
+      }
+      
+      console.log('Available buckets:', buckets.map(b => b.name));
+      
+      const bucketExists = buckets.some(bucket => bucket.name === BUCKET_NAME);
+      if (!bucketExists) {
+        console.error(`Bucket "${BUCKET_NAME}" does not exist!`);
+        throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist`);
+      }
       
       const { data, error } = await supabase.storage
         .from(BUCKET_NAME)
