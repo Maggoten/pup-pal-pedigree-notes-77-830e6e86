@@ -16,7 +16,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const UPLOAD_TIMEOUT = 30000; // 30 seconds
-  const BUCKET_NAME = 'dog-photos'; // Using the internal bucket ID
+  const BUCKET_NAME = 'dog-photos'; // Bucket name
 
   const validateFile = (file: File) => {
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
@@ -42,18 +42,27 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
 
   const checkBucketExists = async (): Promise<boolean> => {
     try {
-      const { data: buckets, error } = await supabase.storage.listBuckets();
+      // First check if user has a valid session
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData.session) {
+        console.error('Storage bucket check failed: No active session', sessionError);
+        return false;
+      }
+
+      console.log('Checking if bucket exists:', BUCKET_NAME);
+      
+      // Check if the bucket exists by trying to list files in it
+      const { data, error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .list('', { limit: 1 });
       
       if (error) {
-        console.error('Error checking buckets:', error);
+        console.error('Error checking bucket existence:', error);
         return false;
       }
       
-      const bucketExists = buckets.some(bucket => bucket.id === BUCKET_NAME);
-      console.log(`Bucket "${BUCKET_NAME}" ${bucketExists ? 'exists' : 'does not exist'} in available buckets:`, 
-        buckets.map(b => b.id));
-      
-      return bucketExists;
+      console.log('Bucket exists, can list files:', BUCKET_NAME, data);
+      return true;
     } catch (err) {
       console.error('Error in bucket verification:', err);
       return false;

@@ -9,9 +9,39 @@ interface StorageCleanupOptions {
   excludeDogId?: string;
 }
 
+const BUCKET_NAME = 'dog-photos';
+
+// Check if bucket exists and is accessible
+const checkBucketExists = async (): Promise<boolean> => {
+  try {
+    // First check if user has a valid session
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      console.error('Storage bucket check failed: No active session', sessionError);
+      return false;
+    }
+
+    console.log('Checking if bucket exists:', BUCKET_NAME);
+    
+    // Try to list files in the bucket to verify access
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .list('', { limit: 1 });
+    
+    if (error) {
+      console.error('Error checking bucket existence:', error);
+      return false;
+    }
+    
+    console.log('Bucket exists, can list files:', data);
+    return true;
+  } catch (err) {
+    console.error('Error in bucket verification:', err);
+    return false;
+  }
+};
+
 export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }: StorageCleanupOptions) => {
-  const BUCKET_NAME = 'dog-photos';
-  
   if (!oldImageUrl || !oldImageUrl.includes(BUCKET_NAME)) {
     console.log('No valid image URL to cleanup:', oldImageUrl);
     return;
@@ -46,21 +76,14 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
       return;
     }
 
-    // Check if bucket exists
-    const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-    if (bucketError) {
-      console.error('Error listing buckets:', bucketError);
-      throw bucketError;
-    }
-    
-    const bucketExists = buckets.some(bucket => bucket.id === BUCKET_NAME);
+    // Check if bucket exists and is accessible
+    const bucketExists = await checkBucketExists();
     if (!bucketExists) {
-      console.error(`Bucket "${BUCKET_NAME}" does not exist in available buckets:`, 
-        buckets.map(b => b.id));
-      throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist`);
+      console.error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
+      throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
     }
     
-    console.log(`Found bucket "${BUCKET_NAME}", proceeding with deletion`);
+    console.log(`Bucket "${BUCKET_NAME}" exists and is accessible, proceeding with deletion`);
 
     const urlParts = oldImageUrl.split('/');
     const bucketIndex = urlParts.findIndex(part => part === BUCKET_NAME);
@@ -75,7 +98,6 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
       .join('/');
 
     console.log('Deleting unused image:', storagePath);
-    console.log('Bucket name:', BUCKET_NAME);
     
     const { error: deleteError } = await supabase.storage
       .from(BUCKET_NAME)
@@ -127,6 +149,13 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
 
 export const cleanupAllUnusedPhotos = async () => {
   try {
+    // Check if bucket exists and is accessible first
+    const bucketExists = await checkBucketExists();
+    if (!bucketExists) {
+      console.error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
+      throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
+    }
+    
     const { data, error } = await supabase.functions.invoke('cleanup-photos', {
       method: 'POST'
     });
