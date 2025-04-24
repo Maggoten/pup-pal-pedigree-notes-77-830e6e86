@@ -20,6 +20,7 @@ export const usePlannedLitterMutations = (
         await refreshLitters();
       }
     } catch (error) {
+      console.error('Error adding planned litter:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "An unknown error occurred",
@@ -30,6 +31,7 @@ export const usePlannedLitterMutations = (
 
   const handleAddMatingDate = async (litterId: string, date: Date) => {
     try {
+      console.log("Adding mating date:", date, "for litter:", litterId);
       await plannedLittersService.addMatingDate(litterId, date);
       await refreshLitters();
       
@@ -38,6 +40,7 @@ export const usePlannedLitterMutations = (
         description: `Mating date ${format(date, 'PPP')} added successfully. A pregnancy has been created.`
       });
     } catch (error) {
+      console.error('Error adding mating date:', error);
       toast({
         title: "Error",
         description: "Failed to add mating date",
@@ -48,6 +51,7 @@ export const usePlannedLitterMutations = (
 
   const handleEditMatingDate = async (litterId: string, dateIndex: number, newDate: Date) => {
     try {
+      console.log("Editing mating date at index:", dateIndex, "to:", newDate, "for litter:", litterId);
       await plannedLittersService.editMatingDate(litterId, dateIndex, newDate);
       await refreshLitters();
       
@@ -56,6 +60,7 @@ export const usePlannedLitterMutations = (
         description: `Mating date updated to ${format(newDate, 'PPP')} successfully.`
       });
     } catch (error) {
+      console.error('Error updating mating date:', error);
       toast({
         title: "Error",
         description: "Failed to update mating date",
@@ -66,6 +71,7 @@ export const usePlannedLitterMutations = (
 
   const handleDeleteMatingDate = async (litterId: string, dateIndex: number) => {
     try {
+      console.log("Deleting mating date at index:", dateIndex, "for litter:", litterId);
       await plannedLittersService.deleteMatingDate(litterId, dateIndex);
       await refreshLitters();
       
@@ -74,6 +80,7 @@ export const usePlannedLitterMutations = (
         description: "The mating date has been removed successfully."
       });
     } catch (error) {
+      console.error('Error deleting mating date:', error);
       toast({
         title: "Error",
         description: "Failed to delete mating date",
@@ -84,6 +91,7 @@ export const usePlannedLitterMutations = (
 
   const handleDeleteLitter = async (litterId: string) => {
     try {
+      console.log("Deleting litter:", litterId);
       const { error } = await supabase
         .from('planned_litters')
         .delete()

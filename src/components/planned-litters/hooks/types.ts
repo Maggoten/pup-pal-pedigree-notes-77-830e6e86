@@ -11,6 +11,8 @@ export interface UsePlannedLitterQueries {
   recentMatings: RecentMating[];
   males: Dog[];
   females: Dog[];
+  isLoading: boolean;
+  setPlannedLitters: React.Dispatch<React.SetStateAction<PlannedLitter[]>>;
 }
 
 export interface UsePlannedLitterMutations {
@@ -21,4 +23,6 @@ export interface UsePlannedLitterMutations {
   handleDeleteLitter: (litterId: string) => Promise<void>;
 }
 
-export type UsePlannedLitters = UsePlannedLitterQueries & UsePlannedLitterMutations;
+export type UsePlannedLitters = UsePlannedLitterQueries & UsePlannedLitterMutations & {
+  isRefreshing: boolean;
+};

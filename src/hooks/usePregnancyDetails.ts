@@ -1,17 +1,9 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '@/components/ui/use-toast';
-import { parseISO, addDays, differenceInDays } from 'date-fns';
-
-interface PregnancyDetails {
-  id: string;
-  maleName: string;
-  femaleName: string;
-  matingDate: Date;
-  expectedDueDate: Date;
-  daysLeft: number;
-}
+import { toast } from '@/hooks/use-toast';
+import { getPregnancyDetails } from '@/services/PregnancyService';
+import { PregnancyDetails } from '@/services/PregnancyService';
 
 export const usePregnancyDetails = (id: string | undefined) => {
   const navigate = useNavigate();
@@ -19,34 +11,21 @@ export const usePregnancyDetails = (id: string | undefined) => {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // Fetch pregnancy details from localStorage
-    const fetchPregnancyDetails = () => {
+    const fetchPregnancyDetails = async () => {
       setLoading(true);
-      const plannedLittersJSON = localStorage.getItem('plannedLitters');
-      if (plannedLittersJSON && id) {
-        const plannedLitters = JSON.parse(plannedLittersJSON);
-        const litter = plannedLitters.find((litter: any) => litter.id === id);
+      
+      if (!id) {
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        const details = await getPregnancyDetails(id);
         
-        if (litter && litter.matingDates && litter.matingDates.length > 0) {
-          // Use the most recent mating date
-          const sortedMatingDates = [...litter.matingDates].sort((a: string, b: string) => 
-            new Date(b).getTime() - new Date(a).getTime()
-          );
-          
-          const matingDate = parseISO(sortedMatingDates[0]);
-          const expectedDueDate = addDays(matingDate, 63); // 63 days is the average gestation period for dogs
-          const daysLeft = differenceInDays(expectedDueDate, new Date());
-          
-          setPregnancy({
-            id: litter.id,
-            maleName: litter.maleName,
-            femaleName: litter.femaleName,
-            matingDate,
-            expectedDueDate,
-            daysLeft: daysLeft > 0 ? daysLeft : 0
-          });
+        if (details) {
+          setPregnancy(details);
         } else {
-          // Handle case where litter is not found or has no mating dates
+          // Handle case where pregnancy is not found
           toast({
             title: "Pregnancy not found",
             description: "The pregnancy details could not be loaded.",
@@ -54,8 +33,17 @@ export const usePregnancyDetails = (id: string | undefined) => {
           });
           navigate('/pregnancy');
         }
+      } catch (error) {
+        console.error("Error fetching pregnancy details:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load pregnancy details.",
+          variant: "destructive"
+        });
+        navigate('/pregnancy');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     
     fetchPregnancyDetails();

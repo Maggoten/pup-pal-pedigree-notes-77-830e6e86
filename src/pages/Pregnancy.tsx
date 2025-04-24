@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Heart } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useDogs } from '@/context/DogsContext';
 import { getActivePregnancies } from '@/services/PregnancyService';
@@ -25,9 +25,14 @@ const Pregnancy: React.FC = () => {
       try {
         setIsLoading(true);
         const pregnancies = await getActivePregnancies();
+        console.log("Fetched pregnancies:", pregnancies);
         setActivePregnancies(pregnancies);
       } catch (error) {
         console.error("Error fetching pregnancies:", error);
+        toast({
+          title: "Error loading pregnancies",
+          description: "There was a problem loading active pregnancies."
+        });
       } finally {
         setIsLoading(false);
       }
@@ -65,11 +70,14 @@ const Pregnancy: React.FC = () => {
         <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
           <ActivePregnanciesList 
             pregnancies={activePregnancies} 
-            onAddPregnancy={handleAddPregnancyClick} 
+            onAddPregnancy={handleAddPregnancyClick}
+            isLoading={isLoading}
           />
         </div>
         <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
-          <TemperatureLogOverview onLogTemperature={handleLogTemperature} />
+          <TemperatureLogOverview 
+            onLogTemperature={handleLogTemperature} 
+          />
         </div>
       </div>
 

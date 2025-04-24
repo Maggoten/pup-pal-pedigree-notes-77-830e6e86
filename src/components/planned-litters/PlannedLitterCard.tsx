@@ -41,6 +41,11 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
     }
   };
 
+  // Format mating dates for display
+  const formattedMatingDates = litter.matingDates && litter.matingDates.length > 0 
+    ? litter.matingDates.map(dateStr => typeof dateStr === 'string' ? new Date(dateStr) : dateStr)
+    : [];
+
   return (
     <Card className="flex flex-col h-full">
       <CardHeader className="relative">
@@ -66,23 +71,23 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
       <CardContent className="flex-grow">
         <p className="text-sm">{litter.notes}</p>
         
-        {litter.matingDates && litter.matingDates.length > 0 && (
+        {formattedMatingDates.length > 0 && (
           <div className="mt-4">
             <h4 className="text-sm font-medium">Mating Dates:</h4>
             <ul className="mt-1 space-y-1">
-              {litter.matingDates.map((date, index) => (
+              {formattedMatingDates.map((date, index) => (
                 <li key={index} className="flex items-center justify-between py-1 text-sm">
                   {editingDateIndex === index ? (
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" size="sm">
-                          {new Date(date).toLocaleDateString()}
+                          {date.toLocaleDateString()}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <CalendarComponent
                           mode="single"
-                          selected={parseISO(date)}
+                          selected={date}
                           onSelect={handleEditMatingDate}
                           initialFocus
                           className="p-3 pointer-events-auto"
@@ -90,7 +95,7 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
                       </PopoverContent>
                     </Popover>
                   ) : (
-                    <span>{new Date(date).toLocaleDateString()}</span>
+                    <span>{date.toLocaleDateString()}</span>
                   )}
                   
                   <div className="flex space-x-1">

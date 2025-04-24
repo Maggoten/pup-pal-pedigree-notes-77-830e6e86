@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/select";
 import { getActivePregnancies } from '@/services/PregnancyService';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
+import { toast } from '@/hooks/use-toast';
 
-// Import our new component files
+// Import our components
 import PregnancyHeader from '@/components/pregnancy/PregnancyHeader';
 import PregnancySummaryCards from '@/components/pregnancy/PregnancySummaryCards';
 import PregnancyTabs from '@/components/pregnancy/PregnancyTabs';
@@ -31,9 +32,14 @@ const PregnancyDetails: React.FC = () => {
       try {
         setIsLoadingPregnancies(true);
         const pregnancies = await getActivePregnancies();
+        console.log("Loaded pregnancies for selector:", pregnancies);
         setActivePregnancies(pregnancies);
       } catch (error) {
         console.error("Error fetching pregnancies:", error);
+        toast({
+          title: "Error loading pregnancies",
+          description: "There was a problem loading the pregnancy list."
+        });
       } finally {
         setIsLoadingPregnancies(false);
       }
@@ -63,6 +69,7 @@ const PregnancyDetails: React.FC = () => {
             <Select 
               value={id} 
               onValueChange={handlePregnancyChange}
+              disabled={isLoadingPregnancies}
             >
               <SelectTrigger className="w-[200px] bg-greige-50 border-greige-300 text-greige-700 hover:bg-greige-100">
                 <SelectValue placeholder="Select pregnancy" />
