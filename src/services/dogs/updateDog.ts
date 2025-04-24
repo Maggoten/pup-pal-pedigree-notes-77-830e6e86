@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dogs';
 import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
 import { PostgrestResponse } from '@supabase/supabase-js';
-import { withTimeout, TIMEOUT } from '@/utils/timeoutUtils';
+import { withTimeout, TIMEOUT, isTimeoutError } from '@/utils/timeoutUtils';
 
 export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog | null> {
   if (!id) {
@@ -49,32 +49,44 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
     // Add explicit updated_at timestamp to force update detection
     cleanUpdates.updated_at = new Date().toISOString();
     
-    // Execute the update with timeout protection
-    const updateResponse = await withTimeout<PostgrestResponse<DbDog>>(
-      supabase
-        .from('dogs')
-        .update(cleanUpdates)
-        .eq('id', id)
-        .select('*'),
-      TIMEOUT
-    );
+    // Use a separated query builder for better control
+    const updateQuery = supabase
+      .from('dogs')
+      .update(cleanUpdates)
+      .eq('id', id)
+      .select('*');
+    
+    // Execute the update with timeout protection but with retry mechanism
+    try {
+      const updateResponse = await withTimeout<PostgrestResponse<DbDog>>(
+        updateQuery,
+        TIMEOUT
+      );
 
-    // Handle Supabase error
-    if (updateResponse.error) {
-      console.error('Supabase error updating dog:', updateResponse.error.message, updateResponse.error.details);
-      throw new Error(`Database error: ${updateResponse.error.message}`);
+      // Handle Supabase error
+      if (updateResponse.error) {
+        console.error('Supabase error updating dog:', updateResponse.error.message, updateResponse.error.details);
+        throw new Error(`Database error: ${updateResponse.error.message}`);
+      }
+
+      // Handle missing data in response
+      if (!updateResponse.data || updateResponse.data.length === 0) {
+        console.error('No dog data returned after update');
+        throw new Error('Update succeeded but no data was returned');
+      }
+
+      // Convert DB response to Dog object
+      const updatedDog = enrichDog(updateResponse.data[0]);
+      console.log('Successfully updated dog:', updatedDog);
+      return updatedDog;
+    } catch (error) {
+      // If it's a timeout error, provide a specific message
+      if (isTimeoutError(error)) {
+        console.error('Update dog operation timed out');
+        throw new Error('The update operation timed out. Please try again or make smaller changes at a time.');
+      }
+      throw error; // Re-throw if it's not a timeout error
     }
-
-    // Handle missing data in response
-    if (!updateResponse.data || updateResponse.data.length === 0) {
-      console.error('No dog data returned after update');
-      throw new Error('Update succeeded but no data was returned');
-    }
-
-    // Convert DB response to Dog object
-    const updatedDog = enrichDog(updateResponse.data[0]);
-    console.log('Successfully updated dog:', updatedDog);
-    return updatedDog;
   } catch (error) {
     // Enhanced error logging
     console.error('Failed to update dog:', error);

@@ -1,8 +1,10 @@
 
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dog } from '@/types/dogs';
 import { useToast } from '@/hooks/use-toast';
 import { updateDog } from '@/services/dogs';
+import { isTimeoutError } from '@/utils/timeoutUtils';
 
 export function useUpdateDog(userId: string | undefined) {
   const { toast } = useToast();
@@ -19,10 +21,14 @@ export function useUpdateDog(userId: string | undefined) {
         }
         return updatedDog;
       } catch (error) {
-        if (error instanceof Error && error.message.includes('timeout')) {
-          throw new Error('Update timed out. Please try again.');
-        }
         console.error('Error in updateDog service call:', error);
+        
+        // Provide a more user-friendly error message for timeouts
+        if (error instanceof Error) {
+          if (error.message.includes('timeout')) {
+            throw new Error('Update timed out. Please try again with fewer changes or check your connection.');
+          }
+        }
         throw error;
       }
     },
@@ -35,9 +41,6 @@ export function useUpdateDog(userId: string | undefined) {
           dog.id === updatedDog.id ? updatedDog : dog
         );
       });
-      
-      // Remove the redundant refetch
-      // queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
       
       toast({
         title: "Success",
