@@ -16,6 +16,9 @@ export const migratePregnancyData = async () => {
     }
     
     const userId = sessionData.session.user.id;
+    const accessToken = sessionData.session.access_token;
+    const supabaseUrl = "https://yqcgqriecxtppuvcguyj.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2dxcmllY3h0cHB1dmNndXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTI4NjksImV4cCI6MjA2MDI2ODg2OX0.PD0W-rLpQBHUGm9--nv4-3PVYQFMAsRujmExBDuP5oA";
     
     // Migrate planned litters with mating dates to pregnancies
     const plannedLittersJSON = localStorage.getItem('plannedLitters');
@@ -26,7 +29,8 @@ export const migratePregnancyData = async () => {
       );
 
       for (const litter of activeLitters) {
-        const { error } = await supabase.from('pregnancies').insert({
+        // Insert pregnancy using REST API
+        const pregnancyData = {
           user_id: userId,
           female_dog_id: litter.femaleId,
           male_dog_id: litter.maleId,
@@ -34,23 +38,35 @@ export const migratePregnancyData = async () => {
           mating_date: litter.matingDates[0],
           expected_due_date: addDays(new Date(litter.matingDates[0]), 63).toISOString(),
           status: 'active'
-        });
-
-        if (error) {
-          console.error('Error migrating pregnancy:', error);
+        };
+        
+        const pregnancyResponse = await fetch(
+          `${supabaseUrl}/rest/v1/pregnancies`, 
+          {
+            method: 'POST',
+            headers: {
+              'apikey': supabaseKey,
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`,
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify(pregnancyData)
+          }
+        );
+        
+        if (!pregnancyResponse.ok) {
+          console.error('Error creating pregnancy:', await pregnancyResponse.text());
           continue;
         }
-
-        // Get the newly created pregnancy ID
-        const { data: newPregnancy } = await supabase
-          .from('pregnancies')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('female_dog_id', litter.femaleId)
-          .eq('mating_date', litter.matingDates[0])
-          .single();
-          
-        if (!newPregnancy) continue;
+        
+        const pregnancyResult = await pregnancyResponse.json();
+        const newPregnancy = pregnancyResult[0];
+        
+        if (!newPregnancy) {
+          console.error('No pregnancy created');
+          continue;
+        }
+        
         const newPregnancyId = newPregnancy.id;
 
         // Migrate temperature logs
@@ -58,13 +74,26 @@ export const migratePregnancyData = async () => {
         if (tempLogsJSON) {
           const tempLogs = JSON.parse(tempLogsJSON);
           for (const temp of tempLogs) {
-            await supabase.from('temperature_logs').insert({
+            const tempData = {
               pregnancy_id: newPregnancyId,
               user_id: userId,
               temperature: temp.temperature,
               date: temp.date,
               notes: temp.notes || null
-            });
+            };
+            
+            await fetch(
+              `${supabaseUrl}/rest/v1/temperature_logs`, 
+              {
+                method: 'POST',
+                headers: {
+                  'apikey': supabaseKey,
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify(tempData)
+              }
+            );
           }
         }
 
@@ -73,13 +102,26 @@ export const migratePregnancyData = async () => {
         if (symptomLogsJSON) {
           const symptomLogs = JSON.parse(symptomLogsJSON);
           for (const symptom of symptomLogs) {
-            await supabase.from('symptom_logs').insert({
+            const symptomData = {
               pregnancy_id: newPregnancyId,
               user_id: userId,
               title: symptom.title,
               description: symptom.description,
               date: symptom.date
-            });
+            };
+            
+            await fetch(
+              `${supabaseUrl}/rest/v1/symptom_logs`, 
+              {
+                method: 'POST',
+                headers: {
+                  'apikey': supabaseKey,
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify(symptomData)
+              }
+            );
           }
         }
       }

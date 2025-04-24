@@ -14,27 +14,28 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
     
     const userId = sessionData.session.user.id;
     
-    // Using raw query to avoid type issues
-    const { data: pregnancies, error } = await supabase
-      .from('pregnancies')
-      .select(`
-        id,
-        mating_date,
-        female_dog_id,
-        male_dog_id,
-        external_male_name,
-        dogs!female_dog_id (name),
-        male:dogs!male_dog_id (name)
-      `)
-      .eq('status', 'active')
-      .eq('user_id', userId);
-
-    if (error) {
-      console.error('Error fetching pregnancies:', error);
-      return [];
+    // Use fetch API to bypass TypeScript restrictions
+    const supabaseUrl = "https://yqcgqriecxtppuvcguyj.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2dxcmllY3h0cHB1dmNndXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTI4NjksImV4cCI6MjA2MDI2ODg2OX0.PD0W-rLpQBHUGm9--nv4-3PVYQFMAsRujmExBDuP5oA";
+    
+    const response = await fetch(
+      `${supabaseUrl}/rest/v1/pregnancies?status=eq.active&user_id=eq.${userId}&select=id,mating_date,female_dog_id,male_dog_id,external_male_name,dogs:female_dog_id(name),male:male_dog_id(name)`,
+      {
+        headers: {
+          'apikey': supabaseKey,
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionData.session.access_token}`
+        }
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error('Failed to load pregnancies data');
     }
+    
+    const data = await response.json();
 
-    return pregnancies.map((pregnancy: any) => {
+    return data.map((pregnancy: any) => {
       const matingDate = parseISO(pregnancy.mating_date);
       const expectedDueDate = addDays(matingDate, 63);
       const daysLeft = differenceInDays(expectedDueDate, new Date());
@@ -42,7 +43,7 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       return {
         id: pregnancy.id,
         maleName: pregnancy.male?.name || pregnancy.external_male_name,
-        femaleName: pregnancy.dogs.name,
+        femaleName: pregnancy.dogs?.name,
         matingDate,
         expectedDueDate,
         daysLeft: daysLeft > 0 ? daysLeft : 0

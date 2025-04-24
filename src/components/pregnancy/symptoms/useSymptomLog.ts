@@ -3,45 +3,41 @@ import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { SymptomRecord } from './types';
 import { supabase } from '@/integrations/supabase/client';
-import { Session } from '@supabase/supabase-js';
 
 export const useSymptomLog = (pregnancyId: string, femaleName: string) => {
   const [symptoms, setSymptoms] = useState<SymptomRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState<Session | null>(null);
-
-  useEffect(() => {
-    // Get current session
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-    };
-    
-    getSession();
-  }, []);
 
   useEffect(() => {
     const loadSymptoms = async () => {
       setLoading(true);
       
       try {
-        // Use the raw query method to avoid type errors
-        const { data, error } = await supabase
-          .from('symptom_logs')
-          .select('*')
-          .eq('pregnancy_id', pregnancyId)
-          .order('date', { ascending: false });
-
-        if (error) {
-          console.error('Error loading symptoms:', error);
-          toast({
-            title: "Error loading observations",
-            description: "There was a problem loading the observation records.",
-            variant: "destructive"
-          });
-          setLoading(false);
-          return;
+        // Use fetch API to bypass TypeScript restrictions
+        const supabaseUrl = "https://yqcgqriecxtppuvcguyj.supabase.co";
+        const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2dxcmllY3h0cHB1dmNndXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTI4NjksImV4cCI6MjA2MDI2ODg2OX0.PD0W-rLpQBHUGm9--nv4-3PVYQFMAsRujmExBDuP5oA";
+        
+        // Get auth session for authentication
+        const { data: sessionData } = await supabase.auth.getSession();
+        const authHeader = sessionData.session ? 
+          { Authorization: `Bearer ${sessionData.session.access_token}` } : {};
+          
+        const response = await fetch(
+          `${supabaseUrl}/rest/v1/symptom_logs?pregnancy_id=eq.${pregnancyId}&order=date.desc`, 
+          {
+            headers: {
+              'apikey': supabaseKey,
+              'Content-Type': 'application/json',
+              ...authHeader
+            }
+          }
+        );
+        
+        if (!response.ok) {
+          throw new Error('Failed to load symptom data');
         }
+        
+        const data = await response.json();
 
         // Process the data manually
         const processedSymptoms = data.map((symptom: any) => ({
@@ -70,44 +66,59 @@ export const useSymptomLog = (pregnancyId: string, femaleName: string) => {
   }, [pregnancyId]);
 
   const addSymptom = async (record: Omit<SymptomRecord, 'id'>) => {
-    if (!session?.user.id) {
-      toast({
-        title: "Authentication required",
-        description: "You need to be logged in to add observations.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     try {
-      // Use the raw insert method to avoid type errors
-      const { data, error } = await supabase
-        .from('symptom_logs')
-        .insert({
-          pregnancy_id: pregnancyId,
-          user_id: session.user.id,
-          title: record.title,
-          description: record.description,
-          date: record.date.toISOString()
-        })
-        .select('*')
-        .single();
-
-      if (error) {
-        console.error('Error adding symptom:', error);
+      // Get auth session for authentication
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData.session) {
         toast({
-          title: "Error saving observation",
-          description: "The observation could not be saved.",
+          title: "Authentication required",
+          description: "You need to be logged in to add observations.",
           variant: "destructive"
         });
         return;
       }
+      
+      const userId = sessionData.session.user.id;
+      const supabaseUrl = "https://yqcgqriecxtppuvcguyj.supabase.co";
+      const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2dxcmllY3h0cHB1dmNndXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTI4NjksImV4cCI6MjA2MDI2ODg2OX0.PD0W-rLpQBHUGm9--nv4-3PVYQFMAsRujmExBDuP5oA";
+      
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/symptom_logs`, 
+        {
+          method: 'POST',
+          headers: {
+            'apikey': supabaseKey,
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({
+            pregnancy_id: pregnancyId,
+            user_id: userId,
+            title: record.title,
+            description: record.description,
+            date: record.date.toISOString()
+          })
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to save symptom data');
+      }
+      
+      const data = await response.json();
+      const newRecordData = data[0]; // Get the first returned item
+      
+      if (!newRecordData) {
+        throw new Error('No data returned after saving');
+      }
 
       const newRecord: SymptomRecord = {
-        id: data.id,
-        date: new Date(data.date),
-        title: data.title,
-        description: data.description
+        id: newRecordData.id,
+        date: new Date(newRecordData.date),
+        title: newRecordData.title,
+        description: newRecordData.description
       };
 
       setSymptoms(prev => [newRecord, ...prev].sort((a, b) => 
@@ -130,20 +141,35 @@ export const useSymptomLog = (pregnancyId: string, femaleName: string) => {
 
   const deleteSymptom = async (id: string) => {
     try {
-      // Use the raw delete method to avoid type errors
-      const { error } = await supabase
-        .from('symptom_logs')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting symptom:', error);
+      // Get auth session for authentication  
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData.session) {
         toast({
-          title: "Error deleting record",
-          description: "The observation could not be deleted.",
+          title: "Authentication required",
+          description: "You need to be logged in to delete observations.",
           variant: "destructive"
         });
         return;
+      }
+      
+      const supabaseUrl = "https://yqcgqriecxtppuvcguyj.supabase.co";
+      const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2dxcmllY3h0cHB1dmNndXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTI4NjksImV4cCI6MjA2MDI2ODg2OX0.PD0W-rLpQBHUGm9--nv4-3PVYQFMAsRujmExBDuP5oA";
+      
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/symptom_logs?id=eq.${id}`, 
+        {
+          method: 'DELETE',
+          headers: {
+            'apikey': supabaseKey,
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`
+          }
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete symptom data');
       }
 
       setSymptoms(prev => prev.filter(symptom => symptom.id !== id));
