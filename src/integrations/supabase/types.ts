@@ -72,6 +72,101 @@ export type Database = {
         }
         Relationships: []
       }
+      pregnancies: {
+        Row: {
+          created_at: string
+          expected_due_date: string
+          external_male_name: string | null
+          female_dog_id: string | null
+          id: string
+          male_dog_id: string | null
+          mating_date: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expected_due_date: string
+          external_male_name?: string | null
+          female_dog_id?: string | null
+          id?: string
+          male_dog_id?: string | null
+          mating_date: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expected_due_date?: string
+          external_male_name?: string | null
+          female_dog_id?: string | null
+          id?: string
+          male_dog_id?: string | null
+          mating_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pregnancies_female_dog_id_fkey"
+            columns: ["female_dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pregnancies_male_dog_id_fkey"
+            columns: ["male_dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pregnancy_checklists: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: string
+          item_id: string
+          pregnancy_id: string
+          updated_at: string
+          user_id: string
+          week_number: number
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          item_id: string
+          pregnancy_id: string
+          updated_at?: string
+          user_id: string
+          week_number: number
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          item_id?: string
+          pregnancy_id?: string
+          updated_at?: string
+          user_id?: string
+          week_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pregnancy_checklists_pregnancy_id_fkey"
+            columns: ["pregnancy_id"]
+            isOneToOne: false
+            referencedRelation: "pregnancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -108,6 +203,66 @@ export type Database = {
           phone?: string | null
           subscription_status?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      symptom_logs: {
+        Row: {
+          created_at: string
+          date: string
+          description: string
+          id: string
+          pregnancy_id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          description: string
+          id?: string
+          pregnancy_id: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          pregnancy_id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      temperature_logs: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          notes: string | null
+          pregnancy_id: string
+          temperature: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          notes?: string | null
+          pregnancy_id: string
+          temperature: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          pregnancy_id?: string
+          temperature?: number
+          user_id?: string
         }
         Relationships: []
       }

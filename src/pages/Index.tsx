@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getActivePregnancies } from '@/services/PregnancyService';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import DashboardLayout from '@/components/home/DashboardLayout';
+import { migratePregnancyData } from '@/utils/pregnancyMigration';
 
 const Index = () => {
   const { user } = useAuth();
@@ -12,20 +13,29 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Get active pregnancies from the service
-    const fetchPregnancies = async () => {
+    const initialize = async () => {
       try {
         setIsLoading(true);
+        
+        // Run data migration if needed
+        const migrationResult = await migratePregnancyData();
+        if (migrationResult.success) {
+          toast({
+            title: "Data Migration Complete",
+            description: "Your pregnancy data has been successfully migrated to the cloud."
+          });
+        }
+        
         const pregnancies = await getActivePregnancies();
         setActivePregnancies(pregnancies);
       } catch (error) {
-        console.error("Error fetching pregnancies:", error);
+        console.error("Error initializing:", error);
       } finally {
         setIsLoading(false);
       }
     };
     
-    fetchPregnancies();
+    initialize();
   }, []);
   
   const handleAddDogClick = () => {
@@ -45,3 +55,4 @@ const Index = () => {
 };
 
 export default Index;
+
