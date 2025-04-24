@@ -12,7 +12,7 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       return [];
     }
 
-    // Using explicit column references in the relationship to avoid ambiguity
+    // Using the proper syntax to disambiguate relationships with dogs table
     const { data: pregnancies, error } = await supabase
       .from('pregnancies')
       .select(`
@@ -21,8 +21,10 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
         expected_due_date,
         external_male_name,
         user_id,
-        female_dog:female_dog_id(id, name),
-        male_dog:male_dog_id(id, name)
+        female_dog_id,
+        male_dog_id,
+        dogs!female_dog_id(id, name),
+        dogs!male_dog_id(id, name)
       `)
       .eq('status', 'active')
       .eq('user_id', sessionData.session.user.id);
@@ -36,14 +38,14 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       const expectedDueDate = new Date(pregnancy.expected_due_date);
       const daysLeft = differenceInDays(expectedDueDate, new Date());
       
-      // Access dog names from the explicitly named relationships
-      const femaleDog = pregnancy.female_dog;
-      const maleDog = pregnancy.male_dog;
+      // Access dog names from the correctly hinted relationships
+      const femaleDog = pregnancy["dogs!female_dog_id"];
+      const maleDog = pregnancy["dogs!male_dog_id"];
 
       return {
         id: pregnancy.id,
-        maleName: maleDog?.name || pregnancy.external_male_name,
-        femaleName: femaleDog?.name,
+        maleName: maleDog?.[0]?.name || pregnancy.external_male_name,
+        femaleName: femaleDog?.[0]?.name,
         matingDate,
         expectedDueDate,
         daysLeft: daysLeft > 0 ? daysLeft : 0
