@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { StorageError } from '@supabase/storage-js';
@@ -45,6 +46,22 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
       return;
     }
 
+    // Check if bucket exists
+    const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+    if (bucketError) {
+      console.error('Error listing buckets:', bucketError);
+      throw bucketError;
+    }
+    
+    const bucketExists = buckets.some(bucket => bucket.id === BUCKET_NAME);
+    if (!bucketExists) {
+      console.error(`Bucket "${BUCKET_NAME}" does not exist in available buckets:`, 
+        buckets.map(b => b.id));
+      throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist`);
+    }
+    
+    console.log(`Found bucket "${BUCKET_NAME}", proceeding with deletion`);
+
     const urlParts = oldImageUrl.split('/');
     const bucketIndex = urlParts.findIndex(part => part === BUCKET_NAME);
     
@@ -72,7 +89,8 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
       console.error('Delete error:', {
         error: deleteError,
         message: errorMessage,
-        details: deleteError instanceof StorageError ? deleteError.message : 'Unknown error'
+        details: deleteError instanceof StorageError ? deleteError.message : 'Unknown error',
+        status: deleteError instanceof StorageError ? deleteError.statusCode : 'unknown'
       });
 
       toast({
@@ -95,7 +113,8 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
 
     console.error('Cleanup error:', {
       error,
-      message: errorMessage
+      message: errorMessage,
+      status: error instanceof Error && 'statusCode' in error ? (error as any).statusCode : 'unknown'
     });
 
     toast({

@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -39,6 +40,26 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     return true;
   };
 
+  const checkBucketExists = async (): Promise<boolean> => {
+    try {
+      const { data: buckets, error } = await supabase.storage.listBuckets();
+      
+      if (error) {
+        console.error('Error checking buckets:', error);
+        return false;
+      }
+      
+      const bucketExists = buckets.some(bucket => bucket.id === BUCKET_NAME);
+      console.log(`Bucket "${BUCKET_NAME}" ${bucketExists ? 'exists' : 'does not exist'} in available buckets:`, 
+        buckets.map(b => b.id));
+      
+      return bucketExists;
+    } catch (err) {
+      console.error('Error in bucket verification:', err);
+      return false;
+    }
+  };
+
   const uploadImage = async (file: File) => {
     if (!user_id) {
       console.error('Upload failed: No user ID provided');
@@ -62,6 +83,12 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       }
       console.log('Active session found for user:', sessionData.session.user.id);
       
+      // Verify bucket exists before attempting upload
+      const bucketExists = await checkBucketExists();
+      if (!bucketExists) {
+        throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
+      }
+      
       const fileExt = file.name.split('.').pop();
       const fileName = `${user_id}/${Date.now()}.${fileExt}`;
       
@@ -74,27 +101,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         });
       }, UPLOAD_TIMEOUT);
 
-      console.log('Attempting to upload file:', fileName);
-      
-      const { data: buckets, error: bucketError } = await supabase
-        .storage
-        .listBuckets();
-      
-      if (bucketError) {
-        console.error('Error listing buckets:', bucketError);
-        throw bucketError;
-      }
-      
-      console.log('Available buckets:', buckets.map(b => `${b.name} (id: ${b.id})`));
-      
-      const bucketExists = buckets.some(bucket => bucket.id === BUCKET_NAME);
-      if (!bucketExists) {
-        console.error(`Bucket "${BUCKET_NAME}" does not exist in available buckets:`, 
-          buckets.map(b => `${b.name} (id: ${b.id})`));
-        throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist`);
-      }
-      
-      console.log(`Found bucket "${BUCKET_NAME}", proceeding with upload`);
+      console.log(`Attempting to upload file to bucket "${BUCKET_NAME}": ${fileName}`);
       
       const { data, error } = await supabase.storage
         .from(BUCKET_NAME)
@@ -113,7 +120,8 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         console.error('Upload error:', {
           error,
           message: errorMessage,
-          details: error instanceof StorageError ? error.message : 'Unknown error'
+          details: error instanceof StorageError ? error.message : 'Unknown error',
+          status: error instanceof StorageError ? error.statusCode : 'unknown'
         });
 
         toast({
@@ -173,6 +181,12 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         throw new Error('No active session. User authentication is required.');
       }
       
+      // Verify bucket exists before attempting deletion
+      const bucketExists = await checkBucketExists();
+      if (!bucketExists) {
+        throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
+      }
+      
       const urlParts = imageUrl.split('/');
       const storageIndex = urlParts.findIndex(part => part === BUCKET_NAME);
       
@@ -192,12 +206,15 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       if (error) {
         console.error('Error removing image:', error);
         
-        const errorMessage = error instanceof Error ? error.message : "Failed to remove image";
+        const errorMessage = error instanceof StorageError 
+          ? error.message 
+          : "Failed to remove image";
         
-        console.error('Error details:', error instanceof Error ? {
-          message: error.message,
-          name: error.name
-        } : { error });
+        console.error('Error details:', {
+          error,
+          message: errorMessage,
+          status: error instanceof StorageError ? error.statusCode : 'unknown'
+        });
         
         throw error;
       }
