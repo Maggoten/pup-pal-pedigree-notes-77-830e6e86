@@ -3,6 +3,7 @@ import { PlannedLitter } from '@/types/breeding';
 import { UpcomingHeat } from '@/types/reminders';
 import { RecentMating } from '../types';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
+import { Dog } from '@/context/DogsContext';
 
 export interface UsePlannedLitterQueries {
   plannedLitters: PlannedLitter[];

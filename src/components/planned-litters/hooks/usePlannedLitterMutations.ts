@@ -3,6 +3,8 @@ import { toast } from '@/hooks/use-toast';
 import { plannedLittersService } from '@/services/PlannedLitterService';
 import { format } from 'date-fns';
 import { UsePlannedLitterMutations } from './types';
+import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
+import { supabase } from '@/integrations/supabase/client';
 
 export const usePlannedLitterMutations = (
   refreshLitters: () => Promise<void>
