@@ -22,7 +22,7 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
 
     console.log("Fetching active pregnancies for user:", sessionData.session.user.id);
 
-    // First get all active pregnancies with more detailed join queries
+    // Use proper table aliasing to avoid ambiguity
     const { data: pregnancies, error } = await supabase
       .from('pregnancies')
       .select(`
@@ -34,8 +34,8 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
         female_dog_id,
         male_dog_id,
         status,
-        dogs!female_dog_id(id, name),
-        dogs!male_dog_id(id, name)
+        femaleDog:dogs!female_dog_id(id, name),
+        maleDog:dogs!male_dog_id(id, name)
       `)
       .eq('status', 'active')
       .eq('user_id', sessionData.session.user.id);
@@ -57,31 +57,27 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       const expectedDueDate = new Date(pregnancy.expected_due_date);
       const daysLeft = differenceInDays(expectedDueDate, new Date());
       
-      // Get the dog data from the join results
-      const femaleDog = pregnancy.dogs || [];
-      let femaleName = "Unknown Female";
+      // Get the dog data from the proper aliased joins
+      const femaleDog = pregnancy.femaleDog || [];
+      const maleDog = pregnancy.maleDog || [];
       
-      // Female dog should be the one with the correct female_dog_id
-      if (pregnancy.female_dog_id && femaleDog && femaleDog.length > 0) {
-        const female = femaleDog.find(dog => dog?.id === pregnancy.female_dog_id);
-        if (female) {
-          femaleName = female.name;
-        }
+      let femaleName = "Unknown Female";
+      if (femaleDog && femaleDog.length > 0) {
+        femaleName = femaleDog[0]?.name || "Unknown Female";
       }
       
       // Male dog handling (could be external)
       let maleName = pregnancy.external_male_name || "Unknown Male";
-      if (pregnancy.male_dog_id && femaleDog && femaleDog.length > 0) {
-        const male = femaleDog.find(dog => dog?.id === pregnancy.male_dog_id);
-        if (male) {
-          maleName = male.name;
-        }
+      if (pregnancy.male_dog_id && maleDog && maleDog.length > 0) {
+        maleName = maleDog[0]?.name || "Unknown Male";
       }
 
       console.log(`Processing pregnancy ${pregnancy.id}:`);
       console.log(`- Female: ${femaleName} (ID: ${pregnancy.female_dog_id})`);
       console.log(`- Male: ${maleName} (ID: ${pregnancy.male_dog_id || 'external'})`);
       console.log(`- Mating date: ${matingDate}`);
+      console.log(`- Expected due date: ${expectedDueDate}`);
+      console.log(`- Days left: ${daysLeft}`);
 
       return {
         id: pregnancy.id,
