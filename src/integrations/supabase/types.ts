@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      calendar_events: {
+        Row: {
+          created_at: string | null
+          date: string
+          dog_id: string | null
+          dog_name: string | null
+          id: string
+          notes: string | null
+          time: string | null
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          dog_id?: string | null
+          dog_name?: string | null
+          id?: string
+          notes?: string | null
+          time?: string | null
+          title: string
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          dog_id?: string | null
+          dog_name?: string | null
+          id?: string
+          notes?: string | null
+          time?: string | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       dogs: {
         Row: {
           birthdate: string | null
@@ -314,6 +356,51 @@ export type Database = {
           phone?: string | null
           subscription_status?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      reminders: {
+        Row: {
+          created_at: string | null
+          description: string
+          due_date: string
+          id: string
+          is_completed: boolean | null
+          is_deleted: boolean | null
+          priority: string
+          related_id: string | null
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          due_date: string
+          id?: string
+          is_completed?: boolean | null
+          is_deleted?: boolean | null
+          priority: string
+          related_id?: string | null
+          title: string
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          due_date?: string
+          id?: string
+          is_completed?: boolean | null
+          is_deleted?: boolean | null
+          priority?: string
+          related_id?: string | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }

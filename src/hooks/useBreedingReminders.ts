@@ -2,86 +2,76 @@
 import { useDogs } from '@/context/DogsContext';
 import { toast } from '@/components/ui/use-toast';
 import { useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { createCalendarClockIcon } from '@/utils/iconUtils';
 import { Reminder, CustomReminderInput } from '@/types/reminders';
 import { 
-  loadCustomReminders, 
-  saveCustomReminders,
-  loadCompletedReminders,
-  saveCompletedReminders,
-  loadDeletedReminders,
-  saveDeletedReminders
-} from '@/utils/reminderStorage';
-import {
   generateDogReminders,
   generateLitterReminders,
   generateGeneralReminders
 } from '@/services/ReminderService';
+import { 
+  fetchReminders, 
+  addReminder, 
+  updateReminder, 
+  deleteReminder as deleteReminderFromSupabase,
+  migrateRemindersFromLocalStorage 
+} from '@/services/RemindersService';
+import { useAuth } from '@/context/AuthContext';
 
 export type { Reminder, CustomReminderInput };
 
 export const useBreedingReminders = () => {
   const { dogs } = useDogs();
-  const [customReminders, setCustomReminders] = useState<Reminder[]>([]);
-  const [completedReminders, setCompletedReminders] = useState<Set<string>>(new Set());
-  const [deletedReminderIds, setDeletedReminderIds] = useState<Set<string>>(new Set());
+  const { user } = useAuth();
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasError, setHasError] = useState<boolean>(false);
+  const [hasMigrated, setHasMigrated] = useState<boolean>(false);
   
-  // Load data from localStorage on mount
+  // Fetch reminders when component mounts or when dogs/user changes
   useEffect(() => {
-    setCustomReminders(loadCustomReminders());
-    setCompletedReminders(loadCompletedReminders());
-    setDeletedReminderIds(loadDeletedReminders());
-  }, []);
-  
-  // Save custom reminders to localStorage when they change
-  useEffect(() => {
-    if (customReminders.length > 0) {
-      saveCustomReminders(customReminders);
-    }
-  }, [customReminders]);
-  
-  // Save completed reminders to localStorage when they change
-  useEffect(() => {
-    if (completedReminders.size > 0) {
-      saveCompletedReminders(completedReminders);
-    }
-  }, [completedReminders]);
-  
-  // Save deleted reminders to localStorage when they change
-  useEffect(() => {
-    if (deletedReminderIds.size > 0) {
-      saveDeletedReminders(deletedReminderIds);
-    }
-  }, [deletedReminderIds]);
-  
-  // Generate reminders based on all data sources
-  const generateReminders = (): Reminder[] => {
-    // Get reminders from different sources
-    const dogReminders = generateDogReminders(dogs);
-    const litterReminders = generateLitterReminders();
-    const generalReminders = generateGeneralReminders(dogs);
+    const loadReminders = async () => {
+      if (!user) {
+        // Don't fetch if not authenticated
+        setIsLoading(false);
+        return;
+      }
+      
+      setIsLoading(true);
+      setHasError(false);
+      
+      try {
+        // Check if migration is needed (first time only)
+        if (!hasMigrated) {
+          await migrateRemindersFromLocalStorage();
+          setHasMigrated(true);
+        }
+        
+        // Fetch reminders from Supabase
+        const supabaseReminders = await fetchReminders();
+        
+        // Generate system reminders
+        const dogReminders = generateDogReminders(dogs);
+        const litterReminders = generateLitterReminders();
+        const generalReminders = generateGeneralReminders(dogs);
+        
+        // Combine all reminders
+        const allReminders = [...supabaseReminders, ...dogReminders, ...litterReminders, ...generalReminders];
+        
+        setReminders(allReminders);
+      } catch (error) {
+        console.error("Error loading reminders:", error);
+        setHasError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    // Combine all system-generated reminders
-    const systemReminders = [...dogReminders, ...litterReminders, ...generalReminders];
-    
-    // Filter out deleted reminders
-    const filteredReminders = systemReminders.filter(reminder => !deletedReminderIds.has(reminder.id));
-    
-    // Add custom reminders
-    const allReminders = [...filteredReminders, ...customReminders];
-    
-    // Add completed status to reminders
-    return allReminders.map(reminder => ({
-      ...reminder,
-      isCompleted: completedReminders.has(reminder.id)
-    }));
-  };
-
-  const allReminders = generateReminders();
+    loadReminders();
+  }, [dogs, user, hasMigrated]);
   
   // Sort reminders by priority (high first) and then by completion status
-  const sortedReminders = [...allReminders].sort((a, b) => {
+  const sortedReminders = [...reminders].sort((a, b) => {
     // First sort by completion status
     if (a.isCompleted && !b.isCompleted) return 1;
     if (!a.isCompleted && b.isCompleted) return -1;
@@ -91,28 +81,53 @@ export const useBreedingReminders = () => {
     return priorityOrder[a.priority] - priorityOrder[b.priority];
   });
   
-  const handleMarkComplete = (id: string) => {
-    setCompletedReminders(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
+  const handleMarkComplete = async (id: string) => {
+    // Find the reminder in our list
+    const reminder = reminders.find(r => r.id === id);
+    if (!reminder) return;
+    
+    const newStatus = !reminder.isCompleted;
+    
+    // Optimistically update the UI
+    setReminders(prev => prev.map(r => 
+      r.id === id ? {...r, isCompleted: newStatus} : r
+    ));
+    
+    // Update in Supabase if it's a custom reminder (uuid format)
+    if (id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
+      const success = await updateReminder(id, newStatus);
+      
+      if (!success) {
+        // Revert the change if the API call fails
+        setReminders(prev => prev.map(r => 
+          r.id === id ? {...r, isCompleted: !newStatus} : r
+        ));
+        return;
       }
-      return newSet;
-    });
+    }
     
     toast({
-      title: completedReminders.has(id) ? "Reminder Reopened" : "Reminder Completed",
-      description: completedReminders.has(id) 
-        ? "This task has been marked as not completed."
-        : "This task has been marked as completed."
+      title: newStatus ? "Reminder Completed" : "Reminder Reopened",
+      description: newStatus 
+        ? "This task has been marked as completed."
+        : "This task has been marked as not completed."
     });
   };
   
-  const addCustomReminder = (input: CustomReminderInput) => {
+  const addCustomReminder = async (input: CustomReminderInput) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to add reminders.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Create a temporary reminder for optimistic UI update
+    const tempId = `temp-${Date.now()}`;
     const newReminder: Reminder = {
-      id: `custom-${uuidv4()}`,
+      id: tempId,
       title: input.title,
       description: input.description,
       dueDate: input.dueDate,
@@ -124,29 +139,47 @@ export const useBreedingReminders = () => {
       )
     };
     
-    setCustomReminders(prev => [...prev, newReminder]);
+    // Optimistically update UI
+    setReminders(prev => [...prev, newReminder]);
+    
+    // Add to Supabase
+    const success = await addReminder(input);
+    
+    if (!success) {
+      // Revert the change if the API call fails
+      setReminders(prev => prev.filter(r => r.id !== tempId));
+    } else {
+      // Refresh the data from the server to get the real ID
+      const updatedReminders = await fetchReminders();
+      
+      const dogReminders = generateDogReminders(dogs);
+      const litterReminders = generateLitterReminders();
+      const generalReminders = generateGeneralReminders(dogs);
+      
+      // Combine all reminders
+      setReminders([...updatedReminders, ...dogReminders, ...litterReminders, ...generalReminders]);
+    }
   };
   
-  const deleteReminder = (id: string) => {
-    // If it's a custom reminder, remove it from the custom reminders array
-    if (id.startsWith('custom-')) {
-      setCustomReminders(prev => prev.filter(r => r.id !== id));
-    } else {
-      // For system-generated reminders, add to the deleted reminders set
-      setDeletedReminderIds(prev => {
-        const newSet = new Set(prev);
-        newSet.add(id);
-        return newSet;
-      });
-    }
+  const deleteReminderHandler = async (id: string) => {
+    // Optimistically update UI
+    setReminders(prev => prev.filter(r => r.id !== id));
     
-    // Also remove from completed if needed
-    if (completedReminders.has(id)) {
-      setCompletedReminders(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(id);
-        return newSet;
-      });
+    // If it's a UUID format (custom reminder in DB), call the delete API
+    if (id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
+      const success = await deleteReminderFromSupabase(id);
+      
+      if (!success) {
+        // Fetch fresh data on error to restore state
+        const updatedReminders = await fetchReminders();
+        
+        const dogReminders = generateDogReminders(dogs);
+        const litterReminders = generateLitterReminders();
+        const generalReminders = generateGeneralReminders(dogs);
+        
+        setReminders([...updatedReminders, ...dogReminders, ...litterReminders, ...generalReminders]);
+        return;
+      }
     }
     
     toast({
@@ -157,8 +190,10 @@ export const useBreedingReminders = () => {
   
   return {
     reminders: sortedReminders,
+    isLoading,
+    hasError,
     handleMarkComplete,
     addCustomReminder,
-    deleteReminder
+    deleteReminder: deleteReminderHandler
   };
 };

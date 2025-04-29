@@ -9,6 +9,7 @@ import { useDogs } from '@/context/DogsContext';
 import { getActivePregnancies } from '@/services/PregnancyService';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useAuth } from '@/context/AuthContext';
 
 import ActivePregnanciesList from '@/components/pregnancy/ActivePregnanciesList';
 import TemperatureLogOverview from '@/components/pregnancy/TemperatureLogOverview';
@@ -17,12 +18,19 @@ import WeeklyDevelopmentGuide from '@/components/pregnancy/WeeklyDevelopmentGuid
 const Pregnancy: React.FC = () => {
   const navigate = useNavigate();
   const { dogs } = useDogs();
+  const { user } = useAuth();
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const fetchPregnancies = async () => {
+      if (!user) {
+        // Don't fetch if not authenticated
+        setIsLoading(false);
+        return;
+      }
+      
       try {
         setIsLoading(true);
         setHasError(false);
@@ -60,7 +68,7 @@ const Pregnancy: React.FC = () => {
     };
     
     fetchPregnancies();
-  }, [dogs]);
+  }, [dogs, user]);
 
   const handleAddPregnancyClick = () => {
     navigate('/planned-litters');

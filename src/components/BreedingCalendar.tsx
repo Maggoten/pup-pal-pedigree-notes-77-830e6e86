@@ -4,6 +4,8 @@ import { Card } from '@/components/ui/card';
 import { useDogs } from '@/context/DogsContext';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import CalendarContent from './calendar/CalendarContent';
+import { Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const BreedingCalendar: React.FC = () => {
   const { dogs } = useDogs();
@@ -12,20 +14,37 @@ const BreedingCalendar: React.FC = () => {
     getEventColor, 
     addEvent, 
     deleteEvent,
-    editEvent
+    editEvent,
+    isLoading,
+    hasError
   } = useCalendarEvents(dogs);
   
   return (
     <Card className="border-greige-300 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full bg-greige-50">
-      <CalendarContent
-        dogs={dogs}
-        getEventsForDate={getEventsForDate}
-        getEventColor={getEventColor}
-        onDeleteEvent={deleteEvent}
-        onAddEvent={addEvent}
-        onEditEvent={editEvent}
-        compact={false} // Use full size calendar now
-      />
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center h-60">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mb-3" />
+          <span className="text-muted-foreground">Loading calendar events...</span>
+        </div>
+      ) : hasError ? (
+        <div className="p-6">
+          <Alert variant="destructive">
+            <AlertDescription>
+              There was a problem loading your calendar events. Please try refreshing the page.
+            </AlertDescription>
+          </Alert>
+        </div>
+      ) : (
+        <CalendarContent
+          dogs={dogs}
+          getEventsForDate={getEventsForDate}
+          getEventColor={getEventColor}
+          onDeleteEvent={deleteEvent}
+          onAddEvent={addEvent}
+          onEditEvent={editEvent}
+          compact={false} // Use full size calendar now
+        />
+      )}
     </Card>
   );
 };

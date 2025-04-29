@@ -9,10 +9,11 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Calendar } from 'lucide-react';
+import { Calendar, Loader2 } from 'lucide-react';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import AddReminderForm from './AddReminderForm';
 import RemindersTabContent from './RemindersTabContent';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface RemindersDialogProps {
   open: boolean;
@@ -20,7 +21,7 @@ interface RemindersDialogProps {
 }
 
 const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange }) => {
-  const { reminders, handleMarkComplete, addCustomReminder, deleteReminder } = useBreedingReminders();
+  const { reminders, isLoading, hasError, handleMarkComplete, addCustomReminder, deleteReminder } = useBreedingReminders();
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -47,11 +48,24 @@ const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange })
           
           {/* Right side - Tabs with reminders lists */}
           <div className="md:col-span-2">
-            <RemindersTabContent 
-              reminders={reminders} 
-              onComplete={handleMarkComplete}
-              onDelete={deleteReminder}
-            />
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center h-60">
+                <Loader2 className="h-10 w-10 animate-spin text-primary mb-3" />
+                <span className="text-muted-foreground">Loading reminders...</span>
+              </div>
+            ) : hasError ? (
+              <Alert variant="destructive" className="mb-6">
+                <AlertDescription>
+                  There was a problem loading your reminders. Please try refreshing the page.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <RemindersTabContent 
+                reminders={reminders} 
+                onComplete={handleMarkComplete}
+                onDelete={deleteReminder}
+              />
+            )}
           </div>
         </div>
         
