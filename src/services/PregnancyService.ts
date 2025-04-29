@@ -58,18 +58,25 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
       const daysLeft = differenceInDays(expectedDueDate, new Date());
       
       // Get the dog data from the proper aliased joins
-      const femaleDog = pregnancy.femaleDog || [];
-      const maleDog = pregnancy.maleDog || [];
+      const femaleDog = pregnancy.femaleDog;
+      const maleDog = pregnancy.maleDog;
       
       let femaleName = "Unknown Female";
-      if (femaleDog && femaleDog.length > 0) {
+      // Check if femaleDog exists and has the expected structure
+      if (femaleDog && Array.isArray(femaleDog) && femaleDog.length > 0) {
         femaleName = femaleDog[0]?.name || "Unknown Female";
+      } else if (femaleDog && typeof femaleDog === 'object' && 'name' in femaleDog) {
+        femaleName = femaleDog.name;
       }
       
       // Male dog handling (could be external)
       let maleName = pregnancy.external_male_name || "Unknown Male";
-      if (pregnancy.male_dog_id && maleDog && maleDog.length > 0) {
-        maleName = maleDog[0]?.name || "Unknown Male";
+      if (pregnancy.male_dog_id) {
+        if (maleDog && Array.isArray(maleDog) && maleDog.length > 0) {
+          maleName = maleDog[0]?.name || "Unknown Male";
+        } else if (maleDog && typeof maleDog === 'object' && 'name' in maleDog) {
+          maleName = maleDog.name;
+        }
       }
 
       console.log(`Processing pregnancy ${pregnancy.id}:`);
@@ -135,15 +142,36 @@ export const getPregnancyDetails = async (pregnancyId: string): Promise<Pregnanc
     const expectedDueDate = new Date(pregnancy.expected_due_date);
     const daysLeft = differenceInDays(expectedDueDate, new Date());
     
-    const femaleDog = pregnancy.femaleDog || [];
-    const maleDog = pregnancy.maleDog || [];
-    const femaleName = femaleDog[0]?.name || "Unknown Female";
-    const maleName = maleDog[0]?.name || pregnancy.external_male_name || "Unknown Male";
+    // Process female dog data
+    const femaleDog = pregnancy.femaleDog;
+    let femaleName = "Unknown Female";
+    if (femaleDog && Array.isArray(femaleDog) && femaleDog.length > 0) {
+      femaleName = femaleDog[0]?.name || "Unknown Female";
+    } else if (femaleDog && typeof femaleDog === 'object' && 'name' in femaleDog) {
+      femaleName = femaleDog.name;
+    }
+    
+    // Process male dog data
+    const maleDog = pregnancy.maleDog;
+    let maleName = pregnancy.external_male_name || "Unknown Male";
+    if (pregnancy.male_dog_id) {
+      if (maleDog && Array.isArray(maleDog) && maleDog.length > 0) {
+        maleName = maleDog[0]?.name || "Unknown Male";
+      } else if (maleDog && typeof maleDog === 'object' && 'name' in maleDog) {
+        maleName = maleDog.name;
+      }
+    }
+
+    console.log("Fetched pregnancy details for ID:", pregnancyId);
+    console.log("- Female dog data:", femaleDog);
+    console.log("- Male dog data:", maleDog);
+    console.log("- Female name processed:", femaleName);
+    console.log("- Male name processed:", maleName);
 
     return {
       id: pregnancy.id,
-      maleName: maleName || "Unknown Male",
-      femaleName: femaleName || "Unknown Female",
+      maleName,
+      femaleName,
       matingDate,
       expectedDueDate,
       daysLeft: daysLeft > 0 ? daysLeft : 0
