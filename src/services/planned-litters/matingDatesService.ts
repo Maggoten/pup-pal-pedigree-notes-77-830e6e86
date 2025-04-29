@@ -10,89 +10,124 @@ class MatingDatesService {
 
     const userId = sessionData.session.user.id;
 
-    // Get detailed information about the planned litter
-    const { data: litter, error: litterError } = await supabase
-      .from('planned_litters')
-      .select(`
-        id, 
-        female_id, 
-        male_id, 
-        female_name, 
-        male_name, 
-        external_male, 
-        external_male_name,
-        external_male_breed
-      `)
-      .eq('id', litterId)
-      .single();
-
-    if (litterError || !litter) {
-      console.error('Error fetching planned litter:', litterError);
-      throw new Error('Failed to fetch planned litter details');
-    }
-
-    console.log("Creating pregnancy from litter:", litter);
-    
-    // Validate female dog
-    if (!litter.female_id) {
-      console.error('Missing female dog ID in planned litter');
-      throw new Error('Invalid planned litter: missing female dog');
-    }
-    
-    // Get the female dog details to ensure we have the correct name
-    const { data: femaleDog, error: femaleDogError } = await supabase
-      .from('dogs')
-      .select('name')
-      .eq('id', litter.female_id)
-      .single();
+    try {
+      console.log(`Starting to add mating date for litter ID: ${litterId}, date: ${date.toISOString()}`);
       
-    if (femaleDogError) {
-      console.error('Error fetching female dog details:', femaleDogError);
-    } else {
-      console.log(`Female dog name for ID ${litter.female_id}:`, femaleDog?.name);
-    }
+      // Get detailed information about the planned litter with a more specific query
+      const { data: litter, error: litterError } = await supabase
+        .from('planned_litters')
+        .select(`
+          id, 
+          female_id, 
+          male_id, 
+          female_name, 
+          male_name, 
+          external_male, 
+          external_male_name,
+          external_male_breed
+        `)
+        .eq('id', litterId)
+        .single();
 
-    // Calculate expected due date (63 days from mating)
-    const expectedDueDate = addDays(date, 63);
+      if (litterError || !litter) {
+        console.error('Error fetching planned litter:', litterError);
+        throw new Error('Failed to fetch planned litter details');
+      }
 
-    // Create a new pregnancy record with explicit active status
-    const { data: pregnancy, error: pregnancyError } = await supabase
-      .from('pregnancies')
-      .insert({
+      console.log("Creating pregnancy from litter:", litter);
+      
+      // Validate female dog
+      if (!litter.female_id) {
+        console.error('Missing female dog ID in planned litter');
+        throw new Error('Invalid planned litter: missing female dog');
+      }
+      
+      // Get the female dog details to ensure we have the correct name
+      const { data: femaleDog, error: femaleDogError } = await supabase
+        .from('dogs')
+        .select('name, id')
+        .eq('id', litter.female_id)
+        .single();
+        
+      let femaleName = litter.female_name;
+      if (femaleDogError) {
+        console.error('Error fetching female dog details:', femaleDogError);
+      } else {
+        console.log(`Female dog for ID ${litter.female_id}:`, femaleDog);
+        femaleName = femaleDog?.name || litter.female_name;
+      }
+
+      // Get male dog details if it's an internal male
+      let maleName = litter.external_male ? litter.external_male_name : litter.male_name;
+      if (!litter.external_male && litter.male_id) {
+        const { data: maleDog, error: maleDogError } = await supabase
+          .from('dogs')
+          .select('name')
+          .eq('id', litter.male_id)
+          .single();
+          
+        if (!maleDogError && maleDog) {
+          maleName = maleDog.name;
+          console.log(`Male dog name for ID ${litter.male_id}:`, maleDog.name);
+        }
+      }
+
+      // Calculate expected due date (63 days from mating)
+      const expectedDueDate = addDays(date, 63);
+
+      console.log("Creating pregnancy with the following data:");
+      console.log({
         mating_date: date.toISOString(),
         expected_due_date: expectedDueDate.toISOString(),
-        status: 'active',  // Explicitly set status to active
+        status: 'active',
         user_id: userId,
         female_dog_id: litter.female_id,
         male_dog_id: litter.external_male ? null : litter.male_id,
-        external_male_name: litter.external_male ? (litter.male_name || litter.external_male_name) : null
-      })
-      .select()
-      .single();
-
-    if (pregnancyError) {
-      console.error('Error creating pregnancy:', pregnancyError);
-      throw new Error('Failed to create pregnancy');
-    }
-
-    console.log("Successfully created pregnancy:", pregnancy);
-
-    // Add the mating date and link it to the pregnancy
-    const { error: matingError } = await supabase
-      .from('mating_dates')
-      .insert({
-        planned_litter_id: litterId,
-        mating_date: date.toISOString(),
-        pregnancy_id: pregnancy.id,
-        user_id: userId
+        external_male_name: litter.external_male ? maleName : null
       });
 
-    if (matingError) {
-      console.error('Error adding mating date:', matingError);
-      throw new Error('Failed to add mating date');
-    }
+      // Create a new pregnancy record with explicit active status
+      const { data: pregnancy, error: pregnancyError } = await supabase
+        .from('pregnancies')
+        .insert({
+          mating_date: date.toISOString(),
+          expected_due_date: expectedDueDate.toISOString(),
+          status: 'active',
+          user_id: userId,
+          female_dog_id: litter.female_id,
+          male_dog_id: litter.external_male ? null : litter.male_id,
+          external_male_name: litter.external_male ? maleName : null
+        })
+        .select()
+        .single();
 
-    console.log("Successfully added mating date and linked to pregnancy");
+      if (pregnancyError) {
+        console.error('Error creating pregnancy:', pregnancyError);
+        throw new Error('Failed to create pregnancy');
+      }
+
+      console.log("Successfully created pregnancy:", pregnancy);
+
+      // Add the mating date and link it to the pregnancy
+      const { error: matingError } = await supabase
+        .from('mating_dates')
+        .insert({
+          planned_litter_id: litterId,
+          mating_date: date.toISOString(),
+          pregnancy_id: pregnancy.id,
+          user_id: userId
+        });
+
+      if (matingError) {
+        console.error('Error adding mating date:', matingError);
+        throw new Error('Failed to add mating date');
+      }
+
+      console.log(`Successfully added mating date (${date.toISOString()}) and linked to pregnancy ${pregnancy.id} for female ${femaleName} and male ${maleName}`);
+    } catch (error) {
+      console.error("Error in addMatingDate:", error);
+      throw error;
+    }
   }
 
   async deleteMatingDate(litterId: string, dateIndex: number): Promise<void> {

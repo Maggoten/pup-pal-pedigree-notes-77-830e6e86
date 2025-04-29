@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
-import { Heart, AlertCircle } from 'lucide-react';
+import { Heart, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useDogs } from '@/context/DogsContext';
@@ -30,6 +30,21 @@ const Pregnancy: React.FC = () => {
         console.log("Fetching active pregnancies...");
         const pregnancies = await getActivePregnancies();
         console.log("Fetched pregnancies on Pregnancy page:", pregnancies);
+        
+        if (pregnancies.length === 0) {
+          console.log("No active pregnancies found to display");
+        } else {
+          console.log("Active pregnancies found:", pregnancies.length);
+          pregnancies.forEach((pregnancy, index) => {
+            console.log(`Pregnancy ${index + 1}:`);
+            console.log(`- ID: ${pregnancy.id}`);
+            console.log(`- Female: ${pregnancy.femaleName}`);
+            console.log(`- Male: ${pregnancy.maleName}`);
+            console.log(`- Mating Date: ${pregnancy.matingDate.toISOString()}`);
+            console.log(`- Due Date: ${pregnancy.expectedDueDate.toISOString()}`);
+            console.log(`- Days Left: ${pregnancy.daysLeft}`);
+          });
+        }
         
         setActivePregnancies(pregnancies);
       } catch (error) {
@@ -82,24 +97,33 @@ const Pregnancy: React.FC = () => {
         </Alert>
       )}
       
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
-          <ActivePregnanciesList 
-            pregnancies={activePregnancies} 
-            onAddPregnancy={handleAddPregnancyClick}
-            isLoading={isLoading}
-          />
+      {isLoading ? (
+        <div className="flex justify-center items-center h-40">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2 text-lg">Loading pregnancies...</span>
         </div>
-        <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
-          <TemperatureLogOverview 
-            onLogTemperature={handleLogTemperature} 
-          />
-        </div>
-      </div>
+      ) : (
+        <>
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
+              <ActivePregnanciesList 
+                pregnancies={activePregnancies} 
+                onAddPregnancy={handleAddPregnancyClick}
+                isLoading={isLoading}
+              />
+            </div>
+            <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
+              <TemperatureLogOverview 
+                onLogTemperature={handleLogTemperature} 
+              />
+            </div>
+          </div>
 
-      <div className="mt-6 bg-greige-50 rounded-lg border border-greige-200 p-4">
-        <WeeklyDevelopmentGuide />
-      </div>
+          <div className="mt-6 bg-greige-50 rounded-lg border border-greige-200 p-4">
+            <WeeklyDevelopmentGuide />
+          </div>
+        </>
+      )}
     </PageLayout>
   );
 };
