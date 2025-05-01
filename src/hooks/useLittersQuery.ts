@@ -219,10 +219,26 @@ export function useLittersQuery() {
     deleteLitter: (litterId: string) => deleteLitterMutation.mutate(litterId),
     archiveLitter: (litterId: string, archive: boolean) => 
       archiveLitterMutation.mutate({ litterId, archive }),
-    addPuppy: (litterId: string, puppy: Puppy) => 
-      addPuppyMutation.mutate({ litterId, puppy }),
-    updatePuppy: (litterId: string, puppy: Puppy) => 
-      updatePuppyMutation.mutate({ litterId, puppy }),
+    
+    // Changed the API here - Now we accept the exact parameters needed for each component
+    // For components that need to add a puppy with just a puppy parameter
+    addPuppy: (puppy: Puppy, litterId?: string) => {
+      if (!litterId) {
+        console.error("Cannot add puppy: Missing litter ID");
+        return;
+      }
+      addPuppyMutation.mutate({ litterId, puppy });
+    },
+    
+    // For components that need to update a puppy with just a puppy parameter
+    updatePuppy: (puppy: Puppy, litterId?: string) => {
+      if (!litterId) {
+        console.error("Cannot update puppy: Missing litter ID");
+        return;
+      }
+      updatePuppyMutation.mutate({ litterId, puppy });
+    },
+    
     deletePuppy: (puppyId: string) => deletePuppyMutation.mutate(puppyId),
     
     // Helper functions

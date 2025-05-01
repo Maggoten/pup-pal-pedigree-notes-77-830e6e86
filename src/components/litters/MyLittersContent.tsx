@@ -111,6 +111,19 @@ const MyLittersContent: React.FC = () => {
     archiveLitter(litterId, archive);
   };
   
+  // Create wrapper functions to correctly pass the selected litter ID with puppy operations
+  const handleAddPuppy = (puppy: any) => {
+    if (selectedLitter) {
+      addPuppy(puppy, selectedLitter.id);
+    }
+  };
+  
+  const handleUpdatePuppy = (puppy: any) => {
+    if (selectedLitter) {
+      updatePuppy(puppy, selectedLitter.id);
+    }
+  };
+  
   return (
     <PageLayout 
       title="My Litters" 
@@ -214,8 +227,8 @@ const MyLittersContent: React.FC = () => {
                 onUpdateLitter={updateLitter}
                 onDeleteLitter={deleteLitter}
                 onArchiveLitter={archiveLitter}
-                onAddPuppy={addPuppy}
-                onUpdatePuppy={updatePuppy}
+                onAddPuppy={handleAddPuppy}
+                onUpdatePuppy={handleUpdatePuppy}
                 onDeletePuppy={deletePuppy}
               />
             )}
