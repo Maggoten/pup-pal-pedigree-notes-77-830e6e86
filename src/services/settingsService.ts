@@ -20,10 +20,19 @@ export const getUserSettings = async (user: User | null) => {
       throw profileError;
     }
     
-    // Fetch shared users separately with a join through their profiles
+    // Fetch shared users separately with a join
+    // Use proper relationship syntax - profiles is the table name
     const { data: sharedUsersData, error: sharedError } = await supabase
       .from('shared_users')
-      .select('*, shared_with:shared_with_id(id, email, first_name, last_name)')
+      .select(`
+        *,
+        profiles!shared_users_shared_with_id_fkey (
+          id, 
+          email, 
+          first_name, 
+          last_name
+        )
+      `)
       .eq('owner_id', user.id);
     
     if (sharedError) {
@@ -33,7 +42,7 @@ export const getUserSettings = async (user: User | null) => {
     // Transform the shared users data into the expected format
     const formattedSharedUsers = sharedUsersData?.map(su => ({
       id: su.shared_with_id,
-      email: su.shared_with?.email || '',
+      email: su.profiles?.email || '',
       role: su.role as 'admin' | 'editor' | 'viewer',
       joinedAt: new Date(su.created_at),
       status: su.status as 'pending' | 'active'
