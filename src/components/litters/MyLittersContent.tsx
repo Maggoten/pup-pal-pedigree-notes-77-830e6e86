@@ -76,8 +76,8 @@ const MyLittersContent: React.FC = () => {
       description="Track your litters and individual puppies"
       icon={<PawPrint className="h-6 w-6" />}
     >
-      {/* Wrap the entire content in a container with fixed dimensions to prevent layout shifts */}
-      <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 pb-6 min-h-[50vh]">
+      {/* Main content container with fixed dimensions */}
+      <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 pb-6 min-h-[600px]">
         <Tabs 
           value={categoryTab} 
           onValueChange={setCategoryTab} 
@@ -119,7 +119,7 @@ const MyLittersContent: React.FC = () => {
                 availableYears={getAvailableYears()}
               />
               
-              <TabsContent value="active" className="space-y-6">
+              <TabsContent value="active" className="space-y-6 min-h-[400px]">
                 <LitterTabContent
                   litters={activeLitters}
                   filteredLitters={filteredActiveLitters}
@@ -136,7 +136,7 @@ const MyLittersContent: React.FC = () => {
                 />
               </TabsContent>
               
-              <TabsContent value="archived" className="space-y-6">
+              <TabsContent value="archived" className="space-y-6 min-h-[400px]">
                 <LitterTabContent
                   litters={archivedLitters}
                   filteredLitters={filteredArchivedLitters}
@@ -157,23 +157,17 @@ const MyLittersContent: React.FC = () => {
         </Tabs>
       </div>
       
-      {/* Use consistent placeholder dimensions in the selected litter section */}
-      {isLoading ? (
-        selectedLitter && (
-          <div className="mt-6">
-            <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 min-h-[300px]">
+      {/* Selected litter section with consistent height */}
+      {selectedLitter && (
+        <div className="mt-6">
+          <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 min-h-[300px]">
+            {isLoading ? (
               <div className="space-y-4">
                 <Skeleton className="h-10 w-64" />
                 <Skeleton className="h-16 w-full" />
                 <Skeleton className="h-60 w-full" />
               </div>
-            </div>
-          </div>
-        )
-      ) : (
-        selectedLitter && (
-          <div className="mt-6">
-            <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 min-h-[300px]">
+            ) : (
               <SelectedLitterSection
                 selectedLitter={selectedLitter}
                 onUpdateLitter={handleUpdateLitter}
@@ -183,9 +177,9 @@ const MyLittersContent: React.FC = () => {
                 onUpdatePuppy={handleUpdatePuppy}
                 onDeletePuppy={handleDeletePuppy}
               />
-            </div>
+            )}
           </div>
-        )
+        </div>
       )}
     </PageLayout>
   );

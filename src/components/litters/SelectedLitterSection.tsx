@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Litter, Puppy } from '@/types/breeding';
 import { toast } from '@/components/ui/use-toast';
@@ -56,7 +56,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
   const ageInWeeks = differenceInWeeks(new Date(), birthDate);
   
   return (
-    <div className="animate-fade-in space-y-6">
+    <div className="space-y-6" style={{ transition: 'none' }}>
       {/* Header with edit button */}
       <SelectedLitterHeader 
         litter={selectedLitter}
@@ -67,7 +67,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
       />
       
       {/* Tab-based layout for different sections - Now positioned first */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="min-h-[400px]">
         <TabsList className="mb-6">
           <TabsTrigger value="puppies" className="flex items-center gap-2">
             <Heart className="h-4 w-4" /> Puppies

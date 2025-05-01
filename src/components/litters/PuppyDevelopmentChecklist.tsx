@@ -32,7 +32,7 @@ const PuppyDevelopmentChecklist: React.FC<PuppyDevelopmentChecklistProps> = ({
   }
   
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 min-h-[200px]" style={{ transition: 'none' }}>
       <ChecklistHeader
         completedItems={completedItems}
         totalItems={totalItems}

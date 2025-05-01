@@ -20,7 +20,10 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
   const isMobile = useIsMobile();
   
   return (
-    <div className={`grid grid-cols-1 ${isMobile ? '' : 'sm:grid-cols-2 lg:grid-cols-3'} gap-4 animate-fade-in`}>
+    <div 
+      className={`grid grid-cols-1 ${isMobile ? '' : 'sm:grid-cols-2 lg:grid-cols-3'} gap-4`}
+      style={{ minHeight: litters.length > 0 ? '400px' : '200px' }}
+    >
       {litters.map(litter => (
         <LitterCard 
           key={litter.id}

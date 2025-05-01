@@ -31,10 +31,11 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
 
   return (
     <Card 
-      className={`h-full overflow-hidden hover:shadow-md transition-all duration-300 ${
-        isSelected ? 'ring-2 ring-primary shadow-lg transform scale-[1.02]' : 'hover:scale-[1.01]'
+      className={`h-full min-h-[180px] overflow-hidden hover:shadow-md transition-all duration-300 ${
+        isSelected ? 'ring-2 ring-primary shadow-lg' : ''
       } cursor-pointer`}
       onClick={() => onSelect(litter)}
+      style={{ transform: isSelected ? 'scale(1.01)' : 'scale(1)', transition: 'transform 0.2s ease' }}
     >
       <CardHeader className="pb-1 pt-3 px-4">
         <div className="flex justify-between items-start">
