@@ -40,37 +40,41 @@ const BreedingReminders: React.FC = () => {
             Important tasks and upcoming events
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-0 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-40">
-              <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
-              <span className="text-sm text-muted-foreground">Loading reminders...</span>
-            </div>
-          ) : hasError ? (
-            <Alert variant="destructive" className="m-4">
-              <AlertDescription>
-                There was a problem loading your reminders. Please try again later.
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <>
-              <RemindersList 
-                reminders={highPriorityReminders.length > 0 ? highPriorityReminders : reminders.slice(0, 3)} 
-                onComplete={handleMarkComplete} 
-                compact={true} 
-              />
-              
-              <div className="p-3 text-center">
-                <button 
-                  onClick={() => setRemindersDialogOpen(true)}
-                  className="text-xs text-primary hover:text-primary/70 font-medium"
-                >
-                  View All Reminders
-                </button>
+        
+        {/* Fixed height container to prevent layout shifts */}
+        <div className="h-[500px]">
+          <CardContent className="p-0 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+                <span className="text-sm text-muted-foreground">Loading reminders...</span>
               </div>
-            </>
-          )}
-        </CardContent>
+            ) : hasError ? (
+              <Alert variant="destructive" className="m-4">
+                <AlertDescription>
+                  There was a problem loading your reminders. Please try again later.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <RemindersList 
+                  reminders={highPriorityReminders.length > 0 ? highPriorityReminders : reminders.slice(0, 3)} 
+                  onComplete={handleMarkComplete} 
+                  compact={true} 
+                />
+                
+                <div className="p-3 text-center">
+                  <button 
+                    onClick={() => setRemindersDialogOpen(true)}
+                    className="text-xs text-primary hover:text-primary/70 font-medium"
+                  >
+                    View All Reminders
+                  </button>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </div>
         
         {/* Paw print indicator at the bottom */}
         <div className="absolute bottom-2 right-2 opacity-30">

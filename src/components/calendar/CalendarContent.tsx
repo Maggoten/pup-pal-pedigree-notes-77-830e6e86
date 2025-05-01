@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { format, addDays, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths } from 'date-fns';
 import { CardContent } from '@/components/ui/card';
@@ -110,7 +111,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
         onAddEvent={() => setIsAddDialogOpen(true)}
       />
       
-      <CardContent className={`p-3 bg-gradient-to-br from-cream-50 to-[#FFDEE2]/30 ${compact ? 'max-h-[300px] overflow-y-auto' : ''}`}>
+      <CardContent className={`p-3 bg-gradient-to-br from-cream-50 to-[#FFDEE2]/30 ${compact ? 'max-h-[300px]' : 'h-[520px]'} overflow-y-auto`}>
         {isMobile && (
           <div className="text-xs text-gray-500 mb-2">
             Tap events to view/edit

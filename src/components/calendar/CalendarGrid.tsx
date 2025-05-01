@@ -46,6 +46,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     setSelectedEvent(null);
   };
 
+  // Calculate fixed cell height based on compact mode
+  const cellHeight = compact ? 'h-[80px]' : 'h-[100px]';
+
   return (
     <>
       <div className="grid grid-cols-7 gap-1 text-center font-medium mb-1">
@@ -72,7 +75,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                   <ContextMenuTrigger>
                     <div 
                       className={`
-                        rounded-md border h-full ${compact ? 'min-h-[80px]' : 'min-h-[100px]'}
+                        rounded-md border ${cellHeight} w-full
                         flex flex-col
                         ${isToday 
                           ? 'bg-primary/10 border-primary/30' 

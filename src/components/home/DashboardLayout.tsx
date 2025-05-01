@@ -53,7 +53,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         title="" 
         description=""
       >
-        <div className="space-y-4">
+        <div className="space-y-4 animate-fade-in">
           <DashboardHero 
             username={username}
             reminders={remindersSummary}
@@ -62,17 +62,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             recentLitters={recentLittersData}
           />
           
-          {/* Main dashboard content - Updated layout */}
+          {/* Main dashboard content - Updated layout with fixed heights */}
           <div className="space-y-6">
             {/* Top row: Calendar (2/3) and Reminders (1/3) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[600px]">
               {/* Calendar taking 2/3 of the width */}
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 min-h-[600px]">
                 <BreedingCalendar />
               </div>
               
               {/* Reminders taking 1/3 of the width */}
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-1 min-h-[600px]">
                 <BreedingReminders />
               </div>
             </div>
