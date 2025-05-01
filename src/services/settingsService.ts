@@ -20,33 +20,50 @@ export const getUserSettings = async (user: User | null) => {
       throw profileError;
     }
     
-    // Fetch shared users separately with a join
-    // Use proper relationship syntax - profiles is the table name
+    // First get the shared users data
     const { data: sharedUsersData, error: sharedError } = await supabase
       .from('shared_users')
-      .select(`
-        *,
-        profiles!shared_users_shared_with_id_fkey (
-          id, 
-          email, 
-          first_name, 
-          last_name
-        )
-      `)
+      .select('*')
       .eq('owner_id', user.id);
     
     if (sharedError) {
       throw sharedError;
     }
     
-    // Transform the shared users data into the expected format
-    const formattedSharedUsers = sharedUsersData?.map(su => ({
-      id: su.shared_with_id,
-      email: su.profiles?.email || '',
-      role: su.role as 'admin' | 'editor' | 'viewer',
-      joinedAt: new Date(su.created_at),
-      status: su.status as 'pending' | 'active'
-    })) || [];
+    // If we have shared users, fetch their profile information separately
+    let formattedSharedUsers: SharedUser[] = [];
+    
+    if (sharedUsersData && sharedUsersData.length > 0) {
+      // Create an array of shared user IDs
+      const sharedUserIds = sharedUsersData.map(su => su.shared_with_id);
+      
+      // Fetch profiles for these users in a single query
+      const { data: sharedProfiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, email, first_name, last_name')
+        .in('id', sharedUserIds);
+      
+      if (profilesError) {
+        console.error('Error fetching shared user profiles:', profilesError);
+        // Continue with partial data instead of throwing error
+      }
+      
+      // Create a map of profiles by ID for easier lookup
+      const profilesMap = sharedProfiles ? 
+        Object.fromEntries(sharedProfiles.map(p => [p.id, p])) : {};
+      
+      // Transform the shared users data into the expected format
+      formattedSharedUsers = sharedUsersData.map(su => {
+        const userProfile = profilesMap[su.shared_with_id];
+        return {
+          id: su.shared_with_id,
+          email: userProfile?.email || 'Unknown email',
+          role: su.role as 'admin' | 'editor' | 'viewer',
+          joinedAt: new Date(su.created_at),
+          status: su.status as 'pending' | 'active'
+        };
+      });
+    }
     
     return {
       email: profile.email,
