@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Reminder } from '@/types/reminders';
 import { useDogs } from '@/context/DogsContext';
@@ -116,7 +117,7 @@ export const useBreedingReminders = () => {
   }, [dogs, user, hasMigrated, loadReminders]);
   
   // Mark reminder as complete
-  const handleMarkComplete = useCallback(async (id: string, isCompleted: boolean) => {
+  const handleMarkComplete = useCallback(async (id: string, isCompleted: boolean = true) => {
     try {
       // Update in local state immediately for a responsive UI
       if (isCompleted) {
