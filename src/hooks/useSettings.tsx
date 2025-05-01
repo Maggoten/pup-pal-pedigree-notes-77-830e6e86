@@ -35,6 +35,10 @@ export const useSettings = () => {
           role: (['admin', 'editor', 'viewer'].includes(user.role) 
             ? user.role as 'admin' | 'editor' | 'viewer' 
             : 'viewer'),
+          // Ensure status is one of the allowed types or default to 'pending'
+          status: (['pending', 'active'].includes(user.status) 
+            ? user.status as 'pending' | 'active' 
+            : 'pending'),
         })) || [],
         
         // Derive subscription tier from profile.subscription_status
