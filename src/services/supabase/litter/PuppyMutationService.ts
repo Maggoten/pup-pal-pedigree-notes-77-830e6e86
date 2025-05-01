@@ -5,6 +5,7 @@ import { toast } from '@/components/ui/use-toast';
 import { BaseSupabaseService } from '../base/BaseSupabaseService';
 import { PuppyService } from './types';
 import { LogService } from './LogService';
+import { LitterQueryService } from './LitterQueryService';
 
 /**
  * Service responsible for puppy create/update/delete operations
