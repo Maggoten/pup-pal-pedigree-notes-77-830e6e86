@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -43,6 +43,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { supabase } from '@/integrations/supabase/client';
 
 const inviteFormSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -60,6 +61,7 @@ interface SharingSettingsProps {
 const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
   const { addSharedUser, removeSharedUser, isAddingSharedUser, isRemovingSharedUser } = useSettings();
   const [userToRemove, setUserToRemove] = useState<SharedUser | null>(null);
+  const [sharedUserEmails, setSharedUserEmails] = useState<Record<string, string>>({});
   
   const form = useForm<InviteFormValues>({
     resolver: zodResolver(inviteFormSchema),
@@ -68,6 +70,39 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
       role: 'viewer',
     },
   });
+
+  // Fetch shared user emails
+  useEffect(() => {
+    const fetchSharedUserEmails = async () => {
+      if (!settings.sharedUsers?.length) return;
+      
+      const userIds = settings.sharedUsers.map(user => user.shared_with_id);
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, email')
+          .in('id', userIds);
+          
+        if (error) {
+          console.error('Error fetching shared user emails:', error);
+          return;
+        }
+        
+        if (data) {
+          const emailMap: Record<string, string> = {};
+          data.forEach(profile => {
+            emailMap[profile.id] = profile.email;
+          });
+          setSharedUserEmails(emailMap);
+        }
+      } catch (err) {
+        console.error('Exception fetching shared user emails:', err);
+      }
+    };
+    
+    fetchSharedUserEmails();
+  }, [settings.sharedUsers]);
   
   const onSubmit = (data: InviteFormValues) => {
     addSharedUser(data.email, data.role);
@@ -76,7 +111,7 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
   
   const handleRemoveUser = () => {
     if (!userToRemove) return;
-    removeSharedUser(userToRemove.id);
+    removeSharedUser(userToRemove.shared_with_id);
     setUserToRemove(null);
   };
   
@@ -217,7 +252,7 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
                       <Mail className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                      <div className="font-medium">{user.email}</div>
+                      <div className="font-medium">{sharedUserEmails[user.shared_with_id] || user.shared_with_id}</div>
                       <div className="flex items-center gap-2 mt-1">
                         <span className={`text-xs px-2 py-0.5 rounded-full border capitalize flex items-center gap-1 ${getRoleBadgeClass(user.role)}`}>
                           {getRoleIcon(user.role)}
@@ -259,7 +294,7 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Shared User</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove {userToRemove?.email} from your shared users?
+              Are you sure you want to remove {sharedUserEmails[userToRemove?.shared_with_id || ''] || userToRemove?.shared_with_id} from your shared users?
               They will no longer have access to your breeding records.
             </AlertDialogDescription>
           </AlertDialogHeader>

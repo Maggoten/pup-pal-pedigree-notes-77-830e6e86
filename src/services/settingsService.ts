@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { KennelInfo, SharedUser } from '@/types/settings';
+import { KennelInfo } from '@/types/settings';
 import { User } from '@/types/auth';
 
 export const getUserSettings = async (user: User | null) => {
@@ -50,6 +50,8 @@ export const updateKennelInfo = async (user: User | null, kennelInfo: KennelInfo
       .from('profiles')
       .update({
         kennel_name: kennelInfo.kennelName,
+        address: kennelInfo.address,
+        phone: kennelInfo.phone,
         updated_at: new Date().toISOString()
       })
       .eq('id', user.id);
@@ -122,6 +124,7 @@ export const addSharedUser = async (
         owner_id: user.id,
         shared_with_id: userToAdd.id,
         role: role,
+        status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       });

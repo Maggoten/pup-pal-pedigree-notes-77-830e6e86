@@ -89,20 +89,20 @@ const PregnancyDetails: React.FC = () => {
       <PregnancyHeader 
         femaleName={pregnancy.femaleName}
         maleName={pregnancy.maleName}
-        matingDate={pregnancy.matingDate}
+        matingDate={pregnancy.matingDate || new Date()} // Add default or ensure matingDate is defined
       />
       
       <PregnancySummaryCards 
-        matingDate={pregnancy.matingDate}
-        expectedDueDate={pregnancy.expectedDueDate}
-        daysLeft={pregnancy.daysLeft}
+        matingDate={pregnancy.matingDate || new Date()} // Add default or ensure matingDate is defined
+        expectedDueDate={pregnancy.expectedDueDate || new Date()} // Add default or ensure expectedDueDate is defined
+        daysLeft={pregnancy.daysLeft || 0} // Add default or ensure daysLeft is defined
       />
       
       <PregnancyTabs 
         pregnancyId={pregnancy.id}
         femaleName={pregnancy.femaleName}
-        matingDate={pregnancy.matingDate}
-        expectedDueDate={pregnancy.expectedDueDate}
+        matingDate={pregnancy.matingDate || new Date()} // Add default or ensure matingDate is defined
+        expectedDueDate={pregnancy.expectedDueDate || new Date()} // Add default or ensure expectedDueDate is defined
       />
     </PageLayout>
   );

@@ -8,7 +8,7 @@ import {
   addSharedUser,
   removeSharedUser
 } from '@/services/settingsService';
-import { KennelInfo, SharedUser } from '@/types/settings';
+import { KennelInfo, UserSettings, SharedUser } from '@/types/settings';
 import { toast } from '@/components/ui/use-toast';
 
 export const useSettings = () => {
@@ -22,7 +22,24 @@ export const useSettings = () => {
     error 
   } = useQuery({
     queryKey: ['settings', user?.email],
-    queryFn: () => getUserSettings(user),
+    queryFn: async () => {
+      const data = await getUserSettings(user);
+      
+      // Transform the data to match our UserSettings interface
+      const userSettings: UserSettings = {
+        profile: data.profile,
+        sharedUsers: data.sharedUsers || [],
+        
+        // Derive subscription tier from profile.subscription_status
+        subscriptionTier: data.profile.subscription_status === 'premium' ? 'premium' :
+                        data.profile.subscription_status === 'professional' ? 'professional' : 'free',
+        
+        // Placeholder for subscription end date - would come from a real subscription system
+        subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Placeholder: 30 days from now
+      };
+      
+      return userSettings;
+    },
     enabled: !!user?.email,
   });
   
