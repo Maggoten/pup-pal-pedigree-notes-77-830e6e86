@@ -14,6 +14,7 @@ interface CalendarGridProps {
   onDeleteEvent: (eventId: string) => void;
   onEventClick: (event: CalendarEvent) => void;
   compact?: boolean;
+  hasEvents?: boolean;
 }
 
 const CalendarGrid: React.FC<CalendarGridProps> = ({ 
@@ -22,7 +23,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   getEventColor, 
   onDeleteEvent,
   onEventClick,
-  compact = false 
+  compact = false,
+  hasEvents = true
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -65,7 +67,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             {week.map((day) => {
               const isToday = isSameDay(day, today);
               const isCurrentMonth = isSameMonth(day, new Date());
-              const events = getEventsForDate(day);
+              
+              // Only fetch events if hasEvents is true to avoid unnecessary computations
+              const events = hasEvents ? getEventsForDate(day) : [];
+              
               const maxEvents = compact ? 1 : 3;
               const displayEvents = events.slice(0, maxEvents);
               const hiddenEventsCount = events.length - maxEvents;

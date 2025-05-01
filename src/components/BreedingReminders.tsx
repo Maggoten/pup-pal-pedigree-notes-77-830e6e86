@@ -1,20 +1,31 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BellRing, PawPrint, Loader2 } from 'lucide-react';
 import RemindersList from './reminders/RemindersList';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import RemindersDialog from './reminders/RemindersDialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const BreedingReminders: React.FC = () => {
   const { reminders, isLoading, hasError, handleMarkComplete } = useBreedingReminders();
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
   
   // Take only the top 3 high priority reminders for compact view
-  const highPriorityReminders = reminders
-    .filter(r => r.priority === 'high')
-    .slice(0, 3);
+  const highPriorityReminders = useMemo(() => {
+    return reminders
+      .filter(r => r.priority === 'high')
+      .slice(0, 3);
+  }, [reminders]);
+  
+  // Determine which reminders to display
+  const displayReminders = useMemo(() => {
+    if (highPriorityReminders.length > 0) {
+      return highPriorityReminders;
+    } 
+    return reminders.slice(0, 3);
+  }, [highPriorityReminders, reminders]);
   
   return (
     <>
@@ -42,12 +53,27 @@ const BreedingReminders: React.FC = () => {
         </CardHeader>
         
         {/* Fixed height container to prevent layout shifts */}
-        <div className="h-[500px]">
+        <div className="h-[500px] relative">
           <CardContent className="p-0 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center h-full">
                 <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
                 <span className="text-sm text-muted-foreground">Loading reminders...</span>
+                
+                {/* Add skeleton loaders to maintain layout */}
+                <div className="absolute inset-0 opacity-30 p-4">
+                  <div className="space-y-4">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="flex items-center gap-3 p-3">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="space-y-2 flex-1">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-3 w-1/2" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : hasError ? (
               <Alert variant="destructive" className="m-4">
@@ -56,9 +82,9 @@ const BreedingReminders: React.FC = () => {
                 </AlertDescription>
               </Alert>
             ) : (
-              <>
+              <div className="opacity-100 transition-opacity duration-300">
                 <RemindersList 
-                  reminders={highPriorityReminders.length > 0 ? highPriorityReminders : reminders.slice(0, 3)} 
+                  reminders={displayReminders} 
                   onComplete={handleMarkComplete} 
                   compact={true} 
                 />
@@ -71,7 +97,7 @@ const BreedingReminders: React.FC = () => {
                     View All Reminders
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </CardContent>
         </div>

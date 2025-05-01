@@ -20,6 +20,7 @@ interface CalendarContentProps {
   onAddEvent: (data: AddEventFormValues) => boolean;
   onEditEvent?: (eventId: string, data: AddEventFormValues) => boolean;
   compact?: boolean;
+  hasEvents?: boolean;
 }
 
 const CalendarContent: React.FC<CalendarContentProps> = ({
@@ -29,7 +30,8 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
   onDeleteEvent,
   onAddEvent,
   onEditEvent,
-  compact = false
+  compact = false,
+  hasEvents = true
 }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -125,6 +127,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
             onDeleteEvent={onDeleteEvent}
             onEventClick={handleEventClick}
             compact={compact}
+            hasEvents={hasEvents}
           />
         </div>
       </CardContent>

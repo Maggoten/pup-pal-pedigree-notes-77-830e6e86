@@ -23,30 +23,29 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   
   // Load events on component mount or when dependencies change
   useEffect(() => {
+    let isMounted = true;
+    let loadingTimer: ReturnType<typeof setTimeout>;
+    
     const loadAllEvents = async () => {
       if (!user) {
-        // Don't fetch if not authenticated
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
         return;
       }
       
-      setIsLoading(true);
+      // Only set loading state after a short delay to prevent flickering
+      loadingTimer = setTimeout(() => {
+        if (isMounted) {
+          setIsLoading(true);
+        }
+      }, 300);
+      
       setHasError(false);
       
       try {
-        // Check if migration is needed (first time only)
-        if (!hasMigrated) {
-          await migrateCalendarEventsFromLocalStorage(dogs);
-          setHasMigrated(true);
-        }
-        
-        // Fetch custom events from Supabase
-        const customEvents = await fetchCalendarEvents();
-        
-        // Get sample events (these are not stored in Supabase)
+        // Generate sample events while waiting for backend
         const sampleEvents = getSampleEvents();
-        
-        // Calculate heat events based on dogs data
         const upcomingHeats = calculateUpcomingHeats(dogs);
         const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
           id: `heat-${heat.dogId}-${index}`,
@@ -57,17 +56,57 @@ export const useCalendarEvents = (dogs: Dog[]) => {
           dogName: heat.dogName
         }));
         
-        // Combine all events
-        setCalendarEvents([...sampleEvents, ...heatEvents, ...customEvents]);
+        // Set initial data quickly to prevent flickering
+        if (isMounted) {
+          setCalendarEvents([...sampleEvents, ...heatEvents]);
+        }
+        
+        // Check if migration is needed (first time only)
+        if (!hasMigrated) {
+          try {
+            await migrateCalendarEventsFromLocalStorage(dogs);
+            if (isMounted) {
+              setHasMigrated(true);
+            }
+          } catch (migrationErr) {
+            console.error("Migration error (non-critical):", migrationErr);
+          }
+        }
+        
+        // Fetch custom events from Supabase
+        try {
+          const customEvents = await fetchCalendarEvents();
+          
+          // Update with complete data
+          if (isMounted) {
+            setCalendarEvents(prev => {
+              const nonCustomEvents = prev.filter(event => event.type !== 'custom');
+              return [...nonCustomEvents, ...customEvents];
+            });
+          }
+        } catch (fetchErr) {
+          console.error("Error fetching custom events:", fetchErr);
+          // Don't set error state here - we still have sample data
+        }
       } catch (error) {
         console.error("Error loading calendar events:", error);
-        setHasError(true);
+        if (isMounted) {
+          setHasError(true);
+        }
       } finally {
-        setIsLoading(false);
+        clearTimeout(loadingTimer);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
     
     loadAllEvents();
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(loadingTimer);
+    };
   }, [dogs, user, hasMigrated]);
   
   // Function to get events for a specific date
