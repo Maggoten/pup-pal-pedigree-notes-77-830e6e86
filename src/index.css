@@ -1,11 +1,12 @@
-/* Import fonts before Tailwind to avoid potential conflicts */
-@import url('https://fonts.googleapis.com/css2?family=Le+Jour+Serif:wght@400;700&display=swap');
-@import url('https://fonts.cdnfonts.com/css/glacial-indifference-2');
 
-/* Tailwind directives */
+/* Tailwind directives first */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Import fonts after Tailwind to avoid potential conflicts */
+@import url('https://fonts.googleapis.com/css2?family=Le+Jour+Serif:wght@400;700&display=swap');
+@import url('https://fonts.cdnfonts.com/css/glacial-indifference-2');
 
 /* Custom styles after Tailwind */
 @layer base {

@@ -25,6 +25,10 @@ export default defineConfig(({ mode }) => ({
     emptyOutDir: true,
     // Generate source maps for easier debugging
     sourcemap: true,
+    // Explicitly configure CSS handling
+    cssCodeSplit: true,
+    // Ensure CSS is included in the build
+    assetsInlineLimit: 0,
   },
   css: {
     // Force CSS modules to be processed properly
