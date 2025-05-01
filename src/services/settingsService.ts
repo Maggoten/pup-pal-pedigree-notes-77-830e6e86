@@ -20,19 +20,47 @@ export const getUserSettings = async (user: User | null) => {
       throw profileError;
     }
     
-    // Fetch shared users
+    // Fetch profiles of shared users
     const { data: sharedUsers, error: sharedError } = await supabase
       .from('shared_users')
-      .select('*')
+      .select(`
+        id,
+        role,
+        status,
+        created_at,
+        shared_with_id,
+        profiles!shared_users_shared_with_id_fkey(
+          email,
+          first_name,
+          last_name
+        )
+      `)
       .eq('owner_id', user.id);
     
     if (sharedError) {
       throw sharedError;
     }
     
+    // Transform the shared users data into the expected format
+    const formattedSharedUsers = sharedUsers?.map(su => ({
+      id: su.shared_with_id,
+      email: su.profiles?.email || '',
+      role: su.role as 'admin' | 'editor' | 'viewer',
+      joinedAt: new Date(su.created_at),
+      status: su.status as 'pending' | 'active'
+    })) || [];
+    
     return {
-      profile,
-      sharedUsers: sharedUsers || []
+      email: profile.email,
+      firstName: profile.first_name,
+      lastName: profile.last_name,
+      kennelInfo: {
+        kennelName: profile.kennel_name || '',
+        address: profile.address || '',
+        phone: profile.phone || '',
+      },
+      subscriptionTier: profile.subscription_status === 'active' ? 'premium' : 'free',
+      sharedUsers: formattedSharedUsers
     };
   } catch (error) {
     console.error('Error fetching user settings:', error);

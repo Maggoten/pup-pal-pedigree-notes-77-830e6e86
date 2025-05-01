@@ -404,6 +404,36 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_users: {
+        Row: {
+          created_at: string | null
+          id: string
+          owner_id: string
+          role: string
+          shared_with_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          owner_id: string
+          role: string
+          shared_with_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          owner_id?: string
+          role?: string
+          shared_with_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       symptom_logs: {
         Row: {
           created_at: string

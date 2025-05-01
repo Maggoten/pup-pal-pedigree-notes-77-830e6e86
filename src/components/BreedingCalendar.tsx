@@ -20,14 +20,17 @@ const BreedingCalendar: React.FC = () => {
     hasError
   } = useCalendarEvents(dogs);
   
-  // Create wrapper functions to handle the async nature of the original functions
+  // Create wrapper functions that return boolean synchronously for UI feedback
+  // but still trigger the async operations
   const handleAddEvent = (data: AddEventFormValues) => {
-    addEvent(data);
+    addEvent(data)
+      .catch(error => console.error('Error adding event:', error));
     return true; // Return true synchronously for UI feedback
   };
   
   const handleEditEvent = (eventId: string, data: AddEventFormValues) => {
-    editEvent(eventId, data);
+    editEvent(eventId, data)
+      .catch(error => console.error('Error editing event:', error));
     return true; // Return true synchronously for UI feedback
   };
   
