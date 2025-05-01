@@ -12,6 +12,10 @@ import useLitterFilteredData from '@/hooks/useLitterFilteredData';
 import SelectedLitterSection from './SelectedLitterSection';
 import LitterFilterHeader from './filters/LitterFilterHeader';
 import LitterTabContent from './tabs/LitterTabContent';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const MyLittersContent: React.FC = () => {
   const {
@@ -22,6 +26,7 @@ const MyLittersContent: React.FC = () => {
     showAddLitterDialog,
     setShowAddLitterDialog,
     selectedLitter,
+    isLoading,
     handleAddLitter,
     handleUpdateLitter,
     handleDeleteLitter,
@@ -45,7 +50,11 @@ const MyLittersContent: React.FC = () => {
     setArchivedPage
   } = useLitterFilters();
   
-  // Use our new hook for filtering logic
+  // Get auth context to check if user is logged in
+  const { user, isLoading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  
+  // Use our hook for filtering logic
   const {
     filteredActiveLitters,
     paginatedActiveLitters,
@@ -65,6 +74,44 @@ const MyLittersContent: React.FC = () => {
     setFilterYear(null);
     setSearchQuery('');
   };
+  
+  // Redirect to login if not authenticated
+  // Note: useEffect isn't needed here as this is a conditional render check
+  if (!authLoading && !user) {
+    return (
+      <PageLayout 
+        title="My Litters" 
+        description="Track your litters and individual puppies"
+        icon={<PawPrint className="h-6 w-6" />}
+      >
+        <div className="flex flex-col items-center justify-center py-12">
+          <h2 className="text-2xl font-semibold mb-4">Please log in to access your litters</h2>
+          <p className="text-muted-foreground mb-6">
+            You need to be logged in to view and manage your litters.
+          </p>
+          <Button onClick={() => navigate('/auth')}>
+            Log In or Sign Up
+          </Button>
+        </div>
+      </PageLayout>
+    );
+  }
+  
+  // Show loading state
+  if (authLoading || isLoading) {
+    return (
+      <PageLayout 
+        title="My Litters" 
+        description="Track your litters and individual puppies"
+        icon={<PawPrint className="h-6 w-6" />}
+      >
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+          <p className="text-muted-foreground">Loading your litters...</p>
+        </div>
+      </PageLayout>
+    );
+  }
   
   return (
     <PageLayout 

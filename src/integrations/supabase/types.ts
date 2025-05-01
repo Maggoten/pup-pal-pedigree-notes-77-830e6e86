@@ -51,6 +51,41 @@ export type Database = {
         }
         Relationships: []
       }
+      development_checklist_items: {
+        Row: {
+          completed: boolean | null
+          created_at: string | null
+          id: string
+          item_id: string
+          litter_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string | null
+          id?: string
+          item_id: string
+          litter_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string | null
+          id?: string
+          item_id?: string
+          litter_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_checklist_items_litter_id_fkey"
+            columns: ["litter_id"]
+            isOneToOne: false
+            referencedRelation: "litters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dogs: {
         Row: {
           birthdate: string | null
@@ -111,6 +146,48 @@ export type Database = {
           registration_number?: string | null
           updated_at?: string | null
           vaccinationDate?: string | null
+        }
+        Relationships: []
+      }
+      litters: {
+        Row: {
+          archived: boolean | null
+          created_at: string | null
+          dam_id: string | null
+          dam_name: string
+          date_of_birth: string
+          id: string
+          name: string
+          sire_id: string | null
+          sire_name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          archived?: boolean | null
+          created_at?: string | null
+          dam_id?: string | null
+          dam_name: string
+          date_of_birth: string
+          id?: string
+          name: string
+          sire_id?: string | null
+          sire_name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          archived?: boolean | null
+          created_at?: string | null
+          dam_id?: string | null
+          dam_name?: string
+          date_of_birth?: string
+          id?: string
+          name?: string
+          sire_id?: string | null
+          sire_name?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -358,6 +435,173 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      puppies: {
+        Row: {
+          birth_date_time: string | null
+          birth_weight: number | null
+          breed: string | null
+          collar: string | null
+          color: string | null
+          created_at: string | null
+          current_weight: number | null
+          gender: string
+          id: string
+          image_url: string | null
+          litter_id: string
+          markings: string | null
+          microchip: string | null
+          name: string
+          new_owner: string | null
+          reserved: boolean | null
+          sold: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          birth_date_time?: string | null
+          birth_weight?: number | null
+          breed?: string | null
+          collar?: string | null
+          color?: string | null
+          created_at?: string | null
+          current_weight?: number | null
+          gender: string
+          id?: string
+          image_url?: string | null
+          litter_id: string
+          markings?: string | null
+          microchip?: string | null
+          name: string
+          new_owner?: string | null
+          reserved?: boolean | null
+          sold?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          birth_date_time?: string | null
+          birth_weight?: number | null
+          breed?: string | null
+          collar?: string | null
+          color?: string | null
+          created_at?: string | null
+          current_weight?: number | null
+          gender?: string
+          id?: string
+          image_url?: string | null
+          litter_id?: string
+          markings?: string | null
+          microchip?: string | null
+          name?: string
+          new_owner?: string | null
+          reserved?: boolean | null
+          sold?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "puppies_litter_id_fkey"
+            columns: ["litter_id"]
+            isOneToOne: false
+            referencedRelation: "litters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      puppy_height_logs: {
+        Row: {
+          created_at: string | null
+          date: string
+          height: number
+          id: string
+          puppy_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          height: number
+          id?: string
+          puppy_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          height?: number
+          id?: string
+          puppy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "puppy_height_logs_puppy_id_fkey"
+            columns: ["puppy_id"]
+            isOneToOne: false
+            referencedRelation: "puppies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      puppy_notes: {
+        Row: {
+          content: string
+          created_at: string | null
+          date: string
+          id: string
+          puppy_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          date: string
+          id?: string
+          puppy_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          date?: string
+          id?: string
+          puppy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "puppy_notes_puppy_id_fkey"
+            columns: ["puppy_id"]
+            isOneToOne: false
+            referencedRelation: "puppies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      puppy_weight_logs: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          puppy_id: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          id?: string
+          puppy_id: string
+          weight: number
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          puppy_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "puppy_weight_logs_puppy_id_fkey"
+            columns: ["puppy_id"]
+            isOneToOne: false
+            referencedRelation: "puppies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reminders: {
         Row: {
