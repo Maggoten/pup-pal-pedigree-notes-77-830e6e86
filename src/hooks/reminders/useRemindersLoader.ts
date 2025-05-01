@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { useDogs } from '@/context/DogsContext';
 import { useAuth } from '@/context/AuthContext';
@@ -6,11 +7,12 @@ import { generateLitterReminders } from '@/services/reminders/LitterReminderServ
 import { generateGeneralReminders } from '@/services/reminders/GeneralReminderService';
 import { litterService } from '@/services/LitterService';
 import { fetchReminders, migrateRemindersFromLocalStorage } from '@/services/RemindersService';
+import { Reminder } from '@/types/reminders';
 
 export const useRemindersLoader = (
   hasMigrated: boolean,
   setHasMigrated: (value: boolean) => void,
-  setReminders: (reminders: any[]) => void,
+  setReminders: (reminders: Reminder[]) => void,
   setIsLoading: (isLoading: boolean) => void,
   setHasError: (hasError: boolean) => void,
   setCompletedReminderIds: (value: React.SetStateAction<Set<string>>) => void
@@ -45,11 +47,8 @@ export const useRemindersLoader = (
       ];
       
       // Set generated reminders initially to reduce loading flicker
-      setReminders(prevReminders => {
-        // Keep only custom reminders and add newly generated ones
-        const customReminders = prevReminders.filter(r => r.type === 'custom');
-        return [...generatedReminders, ...customReminders];
-      });
+      // Fix: Instead of using a function update, store the previous state in a variable
+      setReminders(generatedReminders);
       
       // Check if migration is needed (first time only)
       if (!hasMigrated) {
