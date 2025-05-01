@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
@@ -11,14 +11,23 @@ import { RegisterData } from '@/types/auth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login, register, isLoading: authLoading } = useAuth();
+  const { login, register, isLoading: authLoading, isLoggedIn } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
+  
+  // Redirect to home if already logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      console.log('Login page: User already logged in, redirecting to home');
+      navigate('/', { replace: true });
+    }
+  }, [isLoggedIn, navigate]);
 
   const handleLogin = async (values: LoginFormValues) => {
     console.log('Login attempt with:', values.email);
     setIsLoading(true);
+    
     try {
       const success = await login(values.email, values.password);
       
@@ -30,6 +39,7 @@ const Login: React.FC = () => {
         });
         navigate('/');
       } else {
+        console.log('Login failed in handleLogin');
         toast({
           variant: "destructive",
           title: "Login failed",
@@ -76,6 +86,7 @@ const Login: React.FC = () => {
             description: "Your account has been created."
           });
           setShowPayment(false);
+          // Don't navigate here - AuthGuard will handle redirection
         } else {
           toast({
             variant: "destructive",

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, ReactNode, useRef } from 'react';
+import { useState, useEffect, ReactNode, useRef, useCallback } from 'react';
 import { User } from '@/types/auth';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,22 +23,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   
   // Set up auth state listener and check for existing session - only once
   useEffect(() => {
+    // Return early if already initialized to avoid multiple subscriptions
     if (initializedRef.current) return;
     initializedRef.current = true;
     
     console.log('AuthProvider: Initializing once...');
     let isSubscribed = true;
     
+    // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         if (!isSubscribed) return;
         
         console.log('Auth state change event:', event);
+        
+        // Update session state
         setSession(currentSession);
         setIsLoggedIn(!!currentSession);
         setSupabaseUser(currentSession?.user || null);
         
         if (currentSession?.user) {
+          // Set basic user info immediately
           setUser({
             id: currentSession.user.id,
             email: currentSession.user.email || '',
@@ -47,28 +52,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             address: ''
           });
           
-          // Fetch profile in background
+          // Fetch profile in background if not already fetching
           if (!isFetchingProfileRef.current) {
             isFetchingProfileRef.current = true;
-            getUserProfile(currentSession.user.id)
-              .then(profile => {
-                if (profile && isSubscribed) {
-                  setUser(prev => ({
-                    ...prev!,
-                    firstName: profile.first_name,
-                    lastName: profile.last_name,
-                    address: profile.address
-                  }));
-                }
-              })
-              .catch(err => {
-                console.error('Failed to fetch profile:', err);
-              })
-              .finally(() => {
-                isFetchingProfileRef.current = false;
-              });
+            try {
+              const profile = await getUserProfile(currentSession.user.id);
+              
+              if (profile && isSubscribed) {
+                setUser(prev => ({
+                  ...prev!,
+                  firstName: profile.first_name,
+                  lastName: profile.last_name,
+                  address: profile.address
+                }));
+              }
+            } catch (err) {
+              console.error('Failed to fetch profile:', err);
+            } finally {
+              isFetchingProfileRef.current = false;
+            }
           }
         } else if (event === 'SIGNED_OUT' && isSubscribed) {
+          // Clear user state on sign out
           setUser(null);
           setSupabaseUser(null);
           setIsLoggedIn(false);
@@ -77,47 +82,72 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     );
 
     // Initial session check
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      if (!isSubscribed) return;
-      
-      if (initialSession?.user) {
-        console.log('AuthProvider: Initial session found');
-        setSession(initialSession);
-        setSupabaseUser(initialSession.user);
-        setIsLoggedIn(true);
+    const checkInitialSession = async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
         
-        setUser({
-          id: initialSession.user.id,
-          email: initialSession.user.email || '',
-          firstName: '',
-          lastName: '',
-          address: ''
-        });
+        if (!isSubscribed) return;
+        
+        if (initialSession?.user) {
+          console.log('AuthProvider: Initial session found');
+          setSession(initialSession);
+          setSupabaseUser(initialSession.user);
+          setIsLoggedIn(true);
+          
+          setUser({
+            id: initialSession.user.id,
+            email: initialSession.user.email || '',
+            firstName: '',
+            lastName: '',
+            address: ''
+          });
+        } else {
+          console.log('AuthProvider: No initial session found');
+        }
+      } catch (error) {
+        console.error('Error checking initial session:', error);
+      } finally {
+        if (isSubscribed) {
+          setIsLoading(false);
+        }
       }
-      
-      setIsLoading(false);
-    });
+    };
     
+    // Check for existing session
+    checkInitialSession();
+    
+    // Cleanup function to prevent memory leaks
     return () => {
       isSubscribed = false;
       subscription.unsubscribe();
     };
   }, [getUserProfile]);
 
-  // Login wrapper
+  // Login wrapper with better error handling
   const handleLogin = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
+      console.log('Login attempt for:', email);
       const success = await login(email, password);
+      
       if (!success) {
-        console.log('Login failed in handleLogin');
+        console.error('Login failed in handleLogin');
         toast({
           title: "Login failed",
           description: "Please check your credentials and try again.",
           variant: "destructive"
         });
       }
+      
       return success;
+    } catch (error) {
+      console.error('Login error in handleLogin:', error);
+      toast({
+        title: "Login error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -129,6 +159,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const success = await register(userData);
       return success;
+    } catch (error) {
+      console.error('Register error in handleRegister:', error);
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -143,25 +176,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(null);
       setSupabaseUser(null);
       setIsLoggedIn(false);
+    } catch (error) {
+      console.error('Logout error in handleLogout:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const authContextValue = {
+    user,
+    supabaseUser,
+    session,
+    isLoggedIn,
+    loading: isLoading, // for backward compatibility
+    isLoading,
+    login: handleLogin,
+    logout: handleLogout,
+    register: handleRegister
+  };
+
   return (
-    <AuthContext.Provider 
-      value={{ 
-        user, 
-        supabaseUser,
-        session,
-        isLoggedIn, 
-        loading: isLoading, // for backward compatibility
-        isLoading,
-        login: handleLogin, 
-        logout: handleLogout, 
-        register: handleRegister 
-      }}
-    >
+    <AuthContext.Provider value={authContextValue}>
       {children}
     </AuthContext.Provider>
   );

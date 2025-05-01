@@ -43,42 +43,36 @@ export const useBreedingReminders = (): UseRemindersResult => {
   const isMountedRef = useRef(true);
   const isLoadingRef = useRef(false);
   const lastLoadTimeRef = useRef(0);
+  const initialLoadCompletedRef = useRef(false);
   
   // Load reminders only once on mount or when user changes
   useEffect(() => {
     isMountedRef.current = true;
     
-    const loadWithDebounce = async () => {
-      if (isLoadingRef.current || !user) return;
-      
-      const now = Date.now();
-      const timeSinceLastLoad = now - lastLoadTimeRef.current;
-      
-      // Substantial debounce to prevent excessive loads
-      if (timeSinceLastLoad < 10000 && lastLoadTimeRef.current !== 0) {
-        return;
-      }
-      
+    // Only load if user exists and we haven't loaded yet
+    const shouldLoadReminders = user && !initialLoadCompletedRef.current;
+    
+    if (shouldLoadReminders && !isLoadingRef.current) {
+      console.log('useBreedingReminders: Initial load of reminders');
       isLoadingRef.current = true;
       
-      // Clear any existing timer
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current);
-      }
-      
-      try {
-        await loadReminders();
-        lastLoadTimeRef.current = Date.now();
-      } finally {
-        if (isMountedRef.current) {
-          setIsLoading(false);
-        }
-        
-        isLoadingRef.current = false;
-      }
-    };
-    
-    loadWithDebounce();
+      loadReminders()
+        .then(() => {
+          if (isMountedRef.current) {
+            initialLoadCompletedRef.current = true;
+            lastLoadTimeRef.current = Date.now();
+          }
+        })
+        .catch(error => {
+          console.error('Error loading reminders:', error);
+        })
+        .finally(() => {
+          if (isMountedRef.current) {
+            setIsLoading(false);
+            isLoadingRef.current = false;
+          }
+        });
+    }
     
     return () => {
       isMountedRef.current = false;
@@ -86,20 +80,23 @@ export const useBreedingReminders = (): UseRemindersResult => {
         clearTimeout(loadingTimerRef.current);
       }
     };
-  }, [user]);
+  }, [user, loadReminders, setIsLoading]);
   
-  // Refresh reminders with heavy debounce
+  // Heavily debounced refresh function
   const refreshReminders = useCallback(async () => {
+    // Prevent excessive refreshes
     if (isLoadingRef.current) return;
     
     const now = Date.now();
     const timeSinceLastLoad = now - lastLoadTimeRef.current;
     
-    // Heavy debounce to prevent excessive loads
-    if (timeSinceLastLoad < 10000 && lastLoadTimeRef.current !== 0) {
+    // Heavy debounce - 30 seconds between refreshes
+    if (timeSinceLastLoad < 30000 && lastLoadTimeRef.current !== 0) {
+      console.log('useBreedingReminders: Skipping refresh due to debounce');
       return;
     }
     
+    console.log('useBreedingReminders: Refreshing reminders');
     isLoadingRef.current = true;
     setIsLoading(true);
     
@@ -109,8 +106,10 @@ export const useBreedingReminders = (): UseRemindersResult => {
     } catch (error) {
       console.error("Error refreshing reminders:", error);
     } finally {
-      setIsLoading(false);
-      isLoadingRef.current = false;
+      if (isMountedRef.current) {
+        setIsLoading(false);
+        isLoadingRef.current = false;
+      }
     }
   }, [loadReminders, setIsLoading]);
   
