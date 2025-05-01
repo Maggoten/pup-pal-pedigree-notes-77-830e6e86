@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Calendar, Loader2 } from 'lucide-react';
-import { useBreedingReminders } from '@/hooks/useBreedingReminders';
+import { useBreedingReminders } from '@/hooks/reminders';
 import AddReminderForm from './AddReminderForm';
 import RemindersTabContent from './RemindersTabContent';
 import { Alert, AlertDescription } from '@/components/ui/alert';

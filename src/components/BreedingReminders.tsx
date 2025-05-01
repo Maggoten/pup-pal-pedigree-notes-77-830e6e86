@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BellRing, PawPrint, Loader2, Trash2 } from 'lucide-react';
 import RemindersList from './reminders/RemindersList';
-import { useBreedingReminders } from '@/hooks/useBreedingReminders';
+import { useBreedingReminders } from '@/hooks/reminders';
 import RemindersDialog from './reminders/RemindersDialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';

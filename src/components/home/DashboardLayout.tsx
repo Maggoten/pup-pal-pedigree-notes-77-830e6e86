@@ -7,7 +7,7 @@ import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { DogsProvider } from '@/context/DogsContext';
 import PageLayout from '@/components/PageLayout';
 import BreedingStats from '@/components/BreedingStats';
-import { useBreedingReminders } from '@/hooks/useBreedingReminders';
+import { useBreedingReminders } from '@/hooks/reminders';
 import { addDays, subDays } from 'date-fns';
 
 interface DashboardLayoutProps {
