@@ -13,7 +13,7 @@ import PregnancyDetails from "./pages/PregnancyDetails";
 import MyLitters from "./pages/MyLitters";
 import Login from "./pages/Login";
 import AuthGuard from "./components/AuthGuard";
-import { AuthProvider } from "./hooks/useAuth";
+import { AuthProvider } from "./providers/AuthProvider"; // Using direct import path
 import { DogsProvider } from "./context/DogsContext";
 import { getFirstActivePregnancy } from "./services/PregnancyService";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -61,26 +61,56 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <AuthGuard>
-                <DogsProvider>
-                  <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/" element={<Index />} />
-                    <Route path="/my-dogs" element={<MyDogs />} />
-                    <Route path="/planned-litters" element={<PlannedLitters />} />
-                    {/* Handle pregnancy routes with loading state */}
-                    <Route path="/pregnancy" element={loading ? <div>Loading...</div> : 
-                      firstPregnancyId ? 
-                        <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
-                        <Pregnancy />
-                    } />
-                    <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
-                    <Route path="/my-litters" element={<MyLitters />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </DogsProvider>
-              </AuthGuard>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/" element={
+                  <AuthGuard>
+                    <DogsProvider>
+                      <Index />
+                    </DogsProvider>
+                  </AuthGuard>
+                } />
+                <Route path="/my-dogs" element={
+                  <AuthGuard>
+                    <DogsProvider>
+                      <MyDogs />
+                    </DogsProvider>
+                  </AuthGuard>
+                } />
+                <Route path="/planned-litters" element={
+                  <AuthGuard>
+                    <DogsProvider>
+                      <PlannedLitters />
+                    </DogsProvider>
+                  </AuthGuard>
+                } />
+                <Route path="/pregnancy" element={
+                  <AuthGuard>
+                    <DogsProvider>
+                      {loading ? <div>Loading...</div> : 
+                        firstPregnancyId ? 
+                          <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
+                          <Pregnancy />
+                      }
+                    </DogsProvider>
+                  </AuthGuard>
+                } />
+                <Route path="/pregnancy/:id" element={
+                  <AuthGuard>
+                    <DogsProvider>
+                      <PregnancyDetails />
+                    </DogsProvider>
+                  </AuthGuard>
+                } />
+                <Route path="/my-litters" element={
+                  <AuthGuard>
+                    <DogsProvider>
+                      <MyLitters />
+                    </DogsProvider>
+                  </AuthGuard>
+                } />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>

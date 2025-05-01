@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { login, register, logout, getUserProfile } = useAuthActions();
   const isFetchingProfileRef = useRef(false);
+  const authErrorDisplayedRef = useRef(false);
 
   // Set up auth state listener and check for existing session
   useEffect(() => {
@@ -70,6 +71,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                   address: profile.address
                 });
                 console.log('Profile retrieved: success');
+                // Reset the error display flag when profile is loaded successfully
+                authErrorDisplayedRef.current = false;
               } else if (isSubscribed) {
                 console.error('Failed to fetch profile after retries');
                 setUser({
@@ -80,11 +83,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                   address: ''
                 });
                 
-                toast({
-                  title: "Profile partially loaded",
-                  description: "Some profile data couldn't be retrieved",
-                  variant: "default"
-                });
+                // Only show toast once per session
+                if (!authErrorDisplayedRef.current) {
+                  toast({
+                    title: "Profile partially loaded",
+                    description: "Some profile data couldn't be retrieved",
+                    variant: "default"
+                  });
+                  authErrorDisplayedRef.current = true;
+                }
               }
               
               isFetchingProfileRef.current = false;
@@ -160,11 +167,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               address: ''
             });
             
-            toast({
-              title: "Profile partially loaded",
-              description: "Some profile data couldn't be retrieved",
-              variant: "default"
-            });
+            // Only show toast once per session
+            if (!authErrorDisplayedRef.current) {
+              toast({
+                title: "Profile partially loaded",
+                description: "Some profile data couldn't be retrieved",
+                variant: "default"
+              });
+              authErrorDisplayedRef.current = true;
+            }
           }
           
           isFetchingProfileRef.current = false;

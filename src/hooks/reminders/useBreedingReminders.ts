@@ -41,12 +41,17 @@ export const useBreedingReminders = (): UseRemindersResult => {
   const { addCustomReminder } = useCustomReminderActions(loadReminders);
   const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(true);
+  const isLoadingRef = useRef(false); // To prevent multiple simultaneous loads
   
   // Load reminders on component mount and when dependencies change
   useEffect(() => {
     isMountedRef.current = true;
     
     const loadWithDelay = async () => {
+      // Prevent duplicate loads
+      if (isLoadingRef.current) return;
+      isLoadingRef.current = true;
+      
       // Clear any existing timer
       if (loadingTimerRef.current) {
         clearTimeout(loadingTimerRef.current);
@@ -59,12 +64,22 @@ export const useBreedingReminders = (): UseRemindersResult => {
         }
       }, 300);
       
-      await loadReminders();
-      
-      // Clear the loading timer if reminders loaded quickly
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current);
-        loadingTimerRef.current = null;
+      try {
+        await loadReminders();
+      } catch (error) {
+        console.error("Error loading reminders:", error);
+      } finally {
+        // Clear the loading timer if reminders loaded
+        if (loadingTimerRef.current) {
+          clearTimeout(loadingTimerRef.current);
+          loadingTimerRef.current = null;
+        }
+        
+        if (isMountedRef.current) {
+          setIsLoading(false);
+        }
+        
+        isLoadingRef.current = false;
       }
     };
     
@@ -80,7 +95,16 @@ export const useBreedingReminders = (): UseRemindersResult => {
   
   // Refresh reminders
   const refreshReminders = useCallback(async () => {
-    await loadReminders();
+    if (isLoadingRef.current) return; // Prevent duplicate loads
+    
+    isLoadingRef.current = true;
+    try {
+      await loadReminders();
+    } catch (error) {
+      console.error("Error refreshing reminders:", error);
+    } finally {
+      isLoadingRef.current = false;
+    }
   }, [loadReminders]);
   
   return {

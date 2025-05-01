@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext'; // Fix the import path
 import { useToast } from '@/components/ui/use-toast';
 
 interface AuthGuardProps {
@@ -26,9 +26,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     }
   }, [isLoggedIn, isLoginPage, supabaseUser, isLoading, toast]);
 
-  // If still loading auth state, show nothing to prevent flashes
+  // If still loading auth state, show a loading indicator instead of nothing
   if (isLoading) {
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   // If not logged in and not on login page, redirect to login
