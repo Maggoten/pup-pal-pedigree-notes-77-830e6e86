@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
@@ -11,19 +10,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
   const { isLoggedIn, isLoading } = useAuth();
   
-  // Is this the login page?
-  const isLoginPage = location.pathname === '/login';
+  console.log('AuthGuard rendering:', { isLoggedIn, isLoading, path: location.pathname });
   
-  // Log auth state for debugging
-  useEffect(() => {
-    console.log('AuthGuard:', { 
-      isLoggedIn, 
-      isLoading, 
-      isLoginPage,
-      pathname: location.pathname
-    });
-  }, [isLoggedIn, isLoading, isLoginPage, location.pathname]);
-
   // Show loader while checking authentication
   if (isLoading) {
     return (
@@ -33,14 +21,14 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     );
   }
 
-  // If not logged in and not on login page, redirect to login
-  if (!isLoggedIn && !isLoginPage) {
+  // If not logged in, redirect to login
+  if (!isLoggedIn && location.pathname !== '/login') {
     console.log('AuthGuard: Not logged in, redirecting to login');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // If logged in and on login page, redirect to home
-  if (isLoggedIn && isLoginPage) {
+  if (isLoggedIn && location.pathname === '/login') {
     console.log('AuthGuard: Already logged in, redirecting to home');
     return <Navigate to="/" replace />;
   }
