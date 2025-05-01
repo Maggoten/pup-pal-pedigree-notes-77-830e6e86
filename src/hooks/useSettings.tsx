@@ -1,6 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 import { 
   getUserSettings, 
   updateKennelInfo, 
@@ -8,8 +8,8 @@ import {
   addSharedUser,
   removeSharedUser
 } from '@/services/settingsService';
-import { KennelInfo, SharedUser } from '@/types/settings';
-import { toast } from '@/components/ui/use-toast';
+import { KennelInfo, SharedUser, UserSettings } from '@/types/settings';
+import { toast } from '@/hooks/use-toast';
 
 export const useSettings = () => {
   const { user } = useAuth();

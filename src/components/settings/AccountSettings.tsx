@@ -18,6 +18,11 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
     alert('This would open a payment form in a real application.');
   };
   
+  // Since we're refactoring the structure, we'll adapt to get subscription info if available
+  // Assuming subscription_status from profile gives us basic info
+  const subscriptionTier = settings.profile.subscription_status === 'premium' ? 'premium' : 
+                          settings.profile.subscription_status === 'professional' ? 'professional' : 'free';
+  
   // Function to format subscription end date
   const formatSubscriptionDate = (date?: Date) => {
     if (!date) return 'N/A';
@@ -30,7 +35,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
   
   // Get subscription badge and color
   const getSubscriptionBadge = () => {
-    switch (settings.subscriptionTier) {
+    switch (subscriptionTier) {
       case 'premium':
         return <Badge className="bg-amber-500">Premium</Badge>;
       case 'professional':
@@ -63,7 +68,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
       ]
     };
     
-    return features[settings.subscriptionTier || 'free'] || features.free;
+    return features[subscriptionTier as keyof typeof features] || features.free;
   };
   
   return (

@@ -29,7 +29,8 @@ const PregnancyDetails: React.FC = () => {
         <>
           <PregnancyHeader 
             femaleName={pregnancy.femaleName} 
-            maleName={pregnancy.maleName} 
+            maleName={pregnancy.maleName}
+            matingDate={pregnancy.matingDate}
           />
           
           <PregnancySummaryCards 
