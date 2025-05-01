@@ -42,14 +42,24 @@ export const useBreedingReminders = (): UseRemindersResult => {
   const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(true);
   const isLoadingRef = useRef(false); // To prevent multiple simultaneous loads
+  const lastLoadTimeRef = useRef(0);
   
   // Load reminders on component mount and when dependencies change
   useEffect(() => {
     isMountedRef.current = true;
     
     const loadWithDelay = async () => {
-      // Prevent duplicate loads
+      // Prevent duplicate loads and debounce frequent calls
       if (isLoadingRef.current) return;
+      
+      const now = Date.now();
+      const timeSinceLastLoad = now - lastLoadTimeRef.current;
+      
+      // Debounce: Don't reload if we reloaded less than 5 seconds ago
+      if (timeSinceLastLoad < 5000 && lastLoadTimeRef.current !== 0) {
+        return;
+      }
+      
       isLoadingRef.current = true;
       
       // Clear any existing timer
@@ -66,6 +76,7 @@ export const useBreedingReminders = (): UseRemindersResult => {
       
       try {
         await loadReminders();
+        lastLoadTimeRef.current = Date.now();
       } catch (error) {
         console.error("Error loading reminders:", error);
       } finally {
@@ -97,9 +108,18 @@ export const useBreedingReminders = (): UseRemindersResult => {
   const refreshReminders = useCallback(async () => {
     if (isLoadingRef.current) return; // Prevent duplicate loads
     
+    const now = Date.now();
+    const timeSinceLastLoad = now - lastLoadTimeRef.current;
+    
+    // Debounce: Don't reload if we reloaded less than 2 seconds ago
+    if (timeSinceLastLoad < 2000 && lastLoadTimeRef.current !== 0) {
+      return;
+    }
+    
     isLoadingRef.current = true;
     try {
       await loadReminders();
+      lastLoadTimeRef.current = Date.now();
     } catch (error) {
       console.error("Error refreshing reminders:", error);
     } finally {

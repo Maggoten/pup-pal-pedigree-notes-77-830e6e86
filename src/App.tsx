@@ -13,7 +13,7 @@ import PregnancyDetails from "./pages/PregnancyDetails";
 import MyLitters from "./pages/MyLitters";
 import Login from "./pages/Login";
 import AuthGuard from "./components/AuthGuard";
-import { AuthProvider } from "./providers/AuthProvider"; // Using direct import path
+import { AuthProvider } from "./providers/AuthProvider"; 
 import { DogsProvider } from "./context/DogsContext";
 import { getFirstActivePregnancy } from "./services/PregnancyService";
 import ErrorBoundary from "./components/ErrorBoundary";

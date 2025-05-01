@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext'; // Fix the import path
+import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 
 interface AuthGuardProps {
@@ -10,23 +10,23 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn, isLoading, supabaseUser } = useAuth();
+  const { user, isLoggedIn, isLoading } = useAuth();
   const { toast } = useToast();
 
   // Check if user is on the login page
   const isLoginPage = location.pathname === '/login';
 
   useEffect(() => {
-    if (!isLoggedIn && !isLoginPage && !supabaseUser && !isLoading) {
+    if (!isLoggedIn && !isLoginPage && !isLoading) {
       toast({
         title: "Authentication required",
         description: "Please log in to access this page",
         variant: "destructive"
       });
     }
-  }, [isLoggedIn, isLoginPage, supabaseUser, isLoading, toast]);
+  }, [isLoggedIn, isLoginPage, isLoading, toast]);
 
-  // If still loading auth state, show a loading indicator instead of nothing
+  // If still loading auth state, show a loading indicator
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">

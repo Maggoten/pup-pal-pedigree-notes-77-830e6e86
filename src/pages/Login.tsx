@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -28,9 +29,6 @@ const Login: React.FC = () => {
           description: "Welcome back to your breeding journal!"
         });
         navigate('/');
-      } else {
-        console.log('Login page: Login failed');
-        // Toast is handled in useAuthActions
       }
     } catch (error) {
       console.error("Login page: Login error:", error);
@@ -80,8 +78,6 @@ const Login: React.FC = () => {
             setShowPayment(false);
           }
         } else {
-          console.log('Login page: Registration failed');
-          // Toast is handled in useAuthActions
           setShowPayment(false);
         }
       } catch (error) {
