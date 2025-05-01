@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dog } from '@/types/dogs';
@@ -13,6 +12,7 @@ import {
   getEventColor 
 } from '@/services/CalendarEventService';
 import { useAuth } from '@/context/AuthContext';
+import { parseISO, addDays, format, isAfter, isBefore, isSameDay } from 'date-fns';
 
 export const useCalendarEvents = (dogs: Dog[]) => {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
@@ -20,6 +20,123 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   const [hasError, setHasError] = useState<boolean>(false);
   const [hasMigrated, setHasMigrated] = useState<boolean>(false);
   const { user } = useAuth();
+  
+  // Generate automated events based on dog data (birthdays, vaccinations, heats, due dates)
+  const generateAutomatedEvents = (dogList: Dog[]): CalendarEvent[] => {
+    const autoEvents: CalendarEvent[] = [];
+    const today = new Date();
+    const oneYearFromNow = addDays(today, 365);
+    
+    // Process each dog for relevant events
+    dogList.forEach(dog => {
+      // Add birthday events
+      if (dog.dateOfBirth) {
+        try {
+          const birthDate = parseISO(dog.dateOfBirth);
+          const currentYear = today.getFullYear();
+          
+          // Add birthday for current year and next year
+          [currentYear, currentYear + 1].forEach(year => {
+            const birthdayThisYear = new Date(year, birthDate.getMonth(), birthDate.getDate());
+            
+            // Skip if birthday is more than a year in the future
+            if (isBefore(birthdayThisYear, oneYearFromNow)) {
+              const age = year - birthDate.getFullYear();
+              if (age > 0) { // Only show birthdays for dogs already born
+                autoEvents.push({
+                  id: `birthday-${dog.id}-${year}`,
+                  title: `${dog.name}'s ${age}${getOrdinalSuffix(age)} Birthday`,
+                  date: birthdayThisYear,
+                  type: 'birthday',
+                  dogId: dog.id,
+                  dogName: dog.name
+                });
+              }
+            }
+          });
+        } catch (error) {
+          console.error(`Error processing birthday for dog ${dog.name}:`, error);
+        }
+      }
+      
+      // Add vaccination events
+      if (dog.vaccinationDate) {
+        try {
+          const lastVaccination = parseISO(dog.vaccinationDate);
+          const nextVaccination = addDays(lastVaccination, 365); // Yearly vaccinations
+          
+          if (isAfter(nextVaccination, today) && isBefore(nextVaccination, oneYearFromNow)) {
+            autoEvents.push({
+              id: `vaccination-${dog.id}`,
+              title: `${dog.name}'s Vaccination Due`,
+              date: nextVaccination,
+              type: 'vaccination',
+              dogId: dog.id,
+              dogName: dog.name
+            });
+          }
+        } catch (error) {
+          console.error(`Error processing vaccination for dog ${dog.name}:`, error);
+        }
+      }
+      
+      // Add heat events for female dogs
+      if (dog.gender === 'female') {
+        const upcomingHeats = calculateUpcomingHeats([dog], 12); // Look ahead 12 months
+        const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
+          id: `heat-${heat.dogId}-${index}`,
+          title: `${heat.dogName}'s Heat Cycle`,
+          date: heat.date,
+          type: 'heat',
+          dogId: heat.dogId,
+          dogName: heat.dogName
+        }));
+        
+        autoEvents.push(...heatEvents);
+      }
+      
+      // Add due date events for pregnant females
+      if (dog.gender === 'female' && dog.breedingHistory?.matings && dog.breedingHistory.matings.length > 0) {
+        dog.breedingHistory.matings.forEach((mating, index) => {
+          try {
+            const matingDate = parseISO(mating.date);
+            // Only process recent matings (in the past 60 days)
+            if (isBefore(matingDate, today) && isAfter(matingDate, addDays(today, -60))) {
+              const dueDate = addDays(matingDate, 63); // ~9 weeks pregnancy
+              
+              if (isAfter(dueDate, today)) {
+                autoEvents.push({
+                  id: `due-date-${dog.id}-${index}`,
+                  title: `${dog.name}'s Due Date`,
+                  date: dueDate,
+                  type: 'due-date',
+                  dogId: dog.id,
+                  dogName: dog.name
+                });
+              }
+            }
+          } catch (error) {
+            console.error(`Error processing mating date for dog ${dog.name}:`, error);
+          }
+        });
+      }
+    });
+    
+    return autoEvents;
+  };
+  
+  const getOrdinalSuffix = (number: number): string => {
+    if (number % 100 >= 11 && number % 100 <= 13) {
+      return 'th';
+    }
+    
+    switch (number % 10) {
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
+    }
+  };
   
   // Load events on component mount or when dependencies change
   useEffect(() => {
@@ -44,21 +161,12 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       setHasError(false);
       
       try {
-        // Generate sample events while waiting for backend
-        const sampleEvents = getSampleEvents();
-        const upcomingHeats = calculateUpcomingHeats(dogs);
-        const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
-          id: `heat-${heat.dogId}-${index}`,
-          title: 'Heat Cycle',
-          date: heat.date,
-          type: 'heat',
-          dogId: heat.dogId,
-          dogName: heat.dogName
-        }));
+        // Generate automated events
+        const automatedEvents = generateAutomatedEvents(dogs);
         
         // Set initial data quickly to prevent flickering
         if (isMounted) {
-          setCalendarEvents([...sampleEvents, ...heatEvents]);
+          setCalendarEvents(automatedEvents);
         }
         
         // Check if migration is needed (first time only)
@@ -80,13 +188,14 @@ export const useCalendarEvents = (dogs: Dog[]) => {
           // Update with complete data
           if (isMounted) {
             setCalendarEvents(prev => {
-              const nonCustomEvents = prev.filter(event => event.type !== 'custom');
-              return [...nonCustomEvents, ...customEvents];
+              // Keep only custom events and add automated events
+              const customOnly = customEvents.filter(event => event.type === 'custom');
+              return [...automatedEvents, ...customOnly];
             });
           }
         } catch (fetchErr) {
           console.error("Error fetching custom events:", fetchErr);
-          // Don't set error state here - we still have sample data
+          // Don't set error state here - we still have automated data
         }
       } catch (error) {
         console.error("Error loading calendar events:", error);
@@ -112,7 +221,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   // Function to get events for a specific date
   const getEventsForDate = (date: Date) => {
     return calendarEvents.filter(event => 
-      new Date(event.date).toDateString() === date.toDateString()
+      isSameDay(new Date(event.date), date)
     );
   };
   

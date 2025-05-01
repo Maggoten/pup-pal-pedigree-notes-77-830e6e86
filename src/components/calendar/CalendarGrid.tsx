@@ -32,10 +32,18 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   
   const today = new Date();
   const handleEventClick = (event: CalendarEvent) => {
-    if (isMobile) {
-      setSelectedEvent(event);
+    // Only allow editing custom events
+    if (event.type === 'custom') {
+      if (isMobile) {
+        setSelectedEvent(event);
+      } else {
+        onEventClick(event);
+      }
     } else {
-      onEventClick(event);
+      // For automated events, just show details in the mobile view
+      if (isMobile) {
+        setSelectedEvent(event);
+      }
     }
   };
   
@@ -154,10 +162,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           colorClass={getEventColor(selectedEvent.type)}
           onClose={handleCloseEventDetails}
           onDelete={selectedEvent.type === 'custom' ? () => handleDeleteEvent(selectedEvent.id) : undefined}
-          onEdit={() => {
+          onEdit={selectedEvent.type === 'custom' ? () => {
             onEventClick(selectedEvent);
             handleCloseEventDetails();
-          }}
+          } : undefined}
         />
       )}
     </>
@@ -165,3 +173,4 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 };
 
 export default CalendarGrid;
+

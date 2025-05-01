@@ -71,7 +71,7 @@ const BreedingCalendar: React.FC = () => {
                 onDeleteEvent={deleteEvent}
                 onAddEvent={handleAddEvent}
                 onEditEvent={handleEditEvent}
-                compact={false} // Use full size calendar now
+                compact={false} // Use full size calendar
                 hasEvents={hasEvents}
               />
             </div>
@@ -103,3 +103,4 @@ const BreedingCalendar: React.FC = () => {
 };
 
 export default BreedingCalendar;
+

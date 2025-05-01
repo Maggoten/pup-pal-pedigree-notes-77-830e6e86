@@ -1,4 +1,3 @@
-
 import { useDogs } from '@/context/DogsContext';
 import { toast } from '@/components/ui/use-toast';
 import { useState, useEffect } from 'react';
