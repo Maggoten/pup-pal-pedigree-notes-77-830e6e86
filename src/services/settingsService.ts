@@ -20,21 +20,10 @@ export const getUserSettings = async (user: User | null) => {
       throw profileError;
     }
     
-    // Fetch profiles of shared users
-    const { data: sharedUsers, error: sharedError } = await supabase
+    // Fetch shared users separately with a join through their profiles
+    const { data: sharedUsersData, error: sharedError } = await supabase
       .from('shared_users')
-      .select(`
-        id,
-        role,
-        status,
-        created_at,
-        shared_with_id,
-        profiles!shared_users_shared_with_id_fkey(
-          email,
-          first_name,
-          last_name
-        )
-      `)
+      .select('*, shared_with:shared_with_id(id, email, first_name, last_name)')
       .eq('owner_id', user.id);
     
     if (sharedError) {
@@ -42,9 +31,9 @@ export const getUserSettings = async (user: User | null) => {
     }
     
     // Transform the shared users data into the expected format
-    const formattedSharedUsers = sharedUsers?.map(su => ({
+    const formattedSharedUsers = sharedUsersData?.map(su => ({
       id: su.shared_with_id,
-      email: su.profiles?.email || '',
+      email: su.shared_with?.email || '',
       role: su.role as 'admin' | 'editor' | 'viewer',
       joinedAt: new Date(su.created_at),
       status: su.status as 'pending' | 'active'
@@ -150,8 +139,7 @@ export const addSharedUser = async (
         owner_id: user.id,
         shared_with_id: userToAdd.id,
         role: role,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        status: 'pending'
       });
     
     if (error) {
