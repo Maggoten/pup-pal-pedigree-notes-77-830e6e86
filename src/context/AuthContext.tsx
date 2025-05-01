@@ -2,54 +2,35 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
+import { User as AppUser } from '@/types/auth';
 
 export interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
+  supabaseUser: User | null;
   session: Session | null;
   loading: boolean;
+  isLoading: boolean;
+  isLoggedIn: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (userData: any) => Promise<boolean>;
+  logout: () => Promise<void>;
 }
 
 // Create the context with a default value
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  supabaseUser: null,
   session: null,
-  loading: true
+  loading: true,
+  isLoading: true,
+  isLoggedIn: false,
+  login: async () => false,
+  register: async () => false,
+  logout: async () => {}
 });
 
-// Provider component
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const value = {
-    user,
-    session,
-    loading
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+// Export the context for the provider
+export default AuthContext;
 
 // Custom hook to use the auth context
 export const useAuth = () => {
@@ -59,6 +40,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-// Export the context for the provider
-export default AuthContext;

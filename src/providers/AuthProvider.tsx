@@ -203,6 +203,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         supabaseUser,
         session,
         isLoggedIn, 
+        loading: isLoading, // for backward compatibility
         isLoading,
         login: handleLogin, 
         logout: handleLogout, 

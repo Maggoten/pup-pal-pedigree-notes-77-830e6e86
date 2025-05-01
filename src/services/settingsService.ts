@@ -1,132 +1,161 @@
 
-import { KennelInfo, SharedUser, UserSettings } from "@/types/settings";
-import { User } from "@/types/auth";
+import { supabase } from '@/integrations/supabase/client';
+import { KennelInfo, SharedUser } from '@/types/settings';
+import { User } from '@/types/auth';
 
-// Mock settings data - in a real application, this would come from a database
-const MOCK_USER_SETTINGS: Record<string, UserSettings> = {
-  "default@example.com": {
-    firstName: "Default",
-    lastName: "User",
-    email: "default@example.com",
-    kennelInfo: {
-      kennelName: "Happy Paws Kennel",
-      address: "123 Dogwood Lane",
-      website: "happypawskennel.com",
-      phone: "555-123-4567"
-    },
-    subscriptionTier: "free",
-    sharedUsers: []
+export const getUserSettings = async (user: User | null) => {
+  if (!user?.id) {
+    throw new Error('User ID is required');
   }
-};
-
-// Get user settings
-export const getUserSettings = async (user: User | null): Promise<UserSettings | null> => {
-  // In a real application, this would fetch data from an API
-  if (!user?.email) return null;
   
-  // Return mock data if available, or create default settings
-  return MOCK_USER_SETTINGS[user.email] || {
-    email: user.email,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    kennelInfo: { kennelName: "" },
-    subscriptionTier: "free",
-    sharedUsers: []
-  };
-};
-
-// Update kennel information
-export const updateKennelInfo = async (
-  user: User | null, 
-  kennelInfo: KennelInfo
-): Promise<UserSettings | null> => {
-  if (!user?.email) return null;
-  
-  // In a real app, this would call an API to update the database
-  const settings = await getUserSettings(user);
-  if (settings) {
-    settings.kennelInfo = kennelInfo;
+  try {
+    // Fetch the user's profile from the profiles table
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
     
-    // Update mock data
-    MOCK_USER_SETTINGS[user.email] = settings;
+    if (profileError) {
+      throw profileError;
+    }
+    
+    // Fetch shared users
+    const { data: sharedUsers, error: sharedError } = await supabase
+      .from('shared_users')
+      .select('*')
+      .eq('owner_id', user.id);
+    
+    if (sharedError) {
+      throw sharedError;
+    }
+    
+    return {
+      profile,
+      sharedUsers: sharedUsers || []
+    };
+  } catch (error) {
+    console.error('Error fetching user settings:', error);
+    throw error;
   }
-  
-  return settings;
 };
 
-// Update personal information
+export const updateKennelInfo = async (user: User | null, kennelInfo: KennelInfo) => {
+  if (!user?.id) {
+    throw new Error('User ID is required');
+  }
+  
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        kennel_name: kennelInfo.kennelName,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', user.id);
+    
+    if (error) {
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error updating kennel info:', error);
+    throw error;
+  }
+};
+
 export const updatePersonalInfo = async (
   user: User | null, 
   personalInfo: { firstName: string; lastName: string }
-): Promise<UserSettings | null> => {
-  if (!user?.email) return null;
-  
-  // In a real app, this would call an API to update the database
-  const settings = await getUserSettings(user);
-  if (settings) {
-    settings.firstName = personalInfo.firstName;
-    settings.lastName = personalInfo.lastName;
-    
-    // Update mock data
-    MOCK_USER_SETTINGS[user.email] = settings;
+) => {
+  if (!user?.id) {
+    throw new Error('User ID is required');
   }
   
-  return settings;
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        first_name: personalInfo.firstName,
+        last_name: personalInfo.lastName,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', user.id);
+    
+    if (error) {
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error updating personal info:', error);
+    throw error;
+  }
 };
 
-// Add shared user
 export const addSharedUser = async (
   user: User | null, 
   email: string, 
   role: 'admin' | 'editor' | 'viewer'
-): Promise<SharedUser | null> => {
-  if (!user?.email) return null;
-  
-  const settings = await getUserSettings(user);
-  if (!settings) return null;
-  
-  if (!settings.sharedUsers) {
-    settings.sharedUsers = [];
+) => {
+  if (!user?.id) {
+    throw new Error('User ID is required');
   }
   
-  // Check if user is already shared
-  const existingUser = settings.sharedUsers.find(u => u.email === email);
-  if (existingUser) {
-    return null;
+  try {
+    // First check if the user exists
+    const { data: userToAdd, error: userError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .single();
+    
+    if (userError || !userToAdd) {
+      throw new Error('User not found');
+    }
+    
+    // Add the shared user
+    const { error } = await supabase
+      .from('shared_users')
+      .insert({
+        owner_id: user.id,
+        shared_with_id: userToAdd.id,
+        role: role,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+    
+    if (error) {
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error adding shared user:', error);
+    throw error;
   }
-  
-  // Create new shared user
-  const newSharedUser: SharedUser = {
-    id: `shared-${Date.now()}`,
-    email,
-    role,
-    joinedAt: new Date(),
-    status: 'pending'
-  };
-  
-  settings.sharedUsers.push(newSharedUser);
-  MOCK_USER_SETTINGS[user.email] = settings;
-  
-  return newSharedUser;
 };
 
-// Remove shared user
-export const removeSharedUser = async (
-  user: User | null, 
-  sharedUserId: string
-): Promise<boolean> => {
-  if (!user?.email) return false;
-  
-  const settings = await getUserSettings(user);
-  if (!settings || !settings.sharedUsers) return false;
-  
-  const initialLength = settings.sharedUsers.length;
-  settings.sharedUsers = settings.sharedUsers.filter(u => u.id !== sharedUserId);
-  
-  if (settings.sharedUsers.length !== initialLength) {
-    MOCK_USER_SETTINGS[user.email] = settings;
-    return true;
+export const removeSharedUser = async (user: User | null, sharedUserId: string) => {
+  if (!user?.id) {
+    throw new Error('User ID is required');
   }
   
-  return false;
+  try {
+    const { error } = await supabase
+      .from('shared_users')
+      .delete()
+      .eq('owner_id', user.id)
+      .eq('shared_with_id', sharedUserId);
+    
+    if (error) {
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error removing shared user:', error);
+    throw error;
+  }
 };

@@ -6,6 +6,7 @@ import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import CalendarContent from './calendar/CalendarContent';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AddEventFormValues } from './calendar/types';
 
 const BreedingCalendar: React.FC = () => {
   const { dogs } = useDogs();
@@ -18,6 +19,17 @@ const BreedingCalendar: React.FC = () => {
     isLoading,
     hasError
   } = useCalendarEvents(dogs);
+  
+  // Create wrapper functions to handle the async nature of the original functions
+  const handleAddEvent = (data: AddEventFormValues) => {
+    addEvent(data);
+    return true; // Return true synchronously for UI feedback
+  };
+  
+  const handleEditEvent = (eventId: string, data: AddEventFormValues) => {
+    editEvent(eventId, data);
+    return true; // Return true synchronously for UI feedback
+  };
   
   return (
     <Card className="border-greige-300 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full bg-greige-50">
@@ -40,8 +52,8 @@ const BreedingCalendar: React.FC = () => {
           getEventsForDate={getEventsForDate}
           getEventColor={getEventColor}
           onDeleteEvent={deleteEvent}
-          onAddEvent={addEvent}
-          onEditEvent={editEvent}
+          onAddEvent={handleAddEvent}
+          onEditEvent={handleEditEvent}
           compact={false} // Use full size calendar now
         />
       )}
