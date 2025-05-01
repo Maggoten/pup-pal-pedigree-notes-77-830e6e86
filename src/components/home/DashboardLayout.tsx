@@ -6,7 +6,6 @@ import DashboardHero from './DashboardHero';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { DogsProvider } from '@/context/DogsContext';
 import PageLayout from '@/components/PageLayout';
-import AddDogButton from '@/components/AddDogButton';
 import BreedingStats from '@/components/BreedingStats';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import { addDays, subDays } from 'date-fns';
@@ -14,13 +13,12 @@ import { addDays, subDays } from 'date-fns';
 interface DashboardLayoutProps {
   user: { email?: string } | null;
   activePregnancies: ActivePregnancy[];
-  onAddDogClick: () => void;
+  onAddDogClick?: () => void;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
   user, 
-  activePregnancies, 
-  onAddDogClick 
+  activePregnancies 
 }) => {
   const username = user?.email?.split('@')[0] || 'Breeder';
   const { reminders, handleMarkComplete } = useBreedingReminders();
@@ -86,8 +84,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           </div>
         </div>
       </PageLayout>
-        
-      <AddDogButton onClick={onAddDogClick} />
     </DogsProvider>
   );
 };
