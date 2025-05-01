@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { Litter } from '@/types/breeding';
 import LitterCard from './LitterCard';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -11,7 +11,8 @@ interface LitterGridViewProps {
   selectedLitterId?: string | null;
 }
 
-const LitterGridView: React.FC<LitterGridViewProps> = ({ 
+// Use memo to prevent unnecessary re-renders
+const LitterGridView: React.FC<LitterGridViewProps> = memo(({ 
   litters, 
   onSelectLitter, 
   onArchive,
@@ -30,6 +31,8 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
         willChange: 'contents',
         // Apply containment to prevent layout shifts from bubbling up
         contain: 'layout size',
+        // Force hardware acceleration
+        transform: 'translateZ(0)'
       }}
     >
       {litters.map(litter => (
@@ -43,6 +46,9 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
       ))}
     </div>
   );
-};
+});
+
+// Display name for React DevTools
+LitterGridView.displayName = 'LitterGridView';
 
 export default LitterGridView;

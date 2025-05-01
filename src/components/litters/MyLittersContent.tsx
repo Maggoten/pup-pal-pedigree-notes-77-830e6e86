@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PawPrint } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import { 
@@ -7,7 +7,7 @@ import {
   TabsContent, 
 } from '@/components/ui/tabs';
 import { useLitterFilters } from './LitterFilterProvider';
-import { useLitterManagement } from '@/hooks/useLitterManagement';
+import { useLittersQuery } from '@/hooks/useLittersQuery';
 import useLitterFilteredData from '@/hooks/useLitterFilteredData';
 import SelectedLitterSection from './SelectedLitterSection';
 import LitterFilterHeader from './filters/LitterFilterHeader';
@@ -15,27 +15,31 @@ import LitterTabContent from './tabs/LitterTabContent';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { plannedLittersService } from '@/services/planned-litters';
+import { Litter } from '@/types/breeding';
 
 const MyLittersContent: React.FC = () => {
+  // Use our new React Query hook for data fetching
   const {
     activeLitters,
     archivedLitters,
-    selectedLitterId,
-    plannedLitters,
-    showAddLitterDialog,
-    setShowAddLitterDialog,
-    selectedLitter,
     isLoading,
-    handleAddLitter,
-    handleUpdateLitter,
-    handleDeleteLitter,
-    handleArchiveLitter,
-    handleAddPuppy,
-    handleUpdatePuppy,
-    handleDeletePuppy,
-    handleSelectLitter,
+    addLitter,
+    updateLitter,
+    deleteLitter,
+    archiveLitter,
+    addPuppy,
+    updatePuppy,
+    deletePuppy,
     getAvailableYears
-  } = useLitterManagement();
+  } = useLittersQuery();
+  
+  // Selected litter state
+  const [selectedLitterId, setSelectedLitterId] = useState<string | null>(null);
+  const [plannedLitters, setPlannedLitters] = useState<any[]>([]);
+  
+  // UI state
+  const [showAddLitterDialog, setShowAddLitterDialog] = useState(false);
   
   // Get filter state from context
   const { 
@@ -49,6 +53,29 @@ const MyLittersContent: React.FC = () => {
     setArchivedPage
   } = useLitterFilters();
   
+  // Load planned litters only when needed
+  useEffect(() => {
+    const loadPlannedLitters = async () => {
+      try {
+        const plannedLittersData = await plannedLittersService.loadPlannedLitters();
+        setPlannedLitters(plannedLittersData);
+      } catch (error) {
+        console.error('Error loading planned litters:', error);
+      }
+    };
+    
+    loadPlannedLitters();
+  }, []);
+  
+  // Set selected litter when data is loaded
+  useEffect(() => {
+    if (activeLitters.length > 0 && !selectedLitterId) {
+      setSelectedLitterId(activeLitters[0].id);
+    } else if (activeLitters.length === 0 && archivedLitters.length > 0 && !selectedLitterId) {
+      setSelectedLitterId(archivedLitters[0].id);
+    }
+  }, [activeLitters, archivedLitters, selectedLitterId]);
+  
   // Use our hook for filtering logic
   const {
     filteredActiveLitters,
@@ -60,14 +87,28 @@ const MyLittersContent: React.FC = () => {
     isFilterActive
   } = useLitterFilteredData(activeLitters, archivedLitters);
   
+  // Find the currently selected litter
+  const selectedLitter = selectedLitterId 
+    ? [...activeLitters, ...archivedLitters].find(litter => litter.id === selectedLitterId) 
+    : null;
+  
   // Handle creating a new litter
   const handleAddLitterClick = () => {
     setShowAddLitterDialog(true);
   };
   
+  // Handle selecting a litter
+  const handleSelectLitter = (litter: Litter) => {
+    setSelectedLitterId(litter.id);
+  };
+  
   const handleClearFilter = () => {
     setFilterYear(null);
     setSearchQuery('');
+  };
+  
+  const handleArchiveLitter = (litterId: string, archive: boolean) => {
+    archiveLitter(litterId, archive);
   };
   
   return (
@@ -77,7 +118,7 @@ const MyLittersContent: React.FC = () => {
       icon={<PawPrint className="h-6 w-6" />}
     >
       {/* Main content container with fixed dimensions */}
-      <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 pb-6 min-h-[600px]">
+      <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 pb-6 min-h-[600px] stable-layout">
         <Tabs 
           value={categoryTab} 
           onValueChange={setCategoryTab} 
@@ -93,7 +134,7 @@ const MyLittersContent: React.FC = () => {
                 </div>
                 <Skeleton className="h-10 w-40" />
               </div>
-              <div className="space-y-4">
+              <div className="space-y-4 no-content-jump">
                 <div className="flex justify-between">
                   <Skeleton className="h-10 w-64" />
                   <Skeleton className="h-10 w-40" />
@@ -114,12 +155,12 @@ const MyLittersContent: React.FC = () => {
                 setCategoryTab={setCategoryTab}
                 showAddLitterDialog={showAddLitterDialog}
                 setShowAddLitterDialog={setShowAddLitterDialog}
-                onAddLitter={handleAddLitter}
+                onAddLitter={addLitter}
                 plannedLitters={plannedLitters}
                 availableYears={getAvailableYears()}
               />
               
-              <TabsContent value="active" className="space-y-6 min-h-[400px]">
+              <TabsContent value="active" className="space-y-6 min-h-[400px] stable-layout">
                 <LitterTabContent
                   litters={activeLitters}
                   filteredLitters={filteredActiveLitters}
@@ -136,7 +177,7 @@ const MyLittersContent: React.FC = () => {
                 />
               </TabsContent>
               
-              <TabsContent value="archived" className="space-y-6 min-h-[400px]">
+              <TabsContent value="archived" className="space-y-6 min-h-[400px] stable-layout">
                 <LitterTabContent
                   litters={archivedLitters}
                   filteredLitters={filteredArchivedLitters}
@@ -159,8 +200,8 @@ const MyLittersContent: React.FC = () => {
       
       {/* Selected litter section with consistent height */}
       {selectedLitter && (
-        <div className="mt-6">
-          <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 min-h-[300px]">
+        <div className="mt-6 stable-layout">
+          <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 min-h-[300px] transform-gpu">
             {isLoading ? (
               <div className="space-y-4">
                 <Skeleton className="h-10 w-64" />
@@ -170,12 +211,12 @@ const MyLittersContent: React.FC = () => {
             ) : (
               <SelectedLitterSection
                 selectedLitter={selectedLitter}
-                onUpdateLitter={handleUpdateLitter}
-                onDeleteLitter={handleDeleteLitter}
-                onArchiveLitter={handleArchiveLitter}
-                onAddPuppy={handleAddPuppy}
-                onUpdatePuppy={handleUpdatePuppy}
-                onDeletePuppy={handleDeletePuppy}
+                onUpdateLitter={updateLitter}
+                onDeleteLitter={deleteLitter}
+                onArchiveLitter={archiveLitter}
+                onAddPuppy={addPuppy}
+                onUpdatePuppy={updatePuppy}
+                onDeletePuppy={deletePuppy}
               />
             )}
           </div>

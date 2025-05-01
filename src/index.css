@@ -109,7 +109,7 @@
   }
   
   .dog-card:hover {
-    @apply transform -translate-y-1;
+    @apply transform-gpu -translate-y-1;
   }
   
   .stats-card {
@@ -145,15 +145,15 @@
   }
 }
 
-/* Custom animations - Modified to reduce layout shifts */
+/* Custom animations - Optimized to eliminate layout shifts */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(0); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes scale-in {
-  from { transform: scale(0.99); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from { transform: scale(0.99) translateZ(0); opacity: 0; }
+  to { transform: scale(1) translateZ(0); opacity: 1; }
 }
 
 @keyframes pulse {
@@ -170,7 +170,7 @@
 
 .animate-scale-in {
   animation: scale-in 0.2s ease-out forwards;
-  will-change: opacity;
+  will-change: opacity, transform;
   backface-visibility: hidden;
   transform: translateZ(0);
 }
@@ -184,10 +184,19 @@
   contain: layout style paint;
   transform: translateZ(0);
   will-change: contents;
+  position: relative;
 }
 
 /* Prevent content jumps */
 .no-content-jump {
   overflow: hidden;
   contain: strict;
+  position: relative;
+}
+
+/* Hardware accelerated elements */
+.transform-gpu {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
 }
