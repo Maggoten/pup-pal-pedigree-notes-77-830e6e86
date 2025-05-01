@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PawPrint } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import { 
@@ -15,8 +15,12 @@ import LitterTabContent from './tabs/LitterTabContent';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const MyLittersContent: React.FC = () => {
+  // Track if the component has mounted to prevent flash of loading content
+  const [isMounted, setIsMounted] = useState(false);
+  
   const {
     activeLitters,
     archivedLitters,
@@ -60,6 +64,11 @@ const MyLittersContent: React.FC = () => {
     isFilterActive
   } = useLitterFilteredData(activeLitters, archivedLitters);
   
+  // Effect to set mounted state
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
   // Handle creating a new litter
   const handleAddLitterClick = () => {
     setShowAddLitterDialog(true);
@@ -70,6 +79,11 @@ const MyLittersContent: React.FC = () => {
     setSearchQuery('');
   };
   
+  // Return null on initial render to prevent flash
+  if (!isMounted) {
+    return null;
+  }
+  
   // Show loading state
   if (isLoading) {
     return (
@@ -78,9 +92,18 @@ const MyLittersContent: React.FC = () => {
         description="Track your litters and individual puppies"
         icon={<PawPrint className="h-6 w-6" />}
       >
-        <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-          <p className="text-muted-foreground">Loading your litters...</p>
+        <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 pb-6 min-h-[500px]">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-10 w-48" />
+              <Skeleton className="h-10 w-36" />
+            </div>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              <Skeleton className="h-40 w-full" />
+              <Skeleton className="h-40 w-full" />
+              <Skeleton className="h-40 w-full" />
+            </div>
+          </div>
         </div>
       </PageLayout>
     );
