@@ -31,11 +31,25 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
 
   return (
     <Card 
-      className={`h-full min-h-[180px] overflow-hidden hover:shadow-md transition-all duration-300 ${
+      className={`h-full min-h-[180px] overflow-hidden hover:shadow-md ${
         isSelected ? 'ring-2 ring-primary shadow-lg' : ''
       } cursor-pointer`}
       onClick={() => onSelect(litter)}
-      style={{ transform: isSelected ? 'scale(1.01)' : 'scale(1)', transition: 'transform 0.2s ease' }}
+      style={{ 
+        // Use CSS transform for hardware acceleration
+        transform: isSelected ? 'translateZ(0) scale(1.01)' : 'translateZ(0) scale(1)', 
+        // Use smooth transition with no Y translation
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        // Prevent content shifting during animations
+        contain: 'layout paint',
+        // Force stable dimensions to prevent content jumping
+        height: '100%',
+        minHeight: '220px',
+        // Ensure consistent width
+        width: '100%',
+        // Add GPU acceleration hint
+        willChange: isSelected ? 'transform' : 'auto'
+      }}
     >
       <CardHeader className="pb-1 pt-3 px-4">
         <div className="flex justify-between items-start">

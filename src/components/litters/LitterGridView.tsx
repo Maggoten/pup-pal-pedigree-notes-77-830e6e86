@@ -22,7 +22,15 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
   return (
     <div 
       className={`grid grid-cols-1 ${isMobile ? '' : 'sm:grid-cols-2 lg:grid-cols-3'} gap-4`}
-      style={{ minHeight: litters.length > 0 ? '400px' : '200px' }}
+      style={{ 
+        minHeight: litters.length > 0 ? '500px' : '200px',
+        // Ensure stable layout with a consistent width
+        width: '100%',
+        // Prevent content shifting during animations
+        willChange: 'contents',
+        // Apply containment to prevent layout shifts from bubbling up
+        contain: 'layout size',
+      }}
     >
       {litters.map(litter => (
         <LitterCard 
