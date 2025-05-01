@@ -1,5 +1,5 @@
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useDogs } from '@/context/DogsContext';
 import { useAuth } from '@/context/AuthContext';
 import { generateDogReminders } from '@/services/reminders/DogReminderService';
@@ -19,8 +19,9 @@ export const useRemindersLoader = (
 ) => {
   const { dogs } = useDogs();
   const { user } = useAuth();
+  const isLoadingRef = useRef(false);
   
-  // Load reminders function
+  // Load reminders function with debouncing to prevent multiple simultaneous calls
   const loadReminders = useCallback(async () => {
     if (!user) {
       setReminders([]);
@@ -28,6 +29,12 @@ export const useRemindersLoader = (
       return;
     }
     
+    // Prevent multiple simultaneous calls
+    if (isLoadingRef.current) {
+      return;
+    }
+    
+    isLoadingRef.current = true;
     setIsLoading(true);
     setHasError(false);
     
@@ -45,10 +52,6 @@ export const useRemindersLoader = (
         ...litterRems,
         ...generalRems
       ];
-      
-      // Set generated reminders initially to reduce loading flicker
-      // Fix: Instead of using a function update, store the previous state in a variable
-      setReminders(generatedReminders);
       
       // Check if migration is needed (first time only)
       if (!hasMigrated) {
@@ -79,6 +82,7 @@ export const useRemindersLoader = (
       setHasError(true);
     } finally {
       setIsLoading(false);
+      isLoadingRef.current = false;
     }
   }, [dogs, user, hasMigrated, setHasMigrated, setReminders, setIsLoading, setHasError, setCompletedReminderIds]);
   

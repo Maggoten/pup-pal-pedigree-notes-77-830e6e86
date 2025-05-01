@@ -1,8 +1,8 @@
 
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, ReactNode, useRef } from 'react';
 import { User } from '@/types/auth';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
-import { supabase, Profile } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import AuthContext from '@/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { login, register, logout, getUserProfile } = useAuthActions();
+  const isFetchingProfileRef = useRef(false);
 
   // Set up auth state listener and check for existing session
   useEffect(() => {
@@ -41,23 +42,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setTimeout(async () => {
             try {
               if (!isSubscribed) return;
+              if (isFetchingProfileRef.current) return; // Prevent duplicate requests
+              
+              isFetchingProfileRef.current = true;
               
               // Get user profile from database with retry logic
               let retryCount = 0;
               let profile = null;
               
-              while (retryCount < 3 && !profile) {
+              while (retryCount < 5 && !profile) {
                 try {
                   profile = await getUserProfile(currentSession.user.id);
                   if (profile) break;
                 } catch (err) {
                   console.log(`Profile fetch attempt ${retryCount + 1} failed:`, err);
-                  await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between retries
+                  await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Exponential backoff
                 }
                 retryCount++;
               }
               
-              if (profile) {
+              if (profile && isSubscribed) {
                 setUser({
                   id: currentSession.user.id,
                   email: currentSession.user.email || '',
@@ -65,15 +69,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                   lastName: profile.last_name,
                   address: profile.address
                 });
-              } else {
+                console.log('Profile retrieved: success');
+              } else if (isSubscribed) {
                 console.error('Failed to fetch profile after retries');
+                setUser({
+                  id: currentSession.user.id,
+                  email: currentSession.user.email || '',
+                  firstName: '',
+                  lastName: '',
+                  address: ''
+                });
+                
                 toast({
-                  variant: "destructive",
-                  title: "Error loading profile",
-                  description: "Please try refreshing the page"
+                  title: "Profile partially loaded",
+                  description: "Some profile data couldn't be retrieved",
+                  variant: "default"
                 });
               }
+              
+              isFetchingProfileRef.current = false;
             } catch (error) {
+              isFetchingProfileRef.current = false;
               console.error('Error in auth state change handler:', error);
             }
           }, 0);
@@ -106,17 +122,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setSupabaseUser(initialSession.user);
           setIsLoggedIn(true);
           
+          if (isFetchingProfileRef.current) return; // Prevent duplicate requests
+          isFetchingProfileRef.current = true;
+          
           // Get user profile from database with retry logic
           let retryCount = 0;
           let profile = null;
           
-          while (retryCount < 3 && !profile) {
+          while (retryCount < 5 && !profile) {
             try {
               profile = await getUserProfile(initialSession.user.id);
               if (profile) break;
             } catch (err) {
               console.log(`Initial profile fetch attempt ${retryCount + 1} failed:`, err);
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
             }
             retryCount++;
           }
@@ -129,19 +148,33 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               lastName: profile.last_name,
               address: profile.address
             });
+            console.log('Profile retrieved: success');
           } else if (isSubscribed) {
             console.error('Failed to fetch initial profile after retries');
+            // Fallback to basic user info without profile data
+            setUser({
+              id: initialSession.user.id,
+              email: initialSession.user.email || '',
+              firstName: '',
+              lastName: '',
+              address: ''
+            });
+            
             toast({
-              variant: "destructive",
-              title: "Error loading profile",
-              description: "Please try refreshing the page"
+              title: "Profile partially loaded",
+              description: "Some profile data couldn't be retrieved",
+              variant: "default"
             });
           }
+          
+          isFetchingProfileRef.current = false;
         }
       } catch (error) {
         console.error('Error checking initial session:', error);
       } finally {
-        setIsLoading(false);
+        if (isSubscribed) {
+          setIsLoading(false);
+        }
       }
     };
 

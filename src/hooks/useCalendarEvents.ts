@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dog } from '@/types/dogs';
 import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
@@ -19,6 +20,8 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   const [hasError, setHasError] = useState<boolean>(false);
   const [hasMigrated, setHasMigrated] = useState<boolean>(false);
   const { user } = useAuth();
+  const isLoadingRef = useRef(false);
+  const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Generate automated events based on dog data (birthdays, vaccinations, heats, due dates)
   const generateAutomatedEvents = useCallback((dogList: Dog[]): CalendarEvent[] => {
@@ -145,15 +148,17 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       return;
     }
     
+    // Prevent multiple simultaneous calls
+    if (isLoadingRef.current) {
+      return;
+    }
+    
+    isLoadingRef.current = true;
     setHasError(false);
-    setIsLoading(true);
     
     try {
       // Generate automated events
       const automatedEvents = generateAutomatedEvents(dogs);
-      
-      // Set initial data quickly to prevent flickering
-      setCalendarEvents(automatedEvents);
       
       // Check if migration is needed (first time only)
       if (!hasMigrated) {
@@ -178,50 +183,64 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       } catch (fetchErr) {
         console.error("Error fetching custom events:", fetchErr);
         // Don't set error state here - we still have automated data
+        setCalendarEvents(automatedEvents);
       }
     } catch (error) {
       console.error("Error loading calendar events:", error);
       setHasError(true);
     } finally {
       setIsLoading(false);
+      isLoadingRef.current = false;
     }
   }, [dogs, user, hasMigrated, generateAutomatedEvents]);
   
   // Load events on component mount or when dependencies change
   useEffect(() => {
     let isMounted = true;
-    let loadingTimer: ReturnType<typeof setTimeout>;
     
     const delayedLoad = async () => {
+      // Clear any existing timer
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
+      }
+      
       // Only set loading state after a short delay to prevent flickering
-      loadingTimer = setTimeout(() => {
+      loadingTimerRef.current = setTimeout(() => {
         if (isMounted) {
           setIsLoading(true);
         }
       }, 300);
       
       await loadEvents();
+      
+      // Clear the loading timer if events loaded quickly
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
+        loadingTimerRef.current = null;
+      }
     };
     
     delayedLoad();
     
     return () => {
       isMounted = false;
-      clearTimeout(loadingTimer);
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
+      }
     };
   }, [dogs, user, hasMigrated, loadEvents]);
   
   // Function to get events for a specific date
-  const getEventsForDate = (date: Date) => {
+  const getEventsForDate = useCallback((date: Date) => {
     return calendarEvents.filter(event => 
       isSameDay(new Date(event.date), date)
     );
-  };
+  }, [calendarEvents]);
   
   // Function to refresh events 
-  const refreshEvents = async () => {
+  const refreshEvents = useCallback(async () => {
     await loadEvents();
-  };
+  }, [loadEvents]);
   
   // Function to add a new event
   const handleAddEvent = async (data: AddEventFormValues) => {

@@ -1,5 +1,5 @@
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useRemindersState } from './useRemindersState';
 import { useRemindersLoader } from './useRemindersLoader';
 import { useRemindersProcessor } from './useRemindersProcessor';
@@ -39,28 +39,42 @@ export const useBreedingReminders = (): UseRemindersResult => {
   );
   
   const { addCustomReminder } = useCustomReminderActions(loadReminders);
+  const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
   
   // Load reminders on component mount and when dependencies change
   useEffect(() => {
-    let isMounted = true;
-    let loadingTimer: ReturnType<typeof setTimeout>;
+    isMountedRef.current = true;
     
     const loadWithDelay = async () => {
+      // Clear any existing timer
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
+      }
+      
       // Only set loading state after a delay to avoid flickering for fast loads
-      loadingTimer = setTimeout(() => {
-        if (isMounted) {
+      loadingTimerRef.current = setTimeout(() => {
+        if (isMountedRef.current) {
           setIsLoading(true);
         }
       }, 300);
       
       await loadReminders();
+      
+      // Clear the loading timer if reminders loaded quickly
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
+        loadingTimerRef.current = null;
+      }
     };
     
     loadWithDelay();
     
     return () => {
-      isMounted = false;
-      clearTimeout(loadingTimer);
+      isMountedRef.current = false;
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
+      }
     };
   }, [user, hasMigrated, loadReminders, setIsLoading]);
   

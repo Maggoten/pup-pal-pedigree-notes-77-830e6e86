@@ -1,19 +1,16 @@
 
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BellRing, PawPrint, Loader2, Trash2 } from 'lucide-react';
+import { BellRing, PawPrint, Loader2 } from 'lucide-react';
 import RemindersList from './reminders/RemindersList';
 import { useBreedingReminders } from '@/hooks/reminders';
 import RemindersDialog from './reminders/RemindersDialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { cleanupOrphanedReminders } from '@/services/CleanupService';
 
 const BreedingReminders: React.FC = () => {
   const { reminders, isLoading, hasError, handleMarkComplete, refreshReminders } = useBreedingReminders();
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
-  const [isCleaningUp, setIsCleaningUp] = useState(false);
   
   // Take only the top 3 high priority reminders for compact view
   const highPriorityReminders = useMemo(() => {
@@ -30,19 +27,6 @@ const BreedingReminders: React.FC = () => {
     return reminders.slice(0, 3);
   }, [highPriorityReminders, reminders]);
   
-  const handleCleanupOrphanedReminders = async () => {
-    setIsCleaningUp(true);
-    try {
-      await cleanupOrphanedReminders();
-      // Refresh reminders after cleanup
-      await refreshReminders();
-    } catch (error) {
-      console.error('Error during reminders cleanup:', error);
-    } finally {
-      setIsCleaningUp(false);
-    }
-  };
-  
   return (
     <>
       <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full relative bg-greige-50">
@@ -57,24 +41,6 @@ const BreedingReminders: React.FC = () => {
               <div className="absolute animate-ping w-3 h-3 rounded-full bg-primary/30"></div>
               <div className="w-3 h-3 rounded-full bg-primary/60"></div>
             </div>
-          </div>
-          
-          {/* Add cleanup button */}
-          <div className="absolute top-3 right-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCleanupOrphanedReminders}
-              disabled={isCleaningUp}
-              className="flex items-center gap-1 text-xs"
-            >
-              {isCleaningUp ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <Trash2 className="h-3 w-3" />
-              )}
-              Clean
-            </Button>
           </div>
           
           <CardTitle className="flex items-center gap-2 text-primary">
