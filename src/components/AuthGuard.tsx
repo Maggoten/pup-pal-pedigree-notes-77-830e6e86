@@ -10,21 +10,26 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn, supabaseUser } = useAuth();
+  const { isLoggedIn, isLoading, supabaseUser } = useAuth();
   const { toast } = useToast();
 
   // Check if user is on the login page
   const isLoginPage = location.pathname === '/login';
 
   useEffect(() => {
-    if (!isLoggedIn && !isLoginPage && !supabaseUser) {
+    if (!isLoggedIn && !isLoginPage && !supabaseUser && !isLoading) {
       toast({
         title: "Authentication required",
         description: "Please log in to access this page",
         variant: "destructive"
       });
     }
-  }, [isLoggedIn, isLoginPage, supabaseUser, toast]);
+  }, [isLoggedIn, isLoginPage, supabaseUser, isLoading, toast]);
+
+  // If still loading auth state, show nothing to prevent flashes
+  if (isLoading) {
+    return null;
+  }
 
   // If not logged in and not on login page, redirect to login
   if (!isLoggedIn && !isLoginPage) {

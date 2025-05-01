@@ -33,12 +33,13 @@ export const saveChecklistItemStatus = async (
 
 /**
  * Applies saved completion statuses to checklist items
- * (For now, we'll return the items directly as they'll be updated later)
  */
 export const applyStoredStatuses = (
   items: ChecklistItem[], 
-  litterId: string
+  savedStatuses: Record<string, boolean>
 ): ChecklistItem[] => {
-  // We'll only use this for initial loading
-  return items;
+  return items.map(item => ({
+    ...item,
+    isCompleted: savedStatuses[item.id] ?? item.isCompleted
+  }));
 };
