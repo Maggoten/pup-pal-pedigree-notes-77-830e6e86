@@ -10,9 +10,10 @@ import AddDogButton from '@/components/AddDogButton';
 import BreedingStats from '@/components/BreedingStats';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import { addDays, subDays } from 'date-fns';
+import { User } from '@/types/auth';
 
 interface DashboardLayoutProps {
-  user: { email?: string } | null;
+  user: User | null;
   activePregnancies: ActivePregnancy[];
   onAddDogClick: () => void;
 }
@@ -22,7 +23,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   activePregnancies, 
   onAddDogClick 
 }) => {
-  const username = user?.email?.split('@')[0] || 'Breeder';
+  // Get the personalized username
+  const username = useMemo(() => {
+    if (user?.firstName) {
+      // Use first name if available (preferred)
+      return user.firstName;
+    } else if (user?.email) {
+      // Fallback to email prefix
+      return user.email.split('@')[0];
+    }
+    // Ultimate fallback
+    return 'Breeder';
+  }, [user]);
+  
   const { reminders, handleMarkComplete } = useBreedingReminders();
   
   // Sample data for planned litters and recent litters
