@@ -10,7 +10,6 @@ import { getActivePregnancies } from '@/services/PregnancyService';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/context/AuthContext';
-import PregnancySummaryCards from '@/components/pregnancy/PregnancySummaryCards';
 
 import ActivePregnanciesList from '@/components/pregnancy/ActivePregnanciesList';
 import TemperatureLogOverview from '@/components/pregnancy/TemperatureLogOverview';
@@ -113,14 +112,6 @@ const Pregnancy: React.FC = () => {
         </div>
       ) : (
         <>
-          {activePregnancies.length > 0 && (
-            <PregnancySummaryCards 
-              matingDate={activePregnancies[0].matingDate}
-              expectedDueDate={activePregnancies[0].expectedDueDate}
-              daysLeft={activePregnancies[0].daysLeft}
-            />
-          )}
-
           <div className="grid gap-6 md:grid-cols-2">
             <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
               <ActivePregnanciesList 

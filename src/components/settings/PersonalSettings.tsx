@@ -36,13 +36,12 @@ const PersonalSettings: React.FC<PersonalSettingsProps> = ({ settings }) => {
   const { updatePersonalInfo, updateKennelInfo, isUpdatingPersonal, isUpdatingKennel } = useSettings();
   
   const defaultValues: PersonalFormValues = {
-    firstName: settings.profile.first_name || '',
-    lastName: settings.profile.last_name || '',
-    kennelName: settings.profile.kennel_name || '',
-    address: settings.profile.address || '',
-    // These fields might need proper initialization if they are added to the profile
-    website: '', // Add to profile if needed
-    phone: settings.profile.phone || '',
+    firstName: settings.firstName || '',
+    lastName: settings.lastName || '',
+    kennelName: settings.kennelInfo?.kennelName || '',
+    address: settings.kennelInfo?.address || '',
+    website: settings.kennelInfo?.website || '',
+    phone: settings.kennelInfo?.phone || '',
   };
   
   const form = useForm<PersonalFormValues>({
