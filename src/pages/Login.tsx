@@ -17,13 +17,13 @@ const Login: React.FC = () => {
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
 
   const handleLogin = async (values: LoginFormValues) => {
+    console.log('Login attempt with:', values.email);
     setIsLoading(true);
     try {
-      console.log('Login page: Attempting login for:', values.email);
       const success = await login(values.email, values.password);
       
       if (success) {
-        console.log('Login page: Login successful, redirecting');
+        console.log('Login successful, redirecting to home');
         toast({
           title: "Login successful",
           description: "Welcome back to your breeding journal!"
@@ -31,7 +31,7 @@ const Login: React.FC = () => {
         navigate('/');
       }
     } catch (error) {
-      console.error("Login page: Login error:", error);
+      console.error("Login error:", error);
       toast({
         variant: "destructive",
         title: "Login error",
@@ -43,11 +43,13 @@ const Login: React.FC = () => {
   };
 
   const handleRegistration = (values: RegistrationFormValues) => {
+    console.log('Registration form submitted, showing payment');
     setRegistrationData(values);
     setShowPayment(true);
   };
 
   const handlePayment = async () => {
+    console.log('Payment submitted, registering user');
     setIsLoading(true);
     
     if (registrationData) {
@@ -60,28 +62,27 @@ const Login: React.FC = () => {
           address: registrationData.address
         };
         
-        console.log('Login page: Attempting registration');
         const success = await register(registerData);
         
         if (success) {
-          console.log('Login page: Registration successful');
           toast({
             title: "Registration successful",
             description: "Your account has been created. Please check your email for confirmation instructions."
           });
           
-          // Navigate but only if email confirmation is not required
+          // Only navigate if user has been fully authenticated
           if (document.cookie.includes('supabase-auth-token')) {
+            console.log('Registration successful with token, redirecting to home');
             navigate('/');
           } else {
-            // Stay on login page so user can log in after confirming email
+            console.log('Registration successful without token, staying on login page');
             setShowPayment(false);
           }
         } else {
           setShowPayment(false);
         }
       } catch (error) {
-        console.error("Login page: Registration error:", error);
+        console.error("Registration error:", error);
         toast({
           variant: "destructive",
           title: "Registration error",

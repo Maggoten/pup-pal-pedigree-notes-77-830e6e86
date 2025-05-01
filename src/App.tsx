@@ -13,7 +13,7 @@ import PregnancyDetails from "./pages/PregnancyDetails";
 import MyLitters from "./pages/MyLitters";
 import Login from "./pages/Login";
 import AuthGuard from "./components/AuthGuard";
-import { AuthProvider } from "./providers/AuthProvider"; 
+import { AuthProvider } from "./providers/AuthProvider";
 import { DogsProvider } from "./context/DogsContext";
 import { getFirstActivePregnancy } from "./services/PregnancyService";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -24,7 +24,6 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      // Use meta for error handling in newer versions of React Query
       meta: {
         onError: (error: Error) => {
           console.error('React Query error:', error);
@@ -56,13 +55,16 @@ const App = () => {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AuthProvider>
             <BrowserRouter>
               <Routes>
+                {/* Login page available to everyone */}
                 <Route path="/login" element={<Login />} />
+                
+                {/* Protected routes */}
                 <Route path="/" element={
                   <AuthGuard>
                     <DogsProvider>
@@ -112,8 +114,8 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
-          </TooltipProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
