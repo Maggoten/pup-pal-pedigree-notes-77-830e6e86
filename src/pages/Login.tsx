@@ -29,6 +29,12 @@ const Login: React.FC = () => {
           description: "Welcome back to your breeding journal!"
         });
         navigate('/');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Login failed",
+          description: "Please check your credentials and try again."
+        });
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -67,18 +73,15 @@ const Login: React.FC = () => {
         if (success) {
           toast({
             title: "Registration successful",
-            description: "Your account has been created. Please check your email for confirmation instructions."
+            description: "Your account has been created."
           });
-          
-          // Only navigate if user has been fully authenticated
-          if (document.cookie.includes('supabase-auth-token')) {
-            console.log('Registration successful with token, redirecting to home');
-            navigate('/');
-          } else {
-            console.log('Registration successful without token, staying on login page');
-            setShowPayment(false);
-          }
+          setShowPayment(false);
         } else {
+          toast({
+            variant: "destructive",
+            title: "Registration failed",
+            description: "Please try again with different credentials."
+          });
           setShowPayment(false);
         }
       } catch (error) {

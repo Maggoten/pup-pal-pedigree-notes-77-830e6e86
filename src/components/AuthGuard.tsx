@@ -13,8 +13,6 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // Check if user is on the login page
   const isLoginPage = location.pathname === '/login';
 
-  console.log('AuthGuard:', { isLoggedIn, isLoading, isLoginPage, pathname: location.pathname });
-
   // Show minimal loader while checking auth
   if (isLoading) {
     return (
@@ -26,13 +24,11 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
   // If not logged in and not on login page, redirect to login
   if (!isLoggedIn && !isLoginPage) {
-    console.log('AuthGuard: Redirecting to login');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // If logged in and on login page, redirect to home
   if (isLoggedIn && isLoginPage) {
-    console.log('AuthGuard: Redirecting to home');
     return <Navigate to="/" replace />;
   }
 
