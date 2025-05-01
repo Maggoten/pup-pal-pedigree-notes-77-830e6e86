@@ -66,14 +66,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
         ageInWeeks={ageInWeeks}
       />
       
-      {/* Compact Development Checklist - Always visible */}
-      <CompactDevelopmentSection 
-        litter={selectedLitter}
-        onToggleItem={handleToggleChecklistItem}
-        key={`compact-${checklistVersion}`}
-      />
-      
-      {/* Tab-based layout for different sections */}
+      {/* Tab-based layout for different sections - Now positioned first */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
           <TabsTrigger value="puppies" className="flex items-center gap-2">
@@ -117,6 +110,13 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
           />
         </TabsContent>
       </Tabs>
+      
+      {/* Compact Development Checklist - Now positioned below the tabs */}
+      <CompactDevelopmentSection 
+        litter={selectedLitter}
+        onToggleItem={handleToggleChecklistItem}
+        key={`compact-${checklistVersion}`}
+      />
     </div>
   );
 };
