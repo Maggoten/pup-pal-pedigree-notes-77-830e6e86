@@ -76,26 +76,32 @@ const MyLittersContent: React.FC = () => {
       description="Track your litters and individual puppies"
       icon={<PawPrint className="h-6 w-6" />}
     >
-      <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 pb-6">
-        <Tabs value={categoryTab} onValueChange={setCategoryTab} className="space-y-4" defaultValue={categoryTab}>
+      {/* Wrap the entire content in a container with fixed dimensions to prevent layout shifts */}
+      <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 pb-6 min-h-[50vh]">
+        <Tabs 
+          value={categoryTab} 
+          onValueChange={setCategoryTab} 
+          className="space-y-4" 
+          defaultValue={categoryTab}
+        >
           {isLoading ? (
             <>
               <div className="flex items-center justify-between border-b mb-4 pb-3">
                 <div className="flex gap-4">
-                  <Skeleton className="h-8 w-20" />
-                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-10 w-32" />
+                  <Skeleton className="h-10 w-32" />
                 </div>
-                <Skeleton className="h-10 w-36" />
+                <Skeleton className="h-10 w-40" />
               </div>
               <div className="space-y-4">
                 <div className="flex justify-between">
-                  <Skeleton className="h-10 w-48" />
-                  <Skeleton className="h-10 w-36" />
+                  <Skeleton className="h-10 w-64" />
+                  <Skeleton className="h-10 w-40" />
                 </div>
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                  <Skeleton className="h-40 w-full" />
-                  <Skeleton className="h-40 w-full" />
-                  <Skeleton className="h-40 w-full" />
+                  <Skeleton className="h-48 w-full" />
+                  <Skeleton className="h-48 w-full" />
+                  <Skeleton className="h-48 w-full" />
                 </div>
               </div>
             </>
@@ -151,22 +157,23 @@ const MyLittersContent: React.FC = () => {
         </Tabs>
       </div>
       
+      {/* Use consistent placeholder dimensions in the selected litter section */}
       {isLoading ? (
         selectedLitter && (
-          <div className="mt-6 space-y-6">
-            <div className="bg-greige-50 rounded-lg border border-greige-300 p-4">
+          <div className="mt-6">
+            <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 min-h-[300px]">
               <div className="space-y-4">
-                <Skeleton className="h-8 w-48" />
-                <Skeleton className="h-14 w-full" />
-                <Skeleton className="h-40 w-full" />
+                <Skeleton className="h-10 w-64" />
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-60 w-full" />
               </div>
             </div>
           </div>
         )
       ) : (
         selectedLitter && (
-          <div className="mt-6 space-y-6">
-            <div className="bg-greige-50 rounded-lg border border-greige-300 p-4">
+          <div className="mt-6">
+            <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 min-h-[300px]">
               <SelectedLitterSection
                 selectedLitter={selectedLitter}
                 onUpdateLitter={handleUpdateLitter}
