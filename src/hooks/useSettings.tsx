@@ -28,7 +28,14 @@ export const useSettings = () => {
       // Transform the data to match our UserSettings interface
       const userSettings: UserSettings = {
         profile: data.profile,
-        sharedUsers: data.sharedUsers || [],
+        // Map the sharedUsers array to ensure roles are properly typed
+        sharedUsers: data.sharedUsers?.map(user => ({
+          ...user,
+          // Ensure role is one of the allowed types or default to 'viewer'
+          role: (['admin', 'editor', 'viewer'].includes(user.role) 
+            ? user.role as 'admin' | 'editor' | 'viewer' 
+            : 'viewer'),
+        })) || [],
         
         // Derive subscription tier from profile.subscription_status
         subscriptionTier: data.profile.subscription_status === 'premium' ? 'premium' :
