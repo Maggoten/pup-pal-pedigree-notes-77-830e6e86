@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useLitterFilters } from './LitterFilterProvider';
-import { useLittersQuery } from '@/hooks/useLittersQuery';
+import { useLittersQuery } from '@/hooks/litters';  // Updated import path
 import useLitterFilteredData from '@/hooks/useLitterFilteredData';
 import { Litter } from '@/types/breeding';
 import { plannedLittersService } from '@/services/planned-litters';
