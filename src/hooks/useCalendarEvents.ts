@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dog } from '@/types/dogs';
 import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
-import { getSampleEvents } from '@/data/sampleCalendarEvents';
 import { 
   fetchCalendarEvents, 
   addEventToSupabase, 
@@ -22,7 +21,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   const { user } = useAuth();
   
   // Generate automated events based on dog data (birthdays, vaccinations, heats, due dates)
-  const generateAutomatedEvents = (dogList: Dog[]): CalendarEvent[] => {
+  const generateAutomatedEvents = useCallback((dogList: Dog[]): CalendarEvent[] => {
     const autoEvents: CalendarEvent[] = [];
     const today = new Date();
     const oneYearFromNow = addDays(today, 365);
@@ -123,7 +122,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     });
     
     return autoEvents;
-  };
+  }, []);
   
   const getOrdinalSuffix = (number: number): string => {
     if (number % 100 >= 11 && number % 100 <= 13) {
@@ -138,19 +137,62 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     }
   };
   
+  // Function to load events
+  const loadEvents = useCallback(async () => {
+    if (!user) {
+      setCalendarEvents([]);
+      setIsLoading(false);
+      return;
+    }
+    
+    setHasError(false);
+    setIsLoading(true);
+    
+    try {
+      // Generate automated events
+      const automatedEvents = generateAutomatedEvents(dogs);
+      
+      // Set initial data quickly to prevent flickering
+      setCalendarEvents(automatedEvents);
+      
+      // Check if migration is needed (first time only)
+      if (!hasMigrated) {
+        try {
+          await migrateCalendarEventsFromLocalStorage(dogs);
+          setHasMigrated(true);
+        } catch (migrationErr) {
+          console.error("Migration error (non-critical):", migrationErr);
+        }
+      }
+      
+      // Fetch custom events from Supabase
+      try {
+        const customEvents = await fetchCalendarEvents();
+        
+        // Update with complete data
+        setCalendarEvents(prev => {
+          // Keep only custom events and add automated events
+          const customOnly = customEvents.filter(event => event.type === 'custom');
+          return [...automatedEvents, ...customOnly];
+        });
+      } catch (fetchErr) {
+        console.error("Error fetching custom events:", fetchErr);
+        // Don't set error state here - we still have automated data
+      }
+    } catch (error) {
+      console.error("Error loading calendar events:", error);
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [dogs, user, hasMigrated, generateAutomatedEvents]);
+  
   // Load events on component mount or when dependencies change
   useEffect(() => {
     let isMounted = true;
     let loadingTimer: ReturnType<typeof setTimeout>;
     
-    const loadAllEvents = async () => {
-      if (!user) {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-        return;
-      }
-      
+    const delayedLoad = async () => {
       // Only set loading state after a short delay to prevent flickering
       loadingTimer = setTimeout(() => {
         if (isMounted) {
@@ -158,71 +200,27 @@ export const useCalendarEvents = (dogs: Dog[]) => {
         }
       }, 300);
       
-      setHasError(false);
-      
-      try {
-        // Generate automated events
-        const automatedEvents = generateAutomatedEvents(dogs);
-        
-        // Set initial data quickly to prevent flickering
-        if (isMounted) {
-          setCalendarEvents(automatedEvents);
-        }
-        
-        // Check if migration is needed (first time only)
-        if (!hasMigrated) {
-          try {
-            await migrateCalendarEventsFromLocalStorage(dogs);
-            if (isMounted) {
-              setHasMigrated(true);
-            }
-          } catch (migrationErr) {
-            console.error("Migration error (non-critical):", migrationErr);
-          }
-        }
-        
-        // Fetch custom events from Supabase
-        try {
-          const customEvents = await fetchCalendarEvents();
-          
-          // Update with complete data
-          if (isMounted) {
-            setCalendarEvents(prev => {
-              // Keep only custom events and add automated events
-              const customOnly = customEvents.filter(event => event.type === 'custom');
-              return [...automatedEvents, ...customOnly];
-            });
-          }
-        } catch (fetchErr) {
-          console.error("Error fetching custom events:", fetchErr);
-          // Don't set error state here - we still have automated data
-        }
-      } catch (error) {
-        console.error("Error loading calendar events:", error);
-        if (isMounted) {
-          setHasError(true);
-        }
-      } finally {
-        clearTimeout(loadingTimer);
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
+      await loadEvents();
     };
     
-    loadAllEvents();
+    delayedLoad();
     
     return () => {
       isMounted = false;
       clearTimeout(loadingTimer);
     };
-  }, [dogs, user, hasMigrated]);
+  }, [dogs, user, hasMigrated, loadEvents]);
   
   // Function to get events for a specific date
   const getEventsForDate = (date: Date) => {
     return calendarEvents.filter(event => 
       isSameDay(new Date(event.date), date)
     );
+  };
+  
+  // Function to refresh events 
+  const refreshEvents = async () => {
+    await loadEvents();
   };
   
   // Function to add a new event
@@ -291,6 +289,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     addEvent: handleAddEvent,
     editEvent: handleEditEvent,
     deleteEvent: handleDeleteEvent,
-    getEventColor
+    getEventColor,
+    refreshEvents
   };
 };

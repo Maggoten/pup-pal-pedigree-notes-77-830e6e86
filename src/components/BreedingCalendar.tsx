@@ -1,13 +1,15 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useDogs } from '@/context/DogsContext';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import CalendarContent from './calendar/CalendarContent';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AddEventFormValues } from './calendar/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { cleanupOrphanedCalendarEvents } from '@/services/CleanupService';
 
 const BreedingCalendar: React.FC = () => {
   const { dogs } = useDogs();
@@ -19,8 +21,11 @@ const BreedingCalendar: React.FC = () => {
     editEvent,
     isLoading,
     hasError,
-    calendarEvents
+    calendarEvents,
+    refreshEvents
   } = useCalendarEvents(dogs);
+  
+  const [isCleaningUp, setIsCleaningUp] = useState(false);
   
   // Memoize the check for empty events to reduce unnecessary renders
   const hasEvents = useMemo(() => {
@@ -39,6 +44,19 @@ const BreedingCalendar: React.FC = () => {
     editEvent(eventId, data)
       .catch(error => console.error('Error editing event:', error));
     return true; // Return true synchronously for UI feedback
+  };
+
+  const handleCleanupOrphanedEvents = async () => {
+    setIsCleaningUp(true);
+    try {
+      await cleanupOrphanedCalendarEvents();
+      // Refresh events after cleanup
+      await refreshEvents();
+    } catch (error) {
+      console.error('Error during cleanup:', error);
+    } finally {
+      setIsCleaningUp(false);
+    }
   };
   
   return (
@@ -59,6 +77,24 @@ const BreedingCalendar: React.FC = () => {
           </div>
         ) : (
           <>
+            {/* Admin tools at the top */}
+            <div className="absolute top-0 right-0 z-10 p-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCleanupOrphanedEvents}
+                disabled={isCleaningUp}
+                className="flex items-center gap-1 text-xs"
+              >
+                {isCleaningUp ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Trash2 className="h-3 w-3" />
+                )}
+                Clean Calendar
+              </Button>
+            </div>
+
             {/* Show the calendar content even when loading to maintain layout */}
             <div className="absolute inset-0" style={{ 
               opacity: isLoading ? 0 : 1, 
@@ -103,4 +139,3 @@ const BreedingCalendar: React.FC = () => {
 };
 
 export default BreedingCalendar;
-
