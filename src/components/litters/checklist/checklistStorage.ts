@@ -1,6 +1,6 @@
 
 import { ChecklistItem } from './types';
-import { supabaseLitterService } from '@/services/supabase/litterService';
+import { supabaseLitterService } from '@/services/supabase/litter';
 
 /**
  * Loads checklist status from Supabase
