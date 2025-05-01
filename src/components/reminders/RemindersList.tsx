@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface RemindersListProps {
   reminders: Reminder[];
-  onComplete: (id: string, isCompleted?: boolean) => void;
+  onComplete: (id: string) => void;
   onDelete?: (id: string) => void;
   compact?: boolean;
   showDelete?: boolean;

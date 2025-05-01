@@ -11,7 +11,6 @@ import PersonalSettings from './PersonalSettings';
 import AccountSettings from './AccountSettings';
 import SharingSettings from './SharingSettings';
 import { useSettings } from '@/hooks/useSettings';
-import { UserSettings } from '@/types/settings';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -20,16 +19,6 @@ interface SettingsDialogProps {
 
 const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onOpenChange }) => {
   const { settings, isLoading } = useSettings();
-
-  // Convert the settings data structure to match UserSettings interface
-  const formattedSettings = settings ? {
-    email: settings.email,
-    firstName: settings.firstName,
-    lastName: settings.lastName,
-    kennelInfo: settings.kennelInfo,
-    subscriptionTier: settings.subscriptionTier,
-    sharedUsers: settings.sharedUsers
-  } as UserSettings : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -42,7 +31,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onOpenChange }) =
           <div className="flex items-center justify-center p-6">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
           </div>
-        ) : formattedSettings ? (
+        ) : settings ? (
           <Tabs defaultValue="personal" className="w-full">
             <TabsList className="grid grid-cols-3 mb-6">
               <TabsTrigger value="personal">Personal</TabsTrigger>
@@ -51,15 +40,15 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onOpenChange }) =
             </TabsList>
             
             <TabsContent value="personal" className="space-y-4">
-              <PersonalSettings settings={formattedSettings} />
+              <PersonalSettings settings={settings} />
             </TabsContent>
             
             <TabsContent value="account" className="space-y-4">
-              <AccountSettings settings={formattedSettings} />
+              <AccountSettings settings={settings} />
             </TabsContent>
             
             <TabsContent value="sharing" className="space-y-4">
-              <SharingSettings settings={formattedSettings} />
+              <SharingSettings settings={settings} />
             </TabsContent>
           </Tabs>
         ) : (

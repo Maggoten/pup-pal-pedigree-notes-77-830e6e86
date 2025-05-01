@@ -2,13 +2,26 @@
 import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
 import { differenceInDays, parseISO } from 'date-fns';
-import { createScaleIcon } from '@/utils/iconUtils';
+import { createPawPrintIcon, createScaleIcon } from '@/utils/iconUtils';
 
 export const generateGeneralReminders = (dogs: Dog[]): Reminder[] => {
   const reminders: Reminder[] = [];
   const today = new Date();
   
-  // Check if there are any puppies that need weighing - this is a critical health maintenance task
+  // Add a few general reminders
+  if (dogs.length > 0 && dogs.filter(dog => dog.gender === 'female').length === 0) {
+    reminders.push({
+      id: 'add-female',
+      title: 'Add Female Dogs',
+      description: 'Add your female dogs to start tracking heat cycles',
+      icon: createPawPrintIcon("primary"),
+      dueDate: today,
+      priority: 'low',
+      type: 'other'
+    });
+  }
+  
+  // Check if there are any puppies that need weighing
   const hasActiveLitters = dogs.some(dog => 
     dog.gender === 'female' && 
     dog.breedingHistory?.litters && 
@@ -32,4 +45,3 @@ export const generateGeneralReminders = (dogs: Dog[]): Reminder[] => {
   
   return reminders;
 };
-

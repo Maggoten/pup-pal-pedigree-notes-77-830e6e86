@@ -14,7 +14,7 @@ interface ReminderItemProps {
   type: string;
   relatedId?: string;
   isCompleted?: boolean;
-  onComplete: (id: string, isCompleted?: boolean) => void;
+  onComplete: (id: string) => void;
   onDelete?: (id: string) => void;
   compact?: boolean;
 }
@@ -37,11 +37,6 @@ const ReminderItem: React.FC<ReminderItemProps> = ({
     high: 'text-rose-600 bg-rose-50',
     medium: 'text-amber-600 bg-amber-50',
     low: 'text-green-600 bg-green-50'
-  };
-  
-  const handleToggleComplete = () => {
-    // Toggle current completion status
-    onComplete(id, !isCompleted);
   };
   
   return (
@@ -103,7 +98,7 @@ const ReminderItem: React.FC<ReminderItemProps> = ({
         {/* Right side - action buttons */}
         <div className="flex items-center gap-1">
           <button
-            onClick={handleToggleComplete}
+            onClick={() => onComplete(id)}
             className={cn(
               "p-1.5 rounded-full hover:bg-primary/10 transition-colors",
               isCompleted && "bg-primary/10"

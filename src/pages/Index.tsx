@@ -37,13 +37,22 @@ const Index = () => {
     
     initialize();
   }, []);
+  
+  const handleAddDogClick = () => {
+    toast({
+      title: "Coming Soon",
+      description: "Add dog feature will be available in the next update.",
+    });
+  };
 
   return (
     <DashboardLayout 
       user={user}
       activePregnancies={activePregnancies}
+      onAddDogClick={handleAddDogClick}
     />
   );
 };
 
 export default Index;
+

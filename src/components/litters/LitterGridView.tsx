@@ -1,5 +1,5 @@
 
-import React, { memo } from 'react';
+import React from 'react';
 import { Litter } from '@/types/breeding';
 import LitterCard from './LitterCard';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -11,8 +11,7 @@ interface LitterGridViewProps {
   selectedLitterId?: string | null;
 }
 
-// Use memo to prevent unnecessary re-renders
-const LitterGridView: React.FC<LitterGridViewProps> = memo(({ 
+const LitterGridView: React.FC<LitterGridViewProps> = ({ 
   litters, 
   onSelectLitter, 
   onArchive,
@@ -21,20 +20,7 @@ const LitterGridView: React.FC<LitterGridViewProps> = memo(({
   const isMobile = useIsMobile();
   
   return (
-    <div 
-      className={`grid grid-cols-1 ${isMobile ? '' : 'sm:grid-cols-2 lg:grid-cols-3'} gap-4`}
-      style={{ 
-        minHeight: litters.length > 0 ? '500px' : '200px',
-        // Ensure stable layout with a consistent width
-        width: '100%',
-        // Prevent content shifting during animations
-        willChange: 'contents',
-        // Apply containment to prevent layout shifts from bubbling up
-        contain: 'layout size',
-        // Force hardware acceleration
-        transform: 'translateZ(0)'
-      }}
-    >
+    <div className={`grid grid-cols-1 ${isMobile ? '' : 'sm:grid-cols-2 lg:grid-cols-3'} gap-4 animate-fade-in`}>
       {litters.map(litter => (
         <LitterCard 
           key={litter.id}
@@ -46,9 +32,6 @@ const LitterGridView: React.FC<LitterGridViewProps> = memo(({
       ))}
     </div>
   );
-});
-
-// Display name for React DevTools
-LitterGridView.displayName = 'LitterGridView';
+};
 
 export default LitterGridView;

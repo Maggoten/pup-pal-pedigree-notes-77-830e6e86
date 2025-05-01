@@ -1,5 +1,5 @@
 
-import React, { memo } from 'react';
+import React from 'react';
 import { format, parseISO } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,13 +14,7 @@ interface LitterCardProps {
   isSelected?: boolean;
 }
 
-// Use memo to prevent unnecessary re-renders
-const LitterCard: React.FC<LitterCardProps> = memo(({ 
-  litter, 
-  onSelect, 
-  onArchive, 
-  isSelected = false 
-}) => {
+const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, isSelected = false }) => {
   // Parse ISO date string to Date object
   const birthDate = parseISO(litter.dateOfBirth);
   
@@ -37,27 +31,10 @@ const LitterCard: React.FC<LitterCardProps> = memo(({
 
   return (
     <Card 
-      className={`h-full min-h-[220px] overflow-hidden hover:shadow-md ${
-        isSelected ? 'ring-2 ring-primary shadow-lg' : ''
+      className={`h-full overflow-hidden hover:shadow-md transition-all duration-300 ${
+        isSelected ? 'ring-2 ring-primary shadow-lg transform scale-[1.02]' : 'hover:scale-[1.01]'
       } cursor-pointer`}
       onClick={() => onSelect(litter)}
-      style={{ 
-        // Use CSS transform for hardware acceleration
-        transform: isSelected ? 'translateZ(0) scale(1.01)' : 'translateZ(0)', 
-        // Use smooth transition with no Y translation
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-        // Prevent content shifting during animations
-        contain: 'layout paint',
-        // Force stable dimensions to prevent content jumping
-        height: '100%',
-        minHeight: '220px',
-        // Ensure consistent width
-        width: '100%',
-        // Add GPU acceleration hint
-        willChange: isSelected ? 'transform' : 'auto',
-        // Prevent layout shifts
-        position: 'relative'
-      }}
     >
       <CardHeader className="pb-1 pt-3 px-4">
         <div className="flex justify-between items-start">
@@ -118,9 +95,6 @@ const LitterCard: React.FC<LitterCardProps> = memo(({
       </CardContent>
     </Card>
   );
-});
-
-// Display name for React DevTools
-LitterCard.displayName = 'LitterCard';
+};
 
 export default LitterCard;

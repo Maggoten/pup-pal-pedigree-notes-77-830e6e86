@@ -430,10 +430,6 @@ export const getEventColor = (type: string): string => {
       return 'bg-indigo-100 border-indigo-300 text-indigo-800';
     case 'due-date':
       return 'bg-amber-100 border-amber-300 text-amber-800';
-    case 'vaccination':
-      return 'bg-emerald-100 border-emerald-300 text-emerald-800';
-    case 'birthday':
-      return 'bg-blue-100 border-blue-300 text-blue-800';
     case 'custom':
       return 'bg-green-100 border-green-300 text-green-800';
     default:

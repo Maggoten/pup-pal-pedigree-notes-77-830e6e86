@@ -1,6 +1,8 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/components/ui/use-toast';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -8,32 +10,32 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn, isLoading } = useAuth();
-  
-  console.log('AuthGuard rendering:', { isLoggedIn, isLoading, path: location.pathname });
-  
-  // Show loader while checking authentication
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  const { isLoggedIn, supabaseUser } = useAuth();
+  const { toast } = useToast();
 
-  // If not logged in, redirect to login
-  if (!isLoggedIn && location.pathname !== '/login') {
-    console.log('AuthGuard: Not logged in, redirecting to login');
+  // Check if user is on the login page
+  const isLoginPage = location.pathname === '/login';
+
+  useEffect(() => {
+    if (!isLoggedIn && !isLoginPage && !supabaseUser) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to access this page",
+        variant: "destructive"
+      });
+    }
+  }, [isLoggedIn, isLoginPage, supabaseUser, toast]);
+
+  // If not logged in and not on login page, redirect to login
+  if (!isLoggedIn && !isLoginPage) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // If logged in and on login page, redirect to home
-  if (isLoggedIn && location.pathname === '/login') {
-    console.log('AuthGuard: Already logged in, redirecting to home');
+  if (isLoggedIn && isLoginPage) {
     return <Navigate to="/" replace />;
   }
 
-  // Otherwise, render children
   return <>{children}</>;
 };
 

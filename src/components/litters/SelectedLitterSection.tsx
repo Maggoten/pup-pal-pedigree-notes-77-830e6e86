@@ -56,7 +56,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
   const ageInWeeks = differenceInWeeks(new Date(), birthDate);
   
   return (
-    <div className="space-y-6" style={{ transition: 'none' }}>
+    <div className="animate-fade-in space-y-6">
       {/* Header with edit button */}
       <SelectedLitterHeader 
         litter={selectedLitter}
@@ -66,8 +66,15 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
         ageInWeeks={ageInWeeks}
       />
       
-      {/* Tab-based layout for different sections - Now positioned first */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="min-h-[400px]">
+      {/* Compact Development Checklist - Always visible */}
+      <CompactDevelopmentSection 
+        litter={selectedLitter}
+        onToggleItem={handleToggleChecklistItem}
+        key={`compact-${checklistVersion}`}
+      />
+      
+      {/* Tab-based layout for different sections */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
           <TabsTrigger value="puppies" className="flex items-center gap-2">
             <Heart className="h-4 w-4" /> Puppies
@@ -110,13 +117,6 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
           />
         </TabsContent>
       </Tabs>
-      
-      {/* Compact Development Checklist - Now positioned below the tabs */}
-      <CompactDevelopmentSection 
-        litter={selectedLitter}
-        onToggleItem={handleToggleChecklistItem}
-        key={`compact-${checklistVersion}`}
-      />
     </div>
   );
 };

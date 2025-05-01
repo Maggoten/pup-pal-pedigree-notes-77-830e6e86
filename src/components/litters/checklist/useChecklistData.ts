@@ -8,23 +8,10 @@ import { generateChecklist, saveChecklistItemStatus } from './checklistService';
 export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, completed: boolean) => void) => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   
   // Load checklist when litter changes
   useEffect(() => {
-    const loadChecklist = async () => {
-      setIsLoading(true);
-      try {
-        const items = await generateChecklist(litter);
-        setChecklist(items);
-      } catch (error) {
-        console.error('Error loading checklist:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadChecklist();
+    setChecklist(generateChecklist(litter));
   }, [litter]);
   
   const birthDate = parseISO(litter.dateOfBirth);
@@ -38,18 +25,18 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
   const completionPercentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
   
   // Handle toggling an item's completion status
-  const handleToggle = useCallback(async (itemId: string) => {
+  const handleToggle = useCallback((itemId: string) => {
     const item = checklist.find(item => item.id === itemId);
     if (item) {
       const newStatus = !item.isCompleted;
       
-      // Update local state immediately for better UX
+      // Update local state immediately
       setChecklist(prev => prev.map(i => 
         i.id === itemId ? { ...i, isCompleted: newStatus } : i
       ));
       
-      // Save to Supabase
-      await saveChecklistItemStatus(litter.id, itemId, newStatus);
+      // Save to localStorage
+      saveChecklistItemStatus(litter.id, itemId, newStatus);
       
       // Call the parent handler
       onToggleItem(itemId, newStatus);
@@ -90,7 +77,6 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
     completionPercentage,
     handleToggle,
     getFilteredItems,
-    getItemsByTimeline,
-    isLoading
+    getItemsByTimeline
   };
 };

@@ -1,3 +1,4 @@
+
 import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
 import { differenceInDays, parseISO, addDays, isSameMonth, isSameDay } from 'date-fns';
@@ -54,7 +55,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
       }
     }
     
-    // Check for upcoming deworming - keeping this as it's a critical health reminder
+    // Check for upcoming deworming
     if (dog.dewormingDate) {
       const lastDeworming = parseISO(dog.dewormingDate);
       const nextDeworming = addDays(lastDeworming, 90); // Quarterly deworming

@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import AuthTabs from '@/components/auth/AuthTabs';
 import PaymentForm from '@/components/auth/PaymentForm';
 import { LoginFormValues } from '@/components/auth/LoginForm';
@@ -11,43 +11,30 @@ import { RegisterData } from '@/types/auth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login, register, isLoading: authLoading, isLoggedIn } = useAuth();
+  const { login, register, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
-  
-  // Redirect to home if already logged in
-  useEffect(() => {
-    if (isLoggedIn) {
-      console.log('Login page: User already logged in, redirecting to home');
-      navigate('/', { replace: true });
-    }
-  }, [isLoggedIn, navigate]);
 
   const handleLogin = async (values: LoginFormValues) => {
-    console.log('Login attempt with:', values.email);
     setIsLoading(true);
-    
     try {
+      console.log('Login page: Attempting login for:', values.email);
       const success = await login(values.email, values.password);
       
       if (success) {
-        console.log('Login successful, redirecting to home');
+        console.log('Login page: Login successful, redirecting');
         toast({
           title: "Login successful",
           description: "Welcome back to your breeding journal!"
         });
         navigate('/');
       } else {
-        console.log('Login failed in handleLogin');
-        toast({
-          variant: "destructive",
-          title: "Login failed",
-          description: "Please check your credentials and try again."
-        });
+        console.log('Login page: Login failed');
+        // Toast is handled in useAuthActions
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login page: Login error:", error);
       toast({
         variant: "destructive",
         title: "Login error",
@@ -59,13 +46,11 @@ const Login: React.FC = () => {
   };
 
   const handleRegistration = (values: RegistrationFormValues) => {
-    console.log('Registration form submitted, showing payment');
     setRegistrationData(values);
     setShowPayment(true);
   };
 
   const handlePayment = async () => {
-    console.log('Payment submitted, registering user');
     setIsLoading(true);
     
     if (registrationData) {
@@ -78,25 +63,30 @@ const Login: React.FC = () => {
           address: registrationData.address
         };
         
+        console.log('Login page: Attempting registration');
         const success = await register(registerData);
         
         if (success) {
+          console.log('Login page: Registration successful');
           toast({
             title: "Registration successful",
-            description: "Your account has been created."
+            description: "Your account has been created. Please check your email for confirmation instructions."
           });
-          setShowPayment(false);
-          // Don't navigate here - AuthGuard will handle redirection
+          
+          // Navigate but only if email confirmation is not required
+          if (document.cookie.includes('supabase-auth-token')) {
+            navigate('/');
+          } else {
+            // Stay on login page so user can log in after confirming email
+            setShowPayment(false);
+          }
         } else {
-          toast({
-            variant: "destructive",
-            title: "Registration failed",
-            description: "Please try again with different credentials."
-          });
+          console.log('Login page: Registration failed');
+          // Toast is handled in useAuthActions
           setShowPayment(false);
         }
       } catch (error) {
-        console.error("Registration error:", error);
+        console.error("Login page: Registration error:", error);
         toast({
           variant: "destructive",
           title: "Registration error",
@@ -113,6 +103,9 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-greige-50 p-4">
+      <div className="text-center mb-8">
+        {/* Removed the Breeding Journey text */}
+      </div>
       {!showPayment ? (
         <AuthTabs 
           onLogin={handleLogin}

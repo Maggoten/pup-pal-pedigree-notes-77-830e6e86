@@ -14,7 +14,6 @@ interface CalendarGridProps {
   onDeleteEvent: (eventId: string) => void;
   onEventClick: (event: CalendarEvent) => void;
   compact?: boolean;
-  hasEvents?: boolean;
 }
 
 const CalendarGrid: React.FC<CalendarGridProps> = ({ 
@@ -23,8 +22,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   getEventColor, 
   onDeleteEvent,
   onEventClick,
-  compact = false,
-  hasEvents = true
+  compact = false 
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -32,18 +30,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   
   const today = new Date();
   const handleEventClick = (event: CalendarEvent) => {
-    // Only allow editing custom events
-    if (event.type === 'custom') {
-      if (isMobile) {
-        setSelectedEvent(event);
-      } else {
-        onEventClick(event);
-      }
+    if (isMobile) {
+      setSelectedEvent(event);
     } else {
-      // For automated events, just show details in the mobile view
-      if (isMobile) {
-        setSelectedEvent(event);
-      }
+      onEventClick(event);
     }
   };
   
@@ -55,9 +45,6 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     onDeleteEvent(eventId);
     setSelectedEvent(null);
   };
-
-  // Calculate fixed cell height based on compact mode
-  const cellHeight = compact ? 'h-[80px]' : 'h-[100px]';
 
   return (
     <>
@@ -75,10 +62,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             {week.map((day) => {
               const isToday = isSameDay(day, today);
               const isCurrentMonth = isSameMonth(day, new Date());
-              
-              // Only fetch events if hasEvents is true to avoid unnecessary computations
-              const events = hasEvents ? getEventsForDate(day) : [];
-              
+              const events = getEventsForDate(day);
               const maxEvents = compact ? 1 : 3;
               const displayEvents = events.slice(0, maxEvents);
               const hiddenEventsCount = events.length - maxEvents;
@@ -88,7 +72,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                   <ContextMenuTrigger>
                     <div 
                       className={`
-                        rounded-md border ${cellHeight} w-full
+                        rounded-md border h-full ${compact ? 'min-h-[80px]' : 'min-h-[100px]'}
                         flex flex-col
                         ${isToday 
                           ? 'bg-primary/10 border-primary/30' 
@@ -162,10 +146,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           colorClass={getEventColor(selectedEvent.type)}
           onClose={handleCloseEventDetails}
           onDelete={selectedEvent.type === 'custom' ? () => handleDeleteEvent(selectedEvent.id) : undefined}
-          onEdit={selectedEvent.type === 'custom' ? () => {
+          onEdit={() => {
             onEventClick(selectedEvent);
             handleCloseEventDetails();
-          } : undefined}
+          }}
         />
       )}
     </>
@@ -173,4 +157,3 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 };
 
 export default CalendarGrid;
-

@@ -1,34 +1,36 @@
 
 import { ChecklistItem } from './types';
-import { supabaseLitterService } from '@/services/supabase/litter';
+
+// Storage key prefix for checklist data
+const STORAGE_KEY_PREFIX = 'litter-checklist-';
 
 /**
- * Loads checklist status from Supabase
+ * Loads checklist status from localStorage
  */
-export const loadChecklistStatus = async (litterId: string): Promise<Record<string, boolean>> => {
-  try {
-    // Load from Supabase
-    const storedStatuses = await supabaseLitterService.loadChecklistStatuses(litterId);
-    return storedStatuses;
-  } catch (error) {
-    console.error('Error loading checklist statuses:', error);
-    return {};
+export const loadChecklistStatus = (litterId: string): Record<string, boolean> => {
+  const savedStatus = localStorage.getItem(`${STORAGE_KEY_PREFIX}${litterId}`);
+  if (savedStatus) {
+    try {
+      return JSON.parse(savedStatus);
+    } catch (e) {
+      console.error('Error parsing saved checklist status', e);
+    }
   }
+  return {};
 };
 
 /**
- * Saves checklist item status to Supabase
+ * Saves checklist item status to localStorage
  */
-export const saveChecklistItemStatus = async (
+export const saveChecklistItemStatus = (
   litterId: string, 
   itemId: string, 
   completed: boolean
-): Promise<void> => {
-  try {
-    await supabaseLitterService.saveChecklistItemStatus(litterId, itemId, completed);
-  } catch (error) {
-    console.error('Error saving checklist item status:', error);
-  }
+): void => {
+  const savedStatus = localStorage.getItem(`${STORAGE_KEY_PREFIX}${litterId}`);
+  const statusMap: Record<string, boolean> = savedStatus ? JSON.parse(savedStatus) : {};
+  statusMap[itemId] = completed;
+  localStorage.setItem(`${STORAGE_KEY_PREFIX}${litterId}`, JSON.stringify(statusMap));
 };
 
 /**
@@ -36,8 +38,10 @@ export const saveChecklistItemStatus = async (
  */
 export const applyStoredStatuses = (
   items: ChecklistItem[], 
-  savedStatuses: Record<string, boolean>
+  litterId: string
 ): ChecklistItem[] => {
+  const savedStatuses = loadChecklistStatus(litterId);
+  
   return items.map(item => ({
     ...item,
     isCompleted: savedStatuses[item.id] ?? item.isCompleted

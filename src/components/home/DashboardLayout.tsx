@@ -6,19 +6,21 @@ import DashboardHero from './DashboardHero';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { DogsProvider } from '@/context/DogsContext';
 import PageLayout from '@/components/PageLayout';
+import AddDogButton from '@/components/AddDogButton';
 import BreedingStats from '@/components/BreedingStats';
-import { useBreedingReminders } from '@/hooks/reminders';
+import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import { addDays, subDays } from 'date-fns';
 
 interface DashboardLayoutProps {
   user: { email?: string } | null;
   activePregnancies: ActivePregnancy[];
-  onAddDogClick?: () => void;
+  onAddDogClick: () => void;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
   user, 
-  activePregnancies 
+  activePregnancies, 
+  onAddDogClick 
 }) => {
   const username = user?.email?.split('@')[0] || 'Breeder';
   const { reminders, handleMarkComplete } = useBreedingReminders();
@@ -53,7 +55,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         title="" 
         description=""
       >
-        <div className="space-y-4 animate-fade-in">
+        <div className="space-y-4">
           <DashboardHero 
             username={username}
             reminders={remindersSummary}
@@ -62,17 +64,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             recentLitters={recentLittersData}
           />
           
-          {/* Main dashboard content - Updated layout with fixed heights and stable containers */}
+          {/* Main dashboard content - Updated layout */}
           <div className="space-y-6">
             {/* Top row: Calendar (2/3) and Reminders (1/3) */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Calendar taking 2/3 of the width */}
-              <div className="lg:col-span-2 h-[600px]">
+              <div className="lg:col-span-2">
                 <BreedingCalendar />
               </div>
               
               {/* Reminders taking 1/3 of the width */}
-              <div className="lg:col-span-1 h-[600px]">
+              <div className="lg:col-span-1">
                 <BreedingReminders />
               </div>
             </div>
@@ -84,6 +86,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           </div>
         </div>
       </PageLayout>
+        
+      <AddDogButton onClick={onAddDogClick} />
     </DogsProvider>
   );
 };

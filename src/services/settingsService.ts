@@ -20,8 +20,8 @@ export const getUserSettings = async (user: User | null) => {
       throw profileError;
     }
     
-    // First get the shared users data
-    const { data: sharedUsersData, error: sharedError } = await supabase
+    // Fetch shared users
+    const { data: sharedUsers, error: sharedError } = await supabase
       .from('shared_users')
       .select('*')
       .eq('owner_id', user.id);
@@ -30,52 +30,9 @@ export const getUserSettings = async (user: User | null) => {
       throw sharedError;
     }
     
-    // If we have shared users, fetch their profile information separately
-    let formattedSharedUsers: SharedUser[] = [];
-    
-    if (sharedUsersData && sharedUsersData.length > 0) {
-      // Create an array of shared user IDs
-      const sharedUserIds = sharedUsersData.map(su => su.shared_with_id);
-      
-      // Fetch profiles for these users in a single query
-      const { data: sharedProfiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, email, first_name, last_name')
-        .in('id', sharedUserIds);
-      
-      if (profilesError) {
-        console.error('Error fetching shared user profiles:', profilesError);
-        // Continue with partial data instead of throwing error
-      }
-      
-      // Create a map of profiles by ID for easier lookup
-      const profilesMap = sharedProfiles ? 
-        Object.fromEntries(sharedProfiles.map(p => [p.id, p])) : {};
-      
-      // Transform the shared users data into the expected format
-      formattedSharedUsers = sharedUsersData.map(su => {
-        const userProfile = profilesMap[su.shared_with_id];
-        return {
-          id: su.shared_with_id,
-          email: userProfile?.email || 'Unknown email',
-          role: su.role as 'admin' | 'editor' | 'viewer',
-          joinedAt: new Date(su.created_at),
-          status: su.status as 'pending' | 'active'
-        };
-      });
-    }
-    
     return {
-      email: profile.email,
-      firstName: profile.first_name,
-      lastName: profile.last_name,
-      kennelInfo: {
-        kennelName: profile.kennel_name || '',
-        address: profile.address || '',
-        phone: profile.phone || '',
-      },
-      subscriptionTier: profile.subscription_status === 'active' ? 'premium' : 'free',
-      sharedUsers: formattedSharedUsers
+      profile,
+      sharedUsers: sharedUsers || []
     };
   } catch (error) {
     console.error('Error fetching user settings:', error);
@@ -165,7 +122,8 @@ export const addSharedUser = async (
         owner_id: user.id,
         shared_with_id: userToAdd.id,
         role: role,
-        status: 'pending'
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       });
     
     if (error) {

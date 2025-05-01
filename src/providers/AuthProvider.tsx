@@ -1,8 +1,8 @@
 
-import { useState, useEffect, ReactNode, useRef, useCallback } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { User } from '@/types/auth';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, Profile } from '@/integrations/supabase/client';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import AuthContext from '@/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
@@ -18,136 +18,154 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { login, register, logout, getUserProfile } = useAuthActions();
-  const isFetchingProfileRef = useRef(false);
-  const initializedRef = useRef(false);
-  
-  // Set up auth state listener and check for existing session - only once
+
+  // Set up auth state listener and check for existing session
   useEffect(() => {
-    // Return early if already initialized to avoid multiple subscriptions
-    if (initializedRef.current) return;
-    initializedRef.current = true;
-    
-    console.log('AuthProvider: Initializing once...');
     let isSubscribed = true;
     
-    // Set up auth state change listener
+    // First set up the auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
-        if (!isSubscribed) return;
-        
         console.log('Auth state change event:', event);
         
-        // Update session state
+        if (!isSubscribed) return;
+        
         setSession(currentSession);
         setIsLoggedIn(!!currentSession);
-        setSupabaseUser(currentSession?.user || null);
         
         if (currentSession?.user) {
-          // Set basic user info immediately
-          setUser({
-            id: currentSession.user.id,
-            email: currentSession.user.email || '',
-            firstName: '',
-            lastName: '',
-            address: ''
-          });
+          console.log('User authenticated:', currentSession.user.id);
+          setSupabaseUser(currentSession.user);
           
-          // Fetch profile in background if not already fetching
-          if (!isFetchingProfileRef.current) {
-            isFetchingProfileRef.current = true;
+          // Use setTimeout to prevent potential deadlocks
+          setTimeout(async () => {
             try {
-              const profile = await getUserProfile(currentSession.user.id);
+              if (!isSubscribed) return;
               
-              if (profile && isSubscribed) {
-                setUser(prev => ({
-                  ...prev!,
+              // Get user profile from database with retry logic
+              let retryCount = 0;
+              let profile = null;
+              
+              while (retryCount < 3 && !profile) {
+                try {
+                  profile = await getUserProfile(currentSession.user.id);
+                  if (profile) break;
+                } catch (err) {
+                  console.log(`Profile fetch attempt ${retryCount + 1} failed:`, err);
+                  await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between retries
+                }
+                retryCount++;
+              }
+              
+              if (profile) {
+                setUser({
+                  id: currentSession.user.id,
+                  email: currentSession.user.email || '',
                   firstName: profile.first_name,
                   lastName: profile.last_name,
                   address: profile.address
-                }));
+                });
+              } else {
+                console.error('Failed to fetch profile after retries');
+                toast({
+                  variant: "destructive",
+                  title: "Error loading profile",
+                  description: "Please try refreshing the page"
+                });
               }
-            } catch (err) {
-              console.error('Failed to fetch profile:', err);
-            } finally {
-              isFetchingProfileRef.current = false;
+            } catch (error) {
+              console.error('Error in auth state change handler:', error);
             }
+          }, 0);
+        } else {
+          if (isSubscribed) {
+            setUser(null);
+            setSupabaseUser(null);
           }
-        } else if (event === 'SIGNED_OUT' && isSubscribed) {
-          // Clear user state on sign out
-          setUser(null);
-          setSupabaseUser(null);
-          setIsLoggedIn(false);
+        }
+        
+        if (event === 'SIGNED_OUT') {
+          if (isSubscribed) {
+            setUser(null);
+            setSupabaseUser(null);
+            setIsLoggedIn(false);
+          }
         }
       }
     );
 
-    // Initial session check
-    const checkInitialSession = async () => {
+    // THEN check for existing session
+    const initializeAuth = async () => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         
-        if (!isSubscribed) return;
+        console.log('Initial session check:', initialSession ? 'Session exists' : 'No session');
         
-        if (initialSession?.user) {
-          console.log('AuthProvider: Initial session found');
+        if (initialSession?.user && isSubscribed) {
           setSession(initialSession);
           setSupabaseUser(initialSession.user);
           setIsLoggedIn(true);
           
-          setUser({
-            id: initialSession.user.id,
-            email: initialSession.user.email || '',
-            firstName: '',
-            lastName: '',
-            address: ''
-          });
-        } else {
-          console.log('AuthProvider: No initial session found');
+          // Get user profile from database with retry logic
+          let retryCount = 0;
+          let profile = null;
+          
+          while (retryCount < 3 && !profile) {
+            try {
+              profile = await getUserProfile(initialSession.user.id);
+              if (profile) break;
+            } catch (err) {
+              console.log(`Initial profile fetch attempt ${retryCount + 1} failed:`, err);
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            retryCount++;
+          }
+          
+          if (profile && isSubscribed) {
+            setUser({
+              id: initialSession.user.id,
+              email: initialSession.user.email || '',
+              firstName: profile.first_name,
+              lastName: profile.last_name,
+              address: profile.address
+            });
+          } else if (isSubscribed) {
+            console.error('Failed to fetch initial profile after retries');
+            toast({
+              variant: "destructive",
+              title: "Error loading profile",
+              description: "Please try refreshing the page"
+            });
+          }
         }
       } catch (error) {
         console.error('Error checking initial session:', error);
       } finally {
-        if (isSubscribed) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     };
+
+    initializeAuth();
     
-    // Check for existing session
-    checkInitialSession();
-    
-    // Cleanup function to prevent memory leaks
     return () => {
       isSubscribed = false;
       subscription.unsubscribe();
     };
   }, [getUserProfile]);
 
-  // Login wrapper with better error handling
+  // Login wrapper
   const handleLogin = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      console.log('Login attempt for:', email);
       const success = await login(email, password);
-      
       if (!success) {
-        console.error('Login failed in handleLogin');
         toast({
           title: "Login failed",
           description: "Please check your credentials and try again.",
           variant: "destructive"
         });
       }
-      
       return success;
-    } catch (error) {
-      console.error('Login error in handleLogin:', error);
-      toast({
-        title: "Login error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
-      });
-      return false;
     } finally {
       setIsLoading(false);
     }
@@ -159,9 +177,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const success = await register(userData);
       return success;
-    } catch (error) {
-      console.error('Register error in handleRegister:', error);
-      return false;
     } finally {
       setIsLoading(false);
     }
@@ -176,28 +191,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(null);
       setSupabaseUser(null);
       setIsLoggedIn(false);
-    } catch (error) {
-      console.error('Logout error in handleLogout:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Memoize the context value to prevent unnecessary re-renders
-  const authContextValue = {
-    user,
-    supabaseUser,
-    session,
-    isLoggedIn,
-    loading: isLoading, // for backward compatibility
-    isLoading,
-    login: handleLogin,
-    logout: handleLogout,
-    register: handleRegister
-  };
-
   return (
-    <AuthContext.Provider value={authContextValue}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        supabaseUser,
+        session,
+        isLoggedIn, 
+        loading: isLoading, // for backward compatibility
+        isLoading,
+        login: handleLogin, 
+        logout: handleLogout, 
+        register: handleRegister 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

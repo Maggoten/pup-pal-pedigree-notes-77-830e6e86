@@ -3,13 +3,13 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, Clock } from 'lucide-react';
 import { format, isWithinInterval, startOfWeek, endOfWeek, addDays } from 'date-fns';
-import { Reminder } from '@/types/reminders';
+import { Reminder } from '@/hooks/useBreedingReminders';
 import ReminderItem from './ReminderItem';
 import { Button } from '@/components/ui/button';
 
 interface WeeklyTasksProps {
   reminders: Reminder[];
-  onComplete: (id: string, isCompleted?: boolean) => void;
+  onComplete: (id: string) => void;
 }
 
 const WeeklyTasks: React.FC<WeeklyTasksProps> = ({ reminders, onComplete }) => {

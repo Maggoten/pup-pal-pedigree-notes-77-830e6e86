@@ -16,8 +16,6 @@ export const generateLitterReminders = (): Reminder[] => {
     const litterBirthDate = parseISO(litter.dateOfBirth);
     const puppyAge = differenceInDays(today, litterBirthDate);
     
-    // Only focus on essential health reminders like deworming for active litters
-    
     // Deworming at 3 weeks
     if (puppyAge >= 19 && puppyAge <= 22) {
       reminders.push({
@@ -73,8 +71,21 @@ export const generateLitterReminders = (): Reminder[] => {
         relatedId: litter.id
       });
     }
+    
+    // Weight check reminders for young puppies (every 3 days for first 3 weeks)
+    if (puppyAge <= 21 && puppyAge % 3 === 0) {
+      reminders.push({
+        id: `weight-${litter.id}-${puppyAge}`,
+        title: `Weigh ${litter.name} Puppies`,
+        description: `Regular weight tracking at ${puppyAge} days old`,
+        icon: createScaleIcon("blue-500"),
+        dueDate: today,
+        priority: 'medium',
+        type: 'weighing',
+        relatedId: litter.id
+      });
+    }
   });
   
   return reminders;
 };
-
