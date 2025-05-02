@@ -78,8 +78,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         </div>
       </div>
       
-      {/* Annual Breeding Statistics in a separate row (full width) */}
-      <div className="min-h-[500px]">
+      {/* Annual Breeding Statistics in a separate row - with debugging border */}
+      <div className="border-4 border-red-500 mb-10">
         {!isDataReady ? (
           <div className="h-full min-h-[500px] rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
             <div className="flex flex-col h-full">

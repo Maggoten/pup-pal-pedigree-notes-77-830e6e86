@@ -31,7 +31,7 @@ const StatisticCard: React.FC<StatisticCardProps> = ({ type, value, label }) => 
   const { icon, color } = config[type];
 
   return (
-    <div className="flex flex-col items-center text-center">
+    <div className="flex flex-col items-center text-center min-h-[120px] py-4">
       <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-3 ${color}`}>
         {icon}
       </div>

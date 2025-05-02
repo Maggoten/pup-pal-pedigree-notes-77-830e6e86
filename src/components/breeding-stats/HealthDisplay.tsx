@@ -9,7 +9,7 @@ interface HealthDisplayProps {
 
 const HealthDisplay: React.FC<HealthDisplayProps> = ({ totalLitters, averageLitterSize, selectedYear }) => {
   return (
-    <div className="py-4">
+    <div className="py-4 border-4 border-purple-500">
       <div className="bg-greige-50/70 rounded-lg p-6 border border-greige-100 shadow-sm">
         <h3 className="font-medium mb-4 text-lg">Program Health</h3>
         <p className="text-sm text-muted-foreground">
