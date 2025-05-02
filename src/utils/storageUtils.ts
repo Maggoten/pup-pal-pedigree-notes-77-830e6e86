@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { StorageError } from '@supabase/storage-js';
@@ -9,7 +8,7 @@ interface StorageCleanupOptions {
   excludeDogId?: string;
 }
 
-const BUCKET_NAME = 'dog-photos';
+const BUCKET_NAME = 'Dog Photos';
 
 // Check if bucket exists and is accessible
 const checkBucketExists = async (): Promise<boolean> => {
