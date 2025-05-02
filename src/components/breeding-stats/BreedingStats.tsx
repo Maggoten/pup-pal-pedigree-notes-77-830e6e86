@@ -10,7 +10,7 @@ const BreedingStats = () => {
   const { stats, selectedYear, currentYear, handlePreviousYear, handleNextYear } = useBreedingStats();
 
   return (
-    <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md bg-greige-50 flex flex-col min-h-[400px]">
+    <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md bg-greige-50 flex flex-col h-full">
       <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 flex flex-row items-center justify-between flex-shrink-0">
         <div>
           <CardTitle className="flex items-center gap-2 text-primary">
