@@ -32,6 +32,17 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
     navigate(`/pregnancy/${pregnancyId}`);
   };
 
+  // Log pregnancies being displayed for debugging
+  console.log("Active pregnancies to display:", pregnancies.length);
+  if (pregnancies.length > 0) {
+    console.log("First pregnancy:", {
+      id: pregnancies[0].id,
+      femaleName: pregnancies[0].femaleName,
+      maleName: pregnancies[0].maleName,
+      expectedDueDate: pregnancies[0].expectedDueDate
+    });
+  }
+
   return (
     <Card className="h-full">
       <CardHeader>

@@ -26,11 +26,16 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
     return null;
   }
 
+  // Log pregnancies being passed to the dropdown for debugging
+  console.log("Pregnancies in dropdown:", pregnancies.map(p => ({id: p.id, femaleName: p.femaleName, maleName: p.maleName})));
+  console.log("Current pregnancy ID:", currentPregnancyId);
+
   const currentPregnancy = currentPregnancyId 
     ? pregnancies.find(p => p.id === currentPregnancyId)
     : pregnancies[0];
     
   const handlePregnancyChange = (pregnancyId: string) => {
+    console.log(`Selecting pregnancy: ${pregnancyId}`);
     navigate(`/pregnancy/${pregnancyId}`);
   };
 

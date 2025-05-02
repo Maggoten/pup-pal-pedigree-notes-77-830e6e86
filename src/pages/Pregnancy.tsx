@@ -41,6 +41,7 @@ const Pregnancy: React.FC = () => {
         
         console.log("Fetching active pregnancies...");
         const pregnancies = await getActivePregnancies();
+        console.log("Fetched pregnancies count:", pregnancies.length);
         setActivePregnancies(pregnancies);
         
         // If no pregnancies found

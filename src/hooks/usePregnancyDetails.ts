@@ -20,12 +20,21 @@ export const usePregnancyDetails = (id: string | undefined) => {
       }
       
       try {
+        console.log(`Fetching pregnancy details for ID: ${id}`);
         const details = await getPregnancyDetails(id);
         
         if (details) {
+          console.log("Successfully loaded pregnancy details:", {
+            id: details.id,
+            femaleName: details.femaleName,
+            maleName: details.maleName,
+            matingDate: details.matingDate,
+            daysLeft: details.daysLeft
+          });
           setPregnancy(details);
         } else {
           // Handle case where pregnancy is not found
+          console.error(`Pregnancy with ID ${id} not found`);
           toast({
             title: "Pregnancy not found",
             description: "The pregnancy details could not be loaded.",
