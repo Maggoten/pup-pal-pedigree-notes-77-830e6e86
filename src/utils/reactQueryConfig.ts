@@ -9,8 +9,6 @@ export const queryClient = new QueryClient({
       retry: 1,
       staleTime: 1000 * 60, // 1 minute
       gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
-      // Prevent suspense in SSR/initial load
-      suspense: false,
       // Modern error handling approach
       throwOnError: false
     },
