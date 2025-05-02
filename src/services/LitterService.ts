@@ -1,3 +1,4 @@
+
 import { Litter, Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
@@ -199,9 +200,9 @@ class LitterService {
       litter.user_id = sessionData.session.user.id;
       
       // Validate the date format
-      let dateOfBirth;
+      let dateOfBirth: string;
       try {
-        // FIX 2 & 3: Properly check if dateOfBirth is a Date object or string
+        // Properly check if dateOfBirth is a Date object or string
         if (typeof litter.dateOfBirth === 'string') {
           const tempDate = new Date(litter.dateOfBirth);
           if (isNaN(tempDate.getTime())) {
@@ -209,9 +210,10 @@ class LitterService {
           }
           dateOfBirth = litter.dateOfBirth;
         } else if (litter.dateOfBirth && typeof litter.dateOfBirth === 'object') {
-          // Check if it's a Date object by checking for toISOString method
-          if ('toISOString' in litter.dateOfBirth) {
-            dateOfBirth = litter.dateOfBirth.toISOString();
+          // Check if it's a Date object by checking if we can call toISOString
+          const dateObj = litter.dateOfBirth as unknown;
+          if (dateObj && typeof dateObj === 'object' && 'toISOString' in dateObj) {
+            dateOfBirth = (dateObj as Date).toISOString();
           } else {
             throw new Error("Invalid date format");
           }
