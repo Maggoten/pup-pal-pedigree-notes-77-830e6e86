@@ -1,11 +1,11 @@
 
 import { useDogsMutations } from './useDogsMutations';
 import { useDogsQueries } from './useDogsQueries';
-import { UseDogs } from './types';
+import { UseDogs, UseDogsMutations, UseDogsQueries } from './types';
 
-export const useDogs = (userId: string | undefined): UseDogs => {
-  const queries = useDogsQueries(userId);
-  const mutations = useDogsMutations(userId);
+export const useDogs = (): UseDogs => {
+  const queries = useDogsQueries();
+  const mutations = useDogsMutations();
 
   return {
     ...queries,

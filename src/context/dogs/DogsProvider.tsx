@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -27,7 +26,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     addDog,
     updateDog: updateDogBase,
     deleteDog 
-  } = useDogsHook(user?.id);
+  } = useDogsHook();
 
   const { activeDog, setActiveDog } = useActiveDog(dogs);
   const forceReload = useForceReload(user?.id, fetchDogs);

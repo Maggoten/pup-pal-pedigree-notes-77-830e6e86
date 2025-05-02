@@ -4,8 +4,11 @@ import { Dog } from '@/types/dogs';
 import { useAddDog, useUpdateDog, useDeleteDog } from './mutations';
 import { UseDogsMutations } from './types';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
-export const useDogsMutations = (userId: string | undefined): UseDogsMutations => {
+export const useDogsMutations = (): UseDogsMutations => {
+  const { user } = useAuth();
+  const userId = user?.id;
   const { toast } = useToast();
   const addDogMutation = useAddDog(userId);
   const updateDogMutation = useUpdateDog(userId);
