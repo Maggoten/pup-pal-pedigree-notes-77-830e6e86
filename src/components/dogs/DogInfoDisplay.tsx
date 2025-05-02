@@ -3,6 +3,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { Dog as DogIcon } from 'lucide-react';
 import { Dog } from '@/context/DogsContext';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface DogInfoDisplayProps {
   dog: Dog;
@@ -13,18 +14,20 @@ const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({ dog }) => {
     <div className="grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr]">
       <div>
         <h3 className="text-sm font-medium text-muted-foreground mb-2">Photo</h3>
-        <div className="aspect-square w-full overflow-hidden rounded-lg border border-border">
-          {dog.image ? (
-            <img 
-              src={dog.image} 
-              alt={dog.name} 
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-muted">
-              <DogIcon className="h-12 w-12 text-muted-foreground/40" />
-            </div>
-          )}
+        <div className="w-full overflow-hidden rounded-lg border border-border">
+          <AspectRatio ratio={1/1}>
+            {dog.image ? (
+              <img 
+                src={dog.image} 
+                alt={dog.name} 
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-muted">
+                <DogIcon className="h-12 w-12 text-muted-foreground/40" />
+              </div>
+            )}
+          </AspectRatio>
         </div>
       </div>
       

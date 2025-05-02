@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Heart, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface DogCardProps {
   dog: Dog;
@@ -39,18 +40,20 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
   return (
     <Card className="dog-card w-full h-full flex flex-col overflow-hidden" onClick={() => onClick(dog)}>
       <CardHeader className="p-0">
-        <div className="aspect-square w-full relative">
-          <img 
-            src={imageSrc} 
-            alt={dog.name} 
-            className="object-cover w-full h-full"
-            onError={handleImageError}
-          />
-          {isPlaceholder && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/5">
-              <Image className="h-12 w-12 text-muted-foreground/40" />
-            </div>
-          )}
+        <div className="relative w-full">
+          <AspectRatio ratio={1/1}>
+            <img 
+              src={imageSrc} 
+              alt={dog.name} 
+              className="object-cover w-full h-full"
+              onError={handleImageError}
+            />
+            {isPlaceholder && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/5">
+                <Image className="h-12 w-12 text-muted-foreground/40" />
+              </div>
+            )}
+          </AspectRatio>
           <div className="absolute top-2 right-2">
             <Badge className={dog.gender === 'male' ? 'bg-blue-500' : 'bg-rose-400'}>
               {dog.gender === 'male' ? 'Male' : 'Female'}
