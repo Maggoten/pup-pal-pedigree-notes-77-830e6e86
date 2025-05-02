@@ -1,12 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Grid2X2 } from 'lucide-react';
+import { Grid2X2 } from 'lucide-react';
 import { Litter, Puppy } from '@/types/breeding';
-import LitterEditDialog from './LitterEditDialog';
 
 interface LitterDetailsProps {
   litter: Litter;
@@ -27,8 +24,6 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
   onDeleteLitter,
   onArchiveLitter
 }) => {
-  const [showEditLitterDialog, setShowEditLitterDialog] = useState(false);
-
   const getBreeds = () => {
     if (!litter.puppies || litter.puppies.length === 0) return 'Unknown';
     
@@ -42,24 +37,6 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-all duration-300">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="sr-only">Litter Details</CardTitle>
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-auto" onClick={() => setShowEditLitterDialog(true)}>
-            <Edit className="h-3.5 w-3.5" />
-            <span className="sr-only">Edit Litter</span>
-          </Button>
-          <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
-            <LitterEditDialog 
-              litter={litter}
-              onClose={() => setShowEditLitterDialog(false)}
-              onUpdate={onUpdateLitter}
-              onDelete={onDeleteLitter}
-              onArchive={onArchiveLitter}
-            />
-          </Dialog>
-        </div>
-      </CardHeader>
       <CardContent>
         <div className="grid gap-4">
           {litter.puppies.length > 0 && (
