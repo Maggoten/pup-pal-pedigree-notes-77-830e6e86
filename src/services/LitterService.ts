@@ -1,4 +1,3 @@
-
 import { Litter, Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
@@ -209,8 +208,13 @@ class LitterService {
             throw new Error("Invalid date string");
           }
           dateOfBirth = litter.dateOfBirth;
-        } else if (litter.dateOfBirth instanceof Date) {
-          dateOfBirth = litter.dateOfBirth.toISOString();
+        } else if (litter.dateOfBirth && typeof litter.dateOfBirth === 'object') {
+          // Check if it's a Date object by checking for toISOString method
+          if ('toISOString' in litter.dateOfBirth) {
+            dateOfBirth = litter.dateOfBirth.toISOString();
+          } else {
+            throw new Error("Invalid date format");
+          }
         } else {
           throw new Error("Invalid date format");
         }
@@ -751,4 +755,3 @@ class LitterService {
 
 // Export a singleton instance
 export const litterService = new LitterService();
-
