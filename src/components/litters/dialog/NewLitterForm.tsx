@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { FormLabel, FormItem } from '@/components/ui/form';
+import React, { useEffect } from 'react';
+import { FormLabel, FormItem, Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
@@ -15,184 +15,174 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Dog } from '@/context/DogsContext';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UseFormReturn } from 'react-hook-form';
 
 interface NewLitterFormProps {
   dogs: Dog[];
-  sireName: string;
-  setSireName: (name: string) => void;
-  sireId: string;
-  setSireId: (id: string) => void;
-  damName: string;
-  setDamName: (name: string) => void;
-  damId: string;
-  setDamId: (id: string) => void;
-  litterName: string;
-  setLitterName: (name: string) => void;
-  dateOfBirth: Date;
-  setDateOfBirth: (date: Date) => void;
-  isExternalSire: boolean;
-  setIsExternalSire: (value: boolean) => void;
-  externalSireName: string;
-  setExternalSireName: (name: string) => void;
-  externalSireBreed: string;
-  setExternalSireBreed: (breed: string) => void;
-  externalSireRegistration: string;
-  setExternalSireRegistration: (reg: string) => void;
+  form: UseFormReturn<any>;
+  onSubmit: (values: any) => void;
 }
 
 const NewLitterForm: React.FC<NewLitterFormProps> = ({
   dogs,
-  sireName,
-  setSireName,
-  sireId,
-  setSireId,
-  damName,
-  setDamName,
-  damId,
-  setDamId,
-  litterName,
-  setLitterName,
-  dateOfBirth,
-  setDateOfBirth,
-  isExternalSire,
-  setIsExternalSire,
-  externalSireName,
-  setExternalSireName,
-  externalSireBreed,
-  setExternalSireBreed,
-  externalSireRegistration,
-  setExternalSireRegistration
+  form,
+  onSubmit
 }) => {
+  const { watch, setValue, register } = form;
+  
+  const isExternalSire = watch("isExternalSire");
+  const selectedDamId = watch("damId");
+  const selectedSireId = watch("sireId");
+  
   const males = dogs.filter(dog => dog.gender === 'male');
   const females = dogs.filter(dog => dog.gender === 'female');
   
+  // Handle sire selection
   const handleSireChange = (selectedSireId: string) => {
-    setSireId(selectedSireId);
+    setValue("sireId", selectedSireId);
     const selectedSire = dogs.find(dog => dog.id === selectedSireId);
     if (selectedSire) {
-      setSireName(selectedSire.name);
       console.log("Selected sire:", selectedSire.name, "with ID:", selectedSireId);
     }
   };
   
+  // Handle dam selection
   const handleDamChange = (selectedDamId: string) => {
-    setDamId(selectedDamId);
-    const selectedDam = dogs.find(dog => dog.id === selectedDamId);
-    if (selectedDam) {
-      setDamName(selectedDam.name);
-    }
+    setValue("damId", selectedDamId);
   };
 
   // Clear internal sire data when switching to external sire
   useEffect(() => {
     if (isExternalSire) {
-      setSireId('');
-      setSireName('');
+      setValue("sireId", "");
     } else {
-      setExternalSireName('');
-      setExternalSireBreed('');
-      setExternalSireRegistration('');
+      setValue("externalSireName", "");
+      setValue("externalSireBreed", "");
+      setValue("externalSireRegistration", "");
     }
-  }, [isExternalSire]);
+  }, [isExternalSire, setValue]);
 
   return (
-    <form className="space-y-4">
-      <FormItem>
-        <FormLabel>Litter Name</FormLabel>
-        <Input 
-          value={litterName}
-          onChange={(e) => setLitterName(e.target.value)}
-          placeholder="Enter litter name"
-          className="bg-white border-greige-300"
-        />
-      </FormItem>
-      
-      <FormItem>
-        <FormLabel>Date of Birth</FormLabel>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal bg-white border-greige-300",
-                !dateOfBirth && "text-muted-foreground"
-              )}
-            >
-              {dateOfBirth ? (
-                format(dateOfBirth, "PPP")
-              ) : (
-                <span>Pick a date</span>
-              )}
-              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 bg-white" align="start">
-            <Calendar
-              mode="single"
-              selected={dateOfBirth}
-              onSelect={(date) => date && setDateOfBirth(date)}
-              disabled={(date) => date > new Date()}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-      </FormItem>
-      
-      <FormItem className="flex flex-row items-center justify-between rounded-lg border border-greige-300 p-4 bg-white">
-        <div className="space-y-0.5">
-          <FormLabel>External Sire</FormLabel>
-          <div className="text-sm text-muted-foreground">
-            Use a sire from outside your kennel
-          </div>
-        </div>
-        <Switch
-          checked={isExternalSire}
-          onCheckedChange={setIsExternalSire}
-        />
-      </FormItem>
-      
-      {isExternalSire ? (
-        <>
-          <FormItem>
-            <FormLabel>External Sire Name</FormLabel>
-            <Input 
-              value={externalSireName}
-              onChange={(e) => setExternalSireName(e.target.value)}
-              placeholder="Enter sire name"
-              className="bg-white border-greige-300"
-            />
-          </FormItem>
-          
-          <FormItem>
-            <FormLabel>External Sire Breed</FormLabel>
-            <Input 
-              value={externalSireBreed}
-              onChange={(e) => setExternalSireBreed(e.target.value)}
-              placeholder="Enter sire breed"
-              className="bg-white border-greige-300"
-            />
-          </FormItem>
-          
-          <FormItem>
-            <FormLabel>External Sire Registration</FormLabel>
-            <Input 
-              value={externalSireRegistration}
-              onChange={(e) => setExternalSireRegistration(e.target.value)}
-              placeholder="Enter registration number (optional)"
-              className="bg-white border-greige-300"
-            />
-          </FormItem>
-        </>
-      ) : (
+    <Form {...form}>
+      <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
         <FormItem>
-          <FormLabel>Sire (Male)</FormLabel>
-          <Select onValueChange={handleSireChange} value={sireId}>
+          <FormLabel>Litter Name</FormLabel>
+          <Input 
+            {...register("litterName")}
+            placeholder="Enter litter name"
+            className="bg-white border-greige-300"
+          />
+        </FormItem>
+        
+        <FormItem>
+          <FormLabel>Date of Birth</FormLabel>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal bg-white border-greige-300",
+                  !form.watch("dateOfBirth") && "text-muted-foreground"
+                )}
+                onClick={(e) => e.preventDefault()}
+              >
+                {form.watch("dateOfBirth") ? (
+                  format(form.watch("dateOfBirth"), "PPP")
+                ) : (
+                  <span>Pick a date</span>
+                )}
+                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0 bg-white" align="start">
+              <Calendar
+                mode="single"
+                selected={form.watch("dateOfBirth")}
+                onSelect={(date) => date && setValue("dateOfBirth", date)}
+                disabled={(date) => date > new Date()}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </FormItem>
+        
+        <FormItem className="flex flex-row items-center justify-between rounded-lg border border-greige-300 p-4 bg-white">
+          <div className="space-y-0.5">
+            <FormLabel>External Sire</FormLabel>
+            <div className="text-sm text-muted-foreground">
+              Use a sire from outside your kennel
+            </div>
+          </div>
+          <Switch
+            checked={form.watch("isExternalSire")}
+            onCheckedChange={(checked) => setValue("isExternalSire", checked)}
+          />
+        </FormItem>
+        
+        {isExternalSire ? (
+          <>
+            <FormItem>
+              <FormLabel>External Sire Name</FormLabel>
+              <Input 
+                {...register("externalSireName")}
+                placeholder="Enter sire name"
+                className="bg-white border-greige-300"
+              />
+            </FormItem>
+            
+            <FormItem>
+              <FormLabel>External Sire Breed</FormLabel>
+              <Input 
+                {...register("externalSireBreed")}
+                placeholder="Enter sire breed"
+                className="bg-white border-greige-300"
+              />
+            </FormItem>
+            
+            <FormItem>
+              <FormLabel>External Sire Registration</FormLabel>
+              <Input 
+                {...register("externalSireRegistration")}
+                placeholder="Enter registration number (optional)"
+                className="bg-white border-greige-300"
+              />
+            </FormItem>
+          </>
+        ) : (
+          <FormItem>
+            <FormLabel>Sire (Male)</FormLabel>
+            <Select 
+              onValueChange={handleSireChange} 
+              value={selectedSireId || ""}
+            >
+              <SelectTrigger className="bg-white border-greige-300">
+                <SelectValue placeholder="Select male dog" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {males.map(dog => (
+                    <SelectItem key={dog.id} value={dog.id}>
+                      {dog.name} ({dog.breed})
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </FormItem>
+        )}
+        
+        <FormItem>
+          <FormLabel>Dam (Female)</FormLabel>
+          <Select 
+            onValueChange={handleDamChange} 
+            value={selectedDamId || ""}
+          >
             <SelectTrigger className="bg-white border-greige-300">
-              <SelectValue placeholder="Select male dog" />
+              <SelectValue placeholder="Select female dog" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                {males.map(dog => (
+                {females.map(dog => (
                   <SelectItem key={dog.id} value={dog.id}>
                     {dog.name} ({dog.breed})
                   </SelectItem>
@@ -201,26 +191,8 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({
             </SelectContent>
           </Select>
         </FormItem>
-      )}
-      
-      <FormItem>
-        <FormLabel>Dam (Female)</FormLabel>
-        <Select onValueChange={handleDamChange} value={damId}>
-          <SelectTrigger className="bg-white border-greige-300">
-            <SelectValue placeholder="Select female dog" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {females.map(dog => (
-                <SelectItem key={dog.id} value={dog.id}>
-                  {dog.name} ({dog.breed})
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </FormItem>
-    </form>
+      </form>
+    </Form>
   );
 };
 

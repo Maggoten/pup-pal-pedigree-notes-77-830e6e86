@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
 import { useDogs } from '@/context/DogsContext';
@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Litter } from '@/types/breeding';
 import NewLitterForm from './NewLitterForm';
 import { useAuth } from '@/context/AuthContext';
+import { useForm } from 'react-hook-form';
 
 interface NewLitterTabContentProps {
   onClose: () => void;
@@ -18,25 +19,23 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
   const { toast } = useToast();
   const { user } = useAuth();
   
-  // New litter form state
-  const [sireName, setSireName] = useState('');
-  const [sireId, setSireId] = useState('');
-  const [damName, setDamName] = useState('');
-  const [damId, setDamId] = useState('');
-  const [litterName, setLitterName] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState<Date>(new Date());
+  // Set up React Hook Form
+  const form = useForm({
+    defaultValues: {
+      litterName: '',
+      sireId: '',
+      damId: '',
+      dateOfBirth: new Date(),
+      isExternalSire: false,
+      externalSireName: '',
+      externalSireBreed: '',
+      externalSireRegistration: '',
+    }
+  });
   
-  // External sire state
-  const [isExternalSire, setIsExternalSire] = useState(false);
-  const [externalSireName, setExternalSireName] = useState('');
-  const [externalSireBreed, setExternalSireBreed] = useState('');
-  const [externalSireRegistration, setExternalSireRegistration] = useState('');
-
-  const handleNewLitterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleNewLitterSubmit = (values: any) => {
     // Validation checks
-    if (!litterName) {
+    if (!values.litterName) {
       toast({
         title: "Missing Information",
         description: "Please enter a litter name",
@@ -45,7 +44,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       return;
     }
     
-    if (!isExternalSire && !sireId) {
+    if (!values.isExternalSire && !values.sireId) {
       toast({
         title: "Missing Information",
         description: "Please select a sire or enable external sire",
@@ -54,7 +53,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       return;
     }
     
-    if (isExternalSire && !externalSireName) {
+    if (values.isExternalSire && !values.externalSireName) {
       toast({
         title: "Missing Information",
         description: "Please enter the external sire's name",
@@ -63,7 +62,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       return;
     }
     
-    if (!damId) {
+    if (!values.damId) {
       toast({
         title: "Missing Information",
         description: "Please select a dam",
@@ -72,17 +71,20 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       return;
     }
 
-    const actualSireId = isExternalSire ? `external-${Date.now()}` : sireId;
-    const actualSireName = isExternalSire ? externalSireName : sireName;
+    // Get actual sire info
+    const actualSireId = values.isExternalSire ? `external-${Date.now()}` : values.sireId;
+    const actualSireName = values.isExternalSire ? values.externalSireName : 
+                          dogs.find(dog => dog.id === values.sireId)?.name || '';
+    const damName = dogs.find(dog => dog.id === values.damId)?.name || '';
     
     try {
       const newLitterId = Date.now().toString();
       const newLitter: Litter = {
         id: newLitterId,
-        name: litterName,
-        dateOfBirth: dateOfBirth.toISOString().split('T')[0],
+        name: values.litterName,
+        dateOfBirth: values.dateOfBirth.toISOString().split('T')[0],
         sireId: actualSireId,
-        damId,
+        damId: values.damId,
         sireName: actualSireName,
         damName,
         puppies: [],
@@ -91,10 +93,10 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
 
       console.log("Creating new litter with data:", newLitter);
       
-      if (isExternalSire) {
+      if (values.isExternalSire) {
         (newLitter as any).externalSire = true;
-        (newLitter as any).externalSireBreed = externalSireBreed;
-        (newLitter as any).externalSireRegistration = externalSireRegistration;
+        (newLitter as any).externalSireBreed = values.externalSireBreed;
+        (newLitter as any).externalSireRegistration = values.externalSireRegistration;
       }
       
       onLitterAdded(newLitter);
@@ -102,7 +104,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       
       toast({
         title: "Success",
-        description: `Litter "${litterName}" has been created`
+        description: `Litter "${values.litterName}" has been created`
       });
     } catch (error) {
       console.error("Error creating litter:", error);
@@ -117,34 +119,16 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
   return (
     <>
       <NewLitterForm 
+        form={form}
         dogs={dogs}
-        sireName={sireName}
-        setSireName={setSireName}
-        sireId={sireId}
-        setSireId={setSireId}
-        damName={damName}
-        setDamName={setDamName}
-        damId={damId}
-        setDamId={setDamId}
-        litterName={litterName}
-        setLitterName={setLitterName}
-        dateOfBirth={dateOfBirth}
-        setDateOfBirth={setDateOfBirth}
-        isExternalSire={isExternalSire}
-        setIsExternalSire={setIsExternalSire}
-        externalSireName={externalSireName}
-        setExternalSireName={setExternalSireName}
-        externalSireBreed={externalSireBreed}
-        setExternalSireBreed={setExternalSireBreed}
-        externalSireRegistration={externalSireRegistration}
-        setExternalSireRegistration={setExternalSireRegistration}
+        onSubmit={handleNewLitterSubmit}
       />
       
       <DialogFooter className="mt-6">
         <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
           Cancel
         </Button>
-        <Button type="button" onClick={handleNewLitterSubmit}>
+        <Button type="button" onClick={form.handleSubmit(handleNewLitterSubmit)}>
           Create Litter
         </Button>
       </DialogFooter>
