@@ -106,8 +106,8 @@ class LitterService {
           dateOfBirth: litter.date_of_birth,
           sireId: litter.sire_id || '',
           damId: litter.dam_id || '',
-          sireName: litter.sire_name,
-          damName: litter.dam_name,
+          sireName: litter.sire_name || '',
+          damName: litter.dam_name || '',
           puppies: puppiesWithDetails,
           archived: litter.archived || false,
           user_id: litter.user_id
@@ -168,6 +168,15 @@ class LitterService {
         litter.puppies = [];
       }
 
+      // Ensure sireName is not undefined
+      const sireName = litter.sireName || '';
+      
+      // Logging the sire data to verify
+      console.log("Sire data being sent to Supabase:", {
+        sireId: litter.sireId,
+        sireName: sireName
+      });
+
       // Insert into Supabase
       const { data: newLitter, error } = await supabase
         .from('litters')
@@ -177,7 +186,7 @@ class LitterService {
           date_of_birth: litter.dateOfBirth,
           sire_id: litter.sireId,
           dam_id: litter.damId,
-          sire_name: litter.sireName,
+          sire_name: sireName,
           dam_name: litter.damName,
           archived: litter.archived,
           user_id: sessionData.session.user.id

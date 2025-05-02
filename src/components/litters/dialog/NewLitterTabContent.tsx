@@ -35,14 +35,45 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
   const handleNewLitterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!litterName || (!sireId && !isExternalSire) || !damId) {
+    // Validation checks
+    if (!litterName) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields",
+        description: "Please enter a litter name",
         variant: "destructive"
       });
       return;
     }
+    
+    if (!isExternalSire && !sireId) {
+      toast({
+        title: "Missing Information",
+        description: "Please select a sire or enable external sire",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (isExternalSire && !externalSireName) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter the external sire's name",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!damId) {
+      toast({
+        title: "Missing Information",
+        description: "Please select a dam",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const actualSireId = isExternalSire ? `external-${Date.now()}` : sireId;
+    const actualSireName = isExternalSire ? externalSireName : sireName;
     
     try {
       const newLitterId = Date.now().toString();
@@ -50,13 +81,15 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
         id: newLitterId,
         name: litterName,
         dateOfBirth: dateOfBirth.toISOString().split('T')[0],
-        sireId: isExternalSire ? `external-${Date.now()}` : sireId,
+        sireId: actualSireId,
         damId,
-        sireName: isExternalSire ? externalSireName : sireName,
+        sireName: actualSireName,
         damName,
         puppies: [],
         user_id: user?.id || '' // Add user_id field with fallback
       };
+
+      console.log("Creating new litter with data:", newLitter);
       
       if (isExternalSire) {
         (newLitter as any).externalSire = true;
@@ -72,6 +105,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
         description: `Litter "${litterName}" has been created`
       });
     } catch (error) {
+      console.error("Error creating litter:", error);
       toast({
         title: "Error",
         description: "Failed to create litter",
