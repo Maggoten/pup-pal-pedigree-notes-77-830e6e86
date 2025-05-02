@@ -118,7 +118,7 @@ class LitterService {
           damId: litter.dam_id || '',
           sireName: litter.sire_name || '',
           damName: litter.dam_name || '',
-          puppies: puppiesWithDetailedPuppies,
+          puppies: puppiesWithDetails,  // FIX 1: Changed from puppiesWithDetailedPuppies to puppiesWithDetails
           archived: litter.archived || false,
           user_id: litter.user_id
         };
@@ -202,7 +202,7 @@ class LitterService {
       // Validate the date format
       let dateOfBirth;
       try {
-        // If it's already an ISO string, use it directly
+        // FIX 2 & 3: Properly check if dateOfBirth is a Date object or string
         if (typeof litter.dateOfBirth === 'string') {
           const tempDate = new Date(litter.dateOfBirth);
           if (isNaN(tempDate.getTime())) {
@@ -751,3 +751,4 @@ class LitterService {
 
 // Export a singleton instance
 export const litterService = new LitterService();
+
