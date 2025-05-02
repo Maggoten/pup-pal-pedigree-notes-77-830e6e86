@@ -16,18 +16,29 @@ interface NewLitterTabContentProps {
   onLitterAdded: (litter: Litter) => void;
 }
 
+interface LitterFormValues {
+  litterName: string;
+  dateOfBirth: Date;
+  sireId: string;
+  damId: string;
+  isExternalSire: boolean;
+  externalSireName: string;
+  externalSireBreed: string;
+  externalSireRegistration: string;
+}
+
 const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLitterAdded }) => {
   const { dogs } = useDogs();
   const { toast } = useToast();
   const { user } = useAuth();
   
-  // Set up React Hook Form
-  const methods = useForm({
+  // Set up React Hook Form with typed form values
+  const methods = useForm<LitterFormValues>({
     defaultValues: {
       litterName: '',
+      dateOfBirth: new Date(),
       sireId: '',
       damId: '',
-      dateOfBirth: new Date(),
       isExternalSire: false,
       externalSireName: '',
       externalSireBreed: '',
@@ -35,7 +46,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
     }
   });
   
-  const handleNewLitterSubmit = async (values: any) => {
+  const handleNewLitterSubmit = async (values: LitterFormValues) => {
     try {
       console.log("Form submission started with values:", values);
       
@@ -76,8 +87,19 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
         return;
       }
 
-      // Check if user session exists
-      if (!user || !user.id) {
+      // Get current session to ensure user is logged in
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        toast({
+          title: "Authentication Error",
+          description: "Could not verify your login session",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (!sessionData.session || !sessionData.session.user) {
         console.error("No active user session found");
         toast({
           title: "Authentication Error",
@@ -103,17 +125,22 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       const damName = selectedDam?.name || '';
       console.log("Selected dam:", selectedDam);
 
+      // Create unique ID for new litter
       const newLitterId = `litter-${Date.now()}`;
+      
+      // Format the date properly
+      const formattedDate = values.dateOfBirth.toISOString();
+      
       const newLitter: Litter = {
         id: newLitterId,
         name: values.litterName,
-        dateOfBirth: values.dateOfBirth.toISOString().split('T')[0],
+        dateOfBirth: formattedDate,
         sireId: actualSireId,
         damId: values.damId,
         sireName: actualSireName,
         damName,
         puppies: [],
-        user_id: user.id
+        user_id: sessionData.session.user.id
       };
 
       console.log("Creating new litter with data:", newLitter);
@@ -126,28 +153,8 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       }
       
       // Use the litterService to add the litter to Supabase
-      const result = await litterService.addLitter(newLitter);
-      console.log("Litter creation result:", result);
-      
-      // Verify the litter was added successfully
-      const { data: checkData, error: checkError } = await supabase
-        .from('litters')
-        .select('*')
-        .eq('id', newLitterId);
-        
-      console.log("Verification check:", checkData, checkError);
-      
-      if (checkError) {
-        console.error("Error verifying litter creation:", checkError);
-        throw new Error(`Failed to verify litter creation: ${checkError.message}`);
-      }
-      
-      if (!checkData || checkData.length === 0) {
-        console.error("Litter verification failed: No data returned");
-        throw new Error("Failed to verify litter creation: No data returned");
-      }
-      
-      console.log("Litter successfully created and verified:", checkData[0]);
+      await litterService.addLitter(newLitter);
+      console.log("Litter successfully created");
       
       // Call the onLitterAdded callback with the new litter
       onLitterAdded(newLitter);
@@ -169,9 +176,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
 
   return (
     <FormProvider {...methods}>
-      <NewLitterForm 
-        dogs={dogs}
-      />
+      <NewLitterForm dogs={dogs} />
       
       <DialogFooter className="mt-6">
         <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">

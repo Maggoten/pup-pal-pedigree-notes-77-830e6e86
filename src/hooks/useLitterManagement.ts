@@ -1,10 +1,10 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Litter, Puppy } from '@/types/breeding';
 import { litterService } from '@/services/LitterService';
 import { plannedLittersService } from '@/services/planned-litters/plannedLittersService';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 export function useLitterManagement() {
   // Add useAuth to get the current user
@@ -20,38 +20,48 @@ export function useLitterManagement() {
   // UI state
   const [showAddLitterDialog, setShowAddLitterDialog] = useState(false);
   
-  // Load litters on component mount
-  useEffect(() => {
-    const loadLitters = async () => {
-      setIsLoading(true);
-      try {
-        const active = await litterService.getActiveLitters();
-        const archived = await litterService.getArchivedLitters();
-        
-        // Sort litters by date (newest first)
-        const sortByDate = (a: Litter, b: Litter) => 
-          new Date(b.dateOfBirth).getTime() - new Date(a.dateOfBirth).getTime();
-        
-        const sortedActive = active.sort(sortByDate);
-        const sortedArchived = archived.sort(sortByDate);
-        
-        setActiveLitters(sortedActive);
-        setArchivedLitters(sortedArchived);
-        
-        // Select the newest active litter by default
-        if (sortedActive.length > 0 && !selectedLitterId) {
-          setSelectedLitterId(sortedActive[0].id);
-        } else if (sortedActive.length === 0 && sortedArchived.length > 0) {
-          setSelectedLitterId(sortedArchived[0].id);
-        }
-      } catch (error) {
-        console.error('Error loading litters:', error);
-      } finally {
-        setIsLoading(false);
+  // Load litters function - extracted for reusability
+  const loadLittersData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      console.log("Loading litters data...");
+      const active = await litterService.getActiveLitters();
+      const archived = await litterService.getArchivedLitters();
+      
+      // Sort litters by date (newest first)
+      const sortByDate = (a: Litter, b: Litter) => 
+        new Date(b.dateOfBirth).getTime() - new Date(a.dateOfBirth).getTime();
+      
+      const sortedActive = active.sort(sortByDate);
+      const sortedArchived = archived.sort(sortByDate);
+      
+      console.log("Loaded active litters:", sortedActive);
+      console.log("Loaded archived litters:", sortedArchived);
+      
+      setActiveLitters(sortedActive);
+      setArchivedLitters(sortedArchived);
+      
+      // Select the newest active litter by default
+      if (sortedActive.length > 0 && !selectedLitterId) {
+        setSelectedLitterId(sortedActive[0].id);
+      } else if (sortedActive.length === 0 && sortedArchived.length > 0 && !selectedLitterId) {
+        setSelectedLitterId(sortedArchived[0].id);
       }
-    };
-    
-    loadLitters();
+    } catch (error) {
+      console.error('Error loading litters:', error);
+      toast({
+        title: "Error Loading Litters",
+        description: "Failed to load your litters. Please refresh the page.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedLitterId]);
+  
+  // Initial data load
+  useEffect(() => {
+    loadLittersData();
     
     // Load planned litters properly handling the async function
     const loadPlannedLitters = async () => {
@@ -64,21 +74,53 @@ export function useLitterManagement() {
     };
     
     loadPlannedLitters();
-  }, []);
+    
+    // Subscribe to changes in the litters table
+    const channel = supabase
+      .channel('litters-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'litters' },
+        (payload) => {
+          console.log('Litter change detected:', payload);
+          // Reload litters when changes are detected
+          loadLittersData();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadLittersData]);
   
   // Handlers for litter operations
   const handleAddLitter = async (newLitter: Litter) => {
     newLitter.puppies = [];
     newLitter.archived = false;
     
-    // Ensure user_id is set correctly
-    if (user) {
-      newLitter.user_id = user.id;
+    // Verify user session
+    const { data: sessionData } = await supabase.auth.getSession();
+    
+    if (!sessionData.session || !sessionData.session.user) {
+      toast({
+        title: "Authentication Error",
+        description: "You must be signed in to add a litter.",
+        variant: "destructive"
+      });
+      return;
     }
     
+    // Ensure user_id is set correctly
+    newLitter.user_id = sessionData.session.user.id;
+    
     try {
-      const updatedLitters = await litterService.addLitter(newLitter);
-      setActiveLitters(await litterService.getActiveLitters());
+      console.log("Adding new litter with user ID:", newLitter.user_id);
+      await litterService.addLitter(newLitter);
+      
+      // Immediately reload litters to refresh the UI
+      await loadLittersData();
+      
+      // Set the newly created litter as selected
       setSelectedLitterId(newLitter.id);
       
       toast({
@@ -95,11 +137,10 @@ export function useLitterManagement() {
     }
   };
   
-  const handleUpdateLitter = async (updatedLitter: Litter) => {
+  async function updateLitter(updatedLitter: Litter) {
     try {
       await litterService.updateLitter(updatedLitter);
-      setActiveLitters(await litterService.getActiveLitters());
-      setArchivedLitters(await litterService.getArchivedLitters());
+      await loadLittersData();
       
       toast({
         title: "Litter Updated",
@@ -113,16 +154,14 @@ export function useLitterManagement() {
         variant: "destructive"
       });
     }
-  };
+  }
   
-  const handleAddPuppy = async (newPuppy: Puppy) => {
+  async function addPuppy(newPuppy: Puppy) {
     if (!selectedLitterId) return;
     
     try {
-      // Add the puppy without modifying its name
       await litterService.addPuppy(selectedLitterId, newPuppy);
-      setActiveLitters(await litterService.getActiveLitters());
-      setArchivedLitters(await litterService.getArchivedLitters());
+      await loadLittersData();
       
       toast({
         title: "Puppy Added",
@@ -136,16 +175,14 @@ export function useLitterManagement() {
         variant: "destructive"
       });
     }
-  };
+  }
   
-  const handleUpdatePuppy = async (updatedPuppy: Puppy) => {
+  async function updatePuppy(updatedPuppy: Puppy) {
     if (!selectedLitterId) return;
     
     try {
-      // Update the puppy without modifying its name
       await litterService.updatePuppy(selectedLitterId, updatedPuppy);
-      setActiveLitters(await litterService.getActiveLitters());
-      setArchivedLitters(await litterService.getArchivedLitters());
+      await loadLittersData();
     } catch (error) {
       console.error('Error updating puppy:', error);
       toast({
@@ -154,15 +191,14 @@ export function useLitterManagement() {
         variant: "destructive"
       });
     }
-  };
+  }
 
-  const handleDeletePuppy = async (puppyId: string) => {
+  async function deletePuppy(puppyId: string) {
     if (!selectedLitterId) return;
     
     try {
       await litterService.deletePuppy(selectedLitterId, puppyId);
-      setActiveLitters(await litterService.getActiveLitters());
-      setArchivedLitters(await litterService.getArchivedLitters());
+      await loadLittersData();
     } catch (error) {
       console.error('Error deleting puppy:', error);
       toast({
@@ -171,24 +207,20 @@ export function useLitterManagement() {
         variant: "destructive"
       });
     }
-  };
+  }
 
-  const handleDeleteLitter = async (litterId: string) => {
+  async function deleteLitter(litterId: string) {
     if (confirm('Are you sure you want to delete this litter? This action cannot be undone.')) {
       try {
         await litterService.deleteLitter(litterId);
-        setActiveLitters(await litterService.getActiveLitters());
-        setArchivedLitters(await litterService.getArchivedLitters());
+        await loadLittersData();
         
         // Select new litter if the deleted one was selected
         if (selectedLitterId === litterId) {
-          const active = await litterService.getActiveLitters();
-          const archived = await litterService.getArchivedLitters();
-          
-          if (active.length > 0) {
-            setSelectedLitterId(active[0].id);
-          } else if (archived.length > 0) {
-            setSelectedLitterId(archived[0].id);
+          if (activeLitters.length > 0) {
+            setSelectedLitterId(activeLitters[0].id);
+          } else if (archivedLitters.length > 0) {
+            setSelectedLitterId(archivedLitters[0].id);
           } else {
             setSelectedLitterId(null);
           }
@@ -208,13 +240,12 @@ export function useLitterManagement() {
         });
       }
     }
-  };
+  }
   
-  const handleArchiveLitter = async (litterId: string, archive: boolean) => {
+  async function archiveLitter(litterId: string, archive: boolean) {
     try {
       await litterService.toggleArchiveLitter(litterId, archive);
-      setActiveLitters(await litterService.getActiveLitters());
-      setArchivedLitters(await litterService.getArchivedLitters());
+      await loadLittersData();
       
       toast({
         title: archive ? "Litter Archived" : "Litter Activated",
@@ -230,10 +261,10 @@ export function useLitterManagement() {
         variant: "destructive"
       });
     }
-  };
+  }
   
   // Get available years for filtering
-  const getAvailableYears = () => {
+  function getAvailableYears() {
     const yearsSet = new Set<number>();
     
     [...activeLitters, ...archivedLitters].forEach(litter => {
@@ -242,8 +273,8 @@ export function useLitterManagement() {
     });
     
     return Array.from(yearsSet).sort((a, b) => b - a); // Sort descending
-  };
-  
+  }
+
   // Find the currently selected litter
   const selectedLitter = selectedLitterId 
     ? [...activeLitters, ...archivedLitters].find(litter => litter.id === selectedLitterId) 
@@ -265,12 +296,12 @@ export function useLitterManagement() {
     selectedLitter,
     isLoading,
     handleAddLitter,
-    handleUpdateLitter,
-    handleAddPuppy,
-    handleUpdatePuppy,
-    handleDeletePuppy,
-    handleDeleteLitter,
-    handleArchiveLitter,
+    handleUpdateLitter: updateLitter,
+    handleAddPuppy: addPuppy,
+    handleUpdatePuppy: updatePuppy,
+    handleDeletePuppy: deletePuppy,
+    handleDeleteLitter: deleteLitter,
+    handleArchiveLitter: archiveLitter,
     handleSelectLitter,
     getAvailableYears
   };
