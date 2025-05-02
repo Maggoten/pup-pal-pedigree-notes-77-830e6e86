@@ -1,96 +1,60 @@
 
 import { Reminder } from '@/types/reminders';
-import { differenceInDays, parseISO, addDays } from 'date-fns';
-import { createCalendarClockIcon, createScaleIcon } from '@/utils/iconUtils';
-import { litterService } from '@/services/LitterService';
+import { createCalendarClockIcon } from '@/utils/iconUtils';
+import { supabase } from '@/integrations/supabase/client';
 
-export const generateLitterReminders = (userId: string): Reminder[] => {
+// Generate litter-related reminders for a specific user
+export const generateLitterReminders = async (userId: string): Promise<Reminder[]> => {
+  console.log(`Generating litter reminders for user: ${userId}`);
   const reminders: Reminder[] = [];
-  const today = new Date();
   
-  // Add puppy-related reminders from litters
-  const litters = litterService.loadLitters();
-  
-  // Filter litters for the current user
-  const userLitters = litters.filter(litter => litter.user_id === userId);
-  
-  // Only include active (not archived) litters
-  const activeLitters = userLitters.filter(litter => !litter.archived);
-  
-  activeLitters.forEach(litter => {
-    const litterBirthDate = parseISO(litter.dateOfBirth);
-    const puppyAge = differenceInDays(today, litterBirthDate);
-    
-    // Deworming at 3 weeks
-    if (puppyAge >= 19 && puppyAge <= 22) {
-      reminders.push({
-        id: `deworm-3w-${litter.id}`,
-        title: `Deworm ${litter.name} Puppies`,
-        description: `First deworming for puppies at 3 weeks old`,
-        icon: createCalendarClockIcon("green-500"),
-        dueDate: addDays(litterBirthDate, 21),
-        priority: 'high',
-        type: 'deworming',
-        relatedId: litter.id
-      });
+  try {
+    // Fetch litters from Supabase for the current user
+    const { data: litters, error } = await supabase
+      .from('litters')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('archived', false);
+      
+    if (error) {
+      console.error("Error fetching litters for reminders:", error);
+      return [];
     }
     
-    // Deworming at 5 weeks
-    if (puppyAge >= 33 && puppyAge <= 36) {
-      reminders.push({
-        id: `deworm-5w-${litter.id}`,
-        title: `Deworm ${litter.name} Puppies`,
-        description: `Second deworming for puppies at 5 weeks old`,
-        icon: createCalendarClockIcon("green-500"),
-        dueDate: addDays(litterBirthDate, 35),
-        priority: 'high',
-        type: 'deworming',
-        relatedId: litter.id
-      });
-    }
+    console.log(`Found ${litters?.length || 0} litters for user ${userId}`);
     
-    // Deworming at 7 weeks
-    if (puppyAge >= 47 && puppyAge <= 50) {
-      reminders.push({
-        id: `deworm-7w-${litter.id}`,
-        title: `Deworm ${litter.name} Puppies`,
-        description: `Third deworming for puppies at 7 weeks old`,
-        icon: createCalendarClockIcon("green-500"),
-        dueDate: addDays(litterBirthDate, 49),
-        priority: 'high',
-        type: 'deworming',
-        relatedId: litter.id
-      });
-    }
+    // Process each litter
+    litters?.forEach(litter => {
+      const birthDate = new Date(litter.date_of_birth);
+      const today = new Date();
+      
+      // Create a reminder for litter's birth date
+      if (birthDate > today) {
+        const daysUntilBirth = Math.floor((birthDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysUntilBirth <= 14) { // Two weeks before birth date
+          reminders.push({
+            id: `litter-birth-${litter.id}`,
+            title: `Litter Birth Approaching`,
+            description: `${litter.name} is due in ${daysUntilBirth} days`,
+            dueDate: birthDate,
+            priority: 'high',
+            type: 'other',
+            icon: createCalendarClockIcon('rose-500'),
+            relatedId: litter.id
+          });
+          
+          console.log(`Created birth reminder for litter ${litter.name}`);
+        }
+      }
+      
+      // Add other litter-related reminders as needed
+    });
     
-    // Vet visit reminder at 6 weeks
-    if (puppyAge >= 40 && puppyAge <= 43) {
-      reminders.push({
-        id: `vet-6w-${litter.id}`,
-        title: `Schedule Vet Visit for ${litter.name}`,
-        description: `Book vet appointment for final check before puppies go to new homes`,
-        icon: createCalendarClockIcon("purple-500"),
-        dueDate: addDays(litterBirthDate, 42),
-        priority: 'high',
-        type: 'vet-visit',
-        relatedId: litter.id
-      });
-    }
-    
-    // Weight check reminders for young puppies (every 3 days for first 3 weeks)
-    if (puppyAge <= 21 && puppyAge % 3 === 0) {
-      reminders.push({
-        id: `weight-${litter.id}-${puppyAge}`,
-        title: `Weigh ${litter.name} Puppies`,
-        description: `Regular weight tracking at ${puppyAge} days old`,
-        icon: createScaleIcon("blue-500"),
-        dueDate: today,
-        priority: 'medium',
-        type: 'weighing',
-        relatedId: litter.id
-      });
-    }
-  });
-  
-  return reminders;
+    console.log(`Generated ${reminders.length} litter reminders for user ${userId}`);
+    return reminders;
+  } catch (error) {
+    console.error("Error generating litter reminders:", error);
+    return [];
+  }
 };

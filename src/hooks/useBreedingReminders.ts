@@ -1,4 +1,3 @@
-
 import { useDogs } from '@/context/DogsContext';
 import { toast } from '@/components/ui/use-toast';
 import { useState, useEffect } from 'react';
@@ -33,10 +32,12 @@ export const useBreedingReminders = () => {
     const loadReminders = async () => {
       if (!user) {
         // Don't fetch if not authenticated
+        console.log("useBreedingReminders: No authenticated user, skipping reminder fetch");
         setIsLoading(false);
         return;
       }
       
+      console.log("useBreedingReminders: Loading reminders for user:", user.id);
       setIsLoading(true);
       setHasError(false);
       
@@ -49,21 +50,32 @@ export const useBreedingReminders = () => {
         
         // Fetch reminders from Supabase - these are already filtered by user ID through RLS
         const supabaseReminders = await fetchReminders();
+        console.log(`useBreedingReminders: Fetched ${supabaseReminders.length} reminders from Supabase`);
         
         // Make sure we only generate reminders for the current user's dogs
         // dogs from the DogsContext should already be filtered by owner_id
-        const dogReminders = generateDogReminders(dogs);
+        console.log(`useBreedingReminders: Generating dog reminders from ${dogs.length} dogs`);
+        console.log("Dogs data for reminders:", dogs);
+        
+        // Filter dogs to ensure we only have current user's dogs
+        const userDogs = dogs.filter(dog => dog.owner_id === user.id);
+        console.log(`useBreedingReminders: Filtered to ${userDogs.length} dogs belonging to current user`);
+        
+        const dogReminders = generateDogReminders(userDogs);
+        console.log(`useBreedingReminders: Generated ${dogReminders.length} dog reminders`);
         
         // Filter litter reminders for the current user
         const litterReminders = generateLitterReminders(user.id);
+        console.log(`useBreedingReminders: Generated ${litterReminders.length} litter reminders`);
         
         // Generate general reminders only for the user's dogs
-        const generalReminders = generateGeneralReminders(dogs);
+        const generalReminders = generateGeneralReminders(userDogs);
+        console.log(`useBreedingReminders: Generated ${generalReminders.length} general reminders`);
         
         // Combine all reminders
         const allReminders = [...supabaseReminders, ...dogReminders, ...litterReminders, ...generalReminders];
         
-        console.log('Total reminders loaded:', allReminders.length);
+        console.log('useBreedingReminders: Total reminders loaded:', allReminders.length);
         setReminders(allReminders);
       } catch (error) {
         console.error("Error loading reminders:", error);
