@@ -1,10 +1,15 @@
+
 import { useState, useEffect } from 'react';
 import { Litter, Puppy } from '@/types/breeding';
 import { litterService } from '@/services/LitterService';
 import { plannedLittersService } from '@/services/PlannedLitterService';
 import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export function useLitterManagement() {
+  // Add useAuth to get the current user
+  const { user } = useAuth();
+  
   // State for litters data
   const [activeLitters, setActiveLitters] = useState<Litter[]>([]);
   const [archivedLitters, setArchivedLitters] = useState<Litter[]>([]);
@@ -54,6 +59,11 @@ export function useLitterManagement() {
   const handleAddLitter = (newLitter: Litter) => {
     newLitter.puppies = [];
     newLitter.archived = false;
+    
+    // Ensure user_id is set correctly
+    if (user) {
+      newLitter.user_id = user.id;
+    }
     
     litterService.addLitter(newLitter);
     setActiveLitters(litterService.getActiveLitters());

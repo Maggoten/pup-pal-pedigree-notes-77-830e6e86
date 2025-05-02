@@ -66,4 +66,5 @@ export interface Litter {
   damName: string;
   puppies: Puppy[];
   archived?: boolean;
+  user_id: string; // Added user_id property to match the database schema
 }
