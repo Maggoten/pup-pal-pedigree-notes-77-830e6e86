@@ -77,7 +77,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           {/* Main dashboard content - Fixed layout with stable heights */}
           <div className="space-y-6">
             {/* Top row: Calendar (2/3) and Reminders (1/3) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[400px]">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
               {/* Calendar taking 2/3 of the width */}
               <div className="lg:col-span-2 h-full">
                 <BreedingCalendar />
@@ -90,7 +90,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </div>
             
             {/* Bottom row: Annual Breeding Stats (full width) */}
-            <div className="min-h-[350px]">
+            <div className="h-[350px]">
               <BreedingStats />
             </div>
           </div>

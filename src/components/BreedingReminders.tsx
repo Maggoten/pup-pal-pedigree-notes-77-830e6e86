@@ -18,14 +18,14 @@ const BreedingReminders: React.FC = () => {
   
   return (
     <>
-      <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full relative bg-greige-50">
+      <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full relative bg-greige-50 flex flex-col">
         {/* Decorative background elements */}
-        <div className="absolute top-1 right-1 opacity-5">
+        <div className="absolute top-1 right-1 opacity-5 pointer-events-none">
           <PawPrint className="h-40 w-40 text-primary transform rotate-12" />
         </div>
         
-        <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 relative">
-          <div className="absolute top-6 right-6">
+        <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 relative flex-shrink-0">
+          <div className="absolute top-6 right-6 pointer-events-none">
             <div className="relative">
               <div className="absolute animate-ping w-3 h-3 rounded-full bg-primary/30"></div>
               <div className="w-3 h-3 rounded-full bg-primary/60"></div>
@@ -40,7 +40,7 @@ const BreedingReminders: React.FC = () => {
             Important tasks and upcoming events
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-0 flex flex-col h-[calc(100%-76px)]">
+        <CardContent className="p-0 flex flex-col flex-grow overflow-hidden">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center flex-grow py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
@@ -56,7 +56,7 @@ const BreedingReminders: React.FC = () => {
             </div>
           ) : (
             <>
-              <div className="flex-grow overflow-y-auto min-h-0 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+              <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
                 <RemindersList 
                   reminders={highPriorityReminders.length > 0 ? highPriorityReminders : reminders.slice(0, 3)} 
                   onComplete={handleMarkComplete} 
@@ -64,7 +64,7 @@ const BreedingReminders: React.FC = () => {
                 />
               </div>
               
-              <div className="p-3 text-center mt-auto">
+              <div className="p-3 text-center mt-auto flex-shrink-0">
                 <button 
                   onClick={() => setRemindersDialogOpen(true)}
                   className="text-xs text-primary hover:text-primary/70 font-medium"
@@ -77,7 +77,7 @@ const BreedingReminders: React.FC = () => {
         </CardContent>
         
         {/* Paw print indicator at the bottom */}
-        <div className="absolute bottom-2 right-2 opacity-30">
+        <div className="absolute bottom-2 right-2 opacity-30 pointer-events-none">
           <div className="flex gap-1">
             {[...Array(3)].map((_, i) => (
               <div 

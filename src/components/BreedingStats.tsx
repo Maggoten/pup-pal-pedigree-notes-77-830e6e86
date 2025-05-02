@@ -76,8 +76,8 @@ const BreedingStats = () => {
   ];
 
   return (
-    <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full bg-greige-50">
-      <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 flex flex-row items-center justify-between">
+    <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full bg-greige-50 flex flex-col">
+      <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 flex flex-row items-center justify-between flex-shrink-0">
         <div>
           <CardTitle className="flex items-center gap-2 text-primary">
             <PieChart className="h-5 w-5" />
@@ -110,7 +110,7 @@ const BreedingStats = () => {
         </div>
       </CardHeader>
       
-      <CardContent className="p-6">
+      <CardContent className="p-6 flex-grow">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, index) => (
             <div key={index} className="flex flex-col items-center text-center">
