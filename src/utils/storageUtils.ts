@@ -26,7 +26,8 @@ const checkBucketExists = async (): Promise<boolean> => {
     // Try to list files in the bucket to verify access
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
-      .list('', { limit: 1 });
+      .list('', { limit: 1 })
+      .abortSignal(AbortSignal.timeout(5000)); // Add a timeout
     
     if (error) {
       console.error('Error checking bucket existence:', error);
@@ -54,25 +55,25 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
       return;
     }
     
+    // Check if other dogs are using the same image before deleting
     const { data: dogsUsingImage, error: searchError } = await supabase
       .from('dogs')
       .select('id')
       .eq('image_url', oldImageUrl)
-      .eq('owner_id', userId)
-      .neq('id', excludeDogId || '');
+      .eq('owner_id', userId);
+    
+    // If excludeDogId is provided, filter it out from the results
+    const otherDogsUsingImage = dogsUsingImage ? 
+      dogsUsingImage.filter(dog => dog.id !== excludeDogId) : 
+      [];
 
     if (searchError) {
       console.error('Error checking for image usage:', searchError);
-      toast({
-        title: "Error checking image usage",
-        description: "Could not verify if the image is still in use",
-        variant: "destructive"
-      });
       return;
     }
 
-    if (dogsUsingImage && dogsUsingImage.length > 0) {
-      console.log('Image is still in use by other dogs, skipping deletion');
+    if (otherDogsUsingImage && otherDogsUsingImage.length > 0) {
+      console.log('Image is still in use by other dogs, skipping deletion', otherDogsUsingImage);
       return;
     }
 
@@ -80,11 +81,13 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
     const bucketExists = await checkBucketExists();
     if (!bucketExists) {
       console.error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
-      throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
+      console.log('Skipping image deletion due to bucket access issues');
+      return; // Just return without throwing, let the dog deletion complete
     }
     
     console.log(`Bucket "${BUCKET_NAME}" exists and is accessible, proceeding with deletion`);
 
+    // Extract the storage path from the URL
     const urlParts = oldImageUrl.split('/');
     const bucketIndex = urlParts.findIndex(part => part === BUCKET_NAME);
     
@@ -99,35 +102,32 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
 
     console.log('Deleting unused image:', storagePath);
     
-    const { error: deleteError } = await supabase.storage
-      .from(BUCKET_NAME)
-      .remove([storagePath]);
-
-    if (deleteError) {
-      const errorMessage = deleteError instanceof StorageError 
-        ? deleteError.message 
-        : "Could not delete the unused image";
-
-      console.error('Delete error:', {
-        error: deleteError,
-        message: errorMessage,
-        details: deleteError instanceof StorageError ? deleteError.message : 'Unknown error',
-        status: deleteError instanceof Error ? deleteError.name : 'unknown'
-      });
-
-      toast({
-        title: "Error removing image",
-        description: errorMessage,
-        variant: "destructive"
-      });
-      return;
+    // Set a timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
+    try {
+      const { error: deleteError } = await supabase.storage
+        .from(BUCKET_NAME)
+        .remove([storagePath])
+        .abortSignal(controller.signal);
+  
+      clearTimeout(timeoutId);
+  
+      if (deleteError) {
+        console.error('Delete error:', {
+          error: deleteError,
+          message: deleteError instanceof StorageError ? deleteError.message : 'Unknown error',
+          status: deleteError instanceof Error ? deleteError.name : 'unknown'
+        });
+        return; // Just return, don't throw
+      }
+  
+      console.log('Successfully deleted unused image');
+    } catch (abortError) {
+      console.error('Image deletion timed out or was aborted:', abortError);
+      // Continue with the flow, don't break the process
     }
-
-    console.log('Successfully deleted unused image');
-    toast({
-      title: "Success",
-      description: "Unused image was successfully removed",
-    });
   } catch (error) {
     const errorMessage = error instanceof Error 
       ? error.message 
@@ -135,15 +135,10 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
 
     console.error('Cleanup error:', {
       error,
-      message: errorMessage,
-      status: error instanceof Error && 'name' in error ? (error as any).name : 'unknown'
+      message: errorMessage
     });
-
-    toast({
-      title: "Error",
-      description: errorMessage,
-      variant: "destructive"
-    });
+    
+    // Don't throw, just log the error and allow the dog deletion to complete
   }
 };
 

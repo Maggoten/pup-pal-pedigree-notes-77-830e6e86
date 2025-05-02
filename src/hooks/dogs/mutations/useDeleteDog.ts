@@ -21,6 +21,7 @@ export function useDeleteDog(userId: string | undefined) {
       });
     },
     onError: (err) => {
+      console.error('Dog deletion error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to remove dog';
       toast({
         title: "Error removing dog",
