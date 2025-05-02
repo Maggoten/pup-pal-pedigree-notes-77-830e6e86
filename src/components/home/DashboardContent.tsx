@@ -79,9 +79,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       </div>
       
       {/* Annual Breeding Statistics in a separate row (full width) */}
-      <div className="h-[450px]">
+      <div className="min-h-[500px]">
         {!isDataReady ? (
-          <div className="h-full rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
+          <div className="h-full min-h-[500px] rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
             <div className="flex flex-col h-full">
               <Skeleton className="h-14 w-full mb-6" />
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
