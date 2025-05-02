@@ -1,119 +1,101 @@
 
-import React, { useState, useCallback } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import React, { useState, useEffect } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Litter, Puppy } from '@/types/breeding';
-import { toast } from '@/components/ui/use-toast';
 import { differenceInWeeks, parseISO } from 'date-fns';
-import { Heart, BarChart2, ClipboardCheck } from 'lucide-react';
-import SelectedLitterHeader from './SelectedLitterHeader';
-import CompactDevelopmentSection from './CompactDevelopmentSection';
+import LitterDetails from './LitterDetails';
 import PuppiesTabContent from './tabs/PuppiesTabContent';
 import DevelopmentTabContent from './tabs/DevelopmentTabContent';
 import GrowthChartsTabContent from './tabs/GrowthChartsTabContent';
+import { useDogsQueries } from '@/hooks/dogs/useDogsQueries';
+import { Dog } from '@/types/dogs';
 
 interface SelectedLitterSectionProps {
-  selectedLitter: Litter | null;
-  onUpdateLitter: (litter: Litter) => void;
-  onDeleteLitter: (litterId: string) => void;
-  onArchiveLitter: (litterId: string, archive: boolean) => void;
+  litter: Litter;
   onAddPuppy: (puppy: Puppy) => void;
   onUpdatePuppy: (puppy: Puppy) => void;
   onDeletePuppy: (puppyId: string) => void;
+  onUpdateLitter: (litter: Litter) => void;
+  onDeleteLitter: (litterId: string) => void;
+  onArchiveLitter: (litterId: string, archive: boolean) => void;
 }
 
 const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
-  selectedLitter,
-  onUpdateLitter,
-  onDeleteLitter,
-  onArchiveLitter,
+  litter,
   onAddPuppy,
   onUpdatePuppy,
-  onDeletePuppy
+  onDeletePuppy,
+  onUpdateLitter,
+  onDeleteLitter,
+  onArchiveLitter
 }) => {
   const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
   const [activeTab, setActiveTab] = useState('puppies');
-  const [checklistVersion, setChecklistVersion] = useState(0);
-  
-  // If no litter is selected, don't show this section
-  if (!selectedLitter) {
-    return null;
-  }
-  
-  const handleToggleChecklistItem = useCallback((itemId: string, completed: boolean) => {
-    // Force a re-render when a checklist item is toggled
-    setChecklistVersion(prev => prev + 1);
-    
-    toast({
-      title: completed ? "Task Completed" : "Task Reopened",
-      description: completed 
-        ? "Item marked as completed" 
-        : "Item marked as not completed"
-    });
-  }, []);
+  const { data: dogs, isLoading } = useDogsQueries.useDogs();
+  const [damBreed, setDamBreed] = useState<string>('');
 
-  // Calculate litter age
-  const birthDate = parseISO(selectedLitter.dateOfBirth);
-  const ageInWeeks = differenceInWeeks(new Date(), birthDate);
-  
+  // Calculate litter age in weeks
+  const litterAge = differenceInWeeks(new Date(), parseISO(litter.dateOfBirth));
+
+  // Find the dam's breed when dogs data is loaded
+  useEffect(() => {
+    if (dogs && dogs.length > 0 && litter.damId) {
+      const dam = dogs.find(dog => dog.id === litter.damId);
+      if (dam) {
+        console.log("Found dam:", dam.name, "with breed:", dam.breed);
+        setDamBreed(dam.breed);
+      }
+    }
+  }, [dogs, litter.damId]);
+
   return (
-    <div className="animate-fade-in space-y-6">
-      {/* Header with edit button */}
-      <SelectedLitterHeader 
-        litter={selectedLitter}
+    <div className="space-y-6 mt-6">
+      <LitterDetails 
+        litter={litter}
+        onAddPuppy={onAddPuppy}
+        onUpdatePuppy={onUpdatePuppy}
+        onDeletePuppy={onDeletePuppy}
         onUpdateLitter={onUpdateLitter}
         onDeleteLitter={onDeleteLitter}
         onArchiveLitter={onArchiveLitter}
-        ageInWeeks={ageInWeeks}
       />
-      
-      {/* Compact Development Checklist - Always visible */}
-      <CompactDevelopmentSection 
-        litter={selectedLitter}
-        onToggleItem={handleToggleChecklistItem}
-        key={`compact-${checklistVersion}`}
-      />
-      
-      {/* Tab-based layout for different sections */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-6">
-          <TabsTrigger value="puppies" className="flex items-center gap-2">
-            <Heart className="h-4 w-4" /> Puppies
-          </TabsTrigger>
-          <TabsTrigger value="charts" className="flex items-center gap-2">
-            <BarChart2 className="h-4 w-4" /> Growth Charts
-          </TabsTrigger>
-          <TabsTrigger value="development" className="flex items-center gap-2">
-            <ClipboardCheck className="h-4 w-4" /> Checklist
-          </TabsTrigger>
+
+      <Tabs 
+        value={activeTab} 
+        onValueChange={setActiveTab}
+        className="w-full"
+      >
+        <TabsList className="grid grid-cols-3 mb-6">
+          <TabsTrigger value="puppies">Puppies</TabsTrigger>
+          <TabsTrigger value="development">Development</TabsTrigger>
+          <TabsTrigger value="charts">Growth Charts</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="puppies" className="mt-0">
           <PuppiesTabContent 
-            puppies={selectedLitter.puppies}
+            puppies={litter.puppies || []}
             onAddPuppy={onAddPuppy}
             onUpdatePuppy={onUpdatePuppy}
             onDeletePuppy={onDeletePuppy}
-            litterDob={selectedLitter.dateOfBirth}
-            damBreed={selectedLitter.damName}
+            litterDob={litter.dateOfBirth}
+            damBreed={damBreed}  
             onSelectPuppy={setSelectedPuppy}
             selectedPuppy={selectedPuppy}
-            litterAge={ageInWeeks}
+            litterAge={litterAge}
           />
         </TabsContent>
-        
-        <TabsContent value="charts" className="mt-0">
-          <GrowthChartsTabContent 
-            selectedPuppy={selectedPuppy}
-            puppies={selectedLitter.puppies}
-            onSelectPuppy={setSelectedPuppy}
-          />
-        </TabsContent>
-        
+
         <TabsContent value="development" className="mt-0">
           <DevelopmentTabContent 
-            litter={selectedLitter}
-            onToggleItem={handleToggleChecklistItem}
-            key={`development-${checklistVersion}`}
+            puppies={litter.puppies || []}
+            litterDob={litter.dateOfBirth}
+          />
+        </TabsContent>
+
+        <TabsContent value="charts" className="mt-0">
+          <GrowthChartsTabContent 
+            puppies={litter.puppies || []}
+            litterAge={litterAge}
           />
         </TabsContent>
       </Tabs>

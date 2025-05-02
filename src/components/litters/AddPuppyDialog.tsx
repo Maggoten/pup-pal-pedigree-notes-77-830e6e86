@@ -42,6 +42,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
   // Update breed when damBreed changes (e.g. if dialog is reused)
   useEffect(() => {
     if (damBreed) {
+      console.log("Setting puppy breed to dam's breed:", damBreed);
       setBreed(damBreed);
     }
   }, [damBreed]);
