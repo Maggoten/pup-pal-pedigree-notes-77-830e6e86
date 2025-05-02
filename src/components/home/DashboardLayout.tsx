@@ -4,7 +4,7 @@ import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { DogsProvider } from '@/context/DogsContext';
 import PageLayout from '@/components/PageLayout';
-import DashboardHero from './DashboardHero';
+import DashboardHero from './dashboard-hero';
 import DashboardContent from './DashboardContent';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { getDisplayUsername } from '@/utils/userDisplayUtils';
