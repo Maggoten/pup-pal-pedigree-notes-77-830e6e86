@@ -14,7 +14,6 @@ import { useAuth } from '@/context/AuthContext';
 import ActivePregnanciesList from '@/components/pregnancy/ActivePregnanciesList';
 import PregnancyDropdownSelector from '@/components/pregnancy/PregnancyDropdownSelector';
 import PregnancySummaryCards from '@/components/pregnancy/PregnancySummaryCards';
-import PregnancyTimeline from '@/components/pregnancy/PregnancyTimeline';
 import PregnancyTabs from '@/components/pregnancy/PregnancyTabs';
 import { PregnancyDetails } from '@/services/PregnancyService';
 
@@ -148,24 +147,14 @@ const Pregnancy: React.FC = () => {
             daysLeft={selectedPregnancy.daysLeft}
           />
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column: Timeline */}
-            <div className="lg:col-span-1">
-              <PregnancyTimeline 
-                matingDate={selectedPregnancy.matingDate}
-                expectedDueDate={selectedPregnancy.expectedDueDate}
-              />
-            </div>
-            
-            {/* Right Column: Pregnancy Journey Tabs */}
-            <div className="lg:col-span-2">
-              <PregnancyTabs 
-                pregnancyId={selectedPregnancy.id}
-                femaleName={selectedPregnancy.femaleName}
-                matingDate={selectedPregnancy.matingDate}
-                expectedDueDate={selectedPregnancy.expectedDueDate}
-              />
-            </div>
+          {/* Full Width Pregnancy Journey Tabs */}
+          <div className="w-full">
+            <PregnancyTabs 
+              pregnancyId={selectedPregnancy.id}
+              femaleName={selectedPregnancy.femaleName}
+              matingDate={selectedPregnancy.matingDate}
+              expectedDueDate={selectedPregnancy.expectedDueDate}
+            />
           </div>
         </div>
       ) : (

@@ -8,7 +8,6 @@ import { usePregnancyDetails } from '@/hooks/usePregnancyDetails';
 
 import PregnancyTabs from '@/components/pregnancy/PregnancyTabs';
 import PregnancySummaryCards from '@/components/pregnancy/PregnancySummaryCards';
-import PregnancyTimeline from '@/components/pregnancy/PregnancyTimeline';
 
 const PregnancyDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -81,24 +80,14 @@ const PregnancyDetails = () => {
           daysLeft={pregnancy.daysLeft}
         />
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column: Timeline */}
-          <div className="lg:col-span-1">
-            <PregnancyTimeline 
-              matingDate={pregnancy.matingDate}
-              expectedDueDate={pregnancy.expectedDueDate}
-            />
-          </div>
-          
-          {/* Right Column: Pregnancy Journey Tabs */}
-          <div className="lg:col-span-2">
-            <PregnancyTabs 
-              pregnancyId={pregnancy.id}
-              femaleName={pregnancy.femaleName}
-              matingDate={pregnancy.matingDate}
-              expectedDueDate={pregnancy.expectedDueDate}
-            />
-          </div>
+        {/* Full Width Pregnancy Journey Tabs */}
+        <div className="w-full">
+          <PregnancyTabs 
+            pregnancyId={pregnancy.id}
+            femaleName={pregnancy.femaleName}
+            matingDate={pregnancy.matingDate}
+            expectedDueDate={pregnancy.expectedDueDate}
+          />
         </div>
       </div>
     </PageLayout>
