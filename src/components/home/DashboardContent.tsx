@@ -31,7 +31,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   remindersProps 
 }) => {
   return (
-    <div className="transition-all duration-300 ease-in-out">
+    <div className="transition-all duration-300 ease-in-out space-y-8">
       {/* Calendar and Reminders row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
         {/* Calendar taking 2/3 of the width */}
@@ -79,9 +79,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       </div>
       
       {/* Annual Breeding Statistics in a separate row (full width) */}
-      <div className="pt-4">
+      <div>
         {!isDataReady ? (
-          <div className="h-[350px] rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
+          <div className="h-[400px] rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
             <div className="flex flex-col h-full">
               <Skeleton className="h-14 w-full mb-6" />
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
