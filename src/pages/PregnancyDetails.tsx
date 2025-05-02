@@ -1,109 +1,106 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
+import { Button } from '@/components/ui/button';
+import { Heart, ArrowLeft, Loader2 } from 'lucide-react';
 import { usePregnancyDetails } from '@/hooks/usePregnancyDetails';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { getActivePregnancies } from '@/services/PregnancyService';
-import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
-import { toast } from '@/hooks/use-toast';
 
-// Import our components
-import PregnancyHeader from '@/components/pregnancy/PregnancyHeader';
-import PregnancySummaryCards from '@/components/pregnancy/PregnancySummaryCards';
 import PregnancyTabs from '@/components/pregnancy/PregnancyTabs';
-import LoadingPregnancy from '@/components/pregnancy/LoadingPregnancy';
+import PregnancySummaryCards from '@/components/pregnancy/PregnancySummaryCards';
+import PregnancyTimeline from '@/components/pregnancy/PregnancyTimeline';
 
-const PregnancyDetails: React.FC = () => {
+const PregnancyDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { pregnancy, loading } = usePregnancyDetails(id);
-  const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
-  const [isLoadingPregnancies, setIsLoadingPregnancies] = useState(true);
-  
-  useEffect(() => {
-    const fetchPregnancies = async () => {
-      try {
-        setIsLoadingPregnancies(true);
-        const pregnancies = await getActivePregnancies();
-        console.log("Loaded pregnancies for selector:", pregnancies);
-        setActivePregnancies(pregnancies);
-      } catch (error) {
-        console.error("Error fetching pregnancies:", error);
-        toast({
-          title: "Error loading pregnancies",
-          description: "There was a problem loading the pregnancy list."
-        });
-      } finally {
-        setIsLoadingPregnancies(false);
-      }
-    };
-    
-    fetchPregnancies();
-  }, []);
-  
-  const handlePregnancyChange = (pregnancyId: string) => {
-    navigate(`/pregnancy/${pregnancyId}`);
+
+  const handleBackClick = () => {
+    navigate('/pregnancy');
   };
-  
-  if (loading || !pregnancy) {
-    return <LoadingPregnancy />;
+
+  if (loading) {
+    return (
+      <PageLayout 
+        title="Pregnancy Details" 
+        description="Loading pregnancy details..."
+        icon={<Heart className="h-6 w-6" />}
+      >
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2 text-lg">Loading pregnancy details...</span>
+        </div>
+      </PageLayout>
+    );
   }
-  
+
+  if (!pregnancy) {
+    return (
+      <PageLayout 
+        title="Pregnancy Not Found" 
+        description="The requested pregnancy could not be found"
+        icon={<Heart className="h-6 w-6" />}
+      >
+        <div className="text-center py-12">
+          <h3 className="text-xl font-medium text-greige-700">Pregnancy Not Found</h3>
+          <p className="text-greige-500 mt-2">The pregnancy you are looking for doesn't exist or has been archived.</p>
+          <Button 
+            onClick={handleBackClick} 
+            className="mt-4 flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Pregnancies
+          </Button>
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout 
-      title=""
-      description=""
-      icon={null}
+      title={`${pregnancy.femaleName}'s Pregnancy`} 
+      description="Track pregnancy progress and development"
+      icon={<Heart className="h-6 w-6" />}
     >
-      <div className="mb-6 flex justify-end">
-        {activePregnancies.length > 1 && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-greige-700">Select Pregnancy:</span>
-            <Select 
-              value={id} 
-              onValueChange={handlePregnancyChange}
-              disabled={isLoadingPregnancies}
-            >
-              <SelectTrigger className="w-[200px] bg-greige-50 border-greige-300 text-greige-700 hover:bg-greige-100">
-                <SelectValue placeholder="Select pregnancy" />
-              </SelectTrigger>
-              <SelectContent className="bg-greige-50">
-                {activePregnancies.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.femaleName} × {p.maleName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+      <div className="mb-6">
+        <Button 
+          variant="outline" 
+          onClick={handleBackClick} 
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Pregnancies
+        </Button>
       </div>
-      
-      <PregnancyHeader 
-        femaleName={pregnancy.femaleName}
-        maleName={pregnancy.maleName}
-        matingDate={pregnancy.matingDate || new Date()} // Add default or ensure matingDate is defined
-      />
-      
-      <PregnancySummaryCards 
-        matingDate={pregnancy.matingDate || new Date()} // Add default or ensure matingDate is defined
-        expectedDueDate={pregnancy.expectedDueDate || new Date()} // Add default or ensure expectedDueDate is defined
-        daysLeft={pregnancy.daysLeft || 0} // Add default or ensure daysLeft is defined
-      />
-      
-      <PregnancyTabs 
-        pregnancyId={pregnancy.id}
-        femaleName={pregnancy.femaleName}
-        matingDate={pregnancy.matingDate || new Date()} // Add default or ensure matingDate is defined
-        expectedDueDate={pregnancy.expectedDueDate || new Date()} // Add default or ensure expectedDueDate is defined
-      />
+
+      <div className="space-y-8">
+        {/* Hero Section with Pregnancy Summary Cards */}
+        <PregnancySummaryCards
+          matingDate={pregnancy.matingDate}
+          expectedDueDate={pregnancy.expectedDueDate}
+          daysLeft={pregnancy.daysLeft}
+        />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column: Timeline */}
+          <div className="lg:col-span-1">
+            <PregnancyTimeline 
+              matingDate={pregnancy.matingDate}
+              expectedDueDate={pregnancy.expectedDueDate}
+            />
+          </div>
+          
+          {/* Right Column: Pregnancy Journey Tabs */}
+          <div className="lg:col-span-2">
+            <PregnancyTabs 
+              pregnancyId={pregnancy.id}
+              femaleName={pregnancy.femaleName}
+              matingDate={pregnancy.matingDate}
+              expectedDueDate={pregnancy.expectedDueDate}
+            />
+          </div>
+        </div>
+      </div>
     </PageLayout>
   );
 };
