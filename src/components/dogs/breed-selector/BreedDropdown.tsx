@@ -17,14 +17,14 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { commonDogBreeds } from '@/utils/dogBreeds';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BreedDropdownProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
-  className?: string; // Add className prop
+  className?: string;
 }
 
 const BreedDropdown: React.FC<BreedDropdownProps> = ({ 
@@ -36,9 +36,17 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({
   const [customBreedDialogOpen, setCustomBreedDialogOpen] = useState(false);
   const [customBreed, setCustomBreed] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  
+  // Display the selected value in the input when not searching
+  useEffect(() => {
+    if (!isDropdownOpen && value) {
+      setSearchTerm(value);
+    }
+  }, [isDropdownOpen, value]);
   
   // Filter breeds based on search term
-  const filteredBreeds = searchTerm 
+  const filteredBreeds = searchTerm && isDropdownOpen
     ? commonDogBreeds.filter(breed => 
         breed.toLowerCase().includes(searchTerm.toLowerCase())
       )
@@ -56,22 +64,39 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({
     }
   }, [customBreedDialogOpen, searchTerm]);
 
-  // Handle value selection
-  const handleValueChange = (selectedValue: string) => {
-    if (selectedValue === 'custom') {
-      setCustomBreedDialogOpen(true);
-    } else {
-      onChange(selectedValue);
-    }
-  };
-
   // Handle custom breed submission
   const handleCustomBreedSubmit = () => {
     if (customBreed.trim()) {
       onChange(customBreed.trim());
       setCustomBreedDialogOpen(false);
+      setSearchTerm(customBreed.trim());
+      setIsDropdownOpen(false);
+    }
+  };
+
+  const handleInputFocus = () => {
+    setIsDropdownOpen(true);
+    if (value === searchTerm) {
       setSearchTerm('');
     }
+  };
+
+  const handleInputBlur = () => {
+    setTimeout(() => {
+      if (!customBreedDialogOpen) {
+        setIsDropdownOpen(false);
+        // Restore the actual value if user didn't select anything
+        if (value && !searchTerm) {
+          setSearchTerm(value);
+        }
+      }
+    }, 200);
+  };
+
+  const handleBreedSelect = (breed: string) => {
+    onChange(breed);
+    setSearchTerm(breed);
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -79,16 +104,21 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({
       <div className={cn("relative w-full", className)}>
         <div className="relative">
           <Input
-            placeholder="Search breeds..."
+            placeholder={value ? value : "Search breeds..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pr-10 bg-white"
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+            className={cn(
+              "w-full pr-10 bg-white",
+              value && !isDropdownOpen && !searchTerm ? "text-gray-900" : ""
+            )}
             disabled={disabled}
           />
           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         </div>
         
-        {searchTerm && !disabled && (
+        {isDropdownOpen && !disabled && (
           <div className="absolute w-full mt-1 max-h-60 overflow-auto z-50 bg-white border border-gray-200 rounded-md shadow-lg">
             {filteredBreeds.length > 0 ? (
               <ul className="py-1">
@@ -96,14 +126,11 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({
                   <li 
                     key={breed} 
                     className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
-                    onClick={() => {
-                      onChange(breed);
-                      setSearchTerm('');
-                    }}
+                    onClick={() => handleBreedSelect(breed)}
                   >
                     {breed}
                     {breed === value && (
-                      <span className="text-primary">✓</span>
+                      <Check className="h-4 w-4 text-primary" />
                     )}
                   </li>
                 ))}
@@ -124,7 +151,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({
               </div>
             )}
             
-            {!hasExactMatch && filteredBreeds.length > 0 && (
+            {!hasExactMatch && filteredBreeds.length > 0 && searchTerm && (
               <div className="px-3 py-2 border-t">
                 <Button 
                   variant="outline" 
@@ -172,4 +199,3 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({
 };
 
 export default BreedDropdown;
-
