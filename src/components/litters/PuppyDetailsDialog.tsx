@@ -94,10 +94,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
           <Trash2 className="h-4 w-4 mr-2" />
           Delete Puppy
         </Button>
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
-            Cancel
-          </Button>
+        <div>
           <Button type="submit" form="puppy-form">
             Save Changes
           </Button>
