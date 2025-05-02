@@ -1,8 +1,8 @@
 
 import { Reminder } from '@/types/reminders';
-import { createCalendarClockIcon, createPawPrintIcon } from '@/utils/iconUtils';
+import { createPawPrintIcon } from '@/utils/iconUtils';
 import { supabase } from '@/integrations/supabase/client';
-import { differenceInDays, parseISO, startOfDay } from 'date-fns';
+import { differenceInDays, startOfDay } from 'date-fns';
 
 // Generate litter-related reminders for a specific user
 export const generateLitterReminders = async (userId: string): Promise<Reminder[]> => {
@@ -47,79 +47,6 @@ export const generateLitterReminders = async (userId: string): Promise<Reminder[
         }
       });
     }
-    
-    // Fetch litters from Supabase for the current user
-    const { data: litters, error } = await supabase
-      .from('litters')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('archived', false);
-      
-    if (error) {
-      console.error("Error fetching litters for reminders:", error);
-      return reminders;
-    }
-    
-    console.log(`Found ${litters?.length || 0} litters for user ${userId}`);
-    
-    // Process each litter
-    litters?.forEach(litter => {
-      const birthDate = new Date(litter.date_of_birth);
-      
-      // Create reminders for upcoming litter care milestones
-      [7, 14, 21, 28, 42, 56].forEach(days => {
-        const milestoneDate = new Date(birthDate);
-        milestoneDate.setDate(birthDate.getDate() + days);
-        
-        const daysUntilMilestone = differenceInDays(milestoneDate, today);
-        
-        // Only show milestone reminders that are coming up within the next 7 days
-        if (daysUntilMilestone >= 0 && daysUntilMilestone <= 7) {
-          let title = '';
-          let description = '';
-          
-          switch(days) {
-            case 7:
-              title = `${litter.name} - 1 Week Milestone`;
-              description = 'Time for first deworming';
-              break;
-            case 14:
-              title = `${litter.name} - 2 Weeks Milestone`;
-              description = 'Eyes opening, start monitoring development';
-              break;
-            case 21:
-              title = `${litter.name} - 3 Weeks Milestone`;
-              description = 'Second deworming, introduce soft food';
-              break;
-            case 28:
-              title = `${litter.name} - 4 Weeks Milestone`;
-              description = 'Weaning begins, increase solid food';
-              break;
-            case 42:
-              title = `${litter.name} - 6 Weeks Milestone`;
-              description = 'Health check and first vaccinations';
-              break;
-            case 56:
-              title = `${litter.name} - 8 Weeks Milestone`;
-              description = 'Puppies ready for new homes';
-              break;
-          }
-          
-          reminders.push({
-            id: `litter-milestone-${litter.id}-${days}`,
-            title,
-            description,
-            dueDate: milestoneDate,
-            priority: 'medium',
-            type: 'other',
-            icon: createCalendarClockIcon('amber-500'),
-            relatedId: litter.id
-          });
-          
-          console.log(`Created ${days}-day milestone reminder for litter ${litter.name}`);
-        }
-      });
-    });
     
     console.log(`Generated ${reminders.length} litter reminders for user ${userId}`);
     return reminders;

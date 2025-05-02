@@ -75,33 +75,6 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
       console.log(`Dog ${dog.name}: No vaccination date recorded`);
     }
     
-    // Check for upcoming deworming
-    if (dog.dewormingDate) {
-      const lastDeworming = parseISO(dog.dewormingDate);
-      const nextDeworming = addDays(lastDeworming, 90); // Quarterly deworming
-      
-      const daysUntilDeworming = differenceInDays(nextDeworming, today);
-      console.log(`Dog ${dog.name}: Next deworming date: ${nextDeworming.toISOString()}, Days until: ${daysUntilDeworming}`);
-      
-      if (daysUntilDeworming >= -7 && daysUntilDeworming <= 14) {
-        const isOverdue = daysUntilDeworming < 0;
-        
-        reminders.push({
-          id: `deworm-${dog.id}`,
-          title: `${dog.name}'s Deworming ${isOverdue ? 'Overdue' : 'Due'}`,
-          description: isOverdue 
-            ? `Deworming overdue by ${Math.abs(daysUntilDeworming)} days`
-            : `Deworming due in ${daysUntilDeworming} days`,
-          icon: createCalendarClockIcon("green-500"),
-          priority: isOverdue ? 'high' : 'medium',
-          type: 'deworming',
-          dueDate: nextDeworming,
-          relatedId: dog.id
-        });
-        console.log(`Created deworming reminder for dog ${dog.name}`);
-      }
-    }
-    
     // Check for dog birthdays
     if (dog.dateOfBirth) {
       const birthdate = parseISO(dog.dateOfBirth);
