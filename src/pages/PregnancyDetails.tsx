@@ -70,9 +70,7 @@ const PregnancyDetails = () => {
       icon={<Heart className="h-6 w-6" />}
     >
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-greige-800">
-          {pregnancy.femaleName}'s Pregnancy
-        </h1>
+        {/* We're removing the duplicate h1 title since PageLayout already renders the title */}
         <PregnancyDropdownSelector 
           pregnancies={activePregnancies} 
           currentPregnancyId={pregnancy.id}

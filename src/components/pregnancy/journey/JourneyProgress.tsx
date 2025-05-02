@@ -13,7 +13,6 @@ interface JourneyProgressProps {
 const JourneyProgress: React.FC<JourneyProgressProps> = ({
   currentWeek,
   totalWeeks,
-  overallProgress,
   calculatedCurrentWeek // Default is undefined
 }) => {
   // Calculate week progress percentage
@@ -26,7 +25,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
     <div className="mt-4 space-y-4">
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <h3 className="text-sm font-medium">
+          <h3 className="text-sm font-medium font-le-jour">
             {isViewingCurrentWeek ? "Current Week" : `Week ${currentWeek}`}
           </h3>
           <span className="text-sm font-medium">
@@ -39,22 +38,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
         />
       </div>
       
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <h3 className="text-sm font-medium">Symptoms Tracked</h3>
-          <span className="text-sm font-medium">
-            {overallProgress}%
-          </span>
-        </div>
-        <Progress
-          value={overallProgress}
-          className={cn(
-            "h-2",
-            overallProgress === 100 ? "bg-green-100" : "bg-gray-100"
-          )}
-          indicatorClassName={overallProgress === 100 ? "bg-green-500" : undefined}
-        />
-      </div>
+      {/* Removed the "Symptoms Tracked" progress bar as requested */}
     </div>
   );
 };

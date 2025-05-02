@@ -16,7 +16,7 @@ const SymptomsLog: React.FC<SymptomsLogProps> = ({ pregnancyId, femaleName }) =>
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Notes & Symptoms</CardTitle>
+        <CardTitle className="font-le-jour">Notes & Symptoms</CardTitle>
         <CardDescription>Record observations during {femaleName}'s pregnancy</CardDescription>
       </CardHeader>
       <CardContent>
