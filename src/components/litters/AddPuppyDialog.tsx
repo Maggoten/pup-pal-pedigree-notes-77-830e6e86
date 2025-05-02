@@ -4,7 +4,6 @@ import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFoot
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/components/ui/use-toast';
 import DatePicker from '@/components/common/DatePicker';
 import BreedDropdown from '@/components/dogs/breed-selector/BreedDropdown';
@@ -34,6 +33,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
   const [timeOfBirth, setTimeOfBirth] = useState<string>('');
   const [dateOfBirth, setDateOfBirth] = useState<Date>(defaultDob);
   const [breed, setBreed] = useState<string>(damBreed);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   
   useEffect(() => {
     setName(`Puppy ${puppyNumber}`);
@@ -43,8 +43,9 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
     setGender(value);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       // Create a datetime for birth
@@ -69,8 +70,8 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
         id: newId,
         name,
         gender,
-        color,
-        breed,
+        color: color || '', // Ensure color is not undefined
+        breed: breed || damBreed || '', // Use breed if selected, fallback to dam breed, or empty string
         birthWeight: weightValue,
         birthDateTime: birthDateTime.toISOString(),
         imageUrl: '',
@@ -80,13 +81,21 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
       };
 
       console.log("Adding new puppy:", newPuppy);
-      onAddPuppy(newPuppy);
+      await onAddPuppy(newPuppy);
+      toast({
+        title: "Puppy Added",
+        description: `${name} has been added to the litter successfully.`,
+      });
+      onClose();
     } catch (error) {
+      console.error("Error adding puppy:", error);
       toast({
         title: "Error Adding Puppy",
         description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -173,8 +182,8 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
           <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
             Cancel
           </Button>
-          <Button type="submit">
-            Add Puppy
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Adding..." : "Add Puppy"}
           </Button>
         </DialogFooter>
       </form>

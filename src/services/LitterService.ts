@@ -18,6 +18,8 @@ class LitterService {
         return this.loadFromLocalStorage();
       }
 
+      console.log("Loading litters for user:", sessionData.session.user.id);
+
       // Fetch litters from Supabase
       const { data: litters, error } = await supabase
         .from('litters')
@@ -32,9 +34,13 @@ class LitterService {
         return this.loadFromLocalStorage();
       }
 
+      console.log("Litters loaded from Supabase:", litters);
+
       // Now fetch weight and height logs for each puppy
       const littersWithDetailedPuppies = await Promise.all(litters.map(async litter => {
         const puppiesWithDetails = await Promise.all((litter.puppies || []).map(async puppy => {
+          console.log("Processing puppy:", puppy.id, puppy.name);
+          
           // Fetch weight logs
           const { data: weightLogs, error: weightError } = await supabase
             .from('puppy_weight_logs')
@@ -42,6 +48,7 @@ class LitterService {
             .eq('puppy_id', puppy.id);
           
           if (weightError) console.error("Error loading weight logs:", weightError);
+          else console.log(`Found ${weightLogs?.length || 0} weight logs for puppy ${puppy.id}`);
           
           // Fetch height logs
           const { data: heightLogs, error: heightError } = await supabase
@@ -50,6 +57,7 @@ class LitterService {
             .eq('puppy_id', puppy.id);
           
           if (heightError) console.error("Error loading height logs:", heightError);
+          else console.log(`Found ${heightLogs?.length || 0} height logs for puppy ${puppy.id}`);
           
           // Fetch notes
           const { data: notes, error: notesError } = await supabase
@@ -106,6 +114,7 @@ class LitterService {
         };
       }));
 
+      console.log("Returning processed litters:", littersWithDetailedPuppies);
       return littersWithDetailedPuppies;
     } catch (error) {
       console.error("Error in loadLitters:", error);
@@ -147,6 +156,8 @@ class LitterService {
         throw new Error("No active session");
       }
 
+      console.log("Adding new litter:", litter);
+
       // Ensure the archived property is set (default to false)
       if (litter.archived === undefined) {
         litter.archived = false;
@@ -178,6 +189,8 @@ class LitterService {
         console.error("Error adding litter to Supabase:", error);
         throw error;
       }
+
+      console.log("Litter added to Supabase:", newLitter);
 
       // Add to localStorage as backup
       const litters = this.loadFromLocalStorage();
@@ -347,29 +360,30 @@ class LitterService {
           id: puppy.id,
           name: puppy.name,
           gender: puppyGender,
-          color: puppy.color,
+          color: puppy.color || '',
           markings: puppy.markings,
-          birth_weight: puppy.birthWeight,
+          birth_weight: puppy.birthWeight || 0,
           current_weight: puppy.currentWeight,
-          sold: puppy.sold,
-          reserved: puppy.reserved,
+          sold: puppy.sold || false,
+          reserved: puppy.reserved || false,
           new_owner: puppy.newOwner,
           collar: puppy.collar,
           microchip: puppy.microchip,
-          breed: puppy.breed,
-          image_url: puppy.imageUrl,
-          birth_date_time: puppy.birthDateTime,
+          breed: puppy.breed || '',
+          image_url: puppy.imageUrl || '',
+          birth_date_time: puppy.birthDateTime || new Date().toISOString(),
           litter_id: litterId
-        })
-        .select();
+        });
 
       if (error) {
         console.error("Error adding puppy to Supabase:", error);
         throw error;
       }
 
+      console.log("Successfully added puppy to database:", data);
+
       // Add initial weight log if birthWeight exists
-      if (puppy.birthWeight && puppy.birthDateTime) {
+      if (puppy.birthWeight && puppy.birthWeight > 0 && puppy.birthDateTime) {
         const birthDate = new Date(puppy.birthDateTime).toISOString();
         const { error: weightError } = await supabase
           .from('puppy_weight_logs')
@@ -381,7 +395,11 @@ class LitterService {
         
         if (weightError) {
           console.error("Error adding initial weight log:", weightError);
+        } else {
+          console.log("Added initial weight log for puppy");
         }
+      } else {
+        console.log("No birth weight or birth date time provided, skipping weight log");
       }
 
       // Update in localStorage as backup
