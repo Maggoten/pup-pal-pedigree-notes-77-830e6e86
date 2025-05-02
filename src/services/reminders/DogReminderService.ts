@@ -11,28 +11,28 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
   // Check each dog for upcoming events
   dogs.forEach((dog) => {
     // If female, add heat cycle reminders (assuming a 6-month cycle)
-    if (dog.gender === 'female' && dog.breedingHistory?.matings && dog.breedingHistory.matings.length > 0) {
-      // Find the last heat date (using the last mating date as an approximation)
-      const lastMating = dog.breedingHistory.matings.sort((a, b) => 
+    if (dog.gender === 'female' && dog.heatHistory && dog.heatHistory.length > 0) {
+      // Find the last heat date
+      const sortedHeatDates = [...dog.heatHistory].sort((a, b) => 
         new Date(b.date).getTime() - new Date(a.date).getTime()
-      )[0];
+      );
       
-      if (lastMating) {
-        const lastHeatDate = parseISO(lastMating.date);
-        const nextHeatDate = addDays(lastHeatDate, 180); // Approximately 6 months
-        
-        if (differenceInDays(nextHeatDate, today) <= 30) {
-          reminders.push({
-            id: `heat-${dog.id}`,
-            title: `${dog.name}'s Heat Approaching`,
-            description: `Expected heat cycle in ${differenceInDays(nextHeatDate, today)} days`,
-            icon: createPawPrintIcon("rose-500"),
-            dueDate: nextHeatDate,
-            priority: 'high',
-            type: 'heat',
-            relatedId: dog.id
-          });
-        }
+      const lastHeatDate = parseISO(sortedHeatDates[0].date);
+      // Use heat interval if available, otherwise default to 180 days (6 months)
+      const intervalDays = dog.heatInterval || 180;
+      const nextHeatDate = addDays(lastHeatDate, intervalDays);
+      
+      if (differenceInDays(nextHeatDate, today) <= 30) {
+        reminders.push({
+          id: `heat-${dog.id}`,
+          title: `${dog.name}'s Heat Approaching`,
+          description: `Expected heat cycle in ${differenceInDays(nextHeatDate, today)} days`,
+          icon: createPawPrintIcon("rose-500"),
+          dueDate: nextHeatDate,
+          priority: 'high',
+          type: 'heat',
+          relatedId: dog.id
+        });
       }
     }
     

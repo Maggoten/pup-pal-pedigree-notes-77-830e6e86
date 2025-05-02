@@ -4,13 +4,18 @@ import { differenceInDays, parseISO, addDays } from 'date-fns';
 import { createCalendarClockIcon, createScaleIcon } from '@/utils/iconUtils';
 import { litterService } from '@/services/LitterService';
 
-export const generateLitterReminders = (): Reminder[] => {
+export const generateLitterReminders = (userId: string): Reminder[] => {
   const reminders: Reminder[] = [];
   const today = new Date();
   
   // Add puppy-related reminders from litters
   const litters = litterService.loadLitters();
-  const activeLitters = litters.filter(litter => !litter.archived);
+  
+  // Filter litters for the current user
+  const userLitters = litters.filter(litter => litter.user_id === userId);
+  
+  // Only include active (not archived) litters
+  const activeLitters = userLitters.filter(litter => !litter.archived);
   
   activeLitters.forEach(litter => {
     const litterBirthDate = parseISO(litter.dateOfBirth);

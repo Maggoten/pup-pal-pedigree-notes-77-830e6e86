@@ -4,7 +4,7 @@ import { Reminder, CustomReminderInput } from '@/types/reminders';
 import { v4 as uuidv4 } from 'uuid';
 import { loadCustomReminders, loadCompletedReminders, loadDeletedReminders } from '@/utils/reminderStorage';
 import { createCalendarClockIcon } from '@/utils/iconUtils';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 
 // Fetch reminders from Supabase
 export const fetchReminders = async (): Promise<Reminder[]> => {
@@ -15,10 +15,14 @@ export const fetchReminders = async (): Promise<Reminder[]> => {
       return [];
     }
     
+    const userId = sessionData.session.user.id;
+    console.log("Fetching reminders for user:", userId);
+    
     const { data: reminders, error } = await supabase
       .from('reminders')
       .select('*')
       .eq('is_deleted', false)
+      .eq('user_id', userId)  // Make sure to filter by user_id
       .order('due_date', { ascending: true });
       
     if (error) {
@@ -27,6 +31,8 @@ export const fetchReminders = async (): Promise<Reminder[]> => {
     }
     
     if (!reminders) return [];
+    
+    console.log("Fetched reminders from Supabase:", reminders.length);
     
     // Transform reminders to match application format
     return reminders.map(reminder => ({
@@ -97,13 +103,22 @@ export const addReminder = async (input: CustomReminderInput): Promise<boolean> 
 // Update an existing reminder (including mark as complete/incomplete)
 export const updateReminder = async (id: string, isCompleted: boolean): Promise<boolean> => {
   try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData?.session) {
+      console.error('No active session:', sessionError);
+      return false;
+    }
+    
+    const userId = sessionData.session.user.id;
+    
     const { error } = await supabase
       .from('reminders')
       .update({ 
         is_completed: isCompleted,
         updated_at: new Date().toISOString()
       })
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', userId);  // Make sure we're only updating the user's own reminders
     
     if (error) {
       console.error("Error updating reminder:", error);
@@ -125,12 +140,21 @@ export const updateReminder = async (id: string, isCompleted: boolean): Promise<
 // Delete (soft delete) a reminder
 export const deleteReminder = async (id: string): Promise<boolean> => {
   try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData?.session) {
+      console.error('No active session:', sessionError);
+      return false;
+    }
+    
+    const userId = sessionData.session.user.id;
+    
     // For custom reminders with UUID format, perform a hard delete
     if (id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
       const { error } = await supabase
         .from('reminders')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', userId);  // Make sure we're only deleting the user's own reminders
         
       if (error) {
         console.error("Error deleting reminder:", error);
@@ -149,7 +173,8 @@ export const deleteReminder = async (id: string): Promise<boolean> => {
           is_deleted: true,
           updated_at: new Date().toISOString()
         })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', userId);  // Make sure we're only updating the user's own reminders
         
       if (error) {
         console.error("Error soft-deleting reminder:", error);

@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dog } from '@/types/dogs';
 import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
-import { getSampleEvents } from '@/data/sampleCalendarEvents';
 import { 
   fetchCalendarEvents, 
   addEventToSupabase, 
@@ -12,7 +11,7 @@ import {
   migrateCalendarEventsFromLocalStorage,
   getEventColor 
 } from '@/services/CalendarEventService';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export const useCalendarEvents = (dogs: Dog[]) => {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
@@ -34,19 +33,19 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       setHasError(false);
       
       try {
+        console.log("Loading calendar events for user:", user.id);
+        
         // Check if migration is needed (first time only)
         if (!hasMigrated) {
           await migrateCalendarEventsFromLocalStorage(dogs);
           setHasMigrated(true);
         }
         
-        // Fetch custom events from Supabase
+        // Fetch custom events from Supabase - these should already be filtered by user_id
         const customEvents = await fetchCalendarEvents();
+        console.log("Fetched custom calendar events:", customEvents.length);
         
-        // Get sample events (these are not stored in Supabase)
-        const sampleEvents = getSampleEvents();
-        
-        // Calculate heat events based on dogs data
+        // Calculate heat events based on dogs data - these will be filtered since dogs are already filtered by owner
         const upcomingHeats = calculateUpcomingHeats(dogs);
         const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
           id: `heat-${heat.dogId}-${index}`,
@@ -56,9 +55,10 @@ export const useCalendarEvents = (dogs: Dog[]) => {
           dogId: heat.dogId,
           dogName: heat.dogName
         }));
+        console.log("Generated heat events:", heatEvents.length);
         
-        // Combine all events
-        setCalendarEvents([...sampleEvents, ...heatEvents, ...customEvents]);
+        // Combine all events - no sample events anymore
+        setCalendarEvents([...heatEvents, ...customEvents]);
       } catch (error) {
         console.error("Error loading calendar events:", error);
         setHasError(true);

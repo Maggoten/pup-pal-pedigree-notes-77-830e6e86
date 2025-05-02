@@ -16,7 +16,7 @@ import {
   deleteReminder as deleteReminderFromSupabase,
   migrateRemindersFromLocalStorage 
 } from '@/services/RemindersService';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export type { Reminder, CustomReminderInput };
 
@@ -47,17 +47,23 @@ export const useBreedingReminders = () => {
           setHasMigrated(true);
         }
         
-        // Fetch reminders from Supabase
+        // Fetch reminders from Supabase - these are already filtered by user ID through RLS
         const supabaseReminders = await fetchReminders();
         
-        // Generate system reminders
+        // Make sure we only generate reminders for the current user's dogs
+        // dogs from the DogsContext should already be filtered by owner_id
         const dogReminders = generateDogReminders(dogs);
-        const litterReminders = generateLitterReminders();
+        
+        // Filter litter reminders for the current user
+        const litterReminders = generateLitterReminders(user.id);
+        
+        // Generate general reminders only for the user's dogs
         const generalReminders = generateGeneralReminders(dogs);
         
         // Combine all reminders
         const allReminders = [...supabaseReminders, ...dogReminders, ...litterReminders, ...generalReminders];
         
+        console.log('Total reminders loaded:', allReminders.length);
         setReminders(allReminders);
       } catch (error) {
         console.error("Error loading reminders:", error);
@@ -153,7 +159,7 @@ export const useBreedingReminders = () => {
       const updatedReminders = await fetchReminders();
       
       const dogReminders = generateDogReminders(dogs);
-      const litterReminders = generateLitterReminders();
+      const litterReminders = generateLitterReminders(user.id);
       const generalReminders = generateGeneralReminders(dogs);
       
       // Combine all reminders
@@ -174,7 +180,7 @@ export const useBreedingReminders = () => {
         const updatedReminders = await fetchReminders();
         
         const dogReminders = generateDogReminders(dogs);
-        const litterReminders = generateLitterReminders();
+        const litterReminders = generateLitterReminders(user.id);
         const generalReminders = generateGeneralReminders(dogs);
         
         setReminders([...updatedReminders, ...dogReminders, ...litterReminders, ...generalReminders]);
