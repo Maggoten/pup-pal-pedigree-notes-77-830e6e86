@@ -109,6 +109,8 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
         return;
       }
 
+      console.log("Creating litter with authenticated user:", sessionData.session.user.id);
+
       // Get actual sire info
       const actualSireId = values.isExternalSire ? `external-${Date.now()}` : values.sireId;
       let actualSireName = '';
@@ -125,13 +127,16 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       const damName = selectedDam?.name || '';
       console.log("Selected dam:", selectedDam);
 
-      // Create unique ID for new litter
-      const newLitterId = `litter-${Date.now()}`;
+      // Create unique ID for new litter - use UUID format for Supabase
+      const newLitterId = crypto.randomUUID();
+      console.log("Generated litter ID:", newLitterId);
       
       // Format the date properly - ensure we're sending an ISO string to Supabase
       const formattedDate = values.dateOfBirth instanceof Date 
         ? values.dateOfBirth.toISOString() 
         : new Date(values.dateOfBirth).toISOString();
+      
+      console.log("Formatted date:", formattedDate);
       
       const newLitter: Litter = {
         id: newLitterId,
@@ -145,7 +150,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
         user_id: sessionData.session.user.id
       };
 
-      console.log("Creating new litter with data:", newLitter);
+      console.log("Creating new litter with data:", JSON.stringify(newLitter, null, 2));
       
       // Add external sire information if applicable
       if (values.isExternalSire) {

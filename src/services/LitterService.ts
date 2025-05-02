@@ -1,3 +1,4 @@
+
 import { Litter, Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
@@ -117,7 +118,7 @@ class LitterService {
           damId: litter.dam_id || '',
           sireName: litter.sire_name || '',
           damName: litter.dam_name || '',
-          puppies: puppiesWithDetails,
+          puppies: puppiesWithDetailedPuppies,
           archived: litter.archived || false,
           user_id: litter.user_id
         };
@@ -160,6 +161,8 @@ class LitterService {
    */
   async addLitter(litter: Litter): Promise<Litter[]> {
     try {
+      console.log("Starting addLitter with:", litter);
+      
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) {
         console.error("Session error:", sessionError);
@@ -171,7 +174,14 @@ class LitterService {
         throw new Error("No active session");
       }
 
-      console.log("Adding new litter:", litter);
+      console.log("Adding new litter for user:", sessionData.session.user.id);
+      console.log("Litter details:", JSON.stringify(litter, null, 2));
+
+      // Check if the litter ID is valid UUID format (required by Supabase)
+      // If not, generate a UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const litterId = uuidRegex.test(litter.id) ? litter.id : crypto.randomUUID();
+      console.log("Original ID:", litter.id, "Using ID:", litterId);
 
       // Ensure the archived property is set (default to false)
       if (litter.archived === undefined) {
@@ -189,16 +199,31 @@ class LitterService {
       // Ensure user_id is set to the current user's ID
       litter.user_id = sessionData.session.user.id;
       
-      // Logging the sire data to verify
-      console.log("Sire data being sent to Supabase:", {
-        sireId: litter.sireId,
-        sireName: sireName
-      });
-
+      // Validate the date format
+      let dateOfBirth;
+      try {
+        // If it's already an ISO string, use it directly
+        if (typeof litter.dateOfBirth === 'string') {
+          const tempDate = new Date(litter.dateOfBirth);
+          if (isNaN(tempDate.getTime())) {
+            throw new Error("Invalid date string");
+          }
+          dateOfBirth = litter.dateOfBirth;
+        } else if (litter.dateOfBirth instanceof Date) {
+          dateOfBirth = litter.dateOfBirth.toISOString();
+        } else {
+          throw new Error("Invalid date format");
+        }
+      } catch (error) {
+        console.error("Date parsing error:", error);
+        throw new Error(`Invalid date of birth: ${error}`);
+      }
+      
+      console.log("Date for insert:", dateOfBirth);
       console.log("Full litter data being sent to Supabase:", {
-        id: litter.id,
+        id: litterId,
         name: litter.name,
-        date_of_birth: litter.dateOfBirth,
+        date_of_birth: dateOfBirth,
         sire_id: litter.sireId,
         dam_id: litter.damId,
         sire_name: sireName,
@@ -206,14 +231,27 @@ class LitterService {
         archived: litter.archived,
         user_id: litter.user_id
       });
+      
+      // Attempt to directly query the table to troubleshoot
+      console.log("Checking existing litters before insert...");
+      const { data: existingLitters, error: queryError } = await supabase
+        .from('litters')
+        .select('id, name, user_id')
+        .limit(5);
+        
+      if (queryError) {
+        console.error("Error querying litters:", queryError);
+      } else {
+        console.log("Sample of existing litters:", existingLitters);
+      }
 
       // Insert into Supabase
       const { data: newLitter, error } = await supabase
         .from('litters')
         .insert({
-          id: litter.id,
+          id: litterId,
           name: litter.name,
-          date_of_birth: litter.dateOfBirth,
+          date_of_birth: dateOfBirth,
           sire_id: litter.sireId,
           dam_id: litter.damId,
           sire_name: sireName,
@@ -230,9 +268,22 @@ class LitterService {
 
       console.log("Litter added to Supabase:", newLitter);
 
+      // Check if the litter was actually inserted
+      const { data: verifyLitter, error: verifyError } = await supabase
+        .from('litters')
+        .select('*')
+        .eq('id', litterId)
+        .single();
+        
+      if (verifyError) {
+        console.error("Error verifying litter insertion:", verifyError);
+      } else {
+        console.log("Verified litter was inserted:", verifyLitter);
+      }
+
       // Add to localStorage as backup
       const litters = this.loadFromLocalStorage();
-      const updatedLitters = [...litters, litter];
+      const updatedLitters = [...litters, {...litter, id: litterId}];
       this.saveLitters(updatedLitters);
 
       // Fetch all litters to ensure we have the latest data

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Litter, Puppy } from '@/types/breeding';
 import { litterService } from '@/services/LitterService';
-import { plannedLittersService } from '@/services/planned-litters/plannedLittersService';
+import { plannedLittersService } from '@/services/PlannedLitterService';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +24,16 @@ export function useLitterManagement() {
   const loadLittersData = useCallback(async () => {
     setIsLoading(true);
     try {
-      console.log("Loading litters data...");
+      console.log("Loading litters data with current user:", user?.id);
+      
+      // Debug auth state
+      const { data: sessionData } = await supabase.auth.getSession();
+      console.log("Current session data:", sessionData?.session ? {
+        id: sessionData.session.user.id,
+        email: sessionData.session.user.email,
+        isActive: !!sessionData.session
+      } : "No active session");
+      
       const active = await litterService.getActiveLitters();
       const archived = await litterService.getArchivedLitters();
       
@@ -57,41 +66,53 @@ export function useLitterManagement() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedLitterId]);
+  }, [selectedLitterId, user?.id]);
   
   // Initial data load
   useEffect(() => {
-    loadLittersData();
+    console.log("Initial useEffect running, user:", user?.id);
     
-    // Load planned litters properly handling the async function
-    const loadPlannedLitters = async () => {
-      try {
-        const loadedPlannedLitters = await plannedLittersService.loadPlannedLitters();
-        setPlannedLitters(loadedPlannedLitters);
-      } catch (error) {
-        console.error('Error loading planned litters:', error);
-      }
-    };
+    // Load data only if we have a user
+    if (user?.id) {
+      loadLittersData();
     
-    loadPlannedLitters();
-    
-    // Subscribe to changes in the litters table
-    const channel = supabase
-      .channel('litters-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'litters' },
-        (payload) => {
-          console.log('Litter change detected:', payload);
-          // Reload litters when changes are detected
-          loadLittersData();
+      // Load planned litters properly handling the async function
+      const loadPlannedLitters = async () => {
+        try {
+          const loadedPlannedLitters = await plannedLittersService.loadPlannedLitters();
+          setPlannedLitters(loadedPlannedLitters);
+        } catch (error) {
+          console.error('Error loading planned litters:', error);
         }
-      )
-      .subscribe();
+      };
       
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [loadLittersData]);
+      loadPlannedLitters();
+      
+      // Subscribe to changes in the litters table
+      const channel = supabase
+        .channel('litters-changes')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'litters' },
+          (payload) => {
+            console.log('Litter change detected:', payload);
+            // Reload litters when changes are detected
+            loadLittersData();
+          }
+        )
+        .subscribe((status) => {
+          console.log('Supabase subscription status:', status);
+        });
+        
+      return () => {
+        console.log('Cleaning up Supabase channel');
+        supabase.removeChannel(channel);
+      };
+    } else {
+      console.log("No user ID available, cannot load litters");
+      setActiveLitters([]);
+      setArchivedLitters([]);
+    }
+  }, [loadLittersData, user?.id]);
   
   // Handlers for litter operations
   const handleAddLitter = async (newLitter: Litter) => {
@@ -100,6 +121,11 @@ export function useLitterManagement() {
     
     // Verify user session
     const { data: sessionData } = await supabase.auth.getSession();
+    
+    console.log("Adding litter with session:", sessionData?.session ? {
+      id: sessionData.session.user.id,
+      email: sessionData.session.user.email
+    } : "No active session");
     
     if (!sessionData.session || !sessionData.session.user) {
       toast({
@@ -115,10 +141,15 @@ export function useLitterManagement() {
     
     try {
       console.log("Adding new litter with user ID:", newLitter.user_id);
-      await litterService.addLitter(newLitter);
+      const updatedLitters = await litterService.addLitter(newLitter);
       
-      // Immediately reload litters to refresh the UI
-      await loadLittersData();
+      // Update the UI with the returned data
+      const active = updatedLitters.filter(litter => !litter.archived);
+      const archived = updatedLitters.filter(litter => litter.archived);
+      
+      console.log("Updated active litters:", active);
+      setActiveLitters(active);
+      setArchivedLitters(archived);
       
       // Set the newly created litter as selected
       setSelectedLitterId(newLitter.id);
@@ -131,7 +162,7 @@ export function useLitterManagement() {
       console.error('Error adding litter:', error);
       toast({
         title: "Error",
-        description: "Failed to add litter. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to add litter. Please try again.",
         variant: "destructive"
       });
     }
