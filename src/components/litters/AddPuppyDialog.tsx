@@ -55,16 +55,17 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
         birthDateTime.setHours(hours, minutes);
       }
 
-      // Generate a unique ID using UUID-like format
-      const newId = `puppy-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      // Generate a unique ID using UUID format that will work with Supabase
+      // Note: Using a proper UUID format for compatibility with Supabase's UUID column type
+      const newId = crypto.randomUUID();
       
       const weightValue = birthWeight ? parseFloat(birthWeight) : 0;
       
       // Create a weight log entry for birth weight
-      const initialWeightLog = [{
+      const initialWeightLog = weightValue ? [{
         date: dateOfBirth.toISOString().split('T')[0],
         weight: weightValue
-      }];
+      }] : [];
 
       const newPuppy: Puppy = {
         id: newId,

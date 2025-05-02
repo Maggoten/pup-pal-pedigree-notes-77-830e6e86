@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Puppy } from '@/types/breeding';
@@ -37,6 +38,10 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   const [addPuppyDialogOpen, setAddPuppyDialogOpen] = useState(false);
   const [activePuppy, setActivePuppy] = useState<Puppy | null>(null);
   
+  useEffect(() => {
+    console.log("PuppiesTabContent rendered with puppies:", puppies);
+  }, [puppies]);
+  
   const handlePuppyClick = (puppy: Puppy) => {
     setActivePuppy(puppy);
     onSelectPuppy(puppy === selectedPuppy ? null : puppy);
@@ -55,8 +60,9 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
     onDeletePuppy(puppyId);
   };
   
-  const handleAddPuppy = (puppy: Puppy) => {
-    onAddPuppy(puppy);
+  const handleAddPuppy = async (puppy: Puppy) => {
+    console.log("PuppiesTabContent - Adding puppy:", puppy);
+    await onAddPuppy(puppy);
     setAddPuppyDialogOpen(false);
   };
   
@@ -94,7 +100,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
       </CardHeader>
       
       <CardContent className="p-4">
-        {puppies.length > 0 ? (
+        {puppies && puppies.length > 0 ? (
           <PuppyList 
             puppies={puppies} 
             onUpdatePuppy={updatePuppyNames} 
