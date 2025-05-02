@@ -39,6 +39,13 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
     setName(`Puppy ${puppyNumber}`);
   }, [puppyNumber]);
 
+  // Update breed when damBreed changes (e.g. if dialog is reused)
+  useEffect(() => {
+    if (damBreed) {
+      setBreed(damBreed);
+    }
+  }, [damBreed]);
+
   const handleGenderChange = (value: 'male' | 'female') => {
     setGender(value);
   };
@@ -132,6 +139,11 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
               onChange={setBreed}
               className="bg-white border-greige-300"
             />
+            {damBreed && breed !== damBreed && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Mother's breed: {damBreed}
+              </p>
+            )}
           </div>
 
           <div>

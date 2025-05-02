@@ -40,7 +40,8 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   
   useEffect(() => {
     console.log("PuppiesTabContent rendered with puppies:", puppies);
-  }, [puppies]);
+    console.log("Dam breed:", damBreed); // Log the dam breed for debugging
+  }, [puppies, damBreed]);
   
   const handlePuppyClick = (puppy: Puppy) => {
     setActivePuppy(puppy);
