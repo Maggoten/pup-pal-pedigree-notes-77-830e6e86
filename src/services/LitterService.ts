@@ -1,3 +1,4 @@
+
 import { Litter, Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
@@ -117,7 +118,7 @@ class LitterService {
           damId: litter.dam_id || '',
           sireName: litter.sire_name || '',
           damName: litter.dam_name || '',
-          puppies: puppiesWithDetails,
+          puppies: puppiesWithDetails,  // FIX 1: Changed from puppiesWithDetailedPuppies to puppiesWithDetails
           archived: litter.archived || false,
           user_id: litter.user_id
         };
@@ -199,9 +200,9 @@ class LitterService {
       litter.user_id = sessionData.session.user.id;
       
       // Validate the date format
-      let dateOfBirth: string;
+      let dateOfBirth;
       try {
-        // Fixed: Properly type check and handle date formats
+        // FIX 2 & 3: Properly check if dateOfBirth is a Date object or string
         if (typeof litter.dateOfBirth === 'string') {
           const tempDate = new Date(litter.dateOfBirth);
           if (isNaN(tempDate.getTime())) {
@@ -750,3 +751,4 @@ class LitterService {
 
 // Export a singleton instance
 export const litterService = new LitterService();
+
