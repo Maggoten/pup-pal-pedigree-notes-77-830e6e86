@@ -21,8 +21,6 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-le-jour text-greige-800">Pregnancy Journey</h2>
-      
       <Tabs defaultValue="journey" className="w-full">
         <TabsList className="grid grid-cols-3 mb-4 bg-greige-100">
           <TabsTrigger value="journey" className="flex items-center gap-2 data-[state=active]:bg-greige-200 data-[state=active]:text-brown-700">
