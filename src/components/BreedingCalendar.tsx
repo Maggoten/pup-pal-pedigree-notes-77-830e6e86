@@ -2,14 +2,31 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { useDogs } from '@/context/DogsContext';
-import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import CalendarContent from './calendar/CalendarContent';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AddEventFormValues } from './calendar/types';
 
-const BreedingCalendar: React.FC = () => {
+// Define props interface for calendar events data
+interface CalendarEventsData {
+  getEventsForDate: (date: Date) => any[];
+  getEventColor: (type: string) => string;
+  addEvent: (data: AddEventFormValues) => boolean;
+  deleteEvent: (eventId: string) => void;
+  editEvent: (eventId: string, data: AddEventFormValues) => boolean;
+  isLoading: boolean;
+  hasError: boolean;
+}
+
+interface BreedingCalendarProps {
+  eventsData?: CalendarEventsData; // Optional because we might fetch data here
+}
+
+const BreedingCalendar: React.FC<BreedingCalendarProps> = ({ eventsData }) => {
   const { dogs } = useDogs();
+  
+  // If no events data is provided, we need to fetch it - for backward compatibility
+  // We'll use the provided eventsData directly from props if available
   const { 
     getEventsForDate, 
     getEventColor, 
@@ -18,7 +35,7 @@ const BreedingCalendar: React.FC = () => {
     editEvent,
     isLoading,
     hasError
-  } = useCalendarEvents(dogs);
+  } = eventsData || { getEventsForDate: () => [], getEventColor: () => '', addEvent: () => false, deleteEvent: () => {}, editEvent: () => false, isLoading: true, hasError: false };
   
   // Create wrapper functions to handle the async nature of the original functions
   const handleAddEvent = (data: AddEventFormValues) => {

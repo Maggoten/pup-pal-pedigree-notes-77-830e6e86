@@ -3,18 +3,40 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BellRing, PawPrint, Loader2 } from 'lucide-react';
 import RemindersList from './reminders/RemindersList';
-import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import RemindersDialog from './reminders/RemindersDialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Reminder } from '@/types/reminders';
 
-const BreedingReminders: React.FC = () => {
-  const { reminders, isLoading, hasError, handleMarkComplete } = useBreedingReminders();
+interface RemindersData {
+  reminders: Reminder[];
+  isLoading: boolean;
+  hasError: boolean;
+  handleMarkComplete: (id: string) => void;
+}
+
+interface BreedingRemindersProps {
+  remindersData?: RemindersData;
+}
+
+const BreedingReminders: React.FC<BreedingRemindersProps> = ({ remindersData }) => {
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
+  
+  // Use provided data or empty defaults
+  const { 
+    reminders = [], 
+    isLoading = false, 
+    hasError = false, 
+    handleMarkComplete = () => {} 
+  } = remindersData || {};
   
   // Take only the top 3 high priority reminders for compact view
   const highPriorityReminders = reminders
     .filter(r => r.priority === 'high')
     .slice(0, 3);
+  
+  const displayReminders = highPriorityReminders.length > 0 ? 
+    highPriorityReminders : 
+    reminders.slice(0, 3);
   
   return (
     <>
@@ -58,7 +80,7 @@ const BreedingReminders: React.FC = () => {
             <>
               <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
                 <RemindersList 
-                  reminders={highPriorityReminders.length > 0 ? highPriorityReminders : reminders.slice(0, 3)} 
+                  reminders={displayReminders} 
                   onComplete={handleMarkComplete} 
                   compact={true} 
                 />

@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import BreedingCalendar from '@/components/BreedingCalendar';
 import BreedingReminders from '@/components/BreedingReminders';
 import DashboardHero from './DashboardHero';
@@ -10,6 +10,8 @@ import BreedingStats from '@/components/BreedingStats';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import { addDays, subDays } from 'date-fns';
 import { User } from '@/types/auth';
+import { useDogs } from '@/context/DogsContext';
+import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 
 interface DashboardLayoutProps {
   user: User | null;
@@ -20,6 +22,29 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   user, 
   activePregnancies
 }) => {
+  // Centralized data fetching for calendar and reminders
+  const { dogs } = useDogs();
+  
+  // Single instances of these hooks to prevent duplicate fetching
+  const { 
+    reminders, 
+    isLoading: remindersLoading, 
+    hasError: remindersError,
+    handleMarkComplete,
+    addCustomReminder,
+    deleteReminder
+  } = useBreedingReminders();
+  
+  const {
+    getEventsForDate,
+    getEventColor,
+    addEvent,
+    deleteEvent,
+    editEvent,
+    isLoading: calendarLoading,
+    hasError: calendarError
+  } = useCalendarEvents(dogs);
+  
   // Get the personalized username
   const username = useMemo(() => {
     if (user?.firstName) {
@@ -32,8 +57,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     // Ultimate fallback
     return 'Breeder';
   }, [user]);
-  
-  const { reminders, handleMarkComplete } = useBreedingReminders();
   
   // Sample data for planned litters and recent litters
   // In a real implementation, this would come from actual data services
@@ -59,33 +82,71 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     };
   }, [reminders]);
   
+  // Only render children when data is loaded to prevent flickering
+  const [isInitialLoading, setInitialLoading] = useState(true);
+  
+  useEffect(() => {
+    if (!remindersLoading && !calendarLoading) {
+      // Give a small delay for stability
+      const timer = setTimeout(() => {
+        setInitialLoading(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [remindersLoading, calendarLoading]);
+  
   return (
-    <DogsProvider>
-      <PageLayout 
-        title="" 
-        description=""
-      >
-        <div className="space-y-4">
-          <DashboardHero 
-            username={username}
-            reminders={remindersSummary}
-            plannedLitters={plannedLittersData}
-            activePregnancies={activePregnancies}
-            recentLitters={recentLittersData}
-          />
-          
-          {/* Main dashboard content - Fixed layout with stable heights */}
+    <PageLayout 
+      title="" 
+      description=""
+    >
+      <div className="space-y-4">
+        <DashboardHero 
+          username={username}
+          reminders={remindersSummary}
+          plannedLitters={plannedLittersData}
+          activePregnancies={activePregnancies}
+          recentLitters={recentLittersData}
+        />
+        
+        {isInitialLoading ? (
+          // Skeleton placeholder with exact same dimensions to prevent layout shift
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
+              <div className="lg:col-span-2 h-full bg-greige-50 rounded-lg animate-pulse"></div>
+              <div className="lg:col-span-1 h-full bg-greige-50 rounded-lg animate-pulse"></div>
+            </div>
+            <div className="h-[350px] bg-greige-50 rounded-lg animate-pulse"></div>
+          </div>
+        ) : (
           <div className="space-y-6">
             {/* Top row: Calendar (2/3) and Reminders (1/3) */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
               {/* Calendar taking 2/3 of the width */}
               <div className="lg:col-span-2 h-full">
-                <BreedingCalendar />
+                <BreedingCalendar 
+                  eventsData={{
+                    getEventsForDate,
+                    getEventColor,
+                    addEvent,
+                    deleteEvent,
+                    editEvent,
+                    isLoading: calendarLoading,
+                    hasError: calendarError
+                  }}
+                />
               </div>
               
               {/* Reminders taking 1/3 of the width */}
               <div className="lg:col-span-1 h-full">
-                <BreedingReminders />
+                <BreedingReminders 
+                  remindersData={{
+                    reminders,
+                    isLoading: remindersLoading, 
+                    hasError: remindersError,
+                    handleMarkComplete
+                  }}
+                />
               </div>
             </div>
             
@@ -94,9 +155,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <BreedingStats />
             </div>
           </div>
-        </div>
-      </PageLayout>
-    </DogsProvider>
+        )}
+      </div>
+    </PageLayout>
   );
 };
 

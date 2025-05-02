@@ -21,7 +21,16 @@ interface RemindersDialogProps {
 }
 
 const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange }) => {
-  const { reminders, isLoading, hasError, handleMarkComplete, addCustomReminder, deleteReminder } = useBreedingReminders();
+  // Since this is a modal dialog, it's okay to use the hook here
+  // It will only fetch once when the dialog is opened
+  const { 
+    reminders, 
+    isLoading, 
+    hasError, 
+    handleMarkComplete, 
+    addCustomReminder, 
+    deleteReminder 
+  } = useBreedingReminders();
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

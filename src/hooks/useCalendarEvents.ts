@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dog } from '@/types/dogs';
 import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
@@ -18,64 +18,73 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
   const [hasMigrated, setHasMigrated] = useState<boolean>(false);
+  const [lastFetchTimestamp, setLastFetchTimestamp] = useState<number>(0);
   const { user } = useAuth();
   
-  // Load events on component mount or when dependencies change
-  useEffect(() => {
-    const loadAllEvents = async () => {
-      if (!user) {
-        // Don't fetch if not authenticated
-        setIsLoading(false);
-        return;
-      }
-      
-      setIsLoading(true);
-      setHasError(false);
-      
-      try {
-        console.log("Loading calendar events for user:", user.id);
-        
-        // Check if migration is needed (first time only)
-        if (!hasMigrated) {
-          await migrateCalendarEventsFromLocalStorage(dogs);
-          setHasMigrated(true);
-        }
-        
-        // Fetch custom events from Supabase - these should already be filtered by user_id
-        const customEvents = await fetchCalendarEvents();
-        console.log("Fetched custom calendar events:", customEvents.length);
-        
-        // Calculate heat events based on dogs data - these will be filtered since dogs are already filtered by owner
-        const upcomingHeats = calculateUpcomingHeats(dogs);
-        const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
-          id: `heat-${heat.dogId}-${index}`,
-          title: 'Heat Cycle',
-          date: heat.date,
-          type: 'heat',
-          dogId: heat.dogId,
-          dogName: heat.dogName
-        }));
-        console.log("Generated heat events:", heatEvents.length);
-        
-        // Combine all events - no sample events anymore
-        setCalendarEvents([...heatEvents, ...customEvents]);
-      } catch (error) {
-        console.error("Error loading calendar events:", error);
-        setHasError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // Consolidated fetch function with debouncing protection
+  const fetchCalendarData = useCallback(async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
     
-    loadAllEvents();
-  }, [dogs, user, hasMigrated]);
+    // Prevent multiple rapid fetch requests (debounce)
+    const now = Date.now();
+    if (now - lastFetchTimestamp < 2000) {
+      console.log("[Calendar] Debounced rapid calendar fetch request");
+      return;
+    }
+    
+    setLastFetchTimestamp(now);
+    setIsLoading(true);
+    setHasError(false);
+    
+    try {
+      console.log("[Calendar] Loading calendar events for user:", user.id);
+      
+      // Only migrate once per session
+      if (!hasMigrated) {
+        await migrateCalendarEventsFromLocalStorage(dogs);
+        setHasMigrated(true);
+      }
+      
+      // Fetch custom events from Supabase
+      const customEvents = await fetchCalendarEvents();
+      console.log("[Calendar] Fetched custom events:", customEvents.length);
+      
+      // Generate heat events based on dogs data
+      const upcomingHeats = calculateUpcomingHeats(dogs);
+      const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
+        id: `heat-${heat.dogId}-${index}`,
+        title: 'Heat Cycle',
+        date: heat.date,
+        type: 'heat',
+        dogId: heat.dogId,
+        dogName: heat.dogName
+      }));
+      console.log("[Calendar] Generated heat events:", heatEvents.length);
+      
+      // Set all events at once to prevent multiple renders
+      setCalendarEvents([...heatEvents, ...customEvents]);
+    } catch (error) {
+      console.error("[Calendar] Error loading calendar events:", error);
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, dogs, hasMigrated, lastFetchTimestamp]);
+  
+  // Initial fetch & refetch on dependencies change
+  useEffect(() => {
+    fetchCalendarData();
+  }, [fetchCalendarData]);
   
   // Function to get events for a specific date
-  const getEventsForDate = (date: Date) => {
+  const getEventsForDate = useCallback((date: Date) => {
     return calendarEvents.filter(event => 
       new Date(event.date).toDateString() === date.toDateString()
     );
-  };
+  }, [calendarEvents]);
   
   // Function to add a new event
   const handleAddEvent = async (data: AddEventFormValues) => {
@@ -83,11 +92,15 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       return false;
     }
     
-    const newEvent = await addEventToSupabase(data, dogs);
-    
-    if (newEvent) {
-      setCalendarEvents(prevEvents => [...prevEvents, newEvent]);
-      return true;
+    try {
+      const newEvent = await addEventToSupabase(data, dogs);
+      
+      if (newEvent) {
+        setCalendarEvents(prevEvents => [...prevEvents, newEvent]);
+        return true;
+      }
+    } catch (error) {
+      console.error("[Calendar] Error adding event:", error);
     }
     
     return false;
@@ -102,13 +115,17 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       return false;
     }
     
-    const updatedEvent = await updateEventInSupabase(eventId, data, dogs);
-    
-    if (updatedEvent) {
-      setCalendarEvents(prevEvents => 
-        prevEvents.map(event => event.id === eventId ? updatedEvent : event)
-      );
-      return true;
+    try {
+      const updatedEvent = await updateEventInSupabase(eventId, data, dogs);
+      
+      if (updatedEvent) {
+        setCalendarEvents(prevEvents => 
+          prevEvents.map(event => event.id === eventId ? updatedEvent : event)
+        );
+        return true;
+      }
+    } catch (error) {
+      console.error("[Calendar] Error editing event:", error);
     }
     
     return false;
@@ -123,13 +140,17 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       return false;
     }
     
-    const success = await deleteEventFromSupabase(eventId);
-    
-    if (success) {
-      setCalendarEvents(prevEvents => 
-        prevEvents.filter(event => event.id !== eventId)
-      );
-      return true;
+    try {
+      const success = await deleteEventFromSupabase(eventId);
+      
+      if (success) {
+        setCalendarEvents(prevEvents => 
+          prevEvents.filter(event => event.id !== eventId)
+        );
+        return true;
+      }
+    } catch (error) {
+      console.error("[Calendar] Error deleting event:", error);
     }
     
     return false;
@@ -143,6 +164,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     addEvent: handleAddEvent,
     editEvent: handleEditEvent,
     deleteEvent: handleDeleteEvent,
-    getEventColor
+    getEventColor,
+    refreshCalendarData: fetchCalendarData
   };
 };

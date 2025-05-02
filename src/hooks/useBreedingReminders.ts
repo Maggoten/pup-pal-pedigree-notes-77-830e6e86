@@ -1,9 +1,9 @@
 
 // This file is kept for backward compatibility
 // It re-exports the new modular hook structure
-import { useBreedingReminders as useBreedingRemindersHook, Reminder, CustomReminderInput } from './reminders';
-export { useBreedingReminders };
-export type { Reminder, CustomReminderInput };
+import { useBreedingRemindersProvider } from './reminders/useBreedingRemindersProvider';
+export { useBreedingRemindersProvider as useBreedingReminders };
+export type { Reminder, CustomReminderInput } from '@/types/reminders';
 
-// Re-export the hook with the same name
-const useBreedingReminders = useBreedingRemindersHook;
+// Re-export the hook with the same name for backward compatibility
+const useBreedingReminders = useBreedingRemindersProvider;
