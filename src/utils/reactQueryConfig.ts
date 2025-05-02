@@ -8,15 +8,15 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: 1,
       staleTime: 1000 * 60, // 1 minute
-      cacheTime: 1000 * 60 * 10, // 10 minutes
+      gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
       // Prevent suspense in SSR/initial load
       suspense: false,
-      // Use callback to handle errors at query level
-      useErrorBoundary: false
+      // Modern error handling approach
+      throwOnError: false
     },
     mutations: {
-      // Use callback to handle errors at mutation level
-      useErrorBoundary: false,
+      // Modern error handling approach
+      throwOnError: false,
     }
   }
 });
