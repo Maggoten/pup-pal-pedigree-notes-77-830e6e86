@@ -40,27 +40,31 @@ const BreedingReminders: React.FC = () => {
             Important tasks and upcoming events
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-0 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+        <CardContent className="p-0 flex flex-col h-[calc(100%-76px)]">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-40">
+            <div className="flex flex-col items-center justify-center flex-grow py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
               <span className="text-sm text-muted-foreground">Loading reminders...</span>
             </div>
           ) : hasError ? (
-            <Alert variant="destructive" className="m-4">
-              <AlertDescription>
-                There was a problem loading your reminders. Please try again later.
-              </AlertDescription>
-            </Alert>
+            <div className="p-4 flex-grow">
+              <Alert variant="destructive">
+                <AlertDescription>
+                  There was a problem loading your reminders. Please try again later.
+                </AlertDescription>
+              </Alert>
+            </div>
           ) : (
             <>
-              <RemindersList 
-                reminders={highPriorityReminders.length > 0 ? highPriorityReminders : reminders.slice(0, 3)} 
-                onComplete={handleMarkComplete} 
-                compact={true} 
-              />
+              <div className="flex-grow overflow-y-auto min-h-0 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+                <RemindersList 
+                  reminders={highPriorityReminders.length > 0 ? highPriorityReminders : reminders.slice(0, 3)} 
+                  onComplete={handleMarkComplete} 
+                  compact={true} 
+                />
+              </div>
               
-              <div className="p-3 text-center">
+              <div className="p-3 text-center mt-auto">
                 <button 
                   onClick={() => setRemindersDialogOpen(true)}
                   className="text-xs text-primary hover:text-primary/70 font-medium"
