@@ -200,23 +200,17 @@ class LitterService {
       litter.user_id = sessionData.session.user.id;
       
       // Validate the date format
-      let dateOfBirth: string;
+      let dateOfBirth;
       try {
-        // Properly check if dateOfBirth is a Date object or string
+        // FIX 2 & 3: Properly check if dateOfBirth is a Date object or string
         if (typeof litter.dateOfBirth === 'string') {
           const tempDate = new Date(litter.dateOfBirth);
           if (isNaN(tempDate.getTime())) {
             throw new Error("Invalid date string");
           }
           dateOfBirth = litter.dateOfBirth;
-        } else if (litter.dateOfBirth && typeof litter.dateOfBirth === 'object') {
-          // Check if it's a Date object by checking if we can call toISOString
-          const dateObj = litter.dateOfBirth as unknown;
-          if (dateObj && typeof dateObj === 'object' && 'toISOString' in dateObj) {
-            dateOfBirth = (dateObj as Date).toISOString();
-          } else {
-            throw new Error("Invalid date format");
-          }
+        } else if (litter.dateOfBirth instanceof Date) {
+          dateOfBirth = litter.dateOfBirth.toISOString();
         } else {
           throw new Error("Invalid date format");
         }
@@ -757,3 +751,4 @@ class LitterService {
 
 // Export a singleton instance
 export const litterService = new LitterService();
+
