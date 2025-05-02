@@ -15,11 +15,6 @@ export function useDeleteDog(userId: string | undefined) {
         return oldData.filter(dog => dog.id !== deletedId);
       });
       
-      // Invalidate any queries that might depend on the deleted dog
-      queryClient.invalidateQueries({ queryKey: ['dogs'] });
-      queryClient.invalidateQueries({ queryKey: ['planned-litters'] });
-      queryClient.invalidateQueries({ queryKey: ['pregnancies'] });
-      
       toast({
         title: "Dog removed",
         description: "Dog has been removed successfully.",
@@ -27,8 +22,6 @@ export function useDeleteDog(userId: string | undefined) {
     },
     onError: (err) => {
       const errorMessage = err instanceof Error ? err.message : 'Failed to remove dog';
-      console.error('Dog deletion error:', err);
-      
       toast({
         title: "Error removing dog",
         description: errorMessage,

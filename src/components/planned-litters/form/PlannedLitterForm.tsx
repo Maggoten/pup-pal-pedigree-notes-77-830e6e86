@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Form } from '@/components/ui/form';
 import { DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,6 @@ import InternalSireSelector from './InternalSireSelector';
 import ExternalSireFields from './ExternalSireFields';
 import HeatDatePicker from './HeatDatePicker';
 import NotesField from './NotesField';
-import { addDays, parseISO } from 'date-fns';
 
 interface PlannedLitterFormProps {
   form: UseFormReturn<PlannedLitterFormValues>;
@@ -28,33 +27,6 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
   onSubmit
 }) => {
   const isExternalMale = form.watch("externalMale");
-  const selectedFemaleId = form.watch("femaleId");
-  
-  // Calculate next expected heat date when female dog is selected
-  useEffect(() => {
-    if (selectedFemaleId) {
-      const selectedFemale = females.find(female => female.id === selectedFemaleId);
-      
-      if (selectedFemale?.heatHistory?.length) {
-        // Sort heat dates (newest first)
-        const sortedHeatDates = [...selectedFemale.heatHistory].sort((a, b) => 
-          new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
-        
-        // Get the most recent heat date
-        const lastHeatDate = parseISO(sortedHeatDates[0].date);
-        
-        // Use the dog's heat interval if available, otherwise default to 180 days (6 months)
-        const intervalDays = selectedFemale.heatInterval || 180;
-        
-        // Calculate next heat date
-        const nextHeatDate = addDays(lastHeatDate, intervalDays);
-        
-        // Set the calculated heat date in the form
-        form.setValue("expectedHeatDate", nextHeatDate);
-      }
-    }
-  }, [selectedFemaleId, females, form]);
   
   const handleSubmit = (values: PlannedLitterFormValues) => {
     // Find the selected female to get the name

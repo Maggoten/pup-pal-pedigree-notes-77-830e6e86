@@ -29,8 +29,7 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
       externalMale: false,
       externalMaleName: "",
       externalMaleBreed: "",
-      externalMaleRegistration: "",
-      expectedHeatDate: new Date() // Default to today, but will update when female is selected
+      externalMaleRegistration: ""
     }
   });
 

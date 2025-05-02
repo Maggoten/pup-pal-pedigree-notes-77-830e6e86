@@ -20,11 +20,8 @@ const DamSelector: React.FC<DamSelectorProps> = ({ form, females }) => {
         <FormItem>
           <FormLabel>Dam (Female)</FormLabel>
           <Select 
-            onValueChange={(value) => {
-              field.onChange(value);
-              // The expected heat date will be updated by the useEffect in PlannedLitterForm
-            }} 
-            value={field.value}
+            onValueChange={field.onChange} 
+            defaultValue={field.value}
           >
             <FormControl>
               <SelectTrigger className="bg-white border-greige-300">
