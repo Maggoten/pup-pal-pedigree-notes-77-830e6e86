@@ -153,6 +153,7 @@ class LitterService {
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) {
+        console.error("No active session found when adding litter");
         throw new Error("No active session");
       }
 
@@ -177,6 +178,18 @@ class LitterService {
         sireName: sireName
       });
 
+      console.log("Full litter data being sent to Supabase:", {
+        id: litter.id,
+        name: litter.name,
+        date_of_birth: litter.dateOfBirth,
+        sire_id: litter.sireId,
+        dam_id: litter.damId,
+        sire_name: sireName,
+        dam_name: litter.damName,
+        archived: litter.archived,
+        user_id: sessionData.session.user.id
+      });
+
       // Insert into Supabase
       const { data: newLitter, error } = await supabase
         .from('litters')
@@ -191,8 +204,7 @@ class LitterService {
           archived: litter.archived,
           user_id: sessionData.session.user.id
         })
-        .select()
-        .single();
+        .select();
 
       if (error) {
         console.error("Error adding litter to Supabase:", error);
@@ -206,6 +218,7 @@ class LitterService {
       const updatedLitters = [...litters, litter];
       this.saveLitters(updatedLitters);
 
+      // Fetch all litters to ensure we have the latest data
       return await this.loadLitters();
     } catch (error) {
       console.error("Error in addLitter:", error);

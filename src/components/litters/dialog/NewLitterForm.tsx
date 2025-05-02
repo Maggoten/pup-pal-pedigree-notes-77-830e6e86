@@ -15,20 +15,15 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Dog } from '@/context/DogsContext';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UseFormReturn } from 'react-hook-form';
+import { UseFormReturn, useFormContext } from 'react-hook-form';
 
 interface NewLitterFormProps {
   dogs: Dog[];
   form: UseFormReturn<any>;
-  onSubmit: (values: any) => void;
 }
 
-const NewLitterForm: React.FC<NewLitterFormProps> = ({
-  dogs,
-  form,
-  onSubmit
-}) => {
-  const { watch, setValue, register } = form;
+const NewLitterForm: React.FC<NewLitterFormProps> = ({ dogs, form }) => {
+  const { watch, setValue, register } = useFormContext();
   
   const isExternalSire = watch("isExternalSire");
   const selectedDamId = watch("damId");
@@ -49,6 +44,10 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({
   // Handle dam selection
   const handleDamChange = (selectedDamId: string) => {
     setValue("damId", selectedDamId);
+    const selectedDam = dogs.find(dog => dog.id === selectedDamId);
+    if (selectedDam) {
+      console.log("Selected dam:", selectedDam.name, "with ID:", selectedDamId);
+    }
   };
 
   // Clear internal sire data when switching to external sire
@@ -64,7 +63,7 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({
 
   return (
     <Form {...form}>
-      <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+      <form className="space-y-4">
         <FormItem>
           <FormLabel>Litter Name</FormLabel>
           <Input 
@@ -82,12 +81,12 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({
                 variant="outline"
                 className={cn(
                   "w-full justify-start text-left font-normal bg-white border-greige-300",
-                  !form.watch("dateOfBirth") && "text-muted-foreground"
+                  !watch("dateOfBirth") && "text-muted-foreground"
                 )}
                 onClick={(e) => e.preventDefault()}
               >
-                {form.watch("dateOfBirth") ? (
-                  format(form.watch("dateOfBirth"), "PPP")
+                {watch("dateOfBirth") ? (
+                  format(watch("dateOfBirth"), "PPP")
                 ) : (
                   <span>Pick a date</span>
                 )}
@@ -97,7 +96,7 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({
             <PopoverContent className="w-auto p-0 bg-white" align="start">
               <Calendar
                 mode="single"
-                selected={form.watch("dateOfBirth")}
+                selected={watch("dateOfBirth")}
                 onSelect={(date) => date && setValue("dateOfBirth", date)}
                 disabled={(date) => date > new Date()}
                 initialFocus
@@ -114,7 +113,7 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({
             </div>
           </div>
           <Switch
-            checked={form.watch("isExternalSire")}
+            checked={watch("isExternalSire")}
             onCheckedChange={(checked) => setValue("isExternalSire", checked)}
           />
         </FormItem>
