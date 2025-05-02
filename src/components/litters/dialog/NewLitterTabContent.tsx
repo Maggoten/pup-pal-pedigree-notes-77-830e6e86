@@ -6,6 +6,7 @@ import { useDogs } from '@/context/DogsContext';
 import { useToast } from '@/hooks/use-toast';
 import { Litter } from '@/types/breeding';
 import NewLitterForm from './NewLitterForm';
+import { useAuth } from '@/context/AuthContext';
 
 interface NewLitterTabContentProps {
   onClose: () => void;
@@ -15,6 +16,7 @@ interface NewLitterTabContentProps {
 const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLitterAdded }) => {
   const { dogs } = useDogs();
   const { toast } = useToast();
+  const { user } = useAuth();
   
   // New litter form state
   const [sireName, setSireName] = useState('');
@@ -52,7 +54,8 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
         damId,
         sireName: isExternalSire ? externalSireName : sireName,
         damName,
-        puppies: []
+        puppies: [],
+        user_id: user?.id || '' // Add user_id field with fallback
       };
       
       if (isExternalSire) {

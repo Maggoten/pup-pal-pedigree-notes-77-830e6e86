@@ -5,6 +5,7 @@ import { DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Litter, PlannedLitter } from '@/types/breeding';
 import PlannedLitterForm from './PlannedLitterForm';
+import { useAuth } from '@/context/AuthContext';
 
 interface PlannedLitterTabContentProps {
   onClose: () => void;
@@ -18,6 +19,7 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
   plannedLitters
 }) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   
   // Planned litter form state
   const [selectedPlannedLitterId, setSelectedPlannedLitterId] = useState('');
@@ -60,7 +62,8 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
         damId: selectedLitter.femaleId,
         sireName: selectedLitter.maleName,
         damName: selectedLitter.femaleName,
-        puppies: []
+        puppies: [],
+        user_id: user?.id || '' // Add user_id field with fallback
       };
       
       if (selectedLitter.externalMale) {
