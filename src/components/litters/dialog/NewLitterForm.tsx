@@ -15,14 +15,13 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Dog } from '@/context/DogsContext';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UseFormReturn, useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 
 interface NewLitterFormProps {
   dogs: Dog[];
-  form: UseFormReturn<any>;
 }
 
-const NewLitterForm: React.FC<NewLitterFormProps> = ({ dogs, form }) => {
+const NewLitterForm: React.FC<NewLitterFormProps> = ({ dogs }) => {
   const { watch, setValue, register } = useFormContext();
   
   const isExternalSire = watch("isExternalSire");
@@ -62,7 +61,7 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({ dogs, form }) => {
   }, [isExternalSire, setValue]);
 
   return (
-    <Form {...form}>
+    <Form>
       <form className="space-y-4">
         <FormItem>
           <FormLabel>Litter Name</FormLabel>

@@ -22,7 +22,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
   const { user } = useAuth();
   
   // Set up React Hook Form
-  const form = useForm({
+  const methods = useForm({
     defaultValues: {
       litterName: '',
       sireId: '',
@@ -37,6 +37,8 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
   
   const handleNewLitterSubmit = async (values: any) => {
     try {
+      console.log("Form submission started with values:", values);
+      
       // Validation checks
       if (!values.litterName) {
         toast({
@@ -74,12 +76,6 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
         return;
       }
 
-      // Get actual sire info
-      const actualSireId = values.isExternalSire ? `external-${Date.now()}` : values.sireId;
-      const actualSireName = values.isExternalSire ? values.externalSireName : 
-                            dogs.find(dog => dog.id === values.sireId)?.name || '';
-      const damName = dogs.find(dog => dog.id === values.damId)?.name || '';
-      
       // Check if user session exists
       if (!user || !user.id) {
         console.error("No active user session found");
@@ -90,6 +86,22 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
         });
         return;
       }
+
+      // Get actual sire info
+      const actualSireId = values.isExternalSire ? `external-${Date.now()}` : values.sireId;
+      let actualSireName = '';
+      
+      if (values.isExternalSire) {
+        actualSireName = values.externalSireName;
+      } else {
+        const selectedSire = dogs.find(dog => dog.id === values.sireId);
+        actualSireName = selectedSire?.name || '';
+        console.log("Selected sire:", selectedSire);
+      }
+      
+      const selectedDam = dogs.find(dog => dog.id === values.damId);
+      const damName = selectedDam?.name || '';
+      console.log("Selected dam:", selectedDam);
 
       const newLitterId = `litter-${Date.now()}`;
       const newLitter: Litter = {
@@ -125,10 +137,19 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
         
       console.log("Verification check:", checkData, checkError);
       
-      if (checkError || !checkData?.length) {
-        throw new Error("Failed to verify litter creation");
+      if (checkError) {
+        console.error("Error verifying litter creation:", checkError);
+        throw new Error(`Failed to verify litter creation: ${checkError.message}`);
       }
       
+      if (!checkData || checkData.length === 0) {
+        console.error("Litter verification failed: No data returned");
+        throw new Error("Failed to verify litter creation: No data returned");
+      }
+      
+      console.log("Litter successfully created and verified:", checkData[0]);
+      
+      // Call the onLitterAdded callback with the new litter
       onLitterAdded(newLitter);
       onClose();
       
@@ -140,16 +161,15 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       console.error("Error creating litter:", error);
       toast({
         title: "Error",
-        description: "Failed to create litter. Please check console for details.",
+        description: `Failed to create litter: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       });
     }
   };
 
   return (
-    <FormProvider {...form}>
+    <FormProvider {...methods}>
       <NewLitterForm 
-        form={form}
         dogs={dogs}
       />
       
@@ -157,7 +177,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
         <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
           Cancel
         </Button>
-        <Button type="button" onClick={form.handleSubmit(handleNewLitterSubmit)}>
+        <Button type="button" onClick={methods.handleSubmit(handleNewLitterSubmit)}>
           Create Litter
         </Button>
       </DialogFooter>

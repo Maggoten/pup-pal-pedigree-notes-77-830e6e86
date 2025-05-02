@@ -1,4 +1,3 @@
-
 import { Litter, Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
@@ -12,10 +11,15 @@ class LitterService {
    */
   async loadLitters(): Promise<Litter[]> {
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        throw sessionError;
+      }
+      
       if (!sessionData.session) {
         console.error("No active session found");
-        return this.loadFromLocalStorage();
+        throw new Error("No active session found");
       }
 
       console.log("Loading litters for user:", sessionData.session.user.id);
@@ -31,10 +35,15 @@ class LitterService {
 
       if (error) {
         console.error("Error loading litters from Supabase:", error);
-        return this.loadFromLocalStorage();
+        throw error;
       }
 
       console.log("Litters loaded from Supabase:", litters);
+
+      if (!litters || litters.length === 0) {
+        console.log("No litters found for user");
+        return [];
+      }
 
       // Now fetch weight and height logs for each puppy
       const littersWithDetailedPuppies = await Promise.all((litters || []).map(async litter => {
@@ -118,7 +127,7 @@ class LitterService {
       return littersWithDetailedPuppies;
     } catch (error) {
       console.error("Error in loadLitters:", error);
-      return this.loadFromLocalStorage();
+      throw error;
     }
   }
 
@@ -151,7 +160,12 @@ class LitterService {
    */
   async addLitter(litter: Litter): Promise<Litter[]> {
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        throw sessionError;
+      }
+      
       if (!sessionData.session) {
         console.error("No active session found when adding litter");
         throw new Error("No active session");
@@ -172,6 +186,9 @@ class LitterService {
       // Ensure sireName is not undefined
       const sireName = litter.sireName || '';
       
+      // Ensure user_id is set to the current user's ID
+      litter.user_id = sessionData.session.user.id;
+      
       // Logging the sire data to verify
       console.log("Sire data being sent to Supabase:", {
         sireId: litter.sireId,
@@ -187,7 +204,7 @@ class LitterService {
         sire_name: sireName,
         dam_name: litter.damName,
         archived: litter.archived,
-        user_id: sessionData.session.user.id
+        user_id: litter.user_id
       });
 
       // Insert into Supabase
@@ -202,7 +219,7 @@ class LitterService {
           sire_name: sireName,
           dam_name: litter.damName,
           archived: litter.archived,
-          user_id: sessionData.session.user.id
+          user_id: litter.user_id
         })
         .select();
 
@@ -222,11 +239,7 @@ class LitterService {
       return await this.loadLitters();
     } catch (error) {
       console.error("Error in addLitter:", error);
-      // Fallback to localStorage
-      const litters = this.loadFromLocalStorage();
-      const updatedLitters = [...litters, litter];
-      this.saveLitters(updatedLitters);
-      return updatedLitters;
+      throw error;
     }
   }
 
@@ -657,16 +670,31 @@ class LitterService {
    * Get active (non-archived) litters
    */
   async getActiveLitters(): Promise<Litter[]> {
-    const litters = await this.loadLitters();
-    return litters.filter(litter => !litter.archived);
+    try {
+      const litters = await this.loadLitters();
+      console.log("Get active litters - all litters:", litters);
+      const activeLitters = litters.filter(litter => !litter.archived);
+      console.log("Active litters:", activeLitters);
+      return activeLitters;
+    } catch (error) {
+      console.error("Error getting active litters:", error);
+      throw error;
+    }
   }
 
   /**
    * Get archived litters
    */
   async getArchivedLitters(): Promise<Litter[]> {
-    const litters = await this.loadLitters();
-    return litters.filter(litter => litter.archived);
+    try {
+      const litters = await this.loadLitters();
+      const archivedLitters = litters.filter(litter => litter.archived);
+      console.log("Archived litters:", archivedLitters);
+      return archivedLitters;
+    } catch (error) {
+      console.error("Error getting archived litters:", error);
+      throw error;
+    }
   }
 }
 
