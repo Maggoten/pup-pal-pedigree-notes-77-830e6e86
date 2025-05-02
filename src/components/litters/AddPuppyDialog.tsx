@@ -9,6 +9,7 @@ import { toast } from '@/components/ui/use-toast';
 import DatePicker from '@/components/common/DatePicker';
 import BreedDropdown from '@/components/dogs/breed-selector/BreedDropdown';
 import { Puppy } from '@/types/breeding';
+import PuppyGenderSelector from './puppies/PuppyGenderSelector';
 
 interface AddPuppyDialogProps {
   onClose: () => void;
@@ -38,6 +39,10 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
     setName(`Puppy ${puppyNumber}`);
   }, [puppyNumber]);
 
+  const handleGenderChange = (value: 'male' | 'female') => {
+    setGender(value);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -60,7 +65,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
         weight: weightValue
       }];
 
-      const newPuppy = {
+      const newPuppy: Puppy = {
         id: newId,
         name,
         gender,
@@ -108,19 +113,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Gender</Label>
-            <RadioGroup value={gender} onValueChange={(value) => setGender(value as 'male' | 'female')} className="flex space-x-4">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="male" id="male" />
-                <Label htmlFor="male">Male</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="female" id="female" />
-                <Label htmlFor="female">Female</Label>
-              </div>
-            </RadioGroup>
-          </div>
+          <PuppyGenderSelector gender={gender} onGenderChange={handleGenderChange} />
 
           <div>
             <Label htmlFor="breed">Breed</Label>

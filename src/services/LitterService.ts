@@ -1,3 +1,4 @@
+
 import { Litter, Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
@@ -58,10 +59,15 @@ class LitterService {
           
           if (notesError) console.error("Error loading puppy notes:", notesError);
 
+          // Ensure gender is one of the allowed values for our type
+          const puppyGender = (puppy.gender === 'male' || puppy.gender === 'female') 
+            ? puppy.gender as 'male' | 'female' 
+            : 'male'; // Default to male if invalid value
+
           return {
             id: puppy.id,
             name: puppy.name,
-            gender: puppy.gender === 'male' ? 'male' : 'female',
+            gender: puppyGender,
             color: puppy.color || '',
             markings: puppy.markings,
             birthWeight: puppy.birth_weight,
@@ -329,13 +335,18 @@ class LitterService {
       if (!puppy.weightLog) puppy.weightLog = [];
       if (!puppy.heightLog) puppy.heightLog = [];
       
+      // Ensure the gender is one of the allowed values
+      const puppyGender = (puppy.gender === 'male' || puppy.gender === 'female') 
+        ? puppy.gender 
+        : 'male'; // Default to male if invalid value
+      
       // Insert puppy into Supabase
       const { data, error } = await supabase
         .from('puppies')
         .insert({
           id: puppy.id,
           name: puppy.name,
-          gender: puppy.gender,
+          gender: puppyGender,
           color: puppy.color,
           markings: puppy.markings,
           birth_weight: puppy.birthWeight,
@@ -420,12 +431,17 @@ class LitterService {
       if (!updatedPuppy.weightLog) updatedPuppy.weightLog = [];
       if (!updatedPuppy.heightLog) updatedPuppy.heightLog = [];
       
+      // Ensure the gender is one of the allowed values
+      const puppyGender = (updatedPuppy.gender === 'male' || updatedPuppy.gender === 'female') 
+        ? updatedPuppy.gender 
+        : 'male'; // Default to male if invalid value
+      
       // Update puppy in Supabase
       const { error } = await supabase
         .from('puppies')
         .update({
           name: updatedPuppy.name,
-          gender: updatedPuppy.gender,
+          gender: puppyGender,
           color: updatedPuppy.color,
           markings: updatedPuppy.markings,
           birth_weight: updatedPuppy.birthWeight,
