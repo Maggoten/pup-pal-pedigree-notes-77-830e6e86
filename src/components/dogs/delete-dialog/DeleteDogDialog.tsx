@@ -1,11 +1,13 @@
 
+import React, { useState } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
 
 interface DeleteDogDialogProps {
   dogName: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
+  onConfirm: () => Promise<boolean>;
 }
 
 const DeleteDogDialog: React.FC<DeleteDogDialogProps> = ({
@@ -14,6 +16,23 @@ const DeleteDogDialog: React.FC<DeleteDogDialogProps> = ({
   onOpenChange,
   onConfirm,
 }) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    
+    try {
+      const success = await onConfirm();
+      if (success) {
+        onOpenChange(false);
+      }
+    } catch (error) {
+      console.error("Error deleting dog:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -24,12 +43,23 @@ const DeleteDogDialog: React.FC<DeleteDogDialogProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
           <AlertDialogAction 
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.preventDefault();
+              handleConfirmDelete();
+            }}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            disabled={isDeleting}
           >
-            Delete
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              'Delete'
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

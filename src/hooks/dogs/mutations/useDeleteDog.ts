@@ -9,19 +9,32 @@ export function useDeleteDog(userId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteDog,
-    onSuccess: (_, deletedId) => {
+    mutationFn: async (dogId: string) => {
+      console.log('Starting dog deletion process in useDeleteDog:', dogId);
+      const result = await deleteDog(dogId);
+      console.log('Dog deletion completed, result:', result);
+      return { dogId, result };
+    },
+    onSuccess: ({ dogId }) => {
+      console.log('Dog deletion successful in mutation, updating cache for ID:', dogId);
+      
+      // Update the query cache
       queryClient.setQueryData(['dogs', userId], (oldData: Dog[] = []) => {
-        return oldData.filter(dog => dog.id !== deletedId);
+        const filteredDogs = oldData.filter(dog => dog.id !== dogId);
+        console.log(`Removed dog ${dogId} from cache. Old count: ${oldData.length}, New count: ${filteredDogs.length}`);
+        return filteredDogs;
       });
+      
+      // Invalidate and refetch to ensure UI is in sync
+      queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
       
       toast({
         title: "Dog removed",
         description: "Dog has been removed successfully.",
       });
     },
-    onError: (err) => {
-      console.error('Dog deletion error:', err);
+    onError: (err, dogId) => {
+      console.error('Dog deletion error in mutation:', err, 'Dog ID:', dogId);
       const errorMessage = err instanceof Error ? err.message : 'Failed to remove dog';
       toast({
         title: "Error removing dog",

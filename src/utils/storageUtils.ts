@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { StorageError } from '@supabase/storage-js';
@@ -13,7 +14,6 @@ const BUCKET_NAME = 'Dog Photos';
 // Check if bucket exists and is accessible
 const checkBucketExists = async (): Promise<boolean> => {
   try {
-    // First check if user has a valid session
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !sessionData.session) {
       console.error('Storage bucket check failed: No active session', sessionError);

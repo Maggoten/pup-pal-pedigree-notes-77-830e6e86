@@ -117,9 +117,32 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
   };
 
   const handleDelete = async () => {
-    const success = await removeDog(dog.id);
-    if (success) {
-      setActiveDog(null);
+    console.log('Deletion requested for dog:', dog.id, dog.name);
+    try {
+      const success = await removeDog(dog.id);
+      console.log('Deletion result:', success);
+      
+      if (success) {
+        console.log('Deletion successful, navigating back to list');
+        setActiveDog(null);
+        return true;
+      } else {
+        console.error('Deletion failed with no error thrown');
+        toast({
+          title: "Deletion failed",
+          description: "Could not delete dog. Please try again.",
+          variant: "destructive"
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error('Error in handleDelete:', error);
+      toast({
+        title: "Deletion error",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive"
+      });
+      return false;
     }
   };
 
