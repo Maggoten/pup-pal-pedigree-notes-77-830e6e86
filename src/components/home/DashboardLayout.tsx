@@ -6,7 +6,6 @@ import DashboardHero from './DashboardHero';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { DogsProvider } from '@/context/DogsContext';
 import PageLayout from '@/components/PageLayout';
-import AddDogButton from '@/components/AddDogButton';
 import BreedingStats from '@/components/BreedingStats';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import { addDays, subDays } from 'date-fns';
@@ -15,13 +14,11 @@ import { User } from '@/types/auth';
 interface DashboardLayoutProps {
   user: User | null;
   activePregnancies: ActivePregnancy[];
-  onAddDogClick: () => void;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
   user, 
-  activePregnancies, 
-  onAddDogClick 
+  activePregnancies
 }) => {
   // Get the personalized username
   const username = useMemo(() => {
@@ -99,8 +96,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           </div>
         </div>
       </PageLayout>
-        
-      <AddDogButton onClick={onAddDogClick} />
     </DogsProvider>
   );
 };
