@@ -12,41 +12,37 @@ import {
   getEventColor 
 } from '@/services/CalendarEventService';
 import { useAuth } from '@/hooks/useAuth';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const useCalendarEvents = (dogs: Dog[]) => {
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasError, setHasError] = useState<boolean>(false);
   const [hasMigrated, setHasMigrated] = useState<boolean>(false);
-  const [lastFetchTimestamp, setLastFetchTimestamp] = useState<number>(0);
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   
-  // Consolidated fetch function with debouncing protection
-  const fetchCalendarData = useCallback(async () => {
-    if (!user) {
-      setIsLoading(false);
-      return;
+  // Handle migration once per session
+  const migrateEventsIfNeeded = useCallback(async () => {
+    if (!hasMigrated && user) {
+      console.log("[Calendar] Starting data migration check...");
+      await migrateCalendarEventsFromLocalStorage(dogs);
+      setHasMigrated(true);
+      console.log("[Calendar] Migration completed");
     }
-    
-    // Prevent multiple rapid fetch requests (debounce)
-    const now = Date.now();
-    if (now - lastFetchTimestamp < 2000) {
-      console.log("[Calendar] Debounced rapid calendar fetch request");
-      return;
-    }
-    
-    setLastFetchTimestamp(now);
-    setIsLoading(true);
-    setHasError(false);
-    
-    try {
+  }, [hasMigrated, user, dogs]);
+  
+  // Use React Query for calendar events
+  const { 
+    data: calendarEvents = [],
+    isLoading,
+    error: fetchError
+  } = useQuery({
+    queryKey: ['calendar-events', user?.id, dogs.length],
+    queryFn: async () => {
+      if (!user) return [];
+      
       console.log("[Calendar] Loading calendar events for user:", user.id);
       
-      // Only migrate once per session
-      if (!hasMigrated) {
-        await migrateCalendarEventsFromLocalStorage(dogs);
-        setHasMigrated(true);
-      }
+      // Ensure migration happens before fetching
+      await migrateEventsIfNeeded();
       
       // Fetch custom events from Supabase
       const customEvents = await fetchCalendarEvents();
@@ -64,100 +60,172 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       }));
       console.log("[Calendar] Generated heat events:", heatEvents.length);
       
-      // Set all events at once to prevent multiple renders
-      setCalendarEvents([...heatEvents, ...customEvents]);
-    } catch (error) {
-      console.error("[Calendar] Error loading calendar events:", error);
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user, dogs, hasMigrated, lastFetchTimestamp]);
+      // Return all events at once
+      return [...heatEvents, ...customEvents];
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    retry: 1, // Only retry once to prevent excessive attempts
+    refetchOnMount: true,
+    refetchOnWindowFocus: false // Prevent refetching when window regains focus
+  });
   
-  // Initial fetch & refetch on dependencies change
-  useEffect(() => {
-    fetchCalendarData();
-  }, [fetchCalendarData]);
-  
-  // Function to get events for a specific date
+  // Memoize getEventsForDate to reduce re-renders
   const getEventsForDate = useCallback((date: Date) => {
-    return calendarEvents.filter(event => 
+    return (calendarEvents || []).filter(event => 
       new Date(event.date).toDateString() === date.toDateString()
     );
   }, [calendarEvents]);
   
-  // Function to add a new event
-  const handleAddEvent = async (data: AddEventFormValues) => {
-    if (!user) {
+  // Add event mutation
+  const addEventMutation = useMutation({
+    mutationFn: async (data: AddEventFormValues) => {
+      if (!user) throw new Error('User not authenticated');
+      return await addEventToSupabase(data, dogs);
+    },
+    onMutate: async (data) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['calendar-events', user?.id, dogs.length] });
+      
+      // No optimistic update because we need the server-generated ID
+      return { submitted: true };
+    },
+    onError: (error) => {
+      console.error("[Calendar] Error adding event:", error);
+    },
+    onSuccess: () => {
+      console.log("[Calendar] Event added successfully");
+    },
+    onSettled: () => {
+      // Always refetch after mutation completes
+      queryClient.invalidateQueries({ queryKey: ['calendar-events', user?.id, dogs.length] });
+    }
+  });
+  
+  // Edit event mutation
+  const editEventMutation = useMutation({
+    mutationFn: async ({ eventId, data }: { eventId: string, data: AddEventFormValues }) => {
+      return await updateEventInSupabase(eventId, data, dogs);
+    },
+    onMutate: async ({ eventId, data }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['calendar-events', user?.id, dogs.length] });
+      
+      // Snapshot the previous value
+      const previousEvents = queryClient.getQueryData(['calendar-events', user?.id, dogs.length]);
+      
+      // Optimistically update
+      queryClient.setQueryData(['calendar-events', user?.id, dogs.length], (oldEvents: CalendarEvent[] = []) => {
+        return oldEvents.map(event => {
+          if (event.id === eventId && event.type === 'custom') {
+            return { 
+              ...event,
+              title: data.title,
+              date: data.date,
+              time: data.time,
+              notes: data.notes,
+              dogId: data.dogId
+            };
+          }
+          return event;
+        });
+      });
+      
+      return { previousEvents };
+    },
+    onError: (err, { eventId }, context) => {
+      console.error(`[Calendar] Error editing event ${eventId}:`, err);
+      // Rollback to the snapshot on error
+      if (context?.previousEvents) {
+        queryClient.setQueryData(['calendar-events', user?.id, dogs.length], context.previousEvents);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['calendar-events', user?.id, dogs.length] });
+    }
+  });
+  
+  // Delete event mutation
+  const deleteEventMutation = useMutation({
+    mutationFn: async (eventId: string) => {
+      return await deleteEventFromSupabase(eventId);
+    },
+    onMutate: async (eventId) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['calendar-events', user?.id, dogs.length] });
+      
+      // Snapshot the previous value
+      const previousEvents = queryClient.getQueryData(['calendar-events', user?.id, dogs.length]);
+      
+      // Optimistically update
+      queryClient.setQueryData(['calendar-events', user?.id, dogs.length], (oldEvents: CalendarEvent[] = []) => {
+        return oldEvents.filter(event => !(event.id === eventId && event.type === 'custom'));
+      });
+      
+      return { previousEvents };
+    },
+    onError: (err, eventId, context) => {
+      console.error(`[Calendar] Error deleting event ${eventId}:`, err);
+      // Rollback to the snapshot on error
+      if (context?.previousEvents) {
+        queryClient.setQueryData(['calendar-events', user?.id, dogs.length], context.previousEvents);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['calendar-events', user?.id, dogs.length] });
+    }
+  });
+  
+  // Wrapper functions
+  const handleAddEvent = async (data: AddEventFormValues): Promise<boolean> => {
+    try {
+      await addEventMutation.mutateAsync(data);
+      return true;
+    } catch {
       return false;
     }
-    
-    try {
-      const newEvent = await addEventToSupabase(data, dogs);
-      
-      if (newEvent) {
-        setCalendarEvents(prevEvents => [...prevEvents, newEvent]);
-        return true;
-      }
-    } catch (error) {
-      console.error("[Calendar] Error adding event:", error);
-    }
-    
-    return false;
   };
   
-  // Function to edit an event
-  const handleEditEvent = async (eventId: string, data: AddEventFormValues) => {
+  const handleEditEvent = async (eventId: string, data: AddEventFormValues): Promise<boolean> => {
     // Check if it's a custom event (only custom events can be edited)
-    const eventToEdit = calendarEvents.find(event => event.id === eventId);
-    
+    const eventToEdit = calendarEvents?.find(event => event.id === eventId);
     if (!eventToEdit || eventToEdit.type !== 'custom') {
       return false;
     }
     
     try {
-      const updatedEvent = await updateEventInSupabase(eventId, data, dogs);
-      
-      if (updatedEvent) {
-        setCalendarEvents(prevEvents => 
-          prevEvents.map(event => event.id === eventId ? updatedEvent : event)
-        );
-        return true;
-      }
-    } catch (error) {
-      console.error("[Calendar] Error editing event:", error);
+      await editEventMutation.mutateAsync({ eventId, data });
+      return true;
+    } catch {
+      return false;
     }
-    
-    return false;
   };
   
-  // Function to delete an event
-  const handleDeleteEvent = async (eventId: string) => {
+  const handleDeleteEvent = async (eventId: string): Promise<boolean> => {
     // Check if it's a custom event (only custom events can be deleted)
-    const eventToDelete = calendarEvents.find(event => event.id === eventId);
-    
+    const eventToDelete = calendarEvents?.find(event => event.id === eventId);
     if (!eventToDelete || eventToDelete.type !== 'custom') {
       return false;
     }
     
     try {
-      const success = await deleteEventFromSupabase(eventId);
-      
-      if (success) {
-        setCalendarEvents(prevEvents => 
-          prevEvents.filter(event => event.id !== eventId)
-        );
-        return true;
-      }
-    } catch (error) {
-      console.error("[Calendar] Error deleting event:", error);
+      await deleteEventMutation.mutateAsync(eventId);
+      return true;
+    } catch {
+      return false;
     }
-    
-    return false;
   };
   
+  // Manual refresh function
+  const refreshCalendarData = () => {
+    queryClient.invalidateQueries({ queryKey: ['calendar-events', user?.id, dogs.length] });
+  };
+  
+  // Error handling
+  const hasError = !!fetchError;
+  
   return {
-    calendarEvents,
+    calendarEvents: calendarEvents || [],
     isLoading,
     hasError,
     getEventsForDate,
@@ -165,6 +233,6 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     editEvent: handleEditEvent,
     deleteEvent: handleDeleteEvent,
     getEventColor,
-    refreshCalendarData: fetchCalendarData
+    refreshCalendarData
   };
 };

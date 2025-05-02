@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { Card } from '@/components/ui/card';
 import { useDogs } from '@/context/DogsContext';
 import CalendarContent from './calendar/CalendarContent';
@@ -22,7 +22,8 @@ interface BreedingCalendarProps {
   eventsData?: CalendarEventsData; // Optional because we might fetch data here
 }
 
-const BreedingCalendar: React.FC<BreedingCalendarProps> = ({ eventsData }) => {
+// Use memo to prevent unnecessary re-renders
+const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) => {
   const { dogs } = useDogs();
   
   // If no events data is provided, we need to fetch it - for backward compatibility
@@ -92,6 +93,8 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = ({ eventsData }) => {
       </div>
     </Card>
   );
-};
+});
+
+BreedingCalendar.displayName = 'BreedingCalendar';
 
 export default BreedingCalendar;

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import ReminderItem from './ReminderItem';
 import EmptyReminders from './EmptyReminders';
 import { Reminder } from '@/types/reminders';
@@ -15,7 +15,8 @@ interface RemindersListProps {
   showDelete?: boolean;
 }
 
-const RemindersList: React.FC<RemindersListProps> = ({ 
+// Use memo to prevent unnecessary re-renders
+const RemindersList: React.FC<RemindersListProps> = memo(({ 
   reminders, 
   onComplete, 
   onDelete,
@@ -24,12 +25,13 @@ const RemindersList: React.FC<RemindersListProps> = ({
 }) => {
   const navigate = useNavigate();
   
-  if (reminders.length === 0) {
+  // Early return if no reminders
+  if (!reminders || reminders.length === 0) {
     return <EmptyReminders />;
   }
 
   return (
-    <div className="space-y-0">
+    <div className="space-y-0 transition-opacity duration-200">
       <div className="divide-y divide-primary/5">
         {reminders.map((reminder) => (
           <ReminderItem
@@ -51,6 +53,8 @@ const RemindersList: React.FC<RemindersListProps> = ({
       </div>
     </div>
   );
-};
+});
+
+RemindersList.displayName = 'RemindersList';
 
 export default RemindersList;

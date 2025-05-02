@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BellRing, PawPrint, Loader2 } from 'lucide-react';
 import RemindersList from './reminders/RemindersList';
@@ -18,7 +18,8 @@ interface BreedingRemindersProps {
   remindersData?: RemindersData;
 }
 
-const BreedingReminders: React.FC<BreedingRemindersProps> = ({ remindersData }) => {
+// Use memo to prevent unnecessary re-renders
+const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersData }) => {
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
   
   // Use provided data or empty defaults
@@ -118,6 +119,8 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = ({ remindersData }) 
       />
     </>
   );
-};
+});
+
+BreedingReminders.displayName = 'BreedingReminders';
 
 export default BreedingReminders;
