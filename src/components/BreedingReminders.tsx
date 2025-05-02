@@ -1,11 +1,12 @@
 
 import React, { useState, memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BellRing, PawPrint, Loader2 } from 'lucide-react';
+import { BellRing, PawPrint, Loader2, Bell } from 'lucide-react';
 import RemindersList from './reminders/RemindersList';
 import RemindersDialog from './reminders/RemindersDialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Reminder } from '@/types/reminders';
+import { Button } from './ui/button';
 
 interface RemindersData {
   reminders: Reminder[];
@@ -30,14 +31,38 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
     handleMarkComplete = () => {} 
   } = remindersData || {};
   
-  // Take only the top 3 high priority reminders for compact view
+  // First prioritize active high priority reminders
   const highPriorityReminders = reminders
-    .filter(r => r.priority === 'high')
+    .filter(r => r.priority === 'high' && !r.isCompleted)
     .slice(0, 3);
   
-  const displayReminders = highPriorityReminders.length > 0 ? 
-    highPriorityReminders : 
-    reminders.slice(0, 3);
+  // Then medium priority reminders if we need more
+  const mediumPriorityReminders = reminders
+    .filter(r => r.priority === 'medium' && !r.isCompleted)
+    .slice(0, 3 - highPriorityReminders.length);
+    
+  // Finally low priority if needed
+  const lowPriorityReminders = reminders
+    .filter(r => r.priority === 'low' && !r.isCompleted)
+    .slice(0, 3 - highPriorityReminders.length - mediumPriorityReminders.length);
+  
+  // Combine all reminders in priority order
+  const displayReminders = [
+    ...highPriorityReminders,
+    ...mediumPriorityReminders,
+    ...lowPriorityReminders
+  ];
+  
+  // If no active reminders, show completed ones
+  if (displayReminders.length === 0 && reminders.length > 0) {
+    const completedReminders = reminders
+      .filter(r => r.isCompleted)
+      .slice(0, 3);
+    
+    displayReminders.push(...completedReminders);
+  }
+  
+  const hasReminders = displayReminders.length > 0;
   
   return (
     <>
@@ -60,7 +85,9 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
             Breeding Reminders
           </CardTitle>
           <CardDescription>
-            Important tasks and upcoming events
+            {hasReminders 
+              ? "Important tasks and upcoming events" 
+              : "All tasks completed - great job!"}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0 flex flex-col flex-grow overflow-hidden">
@@ -88,12 +115,15 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
               </div>
               
               <div className="p-3 text-center mt-auto flex-shrink-0">
-                <button 
+                <Button
+                  variant="ghost"
+                  size="sm" 
                   onClick={() => setRemindersDialogOpen(true)}
-                  className="text-xs text-primary hover:text-primary/70 font-medium"
+                  className="text-xs text-primary hover:text-primary/70 font-medium flex items-center gap-1"
                 >
-                  View All Reminders
-                </button>
+                  <Bell className="h-3 w-3" />
+                  View All Reminders {reminders.length > 0 && `(${reminders.length})`}
+                </Button>
               </div>
             </>
           )}

@@ -30,10 +30,19 @@ const RemindersList: React.FC<RemindersListProps> = memo(({
     return <EmptyReminders />;
   }
 
+  // Split reminders into active and completed
+  const activeReminders = reminders.filter(r => !r.isCompleted);
+  const completedReminders = reminders.filter(r => r.isCompleted);
+  
+  // If in compact mode, prioritize showing active reminders
+  const displayReminders = compact 
+    ? [...activeReminders, ...completedReminders].slice(0, 3) 
+    : [...activeReminders, ...completedReminders];
+
   return (
     <div className="space-y-0 transition-opacity duration-200">
       <div className="divide-y divide-primary/5">
-        {reminders.map((reminder) => (
+        {displayReminders.map((reminder) => (
           <ReminderItem
             key={reminder.id}
             id={reminder.id}
