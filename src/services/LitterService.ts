@@ -1,4 +1,3 @@
-
 import { Litter, Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
@@ -32,38 +31,76 @@ class LitterService {
         return this.loadFromLocalStorage();
       }
 
-      // Map Supabase data to our Litter type
-      return litters.map(litter => ({
-        id: litter.id,
-        name: litter.name,
-        dateOfBirth: litter.date_of_birth,
-        sireId: litter.sire_id || '',
-        damId: litter.dam_id || '',
-        sireName: litter.sire_name,
-        damName: litter.dam_name,
-        puppies: (litter.puppies || []).map(puppy => ({
-          id: puppy.id,
-          name: puppy.name,
-          gender: puppy.gender === 'male' ? 'male' : 'female',
-          color: puppy.color || '',
-          markings: puppy.markings,
-          birthWeight: puppy.birth_weight,
-          currentWeight: puppy.current_weight,
-          sold: puppy.sold || false,
-          reserved: puppy.reserved || false,
-          newOwner: puppy.new_owner,
-          collar: puppy.collar,
-          microchip: puppy.microchip,
-          breed: puppy.breed,
-          imageUrl: puppy.image_url,
-          birthDateTime: puppy.birth_date_time,
-          notes: [],
-          weightLog: [],
-          heightLog: []
-        })),
-        archived: litter.archived || false,
-        user_id: litter.user_id
+      // Now fetch weight and height logs for each puppy
+      const littersWithDetailedPuppies = await Promise.all(litters.map(async litter => {
+        const puppiesWithDetails = await Promise.all((litter.puppies || []).map(async puppy => {
+          // Fetch weight logs
+          const { data: weightLogs, error: weightError } = await supabase
+            .from('puppy_weight_logs')
+            .select('*')
+            .eq('puppy_id', puppy.id);
+          
+          if (weightError) console.error("Error loading weight logs:", weightError);
+          
+          // Fetch height logs
+          const { data: heightLogs, error: heightError } = await supabase
+            .from('puppy_height_logs')
+            .select('*')
+            .eq('puppy_id', puppy.id);
+          
+          if (heightError) console.error("Error loading height logs:", heightError);
+          
+          // Fetch notes
+          const { data: notes, error: notesError } = await supabase
+            .from('puppy_notes')
+            .select('*')
+            .eq('puppy_id', puppy.id);
+          
+          if (notesError) console.error("Error loading puppy notes:", notesError);
+
+          return {
+            id: puppy.id,
+            name: puppy.name,
+            gender: puppy.gender === 'male' ? 'male' : 'female',
+            color: puppy.color || '',
+            markings: puppy.markings,
+            birthWeight: puppy.birth_weight,
+            currentWeight: puppy.current_weight,
+            sold: puppy.sold || false,
+            reserved: puppy.reserved || false,
+            newOwner: puppy.new_owner,
+            collar: puppy.collar,
+            microchip: puppy.microchip,
+            breed: puppy.breed,
+            imageUrl: puppy.image_url,
+            birthDateTime: puppy.birth_date_time,
+            notes: notes || [],
+            weightLog: weightLogs ? weightLogs.map(log => ({
+              date: log.date,
+              weight: log.weight
+            })) : [],
+            heightLog: heightLogs ? heightLogs.map(log => ({
+              date: log.date,
+              height: log.height
+            })) : []
+          };
+        }));
+
+        return {
+          id: litter.id,
+          name: litter.name,
+          dateOfBirth: litter.date_of_birth,
+          sireId: litter.sire_id || '',
+          damId: litter.dam_id || '',
+          sireName: litter.sire_name,
+          damName: litter.dam_name,
+          puppies: puppiesWithDetails,
+          archived: litter.archived || false,
+          user_id: litter.user_id
+        };
       }));
+
+      return littersWithDetailedPuppies;
     } catch (error) {
       console.error("Error in loadLitters:", error);
       return this.loadFromLocalStorage();
@@ -281,6 +318,8 @@ class LitterService {
    */
   async addPuppy(litterId: string, puppy: Puppy): Promise<Litter[]> {
     try {
+      console.log("Adding puppy to litter:", litterId, puppy);
+      
       // Initialize the notes array if it doesn't exist
       if (!puppy.notes) {
         puppy.notes = [];
@@ -290,7 +329,7 @@ class LitterService {
       if (!puppy.weightLog) puppy.weightLog = [];
       if (!puppy.heightLog) puppy.heightLog = [];
       
-      // Insert into Supabase
+      // Insert puppy into Supabase
       const { data, error } = await supabase
         .from('puppies')
         .insert({
@@ -318,6 +357,22 @@ class LitterService {
         throw error;
       }
 
+      // Add initial weight log if birthWeight exists
+      if (puppy.birthWeight && puppy.birthDateTime) {
+        const birthDate = new Date(puppy.birthDateTime).toISOString();
+        const { error: weightError } = await supabase
+          .from('puppy_weight_logs')
+          .insert({
+            puppy_id: puppy.id,
+            date: birthDate,
+            weight: puppy.birthWeight
+          });
+        
+        if (weightError) {
+          console.error("Error adding initial weight log:", weightError);
+        }
+      }
+
       // Update in localStorage as backup
       const litters = this.loadFromLocalStorage();
       const updatedLitters = litters.map(litter => {
@@ -331,6 +386,7 @@ class LitterService {
       });
       this.saveLitters(updatedLitters);
 
+      // Return the updated litters
       return await this.loadLitters();
     } catch (error) {
       console.error("Error in addPuppy:", error);
@@ -364,7 +420,7 @@ class LitterService {
       if (!updatedPuppy.weightLog) updatedPuppy.weightLog = [];
       if (!updatedPuppy.heightLog) updatedPuppy.heightLog = [];
       
-      // Update in Supabase
+      // Update puppy in Supabase
       const { error } = await supabase
         .from('puppies')
         .update({
@@ -389,6 +445,62 @@ class LitterService {
       if (error) {
         console.error("Error updating puppy in Supabase:", error);
         throw error;
+      }
+
+      // Handle weight logs
+      for (const weightLog of updatedPuppy.weightLog) {
+        // Check if this log already exists
+        const { data: existingLog } = await supabase
+          .from('puppy_weight_logs')
+          .select('*')
+          .eq('puppy_id', updatedPuppy.id)
+          .eq('date', weightLog.date)
+          .maybeSingle();
+          
+        if (existingLog) {
+          // Update existing log
+          await supabase
+            .from('puppy_weight_logs')
+            .update({ weight: weightLog.weight })
+            .eq('id', existingLog.id);
+        } else {
+          // Insert new log
+          await supabase
+            .from('puppy_weight_logs')
+            .insert({
+              puppy_id: updatedPuppy.id,
+              date: weightLog.date,
+              weight: weightLog.weight
+            });
+        }
+      }
+
+      // Handle height logs
+      for (const heightLog of updatedPuppy.heightLog) {
+        // Check if this log already exists
+        const { data: existingLog } = await supabase
+          .from('puppy_height_logs')
+          .select('*')
+          .eq('puppy_id', updatedPuppy.id)
+          .eq('date', heightLog.date)
+          .maybeSingle();
+          
+        if (existingLog) {
+          // Update existing log
+          await supabase
+            .from('puppy_height_logs')
+            .update({ height: heightLog.height })
+            .eq('id', existingLog.id);
+        } else {
+          // Insert new log
+          await supabase
+            .from('puppy_height_logs')
+            .insert({
+              puppy_id: updatedPuppy.id,
+              date: heightLog.date,
+              height: heightLog.height
+            });
+        }
       }
 
       // Update in localStorage as backup

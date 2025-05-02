@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -31,7 +32,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
   const [birthWeight, setBirthWeight] = useState<string>('');
   const [timeOfBirth, setTimeOfBirth] = useState<string>('');
   const [dateOfBirth, setDateOfBirth] = useState<Date>(defaultDob);
-  const [breed, setBreed] = useState<string>('');
+  const [breed, setBreed] = useState<string>(damBreed);
   
   useEffect(() => {
     setName(`Puppy ${puppyNumber}`);
@@ -41,28 +42,39 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
     e.preventDefault();
 
     try {
+      // Create a datetime for birth
       let birthDateTime = new Date(dateOfBirth);
       if (timeOfBirth) {
         const [hours, minutes] = timeOfBirth.split(':').map(Number);
         birthDateTime.setHours(hours, minutes);
       }
 
+      // Generate a unique ID using UUID-like format
+      const newId = `puppy-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      
+      const weightValue = birthWeight ? parseFloat(birthWeight) : 0;
+      
+      // Create a weight log entry for birth weight
+      const initialWeightLog = [{
+        date: dateOfBirth.toISOString().split('T')[0],
+        weight: weightValue
+      }];
+
       const newPuppy = {
-        id: Date.now().toString(),
+        id: newId,
         name,
         gender,
         color,
         breed,
-        birthWeight: birthWeight ? parseFloat(birthWeight) : 0,
+        birthWeight: weightValue,
         birthDateTime: birthDateTime.toISOString(),
         imageUrl: '',
-        weightLog: [
-          { date: dateOfBirth.toISOString().split('T')[0], weight: birthWeight ? parseFloat(birthWeight) : 0 }
-        ],
+        weightLog: initialWeightLog,
         heightLog: [],
         notes: []
       };
 
+      console.log("Adding new puppy:", newPuppy);
       onAddPuppy(newPuppy);
     } catch (error) {
       toast({
@@ -92,6 +104,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
               onChange={(e) => setName(e.target.value)} 
               placeholder="Puppy name"
               className="bg-white border-greige-300"
+              required
             />
           </div>
 
