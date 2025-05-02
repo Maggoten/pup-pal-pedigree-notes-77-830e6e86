@@ -11,9 +11,14 @@ export function useDeleteDog(userId: string | undefined) {
   return useMutation({
     mutationFn: async (dogId: string) => {
       console.log('Starting dog deletion process in useDeleteDog:', dogId);
-      const result = await deleteDog(dogId);
-      console.log('Dog deletion completed, result:', result);
-      return { dogId, result };
+      try {
+        const result = await deleteDog(dogId);
+        console.log('Dog deletion completed, result:', result);
+        return { dogId, result };
+      } catch (error) {
+        console.error('Error in deletion mutation function:', error);
+        throw error; // Re-throw to be caught by onError handler
+      }
     },
     onSuccess: ({ dogId }) => {
       console.log('Dog deletion successful in mutation, updating cache for ID:', dogId);
@@ -36,6 +41,7 @@ export function useDeleteDog(userId: string | undefined) {
     onError: (err, dogId) => {
       console.error('Dog deletion error in mutation:', err, 'Dog ID:', dogId);
       const errorMessage = err instanceof Error ? err.message : 'Failed to remove dog';
+      
       toast({
         title: "Error removing dog",
         description: errorMessage,

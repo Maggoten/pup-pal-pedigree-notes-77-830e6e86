@@ -17,17 +17,25 @@ const DeleteDogDialog: React.FC<DeleteDogDialogProps> = ({
   onConfirm,
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
+    setError(null);
     
     try {
+      console.log(`Initiating deletion of dog "${dogName}" from dialog`);
       const success = await onConfirm();
+      console.log(`Deletion result for ${dogName}:`, success);
+      
       if (success) {
         onOpenChange(false);
+      } else {
+        setError("Deletion failed without throwing an error. Please try again.");
       }
     } catch (error) {
       console.error("Error deleting dog:", error);
+      setError(error instanceof Error ? error.message : "An unexpected error occurred");
     } finally {
       setIsDeleting(false);
     }
@@ -38,8 +46,15 @@ const DeleteDogDialog: React.FC<DeleteDogDialogProps> = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete {dogName} from your records.
+          <AlertDialogDescription className="space-y-2">
+            <p>
+              This action cannot be undone. This will permanently delete {dogName} from your records.
+            </p>
+            {error && (
+              <p className="text-destructive font-medium">
+                Error: {error}
+              </p>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
