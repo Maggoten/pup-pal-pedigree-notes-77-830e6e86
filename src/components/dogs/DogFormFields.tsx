@@ -13,7 +13,6 @@ export const dogFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   breed: z.string().min(1, "Breed is required"),
   dateOfBirth: z.instanceof(Date, { message: "Date of birth is required" }),
-  birthYear: z.number().int().min(1990).max(new Date().getFullYear()),
   gender: z.enum(["male", "female"] as const),
   color: z.string().optional(),
   registrationNumber: z.string().optional(),

@@ -30,7 +30,6 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
   onOpenChange
 }) => {
   const { addDog, loading } = useDogs();
-  const currentYear = new Date().getFullYear();
   
   const form = useForm<z.infer<typeof dogFormSchema>>({
     resolver: zodResolver(dogFormSchema),
@@ -39,7 +38,6 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
       breed: '',
       gender: 'female',
       dateOfBirth: new Date(),
-      birthYear: currentYear,
       color: '',
       registrationNumber: '',
       notes: '',
@@ -52,15 +50,11 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
     if (loading) return;
     
     try {
-      // Ensure the dateOfBirth year matches the selected birthYear
-      const birthDate = new Date(data.dateOfBirth);
-      birthDate.setFullYear(data.birthYear);
-      
       const result = await addDog({
         name: data.name,
         breed: data.breed,
         gender: data.gender,
-        dateOfBirth: birthDate.toISOString().split('T')[0],
+        dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
         color: data.color,
         registrationNumber: data.registrationNumber,
         notes: data.notes || '',
