@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarIcon } from 'lucide-react';
@@ -51,6 +51,9 @@ const HeatDatePicker: React.FC<HeatDatePickerProps> = ({ form }) => {
               />
             </PopoverContent>
           </Popover>
+          <FormDescription className="text-xs text-muted-foreground">
+            Date may be automatically calculated based on heat history.
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}
