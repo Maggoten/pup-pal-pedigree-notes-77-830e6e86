@@ -29,15 +29,22 @@ const checkBucketExists = async (): Promise<boolean> => {
     const timeoutId = setTimeout(() => controller.abort(), 5000);
     
     try {
-      // Pass the signal as an option to the list method
-      const { data, error } = await supabase.storage
+      // Using a timeout-based approach with Promise.race instead
+      const listPromise = supabase.storage
         .from(BUCKET_NAME)
-        .list('', { 
-          limit: 1,
-          signal: controller.signal // Correct way to pass the abort signal
-        });
+        .list('', { limit: 1 });
+      
+      const result = await Promise.race([
+        listPromise,
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Bucket check timed out')), 5000);
+        })
+      ]);
       
       clearTimeout(timeoutId);
+      
+      // TypeScript now knows this is the result of the storage call
+      const { data, error } = result as Awaited<typeof listPromise>;
       
       if (error) {
         console.error('Error checking bucket existence:', error);
@@ -121,14 +128,22 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
     const timeoutId = setTimeout(() => controller.abort(), 10000);
     
     try {
-      // Pass the signal as an option to the remove method
-      const { error: deleteError } = await supabase.storage
+      // Using a timeout-based approach with Promise.race instead
+      const removePromise = supabase.storage
         .from(BUCKET_NAME)
-        .remove([storagePath], {
-          signal: controller.signal // Correct way to pass the abort signal
-        });
+        .remove([storagePath]);
+      
+      const result = await Promise.race([
+        removePromise,
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Delete operation timed out')), 10000);
+        })
+      ]);
   
       clearTimeout(timeoutId);
+      
+      // TypeScript now knows this is the result of the storage call
+      const { error: deleteError } = result as Awaited<typeof removePromise>;
   
       if (deleteError) {
         console.error('Delete error:', {
