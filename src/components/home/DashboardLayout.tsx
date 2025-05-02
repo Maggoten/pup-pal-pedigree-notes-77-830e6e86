@@ -146,7 +146,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         />
         
         <div className="space-y-8 transition-all duration-300 ease-in-out">
-          {/* Top row: Calendar (2/3) and Reminders (1/3) */}
+          {/* Calendar and Reminders row */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
             {/* Calendar taking 2/3 of the width */}
             <div className="lg:col-span-2 h-full">
@@ -209,8 +209,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </div>
           </div>
           
-          {/* Bottom row: Annual Breeding Statistics (full width) */}
-          <div className="h-auto mb-6">
+          {/* Bottom row: Annual Breeding Statistics in a separate row (full width) */}
+          <div>
             {!isDataReady ? (
               <div className="h-[350px] rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
                 <div className="flex flex-col h-full">
