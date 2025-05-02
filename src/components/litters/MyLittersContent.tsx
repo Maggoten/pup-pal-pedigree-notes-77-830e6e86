@@ -143,7 +143,7 @@ const MyLittersContent: React.FC = () => {
       </div>
       
       {selectedLitter && (
-        <div className="mt-6 animate-fade-in space-y-6">
+        <div className="mt-6 animate-fade-in">
           <div className="bg-greige-50 rounded-lg border border-greige-300 p-4">
             <SelectedLitterSection
               litter={selectedLitter}
