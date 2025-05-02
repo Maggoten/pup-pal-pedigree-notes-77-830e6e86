@@ -12,6 +12,7 @@ import { addDays, subDays } from 'date-fns';
 import { User } from '@/types/auth';
 import { useDogs } from '@/context/DogsContext';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import { AddEventFormValues } from '@/components/calendar/types';
 
 interface DashboardLayoutProps {
   user: User | null;
@@ -44,6 +45,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     isLoading: calendarLoading,
     hasError: calendarError
   } = useCalendarEvents(dogs);
+  
+  // Wrapper functions to adapt async functions to the synchronous interface
+  // These will always return true synchronously while the async operations happen in the background
+  const handleAddEvent = (data: AddEventFormValues) => {
+    addEvent(data); // We don't await this
+    return true; // Return synchronously for UI feedback
+  };
+  
+  const handleEditEvent = (eventId: string, data: AddEventFormValues) => {
+    editEvent(eventId, data); // We don't await this
+    return true; // Return synchronously for UI feedback
+  };
   
   // Get the personalized username
   const username = useMemo(() => {
@@ -128,9 +141,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   eventsData={{
                     getEventsForDate,
                     getEventColor,
-                    addEvent,
+                    addEvent: handleAddEvent,
                     deleteEvent,
-                    editEvent,
+                    editEvent: handleEditEvent,
                     isLoading: calendarLoading,
                     hasError: calendarError
                   }}

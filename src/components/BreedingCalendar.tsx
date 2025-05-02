@@ -11,9 +11,9 @@ import { AddEventFormValues } from './calendar/types';
 interface CalendarEventsData {
   getEventsForDate: (date: Date) => any[];
   getEventColor: (type: string) => string;
-  addEvent: (data: AddEventFormValues) => boolean;
+  addEvent: (data: AddEventFormValues) => Promise<boolean> | boolean;
   deleteEvent: (eventId: string) => void;
-  editEvent: (eventId: string, data: AddEventFormValues) => boolean;
+  editEvent: (eventId: string, data: AddEventFormValues) => Promise<boolean> | boolean;
   isLoading: boolean;
   hasError: boolean;
 }
@@ -39,13 +39,25 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = ({ eventsData }) => {
   
   // Create wrapper functions to handle the async nature of the original functions
   const handleAddEvent = (data: AddEventFormValues) => {
-    addEvent(data);
-    return true; // Return true synchronously for UI feedback
+    const result = addEvent(data);
+    // Handle both synchronous boolean returns and Promises
+    if (result instanceof Promise) {
+      result.catch(err => {
+        console.error("Error adding event:", err);
+      });
+    }
+    return true; // Always return true synchronously for UI feedback
   };
   
   const handleEditEvent = (eventId: string, data: AddEventFormValues) => {
-    editEvent(eventId, data);
-    return true; // Return true synchronously for UI feedback
+    const result = editEvent(eventId, data);
+    // Handle both synchronous boolean returns and Promises
+    if (result instanceof Promise) {
+      result.catch(err => {
+        console.error("Error editing event:", err);
+      });
+    }
+    return true; // Always return true synchronously for UI feedback
   };
   
   return (
