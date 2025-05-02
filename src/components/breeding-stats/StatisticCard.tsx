@@ -41,7 +41,7 @@ const StatisticCard: React.FC<StatisticCardProps> = ({ type, value, label }) => 
   );
 };
 
-// Export the PieChart icon separately for reuse in the header
-StatisticCard.PieChartIcon = () => <PieChart className="h-5 w-5" />;
-
 export default StatisticCard;
+
+// Export a separate component for the PieChart icon so it can be used elsewhere
+export const PieChartIcon: React.FC = () => <PieChart className="h-5 w-5" />;

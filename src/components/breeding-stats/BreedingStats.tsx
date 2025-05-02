@@ -1,9 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import StatisticCard from './StatisticCard';
+import StatisticCard, { PieChartIcon } from './StatisticCard';
 import HealthDisplay from './HealthDisplay';
 import YearSelector from './YearSelector';
 import useBreedingStats from './useBreedingStats';
@@ -16,7 +14,7 @@ const BreedingStats = () => {
       <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 flex flex-row items-center justify-between flex-shrink-0">
         <div>
           <CardTitle className="flex items-center gap-2 text-primary">
-            <StatisticCard.PieChartIcon />
+            <PieChartIcon />
             Annual Breeding Statistics
           </CardTitle>
           <CardDescription>

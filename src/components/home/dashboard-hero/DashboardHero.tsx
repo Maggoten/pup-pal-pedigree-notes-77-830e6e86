@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
-import { PawPrint } from 'lucide-react';
 import MetricCardGrid from './MetricCardGrid';
 import RemindersDialog from '@/components/reminders/RemindersDialog';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import WelcomeHeader from './WelcomeHeader';
+import DecorativePawprints from './DecorativePawprints';
 
 interface DashboardHeroProps {
   username: string;
