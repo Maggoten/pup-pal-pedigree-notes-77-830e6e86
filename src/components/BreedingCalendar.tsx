@@ -62,15 +62,15 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
   };
   
   return (
-    <Card className="border-greige-300 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full bg-greige-50 flex flex-col">
-      <div className="h-full flex flex-col flex-grow">
+    <Card className="border-greige-300 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 bg-greige-50 flex flex-col">
+      <div className="flex flex-col">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center h-full py-12 flex-grow">
+          <div className="flex flex-col items-center justify-center py-12">
             <Loader2 className="h-10 w-10 animate-spin text-primary mb-3" />
             <span className="text-muted-foreground">Loading calendar events...</span>
           </div>
         ) : hasError ? (
-          <div className="p-6 h-full flex items-center justify-center flex-grow">
+          <div className="p-6 flex items-center justify-center">
             <Alert variant="destructive">
               <AlertDescription>
                 There was a problem loading your calendar events. Please try refreshing the page.
@@ -78,7 +78,7 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
             </Alert>
           </div>
         ) : (
-          <div className="h-full flex-grow">
+          <div>
             <CalendarContent
               dogs={dogs}
               getEventsForDate={getEventsForDate}

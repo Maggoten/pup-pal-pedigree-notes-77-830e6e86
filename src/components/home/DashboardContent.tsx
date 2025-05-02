@@ -31,55 +31,57 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   remindersProps 
 }) => {
   return (
-    <div className="transition-all duration-300 ease-in-out space-y-8">
-      {/* Calendar and Reminders row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
-        {/* Calendar taking 2/3 of the width */}
-        <div className="lg:col-span-2 h-full">
-          {!isDataReady ? (
-            <div className="h-full rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
-              <div className="flex flex-col h-full">
-                <Skeleton className="h-14 w-full mb-4" />
-                <div className="grid grid-cols-7 gap-2 mb-4">
-                  {Array(7).fill(0).map((_, i) => (
-                    <Skeleton key={i} className="h-6 w-full" />
-                  ))}
-                </div>
-                <div className="grid grid-cols-7 gap-2 flex-grow">
-                  {Array(35).fill(0).map((_, i) => (
-                    <Skeleton key={i} className="h-full w-full min-h-[80px]" />
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <BreedingCalendar eventsData={calendarProps} />
-          )}
-        </div>
-        
-        {/* Reminders taking 1/3 of the width */}
-        <div className="lg:col-span-1 h-full">
-          {!isDataReady ? (
-            <div className="h-full rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
-              <div className="flex flex-col h-full">
-                <Skeleton className="h-14 w-full mb-4" />
-                <Skeleton className="h-4 w-3/4 mb-8" />
-                {Array(5).fill(0).map((_, i) => (
-                  <div key={i} className="mb-4">
-                    <Skeleton className="h-8 w-full mb-2" />
-                    <Skeleton className="h-4 w-3/4" />
+    <div className="space-y-12 pb-12">
+      {/* Calendar and Reminders section */}
+      <section>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Calendar taking 2/3 of the width */}
+          <div className="lg:col-span-2">
+            {!isDataReady ? (
+              <div className="rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
+                <div className="flex flex-col">
+                  <Skeleton className="h-14 w-full mb-4" />
+                  <div className="grid grid-cols-7 gap-2 mb-4">
+                    {Array(7).fill(0).map((_, i) => (
+                      <Skeleton key={i} className="h-6 w-full" />
+                    ))}
                   </div>
-                ))}
+                  <div className="grid grid-cols-7 gap-2">
+                    {Array(35).fill(0).map((_, i) => (
+                      <Skeleton key={i} className="h-20 w-full" />
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          ) : (
-            <BreedingReminders remindersData={remindersProps} />
-          )}
+            ) : (
+              <BreedingCalendar eventsData={calendarProps} />
+            )}
+          </div>
+          
+          {/* Reminders taking 1/3 of the width */}
+          <div className="lg:col-span-1">
+            {!isDataReady ? (
+              <div className="rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
+                <div className="flex flex-col">
+                  <Skeleton className="h-14 w-full mb-4" />
+                  <Skeleton className="h-4 w-3/4 mb-8" />
+                  {Array(5).fill(0).map((_, i) => (
+                    <div key={i} className="mb-4">
+                      <Skeleton className="h-8 w-full mb-2" />
+                      <Skeleton className="h-4 w-3/4" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <BreedingReminders remindersData={remindersProps} />
+            )}
+          </div>
         </div>
-      </div>
+      </section>
       
-      {/* Annual Breeding Statistics in a separate row - without fixed height */}
-      <div className="mb-16">
+      {/* Annual Breeding Statistics in a separate section */}
+      <section>
         {!isDataReady ? (
           <div className="rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
             <div className="flex flex-col">
@@ -99,7 +101,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         ) : (
           <BreedingStats />
         )}
-      </div>
+      </section>
     </div>
   );
 };

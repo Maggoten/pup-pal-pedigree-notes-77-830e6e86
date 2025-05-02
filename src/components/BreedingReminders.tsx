@@ -66,13 +66,13 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
   
   return (
     <>
-      <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md h-full relative bg-greige-50 flex flex-col">
+      <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md relative bg-greige-50 flex flex-col">
         {/* Decorative background elements */}
         <div className="absolute top-1 right-1 opacity-5 pointer-events-none">
           <PawPrint className="h-40 w-40 text-primary transform rotate-12" />
         </div>
         
-        <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 relative flex-shrink-0">
+        <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 relative">
           <div className="absolute top-6 right-6 pointer-events-none">
             <div className="relative">
               <div className="absolute animate-ping w-3 h-3 rounded-full bg-primary/30"></div>
@@ -90,14 +90,14 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
               : "All tasks completed - great job!"}
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-0 flex flex-col flex-grow overflow-hidden">
+        <CardContent className="p-0 flex flex-col overflow-hidden">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center flex-grow py-12">
+            <div className="flex flex-col items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
               <span className="text-sm text-muted-foreground">Loading reminders...</span>
             </div>
           ) : hasError ? (
-            <div className="p-4 flex-grow">
+            <div className="p-4">
               <Alert variant="destructive">
                 <AlertDescription>
                   There was a problem loading your reminders. Please try again later.
@@ -106,7 +106,7 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
             </div>
           ) : (
             <>
-              <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+              <div className="overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
                 <RemindersList 
                   reminders={displayReminders} 
                   onComplete={handleMarkComplete} 
@@ -114,7 +114,7 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
                 />
               </div>
               
-              <div className="p-3 text-center mt-auto flex-shrink-0">
+              <div className="p-3 text-center">
                 <Button
                   variant="ghost"
                   size="sm" 

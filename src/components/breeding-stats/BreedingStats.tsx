@@ -30,7 +30,7 @@ const BreedingStats = () => {
         />
       </CardHeader>
       
-      <CardContent className="p-8 md:p-10 space-y-14">
+      <CardContent className="p-8 md:p-10 space-y-12">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
           <StatisticCard 
             type="litters"
