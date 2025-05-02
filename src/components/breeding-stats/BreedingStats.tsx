@@ -10,8 +10,8 @@ const BreedingStats = () => {
   const { stats, selectedYear, currentYear, handlePreviousYear, handleNextYear } = useBreedingStats();
 
   return (
-    <Card className="border-blue-500 border-4 shadow-sm overflow-hidden transition-shadow hover:shadow-md bg-greige-50 flex flex-col">
-      <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 flex flex-row items-center justify-between flex-shrink-0">
+    <Card className="shadow-sm transition-shadow hover:shadow-md bg-greige-50">
+      <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-6 flex flex-row items-center justify-between">
         <div>
           <CardTitle className="flex items-center gap-2 text-primary">
             <PieChartIcon />
@@ -30,8 +30,8 @@ const BreedingStats = () => {
         />
       </CardHeader>
       
-      <CardContent className="p-6 md:p-8 flex flex-col gap-y-10">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 border-4 border-green-500">
+      <CardContent className="p-8 md:p-10 space-y-14">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
           <StatisticCard 
             type="litters"
             value={stats.totalLitters}

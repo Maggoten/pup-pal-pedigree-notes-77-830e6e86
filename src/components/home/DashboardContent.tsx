@@ -78,11 +78,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         </div>
       </div>
       
-      {/* Annual Breeding Statistics in a separate row - with debugging border */}
-      <div className="border-4 border-red-500 mb-10">
+      {/* Annual Breeding Statistics in a separate row - without fixed height */}
+      <div className="mb-16">
         {!isDataReady ? (
-          <div className="h-full min-h-[500px] rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
-            <div className="flex flex-col h-full">
+          <div className="rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
+            <div className="flex flex-col">
               <Skeleton className="h-14 w-full mb-6" />
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 {Array(4).fill(0).map((_, i) => (
