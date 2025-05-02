@@ -104,9 +104,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   }, []);
   
   const remindersSummary = useMemo(() => {
-    const highPriorityCount = reminders.filter(r => r.priority === 'high').length;
+    const highPriorityCount = reminders.filter(r => r.priority === 'high' && !r.isCompleted).length;
     return {
-      count: reminders.length,
+      count: reminders.filter(r => !r.isCompleted).length,
       highPriority: highPriorityCount
     };
   }, [reminders]);
@@ -136,7 +136,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       title="" 
       description=""
     >
-      <div className="space-y-4">
+      <div className="space-y-6">
         <DashboardHero 
           username={username}
           reminders={remindersSummary}
@@ -145,7 +145,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           recentLitters={recentLittersData}
         />
         
-        <div className="space-y-6 transition-all duration-300 ease-in-out">
+        <div className="space-y-8 transition-all duration-300 ease-in-out">
           {/* Top row: Calendar (2/3) and Reminders (1/3) */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
             {/* Calendar taking 2/3 of the width */}
@@ -209,10 +209,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </div>
           </div>
           
-          {/* Bottom row: Annual Breeding Stats (full width) */}
-          <div className="h-[350px]">
+          {/* Bottom row: Annual Breeding Statistics (full width) */}
+          <div className="h-auto mb-6">
             {!isDataReady ? (
-              <div className="h-full rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
+              <div className="h-[350px] rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
                 <div className="flex flex-col h-full">
                   <Skeleton className="h-14 w-full mb-6" />
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-6">

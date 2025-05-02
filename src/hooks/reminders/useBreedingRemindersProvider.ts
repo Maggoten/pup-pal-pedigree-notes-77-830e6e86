@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Reminder, CustomReminderInput } from '@/types/reminders';
 import { useAuth } from '@/hooks/useAuth';
@@ -88,10 +87,13 @@ export const useBreedingRemindersProvider = () => {
   // Use mutations for state changes with optimistic updates
   const markCompleteReminderMutation = useMutation({
     mutationFn: async ({ id, isCompleted }: { id: string, isCompleted: boolean }) => {
+      console.log(`[Reminders Provider] Marking reminder ${id} as ${isCompleted ? 'completed' : 'not completed'}`);
+      
       // Only update custom reminders in database (those with UUIDs)
       if (id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
         return await updateReminder(id, isCompleted);
       }
+      // For system-generated reminders, we still return success but don't persist to DB
       return true;
     },
     onMutate: async ({ id, isCompleted }) => {
@@ -115,17 +117,20 @@ export const useBreedingRemindersProvider = () => {
         queryClient.setQueryData(['reminders', user?.id, dogs.length], context.previousReminders);
       }
     },
-    onSuccess: (_, { isCompleted }) => {
+    onSuccess: (result, { id, isCompleted }) => {
+      console.log(`[Reminders Provider] Successfully marked reminder ${id} as ${isCompleted ? 'completed' : 'not completed'}`);
+      
+      // Keep the optimistic update in the query cache
+      queryClient.setQueryData(['reminders', user?.id, dogs.length], (old: Reminder[] = []) => 
+        old.map(r => r.id === id ? {...r, isCompleted} : r)
+      );
+      
       toast({
         title: isCompleted ? "Reminder Completed" : "Reminder Reopened",
         description: isCompleted 
           ? "This task has been marked as completed."
           : "This task has been marked as not completed."
       });
-    },
-    onSettled: () => {
-      // Refetch after error or success to ensure data consistency
-      queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length] });
     }
   });
   
@@ -187,10 +192,6 @@ export const useBreedingRemindersProvider = () => {
         title: "Reminder Deleted",
         description: "The reminder has been deleted successfully."
       });
-    },
-    onSettled: () => {
-      // Refetch to ensure data consistency
-      queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length] });
     }
   });
   

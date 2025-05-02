@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dog } from '@/types/dogs';
@@ -13,11 +12,14 @@ import {
 } from '@/services/CalendarEventService';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useBreedingReminders } from '@/hooks/reminders';
+import { format } from 'date-fns';
 
 export const useCalendarEvents = (dogs: Dog[]) => {
   const [hasMigrated, setHasMigrated] = useState<boolean>(false);
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { reminders } = useBreedingReminders();
   
   // Handle migration once per session
   const migrateEventsIfNeeded = useCallback(async () => {
@@ -29,13 +31,31 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     }
   }, [hasMigrated, user, dogs]);
   
+  // Convert reminders to calendar events
+  const reminderToCalendarEvents = useCallback(() => {
+    if (!reminders || reminders.length === 0) return [];
+    
+    return reminders.map(reminder => ({
+      id: `reminder-${reminder.id}`,
+      title: reminder.title,
+      date: reminder.dueDate,
+      type: reminder.type,
+      dogId: reminder.relatedId,
+      dogName: "", // We don't have the dog name in the reminder, but the calendar can show without it
+      time: format(reminder.dueDate, 'HH:mm'),
+      notes: reminder.description,
+      isCompleted: reminder.isCompleted,
+      priority: reminder.priority
+    }));
+  }, [reminders]);
+  
   // Use React Query for calendar events
   const { 
     data: calendarEvents = [],
     isLoading,
     error: fetchError
   } = useQuery({
-    queryKey: ['calendar-events', user?.id, dogs.length],
+    queryKey: ['calendar-events', user?.id, dogs.length, reminders.length],
     queryFn: async () => {
       if (!user) return [];
       
@@ -60,8 +80,12 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       }));
       console.log("[Calendar] Generated heat events:", heatEvents.length);
       
+      // Get reminder events
+      const reminderEvents = reminderToCalendarEvents();
+      console.log("[Calendar] Generated reminder events:", reminderEvents.length);
+      
       // Return all events at once
-      return [...heatEvents, ...customEvents];
+      return [...heatEvents, ...customEvents, ...reminderEvents];
     },
     enabled: !!user,
     staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
