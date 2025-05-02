@@ -24,18 +24,32 @@ const checkBucketExists = async (): Promise<boolean> => {
     console.log('Checking if bucket exists:', BUCKET_NAME);
     
     // Try to list files in the bucket to verify access
-    const { data, error } = await supabase.storage
-      .from(BUCKET_NAME)
-      .list('', { limit: 1 })
-      .abortSignal(AbortSignal.timeout(5000)); // Add a timeout
+    // Create an abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     
-    if (error) {
-      console.error('Error checking bucket existence:', error);
+    try {
+      // Pass the signal as an option to the list method
+      const { data, error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .list('', { 
+          limit: 1,
+          signal: controller.signal // Correct way to pass the abort signal
+        });
+      
+      clearTimeout(timeoutId);
+      
+      if (error) {
+        console.error('Error checking bucket existence:', error);
+        return false;
+      }
+      
+      console.log('Bucket exists, can list files:', data);
+      return true;
+    } catch (listError) {
+      console.error('Error or timeout when listing bucket contents:', listError);
       return false;
     }
-    
-    console.log('Bucket exists, can list files:', data);
-    return true;
   } catch (err) {
     console.error('Error in bucket verification:', err);
     return false;
@@ -107,10 +121,12 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
     const timeoutId = setTimeout(() => controller.abort(), 10000);
     
     try {
+      // Pass the signal as an option to the remove method
       const { error: deleteError } = await supabase.storage
         .from(BUCKET_NAME)
-        .remove([storagePath])
-        .abortSignal(controller.signal);
+        .remove([storagePath], {
+          signal: controller.signal // Correct way to pass the abort signal
+        });
   
       clearTimeout(timeoutId);
   
