@@ -12,6 +12,7 @@ import useLitterFilteredData from '@/hooks/useLitterFilteredData';
 import SelectedLitterSection from './SelectedLitterSection';
 import LitterFilterHeader from './filters/LitterFilterHeader';
 import LitterTabContent from './tabs/LitterTabContent';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const MyLittersContent: React.FC = () => {
   const {
@@ -22,6 +23,7 @@ const MyLittersContent: React.FC = () => {
     showAddLitterDialog,
     setShowAddLitterDialog,
     selectedLitter,
+    isLoading,
     handleAddLitter,
     handleUpdateLitter,
     handleDeleteLitter,
@@ -65,6 +67,24 @@ const MyLittersContent: React.FC = () => {
     setFilterYear(null);
     setSearchQuery('');
   };
+  
+  if (isLoading) {
+    return (
+      <PageLayout 
+        title="My Litters" 
+        description="Track your litters and individual puppies"
+        icon={<PawPrint className="h-6 w-6" />}
+      >
+        <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 pb-6">
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-40 w-full" />
+            <Skeleton className="h-40 w-full" />
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
   
   return (
     <PageLayout 

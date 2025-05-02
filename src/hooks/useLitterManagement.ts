@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Litter, Puppy } from '@/types/breeding';
 import { litterService } from '@/services/LitterService';
-import { plannedLittersService } from '@/services/PlannedLitterService';
+import { plannedLittersService } from '@/services/planned-litters/plannedLittersService';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -15,28 +15,39 @@ export function useLitterManagement() {
   const [archivedLitters, setArchivedLitters] = useState<Litter[]>([]);
   const [selectedLitterId, setSelectedLitterId] = useState<string | null>(null);
   const [plannedLitters, setPlannedLitters] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   // UI state
   const [showAddLitterDialog, setShowAddLitterDialog] = useState(false);
   
   // Load litters on component mount
   useEffect(() => {
-    const loadLitters = () => {
-      const active = litterService.getActiveLitters();
-      const archived = litterService.getArchivedLitters();
-      
-      // Sort litters by date (newest first)
-      const sortByDate = (a: Litter, b: Litter) => 
-        new Date(b.dateOfBirth).getTime() - new Date(a.dateOfBirth).getTime();
-      
-      setActiveLitters(active.sort(sortByDate));
-      setArchivedLitters(archived.sort(sortByDate));
-      
-      // Select the newest active litter by default
-      if (active.length > 0 && !selectedLitterId) {
-        setSelectedLitterId(active[0].id);
-      } else if (active.length === 0 && archived.length > 0) {
-        setSelectedLitterId(archived[0].id);
+    const loadLitters = async () => {
+      setIsLoading(true);
+      try {
+        const active = await litterService.getActiveLitters();
+        const archived = await litterService.getArchivedLitters();
+        
+        // Sort litters by date (newest first)
+        const sortByDate = (a: Litter, b: Litter) => 
+          new Date(b.dateOfBirth).getTime() - new Date(a.dateOfBirth).getTime();
+        
+        const sortedActive = active.sort(sortByDate);
+        const sortedArchived = archived.sort(sortByDate);
+        
+        setActiveLitters(sortedActive);
+        setArchivedLitters(sortedArchived);
+        
+        // Select the newest active litter by default
+        if (sortedActive.length > 0 && !selectedLitterId) {
+          setSelectedLitterId(sortedActive[0].id);
+        } else if (sortedActive.length === 0 && sortedArchived.length > 0) {
+          setSelectedLitterId(sortedArchived[0].id);
+        }
+      } catch (error) {
+        console.error('Error loading litters:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -56,7 +67,7 @@ export function useLitterManagement() {
   }, []);
   
   // Handlers for litter operations
-  const handleAddLitter = (newLitter: Litter) => {
+  const handleAddLitter = async (newLitter: Litter) => {
     newLitter.puppies = [];
     newLitter.archived = false;
     
@@ -65,94 +76,160 @@ export function useLitterManagement() {
       newLitter.user_id = user.id;
     }
     
-    litterService.addLitter(newLitter);
-    setActiveLitters(litterService.getActiveLitters());
-    setSelectedLitterId(newLitter.id);
-    
-    toast({
-      title: "Litter Added",
-      description: `${newLitter.name} has been added successfully.`
-    });
-  };
-  
-  const handleUpdateLitter = (updatedLitter: Litter) => {
-    litterService.updateLitter(updatedLitter);
-    setActiveLitters(litterService.getActiveLitters());
-    setArchivedLitters(litterService.getArchivedLitters());
-    
-    toast({
-      title: "Litter Updated",
-      description: `${updatedLitter.name} has been updated successfully.`
-    });
-  };
-  
-  const handleAddPuppy = (newPuppy: Puppy) => {
-    if (!selectedLitterId) return;
-    
-    // Add the puppy without modifying its name
-    litterService.addPuppy(selectedLitterId, newPuppy);
-    setActiveLitters(litterService.getActiveLitters());
-    setArchivedLitters(litterService.getArchivedLitters());
-    
-    toast({
-      title: "Puppy Added",
-      description: `${newPuppy.name} has been added to the litter.`
-    });
-  };
-  
-  const handleUpdatePuppy = (updatedPuppy: Puppy) => {
-    if (!selectedLitterId) return;
-    
-    // Update the puppy without modifying its name
-    litterService.updatePuppy(selectedLitterId, updatedPuppy);
-    setActiveLitters(litterService.getActiveLitters());
-    setArchivedLitters(litterService.getArchivedLitters());
-  };
-
-  const handleDeletePuppy = (puppyId: string) => {
-    if (!selectedLitterId) return;
-    
-    litterService.deletePuppy(selectedLitterId, puppyId);
-    setActiveLitters(litterService.getActiveLitters());
-    setArchivedLitters(litterService.getArchivedLitters());
-  };
-
-  const handleDeleteLitter = (litterId: string) => {
-    if (confirm('Are you sure you want to delete this litter? This action cannot be undone.')) {
-      litterService.deleteLitter(litterId);
-      setActiveLitters(litterService.getActiveLitters());
-      setArchivedLitters(litterService.getArchivedLitters());
-      
-      // Select new litter if the deleted one was selected
-      if (selectedLitterId === litterId) {
-        if (activeLitters.length > 0) {
-          setSelectedLitterId(activeLitters[0].id);
-        } else if (archivedLitters.length > 0) {
-          setSelectedLitterId(archivedLitters[0].id);
-        } else {
-          setSelectedLitterId(null);
-        }
-      }
+    try {
+      const updatedLitters = await litterService.addLitter(newLitter);
+      setActiveLitters(await litterService.getActiveLitters());
+      setSelectedLitterId(newLitter.id);
       
       toast({
-        title: "Litter Deleted",
-        description: "The litter has been deleted successfully.",
+        title: "Litter Added",
+        description: `${newLitter.name} has been added successfully.`
+      });
+    } catch (error) {
+      console.error('Error adding litter:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add litter. Please try again.",
         variant: "destructive"
       });
     }
   };
   
-  const handleArchiveLitter = (litterId: string, archive: boolean) => {
-    litterService.toggleArchiveLitter(litterId, archive);
-    setActiveLitters(litterService.getActiveLitters());
-    setArchivedLitters(litterService.getArchivedLitters());
+  const handleUpdateLitter = async (updatedLitter: Litter) => {
+    try {
+      await litterService.updateLitter(updatedLitter);
+      setActiveLitters(await litterService.getActiveLitters());
+      setArchivedLitters(await litterService.getArchivedLitters());
+      
+      toast({
+        title: "Litter Updated",
+        description: `${updatedLitter.name} has been updated successfully.`
+      });
+    } catch (error) {
+      console.error('Error updating litter:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update litter. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const handleAddPuppy = async (newPuppy: Puppy) => {
+    if (!selectedLitterId) return;
     
-    toast({
-      title: archive ? "Litter Archived" : "Litter Activated",
-      description: archive 
-        ? "The litter has been moved to the archive." 
-        : "The litter has been moved to active litters."
-    });
+    try {
+      // Add the puppy without modifying its name
+      await litterService.addPuppy(selectedLitterId, newPuppy);
+      setActiveLitters(await litterService.getActiveLitters());
+      setArchivedLitters(await litterService.getArchivedLitters());
+      
+      toast({
+        title: "Puppy Added",
+        description: `${newPuppy.name} has been added to the litter.`
+      });
+    } catch (error) {
+      console.error('Error adding puppy:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add puppy. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const handleUpdatePuppy = async (updatedPuppy: Puppy) => {
+    if (!selectedLitterId) return;
+    
+    try {
+      // Update the puppy without modifying its name
+      await litterService.updatePuppy(selectedLitterId, updatedPuppy);
+      setActiveLitters(await litterService.getActiveLitters());
+      setArchivedLitters(await litterService.getArchivedLitters());
+    } catch (error) {
+      console.error('Error updating puppy:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update puppy. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeletePuppy = async (puppyId: string) => {
+    if (!selectedLitterId) return;
+    
+    try {
+      await litterService.deletePuppy(selectedLitterId, puppyId);
+      setActiveLitters(await litterService.getActiveLitters());
+      setArchivedLitters(await litterService.getArchivedLitters());
+    } catch (error) {
+      console.error('Error deleting puppy:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete puppy. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteLitter = async (litterId: string) => {
+    if (confirm('Are you sure you want to delete this litter? This action cannot be undone.')) {
+      try {
+        await litterService.deleteLitter(litterId);
+        setActiveLitters(await litterService.getActiveLitters());
+        setArchivedLitters(await litterService.getArchivedLitters());
+        
+        // Select new litter if the deleted one was selected
+        if (selectedLitterId === litterId) {
+          const active = await litterService.getActiveLitters();
+          const archived = await litterService.getArchivedLitters();
+          
+          if (active.length > 0) {
+            setSelectedLitterId(active[0].id);
+          } else if (archived.length > 0) {
+            setSelectedLitterId(archived[0].id);
+          } else {
+            setSelectedLitterId(null);
+          }
+        }
+        
+        toast({
+          title: "Litter Deleted",
+          description: "The litter has been deleted successfully.",
+          variant: "destructive"
+        });
+      } catch (error) {
+        console.error('Error deleting litter:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete litter. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+  
+  const handleArchiveLitter = async (litterId: string, archive: boolean) => {
+    try {
+      await litterService.toggleArchiveLitter(litterId, archive);
+      setActiveLitters(await litterService.getActiveLitters());
+      setArchivedLitters(await litterService.getArchivedLitters());
+      
+      toast({
+        title: archive ? "Litter Archived" : "Litter Activated",
+        description: archive 
+          ? "The litter has been moved to the archive." 
+          : "The litter has been moved to active litters."
+      });
+    } catch (error) {
+      console.error('Error archiving litter:', error);
+      toast({
+        title: "Error",
+        description: "Failed to archive litter. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
   
   // Get available years for filtering
@@ -186,6 +263,7 @@ export function useLitterManagement() {
     showAddLitterDialog,
     setShowAddLitterDialog,
     selectedLitter,
+    isLoading,
     handleAddLitter,
     handleUpdateLitter,
     handleAddPuppy,

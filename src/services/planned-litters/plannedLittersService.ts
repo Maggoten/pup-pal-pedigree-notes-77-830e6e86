@@ -90,4 +90,3 @@ class PlannedLittersService {
 }
 
 export const plannedLittersService = new PlannedLittersService();
-
