@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Dog, Heart, PieChart, Baby, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -59,7 +60,7 @@ const BreedingStats = () => {
   };
 
   return (
-    <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md bg-greige-50 flex flex-col">
+    <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md bg-greige-50 flex flex-col mt-8">
       <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 flex flex-row items-center justify-between flex-shrink-0">
         <div>
           <CardTitle className="flex items-center gap-2 text-primary">
