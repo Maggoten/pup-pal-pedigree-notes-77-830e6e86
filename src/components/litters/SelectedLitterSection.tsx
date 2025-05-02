@@ -31,7 +31,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
 }) => {
   const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
   const [activeTab, setActiveTab] = useState('puppies');
-  const { data: dogs, isLoading } = useDogsQueries.useDogs();
+  const { data: dogs } = useDogsQueries().useDogs();
   const [damBreed, setDamBreed] = useState<string>('');
 
   // Calculate litter age in weeks
@@ -87,15 +87,16 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
 
         <TabsContent value="development" className="mt-0">
           <DevelopmentTabContent 
-            puppies={litter.puppies || []}
-            litterDob={litter.dateOfBirth}
+            litter={litter}
+            onToggleItem={() => {}}
           />
         </TabsContent>
 
         <TabsContent value="charts" className="mt-0">
           <GrowthChartsTabContent 
+            selectedPuppy={selectedPuppy}
             puppies={litter.puppies || []}
-            litterAge={litterAge}
+            onSelectPuppy={setSelectedPuppy}
           />
         </TabsContent>
       </Tabs>

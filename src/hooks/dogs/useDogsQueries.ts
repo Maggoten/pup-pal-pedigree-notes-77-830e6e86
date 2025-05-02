@@ -5,8 +5,11 @@ import { useToast } from '@/components/ui/use-toast';
 import { fetchDogs } from '@/services/dogs';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { UseDogsQueries } from './types';
+import { useAuth } from '@/hooks/useAuth';
 
-export const useDogsQueries = (userId: string | undefined): UseDogsQueries => {
+export const useDogsQueries = (): UseDogsQueries => {
+  const { user } = useAuth();
+  const userId = user?.id;
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -110,6 +113,7 @@ export const useDogsQueries = (userId: string | undefined): UseDogsQueries => {
     dogs,
     isLoading: isLoading || isInitialLoad,
     error: error ? (error instanceof Error ? error.message : 'Unknown error') : null,
-    fetchDogs: refreshDogs // Return the renamed function
+    fetchDogs: refreshDogs, // Return the renamed function
+    useDogs: () => ({ data: dogs, isLoading: isLoading || isInitialLoad, error }) // Add useDogs method
   };
 };

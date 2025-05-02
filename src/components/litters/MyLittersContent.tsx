@@ -146,7 +146,7 @@ const MyLittersContent: React.FC = () => {
         <div className="mt-6 animate-fade-in space-y-6">
           <div className="bg-greige-50 rounded-lg border border-greige-300 p-4">
             <SelectedLitterSection
-              selectedLitter={selectedLitter}
+              litter={selectedLitter}
               onUpdateLitter={handleUpdateLitter}
               onDeleteLitter={handleDeleteLitter}
               onArchiveLitter={handleArchiveLitter}
