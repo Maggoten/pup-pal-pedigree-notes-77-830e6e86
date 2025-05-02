@@ -6,7 +6,7 @@ import { Heart, AlertCircle, Loader2, Baby } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDogs } from '@/context/DogsContext';
-import { getActivePregnancies, getFirstActivePregnancy, getPregnancyDetails } from '@/services/PregnancyService';
+import { getActivePregnancies, getFirstActivePregnancy } from '@/services/PregnancyService';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/context/AuthContext';
@@ -51,24 +51,13 @@ const Pregnancy: React.FC = () => {
           return;
         }
         
-        // Determine which pregnancy to display
         let targetPregnancyId = pregnancyId;
         
-        // If no pregnancy ID in URL, use first one
+        // If no pregnancy ID in URL, redirect to the first pregnancy detail page
         if (!targetPregnancyId && pregnancies.length > 0) {
-          targetPregnancyId = pregnancies[0].id;
-        }
-        
-        // Fetch details of the selected pregnancy
-        if (targetPregnancyId) {
-          console.log(`Fetching details for pregnancy ${targetPregnancyId}`);
-          const details = await getPregnancyDetails(targetPregnancyId);
-          setSelectedPregnancy(details);
-          
-          // Update URL if needed
-          if (!pregnancyId && details) {
-            navigate(`/pregnancy/${details.id}`, { replace: true });
-          }
+          console.log("No ID in URL, redirecting to first pregnancy");
+          navigate(`/pregnancy/${pregnancies[0].id}`, { replace: true });
+          return;
         }
       } catch (error) {
         console.error("Error fetching pregnancies:", error);
@@ -95,25 +84,6 @@ const Pregnancy: React.FC = () => {
       description="Track your pregnant bitches and fetal development"
       icon={<Heart className="h-6 w-6" />}
     >
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          {selectedPregnancy && (
-            <h1 className="text-2xl font-bold text-greige-800">
-              {selectedPregnancy.femaleName}'s Pregnancy
-            </h1>
-          )}
-        </div>
-        <div className="flex gap-4">
-          <PregnancyDropdownSelector 
-            pregnancies={activePregnancies} 
-            currentPregnancyId={selectedPregnancy?.id} 
-          />
-          <Button onClick={handleAddPregnancyClick} className="bg-greige-600 hover:bg-greige-700">
-            Add Pregnancy
-          </Button>
-        </div>
-      </div>
-      
       {hasError && (
         <Alert variant="destructive" className="mb-6">
           <AlertCircle className="h-4 w-4" />
@@ -139,30 +109,11 @@ const Pregnancy: React.FC = () => {
             />
           </div>
         </div>
-      ) : selectedPregnancy ? (
-        <div className="space-y-8">
-          {/* Hero Section with Pregnancy Summary Cards */}
-          <PregnancySummaryCards
-            matingDate={selectedPregnancy.matingDate}
-            expectedDueDate={selectedPregnancy.expectedDueDate}
-            daysLeft={selectedPregnancy.daysLeft}
-          />
-          
-          {/* Full Width Pregnancy Journey Tabs */}
-          <div className="w-full">
-            <PregnancyTabs 
-              pregnancyId={selectedPregnancy.id}
-              femaleName={selectedPregnancy.femaleName}
-              matingDate={selectedPregnancy.matingDate}
-              expectedDueDate={selectedPregnancy.expectedDueDate}
-            />
-          </div>
-        </div>
       ) : (
         <div className="text-center py-12">
           <Baby className="h-12 w-12 mx-auto text-greige-400 mb-4" />
-          <h3 className="text-xl font-medium text-greige-700">No Active Pregnancy Selected</h3>
-          <p className="text-greige-500 mt-2">Please select a pregnancy from the dropdown or add a new one.</p>
+          <h3 className="text-xl font-medium text-greige-700">Redirecting to Pregnancy Details</h3>
+          <p className="text-greige-500 mt-2">You will be redirected to view pregnancy details...</p>
           <Button 
             onClick={handleAddPregnancyClick} 
             className="mt-4 bg-greige-600 hover:bg-greige-700"

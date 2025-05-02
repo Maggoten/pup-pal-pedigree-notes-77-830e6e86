@@ -1,15 +1,15 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { ChevronDown } from 'lucide-react';
-import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
+import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
+import { Dog } from 'lucide-react';
 
 interface PregnancyDropdownSelectorProps {
   pregnancies: ActivePregnancy[];
@@ -40,27 +40,32 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
-          <span className="font-medium">
-            {currentPregnancy ? `${currentPregnancy.femaleName} × ${currentPregnancy.maleName}` : 'Select Pregnancy'}
-          </span>
-          <ChevronDown className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-white">
-        {pregnancies.map(pregnancy => (
-          <DropdownMenuItem 
-            key={pregnancy.id}
-            onClick={() => handlePregnancyChange(pregnancy.id)}
-            className="cursor-pointer"
-          >
-            {pregnancy.femaleName} × {pregnancy.maleName}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center gap-2">
+      <Dog className="h-5 w-5 text-greige-600" />
+      <Select 
+        value={currentPregnancy?.id} 
+        onValueChange={handlePregnancyChange}
+      >
+        <SelectTrigger className="min-w-[200px] bg-white">
+          <SelectValue placeholder="Select a pregnancy">
+            {currentPregnancy 
+              ? `${currentPregnancy.femaleName}'s Pregnancy` 
+              : 'Select Pregnancy'}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent className="bg-white">
+          {pregnancies.map(pregnancy => (
+            <SelectItem 
+              key={pregnancy.id} 
+              value={pregnancy.id}
+              className="cursor-pointer"
+            >
+              {`${pregnancy.femaleName}'s Pregnancy`}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 };
 
