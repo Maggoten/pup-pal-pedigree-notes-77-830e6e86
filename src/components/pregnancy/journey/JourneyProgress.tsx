@@ -1,12 +1,14 @@
+
 import React from 'react';
 import { Progress } from '@/components/ui/progress';
-import { cn } from '@/lib/utils';
+
 interface JourneyProgressProps {
   currentWeek: number;
   totalWeeks: number;
   overallProgress: number;
   calculatedCurrentWeek?: number; // Add this new prop
 }
+
 const JourneyProgress: React.FC<JourneyProgressProps> = ({
   currentWeek,
   totalWeeks,
@@ -17,7 +19,9 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
 
   // Determine if we're viewing the natural current week or a selected week
   const isViewingCurrentWeek = calculatedCurrentWeek === undefined || currentWeek === calculatedCurrentWeek;
-  return <div className="mt-4 space-y-4">
+  
+  return (
+    <div className="mt-4 space-y-4">
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <h3 className="text-sm font-medium font">
@@ -29,8 +33,8 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
         </div>
         <Progress value={weekProgressPercentage} className="h-2" />
       </div>
-      
-      {/* Removed the "Symptoms Tracked" progress bar as requested */}
-    </div>;
+    </div>
+  );
 };
+
 export default JourneyProgress;

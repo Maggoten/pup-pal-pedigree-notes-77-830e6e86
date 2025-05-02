@@ -14,12 +14,12 @@ const TemperatureLog: React.FC<TemperatureLogProps> = ({ pregnancyId, femaleName
   const { temperatures, addTemperature, deleteTemperature } = useTemperatureLog(pregnancyId);
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Temperature Log</CardTitle>
+    <Card className="bg-white border-sage-200">
+      <CardHeader className="border-b border-sage-100">
+        <CardTitle className="font-le-jour">Temperature Log</CardTitle>
         <CardDescription>Track {femaleName}'s body temperature</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <div className="grid gap-6">
           <TemperatureLogForm onAddTemperature={addTemperature} />
           <TemperatureHistory 

@@ -50,23 +50,26 @@ const TemperatureLogForm: React.FC<TemperatureLogFormProps> = ({ onAddTemperatur
   };
 
   return (
-    <div className="grid gap-4 py-4 border rounded-lg p-4 bg-slate-50">
+    <div className="grid gap-4 py-4 border rounded-lg p-4 bg-greige-50">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <DatePicker 
-          date={date} 
-          setDate={setDate} 
-          label="Date" 
-        />
+        <div className="space-y-2">
+          <Label htmlFor="date">Date</Label>
+          <DatePicker 
+            date={date} 
+            setDate={setDate} 
+            label="" 
+          />
+        </div>
         
         <div className="space-y-2">
-          <Label htmlFor="temperature">Temperature (°F)</Label>
+          <Label htmlFor="temperature">Temperature (°C)</Label>
           <Input
             id="temperature"
             type="number"
             step="0.1"
             value={temperature}
             onChange={(e) => setTemperature(e.target.value)}
-            placeholder="e.g. 101.5"
+            placeholder="e.g. 38.5"
           />
         </div>
       </div>
@@ -83,7 +86,7 @@ const TemperatureLogForm: React.FC<TemperatureLogFormProps> = ({ onAddTemperatur
       
       <Button 
         onClick={handleSubmit} 
-        className="w-full md:w-auto justify-center"
+        className="w-full md:w-auto justify-center bg-sage-600 hover:bg-sage-700 text-white"
       >
         <Plus className="mr-2 h-4 w-4" /> Add Temperature
       </Button>

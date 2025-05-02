@@ -34,7 +34,7 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="journey" className="bg-greige-50 border border-greige-200 rounded-lg p-4">
+        <TabsContent value="journey" className="bg-white border border-greige-200 rounded-lg p-4">
           <PregnancyJourney
             pregnancyId={pregnancyId}
             femaleName={femaleName}
@@ -43,14 +43,14 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
           />
         </TabsContent>
         
-        <TabsContent value="temperature" className="bg-greige-50 border border-greige-200 rounded-lg p-4">
+        <TabsContent value="temperature" className="bg-white border border-greige-200 rounded-lg p-4">
           <TemperatureLog 
             pregnancyId={pregnancyId} 
             femaleName={femaleName} 
           />
         </TabsContent>
         
-        <TabsContent value="symptoms" className="bg-greige-50 border border-greige-200 rounded-lg p-4">
+        <TabsContent value="symptoms" className="bg-white border border-greige-200 rounded-lg p-4">
           <SymptomsLog 
             pregnancyId={pregnancyId} 
             femaleName={femaleName} 

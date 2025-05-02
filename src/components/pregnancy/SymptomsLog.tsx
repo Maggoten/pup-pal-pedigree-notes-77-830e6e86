@@ -14,12 +14,12 @@ const SymptomsLog: React.FC<SymptomsLogProps> = ({ pregnancyId, femaleName }) =>
   const { symptoms, addSymptom, deleteSymptom } = useSymptomLog(pregnancyId, femaleName);
   
   return (
-    <Card>
-      <CardHeader>
+    <Card className="bg-white border-sage-200">
+      <CardHeader className="border-b border-sage-100">
         <CardTitle className="font-le-jour">Notes & Symptoms</CardTitle>
         <CardDescription>Record observations during {femaleName}'s pregnancy</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <div className="grid gap-6">
           <SymptomLogForm onAddSymptom={addSymptom} />
           <SymptomHistory 

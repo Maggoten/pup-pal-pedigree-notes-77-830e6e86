@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
-import { Dog } from 'lucide-react';
 
 interface PregnancyDropdownSelectorProps {
   pregnancies: ActivePregnancy[];
@@ -40,8 +39,7 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <Dog className="h-5 w-5 text-greige-600" />
+    <div className="flex items-center">
       <Select 
         value={currentPregnancy?.id} 
         onValueChange={handlePregnancyChange}
