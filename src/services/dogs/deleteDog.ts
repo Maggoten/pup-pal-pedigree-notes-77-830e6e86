@@ -24,6 +24,33 @@ export async function deleteDog(id: string): Promise<boolean> {
       throw new Error('Could not fetch dog data for deletion');
     }
 
+    // Update pregnancies where this dog is involved to have a status of 'cancelled'
+    // First, check pregnancies where the dog is the female
+    console.log('Checking for pregnancies where dog is the female...');
+    const { error: femalePregnancyError } = await supabase
+      .from('pregnancies')
+      .update({ status: 'cancelled' })
+      .eq('female_dog_id', id)
+      .eq('status', 'active');
+
+    if (femalePregnancyError) {
+      console.error('Error updating female pregnancies:', femalePregnancyError.message);
+      // Continue with deletion anyway - we don't want to block dog deletion
+    }
+
+    // Then, check pregnancies where the dog is the male
+    console.log('Checking for pregnancies where dog is the male...');
+    const { error: malePregnancyError } = await supabase
+      .from('pregnancies')
+      .update({ status: 'cancelled' })
+      .eq('male_dog_id', id)
+      .eq('status', 'active');
+    
+    if (malePregnancyError) {
+      console.error('Error updating male pregnancies:', malePregnancyError.message);
+      // Continue with deletion anyway - we don't want to block dog deletion
+    }
+
     // Delete the dog record
     console.log('Deleting dog:', id);
     const response = await withTimeout<PostgrestResponse<DbDog>>(
