@@ -1,3 +1,4 @@
+
 import { useDogs } from '@/context/DogsContext';
 import { toast } from '@/components/ui/use-toast';
 import { useState, useEffect } from 'react';
@@ -64,8 +65,10 @@ export const useBreedingReminders = () => {
         const dogReminders = generateDogReminders(userDogs);
         console.log(`useBreedingReminders: Generated ${dogReminders.length} dog reminders`);
         
-        // Filter litter reminders for the current user
-        const litterReminders = generateLitterReminders(user.id);
+        // Get litter reminders for the current user - this now returns a Promise
+        const litterRemindersPromise = generateLitterReminders(user.id);
+        // Wait for the promise to resolve
+        const litterReminders = await litterRemindersPromise;
         console.log(`useBreedingReminders: Generated ${litterReminders.length} litter reminders`);
         
         // Generate general reminders only for the user's dogs
@@ -171,7 +174,9 @@ export const useBreedingReminders = () => {
       const updatedReminders = await fetchReminders();
       
       const dogReminders = generateDogReminders(dogs);
-      const litterReminders = generateLitterReminders(user.id);
+      // Fix: Get litter reminders and wait for the Promise to resolve
+      const litterRemindersPromise = generateLitterReminders(user.id);
+      const litterReminders = await litterRemindersPromise;
       const generalReminders = generateGeneralReminders(dogs);
       
       // Combine all reminders
@@ -192,7 +197,9 @@ export const useBreedingReminders = () => {
         const updatedReminders = await fetchReminders();
         
         const dogReminders = generateDogReminders(dogs);
-        const litterReminders = generateLitterReminders(user.id);
+        // Fix: Get litter reminders and wait for the Promise to resolve
+        const litterRemindersPromise = generateLitterReminders(user.id);
+        const litterReminders = await litterRemindersPromise;
         const generalReminders = generateGeneralReminders(dogs);
         
         setReminders([...updatedReminders, ...dogReminders, ...litterReminders, ...generalReminders]);
