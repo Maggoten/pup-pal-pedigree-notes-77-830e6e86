@@ -225,7 +225,7 @@ class LitterService {
 
       if (error) {
         console.error("Error adding litter to Supabase:", error);
-        throw error;
+        throw new Error(`Failed to add litter: ${error.message || error.toString()}`);
       }
 
       console.log("Litter added to Supabase:", newLitter);

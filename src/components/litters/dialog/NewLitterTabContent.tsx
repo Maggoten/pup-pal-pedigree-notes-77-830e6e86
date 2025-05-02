@@ -128,8 +128,10 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       // Create unique ID for new litter
       const newLitterId = `litter-${Date.now()}`;
       
-      // Format the date properly
-      const formattedDate = values.dateOfBirth.toISOString();
+      // Format the date properly - ensure we're sending an ISO string to Supabase
+      const formattedDate = values.dateOfBirth instanceof Date 
+        ? values.dateOfBirth.toISOString() 
+        : new Date(values.dateOfBirth).toISOString();
       
       const newLitter: Litter = {
         id: newLitterId,
@@ -153,8 +155,13 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       }
       
       // Use the litterService to add the litter to Supabase
-      await litterService.addLitter(newLitter);
-      console.log("Litter successfully created");
+      const result = await litterService.addLitter(newLitter);
+      
+      if (!result) {
+        throw new Error("Failed to add litter - no result returned");
+      }
+      
+      console.log("Litter successfully created:", result);
       
       // Call the onLitterAdded callback with the new litter
       onLitterAdded(newLitter);
@@ -166,9 +173,26 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       });
     } catch (error) {
       console.error("Error creating litter:", error);
+      
+      // More specific error message based on the error
+      let errorMessage = "Failed to create litter";
+      
+      if (error instanceof Error) {
+        errorMessage += `: ${error.message}`;
+        
+        // Check for Supabase specific error patterns
+        if (error.message.includes("duplicate key")) {
+          errorMessage = "A litter with this ID already exists";
+        } else if (error.message.includes("violates row level security")) {
+          errorMessage = "Permission denied. Please check your authentication";
+        } else if (error.message.includes("JWT")) {
+          errorMessage = "Your session has expired. Please log in again";
+        }
+      }
+      
       toast({
         title: "Error",
-        description: `Failed to create litter: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        description: errorMessage,
         variant: "destructive"
       });
     }
