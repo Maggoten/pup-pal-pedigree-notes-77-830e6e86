@@ -92,14 +92,14 @@ export async function deleteDog(id: string): Promise<boolean> {
       console.error('Error updating pregnancies (male references):', pregnanciesMaleError);
     }
 
-    // 4.2 Handle female dog references in pregnancies table - NEW CODE
+    // 4.2 Handle female dog references in pregnancies table
     // This is critical for female dogs that are referenced as female_dog_id in pregnancies
     console.log('Checking for pregnancies where this dog is the female...');
     const { error: pregnanciesFemaleError } = await supabase
       .from('pregnancies')
       .update({ 
         female_dog_id: null,
-        status: 'archived' // Mark as archived since the female dog is being deleted
+        status: 'terminated' // Changed from 'archived' to 'terminated' to comply with check constraint
       })
       .eq('female_dog_id', id);
       
