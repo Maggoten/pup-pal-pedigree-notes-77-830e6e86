@@ -1,21 +1,31 @@
+
 import { useAuth } from '@/context/AuthContext';
 import React, { useState } from 'react';
 import PageLayout from '@/components/PageLayout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useDogs, DogsProvider } from '@/context/DogsContext';
 import DogList from '@/components/DogList';
 import DogDetails from '@/components/dogs/DogDetails';
 import AddDogDialog from '@/components/dogs/AddDogDialog';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 
 const MyDogsContent: React.FC = () => {
   const { dogs, activeDog, loading } = useDogs();
   const [showAddDogDialog, setShowAddDogDialog] = useState(false);
+  const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   
-  const females = dogs.filter(dog => dog.gender === 'female');
-  const males = dogs.filter(dog => dog.gender === 'male');
+  // Filter dogs based on selected gender
+  const filteredDogs = genderFilter === 'all' 
+    ? dogs 
+    : dogs.filter(dog => dog.gender === genderFilter);
 
   return (
     <PageLayout 
@@ -26,7 +36,26 @@ const MyDogsContent: React.FC = () => {
         <DogDetails dog={activeDog} />
       ) : (
         <>
-          <div className="flex justify-end items-center mb-4">
+          <div className="flex justify-between items-center mb-4">
+            <div className="w-48">
+              <Select
+                value={genderFilter}
+                onValueChange={(value) => setGenderFilter(value as 'all' | 'male' | 'female')}
+              >
+                <SelectTrigger className="bg-white w-full">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="Filter by gender" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Dogs</SelectItem>
+                  <SelectItem value="male">Dogs (Males)</SelectItem>
+                  <SelectItem value="female">Bitches (Females)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
             <Button 
               onClick={() => setShowAddDogDialog(true)} 
               className="flex items-center gap-1.5"
@@ -37,40 +66,23 @@ const MyDogsContent: React.FC = () => {
             </Button>
           </div>
           
-          <Tabs defaultValue="bitches" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="bitches">Bitches</TabsTrigger>
-              <TabsTrigger value="dogs">Dogs</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="bitches" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Bitches</CardTitle>
-                  <CardDescription>
-                    Female dogs in your breeding program
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <DogList dogsList={females} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="dogs" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Dogs</CardTitle>
-                  <CardDescription>
-                    Male dogs in your breeding program
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <DogList dogsList={males} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {genderFilter === 'all' ? 'All Dogs' : 
+                 genderFilter === 'male' ? 'Dogs (Males)' : 
+                 'Bitches (Females)'}
+              </CardTitle>
+              <CardDescription>
+                {genderFilter === 'all' ? 'All dogs in your breeding program' :
+                 genderFilter === 'male' ? 'Male dogs in your breeding program' :
+                 'Female dogs in your breeding program'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DogList dogsList={filteredDogs} />
+            </CardContent>
+          </Card>
         </>
       )}
       

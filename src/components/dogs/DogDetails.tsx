@@ -42,7 +42,11 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       }
       if (values.image !== dog.image) updates.image = values.image;
       
-      const newDateOfBirth = values.dateOfBirth.toISOString().split('T')[0];
+      // Ensure the dateOfBirth year matches the selected birthYear
+      const birthDate = new Date(values.dateOfBirth);
+      birthDate.setFullYear(values.birthYear);
+      
+      const newDateOfBirth = birthDate.toISOString().split('T')[0];
       if (newDateOfBirth !== dog.dateOfBirth) {
         updates.dateOfBirth = newDateOfBirth;
       }

@@ -22,6 +22,10 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isLoad
   const transformHeatHistory = dog.heatHistory 
     ? dog.heatHistory.map(heat => ({ date: new Date(heat.date) }))
     : [];
+    
+  // Get the birth year from the dateOfBirth
+  const birthDate = new Date(dog.dateOfBirth);
+  const birthYear = birthDate.getFullYear();
 
   const form = useForm<DogFormValues>({
     resolver: zodResolver(dogFormSchema),
@@ -29,6 +33,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isLoad
       name: dog.name,
       breed: dog.breed,
       dateOfBirth: new Date(dog.dateOfBirth),
+      birthYear: birthYear,
       gender: dog.gender,
       color: dog.color,
       registrationNumber: dog.registrationNumber || '',
@@ -42,6 +47,11 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isLoad
   });
   
   const handleSubmit = (values: DogFormValues) => {
+    // Ensure the dateOfBirth year matches the selected birthYear
+    const updatedDateOfBirth = new Date(values.dateOfBirth);
+    updatedDateOfBirth.setFullYear(values.birthYear);
+    values.dateOfBirth = updatedDateOfBirth;
+    
     onSave(values);
   };
 

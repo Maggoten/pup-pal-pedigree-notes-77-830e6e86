@@ -37,9 +37,9 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
   };
 
   return (
-    <Card className="dog-card w-full h-full overflow-hidden" onClick={() => onClick(dog)}>
+    <Card className="dog-card w-full h-full flex flex-col overflow-hidden" onClick={() => onClick(dog)}>
       <CardHeader className="p-0">
-        <div className="aspect-[4/3] w-full relative">
+        <div className="aspect-square w-full relative">
           <img 
             src={imageSrc} 
             alt={dog.name} 
@@ -58,7 +58,7 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="p-4 flex-grow">
         <h3 className="font-semibold text-lg mb-1">{dog.name}</h3>
         <p className="text-sm text-muted-foreground mb-2">{dog.breed}</p>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -72,7 +72,7 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
           </div>
         )}
       </CardContent>
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="p-4 mt-auto">
         <Button variant="outline" className="w-full text-sm" onClick={(e) => {
           e.stopPropagation();
           onClick(dog);
