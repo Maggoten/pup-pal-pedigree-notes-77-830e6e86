@@ -8,16 +8,18 @@ interface PageLayoutProps {
   description?: string;
   icon?: ReactNode;
   children: ReactNode;
+  className?: string; // Added className prop
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
   title, 
   description, 
   icon, 
-  children
+  children,
+  className = "" // Default to empty string
 }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className={`min-h-screen flex flex-col bg-background ${className}`}>
       <Navbar />
       <WelcomeHeader />
       
