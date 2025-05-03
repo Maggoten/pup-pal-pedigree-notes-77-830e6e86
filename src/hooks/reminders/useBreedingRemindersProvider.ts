@@ -9,11 +9,9 @@ import {
   updateReminder,
   deleteReminder as deleteReminderFromSupabase
 } from '@/services/RemindersService';
-import { 
-  generateDogReminders, 
-  generateLitterReminders, 
-  generateGeneralReminders 
-} from '@/services/ReminderService';
+import { generateDogReminders } from '@/services/reminders/DogReminderService';
+import { generateLitterReminders } from '@/services/reminders/LitterReminderService';
+import { generateGeneralReminders } from '@/services/reminders/GeneralReminderService';
 import { useSortedReminders } from './useSortedReminders';
 import { toast } from '@/components/ui/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -56,7 +54,7 @@ export const useBreedingRemindersProvider = () => {
       
       // Use only dogs belonging to current user
       const userDogs = dogs.filter(dog => dog.owner_id === user.id);
-      console.log(`[Reminders Provider] Found ${userDogs.length} dogs belonging to user`);
+      console.log(`[Reminders Provider] Found ${userDogs.length} dogs belonging to user ${user.id}`);
       
       // Generate all reminders in sequence
       const dogReminders = userDogs.length > 0 ? generateDogReminders(userDogs) : [];

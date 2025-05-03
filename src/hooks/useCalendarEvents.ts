@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dog } from '@/types/dogs';
@@ -35,19 +36,37 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   const reminderToCalendarEvents = useCallback(() => {
     if (!reminders || reminders.length === 0) return [];
     
-    return reminders.map(reminder => ({
-      id: `reminder-${reminder.id}`,
-      title: reminder.title,
-      date: reminder.dueDate,
-      type: reminder.type,
-      dogId: reminder.relatedId,
-      dogName: "", // We don't have the dog name in the reminder, but the calendar can show without it
-      time: format(reminder.dueDate, 'HH:mm'),
-      notes: reminder.description,
-      isCompleted: reminder.isCompleted,
-      priority: reminder.priority
-    }));
-  }, [reminders]);
+    console.log("[Calendar] Converting reminders to calendar events:", reminders.length);
+    
+    const eventsList = reminders.map(reminder => {
+      console.log(`[Calendar] Converting reminder: ${reminder.id} - ${reminder.title} - type: ${reminder.type}`);
+      return {
+        id: `reminder-${reminder.id}`,
+        title: reminder.title,
+        date: reminder.dueDate,
+        type: reminder.type,
+        dogId: reminder.relatedId,
+        dogName: "", // We'll try to add the dog name below
+        time: format(reminder.dueDate, 'HH:mm'),
+        notes: reminder.description,
+        isCompleted: reminder.isCompleted,
+        priority: reminder.priority
+      };
+    });
+    
+    // Add dog names where possible
+    eventsList.forEach(event => {
+      if (event.dogId) {
+        const dog = dogs.find(d => d.id === event.dogId);
+        if (dog) {
+          event.dogName = dog.name;
+        }
+      }
+    });
+    
+    console.log(`[Calendar] Converted ${eventsList.length} reminders to calendar events`);
+    return eventsList;
+  }, [reminders, dogs]);
   
   // Use React Query for calendar events
   const { 
@@ -83,6 +102,11 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       const reminderEvents = reminderToCalendarEvents();
       console.log("[Calendar] Generated reminder events:", reminderEvents.length);
       
+      // Log all vaccination events for debugging
+      const vaccinationEvents = reminderEvents.filter(e => e.type === 'vaccination');
+      console.log(`[Calendar] Vaccination events (${vaccinationEvents.length}):`, 
+        vaccinationEvents.map(e => `${e.title} - ${new Date(e.date).toISOString()} - Dog ID: ${e.dogId}`));
+      
       // Return all events at once
       return [...heatEvents, ...customEvents, ...reminderEvents];
     },
@@ -95,9 +119,15 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   
   // Memoize getEventsForDate to reduce re-renders
   const getEventsForDate = useCallback((date: Date) => {
-    return (calendarEvents || []).filter(event => 
+    const eventsForDate = (calendarEvents || []).filter(event => 
       new Date(event.date).toDateString() === date.toDateString()
     );
+    
+    if (date.toDateString() === new Date().toDateString()) {
+      console.log("[Calendar] Events for today:", eventsForDate);
+    }
+    
+    return eventsForDate;
   }, [calendarEvents]);
   
   // Add event mutation

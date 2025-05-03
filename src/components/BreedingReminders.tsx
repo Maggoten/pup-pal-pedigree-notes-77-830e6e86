@@ -67,26 +67,49 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
     return () => clearTimeout(timer);
   }, [isLoading]);
   
+  // Log all reminders for debugging
+  useEffect(() => {
+    if (reminders.length > 0) {
+      console.log("All Reminders:", reminders.map(r => 
+        `${r.title} (${r.type}) - Due: ${r.dueDate.toISOString()} - Priority: ${r.priority} - Completed: ${r.isCompleted}`
+      ));
+      
+      // Specifically log vaccination reminders
+      const vaccinationReminders = reminders.filter(r => r.type === 'vaccination');
+      console.log(`Found ${vaccinationReminders.length} vaccination reminders:`, 
+        vaccinationReminders.map(r => `${r.title} - Due: ${r.dueDate.toISOString()} - RelatedId: ${r.relatedId}`)
+      );
+    }
+  }, [reminders]);
+  
   // Memoize the priority filtering logic to avoid recalculating on every render
   const displayReminders = React.useMemo(() => {
+    console.log("Calculating display reminders from", reminders.length, "reminders");
+    
     // First prioritize active high priority reminders
     const highPriorityReminders = reminders
       .filter(r => r.priority === 'high' && !r.isCompleted)
       .slice(0, 3);
     
+    // Ensure vaccination reminders are included if they exist
+    const vaccinationReminders = reminders
+      .filter(r => r.type === 'vaccination' && !r.isCompleted)
+      .slice(0, 3 - highPriorityReminders.length);
+      
     // Then medium priority reminders if we need more
     const mediumPriorityReminders = reminders
-      .filter(r => r.priority === 'medium' && !r.isCompleted)
-      .slice(0, 3 - highPriorityReminders.length);
+      .filter(r => r.priority === 'medium' && !r.isCompleted && r.type !== 'vaccination') // Exclude vaccination to avoid duplicates
+      .slice(0, 3 - highPriorityReminders.length - vaccinationReminders.length);
       
     // Finally low priority if needed
     const lowPriorityReminders = reminders
       .filter(r => r.priority === 'low' && !r.isCompleted)
-      .slice(0, 3 - highPriorityReminders.length - mediumPriorityReminders.length);
+      .slice(0, 3 - highPriorityReminders.length - vaccinationReminders.length - mediumPriorityReminders.length);
     
     // Combine all reminders in priority order
     const result = [
       ...highPriorityReminders,
+      ...vaccinationReminders,
       ...mediumPriorityReminders,
       ...lowPriorityReminders
     ];
@@ -100,6 +123,7 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
       result.push(...completedReminders);
     }
 
+    console.log("Displaying reminders:", result.map(r => `${r.title} (${r.type}) - Priority: ${r.priority}`));
     return result;
   }, [reminders]);
   

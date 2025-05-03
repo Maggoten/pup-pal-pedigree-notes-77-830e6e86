@@ -57,6 +57,17 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
     hasError: false 
   };
   
+  // Debug logging for calendar events
+  useEffect(() => {
+    const today = new Date();
+    const eventsForToday = getEventsForDate(today);
+    console.log(`Calendar events for today (${today.toDateString()}):`, eventsForToday);
+    
+    // Log vaccination events
+    const vaccinationEvents = eventsForToday.filter(e => e.type === 'vaccination');
+    console.log(`Vaccination events for today:`, vaccinationEvents);
+  }, [getEventsForDate]);
+  
   // Force show content after a timeout to prevent infinite loading
   useEffect(() => {
     const timer = setTimeout(() => {

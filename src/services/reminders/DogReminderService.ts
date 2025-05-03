@@ -1,8 +1,9 @@
 
 import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
-import { differenceInDays, parseISO, addDays, isSameMonth, isSameDay, addYears, startOfDay, isAfter, isBefore, isToday } from 'date-fns';
+import { differenceInDays, parseISO, addDays, addYears, startOfDay, isAfter, isBefore, isToday } from 'date-fns';
 import { createPawPrintIcon, createCalendarClockIcon } from '@/utils/iconUtils';
+import { dateToISOString, parseISODate } from '@/utils/dateUtils';
 
 export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
   const reminders: Reminder[] = [];
@@ -21,7 +22,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
         new Date(b.date).getTime() - new Date(a.date).getTime()
       );
       
-      const lastHeatDate = parseISO(sortedHeatDates[0].date);
+      const lastHeatDate = parseISODate(sortedHeatDates[0].date) || new Date();
       // Use heat interval if available, otherwise default to 180 days (6 months)
       const intervalDays = dog.heatInterval || 180;
       const nextHeatDate = addDays(lastHeatDate, intervalDays);
@@ -46,18 +47,18 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
     
     // Check for upcoming vaccinations
     if (dog.vaccinationDate) {
-      console.log(`Dog ${dog.name}: Has vaccination date: ${dog.vaccinationDate}`);
-      const lastVaccination = parseISO(dog.vaccinationDate);
+      const lastVaccination = parseISODate(dog.vaccinationDate) || new Date();
       const nextVaccination = addYears(lastVaccination, 1); // Yearly vaccinations
       
       const daysUntilVaccination = differenceInDays(nextVaccination, today);
+      console.log(`Dog ${dog.name} (ID: ${dog.id}): Vaccination date: ${dog.vaccinationDate}, Last vaccination: ${lastVaccination.toISOString()}`);
       console.log(`Dog ${dog.name}: Next vaccination date: ${nextVaccination.toISOString()}, Days until: ${daysUntilVaccination}`);
       
       // Create reminder if vaccination is due within the next 30 days or up to 7 days overdue
       if (daysUntilVaccination >= -7 && daysUntilVaccination <= 30) {
         const isOverdue = daysUntilVaccination < 0;
         
-        reminders.push({
+        const vaccinationReminder = {
           id: `vaccine-${dog.id}`,
           title: `${dog.name}'s Vaccination ${isOverdue ? 'Overdue' : 'Due'}`,
           description: isOverdue 
@@ -68,8 +69,12 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
           priority: isOverdue ? 'high' : 'medium',
           type: 'vaccination',
           relatedId: dog.id
-        });
-        console.log(`Created vaccination reminder for dog ${dog.name}`);
+        };
+        
+        reminders.push(vaccinationReminder);
+        console.log(`Created vaccination reminder for dog ${dog.name}:`, JSON.stringify(vaccinationReminder));
+      } else {
+        console.log(`No vaccination reminder needed for ${dog.name}: ${daysUntilVaccination} days until due date`);
       }
     } else {
       console.log(`Dog ${dog.name}: No vaccination date recorded`);
@@ -77,7 +82,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
     
     // Check for dog birthdays
     if (dog.dateOfBirth) {
-      const birthdate = parseISO(dog.dateOfBirth);
+      const birthdate = parseISODate(dog.dateOfBirth) || new Date();
       const currentYear = today.getFullYear();
       const birthdateThisYear = new Date(currentYear, birthdate.getMonth(), birthdate.getDate());
       
