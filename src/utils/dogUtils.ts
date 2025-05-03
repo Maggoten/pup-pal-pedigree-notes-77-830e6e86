@@ -68,8 +68,8 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
     // Ensure birthdate is stored as YYYY-MM-DD without timezone impact
     dbDog.birthdate = typeof dog.dateOfBirth === 'string' 
       ? dog.dateOfBirth.split('T')[0]
-      : dog.dateOfBirth instanceof Date 
-        ? dateToISOString(dog.dateOfBirth)
+      : isDateObject(dog.dateOfBirth)
+        ? dateToISOString(dog.dateOfBirth as Date)
         : undefined;
     
     console.log('Mapped dateOfBirth to birthdate:', dbDog.birthdate);
@@ -93,9 +93,8 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
         return { date: heat.date.split('T')[0] };
       } else if (heat.date) {
         // Check if it's a Date object safely
-        const dateObj = heat.date as any;
-        if (dateObj instanceof Date) {
-          return { date: dateToISOString(dateObj) };
+        if (isDateObject(heat.date)) {
+          return { date: dateToISOString(heat.date as Date) };
         }
       }
       // Fallback
@@ -110,7 +109,7 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   if ('dewormingDate' in dog && dog.dewormingDate) {
     dbDog.dewormingDate = typeof dog.dewormingDate === 'string'
       ? dog.dewormingDate.split('T')[0]
-      : dog.dewormingDate instanceof Date
+      : isDateObject(dog.dewormingDate)
         ? dateToISOString(dog.dewormingDate as Date)
         : undefined;
   }
@@ -118,7 +117,7 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   if ('vaccinationDate' in dog && dog.vaccinationDate) {
     dbDog.vaccinationDate = typeof dog.vaccinationDate === 'string'
       ? dog.vaccinationDate.split('T')[0]
-      : dog.vaccinationDate instanceof Date 
+      : isDateObject(dog.vaccinationDate)
         ? dateToISOString(dog.vaccinationDate as Date)
         : undefined;
   }
@@ -140,6 +139,17 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   console.log('Sanitized dog object for DB:', dbDog);
   return dbDog;
 };
+
+/**
+ * Helper function to safely check if a value is a Date object
+ * without using instanceof which causes TypeScript errors
+ */
+function isDateObject(value: any): boolean {
+  return value !== null && 
+         typeof value === 'object' && 
+         typeof value.getTime === 'function' &&
+         !isNaN(value.getTime());
+}
 
 /**
  * Convert form heat history (with Date objects) to database heat history (with string dates)
