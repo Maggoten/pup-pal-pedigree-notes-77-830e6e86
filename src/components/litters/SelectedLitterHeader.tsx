@@ -45,6 +45,7 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
           litter={litter}
           onClose={() => setShowEditLitterDialog(false)}
           onUpdate={onUpdateLitter}
+          onUpdateLitter={onUpdateLitter}
           onDelete={onDeleteLitter}
           onArchive={onArchiveLitter}
         />

@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -79,8 +78,10 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
               <LitterEditDialog 
                 litter={litter} 
                 onClose={() => setShowEditLitterDialog(false)} 
+                onUpdate={onUpdateLitter}
                 onUpdateLitter={onUpdateLitter}
-                onDeleteLitter={onDeleteLitter}
+                onDelete={onDeleteLitter}
+                onArchive={onArchiveLitter}
               />
             </Dialog>
             

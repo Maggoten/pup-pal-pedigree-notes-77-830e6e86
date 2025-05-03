@@ -15,6 +15,7 @@ interface LitterEditDialogProps {
   litter: Litter;
   onClose: () => void;
   onUpdate: (litter: Litter) => void;
+  onUpdateLitter: (litter: Litter) => void;  // Added the missing prop
   onDelete: (litterId: string) => void;
   onArchive?: (litterId: string, archived: boolean) => void;
 }
@@ -23,6 +24,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
   litter, 
   onClose, 
   onUpdate,
+  onUpdateLitter, // Added the new prop
   onDelete,
   onArchive
 }) => {
@@ -43,7 +45,9 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
       dateOfBirth: birthDate.toISOString()
     };
     
+    // Use both update functions to maintain compatibility
     onUpdate(updatedLitter);
+    onUpdateLitter(updatedLitter);
   };
   
   return (
