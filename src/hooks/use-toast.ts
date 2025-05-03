@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import type {
   ToastActionElement,
@@ -6,7 +5,7 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 3000 // Reduced from 1000000 to 3000 milliseconds (3 seconds)
+const TOAST_REMOVE_DELAY = 2000 // Reduced from 3000 to 2000 milliseconds (2 seconds) for less intrusive toasts during beta
 
 type ToasterToast = ToastProps & {
   id: string
@@ -168,7 +167,6 @@ function toast({ ...props }: Toast) {
   }
 }
 
-// Make sure this is exported as a function component
 export function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 

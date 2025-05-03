@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 export const useAuthActions = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -59,6 +58,7 @@ export const useAuthActions = () => {
 
       if (error) {
         console.error('Registration error from Supabase:', error);
+        // Keep this toast for registration errors as users need to know why registration failed
         toast({
           title: "Registration failed",
           description: error.message,
@@ -122,7 +122,7 @@ export const useAuthActions = () => {
       
       if (error) {
         console.error('Error fetching user profile:', error);
-        // Don't show toast for profile errors
+        // Removed toast for profile errors - just log to console for debugging
         throw error;
       }
       

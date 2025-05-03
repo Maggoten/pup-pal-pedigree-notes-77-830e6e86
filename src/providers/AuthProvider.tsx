@@ -5,7 +5,8 @@ import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import AuthContext from '@/context/AuthContext';
-import { toast } from '@/components/ui/use-toast';
+// Import toast but we'll disable the error notifications
+import { toast } from '@/hooks/use-toast';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -67,14 +68,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 });
               } else {
                 console.error('Failed to fetch profile after retries');
-                toast({
-                  variant: "destructive",
-                  title: "Error loading profile",
-                  description: "Please try refreshing the page"
+                // REMOVED: Toast error notification for beta testing
+                // Use a fallback approach instead - create a minimal user object
+                setUser({
+                  id: currentSession.user.id,
+                  email: currentSession.user.email || '',
+                  firstName: '',
+                  lastName: '',
+                  address: ''
                 });
               }
             } catch (error) {
               console.error('Error in auth state change handler:', error);
+              // REMOVED: Toast error notification for beta testing
             }
           }, 0);
         } else {
@@ -131,10 +137,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             });
           } else if (isSubscribed) {
             console.error('Failed to fetch initial profile after retries');
-            toast({
-              variant: "destructive",
-              title: "Error loading profile",
-              description: "Please try refreshing the page"
+            // REMOVED: Toast error notification for beta testing
+            // Use a fallback approach instead - create a minimal user object
+            setUser({
+              id: initialSession.user.id,
+              email: initialSession.user.email || '',
+              firstName: '',
+              lastName: '',
+              address: ''
             });
           }
         }
@@ -158,13 +168,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
     try {
       const success = await login(email, password);
-      if (!success) {
-        toast({
-          title: "Login failed",
-          description: "Please check your credentials and try again.",
-          variant: "destructive"
-        });
-      }
       return success;
     } finally {
       setIsLoading(false);
