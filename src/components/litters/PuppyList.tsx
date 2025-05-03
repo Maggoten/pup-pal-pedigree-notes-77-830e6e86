@@ -39,12 +39,13 @@ const PuppyList: React.FC<PuppyListProps> = ({
     
     const latestEntry = sortedLog[0];
     
-    // Handle the type difference
-    const value = type === 'weight' 
-      ? latestEntry.weight 
-      : (latestEntry as any).height; // Type cast for height
-      
-    return `${value} ${type === 'weight' ? 'kg' : 'cm'}`;
+    // Handle the type difference with type checking
+    if (type === 'weight') {
+      return `${latestEntry.weight} kg`;
+    } else {
+      // For height logs, we need to access the height property
+      return `${latestEntry.height} cm`;
+    }
   };
 
   const handleDeletePuppy = (puppyId: string, puppyName: string, e: React.MouseEvent) => {

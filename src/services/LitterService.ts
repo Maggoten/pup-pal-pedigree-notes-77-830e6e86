@@ -201,7 +201,7 @@ class LitterService {
       // Validate the date format
       let dateOfBirth;
       try {
-        // FIX 2 & 3: Fix TypeScript errors by properly handling the date
+        // Ensure we handle dateOfBirth correctly based on its type
         if (typeof litter.dateOfBirth === 'string') {
           // If it's a string, ensure it's a valid date string
           const tempDate = new Date(litter.dateOfBirth);
@@ -209,8 +209,8 @@ class LitterService {
             throw new Error("Invalid date string");
           }
           dateOfBirth = litter.dateOfBirth;
-        } else if (litter.dateOfBirth && typeof litter.dateOfBirth === 'object' && 'toISOString' in litter.dateOfBirth) {
-          // If it's a Date object with toISOString method
+        } else if (litter.dateOfBirth instanceof Date) {
+          // If it's a Date object, convert to ISO string
           dateOfBirth = litter.dateOfBirth.toISOString();
         } else {
           throw new Error("Invalid date format");
