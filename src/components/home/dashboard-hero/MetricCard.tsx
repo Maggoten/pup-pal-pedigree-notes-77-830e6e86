@@ -24,10 +24,10 @@ const MetricCard: React.FC<MetricCardProps> = ({
 }) => {
   const getIconStyles = () => {
     switch (icon) {
-      case 'calendar': return { bgColor: 'bg-warmgreen-50', textColor: 'text-warmgreen-600' };
-      case 'heart': return { bgColor: 'bg-rustbrown-50', textColor: 'text-rustbrown-600' };
-      case 'pawprint': return { bgColor: 'bg-warmgreen-50', textColor: 'text-warmgreen-600' };
-      case 'dog': return { bgColor: 'bg-warmbeige-50', textColor: 'text-warmbeige-600' };
+      case 'calendar': return { bgColor: 'bg-warmgreen-100', textColor: 'text-warmgreen-600' };
+      case 'heart': return { bgColor: 'bg-rustbrown-100', textColor: 'text-rustbrown-600' };
+      case 'pawprint': return { bgColor: 'bg-warmgreen-100', textColor: 'text-warmgreen-600' };
+      case 'dog': return { bgColor: 'bg-warmbeige-100', textColor: 'text-warmbeige-600' };
       default: return { bgColor: 'bg-white', textColor: 'text-primary' };
     }
   };
