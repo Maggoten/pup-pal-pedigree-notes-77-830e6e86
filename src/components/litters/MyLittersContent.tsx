@@ -82,7 +82,7 @@ const MyLittersContent: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <h2 className="text-2xl font-semibold text-warmgreen-700">My Litters</h2>
             <div className="flex items-center space-x-4">
-              <ViewToggle view={view} onChange={handleViewChange} />
+              <ViewToggle view={view} onViewChange={handleViewChange} />
               {activeLitters.length > 0 && (
                 <button 
                   onClick={() => setShowAddLitterDialog(true)}
