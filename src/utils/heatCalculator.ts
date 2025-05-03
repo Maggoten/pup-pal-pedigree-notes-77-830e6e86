@@ -17,6 +17,7 @@ export const calculateUpcomingHeats = (dogs: Dog[], monthsAhead = 6, monthsBehin
   const heatEvents: UpcomingHeat[] = [];
   
   console.log(`Calculating heat cycles for ${dogs.length} dogs, ${monthsAhead} months ahead and ${monthsBehind} months behind`);
+  console.log(`Date range: ${minDate.toISOString()} to ${maxDate.toISOString()}`);
   
   // Filter for female dogs
   const femaleDogs = dogs.filter(dog => dog.gender === 'female');
@@ -24,6 +25,7 @@ export const calculateUpcomingHeats = (dogs: Dog[], monthsAhead = 6, monthsBehin
   
   femaleDogs.forEach(dog => {
     console.log(`Processing dog: ${dog.name}, heat history:`, dog.heatHistory);
+    console.log(`Dog ${dog.name} has heat interval: ${dog.heatInterval} days`);
     
     // Skip if no heat history
     if (!dog.heatHistory?.length) {
@@ -38,17 +40,32 @@ export const calculateUpcomingHeats = (dogs: Dog[], monthsAhead = 6, monthsBehin
     
     // Get the most recent heat date
     const lastHeatDate = parseISO(sortedHeatDates[0].date);
+    console.log(`${dog.name}'s last heat date: ${lastHeatDate.toISOString()}`);
     
     // Use the dog's heat interval if available, otherwise default to 180 days (6 months)
     const intervalDays = dog.heatInterval || 180;
     console.log(`Dog ${dog.name} has interval of ${intervalDays} days`);
     
-    // Calculate next heat cycle (going forward)
-    let nextHeatDate = new Date(lastHeatDate);
+    // Generate both future and past heat cycles
     
-    // First, go backward from the last heat date to include past events
+    // First, calculate past heat events going backward from last recorded heat
     let pastHeatDate = new Date(lastHeatDate);
-    while (pastHeatDate > minDate) {
+    console.log(`Starting backward calculation for ${dog.name} from ${pastHeatDate.toISOString()}`);
+    
+    // Include the last known heat date itself
+    heatEvents.push({
+      dogId: dog.id,
+      dogName: dog.name,
+      date: new Date(pastHeatDate)
+    });
+    
+    // Generate past events by going backward
+    let backwardCount = 0;
+    while (pastHeatDate > minDate && backwardCount < 10) { // Limit to 10 cycles back to prevent infinite loops
+      // Move backward one cycle
+      pastHeatDate = addDays(pastHeatDate, -intervalDays);
+      console.log(`Calculated past heat for ${dog.name}: ${pastHeatDate.toISOString()}`);
+      
       // Add this heat date if it's in our time range
       if (pastHeatDate >= minDate) {
         heatEvents.push({
@@ -56,31 +73,46 @@ export const calculateUpcomingHeats = (dogs: Dog[], monthsAhead = 6, monthsBehin
           dogName: dog.name,
           date: new Date(pastHeatDate)
         });
+        console.log(`Added past heat event for ${dog.name} on ${pastHeatDate.toISOString()}`);
       }
-      
-      // Move backward one cycle
-      pastHeatDate = addDays(pastHeatDate, -intervalDays);
+      backwardCount++;
     }
     
-    // Then go forward from the last heat date to include future events
-    while (nextHeatDate <= maxDate) {
-      // Add this heat date if it's in the future
+    // Then calculate future heat events going forward from last recorded heat
+    let nextHeatDate = new Date(lastHeatDate);
+    console.log(`Starting forward calculation for ${dog.name} from ${nextHeatDate.toISOString()}`);
+    
+    // Generate future events by going forward
+    let forwardCount = 0;
+    while (forwardCount < 10) { // Limit to 10 cycles forward to prevent infinite loops
+      // Move forward one cycle
+      nextHeatDate = addDays(nextHeatDate, intervalDays);
+      console.log(`Calculated future heat for ${dog.name}: ${nextHeatDate.toISOString()}`);
+      
+      // Add this heat date if it's in our time range
       if (nextHeatDate <= maxDate) {
         heatEvents.push({
           dogId: dog.id,
           dogName: dog.name,
           date: new Date(nextHeatDate)
         });
+        console.log(`Added future heat event for ${dog.name} on ${nextHeatDate.toISOString()}`);
+      } else {
+        // Stop if we're beyond our max date
+        break;
       }
-      
-      // Move forward one cycle
-      nextHeatDate = addDays(nextHeatDate, intervalDays);
+      forwardCount++;
     }
   });
   
   // Sort by date (earliest first)
   const sortedHeats = heatEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
   console.log(`Generated ${sortedHeats.length} heat events (past and upcoming)`);
+  
+  // Log all generated events for debugging
+  sortedHeats.forEach(event => {
+    console.log(`Heat event: ${event.dogName} on ${event.date.toISOString()}`);
+  });
   
   return sortedHeats;
 };

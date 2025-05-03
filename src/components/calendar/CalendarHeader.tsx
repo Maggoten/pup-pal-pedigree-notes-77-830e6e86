@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { format, addMonths, subMonths } from 'date-fns';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,12 +40,12 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       <div className="flex items-center space-x-2">
         {todayButton && !isCurrentMonth && (
           <Button 
-            variant="outline" 
+            variant="secondary" 
             size="sm"
-            className="hidden sm:flex"
+            className="flex items-center gap-1"
             onClick={handleTodayClick}
           >
-            <CalendarIcon className="h-4 w-4 mr-1" />
+            <CalendarIcon className="h-4 w-4" />
             Today
           </Button>
         )}
