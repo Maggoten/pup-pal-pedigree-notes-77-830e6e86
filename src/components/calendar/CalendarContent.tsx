@@ -48,6 +48,10 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
     setCurrentDate(subMonths(currentDate, 1));
   };
   
+  const handleTodayClick = () => {
+    setCurrentDate(new Date());
+  };
+  
   const allDaysInMonth = eachDayOfInterval({ start: startDate, end: endDate });
   
   const weeks: Date[][] = [];
@@ -109,6 +113,8 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
         handlePrevMonth={handlePrevMonth}
         handleNextMonth={handleNextMonth}
         onAddEvent={() => setIsAddDialogOpen(true)}
+        todayButton={true}
+        onTodayClick={handleTodayClick}
       />
       
       <CardContent className={`p-3 bg-gradient-to-br from-warmbeige-50 to-warmbeige-100/40 ${compact ? 'max-h-[300px] overflow-y-auto' : ''}`}>

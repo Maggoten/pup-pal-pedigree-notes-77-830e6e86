@@ -7,14 +7,16 @@ import { UpcomingHeat } from '@/types/reminders';
  * Calculate upcoming heat dates for female dogs
  * @param dogs List of all dogs
  * @param monthsAhead Number of months to look ahead (default: 6)
+ * @param monthsBehind Number of months to look behind (default: 12)
  * @returns Array of upcoming heat dates
  */
-export const calculateUpcomingHeats = (dogs: Dog[], monthsAhead = 6): UpcomingHeat[] => {
+export const calculateUpcomingHeats = (dogs: Dog[], monthsAhead = 6, monthsBehind = 12): UpcomingHeat[] => {
   const today = new Date();
-  const maxDate = addDays(today, monthsAhead * 30); // Approximate for months
-  const upcomingHeats: UpcomingHeat[] = [];
+  const maxDate = addDays(today, monthsAhead * 30); // Approximate for months ahead
+  const minDate = addDays(today, -monthsBehind * 30); // Approximate for months behind
+  const heatEvents: UpcomingHeat[] = [];
   
-  console.log(`Calculating heat cycles for ${dogs.length} dogs, ${monthsAhead} months ahead`);
+  console.log(`Calculating heat cycles for ${dogs.length} dogs, ${monthsAhead} months ahead and ${monthsBehind} months behind`);
   
   // Filter for female dogs
   const femaleDogs = dogs.filter(dog => dog.gender === 'female');
@@ -41,28 +43,44 @@ export const calculateUpcomingHeats = (dogs: Dog[], monthsAhead = 6): UpcomingHe
     const intervalDays = dog.heatInterval || 180;
     console.log(`Dog ${dog.name} has interval of ${intervalDays} days`);
     
-    // Calculate next heat cycle
-    let nextHeatDate = addDays(lastHeatDate, intervalDays);
-    console.log(`Next heat date for ${dog.name}: ${nextHeatDate.toDateString()}`);
+    // Calculate next heat cycle (going forward)
+    let nextHeatDate = new Date(lastHeatDate);
     
-    // Add all upcoming heats within the time period
-    while (isAfter(maxDate, nextHeatDate)) {
-      if (isAfter(nextHeatDate, today)) {
-        upcomingHeats.push({
+    // First, go backward from the last heat date to include past events
+    let pastHeatDate = new Date(lastHeatDate);
+    while (pastHeatDate > minDate) {
+      // Add this heat date if it's in our time range
+      if (pastHeatDate >= minDate) {
+        heatEvents.push({
           dogId: dog.id,
           dogName: dog.name,
-          date: nextHeatDate
+          date: new Date(pastHeatDate)
         });
       }
       
-      // Move to the next cycle
+      // Move backward one cycle
+      pastHeatDate = addDays(pastHeatDate, -intervalDays);
+    }
+    
+    // Then go forward from the last heat date to include future events
+    while (nextHeatDate <= maxDate) {
+      // Add this heat date if it's in the future
+      if (nextHeatDate <= maxDate) {
+        heatEvents.push({
+          dogId: dog.id,
+          dogName: dog.name,
+          date: new Date(nextHeatDate)
+        });
+      }
+      
+      // Move forward one cycle
       nextHeatDate = addDays(nextHeatDate, intervalDays);
     }
   });
   
   // Sort by date (earliest first)
-  const sortedHeats = upcomingHeats.sort((a, b) => a.date.getTime() - b.date.getTime());
-  console.log(`Generated ${sortedHeats.length} upcoming heat events`);
+  const sortedHeats = heatEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
+  console.log(`Generated ${sortedHeats.length} heat events (past and upcoming)`);
   
   return sortedHeats;
 };

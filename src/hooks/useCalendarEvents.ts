@@ -68,9 +68,8 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       const customEvents = await fetchCalendarEvents();
       console.log("[Calendar] Fetched custom events:", customEvents.length);
       
-      // Generate heat events based on dogs data
-      const upcomingHeats = calculateUpcomingHeats(dogs);
-      const heatEvents: CalendarEvent[] = upcomingHeats.map((heat, index) => ({
+      // Generate heat events based on dogs data - now showing past events as well
+      const heatEvents: CalendarEvent[] = calculateUpcomingHeats(dogs, 6, 24).map((heat, index) => ({
         id: `heat-${heat.dogId}-${index}`,
         title: 'Heat Cycle',
         date: heat.date,
@@ -251,7 +250,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   return {
     calendarEvents: calendarEvents || [],
     isLoading,
-    hasError,
+    hasError: !!fetchError,
     getEventsForDate,
     addEvent: handleAddEvent,
     editEvent: handleEditEvent,
