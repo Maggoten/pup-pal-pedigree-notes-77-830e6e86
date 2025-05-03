@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import DeleteDogDialog from './delete-dialog/DeleteDogDialog';
 import DogDetailsCard from './details/DogDetailsCard';
 import DogActions from './actions/DogActions';
+import { checkDogDependencies } from '@/utils/dogDependencyCheck';
 
 interface DogDetailsProps {
   dog: Dog;
@@ -118,7 +119,22 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
 
   const handleDelete = async () => {
     console.log('Deletion requested for dog:', dog.id, dog.name);
+    
     try {
+      // Check for dependencies first
+      const dependencyCheck = await checkDogDependencies(dog.id);
+      
+      if (dependencyCheck.hasDependencies) {
+        // Dog has dependencies - show toast message and return false to prevent deletion
+        toast({
+          title: "Cannot Delete Dog",
+          description: dependencyCheck.message,
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      // No dependencies - proceed with deletion
       const success = await removeDog(dog.id);
       console.log('Deletion result:', success);
       
