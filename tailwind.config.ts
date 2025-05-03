@@ -58,30 +58,30 @@ export default {
 				},
 				// Updated custom colors based on the new style guide
 				warmbeige: {
-					DEFAULT: '#F3EEE7',
+					DEFAULT: '#EDE9E3',
 					50: '#FAF9F7',
-					100: '#F3EEE7',
-					200: '#E7DED4',
+					100: '#EDE9E3',
+					200: '#E3DDD4',
 					300: '#D6CFC7',
 					400: '#C0B8AE',
 					500: '#AAA195',
 					600: '#8E8577',
 					700: '#726A5E',
 					800: '#564F45',
-					900: '#3A352E'
+					900: '#3F3B36'
 				},
 				warmgreen: {
-					DEFAULT: '#296B26',
-					50: '#E8F5E8',
-					100: '#D1EBD0',
-					200: '#A3D6A1',
-					300: '#75C273',
-					400: '#47AD44',
-					500: '#2E8F2B',
-					600: '#296B26',
-					700: '#1F501D',
-					800: '#143513',
-					900: '#0A1A0A'
+					DEFAULT: '#1F4C1D',
+					50: '#E8F0E8',
+					100: '#D1E2D0',
+					200: '#A3C5A1',
+					300: '#75A972',
+					400: '#3D7F3A',
+					500: '#2A6628',
+					600: '#1F4C1D',
+					700: '#183D17',
+					800: '#112E11',
+					900: '#0A1F09'
 				},
 				rustbrown: {
 					DEFAULT: '#A65A3A',

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -103,9 +104,9 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
   const getSubscriptionBadge = () => {
     switch (settings.subscriptionTier) {
       case 'premium':
-        return <Badge className="bg-amber-500">Premium</Badge>;
+        return <Badge className="bg-warmgreen-500">Premium</Badge>;
       case 'professional':
-        return <Badge className="bg-indigo-600">Professional</Badge>;
+        return <Badge className="bg-warmgreen-700">Professional</Badge>;
       default:
         return <Badge variant="outline">Free</Badge>;
     }
@@ -158,9 +159,9 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
               {settings.subscriptionTier === 'free' ? (
                 <Shield className="h-5 w-5 text-muted-foreground" />
               ) : settings.subscriptionTier === 'premium' ? (
-                <Star className="h-5 w-5 text-amber-500" />
+                <Star className="h-5 w-5 text-warmgreen-500" />
               ) : (
-                <CreditCard className="h-5 w-5 text-indigo-600" />
+                <CreditCard className="h-5 w-5 text-warmgreen-700" />
               )}
               <span className="font-semibold capitalize">
                 {settings.subscriptionTier || 'Free'} Plan
@@ -179,7 +180,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
             <ul className="space-y-1">
               {getSubscriptionFeatures().map((feature, i) => (
                 <li key={i} className="text-sm flex gap-2 items-center">
-                  <span className="text-green-500">✓</span> {feature}
+                  <span className="text-warmgreen-600">✓</span> {feature}
                 </li>
               ))}
             </ul>
@@ -193,7 +194,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
               <Button variant="outline">Manage Billing</Button>
               <Button 
                 variant="outline" 
-                className="text-amber-600 border-amber-600 hover:bg-amber-50" 
+                className="text-rustbrown-600 border-rustbrown-600 hover:bg-rustbrown-50" 
                 onClick={() => setCancelSubscriptionDialogOpen(true)}
               >
                 Cancel Subscription
@@ -212,7 +213,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 text-rustbrown-500 mt-0.5" />
             <div>
               <h4 className="text-sm font-medium">Password</h4>
               <p className="text-sm text-muted-foreground mt-1">
@@ -295,7 +296,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
                   });
                 }
               }}
-              className="bg-amber-600 hover:bg-amber-700"
+              className="bg-rustbrown-600 hover:bg-rustbrown-700"
               disabled={isProcessing || confirmText.toLowerCase() !== 'cancel'}
             >
               {isProcessing ? "Processing..." : "Cancel Subscription"}
