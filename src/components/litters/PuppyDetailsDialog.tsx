@@ -86,7 +86,8 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
       title: "Note Added",
       description: "Your note has been added successfully."
     });
-  }, [newNote, puppy, onUpdatePuppy]);
+    if (onClose) onClose(); // Close dialog after adding a note
+  }, [newNote, puppy, onUpdatePuppy, onClose]);
 
   return (
     <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto bg-greige-100 border-greige-300">
@@ -118,7 +119,10 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
           </TabsList>
           
           <TabsContent value="details" className="space-y-4">
-            <PuppyDetailsForm puppy={puppy} onSubmit={handleSubmit} />
+            <PuppyDetailsForm 
+              puppy={{...puppy, imageUrl}} 
+              onSubmit={handleSubmit} 
+            />
           </TabsContent>
           
           <TabsContent value="growth" className="space-y-4">
@@ -231,9 +235,11 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
         </Button>
         <div>
           {activeTab === 'details' && (
-            <Button type="submit" form="puppy-form">
-              Save Changes
-            </Button>
+            <DialogClose asChild>
+              <Button type="submit" form="puppy-form">
+                Save Changes
+              </Button>
+            </DialogClose>
           )}
         </div>
       </DialogFooter>

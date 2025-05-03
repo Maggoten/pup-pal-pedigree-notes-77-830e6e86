@@ -1,4 +1,3 @@
-
 import React, { useMemo, useCallback, memo } from 'react';
 import { Edit, Trash2, BarChart2 } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -68,6 +67,10 @@ const PuppyRow = memo(({
     setShowDialog(true);
     if (onPuppyClick) onPuppyClick(puppy);
   }, [puppy, onPuppyClick]);
+
+  const handleCloseDialog = useCallback(() => {
+    setShowDialog(false);
+  }, []);
 
   // Get status badge color
   const getStatusBadge = () => {
@@ -145,6 +148,7 @@ const PuppyRow = memo(({
           puppy={puppy} 
           onUpdatePuppy={onUpdatePuppy} 
           onDeletePuppy={onDeletePuppy} 
+          onClose={handleCloseDialog}
         />
       </Dialog>
     </tr>
