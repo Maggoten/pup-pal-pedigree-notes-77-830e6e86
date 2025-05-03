@@ -1,114 +1,93 @@
 
-import { useCallback, useState } from 'react';
-import { toast } from '@/components/ui/use-toast';
+import { useCallback, useState, useEffect } from 'react';
 import { litterService } from '@/services/LitterService';
-import { plannedLittersService } from '@/services/PlannedLitterService';
-import { supabase } from '@/integrations/supabase/client';
 import { Litter } from '@/types/breeding';
+import { toast } from '@/components/ui/use-toast';
 
 export function useLitterLoading(
-  setActiveLitters, 
-  setArchivedLitters, 
+  setActiveLitters,
+  setArchivedLitters,
   selectedLitterId,
   setSelectedLitterId,
   setPlannedLitters,
   setIsLoading,
   userId
 ) {
-  // Track loading state for detailed litter data
-  const [isLoadingDetails, setIsLoadingDetails] = useState<boolean>(false);
   const [selectedLitterDetails, setSelectedLitterDetails] = useState<Litter | null>(null);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
-  // Load basic litter data - extracted for reusability
+  // Fetch all litters (basic data without puppies for better performance)
   const loadLittersData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      console.log("Loading litters data with current user:", userId);
-      
-      const active = await litterService.getActiveLitters();
-      const archived = await litterService.getArchivedLitters();
-      
-      // Sort litters by date (newest first)
-      const sortByDate = (a, b) => 
-        new Date(b.dateOfBirth).getTime() - new Date(a.dateOfBirth).getTime();
-      
-      const sortedActive = active.sort(sortByDate);
-      const sortedArchived = archived.sort(sortByDate);
-      
-      console.log("Loaded active litters:", sortedActive.length);
-      console.log("Loaded archived litters:", sortedArchived.length);
-      
-      setActiveLitters(sortedActive);
-      setArchivedLitters(sortedArchived);
-      
-      // Select the newest active litter by default if no litter is selected
-      if (sortedActive.length > 0 && !selectedLitterId) {
-        // Only set the ID, will load details when needed
-        setSelectedLitterId(sortedActive[0].id);
-      } else if (sortedActive.length === 0 && sortedArchived.length > 0 && !selectedLitterId) {
-        setSelectedLitterId(sortedArchived[0].id);
-      }
+    if (!userId) {
+      console.log("Cannot load litters: No user ID provided");
+      return;
+    }
 
-      // If a litter is already selected, load its details
-      if (selectedLitterId) {
-        await loadLitterDetails(selectedLitterId);
-      }
+    try {
+      setIsLoading(true);
+      console.log("Loading litters data for user:", userId);
+      
+      const litters = await litterService.loadLitters();
+      console.log("Loaded litters:", litters.length);
+      
+      // Split litters into active and archived
+      const active = litters.filter(litter => !litter.archived);
+      const archived = litters.filter(litter => litter.archived);
+      
+      setActiveLitters(active);
+      setArchivedLitters(archived);
     } catch (error) {
       console.error('Error loading litters:', error);
       toast({
-        title: "Error Loading Litters",
-        description: "Failed to load your litters. Please refresh the page.",
+        title: "Error",
+        description: "Failed to load litters. Please try again.",
         variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
-  }, [selectedLitterId, userId, setActiveLitters, setArchivedLitters, setSelectedLitterId, setIsLoading]);
-  
-  // Function to load detailed information for a specific litter
+  }, [setActiveLitters, setArchivedLitters, setIsLoading, userId]);
+
+  // Fetch planned litters
+  const loadPlannedLitters = useCallback(async () => {
+    // This function would fetch planned litters if they are implemented
+    setPlannedLitters([]);
+  }, [setPlannedLitters]);
+
+  // Load detailed litter data including puppies
   const loadLitterDetails = useCallback(async (litterId: string) => {
-    if (!litterId) return;
-    
-    setIsLoadingDetails(true);
+    if (!litterId || !userId) {
+      console.log("Cannot load litter details: missing litter ID or user ID");
+      return;
+    }
+
     try {
-      console.log(`Loading details for litter ${litterId}`);
-      const litterWithDetails = await litterService.getLitterDetails(litterId);
+      setIsLoadingDetails(true);
+      console.log(`Loading detailed data for litter: ${litterId}`);
       
-      if (litterWithDetails) {
-        console.log(`Loaded litter details for ${litterWithDetails.name} with ${litterWithDetails.puppies?.length || 0} puppies`);
-        // Update the selected litter with detailed information
-        setSelectedLitterDetails(litterWithDetails);
-      } else {
-        console.warn(`No details found for litter ${litterId}`);
-        setSelectedLitterDetails(null);
-      }
+      const detailedLitter = await litterService.getLitterDetails(litterId);
+      console.log("Loaded detailed litter data:", detailedLitter);
+      console.log("Puppies count:", detailedLitter?.puppies?.length || 0);
+      
+      setSelectedLitterDetails(detailedLitter);
     } catch (error) {
-      console.error(`Error loading details for litter ${litterId}:`, error);
+      console.error('Error loading litter details:', error);
       toast({
-        title: "Error Loading Litter Details",
-        description: "Failed to load details for the selected litter.",
+        title: "Error",
+        description: "Failed to load litter details. Please try again.",
         variant: "destructive"
       });
+      setSelectedLitterDetails(null);
     } finally {
       setIsLoadingDetails(false);
     }
-  }, []);
-
-  // Function to load planned litters
-  const loadPlannedLitters = useCallback(async () => {
-    try {
-      const loadedPlannedLitters = await plannedLittersService.loadPlannedLitters();
-      setPlannedLitters(loadedPlannedLitters);
-    } catch (error) {
-      console.error('Error loading planned litters:', error);
-    }
-  }, [setPlannedLitters]);
+  }, [userId, setIsLoadingDetails]);
 
   return {
     loadLittersData,
     loadPlannedLitters,
     loadLitterDetails,
-    isLoadingDetails,
-    selectedLitterDetails
+    selectedLitterDetails,
+    isLoadingDetails
   };
 }

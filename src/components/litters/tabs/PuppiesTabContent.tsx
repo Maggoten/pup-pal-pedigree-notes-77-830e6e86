@@ -40,6 +40,11 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   
   useEffect(() => {
     console.log("PuppiesTabContent rendered with puppies:", puppies);
+    if (!puppies || puppies.length === 0) {
+      console.log("No puppies found in this litter");
+    } else {
+      console.log("Puppy details:", JSON.stringify(puppies[0], null, 2));
+    }
     console.log("Dam breed:", damBreed); // Log the dam breed for debugging
   }, [puppies, damBreed]);
   
@@ -78,7 +83,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
           <div className="flex items-center gap-2">
             <PawPrint className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg font-semibold">
-              Puppies {puppies.length > 0 && `(${puppies.length})`}
+              Puppies {puppies && puppies.length > 0 && `(${puppies.length})`}
             </CardTitle>
           </div>
           

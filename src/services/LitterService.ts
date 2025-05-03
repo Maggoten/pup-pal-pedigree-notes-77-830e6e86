@@ -1,3 +1,4 @@
+
 import { Litter, Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
@@ -79,13 +80,10 @@ class LitterService {
         throw sessionError || new Error("No active session");
       }
 
-      // Fetch the specific litter with its puppies
+      // Fetch the specific litter
       const { data: litter, error: litterError } = await supabase
         .from('litters')
-        .select(`
-          *,
-          puppies(*)
-        `)
+        .select(`*`)
         .eq('id', litterId)
         .eq('user_id', sessionData.session.user.id)
         .single();
@@ -99,9 +97,22 @@ class LitterService {
         console.log("No litter found with ID:", litterId);
         return null;
       }
+      
+      // Fetch puppies separately
+      const { data: puppies, error: puppiesError } = await supabase
+        .from('puppies')
+        .select(`*`)
+        .eq('litter_id', litterId);
+      
+      if (puppiesError) {
+        console.error("Error loading puppies:", puppiesError);
+        throw puppiesError;
+      }
+      
+      console.log(`Found ${puppies?.length || 0} puppies for litter ${litterId}`);
 
       // Process puppies with detailed information
-      const puppiesWithDetails = await Promise.all((litter.puppies || []).map(async puppy => {
+      const puppiesWithDetails = await Promise.all((puppies || []).map(async puppy => {
         console.log("Processing puppy:", puppy.id, puppy.name);
         
         // Fetch weight logs
