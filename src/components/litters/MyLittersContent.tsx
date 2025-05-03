@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { PawPrint } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import { 
@@ -13,6 +13,20 @@ import SelectedLitterSection from './SelectedLitterSection';
 import LitterFilterHeader from './filters/LitterFilterHeader';
 import LitterTabContent from './tabs/LitterTabContent';
 import { Skeleton } from '@/components/ui/skeleton';
+
+// Create a memoized Loading component to avoid redefining on each render
+const LoadingSkeleton = memo(() => (
+  <div className="space-y-4">
+    <Skeleton className="h-10 w-full" />
+    <Skeleton className="h-40 w-full" />
+    <Skeleton className="h-40 w-full" />
+  </div>
+));
+
+LoadingSkeleton.displayName = 'LoadingSkeleton';
+
+// Create a memoized TabContent to optimize rendering
+const MemoizedLitterTabContent = memo(LitterTabContent);
 
 const MyLittersContent: React.FC = () => {
   const {
@@ -47,7 +61,7 @@ const MyLittersContent: React.FC = () => {
     setArchivedPage
   } = useLitterFilters();
   
-  // Use our new hook for filtering logic
+  // Use our optimized hook for filtering logic
   const {
     filteredActiveLitters,
     paginatedActiveLitters,
@@ -58,15 +72,18 @@ const MyLittersContent: React.FC = () => {
     isFilterActive
   } = useLitterFilteredData(activeLitters, archivedLitters);
   
-  // Handle creating a new litter
-  const handleAddLitterClick = () => {
-    setShowAddLitterDialog(true);
-  };
+  // Handle creating a new litter - memoized as this doesn't change often
+  const handleAddLitterClick = useMemo(() => {
+    return () => setShowAddLitterDialog(true);
+  }, [setShowAddLitterDialog]);
   
-  const handleClearFilter = () => {
-    setFilterYear(null);
-    setSearchQuery('');
-  };
+  // Handle clearing filters - memoized
+  const handleClearFilter = useMemo(() => {
+    return () => {
+      setFilterYear(null);
+      setSearchQuery('');
+    };
+  }, [setFilterYear, setSearchQuery]);
   
   if (isLoading) {
     return (
@@ -76,11 +93,7 @@ const MyLittersContent: React.FC = () => {
         icon={<PawPrint className="h-6 w-6" />}
       >
         <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 pb-6">
-          <div className="space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-40 w-full" />
-            <Skeleton className="h-40 w-full" />
-          </div>
+          <LoadingSkeleton />
         </div>
       </PageLayout>
     );
@@ -107,7 +120,7 @@ const MyLittersContent: React.FC = () => {
           />
           
           <TabsContent value="active" className="space-y-6">
-            <LitterTabContent
+            <MemoizedLitterTabContent
               litters={activeLitters}
               filteredLitters={filteredActiveLitters}
               paginatedLitters={paginatedActiveLitters}
@@ -124,7 +137,7 @@ const MyLittersContent: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="archived" className="space-y-6">
-            <LitterTabContent
+            <MemoizedLitterTabContent
               litters={archivedLitters}
               filteredLitters={filteredArchivedLitters}
               paginatedLitters={paginatedArchivedLitters}
@@ -161,4 +174,4 @@ const MyLittersContent: React.FC = () => {
   );
 };
 
-export default MyLittersContent;
+export default memo(MyLittersContent);

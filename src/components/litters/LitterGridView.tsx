@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Litter } from '@/types/breeding';
 import LitterCard from './LitterCard';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -12,7 +12,7 @@ interface LitterGridViewProps {
 }
 
 // Extract LitterCard as a memoized component to avoid re-rendering all cards
-const MemoizedLitterCard = React.memo(({ 
+const MemoizedLitterCard = memo(({ 
   litter, 
   onSelect, 
   onArchive, 
@@ -42,12 +42,10 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
 }) => {
   const isMobile = useIsMobile();
   
-  // Virtualized rendering approach - only render what's visible
-  // For a simple implementation, we'll limit the initial render size
-  // and lazy load the rest when scrolling would be implemented
+  // Only compute this when dependencies change
   const visibleLitters = useMemo(() => {
-    // Only render a reasonable number of cards initially
-    const initialRenderCount = 12;
+    // Implement windowing - only render what's initially visible
+    const initialRenderCount = Math.min(12, litters.length);
     
     return litters.slice(0, initialRenderCount).map(litter => (
       <MemoizedLitterCard
@@ -60,10 +58,13 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
     ));
   }, [litters, selectedLitterId, onSelectLitter, onArchive]);
   
+  // Determine if we need to show "load more" message
+  const hasMore = litters.length > 12;
+  
   return (
     <div className={`grid grid-cols-1 ${isMobile ? '' : 'sm:grid-cols-2 lg:grid-cols-3'} gap-4 animate-fade-in`}>
       {visibleLitters}
-      {litters.length > 12 && (
+      {hasMore && (
         <div className="col-span-full text-center py-2 text-sm text-muted-foreground">
           Showing 12 of {litters.length} litters. Scroll to load more.
         </div>
@@ -73,4 +74,4 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
 };
 
 // Memoize the component to prevent unnecessary re-renders
-export default React.memo(LitterGridView);
+export default memo(LitterGridView);

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useCallback } from 'react';
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -33,7 +34,8 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
   // Local state to track updated puppy data
   const [localPuppy, setLocalPuppy] = useState<Puppy>(puppy);
 
-  const handleAddWeight = () => {
+  // Memoize event handlers to prevent recreating on each render
+  const handleAddWeight = useCallback(() => {
     if (!weight || isNaN(parseFloat(weight))) {
       toast({
         title: "Invalid Weight",
@@ -71,9 +73,9 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       title: "Weight Recorded",
       description: `${puppy.name}'s weight has been recorded and current weight updated.`
     });
-  };
+  }, [weight, selectedDate, selectedTime, localPuppy, puppy.name, onUpdate]);
 
-  const handleAddHeight = () => {
+  const handleAddHeight = useCallback(() => {
     if (!height || isNaN(parseFloat(height))) {
       toast({
         title: "Invalid Height",
@@ -108,9 +110,9 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       title: "Height Recorded",
       description: `${puppy.name}'s height has been recorded successfully.`
     });
-  };
+  }, [height, selectedDate, selectedTime, localPuppy, puppy.name, onUpdate]);
 
-  const handleAddNote = () => {
+  const handleAddNote = useCallback(() => {
     if (!note.trim()) {
       toast({
         title: "Empty Note",
@@ -148,7 +150,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       title: "Note Added",
       description: `Note for ${puppy.name} has been added successfully.`
     });
-  };
+  }, [note, selectedDate, selectedTime, localPuppy, puppy.name, onUpdate]);
 
   return (
     <DialogContent className="sm:max-w-[500px]">
@@ -218,4 +220,4 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
   );
 };
 
-export default PuppyMeasurementsDialog;
+export default React.memo(PuppyMeasurementsDialog);
