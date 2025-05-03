@@ -5,10 +5,11 @@ import MetricCard from './MetricCard';
 interface MetricCardData {
   title: string;
   count: number;
-  icon: string;
+  icon: 'calendar' | 'heart' | 'pawprint' | 'dog';
   highlight: string | null;
   action: () => void;
   color: string;
+  loading?: boolean;
 }
 
 interface MetricCardGridProps {
@@ -25,9 +26,9 @@ const MetricCardGrid: React.FC<MetricCardGridProps> = ({ metricCards }) => {
           count={card.count}
           icon={card.icon}
           highlight={card.highlight}
-          onClick={card.action}
+          action={card.action}
           color={card.color}
-          animationDelay={index * 0.1}
+          loading={card.loading}
         />
       ))}
     </div>
