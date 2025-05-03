@@ -20,6 +20,28 @@ const DatePicker: React.FC<DatePickerProps> = ({
   label, 
   className 
 }) => {
+  // Function to preserve the date without timezone shifts
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    if (!selectedDate) return;
+    
+    // Create a new date at noon (to avoid timezone issues)
+    const newDate = new Date(selectedDate);
+    
+    // Preserve the time from the current date if it exists
+    if (date) {
+      newDate.setHours(
+        date.getHours(),
+        date.getMinutes(),
+        date.getSeconds(),
+        date.getMilliseconds()
+      );
+    }
+    
+    console.log('Selected date:', selectedDate);
+    console.log('New date with preserved time:', newDate);
+    setDate(newDate);
+  };
+
   return (
     <div className={cn("space-y-2", className)}>
       {label && <div className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{label}</div>}
@@ -40,7 +62,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           <Calendar
             mode="single"
             selected={date}
-            onSelect={(date) => date && setDate(date)}
+            onSelect={handleDateSelect}
             initialFocus
             className="p-3 pointer-events-auto"
           />

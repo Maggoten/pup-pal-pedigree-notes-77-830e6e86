@@ -35,11 +35,18 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   };
   
   const handleSubmit = (updatedPuppyData: Puppy) => {
-    // Combine the updated puppy data with the image URL
+    // Clone the puppy data to avoid reference issues
     const updatedPuppy = {
       ...updatedPuppyData,
       imageUrl: imageUrl
     };
+    
+    // Log the update details
+    console.log("Submitting puppy update:", {
+      name: updatedPuppy.name,
+      birthWeight: updatedPuppy.birthWeight,
+      weightLog: updatedPuppy.weightLog
+    });
     
     // Pass the puppy data directly without modifying the name
     onUpdatePuppy(updatedPuppy);

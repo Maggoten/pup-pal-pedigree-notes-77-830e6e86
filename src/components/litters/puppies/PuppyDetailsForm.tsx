@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,12 +16,14 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
   const [name, setName] = useState(puppy.name);
   const [gender, setGender] = useState(puppy.gender);
   const [color, setColor] = useState(puppy.color);
-  const [birthWeight, setBirthWeight] = useState(puppy.birthWeight.toString());
+  const [birthWeight, setBirthWeight] = useState(puppy.birthWeight?.toString() || '');
   const [breed, setBreed] = useState(puppy.breed || '');
   
-  const birthDate = new Date(puppy.birthDateTime);
+  // Fix date handling to prevent timezone issues
+  const birthDate = new Date(puppy.birthDateTime || new Date());
   const [dateOfBirth, setDateOfBirth] = useState<Date>(birthDate);
   
+  // Preserve the exact time component
   const hours = birthDate.getHours().toString().padStart(2, '0');
   const minutes = birthDate.getMinutes().toString().padStart(2, '0');
   const [timeOfBirth, setTimeOfBirth] = useState(`${hours}:${minutes}`);
@@ -31,11 +32,16 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
     e.preventDefault();
 
     try {
+      // Create a date at 12:00 noon to avoid timezone issues
       let birthDateTime = new Date(dateOfBirth);
+      
+      // Preserve the exact hour and minute
       if (timeOfBirth) {
         const [hours, minutes] = timeOfBirth.split(':').map(Number);
         birthDateTime.setHours(hours, minutes);
       }
+
+      const birthWeightValue = birthWeight ? parseFloat(birthWeight) : undefined;
 
       // Create the updated puppy object with the exact name as entered in the form
       const updatedPuppy = {
@@ -44,23 +50,44 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
         gender,
         color,
         breed,
-        birthWeight: parseFloat(birthWeight),
+        birthWeight: birthWeightValue,
         birthDateTime: birthDateTime.toISOString(),
       };
 
-      if (parseFloat(birthWeight) !== puppy.birthWeight) {
+      // Update weight log if birth weight has changed
+      if (birthWeightValue !== undefined && birthWeightValue !== puppy.birthWeight) {
+        console.log(`Birth weight changed from ${puppy.birthWeight} to ${birthWeightValue}`);
+        
+        // First, create a new weightLog array from the existing one
         const newWeightLog = [...puppy.weightLog];
+        
+        // Find if there's an existing entry for the birth date
         const birthWeightEntryIndex = newWeightLog.findIndex(
-          log => new Date(log.date).toDateString() === new Date(puppy.birthDateTime).toDateString()
+          log => {
+            const logDate = new Date(log.date).toISOString().split('T')[0];
+            const birthDate = birthDateTime ? new Date(birthDateTime).toISOString().split('T')[0] : null;
+            return logDate === birthDate;
+          }
         );
         
+        // If we found a matching entry, update it
         if (birthWeightEntryIndex >= 0) {
-          newWeightLog[birthWeightEntryIndex].weight = parseFloat(birthWeight);
+          console.log(`Updating existing weight log entry at index ${birthWeightEntryIndex}`);
+          newWeightLog[birthWeightEntryIndex].weight = birthWeightValue;
+        } else {
+          // Otherwise, add a new entry for this birth date
+          console.log('Adding new birth weight log entry');
+          newWeightLog.push({
+            date: birthDateTime.toISOString(),
+            weight: birthWeightValue
+          });
         }
         
+        // Update the puppy object with the new weight log
         updatedPuppy.weightLog = newWeightLog;
       }
 
+      console.log("Submitting updated puppy:", updatedPuppy);
       onSubmit(updatedPuppy);
     } catch (error) {
       console.error("Error updating puppy:", error);

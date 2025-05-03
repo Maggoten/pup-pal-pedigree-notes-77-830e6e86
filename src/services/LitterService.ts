@@ -1,4 +1,3 @@
-
 import { Litter, Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
@@ -202,14 +201,16 @@ class LitterService {
       // Validate the date format
       let dateOfBirth;
       try {
-        // FIX 2 & 3: Properly check if dateOfBirth is a Date object or string
+        // FIX 2 & 3: Fix TypeScript errors by properly handling the date
         if (typeof litter.dateOfBirth === 'string') {
+          // If it's a string, ensure it's a valid date string
           const tempDate = new Date(litter.dateOfBirth);
           if (isNaN(tempDate.getTime())) {
             throw new Error("Invalid date string");
           }
           dateOfBirth = litter.dateOfBirth;
-        } else if (litter.dateOfBirth instanceof Date) {
+        } else if (litter.dateOfBirth && typeof litter.dateOfBirth === 'object' && 'toISOString' in litter.dateOfBirth) {
+          // If it's a Date object with toISOString method
           dateOfBirth = litter.dateOfBirth.toISOString();
         } else {
           throw new Error("Invalid date format");
@@ -533,6 +534,9 @@ class LitterService {
    */
   async updatePuppy(litterId: string, updatedPuppy: Puppy): Promise<Litter[]> {
     try {
+      console.log("Updating puppy with ID:", updatedPuppy.id, "Name:", updatedPuppy.name);
+      console.log("Current weight log:", JSON.stringify(updatedPuppy.weightLog, null, 2));
+      
       // Ensure notes array exists
       if (!updatedPuppy.notes) {
         updatedPuppy.notes = [];
@@ -547,6 +551,9 @@ class LitterService {
         ? updatedPuppy.gender 
         : 'male'; // Default to male if invalid value
       
+      // Update birth weight to current birth weight (fix for issue #1)
+      let currentBirthWeight = updatedPuppy.birthWeight;
+      
       // Update puppy in Supabase
       const { error } = await supabase
         .from('puppies')
@@ -555,7 +562,7 @@ class LitterService {
           gender: puppyGender,
           color: updatedPuppy.color,
           markings: updatedPuppy.markings,
-          birth_weight: updatedPuppy.birthWeight,
+          birth_weight: currentBirthWeight, // Use the current birth weight
           current_weight: updatedPuppy.currentWeight,
           sold: updatedPuppy.sold,
           reserved: updatedPuppy.reserved,
@@ -573,43 +580,99 @@ class LitterService {
         console.error("Error updating puppy in Supabase:", error);
         throw error;
       }
+      
+      console.log("Successfully updated puppy in Supabase");
 
-      // Handle weight logs
+      // First, synchronize the birth weight record if it exists
+      const birthDate = updatedPuppy.birthDateTime ? 
+        new Date(updatedPuppy.birthDateTime).toISOString().split('T')[0] : 
+        null;
+        
+      if (birthDate && currentBirthWeight) {
+        console.log("Synchronizing birth weight record");
+        
+        // Check if a birth weight entry already exists
+        const { data: existingBirthWeightLog } = await supabase
+          .from('puppy_weight_logs')
+          .select('*')
+          .eq('puppy_id', updatedPuppy.id)
+          .eq('date', birthDate)
+          .maybeSingle();
+          
+        if (existingBirthWeightLog) {
+          // Update existing birth weight log if it exists
+          console.log("Updating existing birth weight log:", existingBirthWeightLog.id);
+          await supabase
+            .from('puppy_weight_logs')
+            .update({ weight: currentBirthWeight })
+            .eq('id', existingBirthWeightLog.id);
+        } else {
+          // Create a new birth weight log if it doesn't exist
+          console.log("Creating new birth weight log entry");
+          await supabase
+            .from('puppy_weight_logs')
+            .insert({
+              puppy_id: updatedPuppy.id,
+              date: birthDate,
+              weight: currentBirthWeight
+            });
+        }
+      }
+
+      // Handle all other weight logs
+      console.log("Processing weight logs:", updatedPuppy.weightLog.length);
       for (const weightLog of updatedPuppy.weightLog) {
+        // Format the date for comparison (strip time component)
+        const logDate = new Date(weightLog.date).toISOString().split('T')[0];
+        
+        // Skip if this is the birth date (already handled above)
+        if (birthDate && logDate === birthDate) {
+          console.log("Skipping birth date weight log as it's already handled");
+          continue;
+        }
+        
+        console.log("Processing weight log for date:", logDate);
+        
         // Check if this log already exists
         const { data: existingLog } = await supabase
           .from('puppy_weight_logs')
           .select('*')
           .eq('puppy_id', updatedPuppy.id)
-          .eq('date', weightLog.date)
+          .eq('date', logDate)
           .maybeSingle();
           
         if (existingLog) {
           // Update existing log
+          console.log("Updating existing weight log:", existingLog.id);
           await supabase
             .from('puppy_weight_logs')
             .update({ weight: weightLog.weight })
             .eq('id', existingLog.id);
         } else {
           // Insert new log
+          console.log("Inserting new weight log");
           await supabase
             .from('puppy_weight_logs')
             .insert({
               puppy_id: updatedPuppy.id,
-              date: weightLog.date,
+              date: logDate,
               weight: weightLog.weight
             });
         }
       }
 
       // Handle height logs
+      console.log("Processing height logs");
       for (const heightLog of updatedPuppy.heightLog) {
+        // Format the date for comparison (strip time component)
+        const logDate = new Date(heightLog.date).toISOString().split('T')[0];
+        
         // Check if this log already exists
         const { data: existingLog } = await supabase
           .from('puppy_height_logs')
           .select('*')
           .eq('puppy_id', updatedPuppy.id)
-          .eq('date', heightLog.date)
+          .eq('date', logDate)
           .maybeSingle();
           
         if (existingLog) {
@@ -624,47 +687,18 @@ class LitterService {
             .from('puppy_height_logs')
             .insert({
               puppy_id: updatedPuppy.id,
-              date: heightLog.date,
+              date: logDate,
               height: heightLog.height
             });
         }
       }
 
-      // Update in localStorage as backup
-      const litters = this.loadFromLocalStorage();
-      const updatedLitters = litters.map(litter => {
-        if (litter.id === litterId) {
-          const updatedPuppies = litter.puppies.map(puppy => 
-            puppy.id === updatedPuppy.id ? updatedPuppy : puppy
-          );
-          return {
-            ...litter,
-            puppies: updatedPuppies
-          };
-        }
-        return litter;
-      });
-      this.saveLitters(updatedLitters);
-
+      console.log("Finished updating all logs, reloading litters");
+      // Immediately reload data to ensure we have the latest
       return await this.loadLitters();
     } catch (error) {
       console.error("Error in updatePuppy:", error);
-      // Fallback to localStorage
-      const litters = this.loadFromLocalStorage();
-      const updatedLitters = litters.map(litter => {
-        if (litter.id === litterId) {
-          const updatedPuppies = litter.puppies.map(puppy => 
-            puppy.id === updatedPuppy.id ? updatedPuppy : puppy
-          );
-          return {
-            ...litter,
-            puppies: updatedPuppies
-          };
-        }
-        return litter;
-      });
-      this.saveLitters(updatedLitters);
-      return updatedLitters;
+      throw error;
     }
   }
 
@@ -751,4 +785,3 @@ class LitterService {
 
 // Export a singleton instance
 export const litterService = new LitterService();
-
