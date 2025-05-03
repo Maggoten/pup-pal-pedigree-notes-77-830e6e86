@@ -1,4 +1,3 @@
-
 import { useEffect, useCallback } from 'react';
 import { Litter, Puppy } from '@/types/breeding';
 import { useAuth } from '@/hooks/useAuth';
@@ -39,7 +38,7 @@ export function useLitterManagement() {
     user?.id
   );
   
-  // Use the operations hook
+  // Use the operations hook, passing selectedLitterId as an argument
   const {
     handleAddLitter,
     updateLitter,
@@ -54,7 +53,8 @@ export function useLitterManagement() {
     setArchivedLitters,
     setSelectedLitterId,
     activeLitters,
-    archivedLitters
+    archivedLitters,
+    selectedLitterId  // Pass selectedLitterId here
   );
   
   // Use utility functions

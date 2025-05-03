@@ -1,4 +1,3 @@
-
 import { litterService } from '@/services/LitterService';
 import { toast } from '@/components/ui/use-toast';
 import { Litter, Puppy } from '@/types/breeding';
@@ -10,7 +9,8 @@ export function useLitterOperations(
   setArchivedLitters,
   setSelectedLitterId,
   activeLitters,
-  archivedLitters
+  archivedLitters,
+  selectedLitterId
 ) {
   // Handlers for litter operations
   const handleAddLitter = async (newLitter: Litter) => {
@@ -145,15 +145,13 @@ export function useLitterOperations(
         await loadLittersData();
         
         // Select new litter if the deleted one was selected
-        if (setSelectedLitterId && activeLitters && archivedLitters) {
-          if (litterId === selectedLitterId) {
-            if (activeLitters.length > 0) {
-              setSelectedLitterId(activeLitters[0].id);
-            } else if (archivedLitters.length > 0) {
-              setSelectedLitterId(archivedLitters[0].id);
-            } else {
-              setSelectedLitterId(null);
-            }
+        if (litterId === selectedLitterId) {
+          if (activeLitters.length > 0) {
+            setSelectedLitterId(activeLitters[0].id);
+          } else if (archivedLitters.length > 0) {
+            setSelectedLitterId(archivedLitters[0].id);
+          } else {
+            setSelectedLitterId(null);
           }
         }
         
