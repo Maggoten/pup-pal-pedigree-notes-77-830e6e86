@@ -1,4 +1,3 @@
-
 import React, { useMemo, useCallback, memo } from 'react';
 import { Edit, Trash2, BarChart2 } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -144,6 +143,13 @@ const PuppyList: React.FC<PuppyListProps> = ({
 }) => {
   // Memoize the getLatestMeasurement function to avoid recreating it on every render
   const getLatestMeasurement = useCallback((puppy: Puppy, type: 'weight' | 'height') => {
+    // For weight, prioritize the currentWeight field from Supabase
+    if (type === 'weight') {
+      if (puppy.currentWeight) {
+        return `${puppy.currentWeight} kg`;
+      }
+    }
+    
     const log = type === 'weight' ? puppy.weightLog : puppy.heightLog;
     if (!log || log.length === 0) return 'Not recorded';
 

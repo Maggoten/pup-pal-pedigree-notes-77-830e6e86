@@ -20,9 +20,12 @@ const PuppiesTable: React.FC<PuppiesTableProps> = ({ puppies }) => {
       </TableHeader>
       <TableBody>
         {puppies.map(puppy => {
-          const latestWeight = puppy.weightLog.length > 0 
-            ? puppy.weightLog[puppy.weightLog.length - 1].weight 
-            : 0;
+          // Use the current_weight value from Supabase if available
+          const displayWeight = puppy.currentWeight 
+            ? `${puppy.currentWeight} kg` 
+            : (puppy.weightLog.length > 0 
+                ? `${puppy.weightLog[puppy.weightLog.length - 1].weight} kg`
+                : 'Not recorded');
             
           return (
             <TableRow key={puppy.id} className="hover:bg-greige-100/20">
@@ -31,7 +34,7 @@ const PuppiesTable: React.FC<PuppiesTableProps> = ({ puppies }) => {
                 {puppy.gender}
               </TableCell>
               <TableCell>{puppy.color}</TableCell>
-              <TableCell>{latestWeight} kg</TableCell>
+              <TableCell>{displayWeight}</TableCell>
             </TableRow>
           );
         })}

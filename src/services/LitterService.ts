@@ -540,6 +540,7 @@ class LitterService {
     try {
       console.log("Updating puppy with ID:", updatedPuppy.id, "Name:", updatedPuppy.name);
       console.log("Current weight log:", JSON.stringify(updatedPuppy.weightLog, null, 2));
+      console.log("Setting current weight to:", updatedPuppy.currentWeight);
       
       // Ensure notes array exists
       if (!updatedPuppy.notes) {
@@ -567,7 +568,7 @@ class LitterService {
           color: updatedPuppy.color,
           markings: updatedPuppy.markings,
           birth_weight: currentBirthWeight, // Use the current birth weight
-          current_weight: updatedPuppy.currentWeight,
+          current_weight: updatedPuppy.currentWeight, // Update the current weight
           sold: updatedPuppy.sold,
           reserved: updatedPuppy.reserved,
           new_owner: updatedPuppy.newOwner,

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -48,9 +47,10 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     const [hours, minutes] = selectedTime.split(':').map(Number);
     measurementDate.setHours(hours, minutes);
 
+    const weightValue = parseFloat(weight);
     const newWeightRecord = { 
       date: measurementDate.toISOString(), 
-      weight: parseFloat(weight) 
+      weight: weightValue 
     };
     
     const updatedPuppy = {
@@ -58,7 +58,9 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       weightLog: [
         ...localPuppy.weightLog,
         newWeightRecord
-      ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+      // Update the currentWeight to this new weight value
+      currentWeight: weightValue
     };
 
     setLocalPuppy(updatedPuppy);
@@ -67,7 +69,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     
     toast({
       title: "Weight Recorded",
-      description: `${puppy.name}'s weight has been recorded successfully.`
+      description: `${puppy.name}'s weight has been recorded and current weight updated.`
     });
   };
 
@@ -174,7 +176,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
           
           <TabsContent value="weight" className="space-y-4 mt-4">
             <PuppyWeightTab
-              puppy={localPuppy} // Use local state
+              puppy={localPuppy}
               weight={weight}
               setWeight={setWeight}
               selectedDate={selectedDate}
@@ -185,7 +187,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
           
           <TabsContent value="height" className="space-y-4 mt-4">
             <PuppyHeightTab
-              puppy={localPuppy} // Use local state
+              puppy={localPuppy}
               height={height}
               setHeight={setHeight}
               selectedDate={selectedDate}
@@ -196,7 +198,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
           
           <TabsContent value="notes" className="space-y-4 mt-4">
             <PuppyNotesTab
-              puppy={localPuppy} // Use local state
+              puppy={localPuppy}
               note={note}
               setNote={setNote}
               selectedDate={selectedDate}
