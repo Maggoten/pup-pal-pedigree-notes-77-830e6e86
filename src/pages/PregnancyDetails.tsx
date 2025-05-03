@@ -1,14 +1,15 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
-import { Loader2, Heart } from 'lucide-react';
+import { Loader2, Heart, Plus } from 'lucide-react';
 import { usePregnancyDetails } from '@/hooks/usePregnancyDetails';
 import { getActivePregnancies } from '@/services/PregnancyService';
 import PregnancyTabs from '@/components/pregnancy/PregnancyTabs';
 import PregnancySummaryCards from '@/components/pregnancy/PregnancySummaryCards';
 import PregnancyDropdownSelector from '@/components/pregnancy/PregnancyDropdownSelector';
-import { useState, useEffect } from 'react';
+import AddPregnancyDialog from '@/components/pregnancy/AddPregnancyDialog';
+import { Button } from '@/components/ui/button';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 
 const PregnancyDetails = () => {
@@ -16,6 +17,7 @@ const PregnancyDetails = () => {
   const { pregnancy, loading } = usePregnancyDetails(id);
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
   const [loadingPregnancies, setLoadingPregnancies] = useState(true);
+  const [addPregnancyDialogOpen, setAddPregnancyDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchPregnancies = async () => {
@@ -32,6 +34,24 @@ const PregnancyDetails = () => {
     
     fetchPregnancies();
   }, []);
+
+  const handleAddPregnancyClick = () => {
+    setAddPregnancyDialogOpen(true);
+  };
+
+  const handleAddPregnancyDialogClose = () => {
+    setAddPregnancyDialogOpen(false);
+    // Refresh pregnancies list after adding a new pregnancy
+    const fetchPregnancies = async () => {
+      try {
+        const pregnancies = await getActivePregnancies();
+        setActivePregnancies(pregnancies);
+      } catch (error) {
+        console.error("Error refreshing pregnancies:", error);
+      }
+    };
+    fetchPregnancies();
+  };
 
   if (loading || loadingPregnancies) {
     return (
@@ -69,7 +89,15 @@ const PregnancyDetails = () => {
       description="Track pregnancy progress and development"
       icon={<Heart className="h-6 w-6" />}
     >
-      <div className="flex justify-end items-center mb-6">
+      <div className="flex justify-end items-center gap-4 mb-6">
+        <Button 
+          onClick={handleAddPregnancyClick} 
+          variant="default"
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Add Pregnancy
+        </Button>
         <PregnancyDropdownSelector 
           pregnancies={activePregnancies} 
           currentPregnancyId={pregnancy.id}
@@ -94,6 +122,12 @@ const PregnancyDetails = () => {
           />
         </div>
       </div>
+
+      <AddPregnancyDialog 
+        open={addPregnancyDialogOpen} 
+        onOpenChange={setAddPregnancyDialogOpen}
+        onClose={handleAddPregnancyDialogClose}
+      />
     </PageLayout>
   );
 };
