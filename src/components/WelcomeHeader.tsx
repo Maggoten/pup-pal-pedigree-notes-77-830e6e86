@@ -8,7 +8,7 @@ const WelcomeHeader: React.FC = () => {
         </div>
         
         <div className="flex items-center flex-row-reverse gap-3">
-          <img src="/lovable-uploads/21265134-8e2a-403f-9eef-09de3de73cc6.png" alt="Breeding Journey Logo" className="h-[250px] w-[250px]" />
+          <img alt="Breeding Journey Logo" src="/lovable-uploads/f9ea5d53-9811-410d-a477-cdf3d45608ff.png" className="h-[190px] w-[180px]" />
           
           <div className="text-right">
             <h1 className="text-2xl md:text-3xl font-bold font-le-jour text-primary animate-fade-in">
