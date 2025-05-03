@@ -104,7 +104,7 @@ const MyLittersContent: React.FC = () => {
         {hasNoLitters ? (
           <EmptyLitterState onAddLitter={() => setShowAddLitterDialog(true)} />
         ) : (
-          <Tabs value={categoryTab} className="w-full space-y-6">
+          <Tabs value={categoryTab} onValueChange={handleCategoryTabChange} className="w-full space-y-6">
             <TabsContent value="active" className="m-0">
               {/* Litters List Section */}
               <Card>
