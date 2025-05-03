@@ -27,8 +27,12 @@ const Pregnancy: React.FC = () => {
   const [selectedPregnancy, setSelectedPregnancy] = useState<PregnancyDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [dataFetched, setDataFetched] = useState(false);
 
   useEffect(() => {
+    // Skip refetching if we've already loaded data
+    if (dataFetched) return;
+    
     const fetchPregnancies = async () => {
       if (!user) {
         setIsLoading(false);
@@ -48,6 +52,7 @@ const Pregnancy: React.FC = () => {
         if (pregnancies.length === 0) {
           console.log("No active pregnancies found");
           setIsLoading(false);
+          setDataFetched(true);
           return;
         }
         
@@ -59,6 +64,8 @@ const Pregnancy: React.FC = () => {
           navigate(`/pregnancy/${pregnancies[0].id}`, { replace: true });
           return;
         }
+        
+        setDataFetched(true);
       } catch (error) {
         console.error("Error fetching pregnancies:", error);
         setHasError(true);
@@ -72,7 +79,7 @@ const Pregnancy: React.FC = () => {
     };
     
     fetchPregnancies();
-  }, [dogs, user, pregnancyId, navigate]);
+  }, [dogs, user, pregnancyId, navigate, dataFetched]);
 
   const handleAddPregnancyClick = () => {
     navigate('/planned-litters');
@@ -105,7 +112,7 @@ const Pregnancy: React.FC = () => {
             <ActivePregnanciesList 
               pregnancies={activePregnancies} 
               onAddPregnancy={handleAddPregnancyClick}
-              isLoading={isLoading}
+              isLoading={false}
             />
           </div>
         </div>

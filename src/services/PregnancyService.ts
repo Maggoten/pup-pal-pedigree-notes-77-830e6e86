@@ -22,7 +22,7 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
 
     console.log("Fetching active pregnancies for user:", sessionData.session.user.id);
 
-    // Use proper table aliasing to avoid ambiguity
+    // Use the specific relationship name as suggested in the error hint
     const { data: pregnancies, error } = await supabase
       .from('pregnancies')
       .select(`
@@ -34,8 +34,8 @@ export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
         female_dog_id,
         male_dog_id,
         status,
-        femaleDog:dogs!female_dog_id(id, name),
-        maleDog:dogs!male_dog_id(id, name)
+        femaleDog:dogs!fk_pregnancies_female_dog_id(id, name),
+        maleDog:dogs!pregnancies_female_dog_id_fkey(id, name)
       `)
       .eq('status', 'active')
       .eq('user_id', sessionData.session.user.id);
@@ -122,8 +122,8 @@ export const getPregnancyDetails = async (pregnancyId: string): Promise<Pregnanc
         external_male_name,
         female_dog_id,
         male_dog_id,
-        femaleDog:dogs!female_dog_id(id, name),
-        maleDog:dogs!male_dog_id(id, name)
+        femaleDog:dogs!fk_pregnancies_female_dog_id(id, name),
+        maleDog:dogs!pregnancies_female_dog_id_fkey(id, name)
       `)
       .eq('id', pregnancyId)
       .eq('user_id', sessionData.session.user.id)
