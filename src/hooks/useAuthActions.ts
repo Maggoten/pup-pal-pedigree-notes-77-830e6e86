@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
@@ -135,16 +134,16 @@ export const useAuthActions = () => {
       }
 
       // Use retry pattern for more resilience on mobile
-      const result = await withRetry(
+      // Fix: Properly await the PostgrestBuilder result by adding .then() to handle the response
+      const { data, error } = await withRetry(
         () => supabase
           .from('profiles')
           .select('*')
           .eq('id', userId)
-          .maybeSingle(),
+          .maybeSingle()
+          .then(result => result), // This properly resolves the PostgrestBuilder to a Promise
         2 // Max 2 retries
       );
-      
-      const { data, error } = result as { data: Profile | null, error: any };
       
       if (error) {
         console.error('Error fetching user profile:', error);
