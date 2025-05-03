@@ -107,6 +107,14 @@ export function useLitterManagement() {
     }
   }, [selectedLitterId, user?.id, loadLitterDetails]);
   
+  // Auto-select first litter when activeLitters changes and none is selected
+  useEffect(() => {
+    if (!selectedLitterId && activeLitters.length > 0 && !isLoading) {
+      console.log("Auto-selecting first litter:", activeLitters[0].id);
+      setSelectedLitterId(activeLitters[0].id);
+    }
+  }, [activeLitters, selectedLitterId, isLoading, setSelectedLitterId]);
+  
   // Handle selecting a litter
   const handleSelectLitter = useCallback((litter: Litter) => {
     console.log("Selected litter:", litter.id);
