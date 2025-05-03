@@ -29,10 +29,14 @@ export const useVersionCheck = () => {
           toast({
             title: "App Update Available",
             description: "Please refresh the page to get the latest version",
-            action: {
-              label: "Refresh",
-              onClick: () => window.location.reload()
-            }
+            action: (
+              <button 
+                className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground"
+                onClick={() => window.location.reload()}
+              >
+                Refresh
+              </button>
+            )
           });
         }
         

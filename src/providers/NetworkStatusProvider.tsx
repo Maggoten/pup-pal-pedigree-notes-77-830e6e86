@@ -68,14 +68,13 @@ export const NetworkStatusProvider: React.FC<{ children: React.ReactNode }> = ({
           toast({
             title: "Back online",
             description: "You're connected to the internet again",
-            icon: <Wifi className="h-4 w-4" />,
+            variant: "default",
           });
         } else {
           toast({
             title: "No connection",
             description: "You're currently offline. Some features may be limited.",
             variant: "destructive",
-            icon: <WifiOff className="h-4 w-4" />,
           });
         }
       }

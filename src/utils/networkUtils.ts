@@ -107,7 +107,7 @@ export const withRetry = async <T>(
       if (attempt < maxRetries) {
         // Exponential backoff with jitter
         const delay = baseDelay * Math.pow(2, attempt) * (0.5 + Math.random() * 0.5);
-        await new sleep(delay);
+        await sleep(delay);
       }
     }
   }
@@ -118,7 +118,9 @@ export const withRetry = async <T>(
 /**
  * Utility sleep function
  */
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
 
 /**
  * Network connectivity observer

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
@@ -134,7 +135,7 @@ export const useAuthActions = () => {
       }
 
       // Use retry pattern for more resilience on mobile
-      const { data, error } = await withRetry(
+      const result = await withRetry(
         () => supabase
           .from('profiles')
           .select('*')
@@ -143,9 +144,10 @@ export const useAuthActions = () => {
         2 // Max 2 retries
       );
       
+      const { data, error } = result as { data: Profile | null, error: any };
+      
       if (error) {
         console.error('Error fetching user profile:', error);
-        // Removed toast for profile errors - just log to console for debugging
         throw error;
       }
       
