@@ -4,7 +4,7 @@ import { Edit, Trash2, BarChart2 } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Puppy } from '@/types/breeding';
+import { Puppy, PuppyWeightRecord, PuppyHeightRecord } from '@/types/breeding';
 import PuppyDetailsDialog from './PuppyDetailsDialog';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
@@ -27,6 +27,16 @@ const PuppyList: React.FC<PuppyListProps> = ({
   onAddMeasurement,
   litterAge
 }) => {
+  // Type guard function to check if a record is a weight record
+  const isWeightRecord = (record: PuppyWeightRecord | PuppyHeightRecord): record is PuppyWeightRecord => {
+    return 'weight' in record;
+  };
+  
+  // Type guard function to check if a record is a height record
+  const isHeightRecord = (record: PuppyWeightRecord | PuppyHeightRecord): record is PuppyHeightRecord => {
+    return 'height' in record;
+  };
+  
   const getLatestMeasurement = (puppy: Puppy, type: 'weight' | 'height') => {
     const log = type === 'weight' ? puppy.weightLog : puppy.heightLog;
     
@@ -39,13 +49,13 @@ const PuppyList: React.FC<PuppyListProps> = ({
     
     const latestEntry = sortedLog[0];
     
-    // Type guard to check if we're dealing with a weight or height log entry
-    if (type === 'weight') {
-      // This is a weight log entry
+    // Use the type guard functions to properly handle the types
+    if (type === 'weight' && isWeightRecord(latestEntry)) {
       return `${latestEntry.weight} kg`;
+    } else if (type === 'height' && isHeightRecord(latestEntry)) {
+      return `${latestEntry.height} cm`;
     } else {
-      // This is a height log entry
-      return `${(latestEntry as any).height} cm`;
+      return 'Invalid record';
     }
   };
 
