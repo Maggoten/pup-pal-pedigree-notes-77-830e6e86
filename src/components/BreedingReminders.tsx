@@ -86,30 +86,30 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
   const displayReminders = React.useMemo(() => {
     console.log("Calculating display reminders from", reminders.length, "reminders");
     
-    // First prioritize active high priority reminders
-    const highPriorityReminders = reminders
-      .filter(r => r.priority === 'high' && !r.isCompleted)
-      .slice(0, 3);
-    
-    // Ensure vaccination reminders are included if they exist
+    // First prioritize vaccination reminders regardless of priority (this is the key change)
     const vaccinationReminders = reminders
       .filter(r => r.type === 'vaccination' && !r.isCompleted)
-      .slice(0, 3 - highPriorityReminders.length);
+      .slice(0, 3);
+      
+    // Then high priority reminders that aren't vaccinations
+    const highPriorityReminders = reminders
+      .filter(r => r.priority === 'high' && !r.isCompleted && r.type !== 'vaccination')
+      .slice(0, 3 - vaccinationReminders.length);
       
     // Then medium priority reminders if we need more
     const mediumPriorityReminders = reminders
-      .filter(r => r.priority === 'medium' && !r.isCompleted && r.type !== 'vaccination') // Exclude vaccination to avoid duplicates
-      .slice(0, 3 - highPriorityReminders.length - vaccinationReminders.length);
+      .filter(r => r.priority === 'medium' && !r.isCompleted && r.type !== 'vaccination') 
+      .slice(0, 3 - vaccinationReminders.length - highPriorityReminders.length);
       
     // Finally low priority if needed
     const lowPriorityReminders = reminders
       .filter(r => r.priority === 'low' && !r.isCompleted)
-      .slice(0, 3 - highPriorityReminders.length - vaccinationReminders.length - mediumPriorityReminders.length);
+      .slice(0, 3 - vaccinationReminders.length - highPriorityReminders.length - mediumPriorityReminders.length);
     
     // Combine all reminders in priority order
     const result = [
+      ...vaccinationReminders, // Vaccinations first (change in ordering)
       ...highPriorityReminders,
-      ...vaccinationReminders,
       ...mediumPriorityReminders,
       ...lowPriorityReminders
     ];

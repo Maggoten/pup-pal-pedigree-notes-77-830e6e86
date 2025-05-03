@@ -54,8 +54,9 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
       console.log(`Dog ${dog.name} (ID: ${dog.id}): Vaccination date: ${dog.vaccinationDate}, Last vaccination: ${lastVaccination.toISOString()}`);
       console.log(`Dog ${dog.name}: Next vaccination date: ${nextVaccination.toISOString()}, Days until: ${daysUntilVaccination}`);
       
-      // Create reminder if vaccination is due within the next 30 days or up to 7 days overdue
-      if (daysUntilVaccination >= -7 && daysUntilVaccination <= 30) {
+      // Updated condition: Create reminder if vaccination is due within the next 60 days (rather than 30)
+      // or up to 14 days overdue (rather than 7) - this makes sure we catch more reminders
+      if (daysUntilVaccination >= -14 && daysUntilVaccination <= 60) {
         const isOverdue = daysUntilVaccination < 0;
         
         const vaccinationReminder: Reminder = {
