@@ -209,9 +209,13 @@ class LitterService {
             throw new Error("Invalid date string");
           }
           dateOfBirth = litter.dateOfBirth;
-        } else if (litter.dateOfBirth instanceof Date) {
-          // If it's a Date object, convert to ISO string
-          dateOfBirth = litter.dateOfBirth.toISOString();
+        } else if (litter.dateOfBirth && typeof litter.dateOfBirth === 'object') {
+          // Check if it's a Date object
+          const tempDate = new Date(litter.dateOfBirth as any);
+          if (isNaN(tempDate.getTime())) {
+            throw new Error("Invalid date object");
+          }
+          dateOfBirth = tempDate.toISOString();
         } else {
           throw new Error("Invalid date format");
         }

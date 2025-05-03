@@ -39,12 +39,13 @@ const PuppyList: React.FC<PuppyListProps> = ({
     
     const latestEntry = sortedLog[0];
     
-    // Handle the type difference with type checking
+    // Type guard to check if we're dealing with a weight or height log entry
     if (type === 'weight') {
+      // This is a weight log entry
       return `${latestEntry.weight} kg`;
     } else {
-      // For height logs, we need to access the height property
-      return `${latestEntry.height} cm`;
+      // This is a height log entry
+      return `${(latestEntry as any).height} cm`;
     }
   };
 
