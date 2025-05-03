@@ -31,12 +31,13 @@ export const useVersionCheck = () => {
             title: "App Update Available",
             description: "Please refresh the page to get the latest version",
             action: (
-              <button 
-                className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground"
+              <Button 
                 onClick={() => window.location.reload()}
+                variant="default"
+                size="sm"
               >
                 Refresh
-              </button>
+              </Button>
             )
           });
         }
