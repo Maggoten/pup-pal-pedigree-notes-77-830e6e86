@@ -50,8 +50,7 @@ export const useAuthActions = () => {
         options: {
           data: {
             firstName: userData.firstName,
-            lastName: userData.lastName,
-            address: userData.address
+            lastName: userData.lastName
           }
         }
       });

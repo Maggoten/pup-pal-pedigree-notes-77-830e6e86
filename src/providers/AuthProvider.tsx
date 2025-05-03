@@ -63,8 +63,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                   id: currentSession.user.id,
                   email: currentSession.user.email || '',
                   firstName: profile.first_name,
-                  lastName: profile.last_name,
-                  address: profile.address
+                  lastName: profile.last_name
                 });
               } else {
                 console.error('Failed to fetch profile after retries');
@@ -74,8 +73,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                   id: currentSession.user.id,
                   email: currentSession.user.email || '',
                   firstName: '',
-                  lastName: '',
-                  address: ''
+                  lastName: ''
                 });
               }
             } catch (error) {
@@ -132,8 +130,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               id: initialSession.user.id,
               email: initialSession.user.email || '',
               firstName: profile.first_name,
-              lastName: profile.last_name,
-              address: profile.address
+              lastName: profile.last_name
             });
           } else if (isSubscribed) {
             console.error('Failed to fetch initial profile after retries');
@@ -143,8 +140,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               id: initialSession.user.id,
               email: initialSession.user.email || '',
               firstName: '',
-              lastName: '',
-              address: ''
+              lastName: ''
             });
           }
         }
