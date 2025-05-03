@@ -39,7 +39,9 @@ const MyLittersContent: React.FC = () => {
     getAvailableYears
   } = useLitterManagement();
 
-  // Use litter filtering - pass the actual state handler
+  // Use litter filtering - explicitly pass the active or archived litters based on tab
+  const littersToFilter = activeTab === 'active' ? activeLitters : archivedLitters;
+  
   const { 
     filteredLitters,
     searchQuery,
@@ -47,7 +49,7 @@ const MyLittersContent: React.FC = () => {
     selectedYear,
     setSelectedYear 
   } = useLitterFiltering(
-    activeTab === 'active' ? activeLitters : archivedLitters,
+    littersToFilter,
     getAvailableYears
   );
 
@@ -57,9 +59,6 @@ const MyLittersContent: React.FC = () => {
       setViewMode(value);
     }
   };
-
-  // Get the litters to display based on active tab
-  const littersToDisplay = filteredLitters;
 
   // Determine if there are no litters at all (for empty state)
   const hasNoLitters = !isLoading && activeLitters.length === 0 && archivedLitters.length === 0;
@@ -124,7 +123,7 @@ const MyLittersContent: React.FC = () => {
                 <div className="p-4">
                   {viewMode === 'grid' ? (
                     <LitterGridView 
-                      litters={littersToDisplay} 
+                      litters={filteredLitters} 
                       onSelectLitter={handleSelectLitter}
                       onArchive={handleArchive}
                       selectedLitterId={selectedLitterId}
@@ -133,7 +132,7 @@ const MyLittersContent: React.FC = () => {
                     />
                   ) : (
                     <LitterListView 
-                      litters={littersToDisplay} 
+                      litters={filteredLitters} 
                       onSelectLitter={handleSelectLitter} 
                       onArchive={handleArchive}
                       selectedLitterId={selectedLitterId}

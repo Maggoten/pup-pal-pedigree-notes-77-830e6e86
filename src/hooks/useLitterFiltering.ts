@@ -10,12 +10,7 @@ export const useLitterFiltering = (
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   
-  // Apply filters to litters
-  const filteredLitters = useMemo(() => {
-    return filterLitters(litters, searchQuery, selectedYear);
-  }, [litters, searchQuery, selectedYear]);
-  
-  // Helper function to filter litters
+  // Helper function to filter litters - defined BEFORE it's used
   const filterLitters = (litters: Litter[], query: string, year: number | null): Litter[] => {
     return litters.filter(litter => {
       // Filter by search query
@@ -31,6 +26,11 @@ export const useLitterFiltering = (
       return matchesSearch && matchesYear;
     });
   };
+  
+  // Apply filters to litters
+  const filteredLitters = useMemo(() => {
+    return filterLitters(litters, searchQuery, selectedYear);
+  }, [litters, searchQuery, selectedYear]);
   
   return { 
     filteredLitters,
