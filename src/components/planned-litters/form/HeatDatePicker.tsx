@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { UseFormReturn } from 'react-hook-form';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
+import { parseISODate } from '@/utils/dateUtils';
 
 interface HeatDatePickerProps {
   form: UseFormReturn<PlannedLitterFormValues>;
@@ -33,7 +34,9 @@ const HeatDatePicker: React.FC<HeatDatePickerProps> = ({ form }) => {
                   )}
                 >
                   {field.value ? (
-                    format(field.value, "PPP")
+                    typeof field.value === 'string'
+                      ? format(parseISODate(field.value) || new Date(), "PPP") 
+                      : format(field.value, "PPP")
                   ) : (
                     <span>Pick a date</span>
                   )}
@@ -44,8 +47,16 @@ const HeatDatePicker: React.FC<HeatDatePickerProps> = ({ form }) => {
             <PopoverContent className="w-auto p-0 bg-white" align="start">
               <Calendar
                 mode="single"
-                selected={field.value}
-                onSelect={field.onChange}
+                selected={typeof field.value === 'string'
+                  ? parseISODate(field.value) || undefined
+                  : field.value}
+                onSelect={(date) => {
+                  if (date) {
+                    // Set time to noon to avoid timezone issues
+                    date.setHours(12, 0, 0, 0);
+                    field.onChange(date);
+                  }
+                }}
                 initialFocus
                 className="p-3 pointer-events-auto bg-white"
               />

@@ -13,6 +13,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { parseISODate } from '@/utils/dateUtils';
 
 interface BirthInfoFieldsProps {
   form: UseFormReturn<DogFormValues>;
@@ -39,7 +40,10 @@ const BirthInfoFields: React.FC<BirthInfoFieldsProps> = ({ form, disabled }) => 
                   disabled={disabled}
                 >
                   {field.value ? (
-                    format(field.value, "PPP")
+                    // Display date without timezone concerns
+                    typeof field.value === 'string' 
+                      ? format(parseISODate(field.value) || new Date(), "PPP")
+                      : format(field.value, "PPP")
                   ) : (
                     <span>Pick a date</span>
                   )}
@@ -50,8 +54,18 @@ const BirthInfoFields: React.FC<BirthInfoFieldsProps> = ({ form, disabled }) => 
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                selected={field.value}
-                onSelect={field.onChange}
+                selected={typeof field.value === 'string' 
+                  ? parseISODate(field.value) || undefined 
+                  : field.value}
+                onSelect={(date) => {
+                  if (date) {
+                    // Set time to noon to avoid timezone issues
+                    date.setHours(12, 0, 0, 0);
+                    field.onChange(date);
+                  } else {
+                    field.onChange(null);
+                  }
+                }}
                 disabled={(date) =>
                   date > new Date() || date < new Date("1990-01-01")
                 }

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { parseISODate, dateToISOString } from '@/utils/dateUtils';
 
 interface HeatDatePickerProps {
   date: Date;
@@ -18,6 +19,17 @@ const HeatDatePicker: React.FC<HeatDatePickerProps> = ({
   onSelect, 
   disabled 
 }) => {
+  // Function to preserve the date without timezone shifts
+  const handleSelect = (selectedDate: Date | undefined) => {
+    if (!selectedDate) return;
+    
+    // Create a new date with time set to noon to avoid timezone issues
+    const newDate = new Date(selectedDate);
+    newDate.setHours(12, 0, 0, 0);
+    
+    onSelect(newDate);
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -37,7 +49,7 @@ const HeatDatePicker: React.FC<HeatDatePickerProps> = ({
         <Calendar
           mode="single"
           selected={date}
-          onSelect={(date) => date && onSelect(date)}
+          onSelect={handleSelect}
           initialFocus
           className={cn("p-3 pointer-events-auto")}
         />

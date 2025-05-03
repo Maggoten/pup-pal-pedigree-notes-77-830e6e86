@@ -5,6 +5,7 @@ import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
 import { PostgrestResponse } from '@supabase/supabase-js';
 import { withTimeout, TIMEOUT, isTimeoutError } from '@/utils/timeoutUtils';
 import { cleanupStorageImage } from '@/utils/storageUtils';
+import { dateToISOString } from '@/utils/dateUtils';
 
 export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog | null> {
   if (!id) {
@@ -29,6 +30,25 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
 
     // Convert Dog object to database format
     const dbUpdates = sanitizeDogForDb(updates);
+
+    // Ensure dates are stored without time components
+    if (dbUpdates.birthdate) {
+      dbUpdates.birthdate = typeof dbUpdates.birthdate === 'string' 
+        ? dbUpdates.birthdate.split('T')[0]
+        : dateToISOString(dbUpdates.birthdate as any);
+    }
+    
+    if (dbUpdates.dewormingDate) {
+      dbUpdates.dewormingDate = typeof dbUpdates.dewormingDate === 'string'
+        ? dbUpdates.dewormingDate.split('T')[0]
+        : dateToISOString(dbUpdates.dewormingDate as any);
+    }
+    
+    if (dbUpdates.vaccinationDate) {
+      dbUpdates.vaccinationDate = typeof dbUpdates.vaccinationDate === 'string'
+        ? dbUpdates.vaccinationDate.split('T')[0]
+        : dateToISOString(dbUpdates.vaccinationDate as any);
+    }
     
     // Remove undefined values from dbUpdates to prevent Supabase errors
     const cleanUpdates: Record<string, any> = {};

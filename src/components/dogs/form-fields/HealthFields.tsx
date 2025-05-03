@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { UseFormReturn } from 'react-hook-form';
 import { DogFormValues } from '../DogFormFields';
+import { parseISODate } from '@/utils/dateUtils';
 
 interface HealthFieldsProps {
   form: UseFormReturn<DogFormValues>;
@@ -36,7 +37,10 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
                     disabled={disabled}
                   >
                     {field.value ? (
-                      format(field.value, "PPP")
+                      // Handle both string dates and Date objects
+                      typeof field.value === 'string'
+                        ? format(parseISODate(field.value) || new Date(), "PPP")
+                        : format(field.value, "PPP")
                     ) : (
                       <span>Pick a date</span>
                     )}
@@ -47,8 +51,18 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
               <PopoverContent className="w-auto p-0 bg-white" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
+                  selected={typeof field.value === 'string' 
+                    ? parseISODate(field.value) || undefined 
+                    : field.value}
+                  onSelect={(date) => {
+                    if (date) {
+                      // Set time to noon to avoid timezone issues
+                      date.setHours(12, 0, 0, 0);
+                      field.onChange(date);
+                    } else {
+                      field.onChange(null);
+                    }
+                  }}
                   disabled={(date) => date > new Date() || !!disabled}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
@@ -79,7 +93,10 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
                     disabled={disabled}
                   >
                     {field.value ? (
-                      format(field.value, "PPP")
+                      // Handle both string dates and Date objects
+                      typeof field.value === 'string'
+                        ? format(parseISODate(field.value) || new Date(), "PPP")
+                        : format(field.value, "PPP")
                     ) : (
                       <span>Pick a date</span>
                     )}
@@ -90,8 +107,18 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
               <PopoverContent className="w-auto p-0 bg-white" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
+                  selected={typeof field.value === 'string' 
+                    ? parseISODate(field.value) || undefined 
+                    : field.value}
+                  onSelect={(date) => {
+                    if (date) {
+                      // Set time to noon to avoid timezone issues
+                      date.setHours(12, 0, 0, 0);
+                      field.onChange(date);
+                    } else {
+                      field.onChange(null);
+                    }
+                  }}
                   disabled={(date) => date > new Date() || !!disabled}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}

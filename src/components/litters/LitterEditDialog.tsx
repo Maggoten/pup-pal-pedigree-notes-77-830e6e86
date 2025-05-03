@@ -10,12 +10,13 @@ import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFoot
 import { CalendarIcon, Trash2, Archive, SquareCheck } from 'lucide-react';
 import { Litter } from '@/types/breeding';
 import { format } from 'date-fns';
+import { parseISODate } from '@/utils/dateUtils';
 
 interface LitterEditDialogProps {
   litter: Litter;
   onClose: () => void;
   onUpdate: (litter: Litter) => void;
-  onUpdateLitter: (litter: Litter) => void;  // Added the missing prop
+  onUpdateLitter: (litter: Litter) => void;
   onDelete: (litterId: string) => void;
   onArchive?: (litterId: string, archived: boolean) => void;
 }
@@ -24,25 +25,34 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
   litter, 
   onClose, 
   onUpdate,
-  onUpdateLitter, // Added the new prop
+  onUpdateLitter,
   onDelete,
   onArchive
 }) => {
   const [litterName, setLitterName] = useState(litter.name);
   const [sireName, setSireName] = useState(litter.sireName);
   const [damName, setDamName] = useState(litter.damName);
-  const [birthDate, setBirthDate] = useState<Date>(new Date(litter.dateOfBirth));
+  
+  // Parse the birth date correctly to avoid timezone issues
+  const [birthDate, setBirthDate] = useState<Date>(
+    parseISODate(litter.dateOfBirth) || new Date()
+  );
+  
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+    
+    // Set birth date time to noon to avoid timezone issues
+    const safeBirthDate = new Date(birthDate);
+    safeBirthDate.setHours(12, 0, 0, 0);
     
     const updatedLitter: Litter = {
       ...litter,
       name: litterName,
       sireName: sireName,
       damName: damName,
-      dateOfBirth: birthDate.toISOString()
+      dateOfBirth: safeBirthDate.toISOString().split('T')[0]
     };
     
     // Use both update functions to maintain compatibility
@@ -112,6 +122,8 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
                   selected={birthDate}
                   onSelect={(date) => {
                     if (date) {
+                      // Set time to noon to avoid timezone issues
+                      date.setHours(12, 0, 0, 0);
                       setBirthDate(date);
                       setIsCalendarOpen(false);
                     }

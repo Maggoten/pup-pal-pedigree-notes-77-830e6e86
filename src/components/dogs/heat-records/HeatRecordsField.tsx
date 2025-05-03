@@ -23,7 +23,11 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
   
   // Add a new heat date record
   const addHeatDate = () => {
-    const newHeatHistory = [...heatHistory, { date: new Date() }];
+    // Create date at noon to avoid timezone issues
+    const newDate = new Date();
+    newDate.setHours(12, 0, 0, 0);
+    
+    const newHeatHistory = [...heatHistory, { date: newDate }];
     form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
   };
   
@@ -36,8 +40,12 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
   
   // Update a heat date
   const updateHeatDate = (index: number, date: Date) => {
+    // Create date at noon to avoid timezone issues
+    const newDate = new Date(date);
+    newDate.setHours(12, 0, 0, 0);
+    
     const newHeatHistory = [...heatHistory];
-    newHeatHistory[index] = { date };
+    newHeatHistory[index] = { date: newDate };
     form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
   };
 

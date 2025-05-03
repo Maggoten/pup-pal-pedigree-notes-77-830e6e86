@@ -6,6 +6,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Calendar as CalendarIcon } from 'lucide-react';
+import { dateToISOString, parseISODate } from '@/utils/dateUtils';
 
 interface DatePickerProps {
   date: Date;
@@ -25,18 +26,9 @@ const DatePicker: React.FC<DatePickerProps> = React.memo(({
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (!selectedDate) return;
     
-    // Create a new date at noon (to avoid timezone issues)
+    // Create a new date with time set to noon to avoid timezone issues
     const newDate = new Date(selectedDate);
-    
-    // Preserve the time from the current date if it exists
-    if (date) {
-      newDate.setHours(
-        date.getHours(),
-        date.getMinutes(),
-        date.getSeconds(),
-        date.getMilliseconds()
-      );
-    }
+    newDate.setHours(12, 0, 0, 0);
     
     setDate(newDate);
   };

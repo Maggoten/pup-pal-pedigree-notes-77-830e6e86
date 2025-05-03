@@ -4,6 +4,7 @@ import { Dog } from '@/types/dogs';
 import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
 import { PostgrestResponse, PostgrestSingleResponse } from '@supabase/supabase-js';
 import { withTimeout, TIMEOUT } from '@/utils/timeoutUtils';
+import { dateToISOString } from '@/utils/dateUtils';
 
 export async function addDog(
   dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>, 
@@ -24,10 +25,15 @@ export async function addDog(
     
     console.log('Sanitized dog object for DB:', dogForDb);
     
+    // Create a minimal dog object with clean date format for the initial insert
     const minimalDog = {
       name: dogForDb.name,
       owner_id: userId,
-      birthdate: dogForDb.birthdate,
+      birthdate: dogForDb.birthdate ? 
+        (typeof dogForDb.birthdate === 'string' ? 
+          dogForDb.birthdate.split('T')[0] : 
+          dateToISOString(dogForDb.birthdate as any)
+        ) : null,
       breed: dogForDb.breed,
       gender: dogForDb.gender,
     };

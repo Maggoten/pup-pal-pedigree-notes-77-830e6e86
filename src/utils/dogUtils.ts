@@ -1,6 +1,7 @@
 
 import { Dog, BreedingHistory, Heat } from '@/types/dogs';
 import { Database } from '@/integrations/supabase/types';
+import { dateToISOString } from './dateUtils';
 
 // Define a type for dogs in the database format
 export type DbDog = Database['public']['Tables']['dogs']['Insert'];
@@ -23,15 +24,16 @@ export const enrichDog = (dog: any): Dog => {
   
   if (dog.heatHistory && Array.isArray(dog.heatHistory)) {
     processedHeatHistory = dog.heatHistory.map((heat: any) => ({
-      date: typeof heat.date === 'string' ? heat.date : 
-            heat.date instanceof Date ? heat.date.toISOString().split('T')[0] : ''
+      // Ensure date is stored as YYYY-MM-DD without timezone impact
+      date: typeof heat.date === 'string' ? heat.date.split('T')[0] : 
+            heat.date instanceof Date ? dateToISOString(heat.date) : ''
     }));
   }
 
   return {
     ...dog,
     // Alias fields for UI
-    dateOfBirth: dog.birthdate || '',
+    dateOfBirth: dog.birthdate ? dog.birthdate.split('T')[0] : '',
     image: dog.image_url || '',
     registrationNumber: dog.registration_number || '',
 
@@ -63,8 +65,14 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   
   // Explicitly map UI field names to DB field names
   if ('dateOfBirth' in dog && dog.dateOfBirth !== undefined) {
-    dbDog.birthdate = dog.dateOfBirth;
-    console.log('Mapped dateOfBirth to birthdate:', dog.dateOfBirth);
+    // Ensure birthdate is stored as YYYY-MM-DD without timezone impact
+    dbDog.birthdate = typeof dog.dateOfBirth === 'string' 
+      ? dog.dateOfBirth.split('T')[0]
+      : dog.dateOfBirth instanceof Date 
+        ? dateToISOString(dog.dateOfBirth)
+        : undefined;
+    
+    console.log('Mapped dateOfBirth to birthdate:', dbDog.birthdate);
   }
   
   if ('registrationNumber' in dog && dog.registrationNumber !== undefined) {
@@ -77,17 +85,17 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
     console.log('Mapped image to image_url:', dog.image);
   }
   
-  // Process heat history if present, ensuring dates are strings
+  // Process heat history if present, ensuring dates are YYYY-MM-DD strings
   if ('heatHistory' in dog && dog.heatHistory) {
     const processedHeatHistory = dog.heatHistory.map((heat: Heat) => {
       // First check if heat.date exists, then check its type
       if (typeof heat.date === 'string') {
-        return { date: heat.date };
+        return { date: heat.date.split('T')[0] };
       } else if (heat.date) {
         // Check if it's a Date object by seeing if it has toISOString method
         const dateObj = heat.date as unknown as Date;
         if (typeof dateObj.toISOString === 'function') {
-          return { date: dateObj.toISOString().split('T')[0] };
+          return { date: dateToISOString(dateObj) };
         }
       }
       // Fallback
@@ -98,11 +106,28 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
     console.log('Processed heatHistory for DB:', processedHeatHistory);
   }
   
+  // Process optional dates to ensure YYYY-MM-DD format
+  if ('dewormingDate' in dog && dog.dewormingDate) {
+    dbDog.dewormingDate = typeof dog.dewormingDate === 'string'
+      ? dog.dewormingDate.split('T')[0]
+      : dog.dewormingDate instanceof Date
+        ? dateToISOString(dog.dewormingDate)
+        : undefined;
+  }
+  
+  if ('vaccinationDate' in dog && dog.vaccinationDate) {
+    dbDog.vaccinationDate = typeof dog.vaccinationDate === 'string'
+      ? dog.vaccinationDate.split('T')[0]
+      : dog.vaccinationDate instanceof Date
+        ? dateToISOString(dog.vaccinationDate)
+        : undefined;
+  }
+  
   // Copy direct fields that have the same name
   const directFields: (keyof Dog & keyof DbDog)[] = [
     'id', 'owner_id', 'name', 'breed', 'gender', 
     'color', 'chip_number', 'notes', 'created_at', 'updated_at',
-    'breedingHistory', 'heatInterval', 'dewormingDate', 'vaccinationDate'
+    'breedingHistory', 'heatInterval'
   ];
   
   directFields.forEach(field => {
@@ -121,7 +146,7 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
  */
 export const convertFormHeatHistoryToDbFormat = (formHeatHistory: { date: Date }[]): Heat[] => {
   return formHeatHistory.map(heat => ({
-    date: heat.date.toISOString().split('T')[0]
+    date: dateToISOString(heat.date) || ''
   }));
 };
 
@@ -129,7 +154,10 @@ export const convertFormHeatHistoryToDbFormat = (formHeatHistory: { date: Date }
  * Convert database heat history (with string dates) to form heat history (with Date objects)
  */
 export const convertDbHeatHistoryToFormFormat = (dbHeatHistory: Heat[]): { date: Date }[] => {
-  return dbHeatHistory.map(heat => ({
-    date: new Date(heat.date)
-  }));
+  return dbHeatHistory.map(heat => {
+    // Create date at noon to avoid timezone issues
+    const date = new Date(heat.date);
+    date.setHours(12, 0, 0, 0);
+    return { date };
+  });
 };
