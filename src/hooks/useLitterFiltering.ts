@@ -1,52 +1,53 @@
 
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Litter } from '@/types/breeding';
 
 export const useLitterFiltering = (
-  litters: Litter[],
-  searchQuery: string,
-  filterYear: number | null,
-  currentPage: number,
-  itemsPerPage: number
+  activeLitters: Litter[],
+  archivedLitters: Litter[],
+  getAvailableYears: () => number[]
 ) => {
-  // Filter litters by year, memoized to prevent recomputation
-  const filteredByYear = useMemo(() => {
-    if (!filterYear) return litters;
-    
+  // Setup state for filtering and tabs
+  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  
+  // Apply filters to active litters
+  const filteredActiveLitters = useMemo(() => {
+    return filterLitters(activeLitters, searchQuery, selectedYear);
+  }, [activeLitters, searchQuery, selectedYear]);
+  
+  // Apply filters to archived litters
+  const filteredArchivedLitters = useMemo(() => {
+    return filterLitters(archivedLitters, searchQuery, selectedYear);
+  }, [archivedLitters, searchQuery, selectedYear]);
+  
+  // Helper function to filter litters
+  const filterLitters = (litters: Litter[], query: string, year: number | null): Litter[] => {
     return litters.filter(litter => {
-      const birthDate = new Date(litter.dateOfBirth);
-      return birthDate.getFullYear() === filterYear;
+      // Filter by search query
+      const matchesSearch = !query || 
+        litter.name.toLowerCase().includes(query.toLowerCase()) || 
+        litter.sireName.toLowerCase().includes(query.toLowerCase()) || 
+        litter.damName.toLowerCase().includes(query.toLowerCase());
+      
+      // Filter by year
+      const matchesYear = !year || 
+        new Date(litter.dateOfBirth).getFullYear() === year;
+      
+      return matchesSearch && matchesYear;
     });
-  }, [litters, filterYear]);
+  };
   
-  // Search litters by name, sire, or dam, memoized to prevent recomputation
-  const filteredLitters = useMemo(() => {
-    if (!searchQuery.trim()) return filteredByYear;
-    
-    const searchTermLower = searchQuery.toLowerCase();
-    return filteredByYear.filter(litter => (
-      litter.name.toLowerCase().includes(searchTermLower) ||
-      litter.sireName.toLowerCase().includes(searchTermLower) ||
-      litter.damName.toLowerCase().includes(searchTermLower)
-    ));
-  }, [filteredByYear, searchQuery]);
-  
-  // Calculate pagination, memoized to prevent recomputation
-  const paginatedLitters = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredLitters.slice(startIndex, endIndex);
-  }, [filteredLitters, currentPage, itemsPerPage]);
-  
-  // Calculate total number of pages, memoized to prevent recomputation
-  const pageCount = useMemo(() => 
-    Math.ceil(filteredLitters.length / itemsPerPage),
-  [filteredLitters.length, itemsPerPage]);
-  
-  return {
-    filteredLitters,
-    paginatedLitters,
-    pageCount
+  return { 
+    filteredActiveLitters, 
+    filteredArchivedLitters,
+    activeTab, 
+    setActiveTab,
+    searchQuery,
+    setSearchQuery,
+    selectedYear,
+    setSelectedYear 
   };
 };
 

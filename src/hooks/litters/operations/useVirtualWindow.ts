@@ -12,6 +12,7 @@ export const useVirtualWindow = (
   { itemsPerPage = 20, onLoadMore }: UseVirtualWindowOptions = {}
 ) => {
   const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   
   // Function to load more items
   const loadMore = useCallback(() => {
@@ -35,6 +36,9 @@ export const useVirtualWindow = (
   return {
     visibleLitters: litters, // In a real implementation with react-window, this would be the virtualized subset
     loadingMore,
+    hasMore,
     loadMore
   };
 };
+
+export default useVirtualWindow;

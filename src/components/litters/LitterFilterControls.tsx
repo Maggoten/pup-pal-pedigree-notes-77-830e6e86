@@ -1,62 +1,62 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
-import { PlusCircle } from 'lucide-react';
-import { useLitterFilters } from './LitterFilterProvider';
-import LitterSearchForm from './LitterSearchForm';
+import { PlusCircle, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import YearFilterDropdown from './YearFilterDropdown';
-import AddLitterDialog from './AddLitterDialog';
-import { PlannedLitter, Litter } from '@/types/breeding';
 
 interface LitterFilterControlsProps {
-  showAddLitterDialog: boolean;
-  setShowAddLitterDialog: (show: boolean) => void;
-  onAddLitter: (litter: Litter) => void;
-  plannedLitters: PlannedLitter[];
+  hasLitters: boolean;
+  onAddLitterClick: () => void;
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  selectedYear: number | null;
+  onYearChange: (year: number | null) => void;
   availableYears: number[];
 }
 
 const LitterFilterControls: React.FC<LitterFilterControlsProps> = ({
-  showAddLitterDialog,
-  setShowAddLitterDialog,
-  onAddLitter,
-  plannedLitters,
+  hasLitters,
+  onAddLitterClick,
+  searchQuery,
+  onSearchChange,
+  selectedYear,
+  onYearChange,
   availableYears
 }) => {
-  const { 
-    searchQuery, 
-    setSearchQuery, 
-    filterYear, 
-    setFilterYear
-  } = useLitterFilters();
-
+  // Handle search input changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onSearchChange(e.target.value);
+  };
+  
   return (
-    <div className="flex flex-wrap items-center gap-2 self-end">
-      <LitterSearchForm 
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
-      
-      <YearFilterDropdown
-        years={availableYears}
-        selectedYear={filterYear}
-        onYearChange={setFilterYear}
-      />
-      
-      <Dialog open={showAddLitterDialog} onOpenChange={setShowAddLitterDialog}>
-        <DialogTrigger asChild>
-          <Button className="flex items-center gap-2 ml-2">
-            <PlusCircle className="h-4 w-4" />
-            Add Litter
-          </Button>
-        </DialogTrigger>
-        <AddLitterDialog 
-          onClose={() => setShowAddLitterDialog(false)} 
-          onLitterAdded={onAddLitter}
-          plannedLitters={plannedLitters}
+    <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-center gap-2 flex-grow">
+        <div className="relative flex-grow max-w-md">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            type="search"
+            placeholder="Search by name, sire or dam..."
+            className="pl-9 bg-white dark:bg-gray-800"
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+        </div>
+        
+        <YearFilterDropdown
+          years={availableYears}
+          selectedYear={selectedYear}
+          onYearChange={onYearChange}
         />
-      </Dialog>
+      </div>
+      
+      <Button 
+        onClick={onAddLitterClick}
+        className="whitespace-nowrap flex items-center gap-2"
+      >
+        <PlusCircle className="h-4 w-4" />
+        Add Litter
+      </Button>
     </div>
   );
 };

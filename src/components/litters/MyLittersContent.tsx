@@ -6,6 +6,7 @@ import { useLitterFiltering } from '@/hooks/useLitterFiltering';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Litter } from '@/types/breeding';
 import LitterGridView from './LitterGridView';
 import LitterListView from './LitterListView';
 import LitterFilterControls from './LitterFilterControls';
@@ -45,11 +46,7 @@ const MyLittersContent: React.FC = () => {
     setSearchQuery,
     selectedYear,
     setSelectedYear 
-  } = useLitterFiltering(
-    activeLitters, 
-    archivedLitters, 
-    getAvailableYears
-  );
+  } = useLitterFiltering(activeLitters, archivedLitters, getAvailableYears);
 
   // Toggle view mode
   const toggleViewMode = (value: string) => {
@@ -65,6 +62,11 @@ const MyLittersContent: React.FC = () => {
 
   // Determine if there are no litters at all (for empty state)
   const hasNoLitters = !isLoading && activeLitters.length === 0 && archivedLitters.length === 0;
+
+  // Helper to handle archive actions for LitterGridView
+  const handleArchive = (litter: Litter) => {
+    handleArchiveLitter(litter.id, !litter.archived);
+  };
 
   return (
     <div className="container py-6">
@@ -119,7 +121,7 @@ const MyLittersContent: React.FC = () => {
                     <LitterGridView 
                       litters={littersToDisplay} 
                       onSelectLitter={handleSelectLitter}
-                      onArchive={handleArchiveLitter}
+                      onArchive={handleArchive}
                       selectedLitterId={selectedLitterId}
                       loadingMore={false}
                       hasMore={false}
