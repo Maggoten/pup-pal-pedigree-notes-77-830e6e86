@@ -92,9 +92,9 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
       if (typeof heat.date === 'string') {
         return { date: heat.date.split('T')[0] };
       } else if (heat.date) {
-        // Check if it's a Date object by seeing if it has toISOString method
-        const dateObj = heat.date as unknown as Date;
-        if (typeof dateObj.toISOString === 'function') {
+        // Check if it's a Date object safely
+        const dateObj = heat.date as any;
+        if (dateObj instanceof Date) {
           return { date: dateToISOString(dateObj) };
         }
       }
@@ -111,15 +111,15 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
     dbDog.dewormingDate = typeof dog.dewormingDate === 'string'
       ? dog.dewormingDate.split('T')[0]
       : dog.dewormingDate instanceof Date
-        ? dateToISOString(dog.dewormingDate)
+        ? dateToISOString(dog.dewormingDate as Date)
         : undefined;
   }
   
   if ('vaccinationDate' in dog && dog.vaccinationDate) {
     dbDog.vaccinationDate = typeof dog.vaccinationDate === 'string'
       ? dog.vaccinationDate.split('T')[0]
-      : dog.vaccinationDate instanceof Date
-        ? dateToISOString(dog.vaccinationDate)
+      : dog.vaccinationDate instanceof Date 
+        ? dateToISOString(dog.vaccinationDate as Date)
         : undefined;
   }
   
