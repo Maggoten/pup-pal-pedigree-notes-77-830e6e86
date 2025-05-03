@@ -1,4 +1,5 @@
 
+
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
 
 @tailwind base;
@@ -9,22 +10,22 @@
   :root {
     /* Light Mode Colors - Based on new color scheme */
     --background: 33 29% 93%; /* Warm beige background #F3EEE7 */
-    --foreground: 0 0% 29%; /* Dark gray #4A4A4A for text */
+    --foreground: 20 6% 23%; /* Dark chocolate gray #3F3B36 for text */
 
     --card: 0 0% 100%; /* White #FFFFFF */
-    --card-foreground: 0 0% 29%; /* Dark gray #4A4A4A */
+    --card-foreground: 20 6% 23%; /* Dark chocolate gray #3F3B36 */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 29%;
+    --popover-foreground: 20 6% 23%;
 
-    --primary: 84 20% 30%; /* Warm green #4A5A3C */
+    --primary: 120 48% 28%; /* Rich natural green #296B26 */
     --primary-foreground: 0 0% 100%; /* White text on primary */
 
     --secondary: 33 15% 86%; /* Light sand #E7DED4 */
-    --secondary-foreground: 0 0% 29%; /* Dark gray text on secondary */
+    --secondary-foreground: 20 6% 23%; /* Dark chocolate gray text on secondary */
 
     --muted: 33 15% 86%; /* Light sand */
-    --muted-foreground: 0 0% 45%; /* Lighter dark gray */
+    --muted-foreground: 20 6% 36%; /* Lighter dark gray */
 
     --accent: 18 48% 44%; /* Rust brown #A65A3A */
     --accent-foreground: 0 0% 100%; /* White text on accent */
@@ -34,38 +35,38 @@
 
     --border: 33 15% 80%; /* Slightly darker than secondary */
     --input: 33 15% 80%;
-    --ring: 84 20% 30%; /* Warm green */
+    --ring: 120 48% 28%; /* Rich natural green */
 
     --radius: 1rem; /* Larger rounded corners */
 
     --sidebar-background: 33 29% 93%;
-    --sidebar-foreground: 0 0% 29%;
-    --sidebar-primary: 84 20% 30%;
+    --sidebar-foreground: 20 6% 23%;
+    --sidebar-primary: 120 48% 28%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 33 15% 86%;
-    --sidebar-accent-foreground: 0 0% 29%;
+    --sidebar-accent-foreground: 20 6% 23%;
     --sidebar-border: 33 15% 80%;
     --sidebar-ring: 33 15% 60%;
   }
 
   .dark {
-    --background: 84 20% 10%; /* Dark warm green background */
+    --background: 120 48% 10%; /* Dark rich green background */
     --foreground: 33 29% 93%; /* Light warm beige for text */
 
-    --card: 84 20% 15%; /* Slightly lighter than background */
+    --card: 120 48% 15%; /* Slightly lighter than background */
     --card-foreground: 33 29% 93%;
 
-    --popover: 84 20% 15%;
+    --popover: 120 48% 15%;
     --popover-foreground: 33 29% 93%;
 
-    --primary: 84 20% 40%; /* Brighter warm green */
+    --primary: 120 48% 40%; /* Brighter rich green */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 84 20% 20%;
+    --secondary: 120 48% 20%;
     --secondary-foreground: 33 29% 93%;
 
-    --muted: 84 20% 20%;
-    --muted-foreground: 84 20% 70%;
+    --muted: 120 48% 20%;
+    --muted-foreground: 120 48% 70%;
 
     --accent: 18 48% 50%; /* Brighter rust brown */
     --accent-foreground: 0 0% 100%;
@@ -73,17 +74,17 @@
     --destructive: 0 62.8% 40.6%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 84 20% 25%;
-    --input: 84 20% 25%;
-    --ring: 84 20% 40%;
+    --border: 120 48% 25%;
+    --input: 120 48% 25%;
+    --ring: 120 48% 40%;
 
-    --sidebar-background: 84 20% 15%;
+    --sidebar-background: 120 48% 15%;
     --sidebar-foreground: 33 29% 93%;
-    --sidebar-primary: 84 20% 40%;
+    --sidebar-primary: 120 48% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 84 20% 20%;
+    --sidebar-accent: 120 48% 20%;
     --sidebar-accent-foreground: 33 29% 93%;
-    --sidebar-border: 84 20% 25%;
+    --sidebar-border: 120 48% 25%;
     --sidebar-ring: 33 15% 50%;
   }
 }

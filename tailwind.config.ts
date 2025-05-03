@@ -56,7 +56,7 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// New custom colors based on the style guide
+				// Updated custom colors based on the new style guide
 				warmbeige: {
 					DEFAULT: '#F3EEE7',
 					50: '#FAF9F7',
@@ -71,17 +71,17 @@ export default {
 					900: '#3A352E'
 				},
 				warmgreen: {
-					DEFAULT: '#4A5A3C',
-					50: '#EFF2EC',
-					100: '#DFE4D9',
-					200: '#BFC9B4',
-					300: '#9FAE8F',
-					400: '#7F936A',
-					500: '#5F7845',
-					600: '#4A5A3C',
-					700: '#394429',
-					800: '#272E1C',
-					900: '#16190F'
+					DEFAULT: '#296B26',
+					50: '#E8F5E8',
+					100: '#D1EBD0',
+					200: '#A3D6A1',
+					300: '#75C273',
+					400: '#47AD44',
+					500: '#2E8F2B',
+					600: '#296B26',
+					700: '#1F501D',
+					800: '#143513',
+					900: '#0A1A0A'
 				},
 				rustbrown: {
 					DEFAULT: '#A65A3A',
@@ -97,17 +97,17 @@ export default {
 					900: '#291A10'
 				},
 				darkgray: {
-					DEFAULT: '#4A4A4A',
-					50: '#EFEFEF',
-					100: '#DFDFDF',
-					200: '#BFBFBF',
-					300: '#9F9F9F',
-					400: '#7F7F7F',
-					500: '#5F5F5F',
-					600: '#4A4A4A',
-					700: '#373737',
-					800: '#252525',
-					900: '#121212'
+					DEFAULT: '#3F3B36',
+					50: '#EDECEA',
+					100: '#DBD9D5',
+					200: '#B7B3AB',
+					300: '#938E82',
+					400: '#6F6858',
+					500: '#554F42',
+					600: '#3F3B36',
+					700: '#2F2C28',
+					800: '#1F1D1B',
+					900: '#0F0E0D'
 				},
 				// Keep the previous color schemes for compatibility
 				greige: {
