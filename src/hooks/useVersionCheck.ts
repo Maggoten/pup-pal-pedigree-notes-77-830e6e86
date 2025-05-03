@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useNetwork } from '@/providers/NetworkStatusProvider';
+import { Button } from '@/components/ui/button';
 
 const VERSION = '1.0.0'; // This should match your app version
 
