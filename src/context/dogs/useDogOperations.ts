@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Dog, DogDependencies } from '@/types/dogs';
 import { DeletionMode } from '@/services/dogs';
+import { RemoveDogFn } from '../dogs/types';
 
 interface UseDogOperationsProps {
   updateDogBase: (id: string, updates: Partial<Dog>) => Promise<Dog | null>;
@@ -50,7 +51,8 @@ export const useDogOperations = ({
     }
   }, [updateDogBase, activeDog, setActiveDog, refreshDogs, toast]);
 
-  const removeDog = useCallback(async (id: string, mode: DeletionMode = 'soft'): Promise<boolean> => {
+  // Create the base removeDog function
+  const removeDogBase = useCallback(async (id: string, mode: DeletionMode = 'soft'): Promise<boolean> => {
     try {
       await deleteDog(id, mode);
       
@@ -70,8 +72,10 @@ export const useDogOperations = ({
     }
   }, [deleteDog, activeDog, setActiveDog, toast]);
 
-  // Correctly add the checkDependencies method to removeDog
-  removeDog.checkDependencies = deleteDog.checkDependencies;
+  // Use Object.assign to create the composite function with checkDependencies method
+  const removeDog: RemoveDogFn = Object.assign(removeDogBase, {
+    checkDependencies: deleteDog.checkDependencies
+  });
 
   return { updateDog, removeDog };
 };

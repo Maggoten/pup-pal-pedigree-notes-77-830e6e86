@@ -34,15 +34,13 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   // Fix the fetchDogs call to handle the return value properly
   const forceReload = useForceReload(user?.id, async () => {
     await fetchDogs(true);
-    return;
   });
   
   const { updateDog, removeDog } = useDogOperations({
     updateDogBase,
     deleteDog,
     refreshDogs: async () => { 
-      await fetchDogs(true); 
-      return;
+      await fetchDogs(true);
     },
     activeDog,
     setActiveDog
@@ -74,9 +72,14 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   const isLoading = authLoading || (isLoggedIn && dogsLoading && !dogLoadingAttempted);
 
   // Fix the error type to be string or null
-  const errorMessage = error ? 
-    (error instanceof Error ? error.message : String(error)) : 
-    (authLoading ? null : (!isLoggedIn && !user?.id && dogLoadingAttempted ? 'Authentication required' : null));
+  let errorMessage: string | null = null;
+  if (error) {
+    errorMessage = error instanceof Error ? error.message : String(error);
+  } else if (authLoading) {
+    errorMessage = null;
+  } else if (!isLoggedIn && !user?.id && dogLoadingAttempted) {
+    errorMessage = 'Authentication required';
+  }
 
   const value: DogsContextType = {
     dogs,

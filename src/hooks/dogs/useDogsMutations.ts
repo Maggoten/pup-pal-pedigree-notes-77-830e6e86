@@ -2,7 +2,7 @@
 import { useCallback } from 'react';
 import { Dog, DogDependencies } from '@/types/dogs';
 import { useAddDog, useUpdateDog, useDeleteDog } from './mutations';
-import { UseDogsMutations } from './types';
+import { UseDogsMutations, RemoveDogFn } from './types';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { DeletionMode } from '@/services/dogs';
@@ -60,8 +60,8 @@ export const useDogsMutations = (): UseDogsMutations => {
     }
   }, [deleteDogMutation, toast]);
 
-  // Create the deleteDog function with the checkDependencies method
-  const deleteDogWithCheck = useCallback(async (id: string, mode: DeletionMode = 'soft') => {
+  // Create the base deleteDog function
+  const deleteDogBase = useCallback(async (id: string, mode: DeletionMode = 'soft') => {
     try {
       console.log(`useDogsMutations.deleteDog called with ID: ${id}, mode: ${mode}`);
       await deleteDogMutation.deleteDog({ dogId: id, mode });
@@ -77,12 +77,14 @@ export const useDogsMutations = (): UseDogsMutations => {
     }
   }, [deleteDogMutation, toast]);
 
-  // Attach the checkDependencies method to deleteDog
-  deleteDogWithCheck.checkDependencies = checkDogDependencies;
+  // Use Object.assign to create the composite function with checkDependencies method
+  const deleteDog: RemoveDogFn = Object.assign(deleteDogBase, {
+    checkDependencies: checkDogDependencies
+  });
 
   return {
     addDog,
     updateDog,
-    deleteDog: deleteDogWithCheck
+    deleteDog
   };
 };

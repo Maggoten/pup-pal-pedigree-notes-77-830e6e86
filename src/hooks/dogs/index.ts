@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useDogsMutations } from './useDogsMutations';
 import { useDogsQueries } from './useDogsQueries';
-import { UseDogs, UseDogsMutations, UseDogsQueries } from './types';
+import { UseDogs, UseDogsMutations, UseDogsQueries, RemoveDogFn } from './types';
 import { Dog } from '@/types/dogs';
 
 export const useDogs = (): UseDogs => {
@@ -16,8 +16,8 @@ export const useDogs = (): UseDogs => {
     return;
   };
 
-  // Create a removeDog function with checkDependencies attached
-  const removeDog = mutations.deleteDog;
+  // Create a removeDog function using the delete function from mutations
+  const removeDog: RemoveDogFn = mutations.deleteDog;
 
   return {
     ...queries,
@@ -30,4 +30,4 @@ export const useDogs = (): UseDogs => {
 };
 
 // Export types
-export type { UseDogs, UseDogsMutations, UseDogsQueries } from './types';
+export type { UseDogs, UseDogsMutations, UseDogsQueries, RemoveDogFn } from './types';
