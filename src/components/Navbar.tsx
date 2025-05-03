@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar, Heart } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -20,6 +19,11 @@ export const Navbar: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   
   const isActive = (path: string) => {
+    // Special case for pregnancy routes
+    if (path === "/pregnancy" && location.pathname.startsWith("/pregnancy")) {
+      return true;
+    }
+    // Default behavior for other routes
     return location.pathname === path;
   };
   
