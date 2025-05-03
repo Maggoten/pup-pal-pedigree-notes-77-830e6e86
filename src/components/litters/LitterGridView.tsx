@@ -4,6 +4,7 @@ import { Litter } from '@/types/breeding';
 import LitterCard from './LitterCard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Loader2 } from 'lucide-react';
+import { useVirtualWindow } from '@/hooks/litters/operations/useVirtualWindow';
 
 interface LitterGridViewProps {
   litters: Litter[];
@@ -49,9 +50,13 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
 }) => {
   const isMobile = useIsMobile();
   
+  // Use the optimized virtualization hook
+  const { visibleLitters, loadMore } = useVirtualWindow(litters);
+  
   // Only compute this when dependencies change
-  const visibleLitters = useMemo(() => {
-    return litters.map(litter => (
+  const renderedLitters = useMemo(() => {
+    console.log(`Rendering ${visibleLitters.length} litters in grid view`);
+    return visibleLitters.map(litter => (
       <MemoizedLitterCard
         key={litter.id}
         litter={litter}
@@ -60,18 +65,27 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
         isSelected={selectedLitterId === litter.id}
       />
     ));
-  }, [litters, selectedLitterId, onSelectLitter, onArchive]);
+  }, [visibleLitters, selectedLitterId, onSelectLitter, onArchive]);
+  
+  // Handle scrolling for virtualization
+  const handleLoadMoreClick = () => {
+    if (onLoadMore) {
+      onLoadMore();
+    } else {
+      loadMore();
+    }
+  };
   
   return (
     <div className="space-y-4 animate-fade-in">
       <div className={`grid grid-cols-1 ${isMobile ? '' : 'sm:grid-cols-2 lg:grid-cols-3'} gap-4`}>
-        {visibleLitters}
+        {renderedLitters}
       </div>
       
       {hasMore && (
         <div 
           className="col-span-full text-center py-4 text-sm text-muted-foreground cursor-pointer hover:text-primary transition-colors"
-          onClick={onLoadMore}
+          onClick={handleLoadMoreClick}
         >
           {loadingMore ? (
             <div className="flex items-center justify-center gap-2">

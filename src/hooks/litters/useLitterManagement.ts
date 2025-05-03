@@ -1,3 +1,4 @@
+
 import { useEffect, useCallback } from 'react';
 import { Litter, Puppy } from '@/types/breeding';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,16 +20,24 @@ export function useLitterManagement() {
     setArchivedLitters,
     selectedLitterId,
     setSelectedLitterId,
+    selectedLitterDetails,
+    setSelectedLitterDetails,
     plannedLitters,
     setPlannedLitters,
     isLoading,
     setIsLoading,
+    isLoadingDetails,
+    setIsLoadingDetails,
     showAddLitterDialog,
     setShowAddLitterDialog
   } = useLitterState();
   
-  // Use the loading hooks
-  const { loadLittersData, loadPlannedLitters } = useLitterLoading(
+  // Use the loading hooks with new detail loading capability
+  const { 
+    loadLittersData, 
+    loadPlannedLitters,
+    loadLitterDetails 
+  } = useLitterLoading(
     setActiveLitters,
     setArchivedLitters,
     selectedLitterId,
@@ -54,7 +63,7 @@ export function useLitterManagement() {
     setSelectedLitterId,
     activeLitters,
     archivedLitters,
-    selectedLitterId  // Pass selectedLitterId here
+    selectedLitterId
   );
   
   // Use utility functions
@@ -82,13 +91,22 @@ export function useLitterManagement() {
     }
   }, [loadLittersData, loadPlannedLitters, setupSubscription, user?.id]);
   
+  // Load detailed litter data when selectedLitterId changes
+  useEffect(() => {
+    if (selectedLitterId && user?.id) {
+      console.log("Selected litter changed, loading details:", selectedLitterId);
+      loadLitterDetails(selectedLitterId);
+    }
+  }, [selectedLitterId, user?.id, loadLitterDetails]);
+  
   // Handle selecting a litter
   const handleSelectLitter = useCallback((litter: Litter) => {
+    console.log("Selected litter:", litter.id);
     setSelectedLitterId(litter.id);
   }, [setSelectedLitterId]);
   
-  // Get the currently selected litter
-  const selectedLitter = findSelectedLitter(selectedLitterId);
+  // Get the currently selected litter - prioritize detailed data if available
+  const selectedLitter = selectedLitterDetails || findSelectedLitter(selectedLitterId);
   
   // Create wrapper functions with proper parameters
   const handleUpdateLitter = useCallback((litter: Litter) => {
@@ -117,6 +135,7 @@ export function useLitterManagement() {
     setShowAddLitterDialog,
     selectedLitter,
     isLoading,
+    isLoadingDetails,
     handleAddLitter,
     handleUpdateLitter,
     handleAddPuppy,

@@ -7,7 +7,8 @@ class LitterService {
   private readonly STORAGE_KEY = 'litters';
 
   /**
-   * Load litters from Supabase
+   * Load basic litter data without puppies or detailed information
+   * This improves initial page load performance
    */
   async loadLitters(): Promise<Litter[]> {
     try {
@@ -22,15 +23,12 @@ class LitterService {
         throw new Error("No active session found");
       }
 
-      console.log("Loading litters for user:", sessionData.session.user.id);
+      console.log("Loading basic litter data for user:", sessionData.session.user.id);
 
-      // Fetch litters from Supabase
+      // Fetch basic litter data without puppies to improve load time
       const { data: litters, error } = await supabase
         .from('litters')
-        .select(`
-          *,
-          puppies(*)
-        `)
+        .select('*')
         .eq('user_id', sessionData.session.user.id);
 
       if (error) {
@@ -38,95 +36,151 @@ class LitterService {
         throw error;
       }
 
-      console.log("Litters loaded from Supabase:", litters);
+      console.log("Basic litter data loaded from Supabase:", litters?.length || 0, "litters");
 
       if (!litters || litters.length === 0) {
         console.log("No litters found for user");
         return [];
       }
 
-      // Now fetch weight and height logs for each puppy
-      const littersWithDetailedPuppies = await Promise.all((litters || []).map(async litter => {
-        const puppiesWithDetails = await Promise.all((litter.puppies || []).map(async puppy => {
-          console.log("Processing puppy:", puppy.id, puppy.name);
-          
-          // Fetch weight logs
-          const { data: weightLogs, error: weightError } = await supabase
-            .from('puppy_weight_logs')
-            .select('*')
-            .eq('puppy_id', puppy.id);
-          
-          if (weightError) console.error("Error loading weight logs:", weightError);
-          else console.log(`Found ${weightLogs?.length || 0} weight logs for puppy ${puppy.id}`);
-          
-          // Fetch height logs
-          const { data: heightLogs, error: heightError } = await supabase
-            .from('puppy_height_logs')
-            .select('*')
-            .eq('puppy_id', puppy.id);
-          
-          if (heightError) console.error("Error loading height logs:", heightError);
-          else console.log(`Found ${heightLogs?.length || 0} height logs for puppy ${puppy.id}`);
-          
-          // Fetch notes
-          const { data: notes, error: notesError } = await supabase
-            .from('puppy_notes')
-            .select('*')
-            .eq('puppy_id', puppy.id);
-          
-          if (notesError) console.error("Error loading puppy notes:", notesError);
+      // Map the basic litter data to our Litter type
+      const mappedLitters = litters.map(litter => ({
+        id: litter.id,
+        name: litter.name,
+        dateOfBirth: litter.date_of_birth,
+        sireId: litter.sire_id || '',
+        damId: litter.dam_id || '',
+        sireName: litter.sire_name || '',
+        damName: litter.dam_name || '',
+        puppies: [], // Initialize with empty puppies array
+        archived: litter.archived || false,
+        user_id: litter.user_id
+      }));
 
-          // Ensure gender is one of the allowed values for our type
-          const puppyGender = (puppy.gender === 'male' || puppy.gender === 'female') 
-            ? puppy.gender as 'male' | 'female' 
-            : 'male'; // Default to male if invalid value
+      console.log("Mapped basic litter data:", mappedLitters.length, "litters");
+      return mappedLitters;
+    } catch (error) {
+      console.error("Error in loadLitters:", error);
+      throw error;
+    }
+  }
 
-          return {
-            id: puppy.id,
-            name: puppy.name,
-            gender: puppyGender,
-            color: puppy.color || '',
-            markings: puppy.markings,
-            birthWeight: puppy.birth_weight,
-            currentWeight: puppy.current_weight,
-            sold: puppy.sold || false,
-            reserved: puppy.reserved || false,
-            newOwner: puppy.new_owner,
-            collar: puppy.collar,
-            microchip: puppy.microchip,
-            breed: puppy.breed,
-            imageUrl: puppy.image_url,
-            birthDateTime: puppy.birth_date_time,
-            notes: notes || [],
-            weightLog: weightLogs ? weightLogs.map(log => ({
-              date: log.date,
-              weight: log.weight
-            })) : [],
-            heightLog: heightLogs ? heightLogs.map(log => ({
-              date: log.date,
-              height: log.height
-            })) : []
-          };
-        }));
+  /**
+   * Get detailed information for a specific litter including puppies and their logs
+   */
+  async getLitterDetails(litterId: string): Promise<Litter | null> {
+    try {
+      console.log(`Loading detailed data for litter: ${litterId}`);
+
+      // Get the session
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData.session) {
+        console.error("Session error or no session found");
+        throw sessionError || new Error("No active session");
+      }
+
+      // Fetch the specific litter with its puppies
+      const { data: litter, error: litterError } = await supabase
+        .from('litters')
+        .select(`
+          *,
+          puppies(*)
+        `)
+        .eq('id', litterId)
+        .eq('user_id', sessionData.session.user.id)
+        .single();
+
+      if (litterError) {
+        console.error("Error loading litter details:", litterError);
+        throw litterError;
+      }
+
+      if (!litter) {
+        console.log("No litter found with ID:", litterId);
+        return null;
+      }
+
+      // Process puppies with detailed information
+      const puppiesWithDetails = await Promise.all((litter.puppies || []).map(async puppy => {
+        console.log("Processing puppy:", puppy.id, puppy.name);
+        
+        // Fetch weight logs
+        const { data: weightLogs, error: weightError } = await supabase
+          .from('puppy_weight_logs')
+          .select('*')
+          .eq('puppy_id', puppy.id);
+        
+        if (weightError) console.error("Error loading weight logs:", weightError);
+        else console.log(`Found ${weightLogs?.length || 0} weight logs for puppy ${puppy.id}`);
+        
+        // Fetch height logs
+        const { data: heightLogs, error: heightError } = await supabase
+          .from('puppy_height_logs')
+          .select('*')
+          .eq('puppy_id', puppy.id);
+        
+        if (heightError) console.error("Error loading height logs:", heightError);
+        else console.log(`Found ${heightLogs?.length || 0} height logs for puppy ${puppy.id}`);
+        
+        // Fetch notes
+        const { data: notes, error: notesError } = await supabase
+          .from('puppy_notes')
+          .select('*')
+          .eq('puppy_id', puppy.id);
+        
+        if (notesError) console.error("Error loading puppy notes:", notesError);
+
+        // Ensure gender is one of the allowed values for our type
+        const puppyGender = (puppy.gender === 'male' || puppy.gender === 'female') 
+          ? puppy.gender as 'male' | 'female' 
+          : 'male'; // Default to male if invalid value
 
         return {
-          id: litter.id,
-          name: litter.name,
-          dateOfBirth: litter.date_of_birth,
-          sireId: litter.sire_id || '',
-          damId: litter.dam_id || '',
-          sireName: litter.sire_name || '',
-          damName: litter.dam_name || '',
-          puppies: puppiesWithDetails,  // FIX 1: Changed from puppiesWithDetailedPuppies to puppiesWithDetails
-          archived: litter.archived || false,
-          user_id: litter.user_id
+          id: puppy.id,
+          name: puppy.name,
+          gender: puppyGender,
+          color: puppy.color || '',
+          markings: puppy.markings,
+          birthWeight: puppy.birth_weight,
+          currentWeight: puppy.current_weight,
+          sold: puppy.sold || false,
+          reserved: puppy.reserved || false,
+          newOwner: puppy.new_owner,
+          collar: puppy.collar,
+          microchip: puppy.microchip,
+          breed: puppy.breed,
+          imageUrl: puppy.image_url,
+          birthDateTime: puppy.birth_date_time,
+          notes: notes || [],
+          weightLog: weightLogs ? weightLogs.map(log => ({
+            date: log.date,
+            weight: log.weight
+          })) : [],
+          heightLog: heightLogs ? heightLogs.map(log => ({
+            date: log.date,
+            height: log.height
+          })) : []
         };
       }));
 
-      console.log("Returning processed litters:", littersWithDetailedPuppies);
-      return littersWithDetailedPuppies;
+      // Return the litter with detailed puppies
+      const detailedLitter: Litter = {
+        id: litter.id,
+        name: litter.name,
+        dateOfBirth: litter.date_of_birth,
+        sireId: litter.sire_id || '',
+        damId: litter.dam_id || '',
+        sireName: litter.sire_name || '',
+        damName: litter.dam_name || '',
+        puppies: puppiesWithDetails,
+        archived: litter.archived || false,
+        user_id: litter.user_id
+      };
+
+      console.log("Loaded detailed litter data:", detailedLitter.name, "with", puppiesWithDetails.length, "puppies");
+      return detailedLitter;
     } catch (error) {
-      console.error("Error in loadLitters:", error);
+      console.error("Error in getLitterDetails:", error);
       throw error;
     }
   }
@@ -761,10 +815,10 @@ class LitterService {
    */
   async getActiveLitters(): Promise<Litter[]> {
     try {
-      const litters = await this.loadLitters();
+      const litters = await this.loadLitters(); // Use the optimized loadLitters method
       console.log("Get active litters - all litters:", litters);
       const activeLitters = litters.filter(litter => !litter.archived);
-      console.log("Active litters:", activeLitters);
+      console.log("Active litters:", activeLitters.length);
       return activeLitters;
     } catch (error) {
       console.error("Error getting active litters:", error);
@@ -777,9 +831,9 @@ class LitterService {
    */
   async getArchivedLitters(): Promise<Litter[]> {
     try {
-      const litters = await this.loadLitters();
+      const litters = await this.loadLitters(); // Use the optimized loadLitters method
       const archivedLitters = litters.filter(litter => litter.archived);
-      console.log("Archived litters:", archivedLitters);
+      console.log("Archived litters:", archivedLitters.length);
       return archivedLitters;
     } catch (error) {
       console.error("Error getting archived litters:", error);

@@ -1,29 +1,35 @@
 
 import { useState } from 'react';
-import { Litter, Puppy } from '@/types/breeding';
+import { Litter } from '@/types/breeding';
 
 export function useLitterState() {
-  // State for litters data
+  // Lists of litters
   const [activeLitters, setActiveLitters] = useState<Litter[]>([]);
   const [archivedLitters, setArchivedLitters] = useState<Litter[]>([]);
-  const [selectedLitterId, setSelectedLitterId] = useState<string | null>(null);
-  const [plannedLitters, setPlannedLitters] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [plannedLitters, setPlannedLitters] = useState<any[]>([]);
   
-  // UI state
-  const [showAddLitterDialog, setShowAddLitterDialog] = useState(false);
+  // Selection and UI state
+  const [selectedLitterId, setSelectedLitterId] = useState<string | null>(null);
+  const [selectedLitterDetails, setSelectedLitterDetails] = useState<Litter | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoadingDetails, setIsLoadingDetails] = useState<boolean>(false);
+  const [showAddLitterDialog, setShowAddLitterDialog] = useState<boolean>(false);
 
   return {
     activeLitters,
     setActiveLitters,
-    archivedLitters, 
+    archivedLitters,
     setArchivedLitters,
-    selectedLitterId,
-    setSelectedLitterId,
     plannedLitters,
     setPlannedLitters,
+    selectedLitterId,
+    setSelectedLitterId,
+    selectedLitterDetails,
+    setSelectedLitterDetails,
     isLoading,
     setIsLoading,
+    isLoadingDetails,
+    setIsLoadingDetails,
     showAddLitterDialog,
     setShowAddLitterDialog
   };

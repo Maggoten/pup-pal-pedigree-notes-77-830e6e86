@@ -47,6 +47,7 @@ const MyLittersContent: React.FC = () => {
     setShowAddLitterDialog,
     selectedLitter,
     isLoading,
+    isLoadingDetails,
     handleAddLitter,
     handleUpdateLitter,
     handleDeleteLitter,
@@ -170,19 +171,28 @@ const MyLittersContent: React.FC = () => {
         </Tabs>
       </div>
       
-      {selectedLitter && (
+      {selectedLitterId && (
         <div className="mt-6 animate-fade-in space-y-6">
           <div className="bg-greige-50 rounded-lg border border-greige-300 p-4">
             <Suspense fallback={<LoadingSkeleton />}>
-              <SelectedLitterSection
-                litter={selectedLitter}
-                onUpdateLitter={handleUpdateLitter}
-                onDeleteLitter={handleDeleteLitter}
-                onArchiveLitter={handleArchiveLitter}
-                onAddPuppy={handleAddPuppy}
-                onUpdatePuppy={handleUpdatePuppy}
-                onDeletePuppy={handleDeletePuppy}
-              />
+              {isLoadingDetails && !selectedLitter ? (
+                <LoadingSkeleton />
+              ) : selectedLitter ? (
+                <SelectedLitterSection
+                  litter={selectedLitter}
+                  onUpdateLitter={handleUpdateLitter}
+                  onDeleteLitter={handleDeleteLitter}
+                  onArchiveLitter={handleArchiveLitter}
+                  onAddPuppy={handleAddPuppy}
+                  onUpdatePuppy={handleUpdatePuppy}
+                  onDeletePuppy={handleDeletePuppy}
+                />
+              ) : (
+                <div className="text-center py-6">
+                  <h3 className="text-lg font-medium">No litter details available</h3>
+                  <p className="text-muted-foreground mt-2">Select a litter to view details</p>
+                </div>
+              )}
             </Suspense>
           </div>
         </div>

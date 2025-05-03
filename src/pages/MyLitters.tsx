@@ -19,7 +19,7 @@ const MyLittersLoading = () => (
 
 const MyLitters: React.FC = () => {
   return (
-    <div className="bg-greige-50">
+    <div className="bg-greige-50 min-h-full">
       <LitterFilterProvider>
         <Suspense fallback={<MyLittersLoading />}>
           <MyLittersContent />
