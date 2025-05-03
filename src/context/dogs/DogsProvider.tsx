@@ -34,6 +34,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   // Fix the fetchDogs call to handle the return value properly
   const forceReload = useForceReload(user?.id, async () => {
     await fetchDogs(true);
+    return [];
   });
   
   const { updateDog, removeDog } = useDogOperations({

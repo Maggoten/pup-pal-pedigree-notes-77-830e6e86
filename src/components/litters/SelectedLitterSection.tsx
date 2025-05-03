@@ -1,8 +1,9 @@
+
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import PuppiesTable from '../puppies/PuppiesTable';
-import { Dog, Litter } from '@/types/dogs';
-import { useDogs } from '@/context/DogsContext';
+import { Litter } from '@/types/breeding';
+import { useDogsContext } from '@/hooks/useDogsContext';
 import { ArrowLeft } from 'lucide-react';
 
 interface SelectedLitterSectionProps {
@@ -11,7 +12,7 @@ interface SelectedLitterSectionProps {
 }
 
 const SelectedLitterSection = ({ litter, onBackClick }: SelectedLitterSectionProps) => {
-  const { dogs } = useDogs();
+  const { dogs } = useDogsContext();
   
   return (
     <div>
@@ -24,7 +25,7 @@ const SelectedLitterSection = ({ litter, onBackClick }: SelectedLitterSectionPro
       
       {/* Add your litter details here */}
       
-      <PuppiesTable litter={litter} />
+      <PuppiesTable puppies={litter.puppies} />
     </div>
   );
 };
