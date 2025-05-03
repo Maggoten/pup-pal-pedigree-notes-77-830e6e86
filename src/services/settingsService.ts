@@ -96,6 +96,35 @@ export const updatePersonalInfo = async (
   }
 };
 
+export const cancelSubscription = async (user: User | null): Promise<boolean> => {
+  if (!user?.id) {
+    throw new Error('User ID is required');
+  }
+  
+  try {
+    // In a real implementation, this would call a Supabase edge function
+    // that would interact with the payment provider's API to cancel the subscription
+    
+    // Update the user's subscription status in the database
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        subscription_status: 'free', // Will be downgraded at the end of the billing period
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', user.id);
+    
+    if (error) {
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error cancelling subscription:', error);
+    throw error;
+  }
+};
+
 export const addSharedUser = async (
   user: User | null, 
   email: string, 

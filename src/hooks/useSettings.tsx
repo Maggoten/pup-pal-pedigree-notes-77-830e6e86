@@ -6,8 +6,10 @@ import {
   updateKennelInfo, 
   updatePersonalInfo,
   addSharedUser,
-  removeSharedUser
+  removeSharedUser,
+  cancelSubscription
 } from '@/services/settingsService';
+import { deleteUserAccount } from '@/services/authService';
 import { KennelInfo, UserSettings, SharedUser } from '@/types/settings';
 import { toast } from '@/components/ui/use-toast';
 
@@ -132,6 +134,43 @@ export const useSettings = () => {
     },
   });
 
+  // Cancel subscription
+  const cancelSubscriptionMutation = useMutation({
+    mutationFn: () => cancelSubscription(user),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings', user?.email] });
+      toast({
+        title: "Subscription cancelled",
+        description: "Your subscription has been cancelled. You'll still have access until the end of your billing period.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to cancel subscription",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete account
+  const deleteAccountMutation = useMutation({
+    mutationFn: (password: string) => deleteUserAccount(password),
+    onSuccess: () => {
+      toast({
+        title: "Account deleted",
+        description: "Your account has been deleted. You will be logged out shortly.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to delete account",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     settings,
     isLoading,
@@ -142,9 +181,13 @@ export const useSettings = () => {
     addSharedUser: (email: string, role: 'admin' | 'editor' | 'viewer') => 
       addSharedUserMutation.mutate({ email, role }),
     removeSharedUser: (sharedUserId: string) => removeSharedUserMutation.mutate(sharedUserId),
+    cancelSubscription: () => cancelSubscriptionMutation.mutate(),
+    deleteAccount: (password: string) => deleteAccountMutation.mutate(password),
     isUpdatingKennel: updateKennelInfoMutation.isPending,
     isUpdatingPersonal: updatePersonalInfoMutation.isPending,
     isAddingSharedUser: addSharedUserMutation.isPending,
-    isRemovingSharedUser: removeSharedUserMutation.isPending
+    isRemovingSharedUser: removeSharedUserMutation.isPending,
+    isCancellingSubscription: cancelSubscriptionMutation.isPending,
+    isDeletingAccount: deleteAccountMutation.isPending
   };
 };

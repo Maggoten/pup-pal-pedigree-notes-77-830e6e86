@@ -1,3 +1,4 @@
+
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
 
@@ -65,6 +66,37 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
   } catch (error) {
     console.error("Registration error:", error);
     return null;
+  }
+};
+
+// Delete user account
+export const deleteUserAccount = async (password: string): Promise<boolean> => {
+  try {
+    // First verify the user's password
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: supabase.auth.getUser().then(({ data }) => data.user?.email || ''),
+      password
+    });
+    
+    if (verifyError) {
+      console.error("Password verification error:", verifyError);
+      return false;
+    }
+    
+    // Delete user account from Supabase Auth (this will cascade to profiles via RLS)
+    const { error } = await supabase.auth.admin.deleteUser(
+      supabase.auth.getUser().then(({ data }) => data.user?.id || '')
+    );
+    
+    if (error) {
+      console.error("Delete account error:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Delete account error:", error);
+    return false;
   }
 };
 
