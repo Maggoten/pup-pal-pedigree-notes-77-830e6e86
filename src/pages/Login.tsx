@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -118,10 +117,7 @@ const Login: React.FC = () => {
   const effectiveLoading = isLoading || authLoading;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-greige-50 p-4">
-      <div className="text-center mb-8">
-        {/* Removed the Breeding Journey text */}
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       {!showPayment ? (
         <AuthTabs 
           onLogin={handleLogin}
