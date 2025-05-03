@@ -2,16 +2,31 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import PuppiesTable from '../puppies/PuppiesTable';
-import { Litter } from '@/types/breeding';
+import { Litter, Puppy } from '@/types/breeding';
 import { useDogsContext } from '@/hooks/useDogsContext';
 import { ArrowLeft } from 'lucide-react';
 
 interface SelectedLitterSectionProps {
   litter: Litter;
   onBackClick: () => void;
+  onUpdateLitter?: (updatedLitter: Litter) => Promise<void>;
+  onDeleteLitter?: (litterId: string) => Promise<void>;
+  onArchiveLitter?: (litterId: string, archive: boolean) => Promise<void>;
+  onAddPuppy?: (newPuppy: Puppy) => Promise<void>;
+  onUpdatePuppy?: (updatedPuppy: Puppy) => Promise<void>;
+  onDeletePuppy?: (puppyId: string) => Promise<void>;
 }
 
-const SelectedLitterSection = ({ litter, onBackClick }: SelectedLitterSectionProps) => {
+const SelectedLitterSection = ({ 
+  litter, 
+  onBackClick,
+  onUpdateLitter,
+  onDeleteLitter,
+  onArchiveLitter,
+  onAddPuppy,
+  onUpdatePuppy,
+  onDeletePuppy 
+}: SelectedLitterSectionProps) => {
   const { dogs } = useDogsContext();
   
   return (
