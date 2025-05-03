@@ -1,5 +1,5 @@
 
-import React, { memo, Suspense, lazy } from 'react';
+import React, { memo, Suspense, lazy, useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useDogs } from '@/context/DogsContext';
 import { Loader2 } from 'lucide-react';
@@ -35,6 +35,7 @@ const CalendarSkeleton = () => (
 // Use memo to prevent unnecessary re-renders
 const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) => {
   const { dogs } = useDogs();
+  const [showLoading, setShowLoading] = useState(true);
   
   // If no events data is provided, we need to fetch it - for backward compatibility
   // We'll use the provided eventsData directly from props if available
@@ -55,6 +56,23 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
     isLoading: true, 
     hasError: false 
   };
+  
+  // Force show content after a timeout to prevent infinite loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        console.log("Forcing calendar to show after timeout");
+        setShowLoading(false);
+      }
+    }, 3000);
+    
+    // If not loading, immediately show content
+    if (!isLoading) {
+      setShowLoading(false);
+    }
+    
+    return () => clearTimeout(timer);
+  }, [isLoading]);
   
   // Create wrapper functions to handle the async nature of the original functions
   const handleAddEvent = (data: AddEventFormValues) => {
@@ -82,7 +100,7 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
   return (
     <Card className="border-warmbeige-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 bg-warmbeige-50 flex flex-col">
       <div className="flex flex-col">
-        {isLoading ? (
+        {showLoading ? (
           <CalendarSkeleton />
         ) : hasError ? (
           <div className="p-6 flex items-center justify-center">

@@ -41,7 +41,7 @@ export const useBreedingRemindersProvider = () => {
     isLoading, 
     error: hasError 
   } = useQuery({
-    queryKey: ['reminders', user?.id, dogs.length],
+    queryKey: ['reminders', user?.id],
     queryFn: async () => {
       if (!user) return [];
       
@@ -59,13 +59,13 @@ export const useBreedingRemindersProvider = () => {
       console.log(`[Reminders Provider] Found ${userDogs.length} dogs belonging to user`);
       
       // Generate all reminders in sequence
-      const dogReminders = generateDogReminders(userDogs);
+      const dogReminders = userDogs.length > 0 ? generateDogReminders(userDogs) : [];
       console.log(`[Reminders Provider] Generated ${dogReminders.length} dog reminders`);
       
       const litterReminders = await generateLitterReminders(user.id);
       console.log(`[Reminders Provider] Generated ${litterReminders.length} litter reminders`);
       
-      const generalReminders = generateGeneralReminders(userDogs);
+      const generalReminders = userDogs.length > 0 ? generateGeneralReminders(userDogs) : [];
       console.log(`[Reminders Provider] Generated ${generalReminders.length} general reminders`);
       
       // Return all reminders at once
@@ -74,7 +74,7 @@ export const useBreedingRemindersProvider = () => {
       
       return allReminders;
     },
-    enabled: !!user && dogs.length > 0,
+    enabled: !!user, // Only depends on user being logged in, not on dogs.length
     staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
     retry: 1, // Only retry once to prevent excessive attempts
     refetchOnMount: true,
@@ -98,13 +98,13 @@ export const useBreedingRemindersProvider = () => {
     },
     onMutate: async ({ id, isCompleted }) => {
       // Cancel any outgoing refetches to avoid overwriting our optimistic update
-      await queryClient.cancelQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+      await queryClient.cancelQueries({ queryKey: ['reminders', user?.id] });
       
       // Snapshot the previous value
-      const previousReminders = queryClient.getQueryData(['reminders', user?.id, dogs.length]);
+      const previousReminders = queryClient.getQueryData(['reminders', user?.id]);
       
       // Optimistically update the cache
-      queryClient.setQueryData(['reminders', user?.id, dogs.length], (old: Reminder[] = []) => 
+      queryClient.setQueryData(['reminders', user?.id], (old: Reminder[] = []) => 
         old.map(r => r.id === id ? {...r, isCompleted} : r)
       );
       
@@ -114,14 +114,14 @@ export const useBreedingRemindersProvider = () => {
       console.error("Error marking reminder complete:", err);
       // Rollback to the previous state
       if (context?.previousReminders) {
-        queryClient.setQueryData(['reminders', user?.id, dogs.length], context.previousReminders);
+        queryClient.setQueryData(['reminders', user?.id], context.previousReminders);
       }
     },
     onSuccess: (result, { id, isCompleted }) => {
       console.log(`[Reminders Provider] Successfully marked reminder ${id} as ${isCompleted ? 'completed' : 'not completed'}`);
       
       // Keep the optimistic update in the query cache
-      queryClient.setQueryData(['reminders', user?.id, dogs.length], (old: Reminder[] = []) => 
+      queryClient.setQueryData(['reminders', user?.id], (old: Reminder[] = []) => 
         old.map(r => r.id === id ? {...r, isCompleted} : r)
       );
       
@@ -146,7 +146,7 @@ export const useBreedingRemindersProvider = () => {
       });
       
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+      queryClient.invalidateQueries({ queryKey: ['reminders', user?.id] });
     },
     onError: (error) => {
       console.error("Error adding reminder:", error);
@@ -168,13 +168,13 @@ export const useBreedingRemindersProvider = () => {
     },
     onMutate: async (id) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+      await queryClient.cancelQueries({ queryKey: ['reminders', user?.id] });
       
       // Snapshot the previous value
-      const previousReminders = queryClient.getQueryData(['reminders', user?.id, dogs.length]);
+      const previousReminders = queryClient.getQueryData(['reminders', user?.id]);
       
       // Optimistically update
-      queryClient.setQueryData(['reminders', user?.id, dogs.length], (old: Reminder[] = []) => 
+      queryClient.setQueryData(['reminders', user?.id], (old: Reminder[] = []) => 
         old.filter(r => r.id !== id)
       );
       
@@ -184,7 +184,7 @@ export const useBreedingRemindersProvider = () => {
       console.error("Error deleting reminder:", err);
       // Rollback on error
       if (context?.previousReminders) {
-        queryClient.setQueryData(['reminders', user?.id, dogs.length], context.previousReminders);
+        queryClient.setQueryData(['reminders', user?.id], context.previousReminders);
       }
     },
     onSuccess: () => {
@@ -226,7 +226,7 @@ export const useBreedingRemindersProvider = () => {
   
   // Force refetch function for manual refresh
   const refreshReminderData = () => {
-    queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+    queryClient.invalidateQueries({ queryKey: ['reminders', user?.id] });
   };
   
   return {

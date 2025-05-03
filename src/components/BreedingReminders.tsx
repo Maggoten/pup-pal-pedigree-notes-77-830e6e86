@@ -1,5 +1,5 @@
 
-import React, { useState, memo, Suspense, lazy } from 'react';
+import React, { useState, memo, Suspense, lazy, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BellRing, PawPrint, Loader2, Bell } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -40,6 +40,7 @@ const RemindersListSkeleton = () => (
 // Use memo to prevent unnecessary re-renders
 const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersData }) => {
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
+  const [showLoading, setShowLoading] = useState(true);
   
   // Use provided data or empty defaults
   const { 
@@ -48,6 +49,23 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
     hasError = false, 
     handleMarkComplete = () => {} 
   } = remindersData || {};
+  
+  // Force show content after a timeout to prevent infinite loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        console.log("Forcing reminders to show after timeout");
+        setShowLoading(false);
+      }
+    }, 3000);
+    
+    // If not loading, immediately show content
+    if (!isLoading) {
+      setShowLoading(false);
+    }
+    
+    return () => clearTimeout(timer);
+  }, [isLoading]);
   
   // Memoize the priority filtering logic to avoid recalculating on every render
   const displayReminders = React.useMemo(() => {
@@ -114,7 +132,7 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0 flex flex-col overflow-hidden">
-          {isLoading ? (
+          {showLoading ? (
             <div className="flex flex-col items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
               <span className="text-sm text-muted-foreground">Loading reminders...</span>

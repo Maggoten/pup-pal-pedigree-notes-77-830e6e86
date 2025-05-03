@@ -12,9 +12,11 @@ export const useDashboardData = () => {
   const [isDataReady, setIsDataReady] = useState<boolean>(false);
   const [plannedLittersData, setPlannedLittersData] = useState({ count: 0, nextDate: null as Date | null });
   const [recentLittersData, setRecentLittersData] = useState({ count: 0, latest: null as Date | null });
+  const [littersLoaded, setLittersLoaded] = useState<boolean>(false);
+  const [initialLoadAttempted, setInitialLoadAttempted] = useState<boolean>(false);
   
   // Centralized data fetching for calendar and reminders
-  const { dogs } = useDogs();
+  const { dogs, loading: dogsLoading } = useDogs();
   
   // Single instances of these hooks to prevent duplicate fetching
   const { 
@@ -41,6 +43,7 @@ export const useDashboardData = () => {
   useEffect(() => {
     const fetchPlannedLittersData = async () => {
       try {
+        console.log("Fetching planned litters data...");
         const plannedLitters = await plannedLittersService.loadPlannedLitters();
         
         // Sort planned litters by expected heat date to find the next one
@@ -57,6 +60,8 @@ export const useDashboardData = () => {
           count: plannedLitters.length,
           nextDate: nextLitter ? new Date(nextLitter.expectedHeatDate) : null
         });
+        
+        console.log("Planned litters data loaded:", plannedLitters.length);
       } catch (error) {
         console.error('Error fetching planned litters:', error);
         setPlannedLittersData({ count: 0, nextDate: null });
@@ -70,6 +75,7 @@ export const useDashboardData = () => {
   useEffect(() => {
     const fetchRecentLittersData = async () => {
       try {
+        console.log("Fetching recent litters data...");
         // Get all litters
         const activeLitters = await litterService.getActiveLitters();
         const archivedLitters = await litterService.getArchivedLitters();
@@ -94,9 +100,14 @@ export const useDashboardData = () => {
           count: recentLitters.length,
           latest: latestDate
         });
+        
+        console.log("Recent litters data loaded:", recentLitters.length);
+        setLittersLoaded(true);
       } catch (error) {
         console.error('Error fetching recent litters:', error);
         setRecentLittersData({ count: 0, latest: null });
+        // Even with an error, we still consider litters loaded to avoid blocking the UI
+        setLittersLoaded(true);
       }
     };
     
@@ -113,19 +124,45 @@ export const useDashboardData = () => {
   
   // Controlled data loading with transition delay
   useEffect(() => {
-    if (!remindersLoading && !calendarLoading) {
+    if (!initialLoadAttempted) {
+      // Mark that we have attempted loading initially
+      setInitialLoadAttempted(true);
+      console.log("Initial load attempted");
+    }
+    
+    // Set data as ready when:
+    // 1. Reminders are no longer loading AND calendar is no longer loading
+    // 2. OR we've attempted to load at least once and litters are loaded (handles case when user has no dogs)
+    const dataIsReady = (!remindersLoading && !calendarLoading) || 
+                        (initialLoadAttempted && littersLoaded && !dogsLoading);
+                        
+    if (dataIsReady && !isDataReady) {
+      console.log("Data is ready, transitioning to ready state");
       // Set a moderate delay for stable transition
       const timer = setTimeout(() => {
         setIsDataReady(true);
+        console.log("Dashboard data is now ready");
       }, 300);
       
       // Clear timeout on cleanup
       return () => clearTimeout(timer);
-    } else {
-      // Reset the state if either data source is loading
-      setIsDataReady(false);
     }
-  }, [remindersLoading, calendarLoading, calendarEvents, reminders]);
+  }, [remindersLoading, calendarLoading, littersLoaded, initialLoadAttempted, isDataReady, dogsLoading]);
+  
+  // Log data load state
+  useEffect(() => {
+    console.log("Dashboard data load state:", {
+      dogsLoading,
+      remindersLoading,
+      calendarLoading,
+      littersLoaded,
+      initialLoadAttempted,
+      isDataReady,
+      dogsCount: dogs.length,
+      remindersCount: reminders.length,
+      eventsCount: calendarEvents?.length || 0
+    });
+  }, [dogsLoading, remindersLoading, calendarLoading, littersLoaded, initialLoadAttempted, isDataReady, dogs.length, reminders.length, calendarEvents]);
   
   // Wrapper functions to adapt async functions to the synchronous interface expected by components
   const handleAddEvent = (data: any) => {
