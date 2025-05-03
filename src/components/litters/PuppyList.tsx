@@ -1,3 +1,4 @@
+
 import React, { useMemo, useCallback, memo } from 'react';
 import { Edit, Trash2, BarChart2 } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -5,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Puppy, PuppyWeightRecord, PuppyHeightRecord } from '@/types/breeding';
 import PuppyDetailsDialog from './PuppyDetailsDialog';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 interface PuppyListProps {
   puppies: Puppy[];
@@ -62,10 +64,28 @@ const PuppyRow = memo(({
     if (onAddMeasurement) onAddMeasurement(puppy);
   }, [puppy, onAddMeasurement]);
 
+  const handleRowClick = useCallback(() => {
+    setShowDialog(true);
+    if (onPuppyClick) onPuppyClick(puppy);
+  }, [puppy, onPuppyClick]);
+
+  // Get status badge color
+  const getStatusBadge = () => {
+    const status = puppy.status || 'Available';
+    switch (status) {
+      case 'Reserved':
+        return <Badge variant="outline" className="bg-rustbrown-100">Reserved</Badge>;
+      case 'Sold':
+        return <Badge variant="outline" className="bg-warmgreen-100">Sold</Badge>;
+      default:
+        return <Badge variant="outline">Available</Badge>;
+    }
+  };
+
   return (
     <tr 
       className={`border-b hover:bg-muted/50 cursor-pointer ${selectedPuppyId === puppy.id ? 'bg-primary/5' : ''}`} 
-      onClick={() => onPuppyClick && onPuppyClick(puppy)}
+      onClick={handleRowClick}
     >
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
@@ -84,6 +104,7 @@ const PuppyRow = memo(({
       <td className="px-4 py-3">{puppy.color}</td>
       <td className="px-4 py-3">{getLatestMeasurement(puppy, 'weight')}</td>
       <td className="px-4 py-3">{getLatestMeasurement(puppy, 'height')}</td>
+      <td className="px-4 py-3">{getStatusBadge()}</td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
           <Button 
@@ -177,6 +198,7 @@ const PuppyList: React.FC<PuppyListProps> = ({
             <th className="px-4 py-3 font-medium text-sm text-muted-foreground">Color</th>
             <th className="px-4 py-3 font-medium text-sm text-muted-foreground">Current Weight</th>
             <th className="px-4 py-3 font-medium text-sm text-muted-foreground">Current Height</th>
+            <th className="px-4 py-3 font-medium text-sm text-muted-foreground">Status</th>
             <th className="px-4 py-3 font-medium text-sm text-muted-foreground">Actions</th>
           </tr>
         </thead>

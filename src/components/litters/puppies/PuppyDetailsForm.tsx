@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -5,6 +6,8 @@ import { Puppy } from '@/types/breeding';
 import DatePicker from '@/components/common/DatePicker';
 import BreedDropdown from '@/components/dogs/breed-selector/BreedDropdown';
 import PuppyGenderSelector from './PuppyGenderSelector';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 
 interface PuppyDetailsFormProps {
   puppy: Puppy;
@@ -12,21 +15,34 @@ interface PuppyDetailsFormProps {
 }
 
 const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) => {
-  // Ensure we're using the exact puppy name without any string manipulation
+  // Basic details state
   const [name, setName] = useState(puppy.name);
   const [gender, setGender] = useState(puppy.gender);
   const [color, setColor] = useState(puppy.color);
   const [birthWeight, setBirthWeight] = useState(puppy.birthWeight?.toString() || '');
   const [breed, setBreed] = useState(puppy.breed || '');
   
+  // New fields state
+  const [registeredName, setRegisteredName] = useState(puppy.registered_name || '');
+  const [registrationNumber, setRegistrationNumber] = useState(puppy.registration_number || '');
+  const [status, setStatus] = useState<'Available' | 'Reserved' | 'Sold'>(
+    puppy.status as 'Available' | 'Reserved' | 'Sold' || 'Available'
+  );
+  const [buyerName, setBuyerName] = useState(puppy.buyer_name || '');
+  const [buyerPhone, setBuyerPhone] = useState(puppy.buyer_phone || '');
+  
   // Fix date handling to prevent timezone issues
-  const birthDate = new Date(puppy.birthDateTime || new Date());
+  const birthDate = puppy.birthDateTime ? new Date(puppy.birthDateTime) : new Date();
   const [dateOfBirth, setDateOfBirth] = useState<Date>(birthDate);
   
   // Preserve the exact time component
   const hours = birthDate.getHours().toString().padStart(2, '0');
   const minutes = birthDate.getMinutes().toString().padStart(2, '0');
   const [timeOfBirth, setTimeOfBirth] = useState(`${hours}:${minutes}`);
+  
+  // Microchip and collar
+  const [microchip, setMicrochip] = useState(puppy.microchip || '');
+  const [collar, setCollar] = useState(puppy.collar || '');
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,16 +58,30 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
       }
 
       const birthWeightValue = birthWeight ? parseFloat(birthWeight) : undefined;
+      
+      // Check if status changed from Available to Reserved/Sold
+      const statusChanged = puppy.status !== status;
 
       // Create the updated puppy object with the exact name as entered in the form
       const updatedPuppy = {
         ...puppy,
-        name,  // Use the name exactly as entered in the form
+        name,
         gender,
         color,
         breed,
         birthWeight: birthWeightValue,
         birthDateTime: birthDateTime.toISOString(),
+        registered_name: registeredName || null,
+        registration_number: registrationNumber || null,
+        status,
+        buyer_name: (status === 'Reserved' || status === 'Sold') ? buyerName : null,
+        buyer_phone: (status === 'Reserved' || status === 'Sold') ? buyerPhone : null,
+        microchip,
+        collar,
+        // Update compatibility fields for backward compatibility
+        reserved: status === 'Reserved',
+        sold: status === 'Sold',
+        newOwner: (status === 'Reserved' || status === 'Sold') ? buyerName : null,
       };
 
       // Update weight log if birth weight has changed
@@ -96,7 +126,7 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
 
   return (
     <form id="puppy-form" onSubmit={handleFormSubmit}>
-      <div className="space-y-4 mt-4">
+      <div className="space-y-4">
         <div>
           <Label htmlFor="name">Name</Label>
           <Input 
@@ -106,6 +136,29 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
             placeholder="Puppy name"
             className="bg-white border-greige-300"
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="registered_name">Registered Name</Label>
+            <Input 
+              id="registered_name" 
+              value={registeredName} 
+              onChange={(e) => setRegisteredName(e.target.value)} 
+              placeholder="Optional registered name"
+              className="bg-white border-greige-300"
+            />
+          </div>
+          <div>
+            <Label htmlFor="registration_number">Registration Number</Label>
+            <Input 
+              id="registration_number" 
+              value={registrationNumber} 
+              onChange={(e) => setRegistrationNumber(e.target.value)} 
+              placeholder="Optional registration number"
+              className="bg-white border-greige-300"
+            />
+          </div>
         </div>
 
         <PuppyGenderSelector gender={gender} onGenderChange={setGender} />
@@ -128,6 +181,29 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
             placeholder="Puppy color"
             className="bg-white border-greige-300"
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="collar">Collar ID</Label>
+            <Input 
+              id="collar" 
+              value={collar} 
+              onChange={(e) => setCollar(e.target.value)} 
+              placeholder="Collar identifier"
+              className="bg-white border-greige-300"
+            />
+          </div>
+          <div>
+            <Label htmlFor="microchip">Microchip</Label>
+            <Input 
+              id="microchip" 
+              value={microchip} 
+              onChange={(e) => setMicrochip(e.target.value)} 
+              placeholder="Microchip number"
+              className="bg-white border-greige-300"
+            />
+          </div>
         </div>
 
         <div>
@@ -162,6 +238,49 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
             className="bg-white border-greige-300"
           />
         </div>
+
+        <div className="space-y-2 pt-4 border-t">
+          <Label htmlFor="status">Status</Label>
+          <Select 
+            value={status} 
+            onValueChange={(value) => setStatus(value as 'Available' | 'Reserved' | 'Sold')}
+          >
+            <SelectTrigger className="bg-white border-greige-300">
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Available">Available</SelectItem>
+              <SelectItem value="Reserved">Reserved</SelectItem>
+              <SelectItem value="Sold">Sold</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {(status === 'Reserved' || status === 'Sold') && (
+          <div className="space-y-4 pt-2 animate-fade-in">
+            <div>
+              <Label htmlFor="buyer_name">Buyer Name</Label>
+              <Input 
+                id="buyer_name" 
+                value={buyerName} 
+                onChange={(e) => setBuyerName(e.target.value)} 
+                placeholder="Buyer's name"
+                className="bg-white border-greige-300"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="buyer_phone">Buyer Phone</Label>
+              <Input 
+                id="buyer_phone" 
+                value={buyerPhone} 
+                onChange={(e) => setBuyerPhone(e.target.value)} 
+                placeholder="Buyer's phone number"
+                className="bg-white border-greige-300"
+              />
+            </div>
+          </div>
+        )}
       </div>
     </form>
   );

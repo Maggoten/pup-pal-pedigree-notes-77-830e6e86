@@ -1,142 +1,150 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Camera, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Camera, Image as ImageIcon, Upload, X } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface PuppyImageUploaderProps {
   puppyName: string;
   currentImage?: string;
-  onImageChange: (imageBase64: string) => void;
+  onImageChange: (url: string) => void;
+  large?: boolean;
 }
 
-const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({ 
+const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
   puppyName,
   currentImage,
-  onImageChange
+  onImageChange,
+  large = false
 }) => {
   const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const handleFileSelect = () => {
-    fileInputRef.current?.click();
-  };
+  const [imageUrl, setImageUrl] = useState<string>(currentImage || '');
+  const [error, setError] = useState<string>('');
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    // Check file size (limit to 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Please select an image under 2MB",
-        variant: "destructive"
-      });
+  // Update local state when prop changes
+  useEffect(() => {
+    setImageUrl(currentImage || '');
+  }, [currentImage]);
+
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) {
       return;
     }
-    
-    // Check file type
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Invalid file type",
-        description: "Please select an image file",
-        variant: "destructive"
-      });
+
+    const file = e.target.files[0];
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File is too large. Maximum size is 5MB.');
       return;
     }
-    
+
     setIsUploading(true);
-    
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64String = event.target?.result as string;
-      onImageChange(base64String);
+    setError('');
+
+    try {
+      // Create a unique filename with uuid
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
+      const filePath = `puppies/${fileName}`;
+
+      // Upload the file to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('breeding-app-images')
+        .upload(filePath, file);
+
+      if (error) {
+        throw error;
+      }
+
+      // Get the public URL for the uploaded file
+      const { data: publicUrl } = supabase.storage
+        .from('breeding-app-images')
+        .getPublicUrl(filePath);
+
+      if (publicUrl) {
+        setImageUrl(publicUrl.publicUrl);
+        onImageChange(publicUrl.publicUrl);
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setError('Error uploading image. Please try again.');
+    } finally {
       setIsUploading(false);
-      
-      toast({
-        title: "Image uploaded",
-        description: "Puppy photo has been updated"
-      });
-    };
-    
-    reader.onerror = () => {
-      toast({
-        title: "Upload failed",
-        description: "Failed to read the image file",
-        variant: "destructive"
-      });
-      setIsUploading(false);
-    };
-    
-    reader.readAsDataURL(file);
-  };
-  
-  const handleRemoveImage = () => {
-    onImageChange('');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
     }
+  }, [onImageChange]);
+
+  const handleRemoveImage = useCallback(() => {
+    setImageUrl('');
+    onImageChange('');
+  }, [onImageChange]);
+
+  const initials = puppyName
+    ? puppyName.substring(0, 2).toUpperCase()
+    : 'PU';
+
+  const avatarSizeClass = large 
+    ? "w-40 h-40 text-3xl"
+    : "w-16 h-16 text-sm";
     
-    toast({
-      title: "Image removed",
-      description: "Puppy photo has been removed"
-    });
-  };
+  const buttonSizeClass = large
+    ? "bottom-2 right-2"
+    : "bottom-0 right-0";
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="relative">
-        <Avatar className="h-28 w-28">
-          {currentImage ? (
-            <AvatarImage 
-              src={currentImage} 
-              alt={puppyName} 
-              className="object-cover"
-            />
-          ) : (
-            <AvatarFallback className="bg-primary/10 text-primary">
-              {puppyName.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          )}
-        </Avatar>
-      </div>
-      
-      <div className="flex gap-2">
-        <Button 
-          type="button" 
-          variant="outline" 
+    <div className={`relative ${large ? 'mx-auto' : ''}`}>
+      <Avatar className={`${avatarSizeClass} bg-primary/10 text-primary`}>
+        {imageUrl ? (
+          <AvatarImage src={imageUrl} alt={puppyName} />
+        ) : (
+          <AvatarFallback className="bg-primary/10 text-primary">
+            {initials}
+          </AvatarFallback>
+        )}
+      </Avatar>
+
+      <div className={`absolute ${buttonSizeClass} flex gap-1`}>
+        <Button
+          type="button"
+          variant="secondary"
           size="sm"
-          onClick={handleFileSelect}
+          className="h-8 w-8 rounded-full p-0 shadow-md"
+          onClick={() => document.getElementById('puppy-image-upload')?.click()}
           disabled={isUploading}
-          className="flex items-center"
         >
-          <Upload className="h-4 w-4 mr-2" />
-          {currentImage ? 'Change Photo' : 'Upload Photo'}
+          <Camera className="h-4 w-4" />
+          <span className="sr-only">Upload image</span>
         </Button>
-        
-        {currentImage && (
-          <Button 
-            type="button" 
-            variant="outline" 
+
+        {imageUrl && (
+          <Button
+            type="button"
+            variant="destructive"
             size="sm"
+            className="h-8 w-8 rounded-full p-0 shadow-md"
             onClick={handleRemoveImage}
-            className="flex items-center"
           >
-            <X className="h-4 w-4 mr-2" />
-            Remove
+            <X className="h-4 w-4" />
+            <span className="sr-only">Remove image</span>
           </Button>
         )}
       </div>
-      
+
       <input
         type="file"
-        ref={fileInputRef}
+        id="puppy-image-upload"
         onChange={handleFileChange}
         accept="image/*"
         className="hidden"
       />
+
+      {error && (
+        <p className="text-destructive text-xs mt-1">{error}</p>
+      )}
+
+      {isUploading && (
+        <p className="text-muted-foreground text-xs mt-1">Uploading...</p>
+      )}
     </div>
   );
 };

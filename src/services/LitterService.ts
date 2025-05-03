@@ -1,4 +1,3 @@
-
 import { Litter, Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
@@ -509,6 +508,9 @@ class LitterService {
         ? puppy.gender 
         : 'male'; // Default to male if invalid value
       
+      // Set default status if not provided
+      const status = puppy.status || 'Available';
+      
       console.log("About to insert puppy into Supabase:", {
         id: puppy.id,
         name: puppy.name,
@@ -537,7 +539,13 @@ class LitterService {
           breed: puppy.breed || '',
           image_url: puppy.imageUrl || '',
           birth_date_time: puppy.birthDateTime || new Date().toISOString(),
-          litter_id: litterId
+          litter_id: litterId,
+          // New fields
+          registered_name: puppy.registered_name || null,
+          registration_number: puppy.registration_number || null,
+          status: status,
+          buyer_name: puppy.buyer_name || null,
+          buyer_phone: puppy.buyer_phone || null
         })
         .select();
 
@@ -624,6 +632,13 @@ class LitterService {
       // Update birth weight to current birth weight (fix for issue #1)
       let currentBirthWeight = updatedPuppy.birthWeight;
       
+      // Ensure status is set
+      const status = updatedPuppy.status || 'Available';
+      
+      // Keep sold/reserved flags in sync with status for backward compatibility
+      const isSold = status === 'Sold';
+      const isReserved = status === 'Reserved';
+      
       // Update puppy in Supabase
       const { error } = await supabase
         .from('puppies')
@@ -634,14 +649,20 @@ class LitterService {
           markings: updatedPuppy.markings,
           birth_weight: currentBirthWeight, // Use the current birth weight
           current_weight: updatedPuppy.currentWeight, // Update the current weight
-          sold: updatedPuppy.sold,
-          reserved: updatedPuppy.reserved,
+          sold: isSold, 
+          reserved: isReserved,
           new_owner: updatedPuppy.newOwner,
           collar: updatedPuppy.collar,
           microchip: updatedPuppy.microchip,
           breed: updatedPuppy.breed,
           image_url: updatedPuppy.imageUrl,
-          birth_date_time: updatedPuppy.birthDateTime
+          birth_date_time: updatedPuppy.birthDateTime,
+          // New fields
+          registered_name: updatedPuppy.registered_name || null,
+          registration_number: updatedPuppy.registration_number || null,
+          status: status,
+          buyer_name: updatedPuppy.buyer_name || null,
+          buyer_phone: updatedPuppy.buyer_phone || null
         })
         .eq('id', updatedPuppy.id)
         .eq('litter_id', litterId);
@@ -760,6 +781,38 @@ class LitterService {
               date: logDate,
               height: heightLog.height
             });
+        }
+      }
+      
+      // Process and save notes
+      if (updatedPuppy.notes && updatedPuppy.notes.length > 0) {
+        console.log("Processing notes:", updatedPuppy.notes.length);
+        
+        // Get existing notes to avoid duplication
+        const { data: existingNotes } = await supabase
+          .from('puppy_notes')
+          .select('*')
+          .eq('puppy_id', updatedPuppy.id);
+          
+        const existingNoteDates = existingNotes 
+          ? existingNotes.map(note => new Date(note.date).toISOString()) 
+          : [];
+          
+        // Process each note
+        for (const note of updatedPuppy.notes) {
+          const noteDate = new Date(note.date).toISOString();
+          
+          // Check if this note already exists by date (simple approach)
+          if (!existingNoteDates.includes(noteDate)) {
+            console.log("Adding new note from date:", noteDate);
+            await supabase
+              .from('puppy_notes')
+              .insert({
+                puppy_id: updatedPuppy.id,
+                date: noteDate,
+                content: note.content
+              });
+          }
         }
       }
 

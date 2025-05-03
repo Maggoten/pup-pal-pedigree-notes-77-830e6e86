@@ -1,4 +1,3 @@
-
 export interface PlannedLitter {
   id: string;
   maleId: string;
@@ -48,12 +47,17 @@ export interface Puppy {
   collar?: string;
   microchip?: string;
   
-  // New properties that were missing
+  // New or enhanced fields
   breed?: string;
   imageUrl?: string;
   birthDateTime?: string;
   weightLog: PuppyWeightRecord[];
   heightLog: PuppyHeightRecord[];
+  registered_name?: string;
+  registration_number?: string;
+  status?: 'Available' | 'Reserved' | 'Sold';
+  buyer_name?: string;
+  buyer_phone?: string;
 }
 
 export interface Litter {

@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
 
 @tailwind base;
@@ -7,7 +8,7 @@
 @layer base {
   :root {
     /* Light Mode Colors - Based on new color scheme */
-    --background: 33 15% 91%; /* Warm beige background #EDE9E3 */
+    --background: 30 15% 94%; /* Warm background #efebe7 */
     --foreground: 28 12% 23%; /* Dark chocolate gray #3F3B36 for text */
 
     --card: 33 15% 86%; /* Light sand greige #E3DDD4 */

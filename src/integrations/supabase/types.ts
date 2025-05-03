@@ -472,6 +472,8 @@ export type Database = {
           birth_date_time: string | null
           birth_weight: number | null
           breed: string | null
+          buyer_name: string | null
+          buyer_phone: string | null
           collar: string | null
           color: string | null
           created_at: string | null
@@ -484,14 +486,19 @@ export type Database = {
           microchip: string | null
           name: string
           new_owner: string | null
+          registered_name: string | null
+          registration_number: string | null
           reserved: boolean | null
           sold: boolean | null
+          status: string | null
           updated_at: string | null
         }
         Insert: {
           birth_date_time?: string | null
           birth_weight?: number | null
           breed?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
           collar?: string | null
           color?: string | null
           created_at?: string | null
@@ -504,14 +511,19 @@ export type Database = {
           microchip?: string | null
           name: string
           new_owner?: string | null
+          registered_name?: string | null
+          registration_number?: string | null
           reserved?: boolean | null
           sold?: boolean | null
+          status?: string | null
           updated_at?: string | null
         }
         Update: {
           birth_date_time?: string | null
           birth_weight?: number | null
           breed?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
           collar?: string | null
           color?: string | null
           created_at?: string | null
@@ -524,8 +536,11 @@ export type Database = {
           microchip?: string | null
           name?: string
           new_owner?: string | null
+          registered_name?: string | null
+          registration_number?: string | null
           reserved?: boolean | null
           sold?: boolean | null
+          status?: string | null
           updated_at?: string | null
         }
         Relationships: [
