@@ -1,10 +1,8 @@
 
 import React, { useMemo, useCallback, memo } from 'react';
 import { Edit, Trash2, BarChart2 } from 'lucide-react';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Puppy, PuppyWeightRecord, PuppyHeightRecord } from '@/types/breeding';
-import PuppyDetailsDialog from './PuppyDetailsDialog';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -46,8 +44,6 @@ const PuppyCard = memo(({
   onUpdatePuppy: (puppy: Puppy) => void;
   onDeletePuppy: (puppyId: string) => void;
 }) => {
-  const [showDialog, setShowDialog] = React.useState(false);
-
   const handleDeletePuppy = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm(`Do you want to delete "${puppy.name}"?`)) {
@@ -57,8 +53,8 @@ const PuppyCard = memo(({
 
   const handleEditClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowDialog(true);
-  }, []);
+    if (onPuppyClick) onPuppyClick(puppy);
+  }, [puppy, onPuppyClick]);
   
   const handleAddMeasurement = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -66,13 +62,8 @@ const PuppyCard = memo(({
   }, [puppy, onAddMeasurement]);
 
   const handleCardClick = useCallback(() => {
-    setShowDialog(true);
     if (onPuppyClick) onPuppyClick(puppy);
   }, [puppy, onPuppyClick]);
-
-  const handleCloseDialog = useCallback(() => {
-    setShowDialog(false);
-  }, []);
 
   // Get status badge color
   const getStatusBadge = () => {
@@ -155,15 +146,7 @@ const PuppyCard = memo(({
         </Button>
       </div>
       
-      {/* Render dialogs outside of the component tree for better performance */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <PuppyDetailsDialog 
-          puppy={puppy} 
-          onUpdatePuppy={onUpdatePuppy} 
-          onDeletePuppy={onDeletePuppy} 
-          onClose={handleCloseDialog}
-        />
-      </Dialog>
+      {/* Removed dialog implementation here */}
     </div>
   );
 });
@@ -188,8 +171,6 @@ const PuppyRow = memo(({
   onUpdatePuppy: (puppy: Puppy) => void;
   onDeletePuppy: (puppyId: string) => void;
 }) => {
-  const [showDialog, setShowDialog] = React.useState(false);
-
   const handleDeletePuppy = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm(`Do you want to delete "${puppy.name}"?`)) {
@@ -199,8 +180,8 @@ const PuppyRow = memo(({
 
   const handleEditClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowDialog(true);
-  }, []);
+    if (onPuppyClick) onPuppyClick(puppy);
+  }, [puppy, onPuppyClick]);
   
   const handleAddMeasurement = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -208,13 +189,8 @@ const PuppyRow = memo(({
   }, [puppy, onAddMeasurement]);
 
   const handleRowClick = useCallback(() => {
-    setShowDialog(true);
     if (onPuppyClick) onPuppyClick(puppy);
   }, [puppy, onPuppyClick]);
-
-  const handleCloseDialog = useCallback(() => {
-    setShowDialog(false);
-  }, []);
 
   // Get status badge color
   const getStatusBadge = () => {
@@ -286,15 +262,7 @@ const PuppyRow = memo(({
         </div>
       </td>
       
-      {/* Render dialogs outside of the component tree for better performance */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <PuppyDetailsDialog 
-          puppy={puppy} 
-          onUpdatePuppy={onUpdatePuppy} 
-          onDeletePuppy={onDeletePuppy} 
-          onClose={handleCloseDialog}
-        />
-      </Dialog>
+      {/* Removed dialog implementation here */}
     </tr>
   );
 });
