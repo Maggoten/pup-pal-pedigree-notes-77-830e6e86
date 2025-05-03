@@ -17,6 +17,7 @@ import ViewToggle from './ViewToggle';
 const MyLittersContent: React.FC = () => {
   // Track view mode locally
   const [view, setView] = useState<ViewType>('grid');
+  // Update the type of categoryTab to match what LitterFilterHeader expects
   const [categoryTab, setCategoryTab] = useState<'active' | 'archived'>('active');
   
   const {
@@ -71,6 +72,13 @@ const MyLittersContent: React.FC = () => {
     setSelectedYear(null);
   };
 
+  // Create a wrapper function to handle type conversion for setCategoryTab
+  const handleCategoryTabChange = (value: string) => {
+    if (value === 'active' || value === 'archived') {
+      setCategoryTab(value);
+    }
+  };
+
   return (
     <div className="container py-6">
       <div className="space-y-6">
@@ -79,7 +87,7 @@ const MyLittersContent: React.FC = () => {
           activeLitters={activeLitters}
           archivedLitters={archivedLitters}
           categoryTab={categoryTab}
-          setCategoryTab={setCategoryTab}
+          setCategoryTab={handleCategoryTabChange}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           selectedYear={selectedYear}

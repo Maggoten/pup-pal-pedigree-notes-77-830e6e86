@@ -7,7 +7,7 @@ import LitterFilterControls from '../LitterFilterControls';
 interface LitterFilterHeaderProps {
   activeLitters: any[];
   archivedLitters: any[];
-  categoryTab: string;
+  categoryTab: 'active' | 'archived'; // Specify exact string literal types
   setCategoryTab: (value: string) => void;
   searchQuery: string;
   onSearchChange: (value: string) => void;
