@@ -47,21 +47,12 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
     };
     
     onUpdatePuppy(updatedPuppy);
-    toast({
-      title: "Puppy Updated",
-      description: `${updatedPuppy.name} has been updated successfully.`
-    });
     if (onClose) onClose();
   }, [imageUrl, onUpdatePuppy, onClose]);
 
   const handleDelete = useCallback(() => {
     if (confirm(`Do you want to delete "${displayName}"?`)) {
       onDeletePuppy(puppy.id);
-      toast({
-        title: "Puppy Deleted",
-        description: `${displayName} has been deleted from the litter.`,
-        variant: "destructive"
-      });
       if (onClose) onClose();
     }
   }, [puppy.id, displayName, onDeletePuppy, onClose]);
@@ -82,18 +73,14 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
 
     onUpdatePuppy(updatedPuppy);
     setNewNote('');
-    toast({
-      title: "Note Added",
-      description: "Your note has been added successfully."
-    });
     if (onClose) onClose(); // Close dialog after adding a note
   }, [newNote, puppy, onUpdatePuppy, onClose]);
 
   return (
-    <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto bg-greige-100 border-greige-300">
+    <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto bg-white border-2 border-warmbeige-400">
       <DialogHeader>
-        <DialogTitle className="text-xl">Puppy Profile</DialogTitle>
-        <DialogDescription>
+        <DialogTitle className="text-xl font-semibold text-warmgreen-800">Puppy Profile</DialogTitle>
+        <DialogDescription className="text-darkgray-700">
           View and manage information for {displayName}.
         </DialogDescription>
       </DialogHeader>
@@ -112,10 +99,25 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="growth">Growth</TabsTrigger>
-            <TabsTrigger value="notes">Notes</TabsTrigger>
+          <TabsList className="grid grid-cols-3 mb-4 bg-warmbeige-200 p-1 rounded-lg">
+            <TabsTrigger 
+              value="details" 
+              className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md rounded-md"
+            >
+              Details
+            </TabsTrigger>
+            <TabsTrigger 
+              value="growth" 
+              className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md rounded-md"
+            >
+              Growth
+            </TabsTrigger>
+            <TabsTrigger 
+              value="notes" 
+              className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md rounded-md"
+            >
+              Notes
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="details" className="space-y-4">
@@ -127,14 +129,14 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
           
           <TabsContent value="growth" className="space-y-4">
             <div className="space-y-4">
-              <h3 className="font-medium">Weight Log</h3>
+              <h3 className="font-medium text-warmgreen-800">Weight Log</h3>
               {puppy.weightLog && puppy.weightLog.length > 0 ? (
-                <div className="border rounded-md overflow-hidden">
+                <div className="border rounded-md overflow-hidden bg-white shadow">
                   <table className="w-full">
-                    <thead className="bg-muted">
+                    <thead className="bg-warmbeige-200">
                       <tr>
-                        <th className="py-2 px-4 text-left">Date</th>
-                        <th className="py-2 px-4 text-left">Weight (kg)</th>
+                        <th className="py-2 px-4 text-left text-warmgreen-800">Date</th>
+                        <th className="py-2 px-4 text-left text-warmgreen-800">Weight (kg)</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -150,17 +152,17 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
                   </table>
                 </div>
               ) : (
-                <p className="text-muted-foreground">No weight records yet.</p>
+                <p className="text-muted-foreground bg-warmbeige-50 p-3 rounded-md">No weight records yet.</p>
               )}
 
-              <h3 className="font-medium">Height Log</h3>
+              <h3 className="font-medium text-warmgreen-800">Height Log</h3>
               {puppy.heightLog && puppy.heightLog.length > 0 ? (
-                <div className="border rounded-md overflow-hidden">
+                <div className="border rounded-md overflow-hidden bg-white shadow">
                   <table className="w-full">
-                    <thead className="bg-muted">
+                    <thead className="bg-warmbeige-200">
                       <tr>
-                        <th className="py-2 px-4 text-left">Date</th>
-                        <th className="py-2 px-4 text-left">Height (cm)</th>
+                        <th className="py-2 px-4 text-left text-warmgreen-800">Date</th>
+                        <th className="py-2 px-4 text-left text-warmgreen-800">Height (cm)</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -176,26 +178,26 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
                   </table>
                 </div>
               ) : (
-                <p className="text-muted-foreground">No height records yet.</p>
+                <p className="text-muted-foreground bg-warmbeige-50 p-3 rounded-md">No height records yet.</p>
               )}
             </div>
           </TabsContent>
           
           <TabsContent value="notes" className="space-y-4">
             <div className="space-y-4">
-              <h3 className="font-medium">Notes</h3>
+              <h3 className="font-medium text-warmgreen-800">Notes</h3>
               
               <div className="flex space-x-2">
                 <Textarea 
                   placeholder="Add a new note about this puppy..."
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
-                  className="flex-1"
+                  className="flex-1 border-2 border-warmbeige-300 focus:border-warmgreen-600"
                 />
                 <Button 
                   type="button" 
                   onClick={handleAddNote}
-                  className="self-end"
+                  className="self-end bg-warmgreen-600 hover:bg-warmgreen-700"
                 >
                   <MessageSquarePlus className="h-4 w-4 mr-2" />
                   Add
@@ -207,7 +209,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
                   {[...puppy.notes]
                     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                     .map((note, idx) => (
-                      <div key={idx} className="bg-white rounded-lg border p-3">
+                      <div key={idx} className="bg-white rounded-lg border-2 border-warmbeige-300 p-3 shadow-sm">
                         <div className="text-sm text-muted-foreground mb-1">
                           {format(new Date(note.date), 'MMM d, yyyy - h:mm a')}
                         </div>
@@ -216,7 +218,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
                     ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground mt-2">No notes yet.</p>
+                <p className="text-muted-foreground bg-warmbeige-50 p-3 rounded-md mt-2">No notes yet.</p>
               )}
             </div>
           </TabsContent>
@@ -236,7 +238,11 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
         <div>
           {activeTab === 'details' && (
             <DialogClose asChild>
-              <Button type="submit" form="puppy-form">
+              <Button 
+                type="submit" 
+                form="puppy-form" 
+                className="bg-warmgreen-600 hover:bg-warmgreen-700"
+              >
                 Save Changes
               </Button>
             </DialogClose>

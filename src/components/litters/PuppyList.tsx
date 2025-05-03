@@ -1,3 +1,4 @@
+
 import React, { useMemo, useCallback, memo } from 'react';
 import { Edit, Trash2, BarChart2 } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -6,6 +7,7 @@ import { Puppy, PuppyWeightRecord, PuppyHeightRecord } from '@/types/breeding';
 import PuppyDetailsDialog from './PuppyDetailsDialog';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PuppyListProps {
   puppies: Puppy[];
@@ -25,6 +27,148 @@ const isWeightRecord = (record: PuppyWeightRecord | PuppyHeightRecord): record i
 const isHeightRecord = (record: PuppyWeightRecord | PuppyHeightRecord): record is PuppyHeightRecord => {
   return 'height' in record;
 };
+
+// Mobile card view for puppies
+const PuppyCard = memo(({
+  puppy,
+  selectedPuppyId,
+  getLatestMeasurement,
+  onPuppyClick,
+  onAddMeasurement,
+  onUpdatePuppy,
+  onDeletePuppy
+}: {
+  puppy: Puppy;
+  selectedPuppyId?: string | null;
+  getLatestMeasurement: (puppy: Puppy, type: 'weight' | 'height') => string;
+  onPuppyClick?: (puppy: Puppy) => void;
+  onAddMeasurement?: (puppy: Puppy) => void;
+  onUpdatePuppy: (puppy: Puppy) => void;
+  onDeletePuppy: (puppyId: string) => void;
+}) => {
+  const [showDialog, setShowDialog] = React.useState(false);
+
+  const handleDeletePuppy = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Do you want to delete "${puppy.name}"?`)) {
+      onDeletePuppy(puppy.id);
+    }
+  }, [puppy, onDeletePuppy]);
+
+  const handleEditClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowDialog(true);
+  }, []);
+  
+  const handleAddMeasurement = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onAddMeasurement) onAddMeasurement(puppy);
+  }, [puppy, onAddMeasurement]);
+
+  const handleCardClick = useCallback(() => {
+    setShowDialog(true);
+    if (onPuppyClick) onPuppyClick(puppy);
+  }, [puppy, onPuppyClick]);
+
+  const handleCloseDialog = useCallback(() => {
+    setShowDialog(false);
+  }, []);
+
+  // Get status badge color
+  const getStatusBadge = () => {
+    const status = puppy.status || 'Available';
+    switch (status) {
+      case 'Reserved':
+        return <Badge variant="outline" className="bg-rustbrown-100">Reserved</Badge>;
+      case 'Sold':
+        return <Badge variant="outline" className="bg-warmgreen-100">Sold</Badge>;
+      default:
+        return <Badge variant="outline">Available</Badge>;
+    }
+  };
+
+  return (
+    <div 
+      className={`border-2 border-warmbeige-300 rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-all ${
+        selectedPuppyId === puppy.id ? 'bg-primary/10 border-primary/30' : 'bg-white'
+      }`}
+      onClick={handleCardClick}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10">
+            {puppy.imageUrl ? 
+              <AvatarImage src={puppy.imageUrl} alt={puppy.name} className="object-cover" /> : 
+              <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                {puppy.name.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            }
+          </Avatar>
+          <div>
+            <h3 className="font-semibold text-warmgreen-800">{puppy.name}</h3>
+            <p className="text-sm text-muted-foreground capitalize">{puppy.gender} • {puppy.color}</p>
+          </div>
+        </div>
+        <div>{getStatusBadge()}</div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <div className="bg-warmbeige-50 p-2 rounded-md">
+          <p className="text-xs text-muted-foreground">Weight</p>
+          <p className="font-medium">{getLatestMeasurement(puppy, 'weight')}</p>
+        </div>
+        <div className="bg-warmbeige-50 p-2 rounded-md">
+          <p className="text-xs text-muted-foreground">Height</p>
+          <p className="font-medium">{getLatestMeasurement(puppy, 'height')}</p>
+        </div>
+      </div>
+      
+      <div className="flex items-center justify-end gap-2 border-t pt-2 mt-2">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={handleAddMeasurement} 
+          className="h-8 w-8 p-0"
+        >
+          <BarChart2 className="h-4 w-4" />
+          <span className="sr-only">Add measurement</span>
+        </Button>
+        
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="h-8 w-8 p-0" 
+          onClick={handleEditClick}
+        >
+          <Edit className="h-4 w-4" />
+          <span className="sr-only">Edit puppy</span>
+        </Button>
+        
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10" 
+          onClick={handleDeletePuppy}
+        >
+          <Trash2 className="h-4 w-4" />
+          <span className="sr-only">Delete puppy</span>
+        </Button>
+      </div>
+      
+      {/* Render dialogs outside of the component tree for better performance */}
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <PuppyDetailsDialog 
+          puppy={puppy} 
+          onUpdatePuppy={onUpdatePuppy} 
+          onDeletePuppy={onDeletePuppy} 
+          onClose={handleCloseDialog}
+        />
+      </Dialog>
+    </div>
+  );
+});
+
+PuppyCard.displayName = 'PuppyCard';
 
 // Extracted as a memoized component to avoid re-rendering the entire table
 const PuppyRow = memo(({ 
@@ -166,6 +310,8 @@ const PuppyList: React.FC<PuppyListProps> = ({
   onAddMeasurement,
   litterAge
 }) => {
+  const isMobile = useIsMobile();
+  
   // Memoize the getLatestMeasurement function to avoid recreating it on every render
   const getLatestMeasurement = useCallback((puppy: Puppy, type: 'weight' | 'height') => {
     // For weight, prioritize the currentWeight field from Supabase
@@ -192,18 +338,37 @@ const PuppyList: React.FC<PuppyListProps> = ({
     }
   }, []);
   
+  if (isMobile) {
+    return (
+      <div className="space-y-2">
+        {puppies.map(puppy => (
+          <PuppyCard
+            key={puppy.id}
+            puppy={puppy}
+            selectedPuppyId={selectedPuppyId}
+            getLatestMeasurement={getLatestMeasurement}
+            onPuppyClick={onPuppyClick}
+            onAddMeasurement={onAddMeasurement}
+            onUpdatePuppy={onUpdatePuppy}
+            onDeletePuppy={onDeletePuppy}
+          />
+        ))}
+      </div>
+    );
+  }
+  
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="border-b text-left">
-            <th className="px-4 py-3 font-medium text-sm text-muted-foreground">Name</th>
-            <th className="px-4 py-3 font-medium text-sm text-muted-foreground">Gender</th>
-            <th className="px-4 py-3 font-medium text-sm text-muted-foreground">Color</th>
-            <th className="px-4 py-3 font-medium text-sm text-muted-foreground">Current Weight</th>
-            <th className="px-4 py-3 font-medium text-sm text-muted-foreground">Current Height</th>
-            <th className="px-4 py-3 font-medium text-sm text-muted-foreground">Status</th>
-            <th className="px-4 py-3 font-medium text-sm text-muted-foreground">Actions</th>
+          <tr className="border-b text-left bg-warmbeige-200">
+            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Name</th>
+            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Gender</th>
+            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Color</th>
+            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Current Weight</th>
+            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Current Height</th>
+            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Status</th>
+            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Actions</th>
           </tr>
         </thead>
         <tbody>

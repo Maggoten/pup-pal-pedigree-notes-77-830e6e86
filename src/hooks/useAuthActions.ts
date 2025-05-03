@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
@@ -18,11 +19,14 @@ export const useAuthActions = () => {
       
       if (error) {
         console.error('Login error from Supabase:', error);
-        toast({
-          title: "Login failed",
-          description: error.message,
-          variant: "destructive"
-        });
+        // Only show toast for user-facing errors, not technical ones
+        if (error.message.includes('Invalid login credentials')) {
+          toast({
+            title: "Invalid credentials",
+            description: "Please check your email and password",
+            variant: "destructive"
+          });
+        }
         return false;
       }
       
@@ -66,27 +70,12 @@ export const useAuthActions = () => {
       // Check if email confirmation is required
       if (data.user && !data.session) {
         console.log('Registration successful but email confirmation required');
-        toast({
-          title: "Almost done!",
-          description: "Please check your email to confirm your account before logging in.",
-          variant: "default"
-        });
         return true;
       } else if (data.session) {
         console.log('Registration successful with immediate session');
-        toast({
-          title: "Registration successful!",
-          description: "Your account has been created and you are now logged in.",
-          variant: "default"
-        });
         return true;
       } else {
         console.warn('Registration returned unexpected state');
-        toast({
-          title: "Registration status unclear",
-          description: "Your account may have been created. Please try logging in.",
-          variant: "default"
-        });
         return false;
       }
     } catch (error) {
@@ -106,11 +95,6 @@ export const useAuthActions = () => {
       
       if (error) {
         console.error('Logout error from Supabase:', error);
-        toast({
-          title: "Logout failed",
-          description: error.message,
-          variant: "destructive"
-        });
       } else {
         console.log('Logout successful');
       }
@@ -138,6 +122,7 @@ export const useAuthActions = () => {
       
       if (error) {
         console.error('Error fetching user profile:', error);
+        // Don't show toast for profile errors
         throw error;
       }
       

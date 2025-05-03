@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const registrationSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -22,6 +23,7 @@ const registrationSchema = z.object({
   address: z.string().min(5, "Address must be at least 5 characters"),
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  subscriptionType: z.enum(['free', 'premium']),
   agreeToTerms: z.boolean().refine(val => val === true, {
     message: "You must agree to the terms and conditions"
   })
@@ -43,6 +45,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
       address: '',
       email: '',
       password: '',
+      subscriptionType: 'free',
       agreeToTerms: false,
     },
   });
@@ -58,7 +61,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
               <FormItem>
                 <FormLabel className="text-brown-800">First Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="John" {...field} className="border-greige-200 focus:border-greige-300" />
+                  <Input placeholder="John" {...field} className="border-warmbeige-300 focus:border-warmgreen-600 bg-white" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -72,7 +75,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
               <FormItem>
                 <FormLabel className="text-brown-800">Last Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Doe" {...field} className="border-greige-200 focus:border-greige-300" />
+                  <Input placeholder="Doe" {...field} className="border-warmbeige-300 focus:border-warmgreen-600 bg-white" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -87,7 +90,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
             <FormItem>
               <FormLabel className="text-brown-800">Address</FormLabel>
               <FormControl>
-                <Input placeholder="123 Main St, City" {...field} className="border-greige-200 focus:border-greige-300" />
+                <Input placeholder="123 Main St, City" {...field} className="border-warmbeige-300 focus:border-warmgreen-600 bg-white" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -101,7 +104,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
             <FormItem>
               <FormLabel className="text-brown-800">Email</FormLabel>
               <FormControl>
-                <Input placeholder="your@email.com" {...field} className="border-greige-200 focus:border-greige-300" />
+                <Input placeholder="your@email.com" {...field} className="border-warmbeige-300 focus:border-warmgreen-600 bg-white" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -115,7 +118,42 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
             <FormItem>
               <FormLabel className="text-brown-800">Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} className="border-greige-200 focus:border-greige-300" />
+                <Input type="password" {...field} className="border-warmbeige-300 focus:border-warmgreen-600 bg-white" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="subscriptionType"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel className="text-brown-800">Subscription Type</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex flex-col space-y-1"
+                >
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="free" />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Free - Basic features only
+                    </FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="premium" />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Premium - $2.99/month, all features
+                    </FormLabel>
+                  </FormItem>
+                </RadioGroup>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -126,21 +164,19 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           control={form.control}
           name="agreeToTerms"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-greige-100/50 border-greige-200">
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-greige-100/50 border-warmbeige-300">
               <FormControl>
                 <input
                   type="checkbox"
                   checked={field.value}
                   onChange={field.onChange}
-                  className="h-4 w-4 rounded border-greige-300 text-primary focus:ring-primary"
+                  className="h-4 w-4 rounded border-warmbeige-300 text-warmgreen-600 focus:ring-warmgreen-500"
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel className="text-brown-800">Accept terms and conditions</FormLabel>
                 <FormDescription className="text-brown-600">
                   By creating an account, you agree to our Terms of Service and Privacy Policy. 
-                  Your membership will be charged $2.99 monthly. 
-                  You can end your subscription at any time.
                 </FormDescription>
               </div>
               <FormMessage />
@@ -149,11 +185,11 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
         />
         
         <Button 
-          className="w-full bg-greige-300 hover:bg-greige-400 text-brown-900" 
+          className="w-full bg-warmgreen-600 hover:bg-warmgreen-700 text-white" 
           type="submit"
           disabled={isLoading}
         >
-          {isLoading ? "Processing..." : "Continue to Payment"}
+          {isLoading ? "Processing..." : "Create Account"}
           <UserPlus className="ml-2 h-4 w-4" />
         </Button>
       </form>

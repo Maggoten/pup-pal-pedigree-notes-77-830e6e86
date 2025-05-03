@@ -1,68 +1,56 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
+import { Litter } from '@/types/breeding';
 
 export type ViewType = 'grid' | 'list';
+export type ListDisplayMode = 'compact' | 'detailed';
 
-interface LitterFilterContextType {
+export interface LitterFilterContext {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  filterYear: number | null;
-  setFilterYear: (year: number | null) => void;
+  selectedYear: number | null;
+  setSelectedYear: (year: number | null) => void;
   view: ViewType;
   setView: (view: ViewType) => void;
-  categoryTab: string;
-  setCategoryTab: (tab: string) => void;
-  activePage: number;
-  setActivePage: (page: number) => void;
-  archivedPage: number;
-  setArchivedPage: (page: number) => void;
-  itemsPerPage: number;
-  setItemsPerPage?: (count: number) => void;
+  displayMode: ListDisplayMode;
+  setDisplayMode: (mode: ListDisplayMode) => void;
 }
 
-const LitterFilterContext = createContext<LitterFilterContextType | undefined>(undefined);
-
-export const useLitterFilters = () => {
-  const context = useContext(LitterFilterContext);
-  if (!context) {
-    throw new Error('useLitterFilters must be used within a LitterFilterProvider');
-  }
-  return context;
+const defaultContext: LitterFilterContext = {
+  searchQuery: '',
+  setSearchQuery: () => {},
+  selectedYear: null,
+  setSelectedYear: () => {},
+  view: 'grid',
+  setView: () => {},
+  displayMode: 'compact',
+  setDisplayMode: () => {},
 };
 
-interface LitterFilterProviderProps {
-  children: ReactNode;
-}
+const FilterContext = createContext<LitterFilterContext>(defaultContext);
 
-export const LitterFilterProvider: React.FC<LitterFilterProviderProps> = ({ children }) => {
+export const useLitterFilter = () => useContext(FilterContext);
+
+export const LitterFilterProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterYear, setFilterYear] = useState<number | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [view, setView] = useState<ViewType>('grid');
-  const [categoryTab, setCategoryTab] = useState('active');
-  const [activePage, setActivePage] = useState(1);
-  const [archivedPage, setArchivedPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(6); // Default to 6 items per page
+  const [displayMode, setDisplayMode] = useState<ListDisplayMode>('compact');
+
+  const contextValue = {
+    searchQuery,
+    setSearchQuery,
+    selectedYear,
+    setSelectedYear,
+    view,
+    setView,
+    displayMode,
+    setDisplayMode,
+  };
 
   return (
-    <LitterFilterContext.Provider
-      value={{
-        searchQuery,
-        setSearchQuery,
-        filterYear,
-        setFilterYear,
-        view,
-        setView,
-        categoryTab,
-        setCategoryTab,
-        activePage,
-        setActivePage,
-        archivedPage,
-        setArchivedPage,
-        itemsPerPage,
-        setItemsPerPage,
-      }}
-    >
+    <FilterContext.Provider value={contextValue}>
       {children}
-    </LitterFilterContext.Provider>
+    </FilterContext.Provider>
   );
 };

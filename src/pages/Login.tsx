@@ -24,22 +24,12 @@ const Login: React.FC = () => {
       
       if (success) {
         console.log('Login page: Login successful, redirecting');
-        toast({
-          title: "Login successful",
-          description: "Welcome back to your breeding journal!"
-        });
         navigate('/');
       } else {
         console.log('Login page: Login failed');
-        // Toast is handled in useAuthActions
       }
     } catch (error) {
       console.error("Login page: Login error:", error);
-      toast({
-        variant: "destructive",
-        title: "Login error",
-        description: "An unexpected error occurred. Please try again."
-      });
     } finally {
       setIsLoading(false);
     }
@@ -47,7 +37,45 @@ const Login: React.FC = () => {
 
   const handleRegistration = (values: RegistrationFormValues) => {
     setRegistrationData(values);
-    setShowPayment(true);
+    // Only show payment screen for premium subscriptions
+    if (values.subscriptionType === 'premium') {
+      setShowPayment(true);
+    } else {
+      // Proceed directly with free registration
+      handleFreeRegistration(values);
+    }
+  };
+
+  const handleFreeRegistration = async (values: RegistrationFormValues) => {
+    setIsLoading(true);
+    
+    try {
+      const registerData: RegisterData = {
+        email: values.email,
+        password: values.password,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        address: values.address
+      };
+      
+      console.log('Login page: Attempting free registration');
+      const success = await register(registerData);
+      
+      if (success) {
+        console.log('Login page: Registration successful');
+        
+        // Navigate but only if email confirmation is not required
+        if (document.cookie.includes('supabase-auth-token')) {
+          navigate('/');
+        }
+      } else {
+        console.log('Login page: Registration failed');
+      }
+    } catch (error) {
+      console.error("Login page: Registration error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePayment = async () => {
@@ -63,15 +91,11 @@ const Login: React.FC = () => {
           address: registrationData.address
         };
         
-        console.log('Login page: Attempting registration');
+        console.log('Login page: Attempting premium registration');
         const success = await register(registerData);
         
         if (success) {
           console.log('Login page: Registration successful');
-          toast({
-            title: "Registration successful",
-            description: "Your account has been created. Please check your email for confirmation instructions."
-          });
           
           // Navigate but only if email confirmation is not required
           if (document.cookie.includes('supabase-auth-token')) {
@@ -82,16 +106,10 @@ const Login: React.FC = () => {
           }
         } else {
           console.log('Login page: Registration failed');
-          // Toast is handled in useAuthActions
           setShowPayment(false);
         }
       } catch (error) {
         console.error("Login page: Registration error:", error);
-        toast({
-          variant: "destructive",
-          title: "Registration error",
-          description: "An unexpected error occurred. Please try again."
-        });
         setShowPayment(false);
       } finally {
         setIsLoading(false);
