@@ -16,6 +16,56 @@ interface DashboardLayoutProps {
   activePregnancies?: ActivePregnancy[];
 }
 
+// Create a wrapper component that will use the dashboard data inside the DogsProvider
+const DashboardContentWithData: React.FC<DashboardLayoutProps> = ({ 
+  user, 
+  activePregnancies,
+  isLoadingPregnancies
+}) => {
+  // Use the custom hook to get all dashboard data and functions
+  const dashboardData = useDashboardData();
+  
+  // Get the personalized username
+  const username = getDisplayUsername(user);
+  
+  // Prepare props for child components
+  const calendarProps = {
+    getEventsForDate: dashboardData.getEventsForDate,
+    getEventColor: dashboardData.getEventColor,
+    addEvent: dashboardData.handleAddEvent,
+    deleteEvent: dashboardData.deleteEvent,
+    editEvent: dashboardData.handleEditEvent,
+    isLoading: dashboardData.calendarLoading,
+    hasError: dashboardData.calendarError
+  };
+  
+  const remindersProps = {
+    reminders: dashboardData.reminders,
+    isLoading: dashboardData.remindersLoading,
+    hasError: dashboardData.remindersError,
+    handleMarkComplete: dashboardData.handleMarkComplete
+  };
+  
+  return (
+    <div className="space-y-6">
+      <DashboardHero 
+        username={username}
+        reminders={dashboardData.remindersSummary}
+        plannedLitters={dashboardData.plannedLittersData}
+        activePregnancies={activePregnancies}
+        recentLitters={dashboardData.recentLittersData}
+        isLoadingPregnancies={isLoadingPregnancies}
+      />
+      
+      <DashboardContent
+        isDataReady={dashboardData.isDataReady}
+        calendarProps={calendarProps}
+        remindersProps={remindersProps}
+      />
+    </div>
+  );
+};
+
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
   user, 
   activePregnancies: initialActivePregnancies = []
@@ -23,9 +73,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   // State for active pregnancies
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>(initialActivePregnancies);
   const [isLoadingPregnancies, setIsLoadingPregnancies] = useState(initialActivePregnancies.length === 0);
-  
-  // Use the custom hook to get all dashboard data and functions
-  const dashboardData = useDashboardData();
   
   // Fetch active pregnancies if not provided
   useEffect(() => {
@@ -51,48 +98,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     fetchActivePregnancies();
   }, [initialActivePregnancies.length]);
   
-  // Get the personalized username
-  const username = getDisplayUsername(user);
-  
-  // Prepare props for child components
-  const calendarProps = {
-    getEventsForDate: dashboardData.getEventsForDate,
-    getEventColor: dashboardData.getEventColor,
-    addEvent: dashboardData.handleAddEvent,
-    deleteEvent: dashboardData.deleteEvent,
-    editEvent: dashboardData.handleEditEvent,
-    isLoading: dashboardData.calendarLoading,
-    hasError: dashboardData.calendarError
-  };
-  
-  const remindersProps = {
-    reminders: dashboardData.reminders,
-    isLoading: dashboardData.remindersLoading,
-    hasError: dashboardData.remindersError,
-    handleMarkComplete: dashboardData.handleMarkComplete
-  };
-  
   return (
     <PageLayout 
       title="" 
       description=""
     >
-      <div className="space-y-6">
-        <DashboardHero 
-          username={username}
-          reminders={dashboardData.remindersSummary}
-          plannedLitters={dashboardData.plannedLittersData}
+      <DogsProvider>
+        <DashboardContentWithData 
+          user={user} 
           activePregnancies={activePregnancies}
-          recentLitters={dashboardData.recentLittersData}
           isLoadingPregnancies={isLoadingPregnancies}
         />
-        
-        <DashboardContent
-          isDataReady={dashboardData.isDataReady}
-          calendarProps={calendarProps}
-          remindersProps={remindersProps}
-        />
-      </div>
+      </DogsProvider>
     </PageLayout>
   );
 };
