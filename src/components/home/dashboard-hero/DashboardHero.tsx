@@ -35,7 +35,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       icon: "calendar" as const,
       highlight: reminders.highPriority > 0 ? `${reminders.highPriority} high priority` : null,
       action: () => setRemindersDialogOpen(true),
-      color: "bg-greige-50 border-greige-200 hover:border-greige-300"
+      loading: false
     },
     {
       title: "Planned Litters",
@@ -43,7 +43,6 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       icon: "heart" as const,
       highlight: plannedLitters.nextDate ? `Next: ${format(plannedLitters.nextDate, 'MMM d')}` : null,
       action: () => navigate("/planned-litters"),
-      color: "bg-greige-100 border-greige-200 hover:border-greige-300",
       loading: false
     },
     {
@@ -52,7 +51,6 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       icon: "pawprint" as const,
       highlight: activePregnancies.length > 0 ? `${activePregnancies[0].daysLeft} days to due date` : null,
       action: () => navigate("/pregnancy"),
-      color: "bg-greige-50 border-greige-200 hover:border-greige-300",
       loading: isLoadingPregnancies
     },
     {
@@ -61,7 +59,6 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       icon: "dog" as const,
       highlight: recentLitters.latest ? `Latest: ${format(recentLitters.latest, 'MMM d')}` : null,
       action: () => navigate("/my-litters"),
-      color: "bg-greige-100 border-greige-200 hover:border-greige-300",
       loading: false
     }
   ];

@@ -8,7 +8,7 @@ interface MetricCardData {
   icon: 'calendar' | 'heart' | 'pawprint' | 'dog';
   highlight: string | null;
   action: () => void;
-  color: string;
+  color?: string;
   loading?: boolean;
 }
 
@@ -27,7 +27,6 @@ const MetricCardGrid: React.FC<MetricCardGridProps> = ({ metricCards }) => {
           icon={card.icon}
           highlight={card.highlight}
           action={card.action}
-          color={card.color}
           loading={card.loading}
         />
       ))}
