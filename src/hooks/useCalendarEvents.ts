@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dog } from '@/types/dogs';
@@ -64,6 +63,13 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       }
     });
     
+    // Log vaccination reminders specifically for debugging
+    const vacEvents = eventsList.filter(e => e.type === 'vaccination');
+    console.log(`[Calendar] Found ${vacEvents.length} vaccination calendar events`);
+    vacEvents.forEach(e => {
+      console.log(`[Calendar] Vaccination event: ${e.title}, Due: ${new Date(e.date).toISOString()}, Dog: ${e.dogName}`);
+    });
+    
     console.log(`[Calendar] Converted ${eventsList.length} reminders to calendar events`);
     return eventsList;
   }, [reminders, dogs]);
@@ -72,7 +78,8 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   const { 
     data: calendarEvents = [],
     isLoading,
-    error: fetchError
+    error: fetchError,
+    refetch
   } = useQuery({
     queryKey: ['calendar-events', user?.id, dogs.length, reminders.length],
     queryFn: async () => {
@@ -110,12 +117,20 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       // Return all events at once
       return [...heatEvents, ...customEvents, ...reminderEvents];
     },
-    enabled: !!user,
-    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    enabled: !!user && reminders.length >= 0, // Changed to ensure it runs even when there are no reminders yet
+    staleTime: 1000 * 60 * 2, // Consider data fresh for 2 minutes (reduced from 5)
     retry: 1, // Only retry once to prevent excessive attempts
     refetchOnMount: true,
-    refetchOnWindowFocus: false // Prevent refetching when window regains focus
+    refetchOnWindowFocus: true // Enable refetching when window regains focus
   });
+  
+  // Force a refresh when reminders change
+  useEffect(() => {
+    if (user && reminders.length > 0) {
+      console.log("[Calendar] Force refreshing calendar events after reminders updated");
+      refetch();
+    }
+  }, [user, reminders, refetch]);
   
   // Memoize getEventsForDate to reduce re-renders
   const getEventsForDate = useCallback((date: Date) => {
@@ -125,6 +140,15 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     
     if (date.toDateString() === new Date().toDateString()) {
       console.log("[Calendar] Events for today:", eventsForDate);
+      
+      // Specifically log vaccination events for today
+      const vacEvents = eventsForDate.filter(e => e.type === 'vaccination');
+      if (vacEvents.length > 0) {
+        console.log("[Calendar] Vaccination events for today:", 
+          vacEvents.map(e => `${e.title} (Dog: ${e.dogName})`));
+      } else {
+        console.log("[Calendar] No vaccination events for today");
+      }
     }
     
     return eventsForDate;
@@ -270,9 +294,11 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   };
   
   // Manual refresh function
-  const refreshCalendarData = () => {
-    queryClient.invalidateQueries({ queryKey: ['calendar-events', user?.id, dogs.length] });
-  };
+  const refreshCalendarData = useCallback(() => {
+    console.log("[Calendar] Manually refreshing calendar events");
+    queryClient.invalidateQueries({ queryKey: ['calendar-events', user?.id, dogs.length, reminders.length] });
+    refetch();
+  }, [queryClient, user, dogs.length, reminders.length, refetch]);
   
   // Error handling
   const hasError = !!fetchError;

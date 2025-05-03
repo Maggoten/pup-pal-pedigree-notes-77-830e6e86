@@ -37,9 +37,10 @@ export const useBreedingRemindersProvider = () => {
   const { 
     data: reminders = [], 
     isLoading, 
-    error: hasError 
+    error: hasError,
+    refetch 
   } = useQuery({
-    queryKey: ['reminders', user?.id],
+    queryKey: ['reminders', user?.id, dogs.length], // Added dogs.length to force refresh when dogs change
     queryFn: async () => {
       if (!user) return [];
       
@@ -56,9 +57,21 @@ export const useBreedingRemindersProvider = () => {
       const userDogs = dogs.filter(dog => dog.owner_id === user.id);
       console.log(`[Reminders Provider] Found ${userDogs.length} dogs belonging to user ${user.id}`);
       
+      // Log each dog's vaccination date for debugging
+      userDogs.forEach(dog => {
+        console.log(`[Reminders Provider] Dog ${dog.name} (ID: ${dog.id}) - Vaccination date: ${dog.vaccinationDate || 'Not set'}`);
+      });
+      
       // Generate all reminders in sequence
       const dogReminders = userDogs.length > 0 ? generateDogReminders(userDogs) : [];
       console.log(`[Reminders Provider] Generated ${dogReminders.length} dog reminders`);
+      
+      // Log all vaccination reminders separately for debugging
+      const vaccinationReminders = dogReminders.filter(r => r.type === 'vaccination');
+      console.log(`[Reminders Provider] Generated ${vaccinationReminders.length} vaccination reminders`);
+      vaccinationReminders.forEach(r => {
+        console.log(`[Reminders Provider] Vaccination reminder: ${r.title}, Due: ${r.dueDate.toISOString()}`);
+      });
       
       const litterReminders = await generateLitterReminders(user.id);
       console.log(`[Reminders Provider] Generated ${litterReminders.length} litter reminders`);
@@ -72,12 +85,20 @@ export const useBreedingRemindersProvider = () => {
       
       return allReminders;
     },
-    enabled: !!user, // Only depends on user being logged in, not on dogs.length
-    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    enabled: !!user && dogs.length > 0, // Only run if user is logged in and dogs are loaded
+    staleTime: 1000 * 60 * 2, // Consider data fresh for 2 minutes (reduced from 5)
     retry: 1, // Only retry once to prevent excessive attempts
     refetchOnMount: true,
-    refetchOnWindowFocus: false, // Prevent refetching when window regains focus
+    refetchOnWindowFocus: true, // Added to refresh when window regains focus
   });
+  
+  // Force an immediate refetch on mount to ensure fresh data
+  useEffect(() => {
+    if (user && dogs.length > 0) {
+      console.log("[Reminders Provider] Force refreshing reminder data on mount");
+      refetch();
+    }
+  }, [user, dogs.length, refetch]);
   
   // Get sorted reminders - memoized in the hook
   const sortedReminders = useSortedReminders(reminders);
@@ -223,9 +244,11 @@ export const useBreedingRemindersProvider = () => {
   };
   
   // Force refetch function for manual refresh
-  const refreshReminderData = () => {
-    queryClient.invalidateQueries({ queryKey: ['reminders', user?.id] });
-  };
+  const refreshReminderData = useCallback(() => {
+    console.log("[Reminders Provider] Manually refreshing reminder data");
+    queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+    refetch();
+  }, [queryClient, user, dogs.length, refetch]);
   
   return {
     reminders: sortedReminders,

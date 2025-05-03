@@ -1,7 +1,6 @@
-
 import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
-import { differenceInDays, parseISO, addDays, addYears, startOfDay, isAfter, isBefore, isToday } from 'date-fns';
+import { differenceInDays, parseISO, addDays, addYears, startOfDay, isAfter, isBefore, isToday, format, isSameDay } from 'date-fns';
 import { createPawPrintIcon, createCalendarClockIcon } from '@/utils/iconUtils';
 import { dateToISOString, parseISODate } from '@/utils/dateUtils';
 
@@ -9,7 +8,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
   const reminders: Reminder[] = [];
   const today = startOfDay(new Date());
   
-  console.log(`Generating reminders for ${dogs.length} dogs`);
+  console.log(`Generating reminders for ${dogs.length} dogs - Today is ${format(today, 'yyyy-MM-dd')}`);
   
   // Check each dog for upcoming events
   dogs.forEach((dog) => {
@@ -47,15 +46,43 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
     
     // Check for upcoming vaccinations
     if (dog.vaccinationDate) {
+      console.log(`[VACCINATION DEBUG] Processing vaccination for ${dog.name} (ID: ${dog.id})`);
+      console.log(`[VACCINATION DEBUG] Vaccination date string: ${dog.vaccinationDate}`);
+      
       const lastVaccination = parseISODate(dog.vaccinationDate) || new Date();
-      const nextVaccination = addYears(lastVaccination, 1); // Yearly vaccinations
+      console.log(`[VACCINATION DEBUG] Parsed last vaccination: ${format(lastVaccination, 'yyyy-MM-dd')}`);
       
+      // FIXED: Calculate next vaccination properly accounting for the current year
+      // Get the month and day from the last vaccination
+      const lastVaccinationMonth = lastVaccination.getMonth();
+      const lastVaccinationDay = lastVaccination.getDate();
+      const currentYear = today.getFullYear();
+      
+      // Start with simple addYears calculation
+      let nextVaccination = addYears(lastVaccination, 1);
+      console.log(`[VACCINATION DEBUG] Initial next vaccination: ${format(nextVaccination, 'yyyy-MM-dd')}`);
+      
+      // Create a date for this year's vaccination using month and day from last vaccination
+      const thisYearsVaccination = new Date(currentYear, lastVaccinationMonth, lastVaccinationDay);
+      
+      // If this year's vaccination is after today, use it
+      // Otherwise, use next year's vaccination
+      if (isAfter(thisYearsVaccination, today) || isSameDay(thisYearsVaccination, today)) {
+        nextVaccination = thisYearsVaccination;
+        console.log(`[VACCINATION DEBUG] Using this year's vaccination date: ${format(nextVaccination, 'yyyy-MM-dd')}`);
+      } else {
+        // Use next year's vaccination
+        nextVaccination = new Date(currentYear + 1, lastVaccinationMonth, lastVaccinationDay);
+        console.log(`[VACCINATION DEBUG] Using next year's vaccination date: ${format(nextVaccination, 'yyyy-MM-dd')}`);
+      }
+      
+      // Calculate days until vaccination
       const daysUntilVaccination = differenceInDays(nextVaccination, today);
-      console.log(`Dog ${dog.name} (ID: ${dog.id}): Vaccination date: ${dog.vaccinationDate}, Last vaccination: ${lastVaccination.toISOString()}`);
-      console.log(`Dog ${dog.name}: Next vaccination date: ${nextVaccination.toISOString()}, Days until: ${daysUntilVaccination}`);
       
-      // Updated condition: Create reminder if vaccination is due within the next 60 days (rather than 30)
-      // or up to 14 days overdue (rather than 7) - this makes sure we catch more reminders
+      console.log(`[VACCINATION DEBUG] Dog ${dog.name}: Next vaccination date: ${format(nextVaccination, 'yyyy-MM-dd')}, Days until: ${daysUntilVaccination}`);
+      
+      // Updated condition: Create reminder if vaccination is due within the next 60 days 
+      // or up to 14 days overdue
       if (daysUntilVaccination >= -14 && daysUntilVaccination <= 60) {
         const isOverdue = daysUntilVaccination < 0;
         
@@ -73,9 +100,9 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
         };
         
         reminders.push(vaccinationReminder);
-        console.log(`Created vaccination reminder for dog ${dog.name}:`, JSON.stringify(vaccinationReminder));
+        console.log(`[VACCINATION DEBUG] Created vaccination reminder for dog ${dog.name}:`, JSON.stringify(vaccinationReminder));
       } else {
-        console.log(`No vaccination reminder needed for ${dog.name}: ${daysUntilVaccination} days until due date`);
+        console.log(`[VACCINATION DEBUG] No vaccination reminder needed for ${dog.name}: ${daysUntilVaccination} days until due date`);
       }
     } else {
       console.log(`Dog ${dog.name}: No vaccination date recorded`);
@@ -118,6 +145,13 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
         console.log(`Created birthday reminder for dog ${dog.name}`);
       }
     }
+  });
+  
+  // Summarize vaccination reminders for debugging
+  const vaccinationReminders = reminders.filter(r => r.type === 'vaccination');
+  console.log(`[VACCINATION SUMMARY] Generated ${vaccinationReminders.length} vaccination reminders:`);
+  vaccinationReminders.forEach(r => {
+    console.log(`- ${r.title} (due: ${format(r.dueDate, 'yyyy-MM-dd')}, priority: ${r.priority})`);
   });
   
   console.log(`Generated ${reminders.length} total dog reminders`);
