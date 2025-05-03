@@ -92,10 +92,9 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
       if (typeof heat.date === 'string') {
         return { date: heat.date.split('T')[0] };
       } else if (heat.date) {
-        // Check if it's a Date object by seeing if it has toISOString method
-        const dateObj = heat.date as unknown as Date;
-        if (typeof dateObj.toISOString === 'function') {
-          return { date: dateToISOString(dateObj) };
+        // Check if it's a Date object
+        if (Object.prototype.toString.call(heat.date) === '[object Date]') {
+          return { date: dateToISOString(heat.date as unknown as Date) };
         }
       }
       // Fallback
@@ -108,19 +107,23 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   
   // Process optional dates to ensure YYYY-MM-DD format
   if ('dewormingDate' in dog && dog.dewormingDate) {
-    dbDog.dewormingDate = typeof dog.dewormingDate === 'string'
-      ? dog.dewormingDate.split('T')[0]
-      : dog.dewormingDate instanceof Date
-        ? dateToISOString(dog.dewormingDate)
-        : undefined;
+    if (typeof dog.dewormingDate === 'string') {
+      dbDog.dewormingDate = dog.dewormingDate.split('T')[0];
+    } else if (Object.prototype.toString.call(dog.dewormingDate) === '[object Date]') {
+      dbDog.dewormingDate = dateToISOString(dog.dewormingDate as unknown as Date);
+    } else {
+      dbDog.dewormingDate = undefined;
+    }
   }
   
   if ('vaccinationDate' in dog && dog.vaccinationDate) {
-    dbDog.vaccinationDate = typeof dog.vaccinationDate === 'string'
-      ? dog.vaccinationDate.split('T')[0]
-      : dog.vaccinationDate instanceof Date
-        ? dateToISOString(dog.vaccinationDate)
-        : undefined;
+    if (typeof dog.vaccinationDate === 'string') {
+      dbDog.vaccinationDate = dog.vaccinationDate.split('T')[0];
+    } else if (Object.prototype.toString.call(dog.vaccinationDate) === '[object Date]') {
+      dbDog.vaccinationDate = dateToISOString(dog.vaccinationDate as unknown as Date);
+    } else {
+      dbDog.vaccinationDate = undefined;
+    }
   }
   
   // Copy direct fields that have the same name
