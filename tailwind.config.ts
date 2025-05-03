@@ -19,8 +19,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'cinzel': ['Cinzel', 'serif'],
-				'lato': ['Lato', 'sans-serif'],
+				'playfair': ['Playfair Display', 'serif'],
+				'sourcesans': ['Source Sans Pro', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -57,12 +57,65 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				// New custom colors based on the style guide
+				warmbeige: {
+					DEFAULT: '#F3EEE7',
+					50: '#FAF9F7',
+					100: '#F3EEE7',
+					200: '#E7DED4',
+					300: '#D6CFC7',
+					400: '#C0B8AE',
+					500: '#AAA195',
+					600: '#8E8577',
+					700: '#726A5E',
+					800: '#564F45',
+					900: '#3A352E'
+				},
+				warmgreen: {
+					DEFAULT: '#4A5A3C',
+					50: '#EFF2EC',
+					100: '#DFE4D9',
+					200: '#BFC9B4',
+					300: '#9FAE8F',
+					400: '#7F936A',
+					500: '#5F7845',
+					600: '#4A5A3C',
+					700: '#394429',
+					800: '#272E1C',
+					900: '#16190F'
+				},
+				rustbrown: {
+					DEFAULT: '#A65A3A',
+					50: '#F7F0EC',
+					100: '#F0E2D9',
+					200: '#E1C5B2',
+					300: '#D2A88C',
+					400: '#C38B65',
+					500: '#B46E3F',
+					600: '#A65A3A',
+					700: '#7D4D2F',
+					800: '#53331F',
+					900: '#291A10'
+				},
+				darkgray: {
+					DEFAULT: '#4A4A4A',
+					50: '#EFEFEF',
+					100: '#DFDFDF',
+					200: '#BFBFBF',
+					300: '#9F9F9F',
+					400: '#7F7F7F',
+					500: '#5F5F5F',
+					600: '#4A4A4A',
+					700: '#373737',
+					800: '#252525',
+					900: '#121212'
+				},
+				// Keep the previous color schemes for compatibility
 				greige: {
-					DEFAULT: '#ECE8E1', // Background
+					DEFAULT: '#ECE8E1',
 					50: '#FAF9F7',
 					100: '#F7F5F2',
-					200: '#ECE8E1', // Main greige
-					300: '#D6CFC7', // Secondary background
+					200: '#ECE8E1',
+					300: '#D6CFC7',
 					400: '#C0B8AE',
 					500: '#AAA195',
 					600: '#8E8577',
@@ -71,45 +124,31 @@ export default {
 					900: '#3A352E'
 				},
 				moss: {
-					DEFAULT: '#4A5A3C', // Primary color
+					DEFAULT: '#4A5A3C',
 					50: '#EFF2EC',
 					100: '#DFE4D9',
 					200: '#BFC9B4',
 					300: '#9FAE8F',
 					400: '#7F936A',
 					500: '#5F7845',
-					600: '#4A5A3C', // Main moss green
+					600: '#4A5A3C',
 					700: '#394429',
 					800: '#272E1C',
 					900: '#16190F'
 				},
 				rust: {
-					DEFAULT: '#A8673F', // Accent color
+					DEFAULT: '#A8673F',
 					50: '#F7F0EC',
 					100: '#F0E2D9',
 					200: '#E1C5B2',
 					300: '#D2A88C',
 					400: '#C38B65',
 					500: '#B46E3F',
-					600: '#A8673F', // Main rust brown
+					600: '#A8673F',
 					700: '#7D4D2F',
 					800: '#53331F',
 					900: '#291A10'
 				},
-				darkgray: {
-					DEFAULT: '#4A4A4A', // Secondary color
-					50: '#EFEFEF',
-					100: '#DFDFDF',
-					200: '#BFBFBF',
-					300: '#9F9F9F',
-					400: '#7F7F7F',
-					500: '#5F5F5F',
-					600: '#4A4A4A', // Main dark gray
-					700: '#373737',
-					800: '#252525',
-					900: '#121212'
-				},
-				// Keep the previous color schemes for compatibility
 				cream: {
 					50: '#FFFDF7',
 					100: '#FFF8E8',

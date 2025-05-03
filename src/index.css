@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Lato:wght@300;400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,7 +8,7 @@
 @layer base {
   :root {
     /* Light Mode Colors - Based on new color scheme */
-    --background: 39 11% 90%; /* Greige background #ECE8E1 */
+    --background: 33 29% 93%; /* Warm beige background #F3EEE7 */
     --foreground: 0 0% 29%; /* Dark gray #4A4A4A for text */
 
     --card: 0 0% 100%; /* White #FFFFFF */
@@ -17,57 +17,57 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 29%;
 
-    --primary: 84 20% 30%; /* Moss green #4A5A3C */
+    --primary: 84 20% 30%; /* Warm green #4A5A3C */
     --primary-foreground: 0 0% 100%; /* White text on primary */
 
-    --secondary: 33 15% 81%; /* Soft beige #D6CFC7 */
+    --secondary: 33 15% 86%; /* Light sand #E7DED4 */
     --secondary-foreground: 0 0% 29%; /* Dark gray text on secondary */
 
-    --muted: 33 15% 81%; /* Soft beige */
+    --muted: 33 15% 86%; /* Light sand */
     --muted-foreground: 0 0% 45%; /* Lighter dark gray */
 
-    --accent: 25 45% 45%; /* Rust brown #A8673F */
+    --accent: 18 48% 44%; /* Rust brown #A65A3A */
     --accent-foreground: 0 0% 100%; /* White text on accent */
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 33 15% 75%; /* Slightly darker than secondary */
-    --input: 33 15% 75%;
-    --ring: 84 20% 30%; /* Moss green */
+    --border: 33 15% 80%; /* Slightly darker than secondary */
+    --input: 33 15% 80%;
+    --ring: 84 20% 30%; /* Warm green */
 
     --radius: 1rem; /* Larger rounded corners */
 
-    --sidebar-background: 39 11% 90%;
+    --sidebar-background: 33 29% 93%;
     --sidebar-foreground: 0 0% 29%;
     --sidebar-primary: 84 20% 30%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 33 15% 81%;
+    --sidebar-accent: 33 15% 86%;
     --sidebar-accent-foreground: 0 0% 29%;
-    --sidebar-border: 33 15% 75%;
+    --sidebar-border: 33 15% 80%;
     --sidebar-ring: 33 15% 60%;
   }
 
   .dark {
-    --background: 84 20% 10%; /* Dark moss background */
-    --foreground: 33 15% 90%; /* Light greige for text */
+    --background: 84 20% 10%; /* Dark warm green background */
+    --foreground: 33 29% 93%; /* Light warm beige for text */
 
     --card: 84 20% 15%; /* Slightly lighter than background */
-    --card-foreground: 33 15% 90%;
+    --card-foreground: 33 29% 93%;
 
     --popover: 84 20% 15%;
-    --popover-foreground: 33 15% 90%;
+    --popover-foreground: 33 29% 93%;
 
-    --primary: 84 20% 40%; /* Brighter moss green */
+    --primary: 84 20% 40%; /* Brighter warm green */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 84 20% 20%;
-    --secondary-foreground: 33 15% 90%;
+    --secondary-foreground: 33 29% 93%;
 
     --muted: 84 20% 20%;
     --muted-foreground: 84 20% 70%;
 
-    --accent: 25 45% 55%; /* Brighter rust */
+    --accent: 18 48% 50%; /* Brighter rust brown */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 40.6%;
@@ -78,11 +78,11 @@
     --ring: 84 20% 40%;
 
     --sidebar-background: 84 20% 15%;
-    --sidebar-foreground: 33 15% 90%;
+    --sidebar-foreground: 33 29% 93%;
     --sidebar-primary: 84 20% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 84 20% 20%;
-    --sidebar-accent-foreground: 33 15% 90%;
+    --sidebar-accent-foreground: 33 29% 93%;
     --sidebar-border: 84 20% 25%;
     --sidebar-ring: 33 15% 50%;
   }
@@ -95,11 +95,11 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Lato', sans-serif;
+    font-family: 'Source Sans Pro', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply text-primary font-cinzel;
+    @apply text-primary font-playfair;
   }
 }
 
@@ -117,22 +117,22 @@
   }
 
   .nature-gradient {
-    @apply bg-gradient-to-br from-moss-100 to-moss-200;
+    @apply bg-gradient-to-br from-warmgreen-100 to-warmgreen-200;
   }
 
-  .greige-gradient {
-    @apply bg-gradient-to-br from-greige-100 to-greige-200;
+  .beige-gradient {
+    @apply bg-gradient-to-br from-warmbeige-50 to-warmbeige-200;
   }
   
   .rust-gradient {
-    @apply bg-gradient-to-br from-rust-100 to-rust-200;
+    @apply bg-gradient-to-br from-rustbrown-100 to-rustbrown-200;
   }
   
-  .moss-gradient {
-    @apply bg-gradient-to-br from-moss-100 to-moss-300;
+  .green-gradient {
+    @apply bg-gradient-to-br from-warmgreen-100 to-warmgreen-300;
   }
   
-  .greige-card {
+  .warmbeige-card {
     @apply bg-secondary/80 border border-secondary-foreground/10 shadow-sm hover:shadow-md transition-all duration-300;
   }
   
@@ -140,8 +140,8 @@
     @apply bg-accent/30 border border-accent/40 shadow-sm hover:shadow-md transition-all duration-300;
   }
   
-  .beige-gradient {
-    @apply bg-gradient-to-br from-greige-50 to-greige-200;
+  .warm-gradient {
+    @apply bg-gradient-to-br from-warmbeige-50 to-warmbeige-200;
   }
 }
 

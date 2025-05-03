@@ -15,6 +15,7 @@ const AddDogButton: React.FC<AddDogButtonProps> = ({ onClick }) => {
         <TooltipTrigger asChild>
           <Button
             onClick={onClick}
+            variant="accent"
             className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"
           >
             <Plus className="h-6 w-6" />

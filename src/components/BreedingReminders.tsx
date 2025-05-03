@@ -89,13 +89,13 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
   
   return (
     <>
-      <Card className="border-greige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md relative bg-greige-50 flex flex-col">
+      <Card className="border-warmbeige-300 shadow-sm overflow-hidden transition-shadow hover:shadow-md relative bg-warmbeige-50 flex flex-col">
         {/* Decorative background elements */}
         <div className="absolute top-1 right-1 opacity-5 pointer-events-none">
           <PawPrint className="h-40 w-40 text-primary transform rotate-12" />
         </div>
         
-        <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-3 relative">
+        <CardHeader className="bg-gradient-to-r from-warmbeige-100 to-transparent border-b border-warmbeige-200 pb-3 relative">
           <div className="absolute top-6 right-6 pointer-events-none">
             <div className="relative">
               <div className="absolute animate-ping w-3 h-3 rounded-full bg-primary/30"></div>

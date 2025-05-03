@@ -102,7 +102,7 @@ const MyLittersContent: React.FC = () => {
           <Tabs value={categoryTab} onValueChange={handleCategoryTabChange} className="w-full space-y-6">
             <TabsContent value="active" className="m-0">
               {/* Litters List Section */}
-              <Card className="shadow-md rounded-2xl overflow-hidden border border-greige-300">
+              <Card className="shadow-md rounded-2xl overflow-hidden border border-warmbeige-300">
                 <div className="p-4">
                   {view === 'grid' ? (
                     <LitterGridView 
@@ -129,7 +129,7 @@ const MyLittersContent: React.FC = () => {
                       <p className="text-muted-foreground mb-6">Try adjusting your search or filters</p>
                       <button 
                         onClick={handleClearFilters} 
-                        className="px-4 py-2 bg-moss-600 text-white rounded-xl hover:bg-moss-700 transition-colors shadow-sm"
+                        className="px-4 py-2 bg-warmgreen-600 text-white rounded-xl hover:bg-warmgreen-700 transition-colors shadow-sm"
                       >
                         Clear Filters
                       </button>
@@ -155,7 +155,7 @@ const MyLittersContent: React.FC = () => {
 
             <TabsContent value="archived" className="m-0">
               {/* Archived Litters Section - Same structure as active */}
-              <Card className="shadow-md rounded-2xl overflow-hidden border border-greige-300">
+              <Card className="shadow-md rounded-2xl overflow-hidden border border-warmbeige-300">
                 <div className="p-4">
                   {view === 'grid' ? (
                     <LitterGridView 
@@ -182,7 +182,7 @@ const MyLittersContent: React.FC = () => {
                       <p className="text-muted-foreground mb-6">Try adjusting your search or filters</p>
                       <button 
                         onClick={handleClearFilters} 
-                        className="px-4 py-2 bg-moss-600 text-white rounded-xl hover:bg-moss-700 transition-colors shadow-sm"
+                        className="px-4 py-2 bg-warmgreen-600 text-white rounded-xl hover:bg-warmgreen-700 transition-colors shadow-sm"
                       >
                         Clear Filters
                       </button>
