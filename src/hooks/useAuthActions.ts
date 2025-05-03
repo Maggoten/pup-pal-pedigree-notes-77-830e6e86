@@ -134,14 +134,18 @@ export const useAuthActions = () => {
       }
 
       // Use retry pattern for more resilience on mobile
-      // Fix: Properly await the PostgrestBuilder result by adding .then() to handle the response
+      // Fix: Convert PostgrestBuilder to a Promise explicitly by using Promise.resolve
       const { data, error } = await withRetry(
-        () => supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .maybeSingle()
-          .then(result => result), // This properly resolves the PostgrestBuilder to a Promise
+        async () => {
+          // Create a proper Promise that resolves with the PostgrestBuilder result
+          return Promise.resolve(
+            supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', userId)
+              .maybeSingle()
+          );
+        },
         2 // Max 2 retries
       );
       
