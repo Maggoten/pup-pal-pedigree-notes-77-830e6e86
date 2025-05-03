@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { PlusCircle, PawPrint } from 'lucide-react';
 import AddPuppyDialog from '../AddPuppyDialog';
 import PuppyMeasurementsDialog from '../puppies/PuppyMeasurementsDialog';
+import PuppyDetailsDialog from '../PuppyDetailsDialog';
 
 interface PuppiesTabContentProps {
   puppies: Puppy[];
@@ -36,6 +37,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
 }) => {
   const [measurementDialogOpen, setMeasurementDialogOpen] = useState(false);
   const [addPuppyDialogOpen, setAddPuppyDialogOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [activePuppy, setActivePuppy] = useState<Puppy | null>(null);
   
   useEffect(() => {
@@ -50,6 +52,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   
   const handlePuppyClick = (puppy: Puppy) => {
     setActivePuppy(puppy);
+    setDetailsDialogOpen(true);
     onSelectPuppy(puppy === selectedPuppy ? null : puppy);
   };
   
@@ -64,6 +67,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   
   const handleDeletePuppy = (puppyId: string) => {
     onDeletePuppy(puppyId);
+    setDetailsDialogOpen(false);
   };
   
   const handleAddPuppy = async (puppy: Puppy) => {
@@ -133,6 +137,17 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
             puppy={activePuppy} 
             onClose={() => setMeasurementDialogOpen(false)} 
             onUpdate={updatePuppyNames}
+          />
+        )}
+      </Dialog>
+
+      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+        {activePuppy && (
+          <PuppyDetailsDialog
+            puppy={activePuppy}
+            onClose={() => setDetailsDialogOpen(false)}
+            onUpdatePuppy={updatePuppyNames}
+            onDeletePuppy={handleDeletePuppy}
           />
         )}
       </Dialog>

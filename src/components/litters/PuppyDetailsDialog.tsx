@@ -76,8 +76,13 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
     if (onClose) onClose(); // Close dialog after adding a note
   }, [newNote, puppy, onUpdatePuppy, onClose]);
 
+  // Add a handler for the close button
+  const handleClose = useCallback(() => {
+    if (onClose) onClose();
+  }, [onClose]);
+
   return (
-    <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto bg-white border-2 border-warmbeige-400">
+    <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto bg-white border-2 border-warmbeige-400" onInteractOutside={handleClose} onEscapeKeyDown={handleClose}>
       <DialogHeader>
         <DialogTitle className="text-xl font-semibold text-warmgreen-800">Puppy Profile</DialogTitle>
         <DialogDescription className="text-darkgray-700">
