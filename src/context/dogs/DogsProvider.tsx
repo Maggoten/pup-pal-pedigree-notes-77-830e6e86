@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,19 +30,28 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   } = useDogsHook();
 
   const { activeDog, setActiveDog } = useActiveDog(dogs);
-  const forceReload = useForceReload(user?.id, fetchDogs);
+  
+  // Fix the fetchDogs call to handle the return value properly
+  const forceReload = useForceReload(user?.id, async () => {
+    await fetchDogs(true);
+    return;
+  });
   
   const { updateDog, removeDog } = useDogOperations({
     updateDogBase,
     deleteDog,
-    refreshDogs: async () => { await fetchDogs(); },
+    refreshDogs: async () => { 
+      await fetchDogs(true); 
+      return;
+    },
     activeDog,
     setActiveDog
   });
 
   const wrappedRefreshDogs = async (): Promise<void> => {
     try {
-      await fetchDogs();
+      await fetchDogs(true);
+      return;
     } catch (e) {
       console.error('Error refreshing dogs:', e);
       toast({
@@ -63,10 +73,15 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
 
   const isLoading = authLoading || (isLoggedIn && dogsLoading && !dogLoadingAttempted);
 
+  // Fix the error type to be string or null
+  const errorMessage = error ? 
+    (error instanceof Error ? error.message : String(error)) : 
+    (authLoading ? null : (!isLoggedIn && !user?.id && dogLoadingAttempted ? 'Authentication required' : null));
+
   const value: DogsContextType = {
     dogs,
     loading: isLoading,
-    error: error ? error : (authLoading ? null : (!isLoggedIn && !user?.id && dogLoadingAttempted ? 'Authentication required' : null)),
+    error: errorMessage,
     activeDog,
     setActiveDog,
     refreshDogs: wrappedRefreshDogs,

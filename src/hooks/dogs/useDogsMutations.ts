@@ -60,7 +60,8 @@ export const useDogsMutations = (): UseDogsMutations => {
     }
   }, [deleteDogMutation, toast]);
 
-  const deleteDog = useCallback(async (id: string, mode: DeletionMode = 'soft') => {
+  // Create the deleteDog function with the checkDependencies method
+  const deleteDogWithCheck = useCallback(async (id: string, mode: DeletionMode = 'soft') => {
     try {
       console.log(`useDogsMutations.deleteDog called with ID: ${id}, mode: ${mode}`);
       await deleteDogMutation.deleteDog({ dogId: id, mode });
@@ -77,11 +78,11 @@ export const useDogsMutations = (): UseDogsMutations => {
   }, [deleteDogMutation, toast]);
 
   // Attach the checkDependencies method to deleteDog
-  deleteDog.checkDependencies = checkDogDependencies;
+  deleteDogWithCheck.checkDependencies = checkDogDependencies;
 
   return {
     addDog,
     updateDog,
-    deleteDog
+    deleteDog: deleteDogWithCheck
   };
 };

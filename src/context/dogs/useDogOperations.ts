@@ -70,7 +70,7 @@ export const useDogOperations = ({
     }
   }, [deleteDog, activeDog, setActiveDog, toast]);
 
-  // Add the checkDependencies method to removeDog
+  // Correctly add the checkDependencies method to removeDog
   removeDog.checkDependencies = deleteDog.checkDependencies;
 
   return { updateDog, removeDog };

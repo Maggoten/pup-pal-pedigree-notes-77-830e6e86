@@ -1,12 +1,12 @@
 
 import { Dog, DogDependencies } from '@/types/dogs';
-import { DeletionMode } from '@/services/dogs';
 
 export interface UseDogsQueries {
   dogs: Dog[];
   isLoading: boolean;
   error: Error | null;
-  fetchDogs: () => Promise<void>;
+  fetchDogs: (skipCache?: boolean) => Promise<Dog[]>;
+  useDogs: () => { data: Dog[], isLoading: boolean, error: Error | null };
 }
 
 export interface UseDogsMutations {
@@ -27,3 +27,6 @@ export type UseDogs = UseDogsQueries & UseDogsMutations & {
     checkDependencies: (id: string) => Promise<DogDependencies | null>;
   };
 };
+
+// Include DeletionMode type here for local reference
+export type DeletionMode = 'soft' | 'hard';

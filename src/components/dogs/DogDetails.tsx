@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -118,6 +119,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
 
   const handleCheckDependencies = async (): Promise<DogDependencies | null> => {
     try {
+      // Fix: Use removeDog.checkDependencies to check dependencies
       return await removeDog.checkDependencies(dog.id);
     } catch (error) {
       console.error('Error checking dependencies:', error);
@@ -133,6 +135,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
   const handleDelete = async (mode: DeletionMode) => {
     console.log('Deletion requested for dog:', dog.id, dog.name, 'with mode:', mode);
     try {
+      // Fix: Pass the mode parameter to removeDog
       const success = await removeDog(dog.id, mode);
       console.log('Deletion result:', success);
       

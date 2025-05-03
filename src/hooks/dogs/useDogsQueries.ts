@@ -65,7 +65,7 @@ export const useDogsQueries = (): UseDogsQueries => {
   }, [status, fetchStatus, isLoading, userId]);
 
   // Rename function to avoid conflict with the imported service
-  const refreshDogs = useCallback(async (skipCache = false) => {
+  const refreshDogs = useCallback(async (skipCache = false): Promise<Dog[]> => {
     console.log('refreshDogs called with skipCache:', skipCache);
     if (skipCache) {
       console.log('Invalidating dogs query cache');
@@ -112,8 +112,8 @@ export const useDogsQueries = (): UseDogsQueries => {
   return {
     dogs,
     isLoading: isLoading || isInitialLoad,
-    error: error ? (error instanceof Error ? error.message : 'Unknown error') : null,
-    fetchDogs: refreshDogs, // Return the renamed function
-    useDogs: () => ({ data: dogs, isLoading: isLoading || isInitialLoad, error }) // Add useDogs method
+    error: error instanceof Error ? error : null,
+    fetchDogs: refreshDogs,
+    useDogs: () => ({ data: dogs, isLoading: isLoading || isInitialLoad, error })
   };
 };

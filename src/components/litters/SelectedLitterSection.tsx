@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Litter, Puppy } from '@/types/breeding';
@@ -31,7 +30,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
 }) => {
   const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
   const [activeTab, setActiveTab] = useState('puppies');
-  const { data: dogs } = useDogsQueries().useDogs();
+  const { dogs } = useDogsQueries();
   const [damBreed, setDamBreed] = useState<string>('');
 
   // Calculate litter age in weeks
