@@ -45,15 +45,17 @@ const MetricCard: React.FC<MetricCardProps> = ({
       onClick={action}
       className="rounded-xl p-4 md:p-5 bg-white border border-greige-100 transition-transform hover:scale-[1.02] flex flex-col items-start gap-3 w-full text-left shadow-sm"
     >
-      <div className={`mb-1 ${getIconStyles().textColor}`}>
-        {renderIcon()}
+      <div className="flex items-center gap-2 mb-2">
+        <div className={getIconStyles().textColor}>
+          {renderIcon()}
+        </div>
+        <p className="text-sm font-medium text-darkgray-600">{title}</p>
       </div>
       
       <div className="space-y-0">
         <h3 className="text-2xl font-semibold text-darkgray-800 mb-0">
           {loading ? <Skeleton className="h-7 w-16" /> : count}
         </h3>
-        <p className="text-sm text-darkgray-600 mt-0">{title}</p>
         {highlight && !loading && (
           <p className="text-xs text-darkgray-400 mt-1">{highlight}</p>
         )}
