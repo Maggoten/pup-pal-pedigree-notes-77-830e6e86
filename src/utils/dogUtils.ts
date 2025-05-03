@@ -1,5 +1,5 @@
 
-import { Dog, BreedingHistory, Heat } from '@/types/dogs';
+import { Dog, BreedingHistory, Heat, DogDependencies } from '@/types/dogs';
 import { Database } from '@/integrations/supabase/types';
 import { dateToISOString } from './dateUtils';
 
@@ -121,6 +121,11 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
         ? dateToISOString(dog.vaccinationDate as Date)
         : undefined;
   }
+
+  // Handle the deleted_at field if provided
+  if ('deleted_at' in dog) {
+    dbDog.deleted_at = dog.deleted_at;
+  }
   
   // Copy direct fields that have the same name
   const directFields: (keyof Dog & keyof DbDog)[] = [
@@ -170,4 +175,43 @@ export const convertDbHeatHistoryToFormFormat = (dbHeatHistory: Heat[]): { date:
     date.setHours(12, 0, 0, 0);
     return { date };
   });
+};
+
+/**
+ * Check if a dog has dependencies in other records that would prevent hard deletion
+ * @param dogId The ID of the dog to check
+ * @returns Promise with dependency information or null if no dependencies
+ */
+export const checkDogDependencies = async (dogId: string): Promise<DogDependencies | null> => {
+  try {
+    const { data, error } = await fetch(`/api/check-dog-dependencies?id=${dogId}`)
+      .then(res => res.json());
+      
+    if (error) {
+      console.error('Error checking dog dependencies:', error);
+      return null;
+    }
+    
+    return Object.keys(data).length > 0 ? data : null;
+  } catch (error) {
+    console.error('Error checking dog dependencies:', error);
+    return null;
+  }
+};
+
+/**
+ * Checks if a dog is soft-deleted
+ */
+export const isDogDeleted = (dog: Dog): boolean => {
+  return !!dog.deleted_at;
+};
+
+/**
+ * Helper to format dog name with deleted indicator
+ */
+export const formatDogName = (dog: Dog): string => {
+  if (isDogDeleted(dog)) {
+    return `${dog.name} (Deleted)`;
+  }
+  return dog.name;
 };

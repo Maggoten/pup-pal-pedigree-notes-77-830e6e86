@@ -1,10 +1,11 @@
 
 import { useCallback } from 'react';
-import { Dog } from '@/types/dogs';
+import { Dog, DogDependencies } from '@/types/dogs';
 import { useAddDog, useUpdateDog, useDeleteDog } from './mutations';
 import { UseDogsMutations } from './types';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { DeletionMode } from '@/services/dogs';
 
 export const useDogsMutations = (): UseDogsMutations => {
   const { user } = useAuth();
@@ -44,10 +45,25 @@ export const useDogsMutations = (): UseDogsMutations => {
     }
   }, [updateDogMutation, toast]);
 
-  const deleteDog = useCallback(async (id: string) => {
+  const checkDogDependencies = useCallback(async (id: string): Promise<DogDependencies | null> => {
     try {
-      console.log('useDogsMutations.deleteDog called with ID:', id);
-      await deleteDogMutation.mutateAsync(id);
+      console.log('useDogsMutations.checkDogDependencies called with ID:', id);
+      return await deleteDogMutation.checkDependencies(id);
+    } catch (error) {
+      console.error('Error in checkDogDependencies:', error);
+      toast({
+        title: "Error checking dependencies",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive"
+      });
+      return null;
+    }
+  }, [deleteDogMutation, toast]);
+
+  const deleteDog = useCallback(async (id: string, mode: DeletionMode = 'soft') => {
+    try {
+      console.log(`useDogsMutations.deleteDog called with ID: ${id}, mode: ${mode}`);
+      await deleteDogMutation.deleteDog({ dogId: id, mode });
       return true;
     } catch (error) {
       console.error('Error in deleteDog:', error);
@@ -59,6 +75,9 @@ export const useDogsMutations = (): UseDogsMutations => {
       return false;
     }
   }, [deleteDogMutation, toast]);
+
+  // Attach the checkDependencies method to deleteDog
+  deleteDog.checkDependencies = checkDogDependencies;
 
   return {
     addDog,

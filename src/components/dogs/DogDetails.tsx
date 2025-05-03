@@ -1,14 +1,14 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { Dog } from '@/types/dogs';
+import { Dog, DogDependencies } from '@/types/dogs';
 import { useDogs } from '@/context/DogsContext';
 import { DogFormValues } from './DogFormFields';
 import { toast } from '@/hooks/use-toast';
 import DeleteDogDialog from './delete-dialog/DeleteDogDialog';
 import DogDetailsCard from './details/DogDetailsCard';
 import DogActions from './actions/DogActions';
+import { DeletionMode } from '@/services/dogs';
 
 interface DogDetailsProps {
   dog: Dog;
@@ -116,10 +116,24 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
     }
   };
 
-  const handleDelete = async () => {
-    console.log('Deletion requested for dog:', dog.id, dog.name);
+  const handleCheckDependencies = async (): Promise<DogDependencies | null> => {
     try {
-      const success = await removeDog(dog.id);
+      return await removeDog.checkDependencies(dog.id);
+    } catch (error) {
+      console.error('Error checking dependencies:', error);
+      toast({
+        title: "Error",
+        description: "Failed to check dog dependencies",
+        variant: "destructive"
+      });
+      return null;
+    }
+  };
+
+  const handleDelete = async (mode: DeletionMode) => {
+    console.log('Deletion requested for dog:', dog.id, dog.name, 'with mode:', mode);
+    try {
+      const success = await removeDog(dog.id, mode);
       console.log('Deletion result:', success);
       
       if (success) {
@@ -176,6 +190,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         onConfirm={handleDelete}
+        onCheckDependencies={handleCheckDependencies}
       />
     </div>
   );

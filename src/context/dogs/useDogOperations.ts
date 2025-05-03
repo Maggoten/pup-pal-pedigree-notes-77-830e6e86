@@ -1,11 +1,15 @@
 
 import { useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Dog } from '@/types/dogs';
+import { Dog, DogDependencies } from '@/types/dogs';
+import { DeletionMode } from '@/services/dogs';
 
 interface UseDogOperationsProps {
   updateDogBase: (id: string, updates: Partial<Dog>) => Promise<Dog | null>;
-  deleteDog: (id: string) => Promise<boolean>; // Updated from Promise<void> to Promise<boolean>
+  deleteDog: {
+    (id: string, mode: DeletionMode): Promise<boolean>;
+    checkDependencies: (id: string) => Promise<DogDependencies | null>;
+  };
   refreshDogs: () => Promise<void>;
   activeDog: Dog | null;
   setActiveDog: (dog: Dog | null) => void;
@@ -46,9 +50,9 @@ export const useDogOperations = ({
     }
   }, [updateDogBase, activeDog, setActiveDog, refreshDogs, toast]);
 
-  const removeDog = useCallback(async (id: string): Promise<boolean> => {
+  const removeDog = useCallback(async (id: string, mode: DeletionMode = 'soft'): Promise<boolean> => {
     try {
-      await deleteDog(id);
+      await deleteDog(id, mode);
       
       if (activeDog?.id === id) {
         setActiveDog(null);
@@ -65,6 +69,9 @@ export const useDogOperations = ({
       return false;
     }
   }, [deleteDog, activeDog, setActiveDog, toast]);
+
+  // Add the checkDependencies method to removeDog
+  removeDog.checkDependencies = deleteDog.checkDependencies;
 
   return { updateDog, removeDog };
 };
