@@ -2,7 +2,6 @@
 import React, { useState, useMemo } from 'react';
 import { Grid2X2, LayoutList } from 'lucide-react';
 import { useLitterManagement } from '@/hooks/litters/useLitterManagement';
-import { useLitterFiltering } from '@/hooks/useLitterFiltering';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -13,9 +12,13 @@ import LitterFilterControls from './LitterFilterControls';
 import SelectedLitterSection from './SelectedLitterSection';
 import EmptyLitterState from './EmptyLitterState';
 import AddLitterDialog from './AddLitterDialog'; 
+import { useLitterFiltering } from '@/hooks/useLitterFiltering';
 
 const MyLittersContent: React.FC = () => {
+  // Track view mode locally
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
+  
   const {
     activeLitters,
     archivedLitters,
@@ -36,17 +39,17 @@ const MyLittersContent: React.FC = () => {
     getAvailableYears
   } = useLitterManagement();
 
-  // Use litter filtering
+  // Use litter filtering - pass the actual state handler
   const { 
-    filteredActiveLitters, 
-    filteredArchivedLitters,
-    activeTab, 
-    setActiveTab,
+    filteredLitters,
     searchQuery,
     setSearchQuery,
     selectedYear,
     setSelectedYear 
-  } = useLitterFiltering(activeLitters, archivedLitters, getAvailableYears);
+  } = useLitterFiltering(
+    activeTab === 'active' ? activeLitters : archivedLitters,
+    getAvailableYears
+  );
 
   // Toggle view mode
   const toggleViewMode = (value: string) => {
@@ -56,9 +59,7 @@ const MyLittersContent: React.FC = () => {
   };
 
   // Get the litters to display based on active tab
-  const littersToDisplay = useMemo(() => {
-    return activeTab === 'active' ? filteredActiveLitters : filteredArchivedLitters;
-  }, [activeTab, filteredActiveLitters, filteredArchivedLitters]);
+  const littersToDisplay = filteredLitters;
 
   // Determine if there are no litters at all (for empty state)
   const hasNoLitters = !isLoading && activeLitters.length === 0 && archivedLitters.length === 0;
@@ -92,13 +93,17 @@ const MyLittersContent: React.FC = () => {
               <Card>
                 {/* Tab Navigation and View Toggle */}
                 <div className="flex items-center justify-between p-4 border-b">
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <Tabs 
+                    value={activeTab} 
+                    onValueChange={(value: 'active' | 'archived') => setActiveTab(value)} 
+                    className="w-full"
+                  >
                     <TabsList className="grid grid-cols-2">
                       <TabsTrigger value="active">
-                        Active ({filteredActiveLitters.length})
+                        Active ({activeLitters.length})
                       </TabsTrigger>
                       <TabsTrigger value="archived">
-                        Archived ({filteredArchivedLitters.length})
+                        Archived ({archivedLitters.length})
                       </TabsTrigger>
                     </TabsList>
                   </Tabs>
@@ -130,6 +135,7 @@ const MyLittersContent: React.FC = () => {
                     <LitterListView 
                       litters={littersToDisplay} 
                       onSelectLitter={handleSelectLitter} 
+                      onArchive={handleArchive}
                       selectedLitterId={selectedLitterId}
                     />
                   )}

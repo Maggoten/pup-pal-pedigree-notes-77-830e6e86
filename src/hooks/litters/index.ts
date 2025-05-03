@@ -7,3 +7,4 @@ export * from './useLitterOperations';
 export * from './useLitterUtils';
 export * from './useLitterSubscription';
 export * from './queries';
+export * from './operations';

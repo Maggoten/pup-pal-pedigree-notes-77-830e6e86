@@ -3,24 +3,17 @@ import { useState, useMemo } from 'react';
 import { Litter } from '@/types/breeding';
 
 export const useLitterFiltering = (
-  activeLitters: Litter[],
-  archivedLitters: Litter[],
+  litters: Litter[],
   getAvailableYears: () => number[]
 ) => {
-  // Setup state for filtering and tabs
-  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
+  // Setup state for filtering
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   
-  // Apply filters to active litters
-  const filteredActiveLitters = useMemo(() => {
-    return filterLitters(activeLitters, searchQuery, selectedYear);
-  }, [activeLitters, searchQuery, selectedYear]);
-  
-  // Apply filters to archived litters
-  const filteredArchivedLitters = useMemo(() => {
-    return filterLitters(archivedLitters, searchQuery, selectedYear);
-  }, [archivedLitters, searchQuery, selectedYear]);
+  // Apply filters to litters
+  const filteredLitters = useMemo(() => {
+    return filterLitters(litters, searchQuery, selectedYear);
+  }, [litters, searchQuery, selectedYear]);
   
   // Helper function to filter litters
   const filterLitters = (litters: Litter[], query: string, year: number | null): Litter[] => {
@@ -40,10 +33,7 @@ export const useLitterFiltering = (
   };
   
   return { 
-    filteredActiveLitters, 
-    filteredArchivedLitters,
-    activeTab, 
-    setActiveTab,
+    filteredLitters,
     searchQuery,
     setSearchQuery,
     selectedYear,

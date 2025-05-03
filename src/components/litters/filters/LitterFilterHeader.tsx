@@ -9,10 +9,11 @@ interface LitterFilterHeaderProps {
   archivedLitters: any[];
   categoryTab: string;
   setCategoryTab: (value: string) => void;
-  showAddLitterDialog: boolean;
-  setShowAddLitterDialog: (show: boolean) => void;
-  onAddLitter: (litter: any) => void;
-  plannedLitters: PlannedLitter[];
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  selectedYear: number | null;
+  onYearChange: (year: number | null) => void;
+  onAddLitterClick: () => void;
   availableYears: number[];
 }
 
@@ -21,10 +22,11 @@ const LitterFilterHeader: React.FC<LitterFilterHeaderProps> = ({
   archivedLitters,
   categoryTab,
   setCategoryTab,
-  showAddLitterDialog,
-  setShowAddLitterDialog,
-  onAddLitter,
-  plannedLitters,
+  searchQuery,
+  onSearchChange,
+  selectedYear,
+  onYearChange,
+  onAddLitterClick,
   availableYears
 }) => {
   return (
@@ -49,10 +51,12 @@ const LitterFilterHeader: React.FC<LitterFilterHeaderProps> = ({
       </CategoryTabsList>
       
       <LitterFilterControls
-        showAddLitterDialog={showAddLitterDialog}
-        setShowAddLitterDialog={setShowAddLitterDialog}
-        onAddLitter={onAddLitter}
-        plannedLitters={plannedLitters}
+        hasLitters={activeLitters.length > 0 || archivedLitters.length > 0}
+        onAddLitterClick={onAddLitterClick}
+        searchQuery={searchQuery}
+        onSearchChange={onSearchChange}
+        selectedYear={selectedYear}
+        onYearChange={onYearChange}
         availableYears={availableYears}
       />
     </div>

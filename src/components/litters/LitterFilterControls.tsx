@@ -6,13 +6,13 @@ import { Input } from '@/components/ui/input';
 import YearFilterDropdown from './YearFilterDropdown';
 
 interface LitterFilterControlsProps {
-  hasLitters: boolean;
   onAddLitterClick: () => void;
   searchQuery: string;
   onSearchChange: (value: string) => void;
   selectedYear: number | null;
   onYearChange: (year: number | null) => void;
   availableYears: number[];
+  hasLitters?: boolean;
 }
 
 const LitterFilterControls: React.FC<LitterFilterControlsProps> = ({
