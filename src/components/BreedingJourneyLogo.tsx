@@ -15,7 +15,7 @@ const BreedingJourneyLogo: React.FC<BreedingJourneyLogoProps> = ({
   const sizeMap = {
     sm: 'h-8 w-8',
     md: 'h-10 w-10',
-    lg: 'h-[80px] w-[80px]' // Reducing from 160px to 80px
+    lg: 'h-[100px] w-[100px]' // Changing from 80px to 100px
   };
   return <Link to="/" className="flex items-center gap-2 transition-transform hover:scale-105">
       <div className="relative">
