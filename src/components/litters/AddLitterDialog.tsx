@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Litter, PlannedLitter } from '@/types/breeding';
 import AddLitterDialogContent from './dialog/AddLitterDialogContent';
 
@@ -22,16 +22,18 @@ const AddLitterDialog: React.FC<AddLitterDialogProps> = ({
   };
 
   return (
-    <DialogContent className="sm:max-w-[550px]">
-      <DialogHeader>
-        <DialogTitle>Add New Litter</DialogTitle>
-      </DialogHeader>
-      <AddLitterDialogContent 
-        onClose={handleClose}
-        onLitterAdded={onAddLitter}
-        plannedLitters={plannedLitters}
-      />
-    </DialogContent>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[550px]">
+        <DialogHeader>
+          <DialogTitle>Add New Litter</DialogTitle>
+        </DialogHeader>
+        <AddLitterDialogContent 
+          onClose={handleClose}
+          onLitterAdded={onAddLitter}
+          plannedLitters={plannedLitters}
+        />
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NewLitterTabContent from './NewLitterTabContent';
 import PlannedLitterTabContent from './PlannedLitterTabContent';
@@ -20,13 +20,10 @@ const AddLitterDialogContent: React.FC<AddLitterDialogContentProps> = ({
   const [activeTab, setActiveTab] = useState('newLitter');
 
   return (
-    <DialogContent className="sm:max-w-[550px] max-h-[85vh] overflow-y-auto bg-greige-100 border-greige-300">
-      <DialogHeader>
-        <DialogTitle>Add New Litter</DialogTitle>
-        <DialogDescription>
-          Create a new litter record for your breeding program
-        </DialogDescription>
-      </DialogHeader>
+    <>
+      <DialogDescription>
+        Create a new litter record for your breeding program
+      </DialogDescription>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
         <TabsList className="grid grid-cols-2 bg-greige-200">
@@ -46,7 +43,7 @@ const AddLitterDialogContent: React.FC<AddLitterDialogContentProps> = ({
           />
         </TabsContent>
       </Tabs>
-    </DialogContent>
+    </>
   );
 };
 
