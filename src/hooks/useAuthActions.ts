@@ -2,19 +2,22 @@ import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
 import { toast } from '@/hooks/use-toast';
+import { withRetry } from '@/utils/networkUtils';
 
 export const useAuthActions = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  // Login function
+  // Login function with retry capability
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
       console.log('Attempting login for:', email);
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      
+      // Use retry wrapper for better mobile resilience
+      const { data, error } = await withRetry(
+        () => supabase.auth.signInWithPassword({ email, password }),
+        2  // Max 2 retries
+      );
       
       if (error) {
         console.error('Login error from Supabase:', error);
@@ -25,6 +28,15 @@ export const useAuthActions = () => {
             description: "Please check your email and password",
             variant: "destructive"
           });
+        } else {
+          // Show network-related errors differently
+          if (error.message.includes('network') || error.message.includes('timeout')) {
+            toast({
+              title: "Connection issue",
+              description: "Please check your internet connection and try again",
+              variant: "destructive"
+            });
+          }
         }
         return false;
       }
@@ -33,6 +45,14 @@ export const useAuthActions = () => {
       return !!data.session;
     } catch (error) {
       console.error("Login error:", error);
+      
+      // Provide helpful error for mobile users
+      toast({
+        title: "Login failed",
+        description: "Please check your connection and try again",
+        variant: "destructive"
+      });
+      
       return false;
     } finally {
       setIsLoading(false);
@@ -104,7 +124,7 @@ export const useAuthActions = () => {
     }
   };
 
-  // Get user profile from database
+  // Get user profile from database with improved resilience
   const getUserProfile = async (userId: string): Promise<Profile | null> => {
     try {
       console.log('Fetching profile for user:', userId);
@@ -113,11 +133,15 @@ export const useAuthActions = () => {
         return null;
       }
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
+      // Use retry pattern for more resilience on mobile
+      const { data, error } = await withRetry(
+        () => supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle(),
+        2 // Max 2 retries
+      );
       
       if (error) {
         console.error('Error fetching user profile:', error);
