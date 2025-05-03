@@ -25,6 +25,7 @@ const MyLitters: React.FC = () => {
       title="My Litters" 
       description="Manage your litter records and puppies" 
       icon={<PawPrint className="h-6 w-6" />}
+      className="bg-warmbeige-50"
     >
       <LitterFilterProvider>
         <Suspense fallback={<MyLittersLoading />}>

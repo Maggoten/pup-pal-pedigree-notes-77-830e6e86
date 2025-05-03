@@ -13,8 +13,8 @@ interface PuppiesCardProps {
 
 const PuppiesCard: React.FC<PuppiesCardProps> = ({ puppies, onLogWeights }) => {
   return (
-    <Card>
-      <CardHeader>
+    <Card className="bg-white border border-warmbeige-200 shadow-sm">
+      <CardHeader className="bg-warmbeige-50">
         <CardTitle>Litter Details</CardTitle>
         <CardDescription>
           Born: {new Date(puppies[0]?.weightLog[0]?.date || new Date()).toLocaleDateString()} | 
@@ -26,7 +26,7 @@ const PuppiesCard: React.FC<PuppiesCardProps> = ({ puppies, onLogWeights }) => {
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Puppies ({puppies.length})</h3>
-            <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={onLogWeights}>
+            <Button variant="outline" size="sm" className="flex items-center gap-2 bg-warmbeige-50 hover:bg-warmbeige-200" onClick={onLogWeights}>
               <BarChart className="h-4 w-4" />
               Log Weights
             </Button>

@@ -42,7 +42,7 @@ const MyDogsContent: React.FC = () => {
                 value={genderFilter}
                 onValueChange={(value) => setGenderFilter(value as 'all' | 'male' | 'female')}
               >
-                <SelectTrigger className="bg-white w-full">
+                <SelectTrigger className="bg-white border border-warmbeige-200 w-full">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4 text-muted-foreground" />
                     <SelectValue placeholder="Filter by gender" />
@@ -66,8 +66,8 @@ const MyDogsContent: React.FC = () => {
             </Button>
           </div>
           
-          <Card>
-            <CardHeader>
+          <Card className="bg-white border border-warmbeige-200 shadow-sm">
+            <CardHeader className="bg-warmbeige-50 border-b border-warmbeige-200">
               <CardTitle>
                 {genderFilter === 'all' ? 'All Dogs' : 
                  genderFilter === 'male' ? 'Dogs (Males)' : 
@@ -79,7 +79,7 @@ const MyDogsContent: React.FC = () => {
                  'Female dogs in your breeding program'}
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="bg-white">
               <DogList dogsList={filteredDogs} />
             </CardContent>
           </Card>

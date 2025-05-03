@@ -33,7 +33,7 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
     <Card 
       className={`h-full overflow-hidden hover:shadow-md transition-all duration-300 ${
         isSelected ? 'ring-2 ring-primary shadow-lg transform scale-[1.02]' : 'hover:scale-[1.01]'
-      } cursor-pointer`}
+      } cursor-pointer bg-white border border-warmbeige-200`}
       onClick={() => onSelect(litter)}
     >
       <CardHeader className="pb-1 pt-3 px-4">
@@ -41,7 +41,7 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
           <CardTitle className="text-lg font-semibold">{litter.name}</CardTitle>
           <div className="flex gap-1">
             {isRecent && (
-              <Badge variant="success" className="text-xs">Active</Badge>
+              <Badge variant="success" className="text-xs bg-warmgreen-600 text-white px-2.5 py-0.5 rounded-full">Active</Badge>
             )}
             {puppyCount > 0 && (
               <Badge variant="secondary" className="text-xs">

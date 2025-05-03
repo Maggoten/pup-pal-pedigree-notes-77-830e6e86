@@ -77,8 +77,8 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   };
   
   return (
-    <Card className="shadow-sm">
-      <CardHeader className="bg-primary/5 pb-4">
+    <Card className="shadow-sm bg-white border border-warmbeige-200">
+      <CardHeader className="bg-warmbeige-100 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <PawPrint className="h-5 w-5 text-primary" />
@@ -89,7 +89,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
           
           <Dialog open={addPuppyDialogOpen} onOpenChange={setAddPuppyDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-1.5" onClick={() => setAddPuppyDialogOpen(true)}>
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5 bg-warmbeige-50 hover:bg-warmbeige-200" onClick={() => setAddPuppyDialogOpen(true)}>
                 <PlusCircle className="h-4 w-4" />
                 <span>Add Puppy</span>
               </Button>

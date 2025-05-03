@@ -117,7 +117,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
         onTodayClick={handleTodayClick}
       />
       
-      <CardContent className={`p-3 bg-gradient-to-br from-warmbeige-50 to-warmbeige-100/40 ${compact ? 'max-h-[300px] overflow-y-auto' : ''}`}>
+      <CardContent className={`p-3 bg-white border-t border-warmbeige-100 ${compact ? 'max-h-[300px] overflow-y-auto' : ''}`}>
         {isMobile && (
           <div className="text-xs text-darkgray-500 mb-2">
             Tap events to view/edit
@@ -136,7 +136,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
       </CardContent>
       
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="bg-warmbeige-50">
+        <DialogContent className="bg-white border border-warmbeige-200">
           <DialogHeader>
             <DialogTitle>Add Calendar Event</DialogTitle>
           </DialogHeader>
@@ -145,7 +145,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
       </Dialog>
       
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="bg-warmbeige-50">
+        <DialogContent className="bg-white border border-warmbeige-200">
           <DialogHeader>
             <DialogTitle>Edit Calendar Event</DialogTitle>
           </DialogHeader>
