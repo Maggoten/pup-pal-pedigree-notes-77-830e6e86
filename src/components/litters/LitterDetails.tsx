@@ -56,7 +56,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
   };
 
   return (
-    <Card className="mb-6 shadow-sm bg-white border border-warmbeige-200">
+    <Card className="mb-6 shadow-sm bg-white border border-warmbeige-100">
       <CardHeader className="pb-4">
         <div className="flex justify-between items-start gap-4">
           <div>
@@ -76,7 +76,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             {/* Only render dialog when it's open to improve performance */}
             <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-1.5 bg-warmbeige-100 hover:bg-warmbeige-200">
+                <Button variant="outline" size="sm" className="flex items-center gap-1.5 bg-warmbeige-50 hover:bg-warmbeige-100">
                   <Edit className="h-4 w-4" />
                   <span>Edit</span>
                 </Button>
@@ -96,7 +96,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             <Button 
               variant="outline" 
               size="sm" 
-              className="flex items-center gap-1.5 bg-warmbeige-100 hover:bg-warmbeige-200"
+              className="flex items-center gap-1.5 bg-warmbeige-50 hover:bg-warmbeige-100"
               onClick={handleArchiveToggle}
             >
               <Archive className="h-4 w-4" />
@@ -126,21 +126,21 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-warmbeige-200 shadow-sm border border-warmbeige-300">
+            <Card className="bg-warmbeige-50 shadow-sm border border-warmbeige-100">
               <CardContent className="pt-6">
                 <div className="text-sm font-medium">Total Puppies</div>
                 <div className="text-2xl font-bold">{puppyCount}</div>
               </CardContent>
             </Card>
             
-            <Card className="bg-warmbeige-200 shadow-sm border border-warmbeige-300">
+            <Card className="bg-warmbeige-50 shadow-sm border border-warmbeige-100">
               <CardContent className="pt-6">
                 <div className="text-sm font-medium">Litter Age</div>
                 <div className="text-2xl font-bold">{litterAge} weeks</div>
               </CardContent>
             </Card>
             
-            <Card className="bg-warmbeige-200 shadow-sm border border-warmbeige-300">
+            <Card className="bg-warmbeige-50 shadow-sm border border-warmbeige-100">
               <CardContent className="pt-6">
                 <div className="text-sm font-medium">Status</div>
                 <div className={`text-2xl font-bold ${!litter.archived ? 'text-warmgreen-600' : ''}`}>
