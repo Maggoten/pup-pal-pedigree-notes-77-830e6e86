@@ -19,8 +19,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'le-jour': ['"Le Jour Serif"', 'serif'],
-				'glacial': ['"Glacial Indifference"', 'sans-serif'],
+				'cinzel': ['Cinzel', 'serif'],
+				'lato': ['Lato', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -56,6 +56,60 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// New custom colors based on the style guide
+				greige: {
+					DEFAULT: '#ECE8E1', // Background
+					50: '#FAF9F7',
+					100: '#F7F5F2',
+					200: '#ECE8E1', // Main greige
+					300: '#D6CFC7', // Secondary background
+					400: '#C0B8AE',
+					500: '#AAA195',
+					600: '#8E8577',
+					700: '#726A5E',
+					800: '#564F45',
+					900: '#3A352E'
+				},
+				moss: {
+					DEFAULT: '#4A5A3C', // Primary color
+					50: '#EFF2EC',
+					100: '#DFE4D9',
+					200: '#BFC9B4',
+					300: '#9FAE8F',
+					400: '#7F936A',
+					500: '#5F7845',
+					600: '#4A5A3C', // Main moss green
+					700: '#394429',
+					800: '#272E1C',
+					900: '#16190F'
+				},
+				rust: {
+					DEFAULT: '#A8673F', // Accent color
+					50: '#F7F0EC',
+					100: '#F0E2D9',
+					200: '#E1C5B2',
+					300: '#D2A88C',
+					400: '#C38B65',
+					500: '#B46E3F',
+					600: '#A8673F', // Main rust brown
+					700: '#7D4D2F',
+					800: '#53331F',
+					900: '#291A10'
+				},
+				darkgray: {
+					DEFAULT: '#4A4A4A', // Secondary color
+					50: '#EFEFEF',
+					100: '#DFDFDF',
+					200: '#BFBFBF',
+					300: '#9F9F9F',
+					400: '#7F7F7F',
+					500: '#5F5F5F',
+					600: '#4A4A4A', // Main dark gray
+					700: '#373737',
+					800: '#252525',
+					900: '#121212'
+				},
+				// Keep the previous color schemes for compatibility
 				cream: {
 					50: '#FFFDF7',
 					100: '#FFF8E8',
@@ -74,47 +128,11 @@ export default {
 					200: '#D0DCCC',
 					300: '#B8CAB4',
 					400: '#A0B89C',
-					500: '#88A684', // Main sage green
+					500: '#88A684',
 					600: '#6A8768',
 					700: '#4D684D',
 					800: '#304832',
 					900: '#192419'
-				},
-				greige: {
-					50: '#F8F6F2',
-					100: '#F0EDE5',
-					200: '#E1DACB',
-					300: '#D2C8B1',
-					400: '#C3B597',
-					500: '#B4A37D',
-					600: '#9A8A67',
-					700: '#7A6E52',
-					800: '#5B523C',
-					900: '#2D2A1E'
-				},
-				brown: {
-					50: '#F9F6F3',
-					100: '#F0E9E2',
-					200: '#E1D2C6',
-					300: '#D2BCAA',
-					400: '#C3A58D',
-					500: '#B48F71',
-					600: '#9A765A',
-					700: '#7A5E48',
-					800: '#5B4735',
-					900: '#2D231A'
-				},
-				blush: {
-					50: '#FFF0F5',
-					100: '#FFDEE8',
-					200: '#FFBDD1',
-					300: '#FF9CBA',
-					400: '#FF7BA3',
-					500: '#FF5A8C',
-					600: '#FF3975',
-					700: '#FF175E',
-					800: '#E60046',
-					900: '#B3003A'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',

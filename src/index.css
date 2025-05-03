@@ -1,6 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Le+Jour+Serif:wght@400;700&display=swap');
-@import url('https://fonts.cdnfonts.com/css/glacial-indifference-2');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Lato:wght@300;400;700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,84 +7,84 @@
 
 @layer base {
   :root {
-    /* Light Mode Colors - More beige tones */
-    --background: 40 30% 94%; /* Soft beige background #f2efea */
-    --foreground: 120 20% 25%;
+    /* Light Mode Colors - Based on new color scheme */
+    --background: 39 11% 90%; /* Greige background #ECE8E1 */
+    --foreground: 0 0% 29%; /* Dark gray #4A4A4A for text */
 
-    --card: 0 0% 100%;
-    --card-foreground: 120 20% 25%;
+    --card: 0 0% 100%; /* White #FFFFFF */
+    --card-foreground: 0 0% 29%; /* Dark gray #4A4A4A */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 120 20% 25%;
+    --popover-foreground: 0 0% 29%;
 
-    --primary: 120 47% 28%; /* Dark green #296b26 */
-    --primary-foreground: 40 30% 96%;
+    --primary: 84 20% 30%; /* Moss green #4A5A3C */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
 
-    --secondary: 40 30% 90%; /* Greige */
-    --secondary-foreground: 120 20% 25%;
+    --secondary: 33 15% 81%; /* Soft beige #D6CFC7 */
+    --secondary-foreground: 0 0% 29%; /* Dark gray text on secondary */
 
-    --muted: 40 25% 90%;
-    --muted-foreground: 120 10% 40%;
+    --muted: 33 15% 81%; /* Soft beige */
+    --muted-foreground: 0 0% 45%; /* Lighter dark gray */
 
-    --accent: 40 30% 86%; /* Soft beige accent */
-    --accent-foreground: 120 20% 25%;
+    --accent: 25 45% 45%; /* Rust brown #A8673F */
+    --accent-foreground: 0 0% 100%; /* White text on accent */
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 40 30% 96%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 40 30% 85%;
-    --input: 40 30% 85%;
-    --ring: 120 47% 28%;
+    --border: 33 15% 75%; /* Slightly darker than secondary */
+    --input: 33 15% 75%;
+    --ring: 84 20% 30%; /* Moss green */
 
-    --radius: 0.5rem;
+    --radius: 1rem; /* Larger rounded corners */
 
-    --sidebar-background: 40 30% 94%;
-    --sidebar-foreground: 120 20% 25%;
-    --sidebar-primary: 120 47% 28%;
-    --sidebar-primary-foreground: 40 30% 96%;
-    --sidebar-accent: 40 30% 90%;
-    --sidebar-accent-foreground: 120 20% 25%;
-    --sidebar-border: 40 30% 85%;
-    --sidebar-ring: 40 30% 70%;
+    --sidebar-background: 39 11% 90%;
+    --sidebar-foreground: 0 0% 29%;
+    --sidebar-primary: 84 20% 30%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 33 15% 81%;
+    --sidebar-accent-foreground: 0 0% 29%;
+    --sidebar-border: 33 15% 75%;
+    --sidebar-ring: 33 15% 60%;
   }
 
   .dark {
-    --background: 120 15% 15%;
-    --foreground: 40 30% 96%;
+    --background: 84 20% 10%; /* Dark moss background */
+    --foreground: 33 15% 90%; /* Light greige for text */
 
-    --card: 120 10% 20%;
-    --card-foreground: 40 30% 96%;
+    --card: 84 20% 15%; /* Slightly lighter than background */
+    --card-foreground: 33 15% 90%;
 
-    --popover: 120 10% 20%;
-    --popover-foreground: 40 30% 96%;
+    --popover: 84 20% 15%;
+    --popover-foreground: 33 15% 90%;
 
-    --primary: 120 20% 35%;
-    --primary-foreground: 40 30% 96%;
+    --primary: 84 20% 40%; /* Brighter moss green */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 120 10% 25%;
-    --secondary-foreground: 40 30% 96%;
+    --secondary: 84 20% 20%;
+    --secondary-foreground: 33 15% 90%;
 
-    --muted: 120 10% 25%;
-    --muted-foreground: 120 10% 70%;
+    --muted: 84 20% 20%;
+    --muted-foreground: 84 20% 70%;
 
-    --accent: 40 30% 50%;
-    --accent-foreground: 40 30% 96%;
+    --accent: 25 45% 55%; /* Brighter rust */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 40.6%;
-    --destructive-foreground: 40 30% 96%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 120 10% 25%;
-    --input: 120 10% 25%;
-    --ring: 120 20% 35%;
+    --border: 84 20% 25%;
+    --input: 84 20% 25%;
+    --ring: 84 20% 40%;
 
-    --sidebar-background: 120 10% 20%;
-    --sidebar-foreground: 40 30% 96%;
-    --sidebar-primary: 120 20% 35%;
-    --sidebar-primary-foreground: 40 30% 96%;
-    --sidebar-accent: 120 10% 25%;
-    --sidebar-accent-foreground: 40 30% 96%;
-    --sidebar-border: 120 10% 25%;
-    --sidebar-ring: 40 30% 40%;
+    --sidebar-background: 84 20% 15%;
+    --sidebar-foreground: 33 15% 90%;
+    --sidebar-primary: 84 20% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 84 20% 20%;
+    --sidebar-accent-foreground: 33 15% 90%;
+    --sidebar-border: 84 20% 25%;
+    --sidebar-ring: 33 15% 50%;
   }
 }
 
@@ -96,16 +95,17 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Lato', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply text-primary;
+    @apply text-primary font-cinzel;
   }
 }
 
 @layer components {
   .dog-card {
-    @apply relative overflow-hidden transition-all duration-300 hover:shadow-lg;
+    @apply relative overflow-hidden transition-all duration-300 hover:shadow-lg rounded-2xl;
   }
   
   .dog-card:hover {
@@ -113,23 +113,23 @@
   }
   
   .stats-card {
-    @apply bg-card border rounded-lg p-4 shadow-sm transition-all duration-300 hover:shadow-md;
+    @apply bg-card border rounded-2xl p-4 shadow-sm transition-all duration-300 hover:shadow-md;
   }
 
   .nature-gradient {
-    @apply bg-gradient-to-br from-sage-100 to-sage-200;
+    @apply bg-gradient-to-br from-moss-100 to-moss-200;
   }
 
   .greige-gradient {
     @apply bg-gradient-to-br from-greige-100 to-greige-200;
   }
   
-  .pink-gradient {
-    @apply bg-gradient-to-br from-blush-100 to-blush-200;
+  .rust-gradient {
+    @apply bg-gradient-to-br from-rust-100 to-rust-200;
   }
   
-  .sage-gradient {
-    @apply bg-gradient-to-br from-sage-100 to-sage-300;
+  .moss-gradient {
+    @apply bg-gradient-to-br from-moss-100 to-moss-300;
   }
   
   .greige-card {
