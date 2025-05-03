@@ -26,8 +26,7 @@ export const loginUser = async (email: string, password: string): Promise<User |
       id: data.user.id,
       email: data.user.email || '',
       firstName: profile.first_name,
-      lastName: profile.last_name,
-      address: profile.address
+      lastName: profile.last_name
     };
   }
   
@@ -44,8 +43,7 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
       options: {
         data: {
           firstName: userData.firstName,
-          lastName: userData.lastName,
-          address: userData.address
+          lastName: userData.lastName
         }
       }
     });
@@ -60,8 +58,7 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
       id: data.user.id,
       email: userData.email,
       firstName: userData.firstName,
-      lastName: userData.lastName,
-      address: userData.address
+      lastName: userData.lastName
     };
   } catch (error) {
     console.error("Registration error:", error);
