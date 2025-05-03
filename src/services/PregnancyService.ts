@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { parseISO, addDays, differenceInDays } from 'date-fns';
@@ -11,6 +10,54 @@ export interface PregnancyDetails {
   expectedDueDate: Date;
   daysLeft: number;
 }
+
+export interface CreatePregnancyParams {
+  femaleDogId: string;
+  maleDogId: string | null;
+  externalMaleName: string | null;
+  matingDate: Date;
+  expectedDueDate: Date;
+}
+
+export const createPregnancy = async (params: CreatePregnancyParams): Promise<string> => {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      throw new Error('No active session');
+    }
+
+    const userId = sessionData.session.user.id;
+    
+    console.log("Creating pregnancy with parameters:", params);
+    
+    // Insert the new pregnancy
+    const { data: pregnancy, error } = await supabase
+      .from('pregnancies')
+      .insert({
+        female_dog_id: params.femaleDogId,
+        male_dog_id: params.maleDogId,
+        external_male_name: params.externalMaleName,
+        mating_date: params.matingDate.toISOString(),
+        expected_due_date: params.expectedDueDate.toISOString(),
+        status: 'active',
+        user_id: userId
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Error creating pregnancy:", error);
+      throw error;
+    }
+    
+    console.log("Successfully created pregnancy:", pregnancy);
+    return pregnancy.id;
+    
+  } catch (err) {
+    console.error('Error in createPregnancy:', err);
+    throw err;
+  }
+};
 
 export const getActivePregnancies = async (): Promise<ActivePregnancy[]> => {
   try {

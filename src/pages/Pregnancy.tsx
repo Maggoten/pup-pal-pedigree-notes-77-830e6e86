@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
-import { Heart, AlertCircle, Loader2, Baby } from 'lucide-react';
+import { Heart, AlertCircle, Loader2, Baby, Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDogs } from '@/context/DogsContext';
@@ -15,6 +15,7 @@ import ActivePregnanciesList from '@/components/pregnancy/ActivePregnanciesList'
 import PregnancyDropdownSelector from '@/components/pregnancy/PregnancyDropdownSelector';
 import PregnancySummaryCards from '@/components/pregnancy/PregnancySummaryCards';
 import PregnancyTabs from '@/components/pregnancy/PregnancyTabs';
+import AddPregnancyDialog from '@/components/pregnancy/AddPregnancyDialog';
 import { PregnancyDetails } from '@/services/PregnancyService';
 
 const Pregnancy: React.FC = () => {
@@ -28,6 +29,7 @@ const Pregnancy: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [dataFetched, setDataFetched] = useState(false);
+  const [addPregnancyDialogOpen, setAddPregnancyDialogOpen] = useState(false);
 
   useEffect(() => {
     // Skip refetching if we've already loaded data
@@ -82,6 +84,16 @@ const Pregnancy: React.FC = () => {
   }, [dogs, user, pregnancyId, navigate, dataFetched]);
 
   const handleAddPregnancyClick = () => {
+    setAddPregnancyDialogOpen(true);
+  };
+
+  const handleAddPregnancyDialogClose = () => {
+    setAddPregnancyDialogOpen(false);
+    // Refresh data after adding a pregnancy
+    setDataFetched(false);
+  };
+
+  const handleNavigateToPlannedLitters = () => {
     navigate('/planned-litters');
   };
 
@@ -111,9 +123,33 @@ const Pregnancy: React.FC = () => {
           <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
             <ActivePregnanciesList 
               pregnancies={activePregnancies} 
-              onAddPregnancy={handleAddPregnancyClick}
+              onAddPregnancy={handleNavigateToPlannedLitters}
               isLoading={false}
             />
+          </div>
+
+          <div className="bg-greige-50 border border-greige-200 rounded-lg p-6 flex flex-col items-center justify-center text-center">
+            <Baby className="h-12 w-12 text-primary mb-4" />
+            <h3 className="text-xl font-medium text-gray-700 mb-2">Add a Pregnancy</h3>
+            <p className="text-gray-500 mb-6 max-w-sm">
+              Already mated your dog? Add the pregnancy directly to track its development.
+            </p>
+            <div className="flex gap-4">
+              <Button 
+                onClick={handleAddPregnancyClick} 
+                variant="default"
+                className="flex items-center gap-1"
+              >
+                <Plus className="h-4 w-4" />
+                Add Pregnancy
+              </Button>
+              <Button 
+                onClick={handleNavigateToPlannedLitters} 
+                variant="outline"
+              >
+                Plan a Litter
+              </Button>
+            </div>
           </div>
         </div>
       ) : (
@@ -121,14 +157,30 @@ const Pregnancy: React.FC = () => {
           <Baby className="h-12 w-12 mx-auto text-greige-400 mb-4" />
           <h3 className="text-xl font-medium text-greige-700">Redirecting to Pregnancy Details</h3>
           <p className="text-greige-500 mt-2">You will be redirected to view pregnancy details...</p>
-          <Button 
-            onClick={handleAddPregnancyClick} 
-            className="mt-4 bg-greige-600 hover:bg-greige-700"
-          >
-            Add Pregnancy
-          </Button>
+          <div className="flex items-center justify-center gap-4 mt-4">
+            <Button 
+              onClick={handleAddPregnancyClick} 
+              variant="default"
+              className="flex items-center gap-1"
+            >
+              <Plus className="h-4 w-4" />
+              Add Pregnancy
+            </Button>
+            <Button 
+              onClick={handleNavigateToPlannedLitters} 
+              variant="outline"
+            >
+              Plan a Litter
+            </Button>
+          </div>
         </div>
       )}
+      
+      <AddPregnancyDialog 
+        open={addPregnancyDialogOpen} 
+        onOpenChange={setAddPregnancyDialogOpen}
+        onClose={handleAddPregnancyDialogClose}
+      />
     </PageLayout>
   );
 };
