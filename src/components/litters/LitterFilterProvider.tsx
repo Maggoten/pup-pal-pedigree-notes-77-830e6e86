@@ -14,6 +14,11 @@ export interface LitterFilterContext {
   setView: (view: ViewType) => void;
   displayMode: ListDisplayMode;
   setDisplayMode: (mode: ListDisplayMode) => void;
+  activePage: number;
+  setActivePage: (page: number) => void;
+  archivedPage: number;
+  setArchivedPage: (page: number) => void;
+  itemsPerPage: number;
 }
 
 const defaultContext: LitterFilterContext = {
@@ -25,6 +30,11 @@ const defaultContext: LitterFilterContext = {
   setView: () => {},
   displayMode: 'compact',
   setDisplayMode: () => {},
+  activePage: 1,
+  setActivePage: () => {},
+  archivedPage: 1,
+  setArchivedPage: () => {},
+  itemsPerPage: 12,
 };
 
 const FilterContext = createContext<LitterFilterContext>(defaultContext);
@@ -36,6 +46,9 @@ export const LitterFilterProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [view, setView] = useState<ViewType>('grid');
   const [displayMode, setDisplayMode] = useState<ListDisplayMode>('compact');
+  const [activePage, setActivePage] = useState(1);
+  const [archivedPage, setArchivedPage] = useState(1);
+  const itemsPerPage = 12;
 
   const contextValue = {
     searchQuery,
@@ -46,6 +59,11 @@ export const LitterFilterProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setView,
     displayMode,
     setDisplayMode,
+    activePage,
+    setActivePage,
+    archivedPage,
+    setArchivedPage,
+    itemsPerPage,
   };
 
   return (

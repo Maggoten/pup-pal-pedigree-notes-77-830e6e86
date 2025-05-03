@@ -1,17 +1,18 @@
 
 import { useMemo, useCallback } from 'react';
 import { Litter } from '@/types/breeding';
+import { useLitterFilter } from '@/components/litters/LitterFilterProvider';
 
 // This hook encapsulates all the filtering and pagination logic
 // to avoid recalculating these values on every render
 const useLitterFilteredData = (activeLitters: Litter[], archivedLitters: Litter[]) => {
   const { 
     searchQuery, 
-    filterYear, 
+    selectedYear: filterYear, 
     activePage,
     archivedPage,
     itemsPerPage 
-  } = useLitterFilters();
+  } = useLitterFilter();
   
   // Check if any filter is active - memoized to prevent recomputation
   const isFilterActive = useMemo(() => {
@@ -79,8 +80,5 @@ const useLitterFilteredData = (activeLitters: Litter[], archivedLitters: Litter[
     isFilterActive
   };
 };
-
-// Fix missing import
-import { useLitterFilters } from '@/components/litters/LitterFilterProvider';
 
 export default useLitterFilteredData;
