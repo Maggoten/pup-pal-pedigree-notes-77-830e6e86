@@ -1,13 +1,17 @@
 
 import { useMemo, useEffect, useState } from 'react';
-import { addDays, subDays } from 'date-fns';
+import { subDays } from 'date-fns';
 import { useDogs } from '@/context/DogsContext';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import { plannedLittersService } from '@/services/PlannedLitterService';
+import { litterService } from '@/services/LitterService';
 
 export const useDashboardData = () => {
   // State for controlled loading
   const [isDataReady, setIsDataReady] = useState<boolean>(false);
+  const [plannedLittersData, setPlannedLittersData] = useState({ count: 0, nextDate: null as Date | null });
+  const [recentLittersData, setRecentLittersData] = useState({ count: 0, latest: null as Date | null });
   
   // Centralized data fetching for calendar and reminders
   const { dogs } = useDogs();
@@ -33,20 +37,70 @@ export const useDashboardData = () => {
     calendarEvents
   } = useCalendarEvents(dogs);
   
-  // Sample data for planned litters and recent litters
-  // In a real implementation, this would come from actual data services
-  const plannedLittersData = useMemo(() => {
-    return {
-      count: 2,
-      nextDate: addDays(new Date(), 14) // Example: next planned litter in 14 days
+  // Fetch planned litters data
+  useEffect(() => {
+    const fetchPlannedLittersData = async () => {
+      try {
+        const plannedLitters = await plannedLittersService.loadPlannedLitters();
+        
+        // Sort planned litters by expected heat date to find the next one
+        const sortedLitters = [...plannedLitters].sort(
+          (a, b) => new Date(a.expectedHeatDate).getTime() - new Date(b.expectedHeatDate).getTime()
+        );
+        
+        // Find the next planned litter (with heat date in the future)
+        const nextLitter = sortedLitters.find(
+          litter => new Date(litter.expectedHeatDate).getTime() > Date.now()
+        );
+        
+        setPlannedLittersData({
+          count: plannedLitters.length,
+          nextDate: nextLitter ? new Date(nextLitter.expectedHeatDate) : null
+        });
+      } catch (error) {
+        console.error('Error fetching planned litters:', error);
+        setPlannedLittersData({ count: 0, nextDate: null });
+      }
     };
+    
+    fetchPlannedLittersData();
   }, []);
   
-  const recentLittersData = useMemo(() => {
-    return {
-      count: 3,
-      latest: subDays(new Date(), 21) // Example: most recent litter was 21 days ago
+  // Fetch recent litters data
+  useEffect(() => {
+    const fetchRecentLittersData = async () => {
+      try {
+        // Get all litters
+        const activeLitters = await litterService.getActiveLitters();
+        const archivedLitters = await litterService.getArchivedLitters();
+        const allLitters = [...activeLitters, ...archivedLitters];
+        
+        // Consider litters from the last 90 days as "recent"
+        const ninetyDaysAgo = subDays(new Date(), 90);
+        const recentLitters = allLitters.filter(
+          litter => new Date(litter.dateOfBirth) >= ninetyDaysAgo
+        );
+        
+        // Find the most recent litter
+        let latestDate: Date | null = null;
+        if (recentLitters.length > 0) {
+          const sortedLitters = [...recentLitters].sort(
+            (a, b) => new Date(b.dateOfBirth).getTime() - new Date(a.dateOfBirth).getTime()
+          );
+          latestDate = sortedLitters[0] ? new Date(sortedLitters[0].dateOfBirth) : null;
+        }
+        
+        setRecentLittersData({
+          count: recentLitters.length,
+          latest: latestDate
+        });
+      } catch (error) {
+        console.error('Error fetching recent litters:', error);
+        setRecentLittersData({ count: 0, latest: null });
+      }
     };
+    
+    fetchRecentLittersData();
   }, []);
   
   const remindersSummary = useMemo(() => {

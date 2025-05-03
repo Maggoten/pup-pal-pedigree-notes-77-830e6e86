@@ -14,6 +14,7 @@ interface DashboardHeroProps {
   plannedLitters: { count: number; nextDate: Date | null };
   activePregnancies: ActivePregnancy[];
   recentLitters: { count: number; latest: Date | null };
+  isLoadingPregnancies?: boolean;
 }
 
 const DashboardHero: React.FC<DashboardHeroProps> = ({ 
@@ -21,7 +22,8 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   reminders,
   plannedLitters,
   activePregnancies,
-  recentLitters
+  recentLitters,
+  isLoadingPregnancies = false
 }) => {
   const navigate = useNavigate();
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
@@ -41,7 +43,8 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       icon: "heart",
       highlight: plannedLitters.nextDate ? `Next: ${format(plannedLitters.nextDate, 'MMM d')}` : null,
       action: () => navigate("/planned-litters"),
-      color: "bg-greige-100 border-greige-200 hover:border-greige-300"
+      color: "bg-greige-100 border-greige-200 hover:border-greige-300",
+      loading: false
     },
     {
       title: "Active Pregnancies",
@@ -49,7 +52,8 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       icon: "pawprint",
       highlight: activePregnancies.length > 0 ? `${activePregnancies[0].daysLeft} days to due date` : null,
       action: () => navigate("/pregnancy"),
-      color: "bg-greige-50 border-greige-200 hover:border-greige-300"
+      color: "bg-greige-50 border-greige-200 hover:border-greige-300",
+      loading: isLoadingPregnancies
     },
     {
       title: "Recent Litters",
@@ -57,7 +61,8 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       icon: "dog",
       highlight: recentLitters.latest ? `Latest: ${format(recentLitters.latest, 'MMM d')}` : null,
       action: () => navigate("/my-litters"),
-      color: "bg-greige-100 border-greige-200 hover:border-greige-300"
+      color: "bg-greige-100 border-greige-200 hover:border-greige-300",
+      loading: false
     }
   ];
   
