@@ -19,7 +19,7 @@ const TemperatureItem: React.FC<TemperatureItemProps> = ({ record, onDelete }) =
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="font-medium">{record.temperature}°F</span>
+            <span className="font-medium">{record.temperature}°C</span>
             <span className="text-sm text-muted-foreground">
               {format(record.date, 'PPP')}
             </span>
