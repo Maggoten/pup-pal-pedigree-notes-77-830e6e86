@@ -73,8 +73,11 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
 export const deleteUserAccount = async (password: string): Promise<boolean> => {
   try {
     // First verify the user's password
+    const user = await supabase.auth.getUser();
+    const email = user.data.user?.email || '';
+    
     const { error: verifyError } = await supabase.auth.signInWithPassword({
-      email: supabase.auth.getUser().then(({ data }) => data.user?.email || ''),
+      email,
       password
     });
     
@@ -84,9 +87,8 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
     }
     
     // Delete user account from Supabase Auth (this will cascade to profiles via RLS)
-    const { error } = await supabase.auth.admin.deleteUser(
-      supabase.auth.getUser().then(({ data }) => data.user?.id || '')
-    );
+    const userId = user.data.user?.id || '';
+    const { error } = await supabase.auth.admin.deleteUser(userId);
     
     if (error) {
       console.error("Delete account error:", error);

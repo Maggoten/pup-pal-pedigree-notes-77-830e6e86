@@ -1,10 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { UserSettings } from '@/types/settings';
-import { format } from 'date-fns';
 import { UserSettings } from '@/types/settings';
 import { format } from 'date-fns';
 import { AlertTriangle, CreditCard, Shield, Star, AlertCircle } from 'lucide-react';
