@@ -22,22 +22,36 @@ const MetricCard: React.FC<MetricCardProps> = ({
   color = 'bg-white',
   loading = false
 }) => {
-  const renderIcon = () => {
+  const getIconStyles = () => {
     switch (icon) {
-      case 'calendar': return <Calendar className="h-6 w-6 text-warmgreen-600" />;
-      case 'heart': return <Heart className="h-6 w-6 text-primary" />;
-      case 'pawprint': return <PawPrint className="h-6 w-6 text-amber-500" />;
-      case 'dog': return <Dog className="h-6 w-6 text-warmbeige-600" />;
+      case 'calendar': return { bgColor: 'bg-sky-100', textColor: 'text-sky-600' };
+      case 'heart': return { bgColor: 'bg-indigo-100', textColor: 'text-indigo-600' };
+      case 'pawprint': return { bgColor: 'bg-rose-100', textColor: 'text-rose-600' };
+      case 'dog': return { bgColor: 'bg-amber-100', textColor: 'text-amber-600' };
+      default: return { bgColor: 'bg-white', textColor: 'text-primary' };
+    }
+  };
+
+  const renderIcon = () => {
+    const { textColor } = getIconStyles();
+    
+    switch (icon) {
+      case 'calendar': return <Calendar className={`h-6 w-6 ${textColor}`} />;
+      case 'heart': return <Heart className={`h-6 w-6 ${textColor}`} />;
+      case 'pawprint': return <PawPrint className={`h-6 w-6 ${textColor}`} />;
+      case 'dog': return <Dog className={`h-6 w-6 ${textColor}`} />;
       default: return null;
     }
   };
+
+  const { bgColor } = getIconStyles();
 
   return (
     <button 
       onClick={action}
       className={`rounded-xl p-4 md:p-5 border ${color} transition-transform hover:scale-[1.02] flex items-center gap-4 w-full text-left shadow-sm`}
     >
-      <div className="shrink-0 p-2.5 rounded-lg bg-white border border-greige-100">
+      <div className={`shrink-0 p-2.5 rounded-lg ${bgColor} border border-greige-100`}>
         {renderIcon()}
       </div>
       
