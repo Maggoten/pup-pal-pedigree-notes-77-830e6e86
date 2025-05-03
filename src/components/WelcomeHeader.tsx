@@ -1,7 +1,7 @@
 import React from 'react';
 import { PawPrint } from 'lucide-react';
 const WelcomeHeader: React.FC = () => {
-  return <div className="w-full bg-background border-b py-px">
+  return <div className="w-full bg-background border-b py-[10px]">
       <div className="container flex items-center justify-center gap-4 relative">
         <div className="absolute left-0 opacity-10 hidden md:block">
           <PawPrint className="h-20 w-20 text-primary transform -rotate-12" />
