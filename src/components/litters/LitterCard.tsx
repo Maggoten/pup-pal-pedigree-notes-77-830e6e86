@@ -33,10 +33,10 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
     <Card 
       className={`h-full overflow-hidden transition-all duration-300 ${
         isSelected ? 'ring-2 ring-primary shadow-lg transform scale-[1.02]' : 'hover:scale-[1.01]'
-      } cursor-pointer bg-white border border-warmbeige-200 hover:shadow-md`}
+      } cursor-pointer bg-white border border-warmbeige-100 hover:shadow-md`}
       onClick={() => onSelect(litter)}
     >
-      <CardHeader className={`pb-1 pt-4 px-4 ${litter.archived ? 'bg-warmbeige-50' : 'bg-warmgreen-50/40'}`}>
+      <CardHeader className={`pb-1 pt-4 px-4 ${litter.archived ? 'bg-warmbeige-50' : 'bg-warmgreen-50/30'}`}>
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg font-semibold">{litter.name}</CardTitle>
           <div className="flex gap-1">

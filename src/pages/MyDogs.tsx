@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/context/AuthContext';
 import React, { useState } from 'react';
 import PageLayout from '@/components/PageLayout';
@@ -31,6 +30,7 @@ const MyDogsContent: React.FC = () => {
     <PageLayout 
       title="My Dogs" 
       description="Manage your breeding dogs"
+      className="bg-warmbeige-50"
     >
       {activeDog ? (
         <DogDetails dog={activeDog} />
@@ -42,7 +42,7 @@ const MyDogsContent: React.FC = () => {
                 value={genderFilter}
                 onValueChange={(value) => setGenderFilter(value as 'all' | 'male' | 'female')}
               >
-                <SelectTrigger className="bg-white border border-warmbeige-200 w-full">
+                <SelectTrigger className="bg-white border border-warmbeige-100 w-full">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4 text-muted-foreground" />
                     <SelectValue placeholder="Filter by gender" />
@@ -66,8 +66,8 @@ const MyDogsContent: React.FC = () => {
             </Button>
           </div>
           
-          <Card className="bg-white border border-warmbeige-200 shadow-sm">
-            <CardHeader className="bg-warmbeige-50 border-b border-warmbeige-200">
+          <Card className="bg-white border border-warmbeige-100 shadow-sm">
+            <CardHeader className="bg-warmbeige-50/50 border-b border-warmbeige-100">
               <CardTitle>
                 {genderFilter === 'all' ? 'All Dogs' : 
                  genderFilter === 'male' ? 'Dogs (Males)' : 

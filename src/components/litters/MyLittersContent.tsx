@@ -97,7 +97,7 @@ const MyLittersContent: React.FC = () => {
               )}
             </div>
           </div>
-          <Separator className="bg-warmbeige-200" />
+          <Separator className="bg-warmbeige-100" />
         </div>
         
         <LitterFilterHeader 
@@ -117,7 +117,7 @@ const MyLittersContent: React.FC = () => {
         {hasNoLitters ? <EmptyLitterState onAddLitter={() => setShowAddLitterDialog(true)} /> : <Tabs value={categoryTab} onValueChange={handleCategoryTabChange} className="w-full space-y-6">
             <TabsContent value="active" className="m-0">
               {/* Litters List Section */}
-              <Card className="shadow-md rounded-2xl overflow-hidden border border-warmbeige-200 bg-white">
+              <Card className="shadow-sm rounded-2xl overflow-hidden border border-warmbeige-100 bg-white">
                 <div className="p-5">
                   {view === 'grid' ? (
                     <LitterGridView 
@@ -154,7 +154,7 @@ const MyLittersContent: React.FC = () => {
 
             <TabsContent value="archived" className="m-0">
               {/* Archived Litters Section - Same structure as active */}
-              <Card className="shadow-md rounded-2xl overflow-hidden border border-warmbeige-200 bg-white">
+              <Card className="shadow-sm rounded-2xl overflow-hidden border border-warmbeige-100 bg-white">
                 <div className="p-5">
                   {view === 'grid' ? (
                     <LitterGridView 
