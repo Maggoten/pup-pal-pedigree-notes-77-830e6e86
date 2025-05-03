@@ -58,7 +58,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
       if (daysUntilVaccination >= -7 && daysUntilVaccination <= 30) {
         const isOverdue = daysUntilVaccination < 0;
         
-        const vaccinationReminder = {
+        const vaccinationReminder: Reminder = {
           id: `vaccine-${dog.id}`,
           title: `${dog.name}'s Vaccination ${isOverdue ? 'Overdue' : 'Due'}`,
           description: isOverdue 
@@ -66,7 +66,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
             : `Vaccination due in ${daysUntilVaccination} days`,
           icon: createCalendarClockIcon("amber-500"),
           dueDate: nextVaccination,
-          priority: isOverdue ? 'high' : 'medium',
+          priority: isOverdue ? 'high' : 'medium' as const,
           type: 'vaccination',
           relatedId: dog.id
         };
