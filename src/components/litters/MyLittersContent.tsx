@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useLitterManagement } from '@/hooks/litters/useLitterManagement';
 import { Card } from '@/components/ui/card';
@@ -14,7 +13,6 @@ import SelectedLitterSection from './SelectedLitterSection';
 import { ViewType } from './LitterFilterProvider';
 import ViewToggle from './ViewToggle';
 import { Separator } from '@/components/ui/separator';
-
 const MyLittersContent: React.FC = () => {
   // Track view mode locally
   const [view, setView] = useState<ViewType>('grid');
@@ -57,7 +55,6 @@ const MyLittersContent: React.FC = () => {
   const handleArchive = (litter: Litter) => {
     handleArchiveLitter(litter.id, !litter.archived);
   };
-  
   const handleViewChange = (newView: ViewType) => {
     setView(newView);
   };
@@ -74,44 +71,15 @@ const MyLittersContent: React.FC = () => {
       setCategoryTab(value);
     }
   };
-  
-  return <div className="container py-6">
+  return <div className="container py-0">
       <div className="space-y-6">
         {/* Header with filter controls */}
         <div className="flex flex-col space-y-4">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-            <h2 className="text-2xl font-semibold text-warmgreen-700">My Litters</h2>
-            <div className="flex items-center space-x-4">
-              <ViewToggle view={view} onViewChange={handleViewChange} />
-              {activeLitters.length > 0 && (
-                <button 
-                  onClick={() => setShowAddLitterDialog(true)}
-                  className="px-4 py-2 bg-primary text-white rounded-xl hover:bg-warmgreen-700 transition-colors flex items-center gap-2 shadow-sm hover:shadow-md"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                  Add Litter
-                </button>
-              )}
-            </div>
-          </div>
+          
           <Separator className="bg-warmbeige-100" />
         </div>
         
-        <LitterFilterHeader 
-          activeLitters={activeLitters} 
-          archivedLitters={archivedLitters} 
-          categoryTab={categoryTab} 
-          setCategoryTab={handleCategoryTabChange} 
-          searchQuery={searchQuery} 
-          onSearchChange={setSearchQuery} 
-          selectedYear={selectedYear} 
-          onYearChange={setSelectedYear} 
-          onAddLitterClick={() => setShowAddLitterDialog(true)} 
-          availableYears={getAvailableYears()} 
-        />
+        <LitterFilterHeader activeLitters={activeLitters} archivedLitters={archivedLitters} categoryTab={categoryTab} setCategoryTab={handleCategoryTabChange} searchQuery={searchQuery} onSearchChange={setSearchQuery} selectedYear={selectedYear} onYearChange={setSelectedYear} onAddLitterClick={() => setShowAddLitterDialog(true)} availableYears={getAvailableYears()} />
 
         {/* No litters empty state */}
         {hasNoLitters ? <EmptyLitterState onAddLitter={() => setShowAddLitterDialog(true)} /> : <Tabs value={categoryTab} onValueChange={handleCategoryTabChange} className="w-full space-y-6">
@@ -119,23 +87,7 @@ const MyLittersContent: React.FC = () => {
               {/* Litters List Section */}
               <Card className="shadow-sm rounded-2xl overflow-hidden border border-warmbeige-100 bg-white">
                 <div className="p-5">
-                  {view === 'grid' ? (
-                    <LitterGridView 
-                      litters={filteredLitters} 
-                      onSelectLitter={handleSelectLitter} 
-                      onArchive={handleArchive} 
-                      selectedLitterId={selectedLitterId} 
-                      loadingMore={false} 
-                      hasMore={false} 
-                    />
-                  ) : (
-                    <LitterListView 
-                      litters={filteredLitters} 
-                      onSelectLitter={handleSelectLitter} 
-                      onArchive={handleArchive} 
-                      selectedLitterId={selectedLitterId} 
-                    />
-                  )}
+                  {view === 'grid' ? <LitterGridView litters={filteredLitters} onSelectLitter={handleSelectLitter} onArchive={handleArchive} selectedLitterId={selectedLitterId} loadingMore={false} hasMore={false} /> : <LitterListView litters={filteredLitters} onSelectLitter={handleSelectLitter} onArchive={handleArchive} selectedLitterId={selectedLitterId} />}
                   
                   {/* Empty filtered results message */}
                   {filteredLitters.length === 0 && (searchQuery || selectedYear) && <div className="text-center py-10">
@@ -156,23 +108,7 @@ const MyLittersContent: React.FC = () => {
               {/* Archived Litters Section - Same structure as active */}
               <Card className="shadow-sm rounded-2xl overflow-hidden border border-warmbeige-100 bg-white">
                 <div className="p-5">
-                  {view === 'grid' ? (
-                    <LitterGridView 
-                      litters={filteredLitters} 
-                      onSelectLitter={handleSelectLitter} 
-                      onArchive={handleArchive} 
-                      selectedLitterId={selectedLitterId} 
-                      loadingMore={false} 
-                      hasMore={false} 
-                    />
-                  ) : (
-                    <LitterListView 
-                      litters={filteredLitters} 
-                      onSelectLitter={handleSelectLitter} 
-                      onArchive={handleArchive} 
-                      selectedLitterId={selectedLitterId} 
-                    />
-                  )}
+                  {view === 'grid' ? <LitterGridView litters={filteredLitters} onSelectLitter={handleSelectLitter} onArchive={handleArchive} selectedLitterId={selectedLitterId} loadingMore={false} hasMore={false} /> : <LitterListView litters={filteredLitters} onSelectLitter={handleSelectLitter} onArchive={handleArchive} selectedLitterId={selectedLitterId} />}
                   
                   {/* Empty filtered results message */}
                   {filteredLitters.length === 0 && (searchQuery || selectedYear) && <div className="text-center py-10">
@@ -195,5 +131,4 @@ const MyLittersContent: React.FC = () => {
       <AddLitterDialog open={showAddLitterDialog} onOpenChange={setShowAddLitterDialog} onAddLitter={handleAddLitter} plannedLitters={[]} />
     </div>;
 };
-
 export default MyLittersContent;
