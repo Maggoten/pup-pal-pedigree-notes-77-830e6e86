@@ -26,7 +26,7 @@ export const enrichDog = (dog: any): Dog => {
     processedHeatHistory = dog.heatHistory.map((heat: any) => ({
       // Ensure date is stored as YYYY-MM-DD without timezone impact
       date: typeof heat.date === 'string' ? heat.date.split('T')[0] : 
-            heat.date instanceof Date ? dateToISOString(heat.date) : ''
+            Object.prototype.toString.call(heat.date) === '[object Date]' ? dateToISOString(heat.date) : ''
     }));
   }
 
