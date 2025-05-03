@@ -12,7 +12,7 @@ const WelcomeHeader: React.FC = () => {
         
         <div className="flex items-center flex-row-reverse gap-3">
           <img 
-            src="/lovable-uploads/76151d1f-b7df-457d-bd59-64a8ac18ae06.png" 
+            src="/lovable-uploads/21265134-8e2a-403f-9eef-09de3de73cc6.png" 
             alt="Breeding Journey Logo" 
             className="h-[100px] w-[100px]" 
           />
