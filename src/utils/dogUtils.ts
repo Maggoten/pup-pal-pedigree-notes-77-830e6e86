@@ -68,8 +68,8 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
     // Ensure birthdate is stored as YYYY-MM-DD without timezone impact
     dbDog.birthdate = typeof dog.dateOfBirth === 'string' 
       ? dog.dateOfBirth.split('T')[0]
-      : dog.dateOfBirth instanceof Date 
-        ? dateToISOString(dog.dateOfBirth)
+      : Object.prototype.toString.call(dog.dateOfBirth) === '[object Date]'
+        ? dateToISOString(dog.dateOfBirth as unknown as Date)
         : undefined;
     
     console.log('Mapped dateOfBirth to birthdate:', dbDog.birthdate);
