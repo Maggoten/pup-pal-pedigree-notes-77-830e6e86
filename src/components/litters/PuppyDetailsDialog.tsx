@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
@@ -30,23 +30,16 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
     setDisplayName(puppy.name);
   }, [puppy.name]);
   
-  const handleImageChange = (newImageUrl: string) => {
+  const handleImageChange = useCallback((newImageUrl: string) => {
     setImageUrl(newImageUrl);
-  };
+  }, []);
   
-  const handleSubmit = (updatedPuppyData: Puppy) => {
+  const handleSubmit = useCallback((updatedPuppyData: Puppy) => {
     // Clone the puppy data to avoid reference issues
     const updatedPuppy = {
       ...updatedPuppyData,
       imageUrl: imageUrl
     };
-    
-    // Log the update details
-    console.log("Submitting puppy update:", {
-      name: updatedPuppy.name,
-      birthWeight: updatedPuppy.birthWeight,
-      weightLog: updatedPuppy.weightLog
-    });
     
     // Pass the puppy data directly without modifying the name
     onUpdatePuppy(updatedPuppy);
@@ -55,9 +48,9 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
       description: `${updatedPuppy.name} has been updated successfully.`
     });
     if (onClose) onClose();
-  };
+  }, [imageUrl, onUpdatePuppy, onClose]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     if (confirm(`Do you want to delete "${displayName}"?`)) {
       onDeletePuppy(puppy.id);
       toast({
@@ -67,7 +60,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
       });
       if (onClose) onClose();
     }
-  };
+  }, [puppy.id, displayName, onDeletePuppy, onClose]);
 
   return (
     <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto bg-greige-100 border-greige-300">
@@ -111,4 +104,5 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   );
 };
 
-export default PuppyDetailsDialog;
+// Use React.memo to prevent unnecessary re-renders
+export default React.memo(PuppyDetailsDialog);

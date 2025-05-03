@@ -7,14 +7,17 @@ export const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 1000 * 60, // 1 minute
-      gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
+      staleTime: 1000 * 60 * 5, // 5 minutes - increase stale time to reduce fetches
+      gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
       // Modern error handling approach
-      throwOnError: false
+      throwOnError: false,
+      refetchOnMount: 'always'
     },
     mutations: {
       // Modern error handling approach
       throwOnError: false,
+      // Add retry for mutations
+      retry: 1
     }
   }
 });
@@ -27,4 +30,26 @@ export const reactQueryDevtoolsOptions = {
   position: 'bottom',
   // Start closed
   initialIsOpen: false,
+};
+
+// Helper function to reset the QueryClient - useful for logout
+export const resetQueryClient = () => {
+  queryClient.clear();
+};
+
+// Helper function to prefetch commonly used data
+export const prefetchCommonData = async (userId: string) => {
+  if (!userId) return;
+  
+  try {
+    // Prefetch active litters
+    await queryClient.prefetchQuery({
+      queryKey: ['litters', 'active'],
+      queryFn: () => fetch('/api/litters/active').then(res => res.json())
+    });
+    
+    // You can add more prefetch operations here for other commonly accessed data
+  } catch (error) {
+    console.error('Error prefetching data:', error);
+  }
 };

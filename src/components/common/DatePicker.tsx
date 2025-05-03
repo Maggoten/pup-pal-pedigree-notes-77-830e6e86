@@ -14,7 +14,8 @@ interface DatePickerProps {
   className?: string;
 }
 
-const DatePicker: React.FC<DatePickerProps> = ({ 
+// Optimize DatePicker with React.memo to prevent unnecessary re-renders
+const DatePicker: React.FC<DatePickerProps> = React.memo(({ 
   date, 
   setDate, 
   label, 
@@ -37,8 +38,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
       );
     }
     
-    console.log('Selected date:', selectedDate);
-    console.log('New date with preserved time:', newDate);
     setDate(newDate);
   };
 
@@ -70,6 +69,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
       </Popover>
     </div>
   );
-};
+});
+
+DatePicker.displayName = 'DatePicker';
 
 export default DatePicker;
