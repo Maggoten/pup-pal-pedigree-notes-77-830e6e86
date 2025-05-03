@@ -1,12 +1,15 @@
 
-import React, { useState, memo } from 'react';
+import React, { useState, memo, Suspense, lazy } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BellRing, PawPrint, Loader2, Bell } from 'lucide-react';
-import RemindersList from './reminders/RemindersList';
-import RemindersDialog from './reminders/RemindersDialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Reminder } from '@/types/reminders';
 import { Button } from './ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Lazy load the dialog and list component to improve initial page load
+const RemindersList = lazy(() => import('./reminders/RemindersList'));
+const RemindersDialog = lazy(() => import('./reminders/RemindersDialog'));
 
 interface RemindersData {
   reminders: Reminder[];
@@ -18,6 +21,21 @@ interface RemindersData {
 interface BreedingRemindersProps {
   remindersData?: RemindersData;
 }
+
+// Skeleton component for reminders list
+const RemindersListSkeleton = () => (
+  <div className="p-4 space-y-4">
+    {Array(3).fill(0).map((_, i) => (
+      <div key={i} className="flex items-center space-x-4">
+        <Skeleton className="h-5 w-5 rounded-full" />
+        <div className="space-y-2 flex-1">
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-3 w-1/2" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 // Use memo to prevent unnecessary re-renders
 const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersData }) => {
@@ -31,36 +49,41 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
     handleMarkComplete = () => {} 
   } = remindersData || {};
   
-  // First prioritize active high priority reminders
-  const highPriorityReminders = reminders
-    .filter(r => r.priority === 'high' && !r.isCompleted)
-    .slice(0, 3);
-  
-  // Then medium priority reminders if we need more
-  const mediumPriorityReminders = reminders
-    .filter(r => r.priority === 'medium' && !r.isCompleted)
-    .slice(0, 3 - highPriorityReminders.length);
-    
-  // Finally low priority if needed
-  const lowPriorityReminders = reminders
-    .filter(r => r.priority === 'low' && !r.isCompleted)
-    .slice(0, 3 - highPriorityReminders.length - mediumPriorityReminders.length);
-  
-  // Combine all reminders in priority order
-  const displayReminders = [
-    ...highPriorityReminders,
-    ...mediumPriorityReminders,
-    ...lowPriorityReminders
-  ];
-  
-  // If no active reminders, show completed ones
-  if (displayReminders.length === 0 && reminders.length > 0) {
-    const completedReminders = reminders
-      .filter(r => r.isCompleted)
+  // Memoize the priority filtering logic to avoid recalculating on every render
+  const displayReminders = React.useMemo(() => {
+    // First prioritize active high priority reminders
+    const highPriorityReminders = reminders
+      .filter(r => r.priority === 'high' && !r.isCompleted)
       .slice(0, 3);
     
-    displayReminders.push(...completedReminders);
-  }
+    // Then medium priority reminders if we need more
+    const mediumPriorityReminders = reminders
+      .filter(r => r.priority === 'medium' && !r.isCompleted)
+      .slice(0, 3 - highPriorityReminders.length);
+      
+    // Finally low priority if needed
+    const lowPriorityReminders = reminders
+      .filter(r => r.priority === 'low' && !r.isCompleted)
+      .slice(0, 3 - highPriorityReminders.length - mediumPriorityReminders.length);
+    
+    // Combine all reminders in priority order
+    const result = [
+      ...highPriorityReminders,
+      ...mediumPriorityReminders,
+      ...lowPriorityReminders
+    ];
+    
+    // If no active reminders, show completed ones
+    if (result.length === 0 && reminders.length > 0) {
+      const completedReminders = reminders
+        .filter(r => r.isCompleted)
+        .slice(0, 3);
+      
+      result.push(...completedReminders);
+    }
+
+    return result;
+  }, [reminders]);
   
   const hasReminders = displayReminders.length > 0;
   
@@ -107,11 +130,13 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
           ) : (
             <>
               <div className="overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-                <RemindersList 
-                  reminders={displayReminders} 
-                  onComplete={handleMarkComplete} 
-                  compact={true} 
-                />
+                <Suspense fallback={<RemindersListSkeleton />}>
+                  <RemindersList 
+                    reminders={displayReminders} 
+                    onComplete={handleMarkComplete} 
+                    compact={true} 
+                  />
+                </Suspense>
               </div>
               
               <div className="p-3 text-center">
@@ -143,10 +168,15 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
         </div>
       </Card>
       
-      <RemindersDialog 
-        open={remindersDialogOpen} 
-        onOpenChange={setRemindersDialogOpen} 
-      />
+      {/* Only render dialog when it's open to save resources */}
+      {remindersDialogOpen && (
+        <Suspense fallback={null}>
+          <RemindersDialog 
+            open={remindersDialogOpen} 
+            onOpenChange={setRemindersDialogOpen} 
+          />
+        </Suspense>
+      )}
     </>
   );
 });

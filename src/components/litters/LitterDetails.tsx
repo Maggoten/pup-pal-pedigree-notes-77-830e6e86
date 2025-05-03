@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useMemo, memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -38,7 +39,11 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
   }, [litter.puppies]);
   
   const puppyCount = useMemo(() => litter.puppies?.length || 0, [litter.puppies]);
-  const birthDate = new Date(litter.dateOfBirth).toLocaleDateString();
+  const birthDate = useMemo(() => new Date(litter.dateOfBirth).toLocaleDateString(), [litter.dateOfBirth]);
+  const litterAge = useMemo(() => 
+    Math.floor((new Date().getTime() - new Date(litter.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 7)), 
+    [litter.dateOfBirth]
+  );
   
   const handleArchiveToggle = () => {
     onArchiveLitter(litter.id, !litter.archived);
@@ -68,6 +73,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
           </div>
           
           <div className="flex gap-2">
+            {/* Only render dialog when it's open to improve performance */}
             <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="flex items-center gap-1.5">
@@ -75,14 +81,16 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
                   <span>Edit</span>
                 </Button>
               </DialogTrigger>
-              <LitterEditDialog 
-                litter={litter} 
-                onClose={() => setShowEditLitterDialog(false)} 
-                onUpdate={onUpdateLitter}
-                onUpdateLitter={onUpdateLitter}
-                onDelete={onDeleteLitter}
-                onArchive={onArchiveLitter}
-              />
+              {showEditLitterDialog && (
+                <LitterEditDialog 
+                  litter={litter} 
+                  onClose={() => setShowEditLitterDialog(false)} 
+                  onUpdate={onUpdateLitter}
+                  onUpdateLitter={onUpdateLitter}
+                  onDelete={onDeleteLitter}
+                  onArchive={onArchiveLitter}
+                />
+              )}
             </Dialog>
             
             <Button 
@@ -128,9 +136,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             <Card className="bg-primary/5">
               <CardContent className="pt-6">
                 <div className="text-sm font-medium">Litter Age</div>
-                <div className="text-2xl font-bold">
-                  {Math.floor((new Date().getTime() - new Date(litter.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 7))} weeks
-                </div>
+                <div className="text-2xl font-bold">{litterAge} weeks</div>
               </CardContent>
             </Card>
             
@@ -148,4 +154,4 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
 };
 
 // Use React.memo to prevent unnecessary re-renders
-export default React.memo(LitterDetails);
+export default memo(LitterDetails);

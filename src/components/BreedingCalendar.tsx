@@ -1,11 +1,13 @@
 
-import React, { memo } from 'react';
+import React, { memo, Suspense, lazy } from 'react';
 import { Card } from '@/components/ui/card';
 import { useDogs } from '@/context/DogsContext';
-import CalendarContent from './calendar/CalendarContent';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AddEventFormValues } from './calendar/types';
+
+// Lazy load the calendar content for better performance
+const CalendarContent = lazy(() => import('./calendar/CalendarContent'));
 
 // Define props interface for calendar events data
 interface CalendarEventsData {
@@ -22,6 +24,14 @@ interface BreedingCalendarProps {
   eventsData?: CalendarEventsData; // Optional because we might fetch data here
 }
 
+// Skeleton loader for calendar content
+const CalendarSkeleton = () => (
+  <div className="flex flex-col items-center justify-center py-12">
+    <Loader2 className="h-10 w-10 animate-spin text-primary mb-3" />
+    <span className="text-muted-foreground">Loading calendar...</span>
+  </div>
+);
+
 // Use memo to prevent unnecessary re-renders
 const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) => {
   const { dogs } = useDogs();
@@ -36,7 +46,15 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
     editEvent,
     isLoading,
     hasError
-  } = eventsData || { getEventsForDate: () => [], getEventColor: () => '', addEvent: () => false, deleteEvent: () => {}, editEvent: () => false, isLoading: true, hasError: false };
+  } = eventsData || { 
+    getEventsForDate: () => [], 
+    getEventColor: () => '', 
+    addEvent: () => false, 
+    deleteEvent: () => {}, 
+    editEvent: () => false, 
+    isLoading: true, 
+    hasError: false 
+  };
   
   // Create wrapper functions to handle the async nature of the original functions
   const handleAddEvent = (data: AddEventFormValues) => {
@@ -65,10 +83,7 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
     <Card className="border-greige-300 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 bg-greige-50 flex flex-col">
       <div className="flex flex-col">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-12">
-            <Loader2 className="h-10 w-10 animate-spin text-primary mb-3" />
-            <span className="text-muted-foreground">Loading calendar events...</span>
-          </div>
+          <CalendarSkeleton />
         ) : hasError ? (
           <div className="p-6 flex items-center justify-center">
             <Alert variant="destructive">
@@ -78,7 +93,7 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
             </Alert>
           </div>
         ) : (
-          <div>
+          <Suspense fallback={<CalendarSkeleton />}>
             <CalendarContent
               dogs={dogs}
               getEventsForDate={getEventsForDate}
@@ -88,7 +103,7 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
               onEditEvent={handleEditEvent}
               compact={false} // Use full size calendar now
             />
-          </div>
+          </Suspense>
         )}
       </div>
     </Card>

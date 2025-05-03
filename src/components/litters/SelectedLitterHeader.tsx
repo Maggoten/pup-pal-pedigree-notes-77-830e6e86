@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
@@ -40,18 +40,22 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
         <Edit className="h-4 w-4" />
         <span className="sr-only">Edit Litter</span>
       </Button>
-      <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
-        <LitterEditDialog 
-          litter={litter}
-          onClose={() => setShowEditLitterDialog(false)}
-          onUpdate={onUpdateLitter}
-          onUpdateLitter={onUpdateLitter}
-          onDelete={onDeleteLitter}
-          onArchive={onArchiveLitter}
-        />
-      </Dialog>
+      {/* Only render dialog when it's open to improve performance */}
+      {showEditLitterDialog && (
+        <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
+          <LitterEditDialog 
+            litter={litter}
+            onClose={() => setShowEditLitterDialog(false)}
+            onUpdate={onUpdateLitter}
+            onUpdateLitter={onUpdateLitter}
+            onDelete={onDeleteLitter}
+            onArchive={onArchiveLitter}
+          />
+        </Dialog>
+      )}
     </div>
   );
 };
 
-export default SelectedLitterHeader;
+// Use React.memo to prevent unnecessary re-renders
+export default memo(SelectedLitterHeader);
