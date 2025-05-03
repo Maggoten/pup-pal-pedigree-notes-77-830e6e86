@@ -3,12 +3,16 @@ import React, { memo, useMemo } from 'react';
 import { Litter } from '@/types/breeding';
 import LitterCard from './LitterCard';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Loader2 } from 'lucide-react';
 
 interface LitterGridViewProps {
   litters: Litter[];
   onSelectLitter: (litter: Litter) => void;
   onArchive?: (litter: Litter) => void;
   selectedLitterId?: string | null;
+  hasMore?: boolean;
+  loadingMore?: boolean;
+  onLoadMore?: () => void;
 }
 
 // Extract LitterCard as a memoized component to avoid re-rendering all cards
@@ -38,16 +42,16 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
   litters, 
   onSelectLitter, 
   onArchive,
-  selectedLitterId
+  selectedLitterId,
+  hasMore,
+  loadingMore,
+  onLoadMore
 }) => {
   const isMobile = useIsMobile();
   
   // Only compute this when dependencies change
   const visibleLitters = useMemo(() => {
-    // Implement windowing - only render what's initially visible
-    const initialRenderCount = Math.min(12, litters.length);
-    
-    return litters.slice(0, initialRenderCount).map(litter => (
+    return litters.map(litter => (
       <MemoizedLitterCard
         key={litter.id}
         litter={litter}
@@ -58,15 +62,25 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
     ));
   }, [litters, selectedLitterId, onSelectLitter, onArchive]);
   
-  // Determine if we need to show "load more" message
-  const hasMore = litters.length > 12;
-  
   return (
-    <div className={`grid grid-cols-1 ${isMobile ? '' : 'sm:grid-cols-2 lg:grid-cols-3'} gap-4 animate-fade-in`}>
-      {visibleLitters}
+    <div className="space-y-4 animate-fade-in">
+      <div className={`grid grid-cols-1 ${isMobile ? '' : 'sm:grid-cols-2 lg:grid-cols-3'} gap-4`}>
+        {visibleLitters}
+      </div>
+      
       {hasMore && (
-        <div className="col-span-full text-center py-2 text-sm text-muted-foreground">
-          Showing 12 of {litters.length} litters. Scroll to load more.
+        <div 
+          className="col-span-full text-center py-4 text-sm text-muted-foreground cursor-pointer hover:text-primary transition-colors"
+          onClick={onLoadMore}
+        >
+          {loadingMore ? (
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Loading more litters...</span>
+            </div>
+          ) : (
+            <span>Show more litters (showing {litters.length} of total)</span>
+          )}
         </div>
       )}
     </div>

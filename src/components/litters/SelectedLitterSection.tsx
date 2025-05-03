@@ -1,14 +1,27 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense, memo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Litter, Puppy } from '@/types/breeding';
 import { differenceInWeeks, parseISO } from 'date-fns';
 import LitterDetails from './LitterDetails';
-import PuppiesTabContent from './tabs/PuppiesTabContent';
-import DevelopmentTabContent from './tabs/DevelopmentTabContent';
-import GrowthChartsTabContent from './tabs/GrowthChartsTabContent';
 import { useDogsQueries } from '@/hooks/dogs/useDogsQueries';
-import { Dog } from '@/types/dogs';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Use lazy loading for tab content components
+const PuppiesTabContent = lazy(() => import('./tabs/PuppiesTabContent'));
+const DevelopmentTabContent = lazy(() => import('./tabs/DevelopmentTabContent'));
+const GrowthChartsTabContent = lazy(() => import('./tabs/GrowthChartsTabContent'));
+
+// Loading fallback component
+const TabLoading = memo(() => (
+  <div className="space-y-4">
+    <Skeleton className="h-10 w-full" />
+    <Skeleton className="h-40 w-full" />
+    <Skeleton className="h-40 w-full" />
+  </div>
+));
+
+TabLoading.displayName = 'TabLoading';
 
 interface SelectedLitterSectionProps {
   litter: Litter;
@@ -20,7 +33,7 @@ interface SelectedLitterSectionProps {
   onArchiveLitter: (litterId: string, archive: boolean) => void;
 }
 
-const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
+const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
   litter,
   onAddPuppy,
   onUpdatePuppy,
@@ -34,7 +47,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
   const { data: dogs } = useDogsQueries().useDogs();
   const [damBreed, setDamBreed] = useState<string>('');
 
-  // Calculate litter age in weeks
+  // Calculate litter age in weeks - memoized by component memo
   const litterAge = differenceInWeeks(new Date(), parseISO(litter.dateOfBirth));
 
   // Find the dam's breed when dogs data is loaded
@@ -71,37 +84,47 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = ({
           <TabsTrigger value="charts">Growth Charts</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="puppies" className="mt-0">
-          <PuppiesTabContent 
-            puppies={litter.puppies || []}
-            onAddPuppy={onAddPuppy}
-            onUpdatePuppy={onUpdatePuppy}
-            onDeletePuppy={onDeletePuppy}
-            litterDob={litter.dateOfBirth}
-            damBreed={damBreed}  
-            onSelectPuppy={setSelectedPuppy}
-            selectedPuppy={selectedPuppy}
-            litterAge={litterAge}
-          />
-        </TabsContent>
+        <Suspense fallback={<TabLoading />}>
+          <TabsContent value="puppies" className="mt-0">
+            {activeTab === 'puppies' && (
+              <PuppiesTabContent 
+                puppies={litter.puppies || []}
+                onAddPuppy={onAddPuppy}
+                onUpdatePuppy={onUpdatePuppy}
+                onDeletePuppy={onDeletePuppy}
+                litterDob={litter.dateOfBirth}
+                damBreed={damBreed}  
+                onSelectPuppy={setSelectedPuppy}
+                selectedPuppy={selectedPuppy}
+                litterAge={litterAge}
+              />
+            )}
+          </TabsContent>
 
-        <TabsContent value="development" className="mt-0">
-          <DevelopmentTabContent 
-            litter={litter}
-            onToggleItem={() => {}}
-          />
-        </TabsContent>
+          <TabsContent value="development" className="mt-0">
+            {activeTab === 'development' && (
+              <DevelopmentTabContent 
+                litter={litter}
+                onToggleItem={() => {}}
+              />
+            )}
+          </TabsContent>
 
-        <TabsContent value="charts" className="mt-0">
-          <GrowthChartsTabContent 
-            selectedPuppy={selectedPuppy}
-            puppies={litter.puppies || []}
-            onSelectPuppy={setSelectedPuppy}
-          />
-        </TabsContent>
+          <TabsContent value="charts" className="mt-0">
+            {activeTab === 'charts' && (
+              <GrowthChartsTabContent 
+                selectedPuppy={selectedPuppy}
+                puppies={litter.puppies || []}
+                onSelectPuppy={setSelectedPuppy}
+              />
+            )}
+          </TabsContent>
+        </Suspense>
       </Tabs>
     </div>
   );
-};
+});
+
+SelectedLitterSection.displayName = 'SelectedLitterSection';
 
 export default SelectedLitterSection;

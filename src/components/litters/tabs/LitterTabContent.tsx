@@ -5,6 +5,7 @@ import { Litter } from '@/types/breeding';
 import LitterGridView from '../LitterGridView';
 import EmptyLitterState from '../EmptyLitterState';
 import LitterPagination from '../LitterPagination';
+import { useVirtualization } from '@/hooks/litters/operations/useVirtualization';
 
 interface LitterTabContentProps {
   litters: Litter[];
@@ -46,6 +47,9 @@ const LitterTabContent: React.FC<LitterTabContentProps> = ({
   isFilterActive,
   onClearFilter
 }) => {
+  // Use virtualization hook for optimized rendering
+  const { visibleLitters, hasMore, loadingMore, loadMore } = useVirtualization(paginatedLitters);
+  
   // Render empty state for no litters
   if (litters.length === 0) {
     return <EmptyLitterState onAddLitter={onAddLitter} />;
@@ -64,10 +68,13 @@ const LitterTabContent: React.FC<LitterTabContentProps> = ({
   return (
     <>
       <LitterGridView
-        litters={paginatedLitters}
+        litters={visibleLitters}
         onSelectLitter={onSelectLitter}
         onArchive={onArchive}
         selectedLitterId={selectedLitterId}
+        hasMore={hasMore}
+        loadingMore={loadingMore}
+        onLoadMore={loadMore}
       />
       
       {pageCount > 1 && (

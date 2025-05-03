@@ -1,5 +1,5 @@
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, lazy, Suspense } from 'react';
 import { PawPrint } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import { 
@@ -9,10 +9,12 @@ import {
 import { useLitterFilters } from './LitterFilterProvider';
 import { useLitterManagement } from '@/hooks/useLitterManagement';
 import useLitterFilteredData from '@/hooks/useLitterFilteredData';
-import SelectedLitterSection from './SelectedLitterSection';
 import LitterFilterHeader from './filters/LitterFilterHeader';
-import LitterTabContent from './tabs/LitterTabContent';
 import { Skeleton } from '@/components/ui/skeleton';
+
+// Lazy load heavy components
+const SelectedLitterSection = lazy(() => import('./SelectedLitterSection'));
+const LitterTabContent = lazy(() => import('./tabs/LitterTabContent'));
 
 // Create a memoized Loading component to avoid redefining on each render
 const LoadingSkeleton = memo(() => (
@@ -25,8 +27,15 @@ const LoadingSkeleton = memo(() => (
 
 LoadingSkeleton.displayName = 'LoadingSkeleton';
 
-// Create a memoized TabContent to optimize rendering
-const MemoizedLitterTabContent = memo(LitterTabContent);
+// Loading component for suspense
+const TabContentLoading = memo(() => (
+  <div className="space-y-4 py-4">
+    <Skeleton className="h-64 w-full" />
+    <Skeleton className="h-10 w-40 mx-auto" />
+  </div>
+));
+
+TabContentLoading.displayName = 'TabContentLoading';
 
 const MyLittersContent: React.FC = () => {
   const {
@@ -119,54 +128,62 @@ const MyLittersContent: React.FC = () => {
             availableYears={getAvailableYears()}
           />
           
-          <TabsContent value="active" className="space-y-6">
-            <MemoizedLitterTabContent
-              litters={activeLitters}
-              filteredLitters={filteredActiveLitters}
-              paginatedLitters={paginatedActiveLitters}
-              selectedLitterId={selectedLitterId}
-              onSelectLitter={handleSelectLitter}
-              onAddLitter={handleAddLitterClick}
-              onArchive={(litter) => handleArchiveLitter(litter.id, true)}
-              pageCount={activePageCount}
-              currentPage={activePage}
-              onPageChange={setActivePage}
-              isFilterActive={isFilterActive}
-              onClearFilter={handleClearFilter}
-            />
-          </TabsContent>
-          
-          <TabsContent value="archived" className="space-y-6">
-            <MemoizedLitterTabContent
-              litters={archivedLitters}
-              filteredLitters={filteredArchivedLitters}
-              paginatedLitters={paginatedArchivedLitters}
-              selectedLitterId={selectedLitterId}
-              onSelectLitter={handleSelectLitter}
-              onAddLitter={handleAddLitterClick}
-              onArchive={(litter) => handleArchiveLitter(litter.id, false)}
-              pageCount={archivedPageCount}
-              currentPage={archivedPage}
-              onPageChange={setArchivedPage}
-              isFilterActive={isFilterActive}
-              onClearFilter={handleClearFilter}
-            />
-          </TabsContent>
+          <Suspense fallback={<TabContentLoading />}>
+            <TabsContent value="active" className="space-y-6">
+              {categoryTab === 'active' && (
+                <LitterTabContent
+                  litters={activeLitters}
+                  filteredLitters={filteredActiveLitters}
+                  paginatedLitters={paginatedActiveLitters}
+                  selectedLitterId={selectedLitterId}
+                  onSelectLitter={handleSelectLitter}
+                  onAddLitter={handleAddLitterClick}
+                  onArchive={(litter) => handleArchiveLitter(litter.id, true)}
+                  pageCount={activePageCount}
+                  currentPage={activePage}
+                  onPageChange={setActivePage}
+                  isFilterActive={isFilterActive}
+                  onClearFilter={handleClearFilter}
+                />
+              )}
+            </TabsContent>
+            
+            <TabsContent value="archived" className="space-y-6">
+              {categoryTab === 'archived' && (
+                <LitterTabContent
+                  litters={archivedLitters}
+                  filteredLitters={filteredArchivedLitters}
+                  paginatedLitters={paginatedArchivedLitters}
+                  selectedLitterId={selectedLitterId}
+                  onSelectLitter={handleSelectLitter}
+                  onAddLitter={handleAddLitterClick}
+                  onArchive={(litter) => handleArchiveLitter(litter.id, false)}
+                  pageCount={archivedPageCount}
+                  currentPage={archivedPage}
+                  onPageChange={setArchivedPage}
+                  isFilterActive={isFilterActive}
+                  onClearFilter={handleClearFilter}
+                />
+              )}
+            </TabsContent>
+          </Suspense>
         </Tabs>
       </div>
       
       {selectedLitter && (
         <div className="mt-6 animate-fade-in space-y-6">
           <div className="bg-greige-50 rounded-lg border border-greige-300 p-4">
-            <SelectedLitterSection
-              litter={selectedLitter}
-              onUpdateLitter={handleUpdateLitter}
-              onDeleteLitter={handleDeleteLitter}
-              onArchiveLitter={handleArchiveLitter}
-              onAddPuppy={handleAddPuppy}
-              onUpdatePuppy={handleUpdatePuppy}
-              onDeletePuppy={handleDeletePuppy}
-            />
+            <Suspense fallback={<LoadingSkeleton />}>
+              <SelectedLitterSection
+                litter={selectedLitter}
+                onUpdateLitter={handleUpdateLitter}
+                onDeleteLitter={handleDeleteLitter}
+                onArchiveLitter={handleArchiveLitter}
+                onAddPuppy={handleAddPuppy}
+                onUpdatePuppy={handleUpdatePuppy}
+                onDeletePuppy={handleDeletePuppy}
+              />
+            </Suspense>
           </div>
         </div>
       )}
