@@ -1,204 +1,171 @@
 
-import React, { memo, useMemo, lazy, Suspense } from 'react';
-import { PawPrint } from 'lucide-react';
-import PageLayout from '@/components/PageLayout';
-import { 
-  Tabs, 
-  TabsContent, 
-} from '@/components/ui/tabs';
-import { useLitterFilters } from './LitterFilterProvider';
-import { useLitterManagement } from '@/hooks/useLitterManagement';
-import useLitterFilteredData from '@/hooks/useLitterFilteredData';
-import LitterFilterHeader from './filters/LitterFilterHeader';
-import { Skeleton } from '@/components/ui/skeleton';
-
-// Lazy load heavy components
-const SelectedLitterSection = lazy(() => import('./SelectedLitterSection'));
-const LitterTabContent = lazy(() => import('./tabs/LitterTabContent'));
-
-// Create a memoized Loading component to avoid redefining on each render
-const LoadingSkeleton = memo(() => (
-  <div className="space-y-4">
-    <Skeleton className="h-10 w-full" />
-    <Skeleton className="h-40 w-full" />
-    <Skeleton className="h-40 w-full" />
-  </div>
-));
-
-LoadingSkeleton.displayName = 'LoadingSkeleton';
-
-// Loading component for suspense
-const TabContentLoading = memo(() => (
-  <div className="space-y-4 py-4">
-    <Skeleton className="h-64 w-full" />
-    <Skeleton className="h-10 w-40 mx-auto" />
-  </div>
-));
-
-TabContentLoading.displayName = 'TabContentLoading';
+import React, { useState, useMemo } from 'react';
+import { Grid2X2, LayoutList } from 'lucide-react';
+import { useLitterManagement } from '@/hooks/litters/useLitterManagement';
+import { useLitterFiltering } from '@/hooks/useLitterFiltering';
+import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import LitterGridView from './LitterGridView';
+import LitterListView from './LitterListView';
+import LitterFilterControls from './LitterFilterControls';
+import SelectedLitterSection from './SelectedLitterSection';
+import EmptyLitterState from './EmptyLitterState';
+import AddLitterDialog from './AddLitterDialog'; 
 
 const MyLittersContent: React.FC = () => {
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const {
     activeLitters,
     archivedLitters,
     selectedLitterId,
-    plannedLitters,
-    showAddLitterDialog,
-    setShowAddLitterDialog,
     selectedLitter,
     isLoading,
     isLoadingDetails,
+    showAddLitterDialog,
+    setShowAddLitterDialog,
     handleAddLitter,
     handleUpdateLitter,
-    handleDeleteLitter,
-    handleArchiveLitter,
+    handleSelectLitter,
     handleAddPuppy,
     handleUpdatePuppy,
     handleDeletePuppy,
-    handleSelectLitter,
+    handleDeleteLitter,
+    handleArchiveLitter,
     getAvailableYears
   } = useLitterManagement();
-  
-  // Get filter state from context
+
+  // Use litter filtering
   const { 
-    setSearchQuery,
-    setFilterYear,
-    categoryTab, 
-    setCategoryTab,
-    activePage,
-    setActivePage,
-    archivedPage,
-    setArchivedPage
-  } = useLitterFilters();
-  
-  // Use our optimized hook for filtering logic
-  const {
-    filteredActiveLitters,
-    paginatedActiveLitters,
-    activePageCount,
+    filteredActiveLitters, 
     filteredArchivedLitters,
-    paginatedArchivedLitters,
-    archivedPageCount,
-    isFilterActive
-  } = useLitterFilteredData(activeLitters, archivedLitters);
-  
-  // Handle creating a new litter - memoized as this doesn't change often
-  const handleAddLitterClick = useMemo(() => {
-    return () => setShowAddLitterDialog(true);
-  }, [setShowAddLitterDialog]);
-  
-  // Handle clearing filters - memoized
-  const handleClearFilter = useMemo(() => {
-    return () => {
-      setFilterYear(null);
-      setSearchQuery('');
-    };
-  }, [setFilterYear, setSearchQuery]);
-  
-  if (isLoading) {
-    return (
-      <PageLayout 
-        title="My Litters" 
-        description="Track your litters and individual puppies"
-        icon={<PawPrint className="h-6 w-6" />}
-      >
-        <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 pb-6">
-          <LoadingSkeleton />
-        </div>
-      </PageLayout>
-    );
-  }
-  
+    activeTab, 
+    setActiveTab,
+    searchQuery,
+    setSearchQuery,
+    selectedYear,
+    setSelectedYear 
+  } = useLitterFiltering(
+    activeLitters, 
+    archivedLitters, 
+    getAvailableYears
+  );
+
+  // Toggle view mode
+  const toggleViewMode = (value: string) => {
+    if (value === 'grid' || value === 'list') {
+      setViewMode(value);
+    }
+  };
+
+  // Get the litters to display based on active tab
+  const littersToDisplay = useMemo(() => {
+    return activeTab === 'active' ? filteredActiveLitters : filteredArchivedLitters;
+  }, [activeTab, filteredActiveLitters, filteredArchivedLitters]);
+
+  // Determine if there are no litters at all (for empty state)
+  const hasNoLitters = !isLoading && activeLitters.length === 0 && archivedLitters.length === 0;
+
   return (
-    <PageLayout 
-      title="My Litters" 
-      description="Track your litters and individual puppies"
-      icon={<PawPrint className="h-6 w-6" />}
-    >
-      <div className="bg-greige-50 rounded-lg border border-greige-300 p-4 pb-6">
-        <Tabs value={categoryTab} onValueChange={setCategoryTab} className="space-y-4">
-          <LitterFilterHeader 
-            activeLitters={activeLitters}
-            archivedLitters={archivedLitters}
-            categoryTab={categoryTab}
-            setCategoryTab={setCategoryTab}
-            showAddLitterDialog={showAddLitterDialog}
-            setShowAddLitterDialog={setShowAddLitterDialog}
-            onAddLitter={handleAddLitter}
-            plannedLitters={plannedLitters}
-            availableYears={getAvailableYears()}
-          />
-          
-          <Suspense fallback={<TabContentLoading />}>
-            <TabsContent value="active" className="space-y-6">
-              {categoryTab === 'active' && (
-                <LitterTabContent
-                  litters={activeLitters}
-                  filteredLitters={filteredActiveLitters}
-                  paginatedLitters={paginatedActiveLitters}
-                  selectedLitterId={selectedLitterId}
-                  onSelectLitter={handleSelectLitter}
-                  onAddLitter={handleAddLitterClick}
-                  onArchive={(litter) => handleArchiveLitter(litter.id, true)}
-                  pageCount={activePageCount}
-                  currentPage={activePage}
-                  onPageChange={setActivePage}
-                  isFilterActive={isFilterActive}
-                  onClearFilter={handleClearFilter}
-                />
-              )}
-            </TabsContent>
-            
-            <TabsContent value="archived" className="space-y-6">
-              {categoryTab === 'archived' && (
-                <LitterTabContent
-                  litters={archivedLitters}
-                  filteredLitters={filteredArchivedLitters}
-                  paginatedLitters={paginatedArchivedLitters}
-                  selectedLitterId={selectedLitterId}
-                  onSelectLitter={handleSelectLitter}
-                  onAddLitter={handleAddLitterClick}
-                  onArchive={(litter) => handleArchiveLitter(litter.id, false)}
-                  pageCount={archivedPageCount}
-                  currentPage={archivedPage}
-                  onPageChange={setArchivedPage}
-                  isFilterActive={isFilterActive}
-                  onClearFilter={handleClearFilter}
-                />
-              )}
-            </TabsContent>
-          </Suspense>
-        </Tabs>
-      </div>
-      
-      {selectedLitterId && (
-        <div className="mt-6 animate-fade-in space-y-6">
-          <div className="bg-greige-50 rounded-lg border border-greige-300 p-4">
-            <Suspense fallback={<LoadingSkeleton />}>
-              {isLoadingDetails && !selectedLitter ? (
-                <LoadingSkeleton />
-              ) : selectedLitter ? (
-                <SelectedLitterSection
+    <div className="container py-6">
+      <div className="flex flex-col space-y-6">
+        {/* Litter Filter Controls Row */}
+        <LitterFilterControls 
+          hasLitters={activeLitters.length > 0 || archivedLitters.length > 0}
+          onAddLitterClick={() => setShowAddLitterDialog(true)}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedYear={selectedYear}
+          onYearChange={setSelectedYear}
+          availableYears={getAvailableYears()}
+        />
+
+        {/* No litters empty state */}
+        {hasNoLitters ? (
+          <EmptyLitterState onAddLitter={() => setShowAddLitterDialog(true)} />
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Litters Column - 1/3 width on large screens */}
+            <div className="lg:col-span-1">
+              <Card>
+                {/* Tab Navigation and View Toggle */}
+                <div className="flex items-center justify-between p-4 border-b">
+                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="grid grid-cols-2">
+                      <TabsTrigger value="active">
+                        Active ({filteredActiveLitters.length})
+                      </TabsTrigger>
+                      <TabsTrigger value="archived">
+                        Archived ({filteredArchivedLitters.length})
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  
+                  <div className="ml-4">
+                    <ToggleGroup type="single" value={viewMode} onValueChange={toggleViewMode}>
+                      <ToggleGroupItem value="grid" aria-label="Grid view" size="sm">
+                        <Grid2X2 className="h-4 w-4" />
+                      </ToggleGroupItem>
+                      <ToggleGroupItem value="list" aria-label="List view" size="sm">
+                        <LayoutList className="h-4 w-4" />
+                      </ToggleGroupItem>
+                    </ToggleGroup>
+                  </div>
+                </div>
+
+                {/* Litter List/Grid */}
+                <div className="p-4">
+                  {viewMode === 'grid' ? (
+                    <LitterGridView 
+                      litters={littersToDisplay} 
+                      onSelectLitter={handleSelectLitter}
+                      onArchive={handleArchiveLitter}
+                      selectedLitterId={selectedLitterId}
+                      loadingMore={false}
+                      hasMore={false}
+                    />
+                  ) : (
+                    <LitterListView 
+                      litters={littersToDisplay} 
+                      onSelectLitter={handleSelectLitter} 
+                      selectedLitterId={selectedLitterId}
+                    />
+                  )}
+                </div>
+              </Card>
+            </div>
+
+            {/* Selected Litter Column - 2/3 width on large screens */}
+            <div className="lg:col-span-2">
+              {selectedLitter ? (
+                <SelectedLitterSection 
                   litter={selectedLitter}
                   onUpdateLitter={handleUpdateLitter}
-                  onDeleteLitter={handleDeleteLitter}
-                  onArchiveLitter={handleArchiveLitter}
                   onAddPuppy={handleAddPuppy}
                   onUpdatePuppy={handleUpdatePuppy}
                   onDeletePuppy={handleDeletePuppy}
+                  onDeleteLitter={handleDeleteLitter}
+                  onArchiveLitter={handleArchiveLitter}
+                  isLoadingDetails={isLoadingDetails}
                 />
               ) : (
-                <div className="text-center py-6">
-                  <h3 className="text-lg font-medium">No litter details available</h3>
-                  <p className="text-muted-foreground mt-2">Select a litter to view details</p>
-                </div>
+                <Card className="p-6 text-center">
+                  <p className="text-muted-foreground">Select a litter to view its details</p>
+                </Card>
               )}
-            </Suspense>
+            </div>
           </div>
-        </div>
-      )}
-    </PageLayout>
+        )}
+      </div>
+
+      {/* Add Litter Dialog */}
+      <AddLitterDialog
+        open={showAddLitterDialog}
+        onOpenChange={setShowAddLitterDialog}
+        onAddLitter={handleAddLitter}
+      />
+    </div>
   );
 };
 
-export default memo(MyLittersContent);
+export default MyLittersContent;

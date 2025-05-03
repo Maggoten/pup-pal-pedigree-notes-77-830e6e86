@@ -36,7 +36,8 @@ export function useLitterManagement() {
   const { 
     loadLittersData, 
     loadPlannedLitters,
-    loadLitterDetails 
+    loadLitterDetails,
+    selectedLitterDetails: loadedLitterDetails
   } = useLitterLoading(
     setActiveLitters,
     setArchivedLitters,
@@ -46,6 +47,13 @@ export function useLitterManagement() {
     setIsLoading,
     user?.id
   );
+  
+  // Update selectedLitterDetails when it changes in useLitterLoading
+  useEffect(() => {
+    if (loadedLitterDetails) {
+      setSelectedLitterDetails(loadedLitterDetails);
+    }
+  }, [loadedLitterDetails, setSelectedLitterDetails]);
   
   // Use the operations hook, passing selectedLitterId as an argument
   const {
@@ -89,7 +97,7 @@ export function useLitterManagement() {
       setActiveLitters([]);
       setArchivedLitters([]);
     }
-  }, [loadLittersData, loadPlannedLitters, setupSubscription, user?.id]);
+  }, [loadLittersData, loadPlannedLitters, setupSubscription, user?.id, setActiveLitters, setArchivedLitters]);
   
   // Load detailed litter data when selectedLitterId changes
   useEffect(() => {

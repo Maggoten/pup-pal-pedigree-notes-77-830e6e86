@@ -6,6 +6,7 @@ import { differenceInWeeks, parseISO } from 'date-fns';
 import LitterDetails from './LitterDetails';
 import { useDogsQueries } from '@/hooks/dogs/useDogsQueries';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2 } from 'lucide-react';
 
 // Use lazy loading for tab content components
 const PuppiesTabContent = lazy(() => import('./tabs/PuppiesTabContent'));
@@ -31,6 +32,7 @@ interface SelectedLitterSectionProps {
   onUpdateLitter: (litter: Litter) => void;
   onDeleteLitter: (litterId: string) => void;
   onArchiveLitter: (litterId: string, archive: boolean) => void;
+  isLoadingDetails?: boolean;
 }
 
 const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
@@ -40,7 +42,8 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
   onDeletePuppy,
   onUpdateLitter,
   onDeleteLitter,
-  onArchiveLitter
+  onArchiveLitter,
+  isLoadingDetails
 }) => {
   const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
   const [activeTab, setActiveTab] = useState('puppies');
@@ -61,6 +64,10 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
     }
   }, [dogs, litter.damId]);
 
+  // If puppies array is undefined, initialize it as empty array
+  const puppies = litter.puppies || [];
+  console.log(`Rendering SelectedLitterSection for ${litter.name} with ${puppies.length} puppies, isLoading=${isLoadingDetails}`);
+
   return (
     <div className="space-y-6 mt-6">
       <LitterDetails 
@@ -73,54 +80,63 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
         onArchiveLitter={onArchiveLitter}
       />
 
-      <Tabs 
-        value={activeTab} 
-        onValueChange={setActiveTab}
-        className="w-full"
-      >
-        <TabsList className="grid grid-cols-3 mb-6">
-          <TabsTrigger value="puppies">Puppies</TabsTrigger>
-          <TabsTrigger value="development">Development</TabsTrigger>
-          <TabsTrigger value="charts">Growth Charts</TabsTrigger>
-        </TabsList>
+      {isLoadingDetails ? (
+        <div className="flex items-center justify-center h-40 bg-background border rounded-lg">
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <p className="text-sm text-muted-foreground">Loading litter details...</p>
+          </div>
+        </div>
+      ) : (
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
+          <TabsList className="grid grid-cols-3 mb-6">
+            <TabsTrigger value="puppies">Puppies</TabsTrigger>
+            <TabsTrigger value="development">Development</TabsTrigger>
+            <TabsTrigger value="charts">Growth Charts</TabsTrigger>
+          </TabsList>
 
-        <Suspense fallback={<TabLoading />}>
-          <TabsContent value="puppies" className="mt-0">
-            {activeTab === 'puppies' && (
-              <PuppiesTabContent 
-                puppies={litter.puppies || []}
-                onAddPuppy={onAddPuppy}
-                onUpdatePuppy={onUpdatePuppy}
-                onDeletePuppy={onDeletePuppy}
-                litterDob={litter.dateOfBirth}
-                damBreed={damBreed}  
-                onSelectPuppy={setSelectedPuppy}
-                selectedPuppy={selectedPuppy}
-                litterAge={litterAge}
-              />
-            )}
-          </TabsContent>
+          <Suspense fallback={<TabLoading />}>
+            <TabsContent value="puppies" className="mt-0">
+              {activeTab === 'puppies' && (
+                <PuppiesTabContent 
+                  puppies={puppies}
+                  onAddPuppy={onAddPuppy}
+                  onUpdatePuppy={onUpdatePuppy}
+                  onDeletePuppy={onDeletePuppy}
+                  litterDob={litter.dateOfBirth}
+                  damBreed={damBreed}  
+                  onSelectPuppy={setSelectedPuppy}
+                  selectedPuppy={selectedPuppy}
+                  litterAge={litterAge}
+                />
+              )}
+            </TabsContent>
 
-          <TabsContent value="development" className="mt-0">
-            {activeTab === 'development' && (
-              <DevelopmentTabContent 
-                litter={litter}
-                onToggleItem={() => {}}
-              />
-            )}
-          </TabsContent>
+            <TabsContent value="development" className="mt-0">
+              {activeTab === 'development' && (
+                <DevelopmentTabContent 
+                  litter={litter}
+                  onToggleItem={() => {}}
+                />
+              )}
+            </TabsContent>
 
-          <TabsContent value="charts" className="mt-0">
-            {activeTab === 'charts' && (
-              <GrowthChartsTabContent 
-                selectedPuppy={selectedPuppy}
-                puppies={litter.puppies || []}
-                onSelectPuppy={setSelectedPuppy}
-              />
-            )}
-          </TabsContent>
-        </Suspense>
-      </Tabs>
+            <TabsContent value="charts" className="mt-0">
+              {activeTab === 'charts' && (
+                <GrowthChartsTabContent 
+                  selectedPuppy={selectedPuppy}
+                  puppies={puppies}
+                  onSelectPuppy={setSelectedPuppy}
+                />
+              )}
+            </TabsContent>
+          </Suspense>
+        </Tabs>
+      )}
     </div>
   );
 });

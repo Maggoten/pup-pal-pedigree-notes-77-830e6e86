@@ -15,7 +15,7 @@ export function useLitterLoading(
   setIsLoading,
   userId
 ) {
-  // New state for tracking detailed litter loading
+  // Track loading state for detailed litter data
   const [isLoadingDetails, setIsLoadingDetails] = useState<boolean>(false);
   const [selectedLitterDetails, setSelectedLitterDetails] = useState<Litter | null>(null);
 
@@ -51,7 +51,7 @@ export function useLitterLoading(
 
       // If a litter is already selected, load its details
       if (selectedLitterId) {
-        loadLitterDetails(selectedLitterId);
+        await loadLitterDetails(selectedLitterId);
       }
     } catch (error) {
       console.error('Error loading litters:', error);
@@ -65,7 +65,7 @@ export function useLitterLoading(
     }
   }, [selectedLitterId, userId, setActiveLitters, setArchivedLitters, setSelectedLitterId, setIsLoading]);
   
-  // New function to load detailed information for a specific litter
+  // Function to load detailed information for a specific litter
   const loadLitterDetails = useCallback(async (litterId: string) => {
     if (!litterId) return;
     
@@ -75,9 +75,9 @@ export function useLitterLoading(
       const litterWithDetails = await litterService.getLitterDetails(litterId);
       
       if (litterWithDetails) {
+        console.log(`Loaded litter details for ${litterWithDetails.name} with ${litterWithDetails.puppies?.length || 0} puppies`);
         // Update the selected litter with detailed information
         setSelectedLitterDetails(litterWithDetails);
-        console.log(`Loaded ${litterWithDetails.puppies.length} puppies for litter ${litterWithDetails.name}`);
       } else {
         console.warn(`No details found for litter ${litterId}`);
         setSelectedLitterDetails(null);

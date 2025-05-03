@@ -4,29 +4,36 @@ import { Litter } from '@/types/breeding';
 
 export interface UseVirtualWindowOptions {
   itemsPerPage?: number;
+  onLoadMore?: () => void;
 }
 
 export const useVirtualWindow = (
   litters: Litter[],
-  { itemsPerPage = 20 }: UseVirtualWindowOptions = {}
+  { itemsPerPage = 20, onLoadMore }: UseVirtualWindowOptions = {}
 ) => {
   const [loadingMore, setLoadingMore] = useState(false);
   
-  // Function to load more items - this simulates loading but in a real implementation
-  // with react-window, this would connect to the onItemsRendered prop
+  // Function to load more items
   const loadMore = useCallback(() => {
     if (loadingMore) return;
     
     setLoadingMore(true);
-    // This timeout simulates the time it takes to load more items
-    // In a real implementation, this would be replaced with actual data loading
-    setTimeout(() => {
+    
+    // If an external onLoadMore function is provided, use that
+    if (onLoadMore) {
+      onLoadMore();
       setLoadingMore(false);
-    }, 100);
-  }, [loadingMore]);
+    } else {
+      // This timeout simulates the time it takes to load more items
+      // In a real implementation with a windowing library, this would be handled differently
+      setTimeout(() => {
+        setLoadingMore(false);
+      }, 100);
+    }
+  }, [loadingMore, onLoadMore]);
   
   return {
-    visibleLitters: litters, // In a real implementation, this would be the virtualized subset
+    visibleLitters: litters, // In a real implementation with react-window, this would be the virtualized subset
     loadingMore,
     loadMore
   };
