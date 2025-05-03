@@ -16,6 +16,8 @@ interface LitterFilterContextType {
   setActivePage: (page: number) => void;
   archivedPage: number;
   setArchivedPage: (page: number) => void;
+  itemsPerPage: number;
+  setItemsPerPage?: (count: number) => void;
 }
 
 const LitterFilterContext = createContext<LitterFilterContextType | undefined>(undefined);
@@ -39,6 +41,7 @@ export const LitterFilterProvider: React.FC<LitterFilterProviderProps> = ({ chil
   const [categoryTab, setCategoryTab] = useState('active');
   const [activePage, setActivePage] = useState(1);
   const [archivedPage, setArchivedPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(6); // Default to 6 items per page
 
   return (
     <LitterFilterContext.Provider
@@ -55,6 +58,8 @@ export const LitterFilterProvider: React.FC<LitterFilterProviderProps> = ({ chil
         setActivePage,
         archivedPage,
         setArchivedPage,
+        itemsPerPage,
+        setItemsPerPage,
       }}
     >
       {children}
