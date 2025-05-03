@@ -6,28 +6,20 @@ import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { isDogDeleted } from '@/utils/dogUtils';
 
 interface DogListProps {
   dogsList?: Dog[];
-  includeDeleted?: boolean;
 }
 
-const DogList: React.FC<DogListProps> = ({ dogsList, includeDeleted = false }) => {
+const DogList: React.FC<DogListProps> = ({ dogsList }) => {
   const { dogs: allDogs, setActiveDog, loading } = useDogs();
   const [search, setSearch] = useState('');
 
   // Use the provided dogsList or fall back to all dogs from context
   const dogs = dogsList || allDogs;
 
-  // Filter dogs based on search and whether to include deleted dogs
   const filteredDogs = dogs.filter(dog => {
-    // First check if we should include deleted dogs
-    if (!includeDeleted && isDogDeleted(dog)) {
-      return false;
-    }
-    
-    // Then apply search filter
+    // Search filter only (removed gender filter)
     return dog.name.toLowerCase().includes(search.toLowerCase()) || 
            dog.breed.toLowerCase().includes(search.toLowerCase());
   });

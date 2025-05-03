@@ -147,7 +147,6 @@ const MyLittersContent: React.FC = () => {
           <div className="bg-greige-50 rounded-lg border border-greige-300 p-4">
             <SelectedLitterSection
               litter={selectedLitter}
-              onBackClick={() => setSelectedLitterId(null)}
               onUpdateLitter={handleUpdateLitter}
               onDeleteLitter={handleDeleteLitter}
               onArchiveLitter={handleArchiveLitter}

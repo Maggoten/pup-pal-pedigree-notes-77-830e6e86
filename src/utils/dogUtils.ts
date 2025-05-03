@@ -1,5 +1,5 @@
 
-import { Dog, BreedingHistory, Heat, DogDependencies } from '@/types/dogs';
+import { Dog, BreedingHistory, Heat } from '@/types/dogs';
 import { Database } from '@/integrations/supabase/types';
 import { dateToISOString } from './dateUtils';
 
@@ -68,8 +68,8 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
     // Ensure birthdate is stored as YYYY-MM-DD without timezone impact
     dbDog.birthdate = typeof dog.dateOfBirth === 'string' 
       ? dog.dateOfBirth.split('T')[0]
-      : isDateObject(dog.dateOfBirth)
-        ? dateToISOString(dog.dateOfBirth as Date)
+      : dog.dateOfBirth instanceof Date 
+        ? dateToISOString(dog.dateOfBirth)
         : undefined;
     
     console.log('Mapped dateOfBirth to birthdate:', dbDog.birthdate);
@@ -92,9 +92,10 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
       if (typeof heat.date === 'string') {
         return { date: heat.date.split('T')[0] };
       } else if (heat.date) {
-        // Check if it's a Date object safely
-        if (isDateObject(heat.date)) {
-          return { date: dateToISOString(heat.date as Date) };
+        // Check if it's a Date object by seeing if it has toISOString method
+        const dateObj = heat.date as unknown as Date;
+        if (typeof dateObj.toISOString === 'function') {
+          return { date: dateToISOString(dateObj) };
         }
       }
       // Fallback
@@ -109,22 +110,17 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   if ('dewormingDate' in dog && dog.dewormingDate) {
     dbDog.dewormingDate = typeof dog.dewormingDate === 'string'
       ? dog.dewormingDate.split('T')[0]
-      : isDateObject(dog.dewormingDate)
-        ? dateToISOString(dog.dewormingDate as Date)
+      : dog.dewormingDate instanceof Date
+        ? dateToISOString(dog.dewormingDate)
         : undefined;
   }
   
   if ('vaccinationDate' in dog && dog.vaccinationDate) {
     dbDog.vaccinationDate = typeof dog.vaccinationDate === 'string'
       ? dog.vaccinationDate.split('T')[0]
-      : isDateObject(dog.vaccinationDate)
-        ? dateToISOString(dog.vaccinationDate as Date)
+      : dog.vaccinationDate instanceof Date
+        ? dateToISOString(dog.vaccinationDate)
         : undefined;
-  }
-
-  // Handle the deleted_at field if provided
-  if ('deleted_at' in dog) {
-    dbDog.deleted_at = dog.deleted_at;
   }
   
   // Copy direct fields that have the same name
@@ -146,17 +142,6 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
 };
 
 /**
- * Helper function to safely check if a value is a Date object
- * without using instanceof which causes TypeScript errors
- */
-function isDateObject(value: any): boolean {
-  return value !== null && 
-         typeof value === 'object' && 
-         typeof value.getTime === 'function' &&
-         !isNaN(value.getTime());
-}
-
-/**
  * Convert form heat history (with Date objects) to database heat history (with string dates)
  */
 export const convertFormHeatHistoryToDbFormat = (formHeatHistory: { date: Date }[]): Heat[] => {
@@ -175,43 +160,4 @@ export const convertDbHeatHistoryToFormFormat = (dbHeatHistory: Heat[]): { date:
     date.setHours(12, 0, 0, 0);
     return { date };
   });
-};
-
-/**
- * Check if a dog has dependencies in other records that would prevent hard deletion
- * @param dogId The ID of the dog to check
- * @returns Promise with dependency information or null if no dependencies
- */
-export const checkDogDependencies = async (dogId: string): Promise<DogDependencies | null> => {
-  try {
-    const { data, error } = await fetch(`/api/check-dog-dependencies?id=${dogId}`)
-      .then(res => res.json());
-      
-    if (error) {
-      console.error('Error checking dog dependencies:', error);
-      return null;
-    }
-    
-    return Object.keys(data).length > 0 ? data : null;
-  } catch (error) {
-    console.error('Error checking dog dependencies:', error);
-    return null;
-  }
-};
-
-/**
- * Checks if a dog is soft-deleted
- */
-export const isDogDeleted = (dog: Dog): boolean => {
-  return !!dog.deleted_at;
-};
-
-/**
- * Helper to format dog name with deleted indicator
- */
-export const formatDogName = (dog: Dog): string => {
-  if (isDogDeleted(dog)) {
-    return `${dog.name} (Deleted)`;
-  }
-  return dog.name;
 };

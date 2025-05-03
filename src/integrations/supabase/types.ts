@@ -94,7 +94,6 @@ export type Database = {
           chip_number: string | null
           color: string | null
           created_at: string | null
-          deleted_at: string | null
           dewormingDate: string | null
           gender: string | null
           heatHistory: Json | null
@@ -115,7 +114,6 @@ export type Database = {
           chip_number?: string | null
           color?: string | null
           created_at?: string | null
-          deleted_at?: string | null
           dewormingDate?: string | null
           gender?: string | null
           heatHistory?: Json | null
@@ -136,7 +134,6 @@ export type Database = {
           chip_number?: string | null
           color?: string | null
           created_at?: string | null
-          deleted_at?: string | null
           dewormingDate?: string | null
           gender?: string | null
           heatHistory?: Json | null
@@ -290,20 +287,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_planned_litters_female_id"
-            columns: ["female_id"]
-            isOneToOne: false
-            referencedRelation: "dogs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_planned_litters_male_id"
-            columns: ["male_id"]
-            isOneToOne: false
-            referencedRelation: "dogs"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "planned_litters_female_id_fkey"
             columns: ["female_id"]
             isOneToOne: false
@@ -357,20 +340,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "fk_pregnancies_female_dog_id"
-            columns: ["female_dog_id"]
-            isOneToOne: false
-            referencedRelation: "dogs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_pregnancies_male_dog_id"
-            columns: ["male_dog_id"]
-            isOneToOne: false
-            referencedRelation: "dogs"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "pregnancies_female_dog_id_fkey"
             columns: ["female_dog_id"]
@@ -774,10 +743,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      check_dog_dependencies: {
-        Args: { dog_id: string }
-        Returns: Json
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

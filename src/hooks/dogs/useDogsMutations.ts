@@ -1,11 +1,10 @@
 
 import { useCallback } from 'react';
-import { Dog, DogDependencies } from '@/types/dogs';
+import { Dog } from '@/types/dogs';
 import { useAddDog, useUpdateDog, useDeleteDog } from './mutations';
-import { UseDogsMutations, RemoveDogFn } from './types';
+import { UseDogsMutations } from './types';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { DeletionMode } from '@/services/dogs';
 
 export const useDogsMutations = (): UseDogsMutations => {
   const { user } = useAuth();
@@ -45,26 +44,10 @@ export const useDogsMutations = (): UseDogsMutations => {
     }
   }, [updateDogMutation, toast]);
 
-  const checkDogDependencies = useCallback(async (id: string): Promise<DogDependencies | null> => {
+  const deleteDog = useCallback(async (id: string) => {
     try {
-      console.log('useDogsMutations.checkDogDependencies called with ID:', id);
-      return await deleteDogMutation.checkDependencies(id);
-    } catch (error) {
-      console.error('Error in checkDogDependencies:', error);
-      toast({
-        title: "Error checking dependencies",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive"
-      });
-      return null;
-    }
-  }, [deleteDogMutation, toast]);
-
-  // Create the base deleteDog function
-  const deleteDogBase = useCallback(async (id: string, mode: DeletionMode = 'soft') => {
-    try {
-      console.log(`useDogsMutations.deleteDog called with ID: ${id}, mode: ${mode}`);
-      await deleteDogMutation.deleteDog({ dogId: id, mode });
+      console.log('useDogsMutations.deleteDog called with ID:', id);
+      await deleteDogMutation.mutateAsync(id);
       return true;
     } catch (error) {
       console.error('Error in deleteDog:', error);
@@ -76,11 +59,6 @@ export const useDogsMutations = (): UseDogsMutations => {
       return false;
     }
   }, [deleteDogMutation, toast]);
-
-  // Use Object.assign to create the composite function with checkDependencies method
-  const deleteDog: RemoveDogFn = Object.assign(deleteDogBase, {
-    checkDependencies: checkDogDependencies
-  });
 
   return {
     addDog,

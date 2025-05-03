@@ -25,24 +25,6 @@ export type BreedingHistory = {
   matings?: Breeding[]; // Adding matings for compatibility with ReminderService.ts
 };
 
-export interface DogDependency {
-  count: number;
-  items: Array<{
-    id: string;
-    name: string;
-  }>;
-}
-
-export interface DogDependencies {
-  planned_litters?: DogDependency;
-  planned_litters_female?: DogDependency;
-  pregnancies_female?: DogDependency;
-  pregnancies_male?: DogDependency;
-  litters_dam?: DogDependency;
-  litters_sire?: DogDependency;
-  calendar_events?: DogDependency;
-}
-
 export interface Dog {
   // Primary fields
   id: string;
@@ -59,7 +41,6 @@ export interface Dog {
   dateOfBirth: string;      // Alias for UI components
   created_at?: string;
   updated_at?: string;
-  deleted_at?: string;      // New field for soft deletion
   
   // Registration info
   registration_number?: string;  // Supabase field
