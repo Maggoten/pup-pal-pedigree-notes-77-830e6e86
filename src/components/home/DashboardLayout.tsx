@@ -14,6 +14,7 @@ import { toast } from '@/components/ui/use-toast';
 interface DashboardLayoutProps {
   user: User | null;
   activePregnancies?: ActivePregnancy[];
+  isLoadingPregnancies?: boolean;
 }
 
 // Create a wrapper component that will use the dashboard data inside the DogsProvider
