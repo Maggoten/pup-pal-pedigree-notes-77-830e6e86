@@ -30,9 +30,9 @@ const LitterFilterHeader: React.FC<LitterFilterHeaderProps> = ({
   availableYears
 }) => {
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-      <CategoryTabsList>
-        <CategoryTabsTrigger value="active" className="relative">
+    <div className="space-y-6">
+      <CategoryTabsList className="w-full border-b mb-6">
+        <CategoryTabsTrigger value="active" onClick={() => setCategoryTab('active')} className="relative">
           Active Litters
           {activeLitters.length > 0 && (
             <span className="ml-2 bg-primary text-primary-foreground text-xs rounded-full h-5 min-w-5 inline-flex items-center justify-center px-1.5">
@@ -40,7 +40,7 @@ const LitterFilterHeader: React.FC<LitterFilterHeaderProps> = ({
             </span>
           )}
         </CategoryTabsTrigger>
-        <CategoryTabsTrigger value="archived" className="relative">
+        <CategoryTabsTrigger value="archived" onClick={() => setCategoryTab('archived')} className="relative">
           Archived Litters
           {archivedLitters.length > 0 && (
             <span className="ml-2 bg-muted text-muted-foreground text-xs rounded-full h-5 min-w-5 inline-flex items-center justify-center px-1.5">

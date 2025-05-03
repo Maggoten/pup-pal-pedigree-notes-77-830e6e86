@@ -30,7 +30,7 @@ const LitterFilterControls: React.FC<LitterFilterControlsProps> = ({
   };
   
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div className="flex flex-wrap items-center justify-between gap-4">
       <div className="flex flex-wrap items-center gap-2 flex-grow">
         <div className="relative flex-grow max-w-md">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />

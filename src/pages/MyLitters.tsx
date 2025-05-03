@@ -3,6 +3,8 @@ import React, { Suspense } from 'react';
 import { LitterFilterProvider } from '@/components/litters/LitterFilterProvider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { lazy } from 'react';
+import PageLayout from '@/components/PageLayout';
+import { PawPrint } from 'lucide-react';
 
 // Lazy load the main content component
 const MyLittersContent = lazy(() => import('@/components/litters/MyLittersContent'));
@@ -19,13 +21,17 @@ const MyLittersLoading = () => (
 
 const MyLitters: React.FC = () => {
   return (
-    <div className="bg-greige-50 min-h-full">
+    <PageLayout 
+      title="My Litters" 
+      description="Manage your litter records and puppies" 
+      icon={<PawPrint className="h-6 w-6" />}
+    >
       <LitterFilterProvider>
         <Suspense fallback={<MyLittersLoading />}>
           <MyLittersContent />
         </Suspense>
       </LitterFilterProvider>
-    </div>
+    </PageLayout>
   );
 };
 

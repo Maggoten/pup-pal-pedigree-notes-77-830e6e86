@@ -10,26 +10,21 @@ export const useLitterFiltering = (
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   
-  // Helper function to filter litters - defined BEFORE it's used
-  const filterLitters = (litters: Litter[], query: string, year: number | null): Litter[] => {
+  // Apply filters to litters
+  const filteredLitters = useMemo(() => {
     return litters.filter(litter => {
       // Filter by search query
-      const matchesSearch = !query || 
-        litter.name.toLowerCase().includes(query.toLowerCase()) || 
-        litter.sireName.toLowerCase().includes(query.toLowerCase()) || 
-        litter.damName.toLowerCase().includes(query.toLowerCase());
+      const matchesSearch = !searchQuery || 
+        litter.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        litter.sireName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        litter.damName.toLowerCase().includes(searchQuery.toLowerCase());
       
       // Filter by year
-      const matchesYear = !year || 
-        new Date(litter.dateOfBirth).getFullYear() === year;
+      const matchesYear = !selectedYear || 
+        new Date(litter.dateOfBirth).getFullYear() === selectedYear;
       
       return matchesSearch && matchesYear;
     });
-  };
-  
-  // Apply filters to litters
-  const filteredLitters = useMemo(() => {
-    return filterLitters(litters, searchQuery, selectedYear);
   }, [litters, searchQuery, selectedYear]);
   
   return { 
