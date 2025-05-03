@@ -1,25 +1,25 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import LoginForm, { LoginFormValues } from './LoginForm';
 import RegistrationForm, { RegistrationFormValues } from './RegistrationForm';
 import BreedingJourneyLogo from '@/components/BreedingJourneyLogo';
-
 interface AuthTabsProps {
   onLogin: (values: LoginFormValues) => void;
   onRegister: (values: RegistrationFormValues) => void;
   isLoading: boolean;
 }
-
-const AuthTabs: React.FC<AuthTabsProps> = ({ onLogin, onRegister, isLoading }) => {
-  return (
-    <Card className="w-full max-w-md shadow-lg bg-greige-50 border-greige-100">
+const AuthTabs: React.FC<AuthTabsProps> = ({
+  onLogin,
+  onRegister,
+  isLoading
+}) => {
+  return <Card className="w-full max-w-md shadow-lg bg-greige-50 border-greige-100">
       <CardHeader className="space-y-1 text-center">
         <div className="flex justify-center mb-2">
           <BreedingJourneyLogo size="lg" showText={false} />
         </div>
-        <CardTitle className="text-2xl font-bold text-[#296b26] font-le-jour">Breeding Journey</CardTitle>
+        <CardTitle className="text-2xl font-bold text-[#296b26] font-le-jour my-0 py-0">Breeding Journey</CardTitle>
         <CardDescription>
           Where smart breeding begins
         </CardDescription>
@@ -41,8 +41,6 @@ const AuthTabs: React.FC<AuthTabsProps> = ({ onLogin, onRegister, isLoading }) =
           </TabsContent>
         </Tabs>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default AuthTabs;
