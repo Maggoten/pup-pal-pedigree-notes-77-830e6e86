@@ -22,10 +22,10 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ upcomingHeats }) =>
             {upcomingHeats.map((heat, index) => (
               <div
                 key={`${heat.dogId}-${index}`}
-                className="flex items-start gap-3 p-3 rounded-lg border bg-rose-50 border-rose-200"
+                className="flex items-start gap-3 p-3 rounded-lg border bg-warmbeige-100/80 border-warmbeige-200"
               >
                 <div className="mt-0.5">
-                  <Calendar className="h-5 w-5 text-rose-500" />
+                  <Calendar className="h-5 w-5 text-rustbrown-500" />
                 </div>
                 <div>
                   <h4 className="font-medium">{heat.dogName}'s Heat Cycle</h4>

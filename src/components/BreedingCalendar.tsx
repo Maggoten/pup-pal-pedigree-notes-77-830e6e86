@@ -80,7 +80,7 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
   };
   
   return (
-    <Card className="border-greige-300 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 bg-greige-50 flex flex-col">
+    <Card className="border-warmbeige-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 bg-warmbeige-50 flex flex-col">
       <div className="flex flex-col">
         {isLoading ? (
           <CalendarSkeleton />

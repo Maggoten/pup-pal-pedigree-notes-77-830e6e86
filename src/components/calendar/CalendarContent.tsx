@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { format, addDays, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths } from 'date-fns';
 import { CardContent } from '@/components/ui/card';
@@ -110,9 +111,9 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
         onAddEvent={() => setIsAddDialogOpen(true)}
       />
       
-      <CardContent className={`p-3 bg-gradient-to-br from-cream-50 to-[#FFDEE2]/30 ${compact ? 'max-h-[300px] overflow-y-auto' : ''}`}>
+      <CardContent className={`p-3 bg-gradient-to-br from-warmbeige-50 to-warmbeige-100/40 ${compact ? 'max-h-[300px] overflow-y-auto' : ''}`}>
         {isMobile && (
-          <div className="text-xs text-gray-500 mb-2">
+          <div className="text-xs text-darkgray-500 mb-2">
             Tap events to view/edit
           </div>
         )}
@@ -129,7 +130,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
       </CardContent>
       
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="bg-cream-50">
+        <DialogContent className="bg-warmbeige-50">
           <DialogHeader>
             <DialogTitle>Add Calendar Event</DialogTitle>
           </DialogHeader>
@@ -138,7 +139,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
       </Dialog>
       
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="bg-cream-50">
+        <DialogContent className="bg-warmbeige-50">
           <DialogHeader>
             <DialogTitle>Edit Calendar Event</DialogTitle>
           </DialogHeader>

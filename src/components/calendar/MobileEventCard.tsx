@@ -1,76 +1,80 @@
 
 import React from 'react';
-import { Clock, Trash2, Edit } from 'lucide-react';
 import { CalendarEvent } from './types';
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import { Button } from '@/components/ui/button';
+import { X, Edit, Trash2 } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface MobileEventCardProps {
   event: CalendarEvent;
   colorClass: string;
   onClose: () => void;
+  onEdit: () => void;
   onDelete?: () => void;
-  onEdit?: () => void;
 }
 
-const MobileEventCard: React.FC<MobileEventCardProps> = ({ 
-  event, 
+const MobileEventCard: React.FC<MobileEventCardProps> = ({
+  event,
   colorClass,
   onClose,
+  onEdit,
   onDelete,
-  onEdit
 }) => {
-  const canDelete = event.type === 'custom' && onDelete;
-  const canEdit = event.type === 'custom' && onEdit;
-  
+  // Extract just the background class from colorClass string
+  const bgClass = colorClass.split(' ').find(cls => cls.startsWith('bg-')) || '';
+
   return (
-    <Drawer open={true} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>{event.title}</DrawerTitle>
-        </DrawerHeader>
-        <div className="px-4 py-2 space-y-2">
-          {event.time && <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4" /> {event.time}
-          </div>}
-          {event.dogName && <div className="font-medium">Dog: {event.dogName}</div>}
-          {event.notes && <div className="text-sm mt-2">{event.notes}</div>}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
+      <div className="bg-warmbeige-50 rounded-xl shadow-lg max-w-md w-full max-h-[80vh] overflow-auto">
+        <div className={`p-3 flex justify-between items-center ${bgClass}`}>
+          <h3 className="font-medium">{event.title}</h3>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
         </div>
-        <DrawerFooter className="flex flex-col gap-2">
-          {canEdit && (
-            <Button 
-              variant="outline" 
-              className="w-full flex items-center justify-center gap-2" 
-              onClick={onEdit}
-            >
-              <Edit className="h-4 w-4" />
-              Edit Event
-            </Button>
+        
+        <div className="p-4 space-y-3">
+          <div>
+            <div className="text-sm font-medium text-darkgray-600">Date</div>
+            <div>{format(event.date, 'PPPP')}</div>
+          </div>
+          
+          {event.time && (
+            <div>
+              <div className="text-sm font-medium text-darkgray-600">Time</div>
+              <div>{event.time}</div>
+            </div>
           )}
-          {canDelete && (
-            <Button 
-              variant="destructive" 
-              className="w-full flex items-center justify-center gap-2" 
-              onClick={onDelete}
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete Event
-            </Button>
+          
+          {event.dogName && (
+            <div>
+              <div className="text-sm font-medium text-darkgray-600">Dog</div>
+              <div>{event.dogName}</div>
+            </div>
           )}
-          <DrawerClose asChild>
-            <Button variant="outline" className="w-full">Close</Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+          
+          {event.notes && (
+            <div>
+              <div className="text-sm font-medium text-darkgray-600">Notes</div>
+              <div className="whitespace-pre-line">{event.notes}</div>
+            </div>
+          )}
+          
+          <div className="flex justify-end space-x-2 pt-2">
+            <Button variant="outline" size="sm" className="flex items-center" onClick={onEdit}>
+              <Edit className="mr-1 h-3.5 w-3.5" />
+              Edit
+            </Button>
+            {onDelete && (
+              <Button variant="destructive" size="sm" className="flex items-center" onClick={onDelete}>
+                <Trash2 className="mr-1 h-3.5 w-3.5" />
+                Delete
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

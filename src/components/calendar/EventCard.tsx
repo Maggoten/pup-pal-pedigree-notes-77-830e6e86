@@ -13,16 +13,18 @@ const EventCard: React.FC<EventCardProps> = ({ event, colorClass, onClick, compa
   return (
     <div
       className={`
-        px-1.5 py-0.5 rounded border text-left cursor-pointer
-        transition-colors duration-150 hover:opacity-90
+        px-1.5 py-1 rounded-lg border text-left cursor-pointer
+        transition-all duration-200 hover:opacity-90 hover:shadow-sm
         ${colorClass}
         ${compact ? 'text-[9px] leading-tight' : 'text-[10px]'}
       `}
       onClick={onClick}
     >
-      {event.title}
+      <div className="font-medium truncate">
+        {event.title}
+      </div>
       {event.dogName && !compact && (
-        <div className="text-[8px] font-semibold truncate">
+        <div className="text-[8px] font-semibold truncate opacity-90">
           {event.dogName}
         </div>
       )}

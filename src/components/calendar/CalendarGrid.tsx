@@ -50,7 +50,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     <>
       <div className="grid grid-cols-7 gap-1 text-center font-medium mb-1">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-          <div key={day} className="text-xs py-1">
+          <div key={day} className="text-xs py-1 text-darkgray-600 font-semibold">
             {day}
           </div>
         ))}
@@ -72,13 +72,13 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                   <ContextMenuTrigger>
                     <div 
                       className={`
-                        rounded-md border h-full ${compact ? 'min-h-[80px]' : 'min-h-[100px]'}
-                        flex flex-col
+                        rounded-lg border h-full ${compact ? 'min-h-[80px]' : 'min-h-[100px]'}
+                        flex flex-col transition-colors duration-200
                         ${isToday 
-                          ? 'bg-primary/10 border-primary/30' 
-                          : 'bg-white/70 border-neutral-100'
+                          ? 'bg-warmgreen-50/80 border-warmgreen-200' 
+                          : 'bg-warmbeige-50/70 border-warmbeige-100'
                         }
-                        ${!isCurrentMonth ? 'opacity-50' : ''}
+                        ${!isCurrentMonth ? 'opacity-60' : ''}
                       `}
                     >
                       <div className={`
@@ -105,7 +105,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                         ))}
                         
                         {hiddenEventsCount > 0 && (
-                          <div className="text-[10px] text-center p-1 bg-neutral-100 rounded">
+                          <div className="text-[10px] text-center p-1 bg-warmbeige-200 text-darkgray-600 rounded-lg">
                             +{hiddenEventsCount} more
                           </div>
                         )}

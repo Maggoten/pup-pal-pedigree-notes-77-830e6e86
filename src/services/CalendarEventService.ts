@@ -4,18 +4,19 @@ import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
 import { Dog } from '@/types/dogs';
 import { toast } from '@/components/ui/use-toast';
 
-// Map event types to colors
+// Map event types to colors with softer tones
 const eventTypeColors = {
-  'heat': 'bg-rose-500',
-  'mating': 'bg-violet-500',
-  'due-date': 'bg-amber-500',
-  'vaccination': 'bg-green-500',
-  'deworming': 'bg-teal-500',
-  'birthday': 'bg-blue-500',
-  'custom': 'bg-indigo-500',
-  'planned-mating': 'bg-purple-500',
-  'vet-visit': 'bg-emerald-500',
-  'default': 'bg-gray-500'
+  'heat': 'bg-rose-200 text-rose-800 border-rose-300',
+  'mating': 'bg-violet-100 text-violet-800 border-violet-200',
+  'due-date': 'bg-amber-100 text-amber-800 border-amber-200',
+  'vaccination': 'bg-warmgreen-100 text-warmgreen-800 border-warmgreen-200',
+  'deworming': 'bg-teal-100 text-teal-800 border-teal-200',
+  'birthday': 'bg-blue-100 text-blue-800 border-blue-200',
+  'custom': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+  'planned-mating': 'bg-purple-100 text-purple-800 border-purple-200',
+  'vet-visit': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  'reminder': 'bg-warmbeige-200 text-darkgray-700 border-warmbeige-300',
+  'default': 'bg-warmbeige-100 text-darkgray-800 border-warmbeige-200'
 };
 
 // Get the color for an event type
