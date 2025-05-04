@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { format, isValid } from 'date-fns';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
+import { isValidDate } from '@/utils/dateUtils';
 
 export const useEventQueries = (dogs: Dog[]) => {
   const [hasMigrated, setHasMigrated] = useState<boolean>(false);
@@ -28,6 +29,22 @@ export const useEventQueries = (dogs: Dog[]) => {
     }
   }, [hasMigrated, user, dogs]);
   
+  // Log detailed dog data for debugging
+  useEffect(() => {
+    if (dogs.length > 0) {
+      console.log("[Calendar DEBUG] Available dogs for calendar processing:");
+      dogs.forEach(dog => {
+        console.log(`Dog: ${dog.name} (ID: ${dog.id})`);
+        if (dog.gender === 'female') {
+          console.log(`- Heat History: ${dog.heatHistory ? JSON.stringify(dog.heatHistory) : 'None'}`);
+        }
+        console.log(`- Vaccination Date: ${dog.vaccinationDate || 'Not set'}`);
+      });
+    } else {
+      console.log("[Calendar DEBUG] No dogs available for calendar events");
+    }
+  }, [dogs]);
+  
   // Convert reminders to calendar events
   const reminderToCalendarEvents = useCallback(() => {
     if (!reminders || reminders.length === 0) {
@@ -39,8 +56,10 @@ export const useEventQueries = (dogs: Dog[]) => {
     
     const eventsList = reminders.map(reminder => {
       const dueDate = reminder.dueDate;
-      if (!dueDate || !isValid(dueDate)) {
-        console.error(`[Calendar] Invalid due date for reminder: ${reminder.id} - ${reminder.title}`);
+      
+      // Validate date
+      if (!dueDate || !isValidDate(dueDate)) {
+        console.error(`[Calendar] Invalid due date for reminder: ${reminder.id} - ${reminder.title}`, dueDate);
         return null;
       }
       
@@ -108,14 +127,18 @@ export const useEventQueries = (dogs: Dog[]) => {
         console.log("[Calendar] Fetched custom events:", customEvents.length);
         
         // Generate heat events based on dogs data - now showing past events as well
-        const heatEvents: CalendarEvent[] = calculateUpcomingHeats(dogs, 6, 24).map((heat, index) => ({
-          id: `heat-${heat.dogId}-${index}-${Date.now()}`, // Add timestamp for uniqueness
-          title: 'Heat Cycle',
-          date: heat.date,
-          type: 'heat',
-          dogId: heat.dogId,
-          dogName: heat.dogName
-        }));
+        const heatEvents: CalendarEvent[] = calculateUpcomingHeats(dogs, 6, 24).map((heat, index) => {
+          const event = {
+            id: `heat-${heat.dogId}-${index}-${Date.now()}`, // Add timestamp for uniqueness
+            title: 'Heat Cycle',
+            date: heat.date,
+            type: 'heat',
+            dogId: heat.dogId,
+            dogName: heat.dogName
+          };
+          console.log(`[Calendar] Generated heat event: ${event.title} for ${event.dogName} on ${new Date(event.date).toISOString()}`);
+          return event;
+        });
         console.log("[Calendar] Generated heat events:", heatEvents.length);
         
         // Get reminder events

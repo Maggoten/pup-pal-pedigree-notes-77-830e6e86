@@ -4,7 +4,7 @@ import { fetchReminders, migrateRemindersFromLocalStorage } from '@/services/Rem
 import { generateDogReminders } from '@/services/reminders/DogReminderService';
 import { generateLitterReminders } from '@/services/reminders/LitterReminderService';
 import { generateGeneralReminders } from '@/services/reminders/GeneralReminderService';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { Reminder } from '@/types/reminders';
 
 export const useReminderQueries = (user: any, dogs: any[]) => {
@@ -22,6 +22,22 @@ export const useReminderQueries = (user: any, dogs: any[]) => {
     }
     return hasMigrated;
   }, [user]);
+  
+  // Log detailed dog data for debugging
+  useEffect(() => {
+    if (dogs.length > 0) {
+      console.log("[DEBUG] Available dogs with details:");
+      dogs.forEach(dog => {
+        console.log(`Dog: ${dog.name} (ID: ${dog.id})`);
+        console.log(`- Gender: ${dog.gender || 'Not set'}`);
+        console.log(`- Vaccination Date: ${dog.vaccinationDate || 'Not set'}`);
+        console.log(`- Heat History: ${dog.heatHistory ? JSON.stringify(dog.heatHistory) : 'None'}`);
+        console.log(`- DOB: ${dog.dateOfBirth || 'Not set'}`);
+      });
+    } else {
+      console.log("[DEBUG] No dogs available in the array");
+    }
+  }, [dogs]);
   
   // Use React Query for data fetching with proper caching
   const { 
@@ -64,7 +80,10 @@ export const useReminderQueries = (user: any, dogs: any[]) => {
         // Generate all reminders in sequence
         const dogReminders = userDogs.length > 0 ? generateDogReminders(userDogs) : [];
         console.log(`[Reminders Provider] Generated ${dogReminders.length} dog reminders:`);
-        dogReminders.forEach(r => console.log(`  - ${r.title} (${r.type}) - Due: ${r.dueDate.toISOString().slice(0, 10)} - Priority: ${r.priority}`));
+        dogReminders.forEach(r => {
+          const dueDateStr = r.dueDate instanceof Date ? r.dueDate.toISOString().slice(0, 10) : 'Invalid Date';
+          console.log(`  - ${r.title} (${r.type}) - Due: ${dueDateStr} - Priority: ${r.priority} - Dog ID: ${r.relatedId}`);
+        });
         
         const litterReminders = await generateLitterReminders(user.id);
         console.log(`[Reminders Provider] Generated ${litterReminders.length} litter reminders`);
@@ -75,19 +94,32 @@ export const useReminderQueries = (user: any, dogs: any[]) => {
         // Combine all reminders
         const allGeneratedReminders = [...dogReminders, ...litterReminders, ...generalReminders];
         
-        // For the paginated view, we need to merge generated reminders with db reminders
-        // But we need to be careful with pagination - this is a bit complex because
-        // we need to consider both sources
+        // Verify all due dates are valid
+        const validReminders = allGeneratedReminders.filter(reminder => {
+          if (!(reminder.dueDate instanceof Date) || isNaN(reminder.dueDate.getTime())) {
+            console.error(`[Reminders Provider] Invalid due date in reminder: ${reminder.title} (${reminder.type})`);
+            return false;
+          }
+          return true;
+        });
+        
+        if (validReminders.length !== allGeneratedReminders.length) {
+          console.warn(`[Reminders Provider] Filtered out ${allGeneratedReminders.length - validReminders.length} reminders with invalid dates`);
+        }
         
         // Return paginated reminders along with all generated system reminders
         // This isn't perfect pagination, but it's a pragmatic approach since we can't easily paginate
         // across two different data sources (DB + generated reminders)
+        const combinedReminders = [...paginatedReminders.reminders, ...validReminders];
+        
+        console.log(`[Reminders Provider] Final reminders count: ${combinedReminders.length} (${paginatedReminders.reminders.length} from DB + ${validReminders.length} generated)`);
+        
         return {
-          reminders: [...paginatedReminders.reminders, ...allGeneratedReminders],
-          total: paginatedReminders.total + allGeneratedReminders.length,
+          reminders: combinedReminders,
+          total: paginatedReminders.total + validReminders.length,
           currentPage: paginatedReminders.currentPage,
           totalPages: paginatedReminders.totalPages,
-          generatedRemindersCount: allGeneratedReminders.length
+          generatedRemindersCount: validReminders.length
         };
       } catch (error) {
         console.error("[Reminders Provider] Error generating reminders:", error);
@@ -102,7 +134,7 @@ export const useReminderQueries = (user: any, dogs: any[]) => {
       }
     },
     enabled: !!user, // Enable when user is available, even if dogs are not yet loaded
-    staleTime: 1000 * 60, // Consider data fresh for just 1 minute (reduced from 2)
+    staleTime: 1000 * 30, // Consider data fresh for just 30 seconds (reduced from 60)
     retry: 2, // Increased retry attempts to handle transient issues
     refetchOnMount: true,
     refetchOnWindowFocus: true, // Added to refresh when window regains focus

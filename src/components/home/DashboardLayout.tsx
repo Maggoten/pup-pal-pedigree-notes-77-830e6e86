@@ -29,6 +29,58 @@ const DashboardContentWithData: React.FC<DashboardLayoutProps> = ({
   // Get the personalized username
   const username = getDisplayUsername(user);
   
+  // Log important data for debugging
+  useEffect(() => {
+    console.log("[Dashboard] Reminders data:", {
+      count: dashboardData.reminders?.length || 0,
+      loading: dashboardData.remindersLoading,
+      hasError: dashboardData.remindersError
+    });
+    
+    // Log a sample of the reminders if available
+    if (dashboardData.reminders?.length > 0) {
+      const sampleReminders = dashboardData.reminders.slice(0, 3);
+      console.log("[Dashboard] Sample reminders:", sampleReminders.map(r => ({
+        title: r.title,
+        type: r.type,
+        dueDate: r.dueDate instanceof Date ? r.dueDate.toISOString() : r.dueDate,
+        priority: r.priority,
+        isCompleted: r.isCompleted
+      })));
+    }
+    
+    // Log calendar events data
+    const today = new Date();
+    const eventsForToday = dashboardData.getEventsForDate(today);
+    console.log("[Dashboard] Calendar events for today:", {
+      count: eventsForToday.length,
+      loading: dashboardData.calendarLoading,
+      hasError: dashboardData.calendarError
+    });
+    
+    if (eventsForToday.length > 0) {
+      console.log("[Dashboard] Sample events for today:", eventsForToday.map(e => ({
+        title: e.title,
+        type: e.type,
+        date: e instanceof Date ? e.date.toISOString() : e.date,
+        dogName: e.dogName
+      })));
+    }
+  }, [dashboardData.reminders, dashboardData.getEventsForDate, dashboardData.remindersLoading, 
+      dashboardData.calendarLoading, dashboardData.remindersError, dashboardData.calendarError]);
+  
+  // Force refresh of data when the component mounts
+  useEffect(() => {
+    // A brief timeout to allow for initial data loading
+    const timer = setTimeout(() => {
+      console.log("[Dashboard] Forcing refresh of reminders and calendar data");
+      dashboardData.refreshReminderData();
+      dashboardData.refreshCalendarData();
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, [dashboardData.refreshReminderData, dashboardData.refreshCalendarData]);
+  
   // Prepare props for child components
   const calendarProps = {
     getEventsForDate: dashboardData.getEventsForDate,
@@ -83,6 +135,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           setIsLoadingPregnancies(true);
           const pregnancies = await getActivePregnancies();
           setActivePregnancies(pregnancies);
+          console.log(`[Dashboard] Fetched ${pregnancies.length} active pregnancies`);
         } catch (error) {
           console.error("Error fetching active pregnancies:", error);
           toast({

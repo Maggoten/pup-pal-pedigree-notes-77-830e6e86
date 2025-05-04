@@ -1,9 +1,8 @@
-
 import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
-import { differenceInDays, format, addDays } from 'date-fns';
+import { differenceInDays, format, addDays, isValid } from 'date-fns';
 import { createPawPrintIcon } from '@/utils/iconUtils';
-import { parseISODate } from '@/utils/dateUtils';
+import { parseISODate, isValidDate } from '@/utils/dateUtils';
 
 /**
  * Generate heat cycle reminders for female dogs
@@ -13,8 +12,14 @@ export const generateHeatReminders = (dog: Dog, today: Date): Reminder[] => {
   
   // Only process female dogs with heat history
   if (dog.gender !== 'female' || !dog.heatHistory || dog.heatHistory.length === 0) {
+    if (dog.gender === 'female') {
+      console.log(`[Heat Reminders] No heat history for female dog: ${dog.name}`);
+    }
     return reminders;
   }
+  
+  console.log(`[Heat Reminders] Processing heat reminders for dog: ${dog.name}`);
+  console.log(`[Heat Reminders] Heat history: ${JSON.stringify(dog.heatHistory)}`);
   
   // Find the last heat date
   const sortedHeatDates = [...dog.heatHistory].sort((a, b) => 
@@ -22,12 +27,33 @@ export const generateHeatReminders = (dog: Dog, today: Date): Reminder[] => {
   );
   
   const lastHeatDateString = sortedHeatDates[0].date;
-  console.log(`[HEAT DEBUG] Processing heat for ${dog.name}, last heat date string: ${lastHeatDateString}`);
+  console.log(`[Heat Reminders] Last heat date string for ${dog.name}: ${lastHeatDateString}`);
   
-  const lastHeatDate = parseISODate(lastHeatDateString);
-  if (!lastHeatDate) {
-    console.error(`[HEAT ERROR] Failed to parse last heat date for ${dog.name}: ${lastHeatDateString}`);
-    return reminders;
+  // Try to parse as a Date object if it's already one
+  let lastHeatDate;
+  if (lastHeatDateString instanceof Date) {
+    lastHeatDate = lastHeatDateString;
+    console.log(`[Heat Reminders] Last heat date is already a Date object: ${lastHeatDate.toISOString()}`);
+  } else {
+    // Otherwise try to parse from string
+    lastHeatDate = parseISODate(lastHeatDateString);
+  }
+  
+  if (!lastHeatDate || !isValidDate(lastHeatDate)) {
+    console.error(`[Heat Reminders] Failed to parse last heat date for ${dog.name}: ${lastHeatDateString}`);
+    // Try alternative parsing approach
+    try {
+      const fallbackDate = new Date(lastHeatDateString);
+      if (isValid(fallbackDate)) {
+        lastHeatDate = fallbackDate;
+        console.log(`[Heat Reminders] Used fallback parsing for ${dog.name}'s heat date: ${fallbackDate.toISOString()}`);
+      } else {
+        return reminders;
+      }
+    } catch (e) {
+      console.error(`[Heat Reminders] Fallback parsing also failed for ${dog.name}'s heat date`, e);
+      return reminders;
+    }
   }
   
   // Use heat interval if available, otherwise default to 180 days (6 months)
@@ -36,12 +62,12 @@ export const generateHeatReminders = (dog: Dog, today: Date): Reminder[] => {
   // Calculate the next heat date by adding the interval to the last heat date
   const nextHeatDate = addDays(lastHeatDate, intervalDays);
   
-  console.log(`[HEAT DEBUG] Dog ${dog.name}: Last heat date: ${format(lastHeatDate, 'yyyy-MM-dd')}, Next heat: ${format(nextHeatDate, 'yyyy-MM-dd')}`);
-  console.log(`[HEAT DEBUG] Days until next heat: ${differenceInDays(nextHeatDate, today)}, Interval: ${intervalDays} days`);
+  console.log(`[Heat Reminders] Dog ${dog.name}: Last heat date: ${format(lastHeatDate, 'yyyy-MM-dd')}, Next heat: ${format(nextHeatDate, 'yyyy-MM-dd')}`);
+  console.log(`[Heat Reminders] Days until next heat: ${differenceInDays(nextHeatDate, today)}, Interval: ${intervalDays} days`);
   
   // Show reminder for upcoming heat 30 days in advance
   const daysUntilHeat = differenceInDays(nextHeatDate, today);
-  console.log(`[HEAT DEBUG] Days until heat for ${dog.name}: ${daysUntilHeat}`);
+  console.log(`[Heat Reminders] Days until heat for ${dog.name}: ${daysUntilHeat}`);
   
   if (daysUntilHeat <= 30 && daysUntilHeat >= -5) { // Show reminder even if up to 5 days past
     reminders.push({
@@ -56,9 +82,9 @@ export const generateHeatReminders = (dog: Dog, today: Date): Reminder[] => {
       type: 'heat',
       relatedId: dog.id
     });
-    console.log(`[HEAT DEBUG] Created heat reminder for dog ${dog.name}`);
+    console.log(`[Heat Reminders] Created heat reminder for dog ${dog.name}`);
   } else {
-    console.log(`[HEAT DEBUG] No heat reminder created for ${dog.name}, outside window: ${daysUntilHeat} days until heat`);
+    console.log(`[Heat Reminders] No heat reminder created for ${dog.name}, outside window: ${daysUntilHeat} days until heat`);
   }
   
   return reminders;

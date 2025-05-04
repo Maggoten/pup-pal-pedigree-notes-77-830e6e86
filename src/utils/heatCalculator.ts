@@ -1,133 +1,165 @@
 
-import { parseISO, addDays, isAfter, format, isValid } from 'date-fns';
-import { Dog } from '@/types/dogs';
-import { UpcomingHeat } from '@/types/reminders';
-import { parseISODate, getNormalizedToday } from '@/utils/dateUtils';
+import { Dog } from "@/types/dogs";
+import { addDays, format, isValid, parse, parseISO } from "date-fns";
+import { parseISODate, isValidDate } from "@/utils/dateUtils";
+
+export interface UpcomingHeat {
+  dogId: string;
+  dogName: string;
+  date: Date;
+}
 
 /**
- * Calculate upcoming heat dates for female dogs
- * @param dogs List of all dogs
- * @param monthsAhead Number of months to look ahead (default: 6)
- * @param monthsBehind Number of months to look behind (default: 12)
+ * Parses a date string in different formats and returns a valid Date object or null
+ */
+const safelyParseDate = (dateStr: string | Date): Date | null => {
+  console.log(`[Heat Calculator] Attempting to parse date: ${dateStr}`);
+  
+  // If it's already a Date object, just check if it's valid
+  if (dateStr instanceof Date) {
+    if (isValid(dateStr)) {
+      console.log(`[Heat Calculator] Date is already a Date object: ${dateStr.toISOString()}`);
+      return dateStr;
+    }
+    console.warn(`[Heat Calculator] Invalid Date object provided`);
+    return null;
+  }
+  
+  // If it's a string, try different parsing approaches
+  try {
+    // Try our custom parser first
+    const parsedDate = parseISODate(dateStr);
+    if (parsedDate && isValidDate(parsedDate)) {
+      console.log(`[Heat Calculator] Successfully parsed date with parseISODate: ${parsedDate.toISOString()}`);
+      return parsedDate;
+    }
+    
+    // Try parseISO for ISO format strings
+    const isoParsed = parseISO(dateStr);
+    if (isValid(isoParsed)) {
+      console.log(`[Heat Calculator] Successfully parsed date with parseISO: ${isoParsed.toISOString()}`);
+      return isoParsed;
+    }
+    
+    // Try parse with date-fns as a fallback for different formats
+    let formatPatterns = ["yyyy-MM-dd", "M/d/yyyy", "MM/dd/yyyy", "dd/MM/yyyy"];
+    for (let pattern of formatPatterns) {
+      const dateFnsParsed = parse(dateStr, pattern, new Date());
+      if (isValid(dateFnsParsed)) {
+        console.log(`[Heat Calculator] Successfully parsed date with format ${pattern}: ${dateFnsParsed.toISOString()}`);
+        return dateFnsParsed;
+      }
+    }
+    
+    // Last resort: native Date parsing
+    const nativeParsed = new Date(dateStr);
+    if (isValid(nativeParsed)) {
+      console.log(`[Heat Calculator] Successfully parsed date with native Date: ${nativeParsed.toISOString()}`);
+      return nativeParsed;
+    }
+    
+    console.warn(`[Heat Calculator] Failed to parse date: ${dateStr}`);
+    return null;
+  } catch (err) {
+    console.error(`[Heat Calculator] Error parsing date: ${dateStr}`, err);
+    return null;
+  }
+};
+
+/**
+ * Calculate upcoming heat cycles based on dog data
+ * @param dogs Array of dogs to process
+ * @param monthsAhead Number of months ahead to calculate heats for (default: 3)
+ * @param monthsPast Number of months in the past to include (default: 0)
  * @returns Array of upcoming heat dates
  */
-export const calculateUpcomingHeats = (dogs: Dog[], monthsAhead = 6, monthsBehind = 12): UpcomingHeat[] => {
-  const today = getNormalizedToday(); // Use normalized today date at noon
-  const maxDate = addDays(today, monthsAhead * 30); // Approximate for months ahead
-  const minDate = addDays(today, -monthsBehind * 30); // Approximate for months behind
-  const heatEvents: UpcomingHeat[] = [];
+export const calculateUpcomingHeats = (
+  dogs: Dog[], 
+  monthsAhead: number = 3,
+  monthsPast: number = 0
+): UpcomingHeat[] => {
+  const upcomingHeats: UpcomingHeat[] = [];
+  const today = new Date();
+  const cutoffFuture = addDays(today, monthsAhead * 30); // Approximate months to days
+  const cutoffPast = addDays(today, -monthsPast * 30); // Negative days for past
   
-  console.log(`Calculating heat cycles for ${dogs.length} dogs, ${monthsAhead} months ahead and ${monthsBehind} months behind`);
-  console.log(`Date range: ${format(minDate, 'yyyy-MM-dd')} to ${format(maxDate, 'yyyy-MM-dd')}`);
+  console.log(`[Heat Calculator] Calculating heats with ${dogs.length} dogs, cutoff dates: Past=${format(cutoffPast, 'yyyy-MM-dd')}, Future=${format(cutoffFuture, 'yyyy-MM-dd')}`);
   
-  // Filter for female dogs
-  const femaleDogs = dogs.filter(dog => dog.gender === 'female');
-  console.log(`Found ${femaleDogs.length} female dogs`);
+  // Process only female dogs
+  const femaleDogs = dogs.filter(dog => dog.gender === "female");
+  console.log(`[Heat Calculator] Found ${femaleDogs.length} female dogs`);
   
   femaleDogs.forEach(dog => {
-    console.log(`Processing dog: ${dog.name}, heat history:`, dog.heatHistory);
-    console.log(`Dog ${dog.name} has heat interval: ${dog.heatInterval} days`);
+    console.log(`[Heat Calculator] Processing dog: ${dog.name}`);
     
-    // Skip if no heat history
-    if (!dog.heatHistory?.length) {
-      console.log(`No heat history for ${dog.name}, skipping`);
+    // Skip if no heat history is available
+    if (!dog.heatHistory || dog.heatHistory.length === 0) {
+      console.log(`[Heat Calculator] No heat history for dog: ${dog.name}`);
       return;
     }
     
+    // Use custom interval if available, otherwise default to 6 months (180 days)
+    const heatInterval = dog.heatInterval || 180;
+    console.log(`[Heat Calculator] Using heat interval of ${heatInterval} days for ${dog.name}`);
+    
     try {
-      // Sort heat dates (newest first)
-      const sortedHeatDates = [...dog.heatHistory].sort((a, b) => 
-        new Date(b.date).getTime() - new Date(a.date).getTime()
-      );
-      
       // Get the most recent heat date
-      const lastHeatDateString = sortedHeatDates[0].date;
-      const lastHeatDate = parseISODate(lastHeatDateString);
+      const sortedHeatDates = [...dog.heatHistory].sort((a, b) => {
+        const dateA = safelyParseDate(a.date);
+        const dateB = safelyParseDate(b.date);
+        if (!dateA || !dateB) return 0;
+        return dateB.getTime() - dateA.getTime();
+      });
       
-      if (!lastHeatDate || !isValid(lastHeatDate)) {
-        console.error(`Invalid last heat date for ${dog.name}: ${lastHeatDateString}`);
+      if (sortedHeatDates.length === 0) {
+        console.log(`[Heat Calculator] No valid heat dates found for ${dog.name}`);
         return;
       }
       
-      console.log(`${dog.name}'s last heat date: ${format(lastHeatDate, 'yyyy-MM-dd')}`);
+      const lastHeatRaw = sortedHeatDates[0].date;
+      const lastHeatDate = safelyParseDate(lastHeatRaw);
       
-      // Use the dog's heat interval if available, otherwise default to 180 days (6 months)
-      const intervalDays = dog.heatInterval || 180;
-      console.log(`Dog ${dog.name} has interval of ${intervalDays} days`);
-      
-      // Generate both future and past heat cycles
-      
-      // First, calculate past heat events going backward from last recorded heat
-      let pastHeatDate = new Date(lastHeatDate);
-      console.log(`Starting backward calculation for ${dog.name} from ${format(pastHeatDate, 'yyyy-MM-dd')}`);
-      
-      // Include the last known heat date itself
-      heatEvents.push({
-        dogId: dog.id,
-        dogName: dog.name,
-        date: new Date(pastHeatDate)
-      });
-      
-      // Generate past events by going backward
-      let backwardCount = 0;
-      while (pastHeatDate > minDate && backwardCount < 10) { // Limit to 10 cycles back to prevent infinite loops
-        // Move backward one cycle
-        pastHeatDate = addDays(pastHeatDate, -intervalDays);
-        console.log(`Calculated past heat for ${dog.name}: ${format(pastHeatDate, 'yyyy-MM-dd')}`);
-        
-        // Add this heat date if it's in our time range
-        if (pastHeatDate >= minDate) {
-          heatEvents.push({
-            dogId: dog.id,
-            dogName: dog.name,
-            date: new Date(pastHeatDate)
-          });
-          console.log(`Added past heat event for ${dog.name} on ${format(pastHeatDate, 'yyyy-MM-dd')}`);
-        }
-        backwardCount++;
+      if (!lastHeatDate) {
+        console.error(`[Heat Calculator] Failed to parse last heat date for ${dog.name}: ${lastHeatRaw}`);
+        return;
       }
       
-      // Then calculate future heat events going forward from last recorded heat
-      let nextHeatDate = new Date(lastHeatDate);
-      console.log(`Starting forward calculation for ${dog.name} from ${format(nextHeatDate, 'yyyy-MM-dd')}`);
+      console.log(`[Heat Calculator] Last heat date for ${dog.name}: ${format(lastHeatDate, 'yyyy-MM-dd')}`);
       
-      // Generate future events by going forward
-      let forwardCount = 0;
-      while (forwardCount < 10) { // Limit to 10 cycles forward to prevent infinite loops
-        // Move forward one cycle
-        nextHeatDate = addDays(nextHeatDate, intervalDays);
-        console.log(`Calculated future heat for ${dog.name}: ${format(nextHeatDate, 'yyyy-MM-dd')}`);
-        
-        // Add this heat date if it's in our time range
-        if (nextHeatDate <= maxDate) {
-          heatEvents.push({
+      // Calculate the next heat date
+      let nextHeatDate = addDays(lastHeatDate, heatInterval);
+      console.log(`[Heat Calculator] First calculated next heat for ${dog.name}: ${format(nextHeatDate, 'yyyy-MM-dd')}`);
+      
+      // Generate heat cycles until we're beyond our future cutoff
+      while (nextHeatDate <= cutoffFuture) {
+        // Only add heat dates that are after our past cutoff
+        if (nextHeatDate >= cutoffPast) {
+          upcomingHeats.push({
             dogId: dog.id,
             dogName: dog.name,
-            date: new Date(nextHeatDate)
+            date: nextHeatDate
           });
-          console.log(`Added future heat event for ${dog.name} on ${format(nextHeatDate, 'yyyy-MM-dd')}`);
-        } else {
-          // Stop if we're beyond our max date
-          break;
+          
+          console.log(`[Heat Calculator] Added heat cycle for ${dog.name} on ${format(nextHeatDate, 'yyyy-MM-dd')}`);
         }
-        forwardCount++;
+        
+        // Calculate the next cycle
+        nextHeatDate = addDays(nextHeatDate, heatInterval);
       }
-    } catch (err) {
-      console.error(`Error calculating heat cycles for ${dog.name}:`, err);
+    } catch (error) {
+      console.error(`[Heat Calculator] Error calculating heats for ${dog.name}:`, error);
     }
   });
   
-  // Sort by date (earliest first)
-  const sortedHeats = heatEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
-  console.log(`Generated ${sortedHeats.length} heat events (past and upcoming)`);
+  // Sort heats by date
+  upcomingHeats.sort((a, b) => a.date.getTime() - b.date.getTime());
   
-  // Log all generated events for debugging
-  sortedHeats.forEach(event => {
-    console.log(`Heat event: ${event.dogName} on ${format(event.date, 'yyyy-MM-dd')}`);
+  console.log(`[Heat Calculator] Generated ${upcomingHeats.length} total heat cycles:`);
+  upcomingHeats.forEach((heat, i) => {
+    if (i < 10) { // Only log the first 10 to avoid cluttering the console
+      console.log(`- ${heat.dogName}: ${format(heat.date, 'yyyy-MM-dd')}`);
+    }
   });
   
-  return sortedHeats;
+  return upcomingHeats;
 };
-
-// Re-export the UpcomingHeat type for backward compatibility
-export type { UpcomingHeat };

@@ -30,8 +30,14 @@ export const parseISODate = (dateStr: string | null | undefined): Date | null =>
     // Create a date at noon in the user's local timezone
     // This helps avoid date shifts due to timezone conversions
     const [year, month, day] = dateStr.split('-').map(Number);
-    if (!year || !month || !day) return null;
-    if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+    if (!year || !month || !day) {
+      console.warn(`[Date Parse Warning] Invalid date format: ${dateStr}`);
+      return null;
+    }
+    if (isNaN(year) || isNaN(month) || isNaN(day)) {
+      console.warn(`[Date Parse Warning] Date contains NaN values: ${dateStr} -> y:${year}, m:${month}, d:${day}`);
+      return null;
+    }
     
     const date = new Date();
     date.setFullYear(year);
@@ -41,9 +47,10 @@ export const parseISODate = (dateStr: string | null | undefined): Date | null =>
     // Set to noon to avoid timezone-related date shifts
     date.setHours(12, 0, 0, 0);
     
+    console.log(`[Date Utils] Successfully parsed ${dateStr} to ${date.toISOString()}`);
     return date;
   } catch (err) {
-    console.error("Error parsing date:", dateStr, err);
+    console.error(`[Date Parse Error] Failed to parse date: ${dateStr}`, err);
     return null;
   }
 };
@@ -88,3 +95,26 @@ export const prepareDateForStorage = (date: Date | string | null | undefined): s
   // Otherwise, convert the Date object to YYYY-MM-DD
   return dateToISOString(date);
 };
+
+/**
+ * Verifies if a date is valid and logs diagnostic information
+ */
+export const isValidDate = (date: any): boolean => {
+  if (!date) {
+    console.warn("[Date Validation] Null or undefined date");
+    return false;
+  }
+  
+  if (!(date instanceof Date)) {
+    console.warn(`[Date Validation] Not a Date object: ${date} (type: ${typeof date})`);
+    return false;
+  }
+  
+  if (isNaN(date.getTime())) {
+    console.warn(`[Date Validation] Invalid Date object: ${date}`);
+    return false;
+  }
+  
+  return true;
+};
+
