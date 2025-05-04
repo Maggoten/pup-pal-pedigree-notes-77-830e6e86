@@ -20,19 +20,7 @@
 
   <body>
     <div id="root"></div>
-    <!-- Conditionally load the GPT Engineer script -->
-    <script>
-      // Check if we're on a mobile device
-      const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      
-      // Only load the script on non-mobile devices or explicitly in development mode
-      if (!isMobileDevice || window.location.hostname === 'localhost') {
-        const script = document.createElement('script');
-        script.src = "https://cdn.gpteng.co/gptengineer.js";
-        script.type = "module";
-        document.body.appendChild(script);
-      }
-    </script>
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

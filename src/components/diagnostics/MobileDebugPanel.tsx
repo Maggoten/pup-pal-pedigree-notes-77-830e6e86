@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDogs } from '@/context/DogsContext';
@@ -88,7 +87,7 @@ const MobileDebugPanel: React.FC = () => {
       // Clear React Query cache
       await queryClient.invalidateQueries();
       
-      // Refresh dogs data - removing the boolean argument that was causing the error
+      // Refresh dogs data - fixing the error by removing the second argument
       await refreshDogs();
       console.log('[MobileDebug] Dogs refreshed');
       
