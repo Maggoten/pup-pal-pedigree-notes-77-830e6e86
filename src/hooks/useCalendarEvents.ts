@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dog } from '@/types/dogs';
