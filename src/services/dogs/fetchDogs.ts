@@ -3,14 +3,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dogs';
 import { enrichDog, DbDog } from '@/utils/dogUtils';
 import { PostgrestResponse } from '@supabase/supabase-js';
-import { withTimeout, TIMEOUT } from '@/utils/timeoutUtils';
+import { withTimeout, TIMEOUT, isTimeoutError } from '@/utils/timeoutUtils';
+import { fetchWithRetry, isMobileDevice } from '@/utils/fetchUtils';
+import { toast } from '@/hooks/use-toast';
 
-// Add device detection
-const isMobileDevice = () => {
-  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-};
-
+// Constants for timeouts and retries
 const MOBILE_TIMEOUT = 15000; // 15 seconds for mobile devices
+const MAX_RETRIES = 2;
+const RETRY_DELAY = 2000;
 
 export async function fetchDogs(userId: string): Promise<Dog[]> {
   if (!userId) {
@@ -22,27 +22,38 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
   const effectiveTimeout = isMobileDevice() ? MOBILE_TIMEOUT : TIMEOUT;
   
   console.log(`[Dogs Debug] Fetching dogs for user ${userId} on ${deviceType}`);
-  console.log(`[Dogs Debug] Using timeout: ${effectiveTimeout}ms`);
+  console.log(`[Dogs Debug] Using timeout: ${effectiveTimeout}ms with ${MAX_RETRIES} retries`);
   
   try {
-    const startTime = performance.now();
-    console.log(`[Dogs Debug] Database request started at ${new Date().toISOString()}`);
-    
-    const response = await withTimeout<PostgrestResponse<DbDog>>(
-      supabase
+    // Use our new retry wrapper for the fetch operation
+    const response = await fetchWithRetry<PostgrestResponse<DbDog>>(
+      // Fetch function
+      () => supabase
         .from('dogs')
         .select('*')
         .eq('owner_id', userId)
         .order('created_at', { ascending: false }),
-      effectiveTimeout
+      // Retry options
+      {
+        maxRetries: MAX_RETRIES,
+        initialDelay: RETRY_DELAY,
+        useBackoff: true,
+        onRetry: (attempt, error) => {
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+          console.log(`[Dogs Debug] Retry #${attempt} after error: ${errorMsg}`);
+          
+          // Show toast only on first retry to avoid spamming
+          if (attempt === 1) {
+            toast({
+              title: "Retrying connection",
+              description: "Slow network detected. Retrying..."
+            });
+          }
+        }
+      }
     );
 
-    const endTime = performance.now();
-    console.log(`[Dogs Debug] Query execution time: ${Math.round(endTime - startTime)}ms`);
-
     if (response.error) {
-      console.error(`[Dogs Debug] Error fetching dogs: ${response.error.message}`);
-      console.error(`[Dogs Debug] Error details:`, response.error);
       throw new Error(response.error.message);
     }
     
@@ -54,28 +65,9 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
       return [];
     }
     
-    // Check data structure to help debug problems
-    const firstDog = response.data ? response.data[0] : null;
-    if (firstDog) {
-      console.log(`[Dogs Debug] First dog: "${firstDog.name}" (ID: ${firstDog.id.substring(0, 8)}...)`);
-      console.log(`[Dogs Debug] Heat history type: ${typeof firstDog.heatHistory}, isArray: ${Array.isArray(firstDog.heatHistory)}`);
-      
-      if (firstDog.heatHistory) {
-        const count = Array.isArray(firstDog.heatHistory) ? firstDog.heatHistory.length : 'unknown (not an array)';
-        console.log(`[Dogs Debug] Heat history entries: ${count}`);
-      }
-    }
-    
     try {
       const enrichedDogs = (response.data || []).map(enrichDog);
       console.log(`[Dogs Debug] Successfully enriched ${enrichedDogs.length} dogs`);
-      
-      // Verify the enriched results
-      if (enrichedDogs.length > 0) {
-        const firstEnriched = enrichedDogs[0];
-        console.log(`[Dogs Debug] First enriched dog: "${firstEnriched.name}" (heat entries: ${firstEnriched.heatHistory?.length || 0})`);
-      }
-      
       return enrichedDogs;
     } catch (enrichError) {
       console.error(`[Dogs Debug] Error during dog enrichment:`, enrichError);
@@ -84,12 +76,30 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
     }
   } catch (error) {
     console.error('[Dogs Debug] Failed to fetch dogs:', error);
-    // Add more detailed error for timeout cases
-    const errorMessage = error instanceof Error ? 
-      (error.message.includes('timeout') ? 
-        `[${deviceType}] Request timed out after ${effectiveTimeout}ms. Please check your connection.` : 
-        error.message) : 
-      'Failed to fetch dogs';
+    
+    // Create detailed error message based on error type
+    let errorMessage = 'Failed to fetch dogs';
+    
+    if (isTimeoutError(error)) {
+      errorMessage = `[${deviceType}] Request timed out after ${effectiveTimeout}ms. Please check your connection.`;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
+    // Show toast with retry option
+    toast({
+      title: "Error loading dogs",
+      description: errorMessage,
+      variant: "destructive",
+      action: (
+        <button 
+          className="bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
+          onClick={() => fetchDogs(userId)}
+        >
+          Retry
+        </button>
+      )
+    });
     
     throw new Error(errorMessage);
   }

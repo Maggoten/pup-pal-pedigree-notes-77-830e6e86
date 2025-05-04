@@ -1,9 +1,9 @@
 
-import { useAuth } from '@/context/AuthContext';
-import React, { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, Filter } from 'lucide-react';
+import { PlusCircle, Filter, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useDogs, DogsProvider } from '@/context/DogsContext';
 import DogList from '@/components/DogList';
@@ -16,16 +16,40 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const MyDogsContent: React.FC = () => {
-  const { dogs, activeDog, loading } = useDogs();
+  const { dogs, activeDog, loading, error, fetchDogs } = useDogs();
   const [showAddDogDialog, setShowAddDogDialog] = useState(false);
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
+  const { isAuthReady } = useAuth();
+  const [pageReady, setPageReady] = useState(false);
+  
+  // Add a slight delay to ensure auth is ready
+  useEffect(() => {
+    if (isAuthReady) {
+      const timer = setTimeout(() => {
+        setPageReady(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthReady]);
   
   // Filter dogs based on selected gender
   const filteredDogs = genderFilter === 'all' 
     ? dogs 
     : dogs.filter(dog => dog.gender === genderFilter);
+
+  // Handle retry for loading dogs
+  const handleRetry = () => {
+    fetchDogs(true); // true to skip cache
+  };
+
+  // Formatting the error message
+  const errorMessage = typeof error === 'string' ? error : 'Failed to load dogs';
+  const isNetworkError = errorMessage.includes('Failed to fetch') || 
+                        errorMessage.includes('Network error') ||
+                        errorMessage.includes('timeout');
 
   return (
     <PageLayout 
@@ -33,7 +57,32 @@ const MyDogsContent: React.FC = () => {
       description="Manage your breeding dogs"
       className="bg-warmbeige-50"
     >
-      {activeDog ? (
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4 mr-2" />
+          <AlertDescription className="flex items-center justify-between w-full">
+            <span>{isNetworkError ? 
+              'Network connection problem. Please check your internet connection.' : 
+              errorMessage}
+            </span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRetry}
+              className="ml-2 bg-white"
+            >
+              Try Again
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {loading || !pageReady ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
+          <p className="text-muted-foreground">Loading your dogs...</p>
+        </div>
+      ) : activeDog ? (
         <DogDetails dog={activeDog} />
       ) : (
         <>
@@ -82,6 +131,20 @@ const MyDogsContent: React.FC = () => {
             </CardHeader>
             <CardContent className="bg-white">
               <DogList dogsList={filteredDogs} />
+              
+              {filteredDogs.length === 0 && !loading && (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No dogs found.</p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowAddDogDialog(true)}
+                    className="mt-4"
+                  >
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Add Your First Dog
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </>

@@ -11,6 +11,7 @@ export interface AuthContextType {
   loading: boolean;
   isLoading: boolean;
   isLoggedIn: boolean;
+  isAuthReady: boolean; // New property to signal auth is fully initialized
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: any) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   isLoading: true,
   isLoggedIn: false,
+  isAuthReady: false, // New property
   login: async () => false,
   register: async () => false,
   logout: async () => {}

@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { StorageError } from '@supabase/storage-js';
+import { fetchWithRetry, isMobileDevice } from '@/utils/fetchUtils';
 
 interface StorageCleanupOptions {
   oldImageUrl: string;
@@ -9,10 +10,11 @@ interface StorageCleanupOptions {
   excludeDogId?: string;
 }
 
-const BUCKET_NAME = 'Dog Photos';
+// We'll now use a constant for bucket name that's consistent throughout the app
+export const BUCKET_NAME = 'dog-photos';
 
-// Check if bucket exists and is accessible
-const checkBucketExists = async (): Promise<boolean> => {
+// Check if bucket exists and is accessible with retries
+export const checkBucketExists = async (): Promise<boolean> => {
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !sessionData.session) {
@@ -22,35 +24,22 @@ const checkBucketExists = async (): Promise<boolean> => {
 
     console.log('Checking if bucket exists:', BUCKET_NAME);
     
-    // Try to list files in the bucket to verify access
-    // Create an abort controller for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
     try {
-      // Using a timeout-based approach with Promise.race instead
-      const listPromise = supabase.storage
-        .from(BUCKET_NAME)
-        .list('', { limit: 1 });
+      // Using our retry utility for more reliable bucket checking
+      const result = await fetchWithRetry(
+        () => supabase.storage.from(BUCKET_NAME).list('', { limit: 1 }),
+        {
+          maxRetries: 2,
+          initialDelay: 1000
+        }
+      );
       
-      const result = await Promise.race([
-        listPromise,
-        new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Bucket check timed out')), 5000);
-        })
-      ]);
-      
-      clearTimeout(timeoutId);
-      
-      // TypeScript now knows this is the result of the storage call
-      const { data, error } = result as Awaited<typeof listPromise>;
-      
-      if (error) {
-        console.error('Error checking bucket existence:', error);
+      if (result.error) {
+        console.error('Error checking bucket existence:', result.error);
         return false;
       }
       
-      console.log('Bucket exists, can list files:', data);
+      console.log('Bucket exists, can list files:', result.data);
       return true;
     } catch (listError) {
       console.error('Error or timeout when listing bucket contents:', listError);
@@ -62,6 +51,159 @@ const checkBucketExists = async (): Promise<boolean> => {
   }
 };
 
+// Improved upload function with retry logic and progress reporting
+export const uploadToStorage = async (
+  fileName: string, 
+  file: File, 
+  onProgress?: (progress: number) => void
+): Promise<{data: any, error: StorageError | null}> => {
+  try {
+    // First verify auth session
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      throw new Error('No active session for upload');
+    }
+    
+    // For mobile devices, compress images before upload if it's an image file
+    let fileToUpload = file;
+    if (isMobileDevice() && file.type.startsWith('image/')) {
+      try {
+        fileToUpload = await compressImageForUpload(file);
+        console.log(`Compressed image from ${file.size} to ${fileToUpload.size} bytes`);
+      } catch (compressError) {
+        console.warn('Image compression failed, using original file:', compressError);
+      }
+    }
+    
+    // Upload with retry logic
+    return await fetchWithRetry(
+      () => supabase.storage
+        .from(BUCKET_NAME)
+        .upload(fileName, fileToUpload, {
+          cacheControl: '3600',
+          upsert: true
+        }),
+      { 
+        maxRetries: 2,
+        initialDelay: 2000,
+        onRetry: (attempt) => {
+          console.log(`Retrying upload attempt ${attempt}`);
+          if (onProgress) onProgress(-1); // Signal retry to UI
+        }
+      }
+    );
+  } catch (error) {
+    console.error('Upload error:', error);
+    return { data: null, error: new StorageError('Upload failed', 500) };
+  }
+};
+
+// Helper function to compress images for mobile uploads
+async function compressImageForUpload(file: File, maxSizeKB = 500): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      
+      // Calculate new dimensions while maintaining aspect ratio
+      const maxDimension = 1200; // Max width or height
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'));
+        return;
+      }
+      
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Start with high quality
+      let quality = 0.9;
+      let compressedFile: File;
+      let dataUrl: string;
+      
+      // Try progressively lower qualities until we're under target size
+      const tryCompress = () => {
+        dataUrl = canvas.toDataURL('image/jpeg', quality);
+        const binaryData = atob(dataUrl.split(',')[1]);
+        const array = new Uint8Array(binaryData.length);
+        for (let i = 0; i < binaryData.length; i++) {
+          array[i] = binaryData.charCodeAt(i);
+        }
+        
+        const blob = new Blob([array], { type: 'image/jpeg' });
+        compressedFile = new File([blob], file.name, { type: 'image/jpeg' });
+        
+        const currentSizeKB = compressedFile.size / 1024;
+        
+        if (currentSizeKB > maxSizeKB && quality > 0.1) {
+          quality -= 0.1;
+          tryCompress();
+        } else {
+          resolve(compressedFile);
+        }
+      };
+      
+      tryCompress();
+    };
+    
+    img.onerror = () => reject(new Error('Failed to load image for compression'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// Get public URL for a file
+export const getPublicUrl = (fileName: string) => {
+  return supabase.storage
+    .from(BUCKET_NAME)
+    .getPublicUrl(fileName);
+};
+
+// Remove file from storage with retries
+export const removeFromStorage = async (storagePath: string) => {
+  try {
+    // Verify session first
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      throw new Error('No active session for deletion');
+    }
+    
+    return await fetchWithRetry(
+      () => supabase.storage
+        .from(BUCKET_NAME)
+        .remove([storagePath]),
+      { maxRetries: 1, initialDelay: 1000 }
+    );
+  } catch (error) {
+    console.error('Remove from storage error:', error);
+    throw error;
+  }
+};
+
+// Image prefetch function to help with mobile loading
+export const prefetchImage = async (url: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
+    img.src = url;
+  });
+};
+
+// Improved cleanup with better error handling
 export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }: StorageCleanupOptions) => {
   if (!oldImageUrl || !oldImageUrl.includes(BUCKET_NAME)) {
     console.log('No valid image URL to cleanup:', oldImageUrl);
@@ -122,42 +264,15 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
 
     console.log('Deleting unused image:', storagePath);
     
-    // Set a timeout to prevent hanging
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-    
-    try {
-      // Using a timeout-based approach with Promise.race instead
-      const removePromise = supabase.storage
+    // Use fetchWithRetry for deletion
+    await fetchWithRetry(
+      () => supabase.storage
         .from(BUCKET_NAME)
-        .remove([storagePath]);
-      
-      const result = await Promise.race([
-        removePromise,
-        new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Delete operation timed out')), 10000);
-        })
-      ]);
+        .remove([storagePath]),
+      { maxRetries: 1, initialDelay: 1000 }
+    );
   
-      clearTimeout(timeoutId);
-      
-      // TypeScript now knows this is the result of the storage call
-      const { error: deleteError } = result as Awaited<typeof removePromise>;
-  
-      if (deleteError) {
-        console.error('Delete error:', {
-          error: deleteError,
-          message: deleteError instanceof StorageError ? deleteError.message : 'Unknown error',
-          status: deleteError instanceof Error ? deleteError.name : 'unknown'
-        });
-        return; // Just return, don't throw
-      }
-  
-      console.log('Successfully deleted unused image');
-    } catch (abortError) {
-      console.error('Image deletion timed out or was aborted:', abortError);
-      // Continue with the flow, don't break the process
-    }
+    console.log('Successfully deleted unused image');
   } catch (error) {
     const errorMessage = error instanceof Error 
       ? error.message 
@@ -169,31 +284,5 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
     });
     
     // Don't throw, just log the error and allow the dog deletion to complete
-  }
-};
-
-export const cleanupAllUnusedPhotos = async () => {
-  try {
-    // Check if bucket exists and is accessible first
-    const bucketExists = await checkBucketExists();
-    if (!bucketExists) {
-      console.error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
-      throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
-    }
-    
-    const { data, error } = await supabase.functions.invoke('cleanup-photos', {
-      method: 'POST'
-    });
-
-    if (error) {
-      console.error('Error cleaning up photos:', error);
-      throw error;
-    }
-
-    console.log('Photos cleanup completed:', data);
-    return data;
-  } catch (error) {
-    console.error('Error in cleanupAllUnusedPhotos:', error);
-    throw error;
   }
 };

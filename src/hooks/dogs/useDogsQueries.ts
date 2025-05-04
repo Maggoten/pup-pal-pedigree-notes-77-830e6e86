@@ -6,18 +6,14 @@ import { fetchDogs } from '@/services/dogs';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { UseDogsQueries } from './types';
 import { useAuth } from '@/hooks/useAuth';
+import { fetchWithRetry } from '@/utils/fetchUtils';
 
 export const useDogsQueries = (): UseDogsQueries => {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const userId = user?.id;
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
-  // Add logging to track userId
-  useEffect(() => {
-    console.log('useDogsQueries: userId value changed:', userId);
-  }, [userId]);
   
   // Using React Query for better caching and performance
   const {
@@ -42,47 +38,69 @@ export const useDogsQueries = (): UseDogsQueries => {
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
         console.error('Error fetching dogs:', errorMessage);
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive"
-        });
         throw err;
       } finally {
         setIsInitialLoad(false);
       }
     },
-    enabled: !!userId,
+    enabled: !!userId && !authLoading, // Only run query when userId is available AND auth is done loading
     staleTime: 60 * 1000, // Consider data fresh for 1 minute
     gcTime: 5 * 60 * 1000, // Keep unused data in cache for 5 minutes
     retry: 2, // Retry failed queries twice
+    retryDelay: attempt => Math.min(1000 * Math.pow(2, attempt), 30000), // Exponential backoff
   });
 
   // Add detailed logging about query status
   useEffect(() => {
     console.log('Dogs query status:', status, 'fetchStatus:', fetchStatus, 'isLoading:', isLoading);
-    console.log('Query is enabled:', !!userId);
-  }, [status, fetchStatus, isLoading, userId]);
+    console.log('Auth loading:', authLoading, 'Query is enabled:', !!userId && !authLoading);
+  }, [status, fetchStatus, isLoading, userId, authLoading]);
 
-  // Rename function to avoid conflict with the imported service
+  // Improved refresh function with optional skipCache parameter and retry logic
   const refreshDogs = useCallback(async (skipCache = false) => {
     console.log('refreshDogs called with skipCache:', skipCache);
+    
     if (skipCache) {
       console.log('Invalidating dogs query cache');
-      // Use direct invalidation instead of removing the query
       await queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
     }
-    console.log('Refetching dogs data');
-    const result = await refetch();
-    console.log('Refetch result:', result.status, 'data length:', result.data?.length || 0);
-    return result.data || [];
-  }, [refetch, queryClient, userId]);
+    
+    try {
+      console.log('Refetching dogs data');
+      
+      // Use fetchWithRetry for more reliable data fetching
+      const result = await fetchWithRetry(
+        () => refetch(), 
+        {
+          maxRetries: 2,
+          initialDelay: 2000,
+          onRetry: (attempt) => {
+            toast({
+              title: `Retry ${attempt}/2`,
+              description: "Retrying to fetch dog data..."
+            });
+          }
+        }
+      );
+      
+      console.log('Refetch result:', result.status, 'data length:', result.data?.length || 0);
+      return result.data || [];
+    } catch (error) {
+      console.error('Failed to refresh dogs after retries:', error);
+      toast({
+        title: "Failed to refresh",
+        description: "Could not load dog data after multiple attempts. Please try again later.",
+        variant: "destructive"
+      });
+      return [];
+    }
+  }, [refetch, queryClient, userId, toast]);
 
   // Add a timeout for the initial load to prevent infinite loading
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
     
-    if (userId && isInitialLoad) {
+    if (userId && isInitialLoad && !authLoading) {
       console.log('Initial load - fetching dogs');
       refetch();
       
@@ -97,7 +115,15 @@ export const useDogsQueries = (): UseDogsQueries => {
             toast({
               title: "Loading timeout",
               description: "Could not load dogs in a reasonable time. Please try again.",
-              variant: "destructive"
+              variant: "destructive",
+              action: (
+                <button 
+                  className="bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
+                  onClick={() => refreshDogs(true)}
+                >
+                  Retry
+                </button>
+              )
             });
           }
         }
@@ -107,13 +133,13 @@ export const useDogsQueries = (): UseDogsQueries => {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [userId, refetch, isInitialLoad, dogs.length, error, toast]);
+  }, [userId, refetch, isInitialLoad, dogs.length, error, toast, refreshDogs, authLoading]);
 
   return {
     dogs,
-    isLoading: isLoading || isInitialLoad,
+    isLoading: isLoading || isInitialLoad || authLoading,
     error: error ? (error instanceof Error ? error.message : 'Unknown error') : null,
-    fetchDogs: refreshDogs, // Return the renamed function
-    useDogs: () => ({ data: dogs, isLoading: isLoading || isInitialLoad, error }) // Add useDogs method
+    fetchDogs: refreshDogs,
+    useDogs: () => ({ data: dogs, isLoading: isLoading || isInitialLoad || authLoading, error })
   };
 };
