@@ -19,6 +19,27 @@ const isDevMode = () => {
   return process.env.NODE_ENV === 'development';
 };
 
+// Check for common browser compatibility issues
+const checkBrowserCompatibility = () => {
+  const issues = [];
+  
+  // Check if modules are supported
+  if (typeof HTMLScriptElement.supports !== 'function' || !HTMLScriptElement.supports('type', 'module')) {
+    issues.push('ES Modules not fully supported');
+  }
+  
+  // Check for other potential issues
+  if (typeof window.IntersectionObserver === 'undefined') {
+    issues.push('IntersectionObserver not supported');
+  }
+  
+  if (typeof window.ResizeObserver === 'undefined') {
+    issues.push('ResizeObserver not supported');
+  }
+  
+  return issues;
+};
+
 const MobileDebugPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -28,16 +49,24 @@ const MobileDebugPanel: React.FC = () => {
   const [deviceInfo, setDeviceInfo] = useState('');
   const [networkType, setNetworkType] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [compatibilityIssues, setCompatibilityIssues] = useState<string[]>([]);
   const queryClient = useQueryClient();
   
   // Only show the panel on mobile devices in development mode
   useEffect(() => {
-    const shouldShowPanel = isMobileDevice() && isDevMode();
+    // Always show in development mode, regardless of device
+    const shouldShowPanel = isDevMode();
     setIsVisible(shouldShowPanel);
     
     if (shouldShowPanel) {
       setDeviceInfo(navigator.userAgent);
       setNetworkType((navigator as any).connection?.effectiveType || 'unknown');
+      setCompatibilityIssues(checkBrowserCompatibility());
+      
+      // Log mobile detection
+      console.log(`[MobileDebug] Is mobile device: ${isMobileDevice()}`);
+      console.log(`[MobileDebug] User agent: ${navigator.userAgent}`);
+      console.log(`[MobileDebug] Screen size: ${window.innerWidth}x${window.innerHeight}`);
       
       // Listen for network changes
       const connection = (navigator as any).connection;
@@ -114,6 +143,17 @@ const MobileDebugPanel: React.FC = () => {
               <div className="ml-2">{networkType}</div>
             </div>
             
+            {compatibilityIssues.length > 0 && (
+              <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded">
+                <div className="font-bold text-yellow-800 dark:text-yellow-200">Compatibility Issues:</div>
+                <ul className="ml-2 list-disc list-inside">
+                  {compatibilityIssues.map((issue, i) => (
+                    <li key={i} className="text-yellow-700 dark:text-yellow-300">{issue}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
             <div>
               <div className="font-bold flex items-center gap-1">
                 <User className="h-3 w-3" />
@@ -179,4 +219,3 @@ const MobileDebugPanel: React.FC = () => {
 };
 
 export default MobileDebugPanel;
-
