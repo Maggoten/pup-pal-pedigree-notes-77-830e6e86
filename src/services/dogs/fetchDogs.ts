@@ -13,6 +13,10 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
 
   try {
     console.log(`[FETCH_DOGS] Fetching dogs for user ${userId}`);
+    
+    // Add more detailed logging about the request
+    console.log(`[FETCH_DOGS] Request started at ${new Date().toISOString()}`);
+    
     const response = await withTimeout<PostgrestResponse<DbDog>>(
       supabase
         .from('dogs')
@@ -24,10 +28,16 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
 
     if (response.error) {
       console.error('[FETCH_DOGS] Error fetching dogs:', response.error.message);
+      console.error('[FETCH_DOGS] Error details:', response.error);
       throw new Error(response.error.message);
     }
     
-    if (!response.data || response.data.length === 0) {
+    if (!response.data) {
+      console.warn('[FETCH_DOGS] No data returned from Supabase for user', userId);
+      return [];
+    }
+    
+    if (response.data.length === 0) {
       console.warn('[FETCH_DOGS] No dogs found for user', userId);
       return [];
     }
@@ -44,6 +54,12 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
         vaccinationDate: firstDog.vaccinationDate,
         heatHistory: firstDog.heatHistory ? 
           `${Array.isArray(firstDog.heatHistory) ? firstDog.heatHistory.length : 0} entries` : 'undefined',
+        heatHistoryType: firstDog.heatHistory ? 
+          `Type: ${Array.isArray(firstDog.heatHistory) ? 'Array' : typeof firstDog.heatHistory}` : 'undefined',
+        lastHeatObj: firstDog.heatHistory && 
+                  Array.isArray(firstDog.heatHistory) && 
+                  firstDog.heatHistory.length > 0 ? 
+          JSON.stringify(firstDog.heatHistory[0]) : 'none',
         lastHeat: firstDog.heatHistory && 
                   Array.isArray(firstDog.heatHistory) && 
                   firstDog.heatHistory.length > 0 && 
@@ -53,6 +69,18 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
           firstDog.heatHistory[0].date : 'none'
       });
     }
+    
+    // Enhanced logging for all dogs to catch any inconsistencies
+    response.data.forEach((dog, index) => {
+      if (!dog.heatHistory || !Array.isArray(dog.heatHistory)) {
+        console.log(`[FETCH_DOGS] Dog #${index} (${dog.name}) has invalid heatHistory:`, dog.heatHistory);
+      }
+      if (dog.vaccinationDate) {
+        console.log(`[FETCH_DOGS] Dog #${index} (${dog.name}) vaccination date:`, dog.vaccinationDate);
+      }
+    });
+    
+    console.log(`[FETCH_DOGS] Processing dogs data completed at ${new Date().toISOString()}`);
     
     return (response.data || []).map(enrichDog);
   } catch (error) {
