@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import type {
   ToastActionElement,
@@ -11,7 +12,11 @@ type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
-  action?: ToastActionElement
+  action?: ToastActionElement | {
+    label: string
+    onClick: () => void
+    className?: string
+  }
 }
 
 const actionTypes = {
@@ -148,10 +153,24 @@ function toast({ ...props }: Toast) {
     })
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
+  // Process custom action object format to JSX
+  let processedProps = { ...props };
+  if (props.action && !React.isValidElement(props.action) && 'label' in props.action) {
+    const { label, onClick, className } = props.action;
+    processedProps.action = (
+      <button
+        className={className || "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"}
+        onClick={onClick}
+      >
+        {label}
+      </button>
+    );
+  }
+
   dispatch({
     type: "ADD_TOAST",
     toast: {
-      ...props,
+      ...processedProps,
       id,
       open: true,
       onOpenChange: (open) => {

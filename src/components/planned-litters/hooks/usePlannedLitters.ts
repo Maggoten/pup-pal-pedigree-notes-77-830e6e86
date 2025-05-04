@@ -53,14 +53,11 @@ export const usePlannedLitters = () => {
         title: "Refresh failed",
         description: "Could not load planned litters. Please try again.",
         variant: "destructive",
-        action: (
-          <button
-            className="bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
-            onClick={refreshLitters}
-          >
-            Retry
-          </button>
-        )
+        action: {
+          label: "Retry",
+          onClick: refreshLitters,
+          className: "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
+        }
       });
     } finally {
       setIsRefreshing(false);

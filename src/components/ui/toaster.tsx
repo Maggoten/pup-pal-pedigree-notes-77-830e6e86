@@ -16,6 +16,20 @@ export function Toaster() {
   return (
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, ...props }) {
+        // Process action if it's an object and not a React element
+        let actionElement = action;
+        if (action && !React.isValidElement(action) && typeof action === 'object' && 'label' in action) {
+          const { label, onClick, className } = action as { label: string; onClick: () => void; className?: string };
+          actionElement = (
+            <button
+              className={className || "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"}
+              onClick={onClick}
+            >
+              {label}
+            </button>
+          );
+        }
+
         return (
           <Toast key={id} {...props}>
             <div className="grid gap-1">
@@ -24,7 +38,7 @@ export function Toaster() {
                 <ToastDescription>{description}</ToastDescription>
               )}
             </div>
-            {action}
+            {actionElement}
             <ToastClose />
           </Toast>
         )

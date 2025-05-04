@@ -58,22 +58,19 @@ export const usePlannedLitterQueries = () => {
       } catch (error) {
         console.error('Error loading planned litters:', error);
         
-        // Show toast with retry option
+        // Show toast with retry option using an action object instead of JSX
         toast({
           title: "Loading error",
           description: "Failed to load planned litters",
           variant: "destructive",
-          action: (
-            <button 
-              className="bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
-              onClick={() => {
-                setLoadAttempted(false); // Allow retry
-                loadLitters();
-              }}
-            >
-              Retry
-            </button>
-          )
+          action: {
+            label: "Retry",
+            onClick: () => {
+              setLoadAttempted(false); // Allow retry
+              loadLitters();
+            },
+            className: "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
+          }
         });
         
         // Set empty array as fallback

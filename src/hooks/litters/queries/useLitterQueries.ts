@@ -57,18 +57,16 @@ export const useLitterQueries = () => {
     } catch (error) {
       console.error('Failed to refresh litters:', error);
       
+      // Replace JSX with a function to render the retry action
       toast({
         title: "Refresh failed",
         description: "Could not reload litters data. Please try again.",
         variant: "destructive",
-        action: (
-          <button 
-            className="bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
-            onClick={refreshLitters}
-          >
-            Retry
-          </button>
-        )
+        action: {
+          label: "Retry",
+          onClick: refreshLitters,
+          className: "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
+        }
       });
       
       // Return current data as fallback

@@ -90,7 +90,12 @@ export const useDogsQueries = (): UseDogsQueries => {
       toast({
         title: "Failed to refresh",
         description: "Could not load dog data after multiple attempts. Please try again later.",
-        variant: "destructive"
+        variant: "destructive",
+        action: {
+          label: "Retry",
+          onClick: () => refreshDogs(true),
+          className: "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
+        }
       });
       return [];
     }
@@ -116,14 +121,11 @@ export const useDogsQueries = (): UseDogsQueries => {
               title: "Loading timeout",
               description: "Could not load dogs in a reasonable time. Please try again.",
               variant: "destructive",
-              action: (
-                <button 
-                  className="bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
-                  onClick={() => refreshDogs(true)}
-                >
-                  Retry
-                </button>
-              )
+              action: {
+                label: "Retry",
+                onClick: () => refreshDogs(true),
+                className: "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
+              }
             });
           }
         }
