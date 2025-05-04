@@ -17,9 +17,15 @@ export const useReminderProvider = () => {
   // Get reminder data with React Query
   const { 
     reminders,
+    total,
+    currentPage,
+    totalPages,
+    pageSize,
     isLoading,
     hasError,
-    refetch 
+    refetch,
+    handlePageChange,
+    handlePageSizeChange
   } = useReminderQueries(user, dogs);
   
   // Get reminder mutations
@@ -56,6 +62,14 @@ export const useReminderProvider = () => {
     reminders: sortedReminders,
     isLoading,
     hasError,
+    paginationData: {
+      currentPage,
+      totalPages,
+      pageSize,
+      total,
+      handlePageChange,
+      handlePageSizeChange
+    },
     handleMarkComplete,
     addCustomReminder,
     deleteReminder,

@@ -27,6 +27,7 @@ const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange })
     reminders, 
     isLoading, 
     hasError, 
+    paginationData,
     handleMarkComplete, 
     addCustomReminder, 
     deleteReminder 
@@ -73,6 +74,7 @@ const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange })
                 reminders={reminders} 
                 onComplete={handleMarkComplete}
                 onDelete={deleteReminder}
+                paginationData={paginationData}
               />
             )}
           </div>

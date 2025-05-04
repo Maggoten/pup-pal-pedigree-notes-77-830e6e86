@@ -4,10 +4,14 @@ import { fetchReminders, migrateRemindersFromLocalStorage } from '@/services/Rem
 import { generateDogReminders } from '@/services/reminders/DogReminderService';
 import { generateLitterReminders } from '@/services/reminders/LitterReminderService';
 import { generateGeneralReminders } from '@/services/reminders/GeneralReminderService';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Reminder } from '@/types/reminders';
 
 export const useReminderQueries = (user: any, dogs: any[]) => {
+  // Add pagination state
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  
   // Handle migration (happens once per session)
   const migrateRemindersIfNeeded = useCallback(async (hasMigrated: boolean) => {
     if (!hasMigrated && user) {
@@ -21,26 +25,26 @@ export const useReminderQueries = (user: any, dogs: any[]) => {
   
   // Use React Query for data fetching with proper caching
   const { 
-    data: reminders = [], 
+    data: remindersData = { reminders: [], total: 0, currentPage: 1, totalPages: 1 }, 
     isLoading, 
     error: hasError,
     refetch 
   } = useQuery({
-    queryKey: ['reminders', user?.id, dogs.length], 
+    queryKey: ['reminders', user?.id, page, pageSize, dogs.length], 
     queryFn: async () => {
       if (!user) {
         console.log("[Reminders Provider] No user found, returning empty reminders array");
-        return [];
+        return { reminders: [], total: 0, currentPage: 1, totalPages: 1 };
       }
       
-      console.log("[Reminders Provider] Fetching reminders for user:", user.id);
+      console.log(`[Reminders Provider] Fetching reminders for user: ${user.id}, page: ${page}, pageSize: ${pageSize}`);
       
       // Ensure migration happens before fetching
       await migrateRemindersIfNeeded(false);
       
-      // Fetch custom reminders from Supabase
-      const supabaseReminders = await fetchReminders();
-      console.log(`[Reminders Provider] Fetched ${supabaseReminders.length} custom reminders`);
+      // Fetch custom reminders from Supabase with pagination
+      const paginatedReminders = await fetchReminders(page, pageSize);
+      console.log(`[Reminders Provider] Fetched ${paginatedReminders.reminders.length} custom reminders (page ${page}/${paginatedReminders.totalPages})`);
       
       // Use only dogs belonging to current user
       const userDogs = dogs.filter(dog => dog.owner_id === user.id);
@@ -68,15 +72,33 @@ export const useReminderQueries = (user: any, dogs: any[]) => {
         const generalReminders = userDogs.length > 0 ? generateGeneralReminders(userDogs) : [];
         console.log(`[Reminders Provider] Generated ${generalReminders.length} general reminders`);
         
-        // Return all reminders at once
-        const allReminders = [...supabaseReminders, ...dogReminders, ...litterReminders, ...generalReminders];
-        console.log(`[Reminders Provider] Total: ${allReminders.length} reminders loaded`);
+        // Combine all reminders
+        const allGeneratedReminders = [...dogReminders, ...litterReminders, ...generalReminders];
         
-        return allReminders;
+        // For the paginated view, we need to merge generated reminders with db reminders
+        // But we need to be careful with pagination - this is a bit complex because
+        // we need to consider both sources
+        
+        // Return paginated reminders along with all generated system reminders
+        // This isn't perfect pagination, but it's a pragmatic approach since we can't easily paginate
+        // across two different data sources (DB + generated reminders)
+        return {
+          reminders: [...paginatedReminders.reminders, ...allGeneratedReminders],
+          total: paginatedReminders.total + allGeneratedReminders.length,
+          currentPage: paginatedReminders.currentPage,
+          totalPages: paginatedReminders.totalPages,
+          generatedRemindersCount: allGeneratedReminders.length
+        };
       } catch (error) {
         console.error("[Reminders Provider] Error generating reminders:", error);
         // Return whatever reminders we have so far, even if there was an error
-        return supabaseReminders;
+        return {
+          reminders: paginatedReminders.reminders,
+          total: paginatedReminders.total,
+          currentPage: paginatedReminders.currentPage,
+          totalPages: paginatedReminders.totalPages,
+          generatedRemindersCount: 0
+        };
       }
     },
     enabled: !!user, // Enable when user is available, even if dogs are not yet loaded
@@ -86,10 +108,29 @@ export const useReminderQueries = (user: any, dogs: any[]) => {
     refetchOnWindowFocus: true, // Added to refresh when window regains focus
   });
   
+  // Handle page change
+  const handlePageChange = useCallback((newPage: number) => {
+    console.log(`[Reminders Provider] Changing to page ${newPage}`);
+    setPage(newPage);
+  }, []);
+  
+  // Handle page size change
+  const handlePageSizeChange = useCallback((newPageSize: number) => {
+    console.log(`[Reminders Provider] Changing page size to ${newPageSize}`);
+    setPageSize(newPageSize);
+    setPage(1); // Reset to first page when changing page size
+  }, []);
+  
   return {
-    reminders,
+    reminders: remindersData.reminders || [],
+    total: remindersData.total || 0,
+    currentPage: remindersData.currentPage || 1,
+    totalPages: remindersData.totalPages || 1,
     isLoading,
     hasError: !!hasError,
-    refetch
+    refetch,
+    handlePageChange,
+    handlePageSizeChange,
+    pageSize
   };
 };

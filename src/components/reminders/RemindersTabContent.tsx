@@ -2,18 +2,25 @@
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import RemindersList from './RemindersList';
+import RemindersPagination from './RemindersPagination';
 import { Reminder } from '@/types/reminders';
 
 interface RemindersTabContentProps {
   reminders: Reminder[];
   onComplete: (id: string) => void;
   onDelete: (id: string) => void;
+  paginationData?: {
+    currentPage: number;
+    totalPages: number;
+    handlePageChange: (page: number) => void;
+  };
 }
 
 const RemindersTabContent: React.FC<RemindersTabContentProps> = ({ 
   reminders, 
   onComplete, 
-  onDelete 
+  onDelete,
+  paginationData
 }) => {
   const highPriorityReminders = reminders.filter(r => r.priority === 'high');
   const mediumPriorityReminders = reminders.filter(r => r.priority === 'medium');
@@ -35,6 +42,14 @@ const RemindersTabContent: React.FC<RemindersTabContentProps> = ({
           onDelete={onDelete}
           showDelete={true}
         />
+        
+        {paginationData && (
+          <RemindersPagination 
+            currentPage={paginationData.currentPage}
+            totalPages={paginationData.totalPages}
+            onPageChange={paginationData.handlePageChange}
+          />
+        )}
       </TabsContent>
       
       <TabsContent value="high" className="space-y-4">
