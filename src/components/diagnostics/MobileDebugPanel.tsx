@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDogs } from '@/context/DogsContext';
@@ -9,6 +8,7 @@ import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import { X, Database, User, RefreshCw, ChevronDown, ChevronUp, Bug, Calendar } from 'lucide-react';
 import { triggerAllReminders } from '@/services/ReminderService';
 import { useQueryClient } from '@tanstack/react-query';
+import { TriggerAllRemindersFunction } from '@/types/reminderFunctions';
 
 const isMobileDevice = () => {
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -101,8 +101,8 @@ const MobileDebugPanel: React.FC = () => {
       
       // Manual trigger for reminders if user is available
       if (user && dogs.length > 0) {
-        // Explicitly typing the function to match our usage
-        const manualReminders = await (triggerAllReminders as (userId: string, dogs: any[]) => Promise<any[]>)(user.id, dogs);
+        // Use the function directly with its properly defined type
+        const manualReminders = await triggerAllReminders(user.id, dogs);
         console.log(`[MobileDebug] Manually generated ${manualReminders.length} reminders`);
       }
     } catch (error) {

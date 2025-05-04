@@ -4,8 +4,10 @@ export { generateDogReminders } from './reminders/DogReminderService';
 export { generateLitterReminders } from './reminders/LitterReminderService';
 export { generateGeneralReminders } from './reminders/GeneralReminderService';
 
-// Add a new manual trigger function
-export async function triggerAllReminders(userId: string, dogs: any[]): Promise<any[]> {
+import { TriggerAllRemindersFunction } from '@/types/reminderFunctions';
+
+// Add a new manual trigger function with explicit type
+export const triggerAllReminders: TriggerAllRemindersFunction = async (userId: string, dogs: any[]): Promise<any[]> => {
   console.log(`[Manual Reminder Generation] Starting for user ${userId}`);
   
   if (!userId) {
@@ -39,4 +41,4 @@ export async function triggerAllReminders(userId: string, dogs: any[]): Promise<
     console.error('[Manual Reminder Generation] Failed:', error);
     return [];
   }
-}
+};
