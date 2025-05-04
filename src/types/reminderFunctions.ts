@@ -7,6 +7,5 @@ import { Dog } from './dogs';
  * Ensures TypeScript correctly identifies the function signature
  */
 export type TriggerAllRemindersFunction = (
-  userId: string, 
-  dogs: Dog[]
+  userId: string
 ) => Promise<Reminder[]>;

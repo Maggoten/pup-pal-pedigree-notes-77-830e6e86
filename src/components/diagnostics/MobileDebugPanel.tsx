@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDogs } from '@/context/DogsContext';
@@ -101,8 +102,8 @@ const MobileDebugPanel: React.FC = () => {
       
       // Manual trigger for reminders if user is available
       if (user && dogs.length > 0) {
-        // Use the function directly with its properly defined type
-        const manualReminders = await triggerAllReminders(user.id, dogs);
+        // Fix here: pass only userId as the first argument since that's what the type expects
+        const manualReminders = await triggerAllReminders(user.id);
         console.log(`[MobileDebug] Manually generated ${manualReminders.length} reminders`);
       }
     } catch (error) {

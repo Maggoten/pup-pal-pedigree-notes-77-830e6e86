@@ -9,11 +9,9 @@ import {
   updateReminder,
   deleteReminder as deleteReminderFromSupabase
 } from '@/services/RemindersService';
-import { 
-  generateDogReminders, 
-  generateLitterReminders, 
-  generateGeneralReminders 
-} from '@/services/reminders/DogReminderService';
+import { generateDogReminders } from '@/services/reminders/DogReminderService';
+import { generateLitterReminders } from '@/services/reminders/LitterReminderService';
+import { generateGeneralReminders } from '@/services/reminders/GeneralReminderService';
 import { useSortedReminders } from './useSortedReminders';
 import { toast } from '@/components/ui/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
