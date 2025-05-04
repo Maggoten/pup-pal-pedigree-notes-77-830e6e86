@@ -17,17 +17,21 @@ export function Toaster() {
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         // Process action if it's an object and not a React element
-        let actionElement = action;
-        if (action && !React.isValidElement(action) && typeof action === 'object' && 'label' in action) {
-          const { label, onClick, className } = action as { label: string; onClick: () => void; className?: string };
-          actionElement = (
-            <button
-              className={className || "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"}
-              onClick={onClick}
-            >
-              {label}
-            </button>
-          );
+        let actionElement = null;
+        if (action) {
+          if (React.isValidElement(action)) {
+            actionElement = action;
+          } else if (typeof action === 'object' && 'label' in action) {
+            const { label, onClick, className } = action as { label: string; onClick: () => void; className?: string };
+            actionElement = (
+              <button
+                className={className || "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"}
+                onClick={onClick}
+              >
+                {label}
+              </button>
+            );
+          }
         }
 
         return (
