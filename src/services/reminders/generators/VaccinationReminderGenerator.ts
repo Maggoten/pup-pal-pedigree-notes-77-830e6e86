@@ -1,9 +1,9 @@
 
 import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
-import { differenceInDays, parseISO, addDays, startOfDay, format } from 'date-fns';
+import { differenceInDays, parseISO, addDays, startOfDay, format, isValid } from 'date-fns';
 import { createCalendarClockIcon } from '@/utils/iconUtils';
-import { parseISODate, isValidDate } from '@/utils/dateUtils';
+import { parseISODate, isValidDate, safelyParseDate } from '@/utils/dateUtils';
 
 /**
  * Generate vaccination reminders for dogs
@@ -20,8 +20,8 @@ export const generateVaccinationReminders = (dog: Dog, today: Date): Reminder[] 
   }
   
   try {
-    // Parse the vaccination date
-    const vaccinationDate = parseISODate(dog.vaccinationDate);
+    // Parse the vaccination date using enhanced utilities
+    const vaccinationDate = safelyParseDate(dog.vaccinationDate);
     
     if (!vaccinationDate) {
       console.error(`[Vaccination Reminder] Failed to parse vaccination date for ${dog.name}: ${dog.vaccinationDate}`);
@@ -86,4 +86,3 @@ export const generateVaccinationReminders = (dog: Dog, today: Date): Reminder[] 
     return reminders;
   }
 };
-

@@ -3,6 +3,8 @@
  * Utilities for handling dates in a timezone-safe manner
  */
 
+import { isValid, parse } from 'date-fns';
+
 /**
  * Converts a Date object to a YYYY-MM-DD string without timezone influence
  * This ensures the date shown to the user is the date they selected
@@ -24,33 +26,71 @@ export const dateToISOString = (date: Date | null | undefined): string | null =>
  * Using noon prevents the date from shifting due to timezone conversions
  */
 export const parseISODate = (dateStr: string | null | undefined): Date | null => {
-  if (!dateStr) return null;
+  if (!dateStr) {
+    console.log('[Date Utils] Null or undefined date string provided to parseISODate');
+    return null;
+  }
   
   try {
-    // Create a date at noon in the user's local timezone
-    // This helps avoid date shifts due to timezone conversions
-    const [year, month, day] = dateStr.split('-').map(Number);
-    if (!year || !month || !day) {
-      console.warn(`[Date Parse Warning] Invalid date format: ${dateStr}`);
-      return null;
+    // First, try standard format parsing (YYYY-MM-DD)
+    if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      // Create a date at noon in the user's local timezone
+      const [year, month, day] = dateStr.split('-').map(Number);
+      
+      if (isNaN(year) || isNaN(month) || isNaN(day)) {
+        console.warn(`[Date Utils] Invalid numeric values in date string: ${dateStr}`);
+        return null;
+      }
+      
+      const date = new Date();
+      date.setFullYear(year);
+      date.setMonth(month - 1); // months are 0-indexed
+      date.setDate(day);
+      date.setHours(12, 0, 0, 0);
+      
+      console.log(`[Date Utils] Successfully parsed ${dateStr} to ${date.toISOString()}`);
+      return date;
     }
-    if (isNaN(year) || isNaN(month) || isNaN(day)) {
-      console.warn(`[Date Parse Warning] Date contains NaN values: ${dateStr} -> y:${year}, m:${month}, d:${day}`);
-      return null;
+    
+    // Try to handle ISO string with time component
+    if (dateStr.includes('T')) {
+      const isoDate = new Date(dateStr);
+      if (isValid(isoDate)) {
+        // Reset to noon to avoid timezone issues
+        const standardized = new Date(isoDate);
+        standardized.setHours(12, 0, 0, 0);
+        console.log(`[Date Utils] Successfully parsed ISO datetime ${dateStr} to ${standardized.toISOString()}`);
+        return standardized;
+      }
     }
     
-    const date = new Date();
-    date.setFullYear(year);
-    date.setMonth(month - 1); // months are 0-indexed
-    date.setDate(day);
+    // Try additional common formats
+    const formats = [
+      'yyyy/MM/dd', 'dd/MM/yyyy', 'MM/dd/yyyy',
+      'dd-MM-yyyy', 'MM-dd-yyyy'
+    ];
     
-    // Set to noon to avoid timezone-related date shifts
-    date.setHours(12, 0, 0, 0);
+    for (const formatString of formats) {
+      const parsedDate = parse(dateStr, formatString, new Date());
+      if (isValid(parsedDate)) {
+        parsedDate.setHours(12, 0, 0, 0);
+        console.log(`[Date Utils] Successfully parsed ${dateStr} using format ${formatString} to ${parsedDate.toISOString()}`);
+        return parsedDate;
+      }
+    }
     
-    console.log(`[Date Utils] Successfully parsed ${dateStr} to ${date.toISOString()}`);
-    return date;
+    // Last resort: try native Date parsing
+    const fallbackDate = new Date(dateStr);
+    if (isValid(fallbackDate)) {
+      fallbackDate.setHours(12, 0, 0, 0);
+      console.log(`[Date Utils] Fallback parsed ${dateStr} to ${fallbackDate.toISOString()}`);
+      return fallbackDate;
+    }
+    
+    console.warn(`[Date Utils] Failed to parse date string: ${dateStr}`);
+    return null;
   } catch (err) {
-    console.error(`[Date Parse Error] Failed to parse date: ${dateStr}`, err);
+    console.error(`[Date Utils] Error parsing date: ${dateStr}`, err);
     return null;
   }
 };
@@ -118,3 +158,31 @@ export const isValidDate = (date: any): boolean => {
   return true;
 };
 
+/**
+ * Safely parses any date-like input and returns a valid Date object or null
+ * This is a comprehensive date parsing utility that handles multiple formats
+ */
+export const safelyParseDate = (input: any): Date | null => {
+  // Handle null/undefined cases
+  if (!input) {
+    return null;
+  }
+  
+  // Already a Date object
+  if (input instanceof Date) {
+    return isValid(input) ? input : null;
+  }
+  
+  // String parsing
+  if (typeof input === 'string') {
+    return parseISODate(input);
+  }
+  
+  // Number (timestamp)
+  if (typeof input === 'number') {
+    const date = new Date(input);
+    return isValid(date) ? date : null;
+  }
+  
+  return null;
+};

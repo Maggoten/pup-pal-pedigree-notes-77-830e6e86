@@ -6,7 +6,7 @@ import { DogsProvider } from '@/context/DogsContext';
 import PageLayout from '@/components/PageLayout';
 import DashboardHero from './dashboard-hero';
 import DashboardContent from './DashboardContent';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import { useDashboardData } from '@/hooks/dashboard/useDashboardData';
 import { getDisplayUsername } from '@/utils/userDisplayUtils';
 import { getActivePregnancies } from '@/services/PregnancyService';
 import { toast } from '@/components/ui/use-toast';
@@ -31,6 +31,23 @@ const DashboardContentWithData: React.FC<DashboardLayoutProps> = ({
   
   // Log important data for debugging
   useEffect(() => {
+    console.log("[Dashboard] Dogs data status:", {
+      count: dashboardData.dogs?.length || 0,
+      loading: dashboardData.dogsLoading,
+      dataReady: dashboardData.isDataReady,
+    });
+    
+    // If there are dogs, log detailed information
+    if (dashboardData.dogs?.length > 0) {
+      console.log("[Dashboard] Sample dog data:", dashboardData.dogs[0].name, {
+        gender: dashboardData.dogs[0].gender,
+        hasVaccinationDate: !!dashboardData.dogs[0].vaccinationDate,
+        hasHeatHistory: dashboardData.dogs[0].heatHistory?.length > 0
+      });
+    } else {
+      console.warn("[Dashboard] No dogs available in context");
+    }
+    
     console.log("[Dashboard] Reminders data:", {
       count: dashboardData.reminders?.length || 0,
       loading: dashboardData.remindersLoading,
@@ -62,24 +79,22 @@ const DashboardContentWithData: React.FC<DashboardLayoutProps> = ({
       console.log("[Dashboard] Sample events for today:", eventsForToday.map(e => ({
         title: e.title,
         type: e.type,
-        date: e instanceof Date ? e.date.toISOString() : e.date,
+        date: e.date instanceof Date ? e.date.toISOString() : e.date,
         dogName: e.dogName
       })));
     }
-  }, [dashboardData.reminders, dashboardData.getEventsForDate, dashboardData.remindersLoading, 
+  }, [dashboardData.reminders, dashboardData.dogs, dashboardData.getEventsForDate, dashboardData.remindersLoading, 
       dashboardData.calendarLoading, dashboardData.remindersError, dashboardData.calendarError]);
   
   // Force refresh of data when the component mounts
   useEffect(() => {
-    // A brief timeout to allow for initial data loading
     const timer = setTimeout(() => {
-      console.log("[Dashboard] Forcing refresh of reminders and calendar data");
-      dashboardData.refreshReminderData();
-      dashboardData.refreshCalendarData();
-    }, 2000);
+      console.log("[Dashboard] Initiating complete data refresh");
+      dashboardData.refreshAllData();
+    }, 500);
     
     return () => clearTimeout(timer);
-  }, [dashboardData.refreshReminderData, dashboardData.refreshCalendarData]);
+  }, [dashboardData.refreshAllData]);
   
   // Prepare props for child components
   const calendarProps = {
@@ -115,17 +130,35 @@ const DashboardContentWithData: React.FC<DashboardLayoutProps> = ({
         calendarProps={calendarProps}
         remindersProps={remindersProps}
       />
+      
+      {!dashboardData.hasReminderData && !dashboardData.hasCalendarData && 
+       !dashboardData.remindersLoading && dashboardData.dogs.length > 0 && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mt-4">
+          <p className="text-yellow-800">
+            No reminders or calendar events found. Try adding vaccination dates or heat cycles to your dogs to generate reminders.
+          </p>
+        </div>
+      )}
+      
+      {dashboardData.dogs.length === 0 && !dashboardData.dogsLoading && (
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mt-4">
+          <p className="text-blue-800">
+            No dogs found in your account. Add your first dog to get started with reminders and the breeding calendar.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
   user, 
-  activePregnancies: initialActivePregnancies = []
+  activePregnancies: initialActivePregnancies = [],
+  isLoadingPregnancies: initialIsLoadingPregnancies = false
 }) => {
   // State for active pregnancies
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>(initialActivePregnancies);
-  const [isLoadingPregnancies, setIsLoadingPregnancies] = useState(initialActivePregnancies.length === 0);
+  const [isLoadingPregnancies, setIsLoadingPregnancies] = useState(initialIsLoadingPregnancies || initialActivePregnancies.length === 0);
   
   // Fetch active pregnancies if not provided
   useEffect(() => {

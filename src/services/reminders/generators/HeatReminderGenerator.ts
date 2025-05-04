@@ -3,7 +3,7 @@ import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
 import { differenceInDays, format, addDays, isValid } from 'date-fns';
 import { createPawPrintIcon } from '@/utils/iconUtils';
-import { parseISODate, isValidDate } from '@/utils/dateUtils';
+import { parseISODate, isValidDate, safelyParseDate } from '@/utils/dateUtils';
 
 /**
  * Generate heat cycle reminders for female dogs
@@ -30,24 +30,12 @@ export const generateHeatReminders = (dog: Dog, today: Date): Reminder[] => {
   const lastHeatDateString = sortedHeatDates[0].date;
   console.log(`[Heat Reminders] Last heat date string for ${dog.name}: ${lastHeatDateString}`);
   
-  // Parse the date string using our utility
-  let lastHeatDate = parseISODate(lastHeatDateString);
+  // Parse the date string using our enhanced utility
+  let lastHeatDate = safelyParseDate(lastHeatDateString);
   
-  if (!lastHeatDate || !isValidDate(lastHeatDate)) {
+  if (!lastHeatDate) {
     console.error(`[Heat Reminders] Failed to parse last heat date for ${dog.name}: ${lastHeatDateString}`);
-    // Try alternative parsing approach
-    try {
-      const fallbackDate = new Date(lastHeatDateString);
-      if (isValid(fallbackDate)) {
-        lastHeatDate = fallbackDate;
-        console.log(`[Heat Reminders] Used fallback parsing for ${dog.name}'s heat date: ${fallbackDate.toISOString()}`);
-      } else {
-        return reminders;
-      }
-    } catch (e) {
-      console.error(`[Heat Reminders] Fallback parsing also failed for ${dog.name}'s heat date`, e);
-      return reminders;
-    }
+    return reminders;
   }
   
   // Use heat interval if available, otherwise default to 180 days (6 months)
@@ -64,7 +52,7 @@ export const generateHeatReminders = (dog: Dog, today: Date): Reminder[] => {
   console.log(`[Heat Reminders] Days until heat for ${dog.name}: ${daysUntilHeat}`);
   
   if (daysUntilHeat <= 30 && daysUntilHeat >= -5) { // Show reminder even if up to 5 days past
-    reminders.push({
+    const reminder: Reminder = {
       id: `heat-${dog.id}-${Date.now()}`, // Add timestamp for uniqueness
       title: `${dog.name}'s Heat ${daysUntilHeat < 0 ? 'Started' : 'Approaching'}`,
       description: daysUntilHeat < 0 
@@ -75,8 +63,15 @@ export const generateHeatReminders = (dog: Dog, today: Date): Reminder[] => {
       priority: daysUntilHeat <= 7 ? 'high' : 'medium',
       type: 'heat',
       relatedId: dog.id
-    });
-    console.log(`[Heat Reminders] Created heat reminder for dog ${dog.name}`);
+    };
+    
+    // Validate the reminder before adding it
+    if (isValidDate(reminder.dueDate)) {
+      reminders.push(reminder);
+      console.log(`[Heat Reminders] Created heat reminder for dog ${dog.name}: ${reminder.title} due on ${format(reminder.dueDate, 'yyyy-MM-dd')}`);
+    } else {
+      console.error(`[Heat Reminders] Invalid due date for generated reminder: ${reminder.title}`);
+    }
   } else {
     console.log(`[Heat Reminders] No heat reminder created for ${dog.name}, outside window: ${daysUntilHeat} days until heat`);
   }

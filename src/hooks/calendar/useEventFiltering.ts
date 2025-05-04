@@ -1,7 +1,8 @@
 
 import { useMemo, useCallback } from 'react';
-import { isSameDay, isValid } from 'date-fns';
+import { isSameDay, isValid, format } from 'date-fns';
 import { CalendarEvent } from '@/components/calendar/types';
+import { safelyParseDate } from '@/utils/dateUtils';
 
 export const useEventFiltering = (events: CalendarEvent[] = []) => {
   // Function to get events for a specific date
@@ -15,21 +16,11 @@ export const useEventFiltering = (events: CalendarEvent[] = []) => {
     
     const eventsForDate = events.filter(event => {
       try {
-        // Handle different date formats
-        let eventDate: Date | null = null;
-        
-        if (event.date instanceof Date) {
-          eventDate = event.date;
-        } else if (typeof event.date === 'string') {
-          // Handle ISO string or simple date string
-          eventDate = new Date(event.date);
-        } else {
-          console.warn(`[Calendar] Invalid date format for event: ${event.title}`, event.date);
-          return false;
-        }
+        // Handle different date formats using our enhanced date parsing
+        const eventDate = safelyParseDate(event.date);
         
         // Validate the date
-        if (!isValid(eventDate)) {
+        if (!eventDate) {
           console.warn(`[Calendar] Invalid date for event: ${event.title}`, event.date);
           return false;
         }
@@ -45,10 +36,21 @@ export const useEventFiltering = (events: CalendarEvent[] = []) => {
     
     // Log all vaccination events for today for debugging
     const vacEvents = eventsForDate.filter(e => e.type === 'vaccination');
-    console.log(`[Calendar] Found ${vacEvents.length} vaccination events for ${date.toDateString()}`);
-    vacEvents.forEach(e => {
-      console.log(`[Calendar] Vaccination event for today: ${e.title}, Dog: ${e.dogName}`);
-    });
+    if (vacEvents.length > 0) {
+      console.log(`[Calendar] Found ${vacEvents.length} vaccination events for ${date.toDateString()}`);
+      vacEvents.forEach(e => {
+        console.log(`[Calendar] Vaccination event for today: ${e.title}, Dog: ${e.dogName}`);
+      });
+    }
+    
+    // Log all heat events for today for debugging
+    const heatEvents = eventsForDate.filter(e => e.type === 'heat');
+    if (heatEvents.length > 0) {
+      console.log(`[Calendar] Found ${heatEvents.length} heat events for ${date.toDateString()}`);
+      heatEvents.forEach(e => {
+        console.log(`[Calendar] Heat event for today: ${e.title}, Dog: ${e.dogName}`);
+      });
+    }
     
     console.log(`[Calendar] Found ${eventsForDate.length} events for ${date.toDateString()}`);
     return eventsForDate;

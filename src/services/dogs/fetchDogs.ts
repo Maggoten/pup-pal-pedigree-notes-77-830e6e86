@@ -7,12 +7,12 @@ import { withTimeout, TIMEOUT } from '@/utils/timeoutUtils';
 
 export async function fetchDogs(userId: string): Promise<Dog[]> {
   if (!userId) {
-    console.error('fetchDogs called without userId');
+    console.error('[FETCH_DOGS] fetchDogs called without userId');
     return [];
   }
 
   try {
-    console.log(`Fetching dogs for user ${userId}`);
+    console.log(`[FETCH_DOGS] Fetching dogs for user ${userId}`);
     const response = await withTimeout<PostgrestResponse<DbDog>>(
       supabase
         .from('dogs')
@@ -23,14 +23,35 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
     );
 
     if (response.error) {
-      console.error('Error fetching dogs:', response.error.message);
+      console.error('[FETCH_DOGS] Error fetching dogs:', response.error.message);
       throw new Error(response.error.message);
     }
     
-    console.log(`Retrieved ${response.data?.length || 0} dogs from database`);
+    if (!response.data || response.data.length === 0) {
+      console.warn('[FETCH_DOGS] No dogs found for user', userId);
+      return [];
+    }
+    
+    console.log(`[FETCH_DOGS] Retrieved ${response.data.length} dogs from database`);
+    
+    // Log details of the first dog to help debug date parsing issues
+    if (response.data.length > 0) {
+      const firstDog = response.data[0];
+      console.log('[FETCH_DOGS] First dog sample:', {
+        id: firstDog.id,
+        name: firstDog.name,
+        gender: firstDog.gender,
+        vaccinationDate: firstDog.vaccinationDate,
+        heatHistory: firstDog.heatHistory ? 
+          `${firstDog.heatHistory.length} entries` : 'undefined',
+        lastHeat: firstDog.heatHistory && firstDog.heatHistory.length > 0 ? 
+          firstDog.heatHistory[0].date : 'none'
+      });
+    }
+    
     return (response.data || []).map(enrichDog);
   } catch (error) {
-    console.error('Failed to fetch dogs:', error);
+    console.error('[FETCH_DOGS] Failed to fetch dogs:', error);
     throw new Error(error instanceof Error ? error.message : 'Failed to fetch dogs');
   }
 }
