@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { StorageError } from '@supabase/storage-js';
@@ -27,11 +26,7 @@ export const checkBucketExists = async (): Promise<boolean> => {
     try {
       // Using our retry utility for more reliable bucket checking
       const result = await fetchWithRetry(
-        () => supabase.storage.from(BUCKET_NAME).list('', { limit: 1 }),
-        {
-          maxRetries: 2,
-          initialDelay: 1000
-        }
+        () => supabase.storage.from(BUCKET_NAME).list('', { limit: 1 })
       );
       
       if (result.error) {
@@ -75,7 +70,7 @@ export const uploadToStorage = async (
       }
     }
     
-    // Upload with retry logic
+    // Upload with retry logic - corrected to pass a single options argument
     return await fetchWithRetry(
       () => supabase.storage
         .from(BUCKET_NAME)
@@ -264,7 +259,7 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
 
     console.log('Deleting unused image:', storagePath);
     
-    // Use fetchWithRetry for deletion
+    // Use fetchWithRetry for deletion - corrected to pass a single options argument
     await fetchWithRetry(
       () => supabase.storage
         .from(BUCKET_NAME)

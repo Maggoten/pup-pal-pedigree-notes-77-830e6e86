@@ -152,20 +152,9 @@ function toast({ ...props }: Toast) {
     })
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
-  // Process custom action object format to JSX
-  let processedProps = { ...props };
-  if (props.action && !React.isValidElement(props.action) && typeof props.action === 'object' && 'label' in props.action) {
-    const { label, onClick, className } = props.action as { label: string; onClick: () => void; className?: string };
-    processedProps.action = (
-      <button
-        className={className || "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"}
-        onClick={onClick}
-      >
-        {label}
-      </button>
-    );
-  }
-
+  // Instead of creating JSX here, we'll just keep the action object for the Toaster component to handle
+  const processedProps = { ...props };
+  
   dispatch({
     type: "ADD_TOAST",
     toast: {

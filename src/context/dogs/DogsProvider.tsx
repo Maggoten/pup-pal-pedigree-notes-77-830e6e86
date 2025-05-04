@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -70,6 +71,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     activeDog,
     setActiveDog,
     refreshDogs: wrappedRefreshDogs,
+    fetchDogs, // Expose the raw fetchDogs function for direct calls
     addDog,
     updateDog,
     removeDog

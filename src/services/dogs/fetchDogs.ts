@@ -27,12 +27,12 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
   try {
     // Use our new retry wrapper for the fetch operation
     const response = await fetchWithRetry<PostgrestResponse<DbDog>>(
-      // Fetch function
+      // Fetch function - with type assertion to avoid Promise compatibility issues
       () => supabase
         .from('dogs')
         .select('*')
         .eq('owner_id', userId)
-        .order('created_at', { ascending: false }),
+        .order('created_at', { ascending: false }) as unknown as Promise<PostgrestResponse<DbDog>>,
       // Retry options
       {
         maxRetries: MAX_RETRIES,

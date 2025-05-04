@@ -58,7 +58,6 @@ export const usePlannedLitterQueries = () => {
       } catch (error) {
         console.error('Error loading planned litters:', error);
         
-        // Show toast with retry option using an action object instead of JSX
         toast({
           title: "Loading error",
           description: "Failed to load planned litters",
