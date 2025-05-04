@@ -1,3 +1,4 @@
+
 import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
 import { differenceInDays, format, addDays, isValid } from 'date-fns';
@@ -29,15 +30,8 @@ export const generateHeatReminders = (dog: Dog, today: Date): Reminder[] => {
   const lastHeatDateString = sortedHeatDates[0].date;
   console.log(`[Heat Reminders] Last heat date string for ${dog.name}: ${lastHeatDateString}`);
   
-  // Try to parse as a Date object if it's already one
-  let lastHeatDate;
-  if (lastHeatDateString instanceof Date) {
-    lastHeatDate = lastHeatDateString;
-    console.log(`[Heat Reminders] Last heat date is already a Date object: ${lastHeatDate.toISOString()}`);
-  } else {
-    // Otherwise try to parse from string
-    lastHeatDate = parseISODate(lastHeatDateString);
-  }
+  // Parse the date string using our utility
+  let lastHeatDate = parseISODate(lastHeatDateString);
   
   if (!lastHeatDate || !isValidDate(lastHeatDate)) {
     console.error(`[Heat Reminders] Failed to parse last heat date for ${dog.name}: ${lastHeatDateString}`);
