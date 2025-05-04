@@ -47,7 +47,9 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
         lastHeat: firstDog.heatHistory && 
                   Array.isArray(firstDog.heatHistory) && 
                   firstDog.heatHistory.length > 0 && 
-                  typeof firstDog.heatHistory[0] === 'object' ? 
+                  typeof firstDog.heatHistory[0] === 'object' && 
+                  firstDog.heatHistory[0] !== null &&
+                  'date' in firstDog.heatHistory[0] ? 
           firstDog.heatHistory[0].date : 'none'
       });
     }
