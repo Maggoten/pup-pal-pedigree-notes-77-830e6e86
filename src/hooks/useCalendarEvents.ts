@@ -174,7 +174,8 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       if (!event || !event.date) return false;
       
       // Convert event.date to string for comparison if it's a Date object
-      let eventDateStr;
+      let eventDateStr: string;
+      
       if (event.date instanceof Date) {
         eventDateStr = event.date.toISOString().split('T')[0];
       } else if (typeof event.date === 'string') {
