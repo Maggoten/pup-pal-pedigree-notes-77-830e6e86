@@ -1,7 +1,8 @@
+
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { useDogs as useDogsHook } from '@/hooks/dogs';
+import { useDogs as useDogsHook } from '@/hooks/dogs'; // Import using the correct path
 import { DogsContextType } from './types';
 import { useForceReload } from './useForceReload';
 import { useActiveDog } from './useActiveDog';

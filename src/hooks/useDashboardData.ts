@@ -1,7 +1,7 @@
 
 import { useMemo, useEffect, useState } from 'react';
 import { subDays } from 'date-fns';
-import { useDogs } from '@/context/DogsContext';
+import { useDogs } from '@/context/DogsContext'; // Updated import path
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { plannedLittersService } from '@/services/PlannedLitterService';
