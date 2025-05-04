@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase, Profile, isMobileSafari } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
@@ -29,10 +28,7 @@ export const useAuthActions = () => {
         () => supabase.auth.signInWithPassword({ 
           email, 
           password,
-          options: isMobileSafari() ? {
-            // Safari-specific options that might help
-            redirectTo: window.location.origin,
-          } : undefined
+          // Remove the options property with redirectTo as it's not supported in the type
         }),
         isMobileSafari() ? 3 : 2  // More retries for Mobile Safari
       );
@@ -152,17 +148,17 @@ export const useAuthActions = () => {
       console.log('Attempting registration for:', userData.email, 
                  'on', isMobileSafari() ? 'Mobile Safari' : 'standard browser');
       
+      const signUpOptions = {
+        data: {
+          firstName: userData.firstName,
+          lastName: userData.lastName
+        }
+      };
+      
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
-        options: {
-          data: {
-            firstName: userData.firstName,
-            lastName: userData.lastName
-          },
-          // Add redirectTo for mobile Safari to help with cookie handling
-          ...(isMobileSafari() ? { redirectTo: window.location.origin } : {})
-        }
+        options: signUpOptions
       });
 
       if (error) {

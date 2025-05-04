@@ -10,7 +10,7 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 export const isMobileSafari = () => {
   const ua = navigator.userAgent;
   return /iPhone|iPad|iPod/.test(ua) && 
-         !window.MSStream && 
+         !('MSStream' in window) && // Fixed TypeScript error by using 'in' operator
          /WebKit/.test(ua) && 
          !/Chrome/.test(ua);
 };
