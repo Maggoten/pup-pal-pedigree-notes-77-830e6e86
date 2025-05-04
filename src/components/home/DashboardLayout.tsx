@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
-import { DogsProvider } from '@/context/DogsContext'; // Using the correct import path
+import { DogsProvider } from '@/context/DogsContext'; 
 import PageLayout from '@/components/PageLayout';
 import DashboardHero from './dashboard-hero';
 import DashboardContent from './DashboardContent';
