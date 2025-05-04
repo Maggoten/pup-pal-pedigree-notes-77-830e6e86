@@ -24,8 +24,8 @@ const isDevMode = () => {
 const checkBrowserCompatibility = () => {
   const issues = [];
   
-  // Check if modules are supported
-  if (typeof HTMLScriptElement.supports !== 'function' || !HTMLScriptElement.supports('type', 'module')) {
+  // Safer check for module support without passing multiple arguments
+  if (!('noModule' in document.createElement('script'))) {
     issues.push('ES Modules not fully supported');
   }
   
