@@ -4,7 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { StorageError } from '@supabase/storage-js';
 import { validateImageFile } from '@/utils/imageValidation';
-import { checkBucketExists, uploadToStorage, getPublicUrl, removeFromStorage, BUCKET_NAME } from '@/utils/storageUtils';
+import { 
+  BUCKET_NAME, 
+  checkBucketExists, 
+  uploadToStorage, 
+  getPublicUrl, 
+  removeFromStorage,
+  processImageForUpload
+} from '@/utils/storage';
 import { useUploadTimeout } from '@/hooks/useUploadTimeout';
 
 interface UseImageUploadProps {
@@ -48,9 +55,12 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       const fileName = `${user_id}/${Date.now()}.${fileExt}`;
       
       startTimeout();
+      
+      // Process the image (compress if on mobile)
+      const processedFile = await processImageForUpload(file);
 
       // Call uploadToStorage without the onProgress parameter
-      const { data, error } = await uploadToStorage(fileName, file);
+      const { data, error } = await uploadToStorage(fileName, processedFile);
       
       clearTimeout();
       
