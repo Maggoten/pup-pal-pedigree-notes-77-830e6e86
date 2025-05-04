@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dog } from '@/types/dogs';
@@ -175,15 +176,14 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       // Convert event.date to string for comparison if it's a Date object
       let eventDateStr: string;
       
-      if (event.date instanceof Date) {
-        eventDateStr = event.date.toISOString().split('T')[0];
-      } else if (typeof event.date === 'string') {
-        // Handle ISO string directly
-        eventDateStr = event.date.split('T')[0];
-      } else {
-        // Handle date that's not a Date or string - more robust handling
-        try {
-          // First try to create a new Date object
+      try {
+        if (event.date instanceof Date) {
+          eventDateStr = event.date.toISOString().split('T')[0];
+        } else if (typeof event.date === 'string') {
+          // Handle ISO string directly
+          eventDateStr = event.date.split('T')[0];
+        } else {
+          // Handle date that's not a Date or string - create a new Date object
           const eventDate = new Date(event.date as any);
           if (isValid(eventDate)) {
             eventDateStr = eventDate.toISOString().split('T')[0];
@@ -192,13 +192,13 @@ export const useCalendarEvents = (dogs: Dog[]) => {
             console.error(`[Calendar] Invalid date format:`, event.date);
             return false;
           }
-        } catch (err) {
-          console.error(`[Calendar] Error converting event date:`, event.date, err);
-          return false;
         }
+        
+        return eventDateStr === targetDateStr;
+      } catch (err) {
+        console.error(`[Calendar] Error processing event date:`, event.date, err);
+        return false;
       }
-      
-      return eventDateStr === targetDateStr;
     });
     
     const today = getNormalizedToday();
