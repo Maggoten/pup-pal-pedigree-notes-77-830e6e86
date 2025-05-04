@@ -43,8 +43,8 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
         gender: firstDog.gender,
         vaccinationDate: firstDog.vaccinationDate,
         heatHistory: firstDog.heatHistory ? 
-          `${firstDog.heatHistory.length} entries` : 'undefined',
-        lastHeat: firstDog.heatHistory && firstDog.heatHistory.length > 0 ? 
+          `${Array.isArray(firstDog.heatHistory) ? firstDog.heatHistory.length : 0} entries` : 'undefined',
+        lastHeat: firstDog.heatHistory && Array.isArray(firstDog.heatHistory) && firstDog.heatHistory.length > 0 ? 
           firstDog.heatHistory[0].date : 'none'
       });
     }

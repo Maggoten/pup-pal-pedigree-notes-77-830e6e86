@@ -10,7 +10,7 @@ import { useEventHandlers } from './useEventHandlers';
 
 export const useDashboardData = () => {
   // Get centralized data sources
-  const { dogs, loading: dogsLoading, refreshDogs: refreshDogData } = useDogs();
+  const { dogs, loading: dogsLoading, refreshDogs } = useDogs();
   
   // Single instances of these hooks to prevent duplicate fetching
   const { 
@@ -20,7 +20,7 @@ export const useDashboardData = () => {
     handleMarkComplete,
     addCustomReminder,
     deleteReminder,
-    refreshReminderData
+    refreshReminders: refreshReminderData
   } = useBreedingReminders();
   
   const {
@@ -57,14 +57,14 @@ export const useDashboardData = () => {
   const refreshAllData = useCallback(async () => {
     console.log('[DASHBOARD] Refreshing all data...');
     // First refresh dogs
-    await refreshDogData(true);
+    await refreshDogs();
     // Then refresh reminders and calendar (which depend on dogs)
     await Promise.all([
       refreshReminderData(),
       refreshCalendarData()
     ]);
     console.log('[DASHBOARD] All data refreshed');
-  }, [refreshDogData, refreshReminderData, refreshCalendarData]);
+  }, [refreshDogs, refreshReminderData, refreshCalendarData]);
 
   // Log event counts and force refresh if needed
   useEffect(() => {
@@ -91,7 +91,7 @@ export const useDashboardData = () => {
     } else if (!dogsLoading) {
       // No dogs and not loading dogs - try to refresh dogs data
       console.log("[DASHBOARD] No dogs available, forcing refresh of dogs data");
-      refreshDogData(true);
+      refreshDogs();
     }
   }, [
     dogs.length, 
@@ -102,7 +102,7 @@ export const useDashboardData = () => {
     calendarLoading,
     refreshReminderData,
     refreshCalendarData,
-    refreshDogData
+    refreshDogs
   ]);
   
   // Check if there's any data to display
@@ -112,6 +112,7 @@ export const useDashboardData = () => {
   return {
     isDataReady,
     dogs,
+    dogsLoading,  // Explicitly include this in the return object
     reminders,
     remindersLoading,
     remindersError,
@@ -132,7 +133,7 @@ export const useDashboardData = () => {
     hasReminderData,
     refreshReminderData,
     refreshCalendarData,
-    refreshDogData,
+    refreshDogData: refreshDogs,
     refreshAllData
   };
 };
