@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { StorageError } from '@supabase/storage-js';
 import { validateImageFile } from '@/utils/imageValidation';
-import { checkBucketExists, uploadToStorage, getPublicUrl, removeFromStorage, BUCKET_NAME } from '@/utils/storageOperations';
+import { checkBucketExists, uploadToStorage, getPublicUrl, removeFromStorage, BUCKET_NAME } from '@/utils/storageUtils';
 import { useUploadTimeout } from '@/hooks/useUploadTimeout';
 
 interface UseImageUploadProps {

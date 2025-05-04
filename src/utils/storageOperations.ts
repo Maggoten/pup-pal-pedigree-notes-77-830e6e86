@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
-export const BUCKET_NAME = 'dog-photos';
+export const BUCKET_NAME = 'Dog Photos';
 
 export const checkBucketExists = async (): Promise<boolean> => {
   try {

@@ -10,7 +10,7 @@ interface StorageCleanupOptions {
 }
 
 // We'll now use a constant for bucket name that's consistent throughout the app
-export const BUCKET_NAME = 'dog-photos';
+export const BUCKET_NAME = 'Dog Photos';
 
 // Check if bucket exists and is accessible with retries
 export const checkBucketExists = async (): Promise<boolean> => {
@@ -70,7 +70,7 @@ export const uploadToStorage = async (
       }
     }
     
-    // Upload with retry logic - fixed to pass options as a single object
+    // Upload with retry logic - properly pass options as a single object
     return await fetchWithRetry(
       () => supabase.storage
         .from(BUCKET_NAME)
@@ -259,7 +259,7 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
     
     console.log('Deleting unused image:', storagePath);
     
-    // Fixed to pass options as a single object
+    // Properly pass options as a single object
     await fetchWithRetry(
       () => supabase.storage
         .from(BUCKET_NAME)
