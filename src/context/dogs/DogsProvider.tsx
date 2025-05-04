@@ -71,7 +71,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     activeDog,
     setActiveDog,
     refreshDogs: wrappedRefreshDogs,
-    fetchDogs, // Expose the raw fetchDogs function for direct calls
+    fetchDogs, // Expose the raw fetchDogs function with proper type
     addDog,
     updateDog,
     removeDog

@@ -8,7 +8,7 @@ export interface DogsContextType {
   activeDog: Dog | null;
   setActiveDog: (dog: Dog | null) => void;
   refreshDogs: () => Promise<void>;
-  fetchDogs: (skipCache?: boolean) => Promise<void>; // Added this line
+  fetchDogs: (skipCache?: boolean) => Promise<Dog[]>; // Fixed the return type to match implementation
   addDog: (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>) => Promise<Dog | undefined>;
   updateDog: (id: string, updates: Partial<Dog>) => Promise<Dog | null>;
   removeDog: (id: string) => Promise<boolean>;
