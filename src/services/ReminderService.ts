@@ -5,7 +5,7 @@ export { generateLitterReminders } from './reminders/LitterReminderService';
 export { generateGeneralReminders } from './reminders/GeneralReminderService';
 
 // Add a new manual trigger function
-export async function triggerAllReminders(userId: string, dogs: any[]) {
+export async function triggerAllReminders(userId: string, dogs: any[]): Promise<any[]> {
   console.log(`[Manual Reminder Generation] Starting for user ${userId}`);
   
   if (!userId) {

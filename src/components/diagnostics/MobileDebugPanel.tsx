@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDogs } from '@/context/DogsContext';
@@ -100,6 +101,7 @@ const MobileDebugPanel: React.FC = () => {
       
       // Manual trigger for reminders if user is available
       if (user && dogs.length > 0) {
+        // Explicitly typing the function to match our usage
         const manualReminders = await triggerAllReminders(user.id, dogs);
         console.log(`[MobileDebug] Manually generated ${manualReminders.length} reminders`);
       }
