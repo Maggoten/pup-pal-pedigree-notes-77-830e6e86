@@ -10,7 +10,6 @@ import { getActivePregnancies, getFirstActivePregnancy } from '@/services/Pregna
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/context/AuthContext';
-import { DogsProvider } from '@/context/DogsContext';
 
 import ActivePregnanciesList from '@/components/pregnancy/ActivePregnanciesList';
 import PregnancyDropdownSelector from '@/components/pregnancy/PregnancyDropdownSelector';
@@ -19,8 +18,7 @@ import PregnancyTabs from '@/components/pregnancy/PregnancyTabs';
 import AddPregnancyDialog from '@/components/pregnancy/AddPregnancyDialog';
 import { PregnancyDetails } from '@/services/PregnancyService';
 
-// Create a content component that uses the DogsProvider context
-const PregnancyContent: React.FC = () => {
+const Pregnancy: React.FC = () => {
   const navigate = useNavigate();
   const { pregnancyId } = useParams();
   const { dogs } = useDogs();
@@ -184,15 +182,6 @@ const PregnancyContent: React.FC = () => {
         onClose={handleAddPregnancyDialogClose}
       />
     </PageLayout>
-  );
-};
-
-// Main Pregnancy component that wraps the content with DogsProvider
-const Pregnancy: React.FC = () => {
-  return (
-    <DogsProvider>
-      <PregnancyContent />
-    </DogsProvider>
   );
 };
 

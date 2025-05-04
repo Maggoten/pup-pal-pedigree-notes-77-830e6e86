@@ -5,29 +5,17 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface YearSelectorProps {
   selectedYear: number;
-  onChange: (year: number) => void;
-  startYear: number;
-  endYear: number;
+  currentYear: number;
+  handlePreviousYear: () => void;
+  handleNextYear: () => void;
 }
 
 const YearSelector: React.FC<YearSelectorProps> = ({ 
   selectedYear,
-  onChange,
-  startYear,
-  endYear
+  currentYear,
+  handlePreviousYear,
+  handleNextYear
 }) => {
-  const handlePreviousYear = () => {
-    if (selectedYear > startYear) {
-      onChange(selectedYear - 1);
-    }
-  };
-
-  const handleNextYear = () => {
-    if (selectedYear < endYear) {
-      onChange(selectedYear + 1);
-    }
-  };
-
   return (
     <div className="flex items-center space-x-1">
       <Button 
@@ -35,7 +23,6 @@ const YearSelector: React.FC<YearSelectorProps> = ({
         size="icon" 
         className="h-8 w-8 rounded-full" 
         onClick={handlePreviousYear}
-        disabled={selectedYear <= startYear}
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
@@ -45,7 +32,7 @@ const YearSelector: React.FC<YearSelectorProps> = ({
         size="icon" 
         className="h-8 w-8 rounded-full" 
         onClick={handleNextYear}
-        disabled={selectedYear >= endYear}
+        disabled={selectedYear >= currentYear}
       >
         <ChevronRight className="h-4 w-4" />
       </Button>

@@ -6,64 +6,11 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://yqcgqriecxtppuvcguyj.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2dxcmllY3h0cHB1dmNndXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTI4NjksImV4cCI6MjA2MDI2ODg2OX0.PD0W-rLpQBHUGm9--nv4-3PVYQFMAsRujmExBDuP5oA";
 
-// Mobile browser detection utility
-export const isMobileSafari = () => {
-  const ua = navigator.userAgent;
-  return /iPhone|iPad|iPod/.test(ua) && 
-         !('MSStream' in window) && // Fixed TypeScript error by using 'in' operator
-         /WebKit/.test(ua) && 
-         !/Chrome/.test(ua);
-};
-
-// Determine best storage mechanism based on browser
-const getStorageMechanism = () => {
-  // For Mobile Safari, try to use localStorage with specific fallback handling
-  if (isMobileSafari()) {
-    try {
-      // Test if localStorage is working by setting and reading a test value
-      localStorage.setItem('supabase_test', 'test');
-      localStorage.getItem('supabase_test');
-      localStorage.removeItem('supabase_test');
-      console.log('Using localStorage for authentication storage on Mobile Safari');
-      return localStorage;
-    } catch (e) {
-      console.warn('localStorage not available on Mobile Safari, using memory storage');
-      // Return an in-memory storage implementation as fallback
-      const memoryStorage = {
-        _data: {},
-        getItem(key: string) {
-          return this._data[key] || null;
-        },
-        setItem(key: string, value: string) {
-          this._data[key] = value;
-        },
-        removeItem(key: string) {
-          delete this._data[key];
-        },
-        clear() {
-          this._data = {};
-        },
-        key(index: number) {
-          return Object.keys(this._data)[index] || null;
-        },
-        get length() {
-          return Object.keys(this._data).length;
-        }
-      };
-      return memoryStorage;
-    }
-  }
-  
-  // For other browsers, use localStorage (default)
-  return localStorage;
-};
-
 // Log configuration details for debugging
 console.log('Supabase client configuration:', { 
   url: SUPABASE_URL,
   keyLength: SUPABASE_PUBLISHABLE_KEY?.length ?? 0,
-  isConfigured: !!SUPABASE_URL && !!SUPABASE_PUBLISHABLE_KEY,
-  isMobileSafari: isMobileSafari(),
+  isConfigured: !!SUPABASE_URL && !!SUPABASE_PUBLISHABLE_KEY
 });
 
 // Import the supabase client like this:
@@ -72,39 +19,17 @@ console.log('Supabase client configuration:', {
 // Define profile type that can be used in the app
 export type Profile = Database['public']['Tables']['profiles']['Row'];
 
-// Create and export the supabase client with enhanced configuration for mobile
-export const supabase = createClient<Database>(
-  SUPABASE_URL, 
-  SUPABASE_PUBLISHABLE_KEY,
-  {
-    auth: {
-      storage: getStorageMechanism(),
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      flowType: 'implicit',
-    },
-    realtime: {
-      params: {
-        eventsPerSecond: 2,
-      },
-    },
-    global: {
-      headers: {
-        'X-Client-Info': `browser-${isMobileSafari() ? 'mobile-safari' : 'desktop'}`,
-      },
-    },
-  }
-);
+// Create and export the supabase client
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 // Setup a health check for the Supabase connection
 (async () => {
   try {
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError) {
-      console.error('Supabase connection check failed:', sessionError.message);
+    const { error } = await supabase.auth.getSession();
+    if (error) {
+      console.error('Supabase connection check failed:', error.message);
     } else {
-      console.log('Supabase connection check successful', sessionData?.session ? 'Session exists' : 'No session');
+      console.log('Supabase connection check successful');
     }
   } catch (err) {
     console.error('Supabase client initialization error:', err);

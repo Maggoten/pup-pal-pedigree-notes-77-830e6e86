@@ -1,5 +1,5 @@
 
-import React, { lazy, Suspense, useState, useEffect } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddEventFormValues } from '@/components/calendar/types';
 
@@ -83,24 +83,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   calendarProps, 
   remindersProps 
 }) => {
-  // Add timeout to prevent infinite loading state
-  const [forceShow, setForceShow] = useState<boolean>(false);
-  
-  useEffect(() => {
-    // If data is not ready after 5 seconds, force show the components
-    const timer = setTimeout(() => {
-      if (!isDataReady) {
-        console.log("Forcing dashboard components to show after timeout");
-        setForceShow(true);
-      }
-    }, 5000);
-    
-    return () => clearTimeout(timer);
-  }, [isDataReady]);
-  
-  // Either data is ready, or we're forcing components to show after timeout
-  const shouldShowComponents = isDataReady || forceShow;
-  
   return (
     <div className="space-y-12 pb-12">
       {/* Calendar and Reminders section */}
@@ -108,7 +90,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendar taking 2/3 of the width */}
           <div className="lg:col-span-2">
-            {!shouldShowComponents ? (
+            {!isDataReady ? (
               <CalendarSkeleton />
             ) : (
               <Suspense fallback={<CalendarSkeleton />}>
@@ -119,7 +101,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
           
           {/* Reminders taking 1/3 of the width */}
           <div className="lg:col-span-1">
-            {!shouldShowComponents ? (
+            {!isDataReady ? (
               <RemindersSkeleton />
             ) : (
               <Suspense fallback={<RemindersSkeleton />}>
@@ -132,7 +114,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       
       {/* Annual Breeding Statistics in a separate section */}
       <section>
-        {!shouldShowComponents ? (
+        {!isDataReady ? (
           <StatsSkeleton />
         ) : (
           <Suspense fallback={<StatsSkeleton />}>

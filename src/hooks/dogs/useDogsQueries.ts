@@ -6,7 +6,6 @@ import { fetchDogs } from '@/services/dogs';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { UseDogsQueries } from './types';
 import { useAuth } from '@/hooks/useAuth';
-import { TIMEOUT } from '@/utils/timeoutUtils';
 
 export const useDogsQueries = (): UseDogsQueries => {
   const { user } = useAuth();
@@ -56,8 +55,7 @@ export const useDogsQueries = (): UseDogsQueries => {
     enabled: !!userId,
     staleTime: 60 * 1000, // Consider data fresh for 1 minute
     gcTime: 5 * 60 * 1000, // Keep unused data in cache for 5 minutes
-    retry: 3, // Increase retry attempts for mobile networks
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff with max 30s
+    retry: 2, // Retry failed queries twice
   });
 
   // Add detailed logging about query status
@@ -80,7 +78,7 @@ export const useDogsQueries = (): UseDogsQueries => {
     return result.data || [];
   }, [refetch, queryClient, userId]);
 
-  // Updated timeout to match TIMEOUT from timeoutUtils for consistency
+  // Add a timeout for the initial load to prevent infinite loading
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
     
@@ -88,22 +86,22 @@ export const useDogsQueries = (): UseDogsQueries => {
       console.log('Initial load - fetching dogs');
       refetch();
       
-      // Set a timeout to stop the initial loading state after TIMEOUT milliseconds
+      // Set a timeout to stop the initial loading state after 10 seconds
       timeoutId = setTimeout(() => {
         if (isInitialLoad) {
           console.log('Initial load timeout reached, resetting loading state');
           setIsInitialLoad(false);
           
-          // If no data was loaded, show an error toast with retry option
+          // If no data was loaded, show an error toast
           if (dogs.length === 0 && !error) {
             toast({
               title: "Loading timeout",
-              description: "Could not load dogs in a reasonable time. Pull down to refresh.",
+              description: "Could not load dogs in a reasonable time. Please try again.",
               variant: "destructive"
             });
           }
         }
-      }, TIMEOUT); // Use the same TIMEOUT value from utils for consistency
+      }, 10000); // 10 second timeout
     }
     
     return () => {

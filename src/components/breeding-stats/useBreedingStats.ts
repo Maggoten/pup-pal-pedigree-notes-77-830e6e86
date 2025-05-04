@@ -1,21 +1,11 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useDogs } from '@/context/DogsContext';
 
-export interface BreedingStatsResult {
-  totalPuppies: number;
-  successfulLitters: number;
-  avgLitterSize: number;
-  healthScores: {
-    totalLitters: number;
-    averageLitterSize: number;
-  };
-  isLoading: boolean;
-}
-
-export const useBreedingStats = (selectedYear: number): BreedingStatsResult => {
-  const { dogs, loading } = useDogs();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+const useBreedingStats = () => {
+  const { dogs } = useDogs();
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState(currentYear);
   
   // Calculate statistics for the selected year
   const stats = useMemo(() => {
@@ -49,37 +39,30 @@ export const useBreedingStats = (selectedYear: number): BreedingStatsResult => {
       : 0;
     
     return {
-      totalPuppies: yearPuppies,
-      successfulLitters: yearLitters, 
-      avgLitterSize: avgPuppiesPerLitter,
-      healthScores: {
-        totalLitters: yearLitters,
-        averageLitterSize: avgPuppiesPerLitter
-      }
+      totalLitters: yearLitters,
+      totalPuppies: yearPuppies, 
+      dogsAdded: dogsAddedThisYear,
+      avgLitterSize: avgPuppiesPerLitter
     };
   }, [dogs, selectedYear]);
 
-  // Reset loading state when dogs data or year changes
-  useEffect(() => {
-    setIsLoading(loading);
-    
-    // If data is already loaded, set a short timeout to simulate loading
-    // for better UX when switching years
-    if (!loading) {
-      setIsLoading(true);
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 300);
-      
-      return () => clearTimeout(timer);
+  const handlePreviousYear = () => {
+    setSelectedYear(prev => prev - 1);
+  };
+
+  const handleNextYear = () => {
+    if (selectedYear < currentYear) {
+      setSelectedYear(prev => prev + 1);
     }
-  }, [loading, selectedYear]);
+  };
 
   return {
-    ...stats,
-    isLoading
+    stats,
+    selectedYear,
+    currentYear,
+    handlePreviousYear,
+    handleNextYear
   };
 };
 
-// Also export as default for backward compatibility
 export default useBreedingStats;

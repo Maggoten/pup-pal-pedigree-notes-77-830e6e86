@@ -1,42 +1,47 @@
 
 import React from 'react';
-import { Heart, Baby, Dog, PieChart, HomeIcon } from 'lucide-react';
+import { Heart, Baby, Dog, PieChart } from 'lucide-react';
 
 interface StatisticCardProps {
-  title: string;
-  value: number | string;
-  icon: string;
-  highlight?: boolean;
+  type: 'litters' | 'puppies' | 'dogs' | 'averageLitter';
+  value: number;
+  label: string;
 }
 
-const StatisticCard: React.FC<StatisticCardProps> = ({ title, value, icon, highlight = false }) => {
-  // Map icon string to component
-  const renderIcon = () => {
-    switch (icon) {
-      case 'pawprint':
-        return <Baby className="h-5 w-5" />;
-      case 'home':
-        return <HomeIcon className="h-5 w-5" />;
-      case 'dogs':
-        return <Dog className="h-5 w-5" />;
-      case 'heart':
-        return <Heart className="h-5 w-5" />;
-      default:
-        return <PieChart className="h-5 w-5" />;
+const StatisticCard: React.FC<StatisticCardProps> = ({ type, value, label }) => {
+  const config = {
+    litters: {
+      icon: <Heart className="h-5 w-5" />,
+      color: "text-rose-500 bg-rose-50"
+    },
+    puppies: {
+      icon: <Baby className="h-5 w-5" />,
+      color: "text-amber-500 bg-amber-50"
+    },
+    dogs: {
+      icon: <Dog className="h-5 w-5" />,
+      color: "text-green-500 bg-green-50"
+    },
+    averageLitter: {
+      icon: <PieChart className="h-5 w-5" />,
+      color: "text-blue-500 bg-blue-50"
     }
   };
 
+  const { icon, color } = config[type];
+
   return (
-    <div className="flex flex-col items-center text-center py-3">
-      <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
-        highlight ? "text-blue-500 bg-blue-50" : "text-amber-500 bg-amber-50"
-      }`}>
-        {renderIcon()}
+    <div className="flex flex-col items-center text-center py-6">
+      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${color}`}>
+        {icon}
       </div>
-      <div className="text-2xl font-bold mb-1">{value}</div>
-      <div className="text-xs text-muted-foreground">{title}</div>
+      <div className="text-3xl font-bold mb-1">{value}</div>
+      <div className="text-sm text-muted-foreground">{label}</div>
     </div>
   );
 };
 
 export default StatisticCard;
+
+// Export a separate component for the PieChart icon so it can be used elsewhere
+export const PieChartIcon: React.FC = () => <PieChart className="h-5 w-5" />;

@@ -1,65 +1,66 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import YearSelector from './YearSelector';
-import StatisticCard from './StatisticCard';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import StatisticCard, { PieChartIcon } from './StatisticCard';
 import HealthDisplay from './HealthDisplay';
-import { useBreedingStats } from './useBreedingStats';
+import YearSelector from './YearSelector';
+import useBreedingStats from './useBreedingStats';
 
-/**
- * A component that displays breeding statistics for a given year
- */
-const BreedingStats: React.FC = () => {
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  
-  // Use our custom hook to get the stats data
-  const {
-    totalPuppies,
-    successfulLitters,
-    avgLitterSize,
-    healthScores,
-    isLoading
-  } = useBreedingStats(selectedYear);
-  
+const BreedingStats = () => {
+  const { stats, selectedYear, currentYear, handlePreviousYear, handleNextYear } = useBreedingStats();
+
   return (
-    <Card className="border-warmbeige-200 hover:shadow-md transition-all duration-300 bg-warmbeige-50">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-xl font-semibold">Annual Breeding Statistics</CardTitle>
+    <Card className="shadow-sm transition-shadow hover:shadow-md bg-greige-50">
+      <CardHeader className="bg-gradient-to-r from-greige-100 to-transparent border-b border-greige-200 pb-6 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="flex items-center gap-2 text-primary">
+            <PieChartIcon />
+            Annual Breeding Statistics
+          </CardTitle>
+          <CardDescription>
+            Overview of your {selectedYear} breeding program
+          </CardDescription>
+        </div>
+        
         <YearSelector 
-          selectedYear={selectedYear} 
-          onChange={setSelectedYear} 
-          startYear={2020} 
-          endYear={new Date().getFullYear()}
+          selectedYear={selectedYear}
+          currentYear={currentYear}
+          handlePreviousYear={handlePreviousYear}
+          handleNextYear={handleNextYear}
         />
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      
+      <CardContent className="p-8 md:p-10 space-y-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
           <StatisticCard 
-            title="Total Puppies" 
-            value={isLoading ? "..." : totalPuppies} 
-            icon="pawprint" 
+            type="litters"
+            value={stats.totalLitters}
+            label="Total Litters"
           />
+          
           <StatisticCard 
-            title="Litters" 
-            value={isLoading ? "..." : successfulLitters} 
-            icon="home" 
+            type="puppies"
+            value={stats.totalPuppies}
+            label="Total Puppies"
           />
+          
           <StatisticCard 
-            title="Avg. Litter Size" 
-            value={isLoading ? "..." : avgLitterSize} 
-            icon="dogs" 
+            type="dogs"
+            value={stats.dogsAdded}
+            label="Dogs Added"
           />
+          
           <StatisticCard 
-            title="Health Score" 
-            value={isLoading ? "..." : "View"} 
-            icon="heart" 
-            highlight
+            type="averageLitter"
+            value={stats.avgLitterSize}
+            label="Avg. Litter Size"
           />
         </div>
         
         <HealthDisplay 
-          healthScores={healthScores}
-          isLoading={isLoading}
+          totalLitters={stats.totalLitters}
+          averageLitterSize={stats.avgLitterSize}
+          selectedYear={selectedYear}
         />
       </CardContent>
     </Card>
