@@ -44,7 +44,10 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
         vaccinationDate: firstDog.vaccinationDate,
         heatHistory: firstDog.heatHistory ? 
           `${Array.isArray(firstDog.heatHistory) ? firstDog.heatHistory.length : 0} entries` : 'undefined',
-        lastHeat: firstDog.heatHistory && Array.isArray(firstDog.heatHistory) && firstDog.heatHistory.length > 0 ? 
+        lastHeat: firstDog.heatHistory && 
+                  Array.isArray(firstDog.heatHistory) && 
+                  firstDog.heatHistory.length > 0 && 
+                  typeof firstDog.heatHistory[0] === 'object' ? 
           firstDog.heatHistory[0].date : 'none'
       });
     }

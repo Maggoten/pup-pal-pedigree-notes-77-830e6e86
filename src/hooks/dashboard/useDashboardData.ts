@@ -20,7 +20,7 @@ export const useDashboardData = () => {
     handleMarkComplete,
     addCustomReminder,
     deleteReminder,
-    refreshReminders: refreshReminderData
+    refreshReminderData 
   } = useBreedingReminders();
   
   const {
