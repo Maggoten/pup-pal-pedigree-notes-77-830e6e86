@@ -1,3 +1,5 @@
 
-import BreedingStats from './breeding-stats';
-export default BreedingStats;
+import BreedingStatsComponent from './breeding-stats/BreedingStats';
+
+// Export the component directly without lazy loading
+export default BreedingStatsComponent;

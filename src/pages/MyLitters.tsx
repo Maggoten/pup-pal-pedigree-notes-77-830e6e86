@@ -1,13 +1,10 @@
 
-import React, { Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LitterFilterProvider } from '@/components/litters/LitterFilterProvider';
 import { Skeleton } from '@/components/ui/skeleton';
-import { lazy } from 'react';
+import MyLittersContent from '@/components/litters/MyLittersContent';
 import PageLayout from '@/components/PageLayout';
 import { PawPrint } from 'lucide-react';
-
-// Lazy load the main content component
-const MyLittersContent = lazy(() => import('@/components/litters/MyLittersContent'));
 
 const MyLittersLoading = () => (
   <div className="space-y-4 p-4">
@@ -20,6 +17,17 @@ const MyLittersLoading = () => (
 );
 
 const MyLitters: React.FC = () => {
+  const [contentLoading, setContentLoading] = useState(true);
+  
+  // Effect to simulate the content loading (replacing Suspense behavior)
+  useEffect(() => {
+    // Small timeout to simulate dynamic import load time
+    const timer = setTimeout(() => {
+      setContentLoading(false);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <PageLayout 
       title="My Litters" 
@@ -28,9 +36,11 @@ const MyLitters: React.FC = () => {
       className="bg-warmbeige-50/50"
     >
       <LitterFilterProvider>
-        <Suspense fallback={<MyLittersLoading />}>
+        {contentLoading ? (
+          <MyLittersLoading />
+        ) : (
           <MyLittersContent />
-        </Suspense>
+        )}
       </LitterFilterProvider>
     </PageLayout>
   );

@@ -1,13 +1,11 @@
 
-import React, { memo, Suspense, lazy } from 'react';
+import React, { memo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useDogs } from '@/context/DogsContext';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AddEventFormValues } from './calendar/types';
-
-// Lazy load the calendar content for better performance
-const CalendarContent = lazy(() => import('./calendar/CalendarContent'));
+import CalendarContent from './calendar/CalendarContent';
 
 // Define props interface for calendar events data
 interface CalendarEventsData {
@@ -35,6 +33,16 @@ const CalendarSkeleton = () => (
 // Use memo to prevent unnecessary re-renders
 const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) => {
   const { dogs } = useDogs();
+  const [contentLoading, setContentLoading] = useState(true);
+  
+  // Effect to simulate the content loading (replacing Suspense behavior)
+  React.useEffect(() => {
+    // Small timeout to simulate dynamic import load time
+    const timer = setTimeout(() => {
+      setContentLoading(false);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
   
   // If no events data is provided, we need to fetch it - for backward compatibility
   // We'll use the provided eventsData directly from props if available
@@ -82,7 +90,7 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
   return (
     <Card className="border-warmbeige-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 bg-warmbeige-50 flex flex-col">
       <div className="flex flex-col">
-        {isLoading ? (
+        {isLoading || contentLoading ? (
           <CalendarSkeleton />
         ) : hasError ? (
           <div className="p-6 flex items-center justify-center">
@@ -93,17 +101,15 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
             </Alert>
           </div>
         ) : (
-          <Suspense fallback={<CalendarSkeleton />}>
-            <CalendarContent
-              dogs={dogs}
-              getEventsForDate={getEventsForDate}
-              getEventColor={getEventColor}
-              onDeleteEvent={deleteEvent}
-              onAddEvent={handleAddEvent}
-              onEditEvent={handleEditEvent}
-              compact={false} // Use full size calendar now
-            />
-          </Suspense>
+          <CalendarContent
+            dogs={dogs}
+            getEventsForDate={getEventsForDate}
+            getEventColor={getEventColor}
+            onDeleteEvent={deleteEvent}
+            onAddEvent={handleAddEvent}
+            onEditEvent={handleEditEvent}
+            compact={false} // Use full size calendar now
+          />
         )}
       </div>
     </Card>

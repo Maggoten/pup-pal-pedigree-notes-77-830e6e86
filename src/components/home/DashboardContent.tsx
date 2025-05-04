@@ -1,12 +1,12 @@
 
-import React, { lazy, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddEventFormValues } from '@/components/calendar/types';
 
-// Lazy load components to improve initial page load time
-const BreedingCalendar = lazy(() => import('@/components/BreedingCalendar'));
-const BreedingReminders = lazy(() => import('@/components/BreedingReminders'));
-const BreedingStats = lazy(() => import('@/components/BreedingStats'));
+// Static imports to replace lazy loading
+import BreedingCalendar from '@/components/BreedingCalendar';
+import BreedingReminders from '@/components/BreedingReminders';
+import BreedingStats from '@/components/BreedingStats';
 
 interface DashboardContentProps {
   isDataReady: boolean;
@@ -83,6 +83,21 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   calendarProps, 
   remindersProps 
 }) => {
+  const [componentsLoaded, setComponentsLoaded] = useState(false);
+  
+  // Effect to simulate the component loading (replacing Suspense behavior)
+  useEffect(() => {
+    if (isDataReady) {
+      // Small timeout to simulate dynamic import load time
+      const timer = setTimeout(() => {
+        setComponentsLoaded(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isDataReady]);
+  
+  const showComponents = isDataReady && componentsLoaded;
+  
   return (
     <div className="space-y-12 pb-12">
       {/* Calendar and Reminders section */}
@@ -90,23 +105,19 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendar taking 2/3 of the width */}
           <div className="lg:col-span-2">
-            {!isDataReady ? (
+            {!showComponents ? (
               <CalendarSkeleton />
             ) : (
-              <Suspense fallback={<CalendarSkeleton />}>
-                <BreedingCalendar eventsData={calendarProps} />
-              </Suspense>
+              <BreedingCalendar eventsData={calendarProps} />
             )}
           </div>
           
           {/* Reminders taking 1/3 of the width */}
           <div className="lg:col-span-1">
-            {!isDataReady ? (
+            {!showComponents ? (
               <RemindersSkeleton />
             ) : (
-              <Suspense fallback={<RemindersSkeleton />}>
-                <BreedingReminders remindersData={remindersProps} />
-              </Suspense>
+              <BreedingReminders remindersData={remindersProps} />
             )}
           </div>
         </div>
@@ -114,12 +125,10 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       
       {/* Annual Breeding Statistics in a separate section */}
       <section>
-        {!isDataReady ? (
+        {!showComponents ? (
           <StatsSkeleton />
         ) : (
-          <Suspense fallback={<StatsSkeleton />}>
-            <BreedingStats />
-          </Suspense>
+          <BreedingStats />
         )}
       </section>
     </div>
