@@ -180,8 +180,8 @@ export const useCalendarEvents = (dogs: Dog[]) => {
         if (event.date instanceof Date) {
           eventDateStr = event.date.toISOString().split('T')[0];
         } else if (typeof event.date === 'string') {
-          // Handle ISO string directly
-          eventDateStr = event.date.split('T')[0];
+          // Handle ISO string directly with proper type assertion
+          eventDateStr = (event.date as string).split('T')[0];
         } else {
           // Handle date that's not a Date or string - create a new Date object
           const eventDate = new Date(event.date as any);
