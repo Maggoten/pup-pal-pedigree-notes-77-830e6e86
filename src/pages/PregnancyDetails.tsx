@@ -11,6 +11,7 @@ import PregnancyDropdownSelector from '@/components/pregnancy/PregnancyDropdownS
 import AddPregnancyDialog from '@/components/pregnancy/AddPregnancyDialog';
 import { Button } from '@/components/ui/button';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
+import { DogsProvider } from '@/context/DogsContext';
 
 const PregnancyDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -84,51 +85,53 @@ const PregnancyDetails = () => {
   }
 
   return (
-    <PageLayout 
-      title={`${pregnancy.femaleName}'s Pregnancy`} 
-      description="Track pregnancy progress and development"
-      icon={<Heart className="h-6 w-6" />}
-    >
-      <div className="flex justify-end items-center gap-4 mb-6">
-        <Button 
-          onClick={handleAddPregnancyClick} 
-          variant="default"
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add Pregnancy
-        </Button>
-        <PregnancyDropdownSelector 
-          pregnancies={activePregnancies} 
-          currentPregnancyId={pregnancy.id}
-        />
-      </div>
-
-      <div className="space-y-8">
-        {/* Hero Section with Pregnancy Summary Cards */}
-        <PregnancySummaryCards
-          matingDate={pregnancy.matingDate}
-          expectedDueDate={pregnancy.expectedDueDate}
-          daysLeft={pregnancy.daysLeft}
-        />
-        
-        {/* Full Width Pregnancy Journey Tabs */}
-        <div className="w-full">
-          <PregnancyTabs 
-            pregnancyId={pregnancy.id}
-            femaleName={pregnancy.femaleName}
-            matingDate={pregnancy.matingDate}
-            expectedDueDate={pregnancy.expectedDueDate}
+    <DogsProvider>
+      <PageLayout 
+        title={`${pregnancy.femaleName}'s Pregnancy`} 
+        description="Track pregnancy progress and development"
+        icon={<Heart className="h-6 w-6" />}
+      >
+        <div className="flex justify-end items-center gap-4 mb-6">
+          <Button 
+            onClick={handleAddPregnancyClick} 
+            variant="default"
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Pregnancy
+          </Button>
+          <PregnancyDropdownSelector 
+            pregnancies={activePregnancies} 
+            currentPregnancyId={pregnancy.id}
           />
         </div>
-      </div>
 
-      <AddPregnancyDialog 
-        open={addPregnancyDialogOpen} 
-        onOpenChange={setAddPregnancyDialogOpen}
-        onClose={handleAddPregnancyDialogClose}
-      />
-    </PageLayout>
+        <div className="space-y-8">
+          {/* Hero Section with Pregnancy Summary Cards */}
+          <PregnancySummaryCards
+            matingDate={pregnancy.matingDate}
+            expectedDueDate={pregnancy.expectedDueDate}
+            daysLeft={pregnancy.daysLeft}
+          />
+          
+          {/* Full Width Pregnancy Journey Tabs */}
+          <div className="w-full">
+            <PregnancyTabs 
+              pregnancyId={pregnancy.id}
+              femaleName={pregnancy.femaleName}
+              matingDate={pregnancy.matingDate}
+              expectedDueDate={pregnancy.expectedDueDate}
+            />
+          </div>
+        </div>
+
+        <AddPregnancyDialog 
+          open={addPregnancyDialogOpen} 
+          onOpenChange={setAddPregnancyDialogOpen}
+          onClose={handleAddPregnancyDialogClose}
+        />
+      </PageLayout>
+    </DogsProvider>
   );
 };
 

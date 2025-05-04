@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { addDays } from 'date-fns';
 import { createPregnancy } from '@/services/PregnancyService';
+import { DogsProvider } from '@/context/DogsContext';
 
 interface AddPregnancyDialogProps {
   onClose: () => void;
@@ -22,11 +23,8 @@ interface AddPregnancyDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({ 
-  onClose, 
-  open,
-  onOpenChange
-}) => {
+// Create an inner content component that uses the DogsProvider context
+const AddPregnancyDialogContent: React.FC<AddPregnancyDialogProps> = ({ onClose, open, onOpenChange }) => {
   const { dogs } = useDogs();
   const [loading, setLoading] = useState(false);
   const [femaleDogId, setFemaleDogId] = useState<string>('');
@@ -218,6 +216,15 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
         </form>
       </DialogContent>
     </Dialog>
+  );
+};
+
+// Main AddPregnancyDialog component that wraps the content with DogsProvider
+const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = (props) => {
+  return (
+    <DogsProvider>
+      <AddPregnancyDialogContent {...props} />
+    </DogsProvider>
   );
 };
 
