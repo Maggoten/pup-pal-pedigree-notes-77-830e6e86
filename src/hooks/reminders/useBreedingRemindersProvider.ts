@@ -98,8 +98,8 @@ export const useBreedingRemindersProvider = () => {
         return;
       }
       
-      // Update the reminder status
-      updateReminder(id, { ...reminderToUpdate, isCompleted: true })
+      // Update the reminder status - Fix: Pass just the boolean value for isCompleted
+      updateReminder(id, true) // Changed from passing the whole reminder object to just passing true
         .then(() => {
           console.log(`[BREEDING_REMINDERS] Successfully marked reminder ${id} as complete`);
           refetch();

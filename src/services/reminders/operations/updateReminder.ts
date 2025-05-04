@@ -1,42 +1,32 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { Reminder } from '@/types/reminders';
 
 /**
- * Update an existing reminder (including mark as complete/incomplete)
+ * Update a reminder's completion status.
+ * @param id - The ID of the reminder to update
+ * @param isCompleted - Boolean indicating whether the reminder is completed
  */
-export const updateReminder = async (id: string, isCompleted: boolean): Promise<boolean> => {
+export const updateReminder = async (id: string, isCompleted: boolean): Promise<void> => {
   try {
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !sessionData?.session) {
-      console.error('No active session:', sessionError);
-      return false;
-    }
-    
-    const userId = sessionData.session.user.id;
+    console.log(`[REMINDERS_SERVICE] Updating reminder ${id} to completed: ${isCompleted}`);
     
     const { error } = await supabase
       .from('reminders')
       .update({ 
         is_completed: isCompleted,
-        updated_at: new Date().toISOString()
+        completed_at: isCompleted ? new Date().toISOString() : null
       })
-      .eq('id', id)
-      .eq('user_id', userId);  // Make sure we're only updating the user's own reminders
+      .eq('id', id);
     
     if (error) {
-      console.error("Error updating reminder:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update reminder. Please try again.",
-        variant: "destructive"
-      });
-      return false;
+      console.error('[REMINDERS_SERVICE] Error updating reminder:', error);
+      throw new Error(`Failed to update reminder: ${error.message}`);
     }
     
-    return true;
+    console.log(`[REMINDERS_SERVICE] Successfully updated reminder ${id}`);
   } catch (error) {
-    console.error("Error in updateReminder:", error);
-    return false;
+    console.error(`[REMINDERS_SERVICE] Error in updateReminder:`, error);
+    throw error;
   }
 };

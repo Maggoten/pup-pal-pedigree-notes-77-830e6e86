@@ -26,14 +26,14 @@ export const useReminderProvider = () => {
     refetch,
     handlePageChange,
     handlePageSizeChange
-  } = useReminderQueries(user, dogs);
+  } = useReminderQueries(user?.id, dogs); // Fix: Pass user?.id instead of user
   
   // Get reminder mutations
   const {
     handleMarkComplete: markComplete,
     addCustomReminder,
     deleteReminder
-  } = useReminderMutations(user);
+  } = useReminderMutations(user?.id); // Fix: Pass user?.id instead of user
   
   // Get sorted reminders - memoized in the hook
   const sortedReminders = useSortedReminders(reminders);
