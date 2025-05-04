@@ -5,7 +5,6 @@ import YearSelector from './YearSelector';
 import StatisticCard from './StatisticCard';
 import HealthDisplay from './HealthDisplay';
 import { useBreedingStats } from './useBreedingStats';
-import { Dog } from '@/types/dogs';
 
 /**
  * A component that displays breeding statistics for a given year
