@@ -88,7 +88,7 @@ const MobileDebugPanel: React.FC = () => {
       // Clear React Query cache
       await queryClient.invalidateQueries();
       
-      // Refresh dogs data - fixing the error by removing the second argument
+      // Refresh dogs data
       await refreshDogs();
       console.log('[MobileDebug] Dogs refreshed');
       
@@ -102,7 +102,7 @@ const MobileDebugPanel: React.FC = () => {
       // Manual trigger for reminders if user is available
       if (user && dogs.length > 0) {
         // Explicitly typing the function to match our usage
-        const manualReminders = await triggerAllReminders(user.id, dogs);
+        const manualReminders = await (triggerAllReminders as (userId: string, dogs: any[]) => Promise<any[]>)(user.id, dogs);
         console.log(`[MobileDebug] Manually generated ${manualReminders.length} reminders`);
       }
     } catch (error) {

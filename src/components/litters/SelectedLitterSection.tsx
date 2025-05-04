@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, lazy, Suspense, memo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Litter, Puppy } from '@/types/breeding';
 import { differenceInWeeks, parseISO } from 'date-fns';
@@ -8,10 +8,10 @@ import { useDogsQueries } from '@/hooks/dogs/useDogsQueries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
 
-// Use lazy loading for tab content components
-const PuppiesTabContent = lazy(() => import('./tabs/PuppiesTabContent'));
-const DevelopmentTabContent = lazy(() => import('./tabs/DevelopmentTabContent'));
-const GrowthChartsTabContent = lazy(() => import('./tabs/GrowthChartsTabContent'));
+// Static imports instead of lazy loading
+import PuppiesTabContent from './tabs/PuppiesTabContent';
+import DevelopmentTabContent from './tabs/DevelopmentTabContent';
+import GrowthChartsTabContent from './tabs/GrowthChartsTabContent';
 
 // Loading fallback component
 const TabLoading = memo(() => (
@@ -99,42 +99,41 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
             <TabsTrigger value="charts">Growth Charts</TabsTrigger>
           </TabsList>
 
-          <Suspense fallback={<TabLoading />}>
-            <TabsContent value="puppies" className="mt-0">
-              {activeTab === 'puppies' && (
-                <PuppiesTabContent 
-                  puppies={puppies}
-                  onAddPuppy={onAddPuppy}
-                  onUpdatePuppy={onUpdatePuppy}
-                  onDeletePuppy={onDeletePuppy}
-                  litterDob={litter.dateOfBirth}
-                  damBreed={damBreed}  
-                  onSelectPuppy={setSelectedPuppy}
-                  selectedPuppy={selectedPuppy}
-                  litterAge={litterAge}
-                />
-              )}
-            </TabsContent>
+          {/* No Suspense wrapper needed anymore since we're using static imports */}
+          <TabsContent value="puppies" className="mt-0">
+            {activeTab === 'puppies' && (
+              <PuppiesTabContent 
+                puppies={puppies}
+                onAddPuppy={onAddPuppy}
+                onUpdatePuppy={onUpdatePuppy}
+                onDeletePuppy={onDeletePuppy}
+                litterDob={litter.dateOfBirth}
+                damBreed={damBreed}  
+                onSelectPuppy={setSelectedPuppy}
+                selectedPuppy={selectedPuppy}
+                litterAge={litterAge}
+              />
+            )}
+          </TabsContent>
 
-            <TabsContent value="development" className="mt-0">
-              {activeTab === 'development' && (
-                <DevelopmentTabContent 
-                  litter={litter}
-                  onToggleItem={() => {}}
-                />
-              )}
-            </TabsContent>
+          <TabsContent value="development" className="mt-0">
+            {activeTab === 'development' && (
+              <DevelopmentTabContent 
+                litter={litter}
+                onToggleItem={() => {}}
+              />
+            )}
+          </TabsContent>
 
-            <TabsContent value="charts" className="mt-0">
-              {activeTab === 'charts' && (
-                <GrowthChartsTabContent 
-                  selectedPuppy={selectedPuppy}
-                  puppies={puppies}
-                  onSelectPuppy={setSelectedPuppy}
-                />
-              )}
-            </TabsContent>
-          </Suspense>
+          <TabsContent value="charts" className="mt-0">
+            {activeTab === 'charts' && (
+              <GrowthChartsTabContent 
+                selectedPuppy={selectedPuppy}
+                puppies={puppies}
+                onSelectPuppy={setSelectedPuppy}
+              />
+            )}
+          </TabsContent>
         </Tabs>
       )}
     </div>
