@@ -1,3 +1,4 @@
+
 /**
  * Utilities for handling dates in a timezone-safe manner
  */
@@ -25,20 +26,36 @@ export const dateToISOString = (date: Date | null | undefined): string | null =>
 export const parseISODate = (dateStr: string | null | undefined): Date | null => {
   if (!dateStr) return null;
   
-  // Create a date at noon in the user's local timezone
-  // This helps avoid date shifts due to timezone conversions
-  const [year, month, day] = dateStr.split('-').map(Number);
-  if (!year || !month || !day) return null;
-  
-  const date = new Date();
-  date.setFullYear(year);
-  date.setMonth(month - 1); // months are 0-indexed
-  date.setDate(day);
-  
-  // Set to noon to avoid timezone-related date shifts
-  date.setHours(12, 0, 0, 0);
-  
-  return date;
+  try {
+    // Create a date at noon in the user's local timezone
+    // This helps avoid date shifts due to timezone conversions
+    const [year, month, day] = dateStr.split('-').map(Number);
+    if (!year || !month || !day) return null;
+    if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+    
+    const date = new Date();
+    date.setFullYear(year);
+    date.setMonth(month - 1); // months are 0-indexed
+    date.setDate(day);
+    
+    // Set to noon to avoid timezone-related date shifts
+    date.setHours(12, 0, 0, 0);
+    
+    return date;
+  } catch (err) {
+    console.error("Error parsing date:", dateStr, err);
+    return null;
+  }
+};
+
+/**
+ * Creates a normalized date at noon today for consistent date comparisons
+ * This ensures all date comparisons are done with the same time
+ */
+export const getNormalizedToday = (): Date => {
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  return today;
 };
 
 /**

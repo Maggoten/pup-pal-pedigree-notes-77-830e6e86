@@ -1,7 +1,6 @@
-
 import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
-import { differenceInDays, parseISO, addDays, addYears, startOfDay, isAfter, isBefore, isToday, format, isSameDay } from 'date-fns';
+import { differenceInDays, parseISO, addDays, addYears, startOfDay, isAfter, isBefore, isToday, format, isSameDay, isValid } from 'date-fns';
 import { createPawPrintIcon, createCalendarClockIcon } from '@/utils/iconUtils';
 import { dateToISOString, parseISODate } from '@/utils/dateUtils';
 
@@ -23,26 +22,44 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
         new Date(b.date).getTime() - new Date(a.date).getTime()
       );
       
-      const lastHeatDate = parseISODate(sortedHeatDates[0].date) || new Date();
+      const lastHeatDateString = sortedHeatDates[0].date;
+      console.log(`[HEAT DEBUG] Processing heat for ${dog.name}, last heat date string: ${lastHeatDateString}`);
+      
+      const lastHeatDate = parseISODate(lastHeatDateString);
+      if (!lastHeatDate) {
+        console.error(`[HEAT ERROR] Failed to parse last heat date for ${dog.name}: ${lastHeatDateString}`);
+        return; // Skip heat reminders for this dog
+      }
+      
       // Use heat interval if available, otherwise default to 180 days (6 months)
       const intervalDays = dog.heatInterval || 180;
+      
+      // Calculate the next heat date by adding the interval to the last heat date
       const nextHeatDate = addDays(lastHeatDate, intervalDays);
       
-      console.log(`Dog ${dog.name}: Last heat date: ${format(lastHeatDate, 'yyyy-MM-dd')}, Next heat: ${format(nextHeatDate, 'yyyy-MM-dd')}, Days until: ${differenceInDays(nextHeatDate, today)}`);
+      console.log(`[HEAT DEBUG] Dog ${dog.name}: Last heat date: ${format(lastHeatDate, 'yyyy-MM-dd')}, Next heat: ${format(nextHeatDate, 'yyyy-MM-dd')}`);
+      console.log(`[HEAT DEBUG] Days until next heat: ${differenceInDays(nextHeatDate, today)}, Interval: ${intervalDays} days`);
       
       // Show reminder for upcoming heat 30 days in advance
-      if (isAfter(nextHeatDate, today) && differenceInDays(nextHeatDate, today) <= 30) {
+      const daysUntilHeat = differenceInDays(nextHeatDate, today);
+      console.log(`[HEAT DEBUG] Days until heat for ${dog.name}: ${daysUntilHeat}`);
+      
+      if (daysUntilHeat <= 30 && daysUntilHeat >= -5) { // Show reminder even if up to 5 days past
         reminders.push({
-          id: `heat-${dog.id}`,
-          title: `${dog.name}'s Heat Approaching`,
-          description: `Expected heat cycle in ${differenceInDays(nextHeatDate, today)} days`,
+          id: `heat-${dog.id}-${Date.now()}`, // Add timestamp for uniqueness
+          title: `${dog.name}'s Heat ${daysUntilHeat < 0 ? 'Started' : 'Approaching'}`,
+          description: daysUntilHeat < 0 
+            ? `Heat started ${Math.abs(daysUntilHeat)} days ago` 
+            : `Expected heat cycle in ${daysUntilHeat} days`,
           icon: createPawPrintIcon("rose-500"),
           dueDate: nextHeatDate,
-          priority: 'high',
+          priority: daysUntilHeat <= 7 ? 'high' : 'medium',
           type: 'heat',
           relatedId: dog.id
         });
-        console.log(`Created heat reminder for dog ${dog.name}`);
+        console.log(`[HEAT DEBUG] Created heat reminder for dog ${dog.name}`);
+      } else {
+        console.log(`[HEAT DEBUG] No heat reminder created for ${dog.name}, outside window: ${daysUntilHeat} days until heat`);
       }
     }
     
@@ -53,53 +70,70 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
       
       try {
         const lastVaccination = parseISODate(dog.vaccinationDate);
-        if (!lastVaccination) {
+        if (!lastVaccination || !isValid(lastVaccination)) {
           console.error(`[VACCINATION DEBUG] Failed to parse vaccination date for ${dog.name}: ${dog.vaccinationDate}`);
           return; // Skip this vaccination reminder
         }
         
         console.log(`[VACCINATION DEBUG] Parsed last vaccination: ${format(lastVaccination, 'yyyy-MM-dd')}`);
         
-        // Calculate next vaccination date based on annual schedule
-        // Create a date for this year's vaccination
-        const currentYear = today.getFullYear();
+        // Extract day and month from the last vaccination date
         const lastVaccinationMonth = lastVaccination.getMonth();
         const lastVaccinationDay = lastVaccination.getDate();
         
-        // Create a date for this year's vaccination
-        const thisYearsVaccination = new Date(currentYear, lastVaccinationMonth, lastVaccinationDay);
+        // Create dates for both this year and next year's vaccinations
+        const thisYear = today.getFullYear();
+        const nextYear = thisYear + 1;
         
-        // Create a date for next year's vaccination
-        const nextYearsVaccination = new Date(currentYear + 1, lastVaccinationMonth, lastVaccinationDay);
+        // Create normalized dates at noon to avoid time comparison issues
+        const thisYearVaccination = new Date(thisYear, lastVaccinationMonth, lastVaccinationDay, 12, 0, 0, 0);
+        const nextYearVaccination = new Date(nextYear, lastVaccinationMonth, lastVaccinationDay, 12, 0, 0, 0);
         
-        // Decide which vaccination date to use
+        console.log(`[VACCINATION DEBUG] Today: ${format(today, 'yyyy-MM-dd')} `);
+        console.log(`[VACCINATION DEBUG] This year vaccination: ${format(thisYearVaccination, 'yyyy-MM-dd')}`);
+        console.log(`[VACCINATION DEBUG] Next year vaccination: ${format(nextYearVaccination, 'yyyy-MM-dd')}`);
+        
+        // Decide which vaccination date to use - the closest future date or most recent past date
         let nextVaccination;
-        if (isAfter(thisYearsVaccination, today) || isSameDay(thisYearsVaccination, today)) {
-          nextVaccination = thisYearsVaccination;
+        let daysUntilVaccination;
+        
+        if (isSameDay(thisYearVaccination, today) || isAfter(thisYearVaccination, today)) {
+          // If this year's date is today or in the future, use it
+          nextVaccination = thisYearVaccination;
+          daysUntilVaccination = differenceInDays(thisYearVaccination, today);
           console.log(`[VACCINATION DEBUG] Using this year's vaccination date: ${format(nextVaccination, 'yyyy-MM-dd')}`);
         } else {
-          nextVaccination = nextYearsVaccination;
+          // Otherwise use next year's date
+          nextVaccination = nextYearVaccination;
+          daysUntilVaccination = differenceInDays(nextYearVaccination, today);
           console.log(`[VACCINATION DEBUG] Using next year's vaccination date: ${format(nextVaccination, 'yyyy-MM-dd')}`);
         }
         
-        // Calculate days until vaccination
-        const daysUntilVaccination = differenceInDays(nextVaccination, today);
+        console.log(`[VACCINATION DEBUG] Dog ${dog.name}: Days until vaccination: ${daysUntilVaccination}`);
         
-        console.log(`[VACCINATION DEBUG] Dog ${dog.name}: Next vaccination date: ${format(nextVaccination, 'yyyy-MM-dd')}, Days until: ${daysUntilVaccination}`);
-        
-        // Create reminder if vaccination is within the next 60 days or overdue by up to 14 days
-        if (daysUntilVaccination >= -14 && daysUntilVaccination <= 60) {
+        // Create reminder if vaccination is:
+        // 1. Coming up in the next 60 days, or
+        // 2. Overdue by up to 30 days, or
+        // 3. Today
+        if (daysUntilVaccination >= -30 && daysUntilVaccination <= 60) {
           const isOverdue = daysUntilVaccination < 0;
+          const isToday = daysUntilVaccination === 0;
+          
+          const reminderPriority = isOverdue ? 'high' : (daysUntilVaccination <= 7 ? 'high' : 'medium');
           
           const vaccinationReminder: Reminder = {
-            id: `vaccine-${dog.id}`,
-            title: `${dog.name}'s Vaccination ${isOverdue ? 'Overdue' : 'Due'}`,
-            description: isOverdue 
-              ? `Vaccination overdue by ${Math.abs(daysUntilVaccination)} days`
-              : `Vaccination due in ${daysUntilVaccination} days`,
-            icon: createCalendarClockIcon("amber-500"),
+            id: `vaccine-${dog.id}-${Date.now()}`, // Add timestamp for uniqueness
+            title: isToday 
+              ? `${dog.name}'s Vaccination Due Today`
+              : `${dog.name}'s Vaccination ${isOverdue ? 'Overdue' : 'Due'}`,
+            description: isToday 
+              ? `${dog.name}'s vaccination is due today` 
+              : isOverdue 
+                ? `Vaccination overdue by ${Math.abs(daysUntilVaccination)} days`
+                : `Vaccination due in ${daysUntilVaccination} days`,
+            icon: createCalendarClockIcon(isOverdue ? "red-500" : "amber-500"),
             dueDate: nextVaccination,
-            priority: isOverdue ? 'high' : 'medium',
+            priority: reminderPriority,
             type: 'vaccination',
             relatedId: dog.id
           };
@@ -125,25 +159,36 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
           return; // Skip this birthday reminder
         }
         
-        const currentYear = today.getFullYear();
-        const birthdateThisYear = new Date(currentYear, birthdate.getMonth(), birthdate.getDate());
+        // Extract day and month from birthdate
+        const birthMonth = birthdate.getMonth();
+        const birthDay = birthdate.getDate();
         
-        // If birthday already passed this year, calculate for next year
-        const nextBirthday = isBefore(birthdateThisYear, today) 
-          ? new Date(currentYear + 1, birthdate.getMonth(), birthdate.getDate())
-          : birthdateThisYear;
+        // Create dates for this year's birthday
+        const thisYear = today.getFullYear();
+        const nextYear = thisYear + 1;
+        
+        // Create normalized birthday dates at noon
+        const thisYearBirthday = new Date(thisYear, birthMonth, birthDay, 12, 0, 0, 0);
+        const nextYearBirthday = new Date(nextYear, birthMonth, birthDay, 12, 0, 0, 0);
+        
+        // Choose the appropriate birthday based on date
+        let nextBirthday;
+        if (isSameDay(thisYearBirthday, today) || isAfter(thisYearBirthday, today)) {
+          nextBirthday = thisYearBirthday;
+        } else {
+          nextBirthday = nextYearBirthday;
+        }
         
         const daysUntilBirthday = differenceInDays(nextBirthday, today);
         console.log(`Dog ${dog.name}: Birthday: ${format(birthdate, 'yyyy-MM-dd')}, Next birthday: ${format(nextBirthday, 'yyyy-MM-dd')}, Days until: ${daysUntilBirthday}`);
         
         // Show birthday reminders within 7 days before and 2 days after
         if (daysUntilBirthday <= 7 && daysUntilBirthday >= -2) {
-          const age = isToday(nextBirthday) 
-            ? currentYear - birthdate.getFullYear() 
-            : (currentYear + (isBefore(birthdateThisYear, today) ? 1 : 0)) - birthdate.getFullYear();
+          const birthYear = birthdate.getFullYear();
+          const age = thisYear - birthYear + (nextBirthday === nextYearBirthday ? 1 : 0);
           
           reminders.push({
-            id: `birthday-${dog.id}`,
+            id: `birthday-${dog.id}-${Date.now()}`, // Add timestamp for uniqueness
             title: `${dog.name}'s Birthday`,
             description: daysUntilBirthday === 0 
               ? `${dog.name} turns ${age} today!` 
@@ -168,6 +213,13 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
   const vaccinationReminders = reminders.filter(r => r.type === 'vaccination');
   console.log(`[VACCINATION SUMMARY] Generated ${vaccinationReminders.length} vaccination reminders:`);
   vaccinationReminders.forEach(r => {
+    console.log(`- ${r.title} (due: ${format(r.dueDate, 'yyyy-MM-dd')}, priority: ${r.priority})`);
+  });
+  
+  // Summarize heat reminders
+  const heatReminders = reminders.filter(r => r.type === 'heat');
+  console.log(`[HEAT SUMMARY] Generated ${heatReminders.length} heat reminders:`);
+  heatReminders.forEach(r => {
     console.log(`- ${r.title} (due: ${format(r.dueDate, 'yyyy-MM-dd')}, priority: ${r.priority})`);
   });
   

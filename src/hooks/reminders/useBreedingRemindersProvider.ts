@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Reminder, CustomReminderInput } from '@/types/reminders';
 import { useAuth } from '@/hooks/useAuth';
@@ -70,25 +71,31 @@ export const useBreedingRemindersProvider = () => {
         );
       });
       
-      // Generate all reminders in sequence
-      const dogReminders = userDogs.length > 0 ? generateDogReminders(userDogs) : [];
-      console.log(`[Reminders Provider] Generated ${dogReminders.length} dog reminders:`);
-      dogReminders.forEach(r => console.log(`  - ${r.title} (${r.type}) - Due: ${r.dueDate.toISOString().slice(0, 10)} - Priority: ${r.priority}`));
-      
-      const litterReminders = await generateLitterReminders(user.id);
-      console.log(`[Reminders Provider] Generated ${litterReminders.length} litter reminders`);
-      
-      const generalReminders = userDogs.length > 0 ? generateGeneralReminders(userDogs) : [];
-      console.log(`[Reminders Provider] Generated ${generalReminders.length} general reminders`);
-      
-      // Return all reminders at once
-      const allReminders = [...supabaseReminders, ...dogReminders, ...litterReminders, ...generalReminders];
-      console.log(`[Reminders Provider] Total: ${allReminders.length} reminders loaded`);
-      
-      return allReminders;
+      try {
+        // Generate all reminders in sequence
+        const dogReminders = userDogs.length > 0 ? generateDogReminders(userDogs) : [];
+        console.log(`[Reminders Provider] Generated ${dogReminders.length} dog reminders:`);
+        dogReminders.forEach(r => console.log(`  - ${r.title} (${r.type}) - Due: ${r.dueDate.toISOString().slice(0, 10)} - Priority: ${r.priority}`));
+        
+        const litterReminders = await generateLitterReminders(user.id);
+        console.log(`[Reminders Provider] Generated ${litterReminders.length} litter reminders`);
+        
+        const generalReminders = userDogs.length > 0 ? generateGeneralReminders(userDogs) : [];
+        console.log(`[Reminders Provider] Generated ${generalReminders.length} general reminders`);
+        
+        // Return all reminders at once
+        const allReminders = [...supabaseReminders, ...dogReminders, ...litterReminders, ...generalReminders];
+        console.log(`[Reminders Provider] Total: ${allReminders.length} reminders loaded`);
+        
+        return allReminders;
+      } catch (error) {
+        console.error("[Reminders Provider] Error generating reminders:", error);
+        // Return whatever reminders we have so far, even if there was an error
+        return supabaseReminders;
+      }
     },
-    enabled: !!user && dogs.length > 0, // Enable when both user and dogs are available
-    staleTime: 1000 * 60 * 2, // Consider data fresh for 2 minutes (reduced from 5)
+    enabled: !!user, // Enable when user is available, even if dogs are not yet loaded
+    staleTime: 1000 * 60, // Consider data fresh for just 1 minute (reduced from 2)
     retry: 2, // Increased retry attempts to handle transient issues
     refetchOnMount: true,
     refetchOnWindowFocus: true, // Added to refresh when window regains focus
@@ -96,8 +103,8 @@ export const useBreedingRemindersProvider = () => {
   
   // Force an immediate refetch on mount and when dogs change
   useEffect(() => {
-    if (user && dogs.length > 0) {
-      console.log("[Reminders Provider] Force refreshing reminder data - Dogs available:", dogs.length);
+    if (user) {
+      console.log("[Reminders Provider] Force refreshing reminder data - User available with", dogs.length, "dogs");
       refetch();
     }
   }, [user, dogs.length, refetch]);

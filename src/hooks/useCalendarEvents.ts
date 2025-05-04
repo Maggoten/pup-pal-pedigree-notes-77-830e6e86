@@ -14,7 +14,8 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBreedingReminders } from '@/hooks/reminders';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
+import { getNormalizedToday } from '@/utils/dateUtils';
 
 export const useCalendarEvents = (dogs: Dog[]) => {
   const [hasMigrated, setHasMigrated] = useState<boolean>(false);
@@ -42,20 +43,27 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     console.log("[Calendar] Converting reminders to calendar events:", reminders.length);
     
     const eventsList = reminders.map(reminder => {
-      console.log(`[Calendar] Converting reminder: ${reminder.id} - ${reminder.title} - type: ${reminder.type} - due: ${reminder.dueDate.toISOString()}`);
+      const dueDate = reminder.dueDate;
+      if (!dueDate || !isValid(dueDate)) {
+        console.error(`[Calendar] Invalid due date for reminder: ${reminder.id} - ${reminder.title}`);
+        return null;
+      }
+      
+      console.log(`[Calendar] Converting reminder: ${reminder.id} - ${reminder.title} - type: ${reminder.type} - due: ${dueDate.toISOString()}`);
+      
       return {
         id: `reminder-${reminder.id}`,
         title: reminder.title,
-        date: reminder.dueDate,
+        date: dueDate,
         type: reminder.type,
         dogId: reminder.relatedId,
         dogName: "", // We'll try to add the dog name below
-        time: format(reminder.dueDate, 'HH:mm'),
+        time: format(dueDate, 'HH:mm'),
         notes: reminder.description,
         isCompleted: reminder.isCompleted,
         priority: reminder.priority
       };
-    });
+    }).filter(event => event !== null) as CalendarEvent[]; // Filter out any null entries
     
     // Add dog names where possible
     eventsList.forEach(event => {
@@ -96,39 +104,46 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       console.log("[Calendar] Dogs data:", dogs.map(d => ({id: d.id, name: d.name})));
       console.log("[Calendar] Reminders data:", reminders?.length || 0, "reminders available");
       
-      // Ensure migration happens before fetching
-      await migrateEventsIfNeeded();
-      
-      // Fetch custom events from Supabase
-      const customEvents = await fetchCalendarEvents();
-      console.log("[Calendar] Fetched custom events:", customEvents.length);
-      
-      // Generate heat events based on dogs data - now showing past events as well
-      const heatEvents: CalendarEvent[] = calculateUpcomingHeats(dogs, 6, 24).map((heat, index) => ({
-        id: `heat-${heat.dogId}-${index}`,
-        title: 'Heat Cycle',
-        date: heat.date,
-        type: 'heat',
-        dogId: heat.dogId,
-        dogName: heat.dogName
-      }));
-      console.log("[Calendar] Generated heat events:", heatEvents.length);
-      
-      // Get reminder events
-      const reminderEvents = reminderToCalendarEvents();
-      console.log("[Calendar] Generated reminder events:", reminderEvents.length);
-      
-      // Log all vaccination events for debugging
-      const vaccinationEvents = reminderEvents.filter(e => e.type === 'vaccination');
-      console.log(`[Calendar] Vaccination events (${vaccinationEvents.length}):`, 
-        vaccinationEvents.map(e => `${e.title} - ${new Date(e.date).toISOString()} - Dog ID: ${e.dogId}`));
-      
-      // Return all events at once
-      const allEvents = [...heatEvents, ...customEvents, ...reminderEvents];
-      console.log("[Calendar] Total events:", allEvents.length);
-      return allEvents;
+      try {
+        // Ensure migration happens before fetching
+        await migrateEventsIfNeeded();
+        
+        // Fetch custom events from Supabase
+        const customEvents = await fetchCalendarEvents();
+        console.log("[Calendar] Fetched custom events:", customEvents.length);
+        
+        // Generate heat events based on dogs data - now showing past events as well
+        const heatEvents: CalendarEvent[] = calculateUpcomingHeats(dogs, 6, 24).map((heat, index) => ({
+          id: `heat-${heat.dogId}-${index}-${Date.now()}`, // Add timestamp for uniqueness
+          title: 'Heat Cycle',
+          date: heat.date,
+          type: 'heat',
+          dogId: heat.dogId,
+          dogName: heat.dogName
+        }));
+        console.log("[Calendar] Generated heat events:", heatEvents.length);
+        
+        // Get reminder events
+        const reminderEvents = reminderToCalendarEvents();
+        console.log("[Calendar] Generated reminder events:", reminderEvents.length);
+        
+        // Log all vaccination events for debugging
+        const vaccinationEvents = reminderEvents.filter(e => e.type === 'vaccination');
+        console.log(`[Calendar] Vaccination events (${vaccinationEvents.length}):`, 
+          vaccinationEvents.map(e => `${e.title} - ${new Date(e.date).toISOString()} - Dog ID: ${e.dogId}`));
+        
+        // Return all events at once
+        const allEvents = [...heatEvents, ...customEvents, ...reminderEvents];
+        console.log("[Calendar] Total events:", allEvents.length);
+        return allEvents;
+      } catch (error) {
+        console.error("[Calendar] Error generating calendar events:", error);
+        // Return custom events at minimum
+        const customEvents = await fetchCalendarEvents();
+        return customEvents;
+      }
     },
-    enabled: !!user && dogs?.length > 0, // Enable when both user and dogs are available
+    enabled: !!user, // Enable when user is available, even if dogs are not yet loaded
     staleTime: 1000 * 30, // Consider data fresh for just 30 seconds to ensure frequent updates
     retry: 2, // Increased retry attempts
     refetchOnMount: true,
@@ -137,11 +152,11 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   
   // Force a refresh when dogs or reminders change
   useEffect(() => {
-    if (user && (dogs.length > 0 || reminders?.length > 0)) {
+    if (user) {
       console.log("[Calendar] Force refreshing calendar events after dogs or reminders updated");
       refetch();
     }
-  }, [user, dogs, reminders, refetch]);
+  }, [user, dogs.length, reminders?.length, refetch]);
   
   // Memoize getEventsForDate to reduce re-renders
   const getEventsForDate = useCallback((date: Date) => {
@@ -150,11 +165,37 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       return [];
     }
     
-    const eventsForDate = calendarEvents.filter(event => 
-      event && event.date && new Date(event.date).toDateString() === date.toDateString()
-    );
+    // Normalize comparison dates to avoid time issues
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    const targetDateStr = targetDate.toISOString().split('T')[0];
     
-    if (date.toDateString() === new Date().toDateString()) {
+    const eventsForDate = calendarEvents.filter(event => {
+      if (!event || !event.date) return false;
+      
+      // Convert event.date to string for comparison if it's a Date object
+      let eventDateStr;
+      if (event.date instanceof Date) {
+        eventDateStr = event.date.toISOString().split('T')[0];
+      } else if (typeof event.date === 'string') {
+        // Handle ISO string directly
+        eventDateStr = event.date.split('T')[0];
+      } else {
+        // Handle date that's not a Date or string
+        try {
+          const eventDate = new Date(event.date);
+          eventDateStr = eventDate.toISOString().split('T')[0];
+        } catch (err) {
+          console.error(`[Calendar] Invalid event date format:`, event.date);
+          return false;
+        }
+      }
+      
+      return eventDateStr === targetDateStr;
+    });
+    
+    const today = getNormalizedToday();
+    if (date.toDateString() === today.toDateString()) {
       console.log("[Calendar] Events for today:", eventsForDate);
       
       // Specifically log vaccination events for today
