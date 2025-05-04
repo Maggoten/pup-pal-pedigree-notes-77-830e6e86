@@ -1,4 +1,3 @@
-
 import { Dog, BreedingHistory, Heat } from '@/types/dogs';
 import { Database } from '@/integrations/supabase/types';
 import { dateToISOString } from './dateUtils';
@@ -6,47 +5,150 @@ import { dateToISOString } from './dateUtils';
 // Define a type for dogs in the database format
 export type DbDog = Database['public']['Tables']['dogs']['Insert'];
 
+// Add utility function for date handling
+const safeISODateString = (dateValue: any): string => {
+  if (!dateValue) return '';
+  
+  try {
+    // Handle string dates
+    if (typeof dateValue === 'string') {
+      return dateValue.split('T')[0]; // Just get YYYY-MM-DD part
+    }
+    
+    // Handle Date objects
+    if (dateValue instanceof Date) {
+      return dateToISOString(dateValue);
+    }
+    
+    // Handle timestamps
+    if (typeof dateValue === 'number') {
+      return dateToISOString(new Date(dateValue));
+    }
+    
+    // Default fallback
+    return '';
+  } catch (err) {
+    console.error('[Dogs Debug] Date conversion error:', err, 'Original value:', dateValue);
+    return '';
+  }
+};
+
+// Log device detection
+const isMobileDevice = () => {
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+};
+
 /**
  * Enriches a dog record from Supabase with UI-specific fields and defaults
  * @param dog - The raw dog data from Supabase
  * @returns A fully-formed Dog object with all UI fields
  */
 export const enrichDog = (dog: any): Dog => {
-  // Create default breeding history structure if missing
-  const defaultBreedingHistory: BreedingHistory = {
-    breedings: [],
-    litters: [],
-    matings: [] // Include matings for compatibility with ReminderService
-  };
-
-  // If heatHistory is present, ensure it has the correct structure
-  let processedHeatHistory: Heat[] = [];
+  const deviceType = isMobileDevice() ? 'Mobile' : 'Desktop';
   
-  if (dog.heatHistory && Array.isArray(dog.heatHistory)) {
-    processedHeatHistory = dog.heatHistory.map((heat: any) => ({
-      // Ensure date is stored as YYYY-MM-DD without timezone impact
-      date: typeof heat.date === 'string' ? heat.date.split('T')[0] : 
-            Object.prototype.toString.call(heat.date) === '[object Date]' ? dateToISOString(heat.date) : ''
-    }));
+  try {
+    // Create default breeding history structure if missing
+    const defaultBreedingHistory: BreedingHistory = {
+      breedings: [],
+      litters: [],
+      matings: [] // Include matings for compatibility with ReminderService
+    };
+
+    // If heatHistory is present, ensure it has the correct structure
+    let processedHeatHistory: Heat[] = [];
+    
+    if (dog.heatHistory) {
+      console.log(`[Dogs Debug] Processing heat history for dog "${dog.name}" on ${deviceType}`);
+      console.log(`[Dogs Debug] Heat history type: ${typeof dog.heatHistory}`);
+      
+      if (typeof dog.heatHistory === 'string') {
+        // Sometimes it might come as a string that needs parsing
+        try {
+          const parsed = JSON.parse(dog.heatHistory);
+          console.log(`[Dogs Debug] Parsed heat history from string, entries: ${Array.isArray(parsed) ? parsed.length : 'not an array'}`);
+          
+          if (Array.isArray(parsed)) {
+            dog.heatHistory = parsed;
+          } else {
+            console.error(`[Dogs Debug] Parsed heat history is not an array:`, parsed);
+            dog.heatHistory = [];
+          }
+        } catch (error) {
+          console.error(`[Dogs Debug] Failed to parse heat history string:`, error);
+          dog.heatHistory = [];
+        }
+      }
+      
+      // Now process the array (or empty array if parsing failed)
+      if (Array.isArray(dog.heatHistory)) {
+        processedHeatHistory = dog.heatHistory.map((heat: any, index: number) => {
+          if (!heat) {
+            console.error(`[Dogs Debug] Invalid heat entry at index ${index}:`, heat);
+            return { date: '' };
+          }
+          
+          try {
+            return {
+              // Ensure date is stored as YYYY-MM-DD without timezone impact
+              date: typeof heat.date === 'string' ? heat.date.split('T')[0] : 
+                    Object.prototype.toString.call(heat.date) === '[object Date]' ? dateToISOString(heat.date) : ''
+            };
+          } catch (error) {
+            console.error(`[Dogs Debug] Error processing heat entry at index ${index}:`, error, heat);
+            return { date: '' };
+          }
+        });
+        
+        console.log(`[Dogs Debug] Processed heat history entries: ${processedHeatHistory.length}`);
+      } else {
+        console.error(`[Dogs Debug] Heat history is not an array after processing:`, dog.heatHistory);
+      }
+    } else {
+      console.log(`[Dogs Debug] Dog "${dog.name}" has no heat history`);
+    }
+
+    // Create the enriched dog with proper safeguards for all fields
+    const enrichedDog: Dog = {
+      ...dog,
+      // Alias fields for UI
+      dateOfBirth: dog.birthdate ? dog.birthdate.split('T')[0] : '',
+      image: dog.image_url || '',
+      registrationNumber: dog.registration_number || '',
+
+      // Processed fields
+      heatHistory: processedHeatHistory,
+      breedingHistory: dog.breedingHistory || defaultBreedingHistory,
+      heatInterval: dog.heatInterval || undefined,
+
+      // Normalize gender just in case
+      gender: dog.gender === 'male' || dog.gender === 'female'
+        ? dog.gender
+        : (dog.gender?.toLowerCase() === 'male' ? 'male' : 'female')
+    };
+    
+    console.log(`[Dogs Debug] Successfully enriched dog "${dog.name}" on ${deviceType}`);
+    return enrichedDog;
+  } catch (error) {
+    console.error(`[Dogs Debug] Failed to enrich dog:`, error, dog);
+    // Create a minimal valid dog object to prevent app crashes
+    return {
+      ...dog,
+      id: dog.id || 'error-id',
+      owner_id: dog.owner_id || '',
+      name: dog.name || 'Unknown Dog',
+      breed: dog.breed || 'Unknown',
+      gender: dog.gender || 'female',
+      dateOfBirth: '',
+      image: '',
+      registrationNumber: '',
+      heatHistory: [],
+      breedingHistory: {
+        breedings: [],
+        litters: [],
+        matings: []
+      }
+    };
   }
-
-  return {
-    ...dog,
-    // Alias fields for UI
-    dateOfBirth: dog.birthdate ? dog.birthdate.split('T')[0] : '',
-    image: dog.image_url || '',
-    registrationNumber: dog.registration_number || '',
-
-    // Processed fields
-    heatHistory: processedHeatHistory,
-    breedingHistory: dog.breedingHistory || defaultBreedingHistory,
-    heatInterval: dog.heatInterval || undefined,
-
-    // Normalize gender just in case
-    gender: dog.gender === 'male' || dog.gender === 'female'
-      ? dog.gender
-      : (dog.gender?.toLowerCase() === 'male' ? 'male' : 'female')
-  };
 };
 
 /**

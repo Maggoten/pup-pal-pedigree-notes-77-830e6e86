@@ -18,20 +18,28 @@ import { useSortedReminders } from './useSortedReminders';
 import { toast } from '@/components/ui/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
+// Add device detection
+const isMobileDevice = () => {
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+};
+
 // This is the centralized hook for reminders management across the application
 export const useBreedingRemindersProvider = () => {
   const { user } = useAuth();
   const { dogs } = useDogs();
   const [hasMigrated, setHasMigrated] = useState<boolean>(false);
   const queryClient = useQueryClient();
+  const deviceType = isMobileDevice() ? 'Mobile' : 'Desktop';
+  
+  console.log(`[Reminders Debug] Hook initialized on ${deviceType}, user ID: ${user?.id || 'none'}, dogs count: ${dogs.length}`);
   
   // Handle migration first (happens once per session)
   const migrateRemindersIfNeeded = useCallback(async () => {
     if (!hasMigrated && user) {
-      console.log("[Reminders Provider] Starting data migration check...");
+      console.log("[Reminders Debug] Starting data migration check...");
       await migrateRemindersFromLocalStorage();
       setHasMigrated(true);
-      console.log("[Reminders Provider] Migration completed.");
+      console.log("[Reminders Debug] Migration completed.");
     }
   }, [hasMigrated, user]);
   
@@ -43,42 +51,65 @@ export const useBreedingRemindersProvider = () => {
   } = useQuery({
     queryKey: ['reminders', user?.id, dogs.length],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user) {
+        console.log(`[Reminders Debug] No user available, skipping reminders fetch`);
+        return [];
+      }
       
-      console.log("[Reminders Provider] Fetching reminders for user:", user.id);
+      console.log(`[Reminders Debug] Fetching reminders for user: ${user.id} on ${deviceType}`);
+      console.log(`[Reminders Debug] Available dogs for reminders: ${dogs.length}`);
       
       // Ensure migration happens before fetching
       await migrateRemindersIfNeeded();
       
       // Fetch custom reminders from Supabase
+      console.log(`[Reminders Debug] Fetching custom reminders from Supabase`);
+      const startTime = performance.now();
       const supabaseReminders = await fetchReminders();
-      console.log(`[Reminders Provider] Fetched ${supabaseReminders.length} custom reminders`);
+      const endTime = performance.now();
+      
+      console.log(`[Reminders Debug] Fetch duration: ${Math.round(endTime - startTime)}ms`);
+      console.log(`[Reminders Debug] Fetched ${supabaseReminders.length} custom reminders`);
       
       // Use only dogs belonging to current user
       const userDogs = dogs.filter(dog => dog.owner_id === user.id);
-      console.log(`[Reminders Provider] Found ${userDogs.length} dogs belonging to user`);
+      console.log(`[Reminders Debug] Found ${userDogs.length} dogs belonging to user ${user.id}`);
       
-      // Generate all reminders in sequence
-      const dogReminders = generateDogReminders(userDogs);
-      console.log(`[Reminders Provider] Generated ${dogReminders.length} dog reminders`);
+      if (userDogs.length === 0) {
+        console.log(`[Reminders Debug] No user dogs available, showing only custom reminders`);
+        return supabaseReminders;
+      }
       
-      const litterReminders = await generateLitterReminders(user.id);
-      console.log(`[Reminders Provider] Generated ${litterReminders.length} litter reminders`);
-      
-      const generalReminders = generateGeneralReminders(userDogs);
-      console.log(`[Reminders Provider] Generated ${generalReminders.length} general reminders`);
-      
-      // Return all reminders at once
-      const allReminders = [...supabaseReminders, ...dogReminders, ...litterReminders, ...generalReminders];
-      console.log(`[Reminders Provider] Total: ${allReminders.length} reminders loaded`);
-      
-      return allReminders;
+      try {
+        // Generate all reminders in sequence
+        console.log(`[Reminders Debug] Generating dog reminders`);
+        const dogReminders = generateDogReminders(userDogs);
+        console.log(`[Reminders Debug] Generated ${dogReminders.length} dog reminders`);
+        
+        console.log(`[Reminders Debug] Generating litter reminders`);
+        const litterReminders = await generateLitterReminders(user.id);
+        console.log(`[Reminders Debug] Generated ${litterReminders.length} litter reminders`);
+        
+        console.log(`[Reminders Debug] Generating general reminders`);
+        const generalReminders = generateGeneralReminders(userDogs);
+        console.log(`[Reminders Debug] Generated ${generalReminders.length} general reminders`);
+        
+        // Return all reminders at once
+        const allReminders = [...supabaseReminders, ...dogReminders, ...litterReminders, ...generalReminders];
+        console.log(`[Reminders Debug] Total: ${allReminders.length} reminders loaded`);
+        
+        return allReminders;
+      } catch (error) {
+        console.error(`[Reminders Debug] Error generating reminders:`, error);
+        // Return at least the custom reminders to prevent total failure
+        return supabaseReminders;
+      }
     },
-    enabled: !!user && dogs.length > 0,
-    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
-    retry: 1, // Only retry once to prevent excessive attempts
+    enabled: !!user,
+    staleTime: 1000 * 60 * (isMobileDevice() ? 1 : 5), // Consider data fresh for 1 min on mobile, 5 min on desktop
+    retry: 2, // Retry twice to handle mobile connection issues
     refetchOnMount: true,
-    refetchOnWindowFocus: false, // Prevent refetching when window regains focus
+    refetchOnWindowFocus: isMobileDevice() ? true : false, // Refetch when regaining focus on mobile
   });
   
   // Get sorted reminders - memoized in the hook
@@ -86,48 +117,64 @@ export const useBreedingRemindersProvider = () => {
   
   // Use mutations for state changes with optimistic updates
   const markCompleteReminderMutation = useMutation({
-    mutationFn: async ({ id, isCompleted }: { id: string, isCompleted: boolean }) => {
-      console.log(`[Reminders Provider] Marking reminder ${id} as ${isCompleted ? 'completed' : 'not completed'}`);
+    mutationFn: async (id: string) => {
+      console.log(`[Reminders Debug] Marking reminder ${id} as completed`);
+      
+      // Find the current reminder to toggle its state
+      const reminder = reminders.find(r => r.id === id);
+      if (!reminder) {
+        console.error(`[Reminders Debug] Reminder with ID ${id} not found`);
+        return false;
+      }
+      
+      const newCompletedState = !reminder.isCompleted;
       
       // Only update custom reminders in database (those with UUIDs)
       if (id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
-        return await updateReminder(id, isCompleted);
+        return await updateReminder(id, newCompletedState);
       }
       // For system-generated reminders, we still return success but don't persist to DB
       return true;
     },
-    onMutate: async ({ id, isCompleted }) => {
+    onMutate: async (id) => {
       // Cancel any outgoing refetches to avoid overwriting our optimistic update
       await queryClient.cancelQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+      
+      // Find the current reminder to toggle its state
+      const reminder = reminders.find(r => r.id === id);
+      if (!reminder) {
+        return { previousReminders: reminders };
+      }
+      
+      const newCompletedState = !reminder.isCompleted;
       
       // Snapshot the previous value
       const previousReminders = queryClient.getQueryData(['reminders', user?.id, dogs.length]);
       
       // Optimistically update the cache
       queryClient.setQueryData(['reminders', user?.id, dogs.length], (old: Reminder[] = []) => 
-        old.map(r => r.id === id ? {...r, isCompleted} : r)
+        old.map(r => r.id === id ? {...r, isCompleted: newCompletedState} : r)
       );
       
       return { previousReminders };
     },
-    onError: (err, { id }, context) => {
-      console.error("Error marking reminder complete:", err);
+    onError: (err, id, context) => {
+      console.error("[Reminders Debug] Error marking reminder complete:", err);
       // Rollback to the previous state
       if (context?.previousReminders) {
         queryClient.setQueryData(['reminders', user?.id, dogs.length], context.previousReminders);
       }
     },
-    onSuccess: (result, { id, isCompleted }) => {
-      console.log(`[Reminders Provider] Successfully marked reminder ${id} as ${isCompleted ? 'completed' : 'not completed'}`);
+    onSuccess: (result, id) => {
+      // Find the current reminder to get its new state for the message
+      const reminder = reminders.find(r => r.id === id);
+      const newCompletedState = reminder ? !reminder.isCompleted : true;
       
-      // Keep the optimistic update in the query cache
-      queryClient.setQueryData(['reminders', user?.id, dogs.length], (old: Reminder[] = []) => 
-        old.map(r => r.id === id ? {...r, isCompleted} : r)
-      );
+      console.log(`[Reminders Debug] Successfully marked reminder ${id} as ${newCompletedState ? 'completed' : 'not completed'}`);
       
       toast({
-        title: isCompleted ? "Reminder Completed" : "Reminder Reopened",
-        description: isCompleted 
+        title: newCompletedState ? "Reminder Completed" : "Reminder Reopened",
+        description: newCompletedState 
           ? "This task has been marked as completed."
           : "This task has been marked as not completed."
       });
@@ -197,13 +244,7 @@ export const useBreedingRemindersProvider = () => {
   
   // Action handler wrappers
   const handleMarkComplete = (id: string) => {
-    const reminder = reminders.find(r => r.id === id);
-    if (!reminder) return;
-    
-    markCompleteReminderMutation.mutate({ 
-      id, 
-      isCompleted: !reminder.isCompleted 
-    });
+    markCompleteReminderMutation.mutate(id);
   };
   
   const addCustomReminder = async (input: CustomReminderInput) => {
