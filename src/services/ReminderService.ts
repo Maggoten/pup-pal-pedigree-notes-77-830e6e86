@@ -7,6 +7,7 @@ export { generateGeneralReminders } from './reminders/GeneralReminderService';
 import { TriggerAllRemindersFunction } from '@/types/reminderFunctions';
 import { Reminder } from '@/types/reminders';
 import { supabase } from '@/integrations/supabase/client';
+import { enrichDog } from '@/utils/dogUtils';
 
 // Add a new manual trigger function with explicit type
 export const triggerAllReminders: TriggerAllRemindersFunction = async (userId: string): Promise<Reminder[]> => {
@@ -19,7 +20,7 @@ export const triggerAllReminders: TriggerAllRemindersFunction = async (userId: s
   
   try {
     // First fetch the user's dogs
-    const { data: dogs, error: dogsError } = await supabase
+    const { data: dogsData, error: dogsError } = await supabase
       .from('dogs')
       .select('*')
       .eq('owner_id', userId);
@@ -29,7 +30,8 @@ export const triggerAllReminders: TriggerAllRemindersFunction = async (userId: s
       return [];
     }
     
-    const userDogs = dogs || [];
+    // Transform database dogs into the expected Dog type using enrichDog
+    const userDogs = (dogsData || []).map(dog => enrichDog(dog));
     console.log(`[Manual Reminder Generation] Found ${userDogs.length} dogs for user`);
     
     // Import services dynamically
