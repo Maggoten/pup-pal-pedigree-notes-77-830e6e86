@@ -182,12 +182,19 @@ export const useCalendarEvents = (dogs: Dog[]) => {
         // Handle ISO string directly
         eventDateStr = event.date.split('T')[0];
       } else {
-        // Handle date that's not a Date or string
+        // Handle date that's not a Date or string - more robust handling
         try {
-          const eventDate = new Date(event.date);
-          eventDateStr = eventDate.toISOString().split('T')[0];
+          // First try to create a new Date object
+          const eventDate = new Date(event.date as any);
+          if (isValid(eventDate)) {
+            eventDateStr = eventDate.toISOString().split('T')[0];
+          } else {
+            // If we can't create a valid date, log the issue and skip this event
+            console.error(`[Calendar] Invalid date format:`, event.date);
+            return false;
+          }
         } catch (err) {
-          console.error(`[Calendar] Invalid event date format:`, event.date);
+          console.error(`[Calendar] Error converting event date:`, event.date, err);
           return false;
         }
       }
