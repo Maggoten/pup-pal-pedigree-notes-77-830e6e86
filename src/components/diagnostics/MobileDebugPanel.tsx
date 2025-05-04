@@ -59,8 +59,8 @@ const MobileDebugPanel: React.FC = () => {
       // Clear React Query cache
       await queryClient.invalidateQueries();
       
-      // Refresh dogs data
-      await refreshDogs(true);
+      // Refresh dogs data - removing the boolean argument
+      await refreshDogs();
       console.log('[MobileDebug] Dogs refreshed');
       
       // Give time for dogs to load before refreshing reminders
@@ -179,3 +179,4 @@ const MobileDebugPanel: React.FC = () => {
 };
 
 export default MobileDebugPanel;
+
