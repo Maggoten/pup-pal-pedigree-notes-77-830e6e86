@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { isMobileSafari } from '@/integrations/supabase/client';
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -35,10 +36,43 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
       password: '',
     },
   });
+  
+  // Prevent multiple submissions on mobile
+  const handleSubmit = (e: React.FormEvent) => {
+    // On iOS Safari, ensure form input is not focused to avoid keyboard issues
+    if (isMobileSafari()) {
+      // Blur active input fields to dismiss keyboard
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      
+      // Small delay for mobile to ensure UI updates before submission
+      setTimeout(() => {
+        form.handleSubmit((values) => {
+          console.log('Login form submission on mobile device', { email: values.email });
+          onSubmit(values);
+        })(e);
+      }, 50);
+    } else {
+      // Normal submission for desktop
+      form.handleSubmit(onSubmit)(e);
+    }
+  };
+  
+  React.useEffect(() => {
+    // Add viewport meta tag for proper mobile scaling if not present
+    let viewportMeta = document.querySelector('meta[name="viewport"]');
+    if (!viewportMeta) {
+      viewportMeta = document.createElement('meta');
+      viewportMeta.setAttribute('name', 'viewport');
+      viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+      document.head.appendChild(viewportMeta);
+    }
+  }, []);
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <FormField
           control={form.control}
           name="email"
@@ -46,7 +80,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="your@email.com" {...field} />
+                <Input 
+                  placeholder="your@email.com" 
+                  {...field}
+                  type="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  autoComplete="email"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -60,7 +101,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input 
+                  type="password" 
+                  {...field}
+                  autoComplete="current-password"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -1,36 +1,81 @@
+
 import { useState } from 'react';
-import { supabase, Profile } from '@/integrations/supabase/client';
+import { supabase, Profile, isMobileSafari } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
 import { toast } from '@/hooks/use-toast';
 import { withRetry } from '@/utils/networkUtils';
 
+// Utility function to detect network issues
+const hasNetworkIssue = (error: any): boolean => {
+  if (!error?.message) return false;
+  const msg = error.message.toLowerCase();
+  return msg.includes('network') || 
+         msg.includes('offline') || 
+         msg.includes('connection') || 
+         msg.includes('timeout');
+};
+
 export const useAuthActions = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  // Login function with retry capability
+  // Login function with retry capability and mobile-specific handling
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      console.log('Attempting login for:', email);
+      console.log('Attempting login for:', email, 'on', isMobileSafari() ? 'Mobile Safari' : 'standard browser');
       
       // Use retry wrapper for better mobile resilience
       const { data, error } = await withRetry(
-        () => supabase.auth.signInWithPassword({ email, password }),
-        2  // Max 2 retries
+        () => supabase.auth.signInWithPassword({ 
+          email, 
+          password,
+          options: isMobileSafari() ? {
+            // Safari-specific options that might help
+            redirectTo: window.location.origin,
+          } : undefined
+        }),
+        isMobileSafari() ? 3 : 2  // More retries for Mobile Safari
       );
       
       if (error) {
         console.error('Login error from Supabase:', error);
-        // Only show toast for user-facing errors, not technical ones
-        if (error.message.includes('Invalid login credentials')) {
-          toast({
-            title: "Invalid credentials",
-            description: "Please check your email and password",
-            variant: "destructive"
-          });
+        
+        // Mobile-specific error handling
+        if (isMobileSafari()) {
+          if (error.message.includes('Failed to fetch')) {
+            toast({
+              title: "Connection Issue",
+              description: "Please check your internet connection and try again",
+              variant: "destructive"
+            });
+          } else if (error.message.includes('Invalid login credentials')) {
+            toast({
+              title: "Login Failed",
+              description: "Please check your email and password",
+              variant: "destructive"
+            });
+          } else if (error.message.includes('JWT')) {
+            toast({
+              title: "Session Issue",
+              description: "Please enable cookies in your Safari settings and try again",
+              variant: "destructive"
+            });
+          } else {
+            toast({
+              title: "Login Error",
+              description: "Please try again",
+              variant: "destructive"
+            });
+          }
         } else {
-          // Show network-related errors differently
-          if (error.message.includes('network') || error.message.includes('timeout')) {
+          // Non-mobile error handling
+          if (error.message.includes('Invalid login credentials')) {
+            toast({
+              title: "Invalid credentials",
+              description: "Please check your email and password",
+              variant: "destructive"
+            });
+          } else if (hasNetworkIssue(error)) {
             toast({
               title: "Connection issue",
               description: "Please check your internet connection and try again",
@@ -41,17 +86,58 @@ export const useAuthActions = () => {
         return false;
       }
       
+      // Verify we got a valid session
+      if (!data.session) {
+        console.error('Login succeeded but no session returned');
+        
+        if (isMobileSafari()) {
+          toast({
+            title: "Session Error",
+            description: "Login succeeded but session could not be established. Please ensure cookies are enabled in Safari settings.",
+            variant: "destructive"
+          });
+        }
+        return false;
+      }
+      
       console.log('Login successful, session established:', !!data.session);
+      
+      // Extra verification for mobile
+      if (isMobileSafari()) {
+        // Double check the cookie/storage was set correctly
+        try {
+          // Check if the auth token was persisted correctly
+          setTimeout(async () => {
+            const { data: sessionCheck } = await supabase.auth.getSession();
+            if (!sessionCheck.session) {
+              console.warn('Session not persisted correctly on Mobile Safari');
+            } else {
+              console.log('Session successfully persisted on Mobile Safari');
+            }
+          }, 500);
+        } catch (storageError) {
+          console.error('Error checking session persistence:', storageError);
+        }
+      }
+      
       return !!data.session;
     } catch (error) {
       console.error("Login error:", error);
       
       // Provide helpful error for mobile users
-      toast({
-        title: "Login failed",
-        description: "Please check your connection and try again",
-        variant: "destructive"
-      });
+      if (isMobileSafari()) {
+        toast({
+          title: "Login Failed",
+          description: "There was a problem logging you in. Please try again.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Login failed",
+          description: "Please check your connection and try again",
+          variant: "destructive"
+        });
+      }
       
       return false;
     } finally {
@@ -63,7 +149,9 @@ export const useAuthActions = () => {
   const register = async (userData: RegisterData): Promise<boolean> => {
     setIsLoading(true);
     try {
-      console.log('Attempting registration for:', userData.email);
+      console.log('Attempting registration for:', userData.email, 
+                 'on', isMobileSafari() ? 'Mobile Safari' : 'standard browser');
+      
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
@@ -71,7 +159,9 @@ export const useAuthActions = () => {
           data: {
             firstName: userData.firstName,
             lastName: userData.lastName
-          }
+          },
+          // Add redirectTo for mobile Safari to help with cookie handling
+          ...(isMobileSafari() ? { redirectTo: window.location.origin } : {})
         }
       });
 
@@ -92,6 +182,17 @@ export const useAuthActions = () => {
         return true;
       } else if (data.session) {
         console.log('Registration successful with immediate session');
+        
+        // For Mobile Safari: verify session exists
+        if (isMobileSafari()) {
+          setTimeout(async () => {
+            const { data: sessionCheck } = await supabase.auth.getSession();
+            if (!sessionCheck.session) {
+              console.warn('Mobile Safari: session not found after registration');
+            }
+          }, 500);
+        }
+        
         return true;
       } else {
         console.warn('Registration returned unexpected state');
@@ -114,6 +215,17 @@ export const useAuthActions = () => {
       
       if (error) {
         console.error('Logout error from Supabase:', error);
+        
+        // Mobile-specific logout handling
+        if (isMobileSafari()) {
+          // Force clear session data to ensure logout even if API fails
+          try {
+            localStorage.removeItem('supabase.auth.token');
+            sessionStorage.removeItem('supabase.auth.token');
+          } catch (e) {
+            console.warn('Error clearing session data during logout:', e);
+          }
+        }
       } else {
         console.log('Logout successful');
       }
@@ -146,7 +258,7 @@ export const useAuthActions = () => {
               .maybeSingle()
           );
         },
-        2 // Max 2 retries
+        isMobileSafari() ? 3 : 2 // More retries for Mobile Safari
       );
       
       if (error) {
