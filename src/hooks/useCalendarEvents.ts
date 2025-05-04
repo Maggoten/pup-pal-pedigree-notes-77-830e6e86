@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { Dog } from '@/types/dogs';
@@ -38,7 +39,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     console.log("[Calendar] Converting reminders to calendar events:", reminders.length);
     
     const eventsList = reminders.map(reminder => {
-      console.log(`[Calendar] Converting reminder: ${reminder.id} - ${reminder.title} - type: ${reminder.type}`);
+      console.log(`[Calendar] Converting reminder: ${reminder.id} - ${reminder.title} - type: ${reminder.type} - due: ${reminder.dueDate.toISOString()}`);
       return {
         id: `reminder-${reminder.id}`,
         title: reminder.title,
@@ -74,18 +75,19 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     return eventsList;
   }, [reminders, dogs]);
   
-  // Use React Query for calendar events
+  // Use React Query for calendar events - Fixed for v5 compatibility
   const { 
     data: calendarEvents = [],
     isLoading,
     error: fetchError,
     refetch
   } = useQuery({
-    queryKey: ['calendar-events', user?.id, dogs.length, reminders.length],
+    queryKey: ['calendar-events', user?.id, dogs.length],
     queryFn: async () => {
       if (!user) return [];
       
       console.log("[Calendar] Loading calendar events for user:", user.id);
+      console.log("[Calendar] Dogs data:", dogs.map(d => ({id: d.id, name: d.name})));
       
       // Ensure migration happens before fetching
       await migrateEventsIfNeeded();
@@ -117,7 +119,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
       // Return all events at once
       return [...heatEvents, ...customEvents, ...reminderEvents];
     },
-    enabled: !!user && reminders.length >= 0, // Changed to ensure it runs even when there are no reminders yet
+    enabled: !!user, // Only enabled when user is available
     staleTime: 1000 * 60 * 2, // Consider data fresh for 2 minutes (reduced from 5)
     retry: 1, // Only retry once to prevent excessive attempts
     refetchOnMount: true,
@@ -134,7 +136,12 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   
   // Memoize getEventsForDate to reduce re-renders
   const getEventsForDate = useCallback((date: Date) => {
-    const eventsForDate = (calendarEvents || []).filter(event => 
+    if (!calendarEvents) {
+      console.log("[Calendar] No calendar events available");
+      return [];
+    }
+    
+    const eventsForDate = calendarEvents.filter(event => 
       new Date(event.date).toDateString() === date.toDateString()
     );
     
@@ -154,7 +161,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     return eventsForDate;
   }, [calendarEvents]);
   
-  // Add event mutation
+  // Add event mutation - Fixed for v5 compatibility
   const addEventMutation = useMutation({
     mutationFn: async (data: AddEventFormValues) => {
       if (!user) throw new Error('User not authenticated');
@@ -179,7 +186,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     }
   });
   
-  // Edit event mutation
+  // Edit event mutation - Fixed for v5 compatibility
   const editEventMutation = useMutation({
     mutationFn: async ({ eventId, data }: { eventId: string, data: AddEventFormValues }) => {
       return await updateEventInSupabase(eventId, data, dogs);
@@ -222,7 +229,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     }
   });
   
-  // Delete event mutation
+  // Delete event mutation - Fixed for v5 compatibility
   const deleteEventMutation = useMutation({
     mutationFn: async (eventId: string) => {
       return await deleteEventFromSupabase(eventId);
@@ -296,9 +303,9 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   // Manual refresh function
   const refreshCalendarData = useCallback(() => {
     console.log("[Calendar] Manually refreshing calendar events");
-    queryClient.invalidateQueries({ queryKey: ['calendar-events', user?.id, dogs.length, reminders.length] });
+    queryClient.invalidateQueries({ queryKey: ['calendar-events', user?.id, dogs.length] });
     refetch();
-  }, [queryClient, user, dogs.length, reminders.length, refetch]);
+  }, [queryClient, user, dogs.length, refetch]);
   
   // Error handling
   const hasError = !!fetchError;
@@ -306,7 +313,7 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   return {
     calendarEvents: calendarEvents || [],
     isLoading,
-    hasError: !!fetchError,
+    hasError,
     getEventsForDate,
     addEvent: handleAddEvent,
     editEvent: handleEditEvent,

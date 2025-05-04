@@ -19,7 +19,8 @@ export const useDashboardData = () => {
     hasError: remindersError,
     handleMarkComplete,
     addCustomReminder,
-    deleteReminder
+    deleteReminder,
+    refreshReminderData
   } = useBreedingReminders();
   
   const {
@@ -30,7 +31,8 @@ export const useDashboardData = () => {
     editEvent,
     isLoading: calendarLoading,
     hasError: calendarError,
-    calendarEvents
+    calendarEvents,
+    refreshCalendarData
   } = useCalendarEvents(dogs);
 
   // Use the smaller, focused hooks
@@ -51,14 +53,37 @@ export const useDashboardData = () => {
 
   const { handleAddEvent, handleEditEvent } = useEventHandlers();
 
-  // Log event counts
+  // Log event counts and force refresh if needed
   useEffect(() => {
     console.log("Dashboard data load state:", {
       dogsCount: dogs.length,
       remindersCount: reminders.length,
-      eventsCount: calendarEvents?.length || 0
+      eventsCount: calendarEvents?.length || 0,
+      dogsLoading,
+      remindersLoading,
+      calendarLoading
     });
-  }, [dogs.length, reminders.length, calendarEvents]);
+    
+    // Force refresh data on first load
+    if (dogs.length > 0 && reminders.length === 0 && !remindersLoading) {
+      console.log("Forcing refresh of reminders data");
+      refreshReminderData();
+    }
+    
+    if (dogs.length > 0 && (!calendarEvents || calendarEvents.length === 0) && !calendarLoading) {
+      console.log("Forcing refresh of calendar data");
+      refreshCalendarData();
+    }
+  }, [
+    dogs.length, 
+    reminders.length, 
+    calendarEvents, 
+    dogsLoading, 
+    remindersLoading, 
+    calendarLoading,
+    refreshReminderData,
+    refreshCalendarData
+  ]);
   
   // Check if there's any data to display
   const hasCalendarData = calendarEvents && calendarEvents.length > 0;
@@ -84,6 +109,8 @@ export const useDashboardData = () => {
     recentLittersData,
     remindersSummary,
     hasCalendarData,
-    hasReminderData
+    hasReminderData,
+    refreshReminderData,
+    refreshCalendarData
   };
 };

@@ -27,7 +27,7 @@ export const useLoadingState = ({
     
     // Set data as ready when:
     // 1. Reminders are no longer loading AND calendar is no longer loading
-    // 2. OR we've attempted to load at least once and litters are loaded (handles case when user has no dogs)
+    // 2. OR we've attempted to load at least once and litters are loaded
     const dataIsReady = (!remindersLoading && !calendarLoading) || 
                         (initialLoadAttempted && littersLoaded && !dogsLoading);
                         
@@ -41,6 +41,18 @@ export const useLoadingState = ({
       
       // Clear timeout on cleanup
       return () => clearTimeout(timer);
+    }
+
+    // Force ready state after 3 seconds in case loading states get stuck
+    if (!isDataReady && initialLoadAttempted) {
+      const forceReadyTimer = setTimeout(() => {
+        if (!isDataReady) {
+          console.log("Forcing dashboard ready state after timeout");
+          setIsDataReady(true);
+        }
+      }, 3000);
+
+      return () => clearTimeout(forceReadyTimer);
     }
   }, [remindersLoading, calendarLoading, littersLoaded, initialLoadAttempted, isDataReady, dogsLoading]);
 

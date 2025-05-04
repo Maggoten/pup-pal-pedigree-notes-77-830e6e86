@@ -26,7 +26,7 @@ const RemindersList: React.FC<RemindersListProps> = memo(({
   const navigate = useNavigate();
   
   // Early return if no reminders
-  if (!reminders || reminders.length === 0) {
+  if (!reminders || !Array.isArray(reminders) || reminders.length === 0) {
     return <EmptyReminders />;
   }
 

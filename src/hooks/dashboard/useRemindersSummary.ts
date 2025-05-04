@@ -7,11 +7,22 @@ export interface RemindersSummary {
   highPriority: number;
 }
 
-export const useRemindersSummary = (reminders: Reminder[]): RemindersSummary => {
+export const useRemindersSummary = (reminders: Reminder[] = []): RemindersSummary => {
   const remindersSummary = useMemo(() => {
-    const highPriorityCount = reminders.filter(r => r.priority === 'high' && !r.isCompleted).length;
+    // Handle null or undefined reminders
+    if (!reminders || !Array.isArray(reminders)) {
+      console.warn("useRemindersSummary received invalid reminders:", reminders);
+      return {
+        count: 0,
+        highPriority: 0
+      };
+    }
+    
+    const nonCompletedReminders = reminders.filter(r => !r.isCompleted);
+    const highPriorityCount = nonCompletedReminders.filter(r => r.priority === 'high').length;
+    
     return {
-      count: reminders.filter(r => !r.isCompleted).length,
+      count: nonCompletedReminders.length,
       highPriority: highPriorityCount
     };
   }, [reminders]);

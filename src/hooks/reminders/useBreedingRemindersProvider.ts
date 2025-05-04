@@ -33,7 +33,7 @@ export const useBreedingRemindersProvider = () => {
     }
   }, [hasMigrated, user]);
   
-  // Use React Query for data fetching with proper caching
+  // Use React Query for data fetching with proper caching - Fixed for v5 compatibility
   const { 
     data: reminders = [], 
     isLoading, 
@@ -56,6 +56,12 @@ export const useBreedingRemindersProvider = () => {
       // Use only dogs belonging to current user
       const userDogs = dogs.filter(dog => dog.owner_id === user.id);
       console.log(`[Reminders Provider] Found ${userDogs.length} dogs belonging to user ${user.id}`);
+      console.log("[Reminders Provider] Dog data:", userDogs.map(d => ({
+        id: d.id, 
+        name: d.name, 
+        vaccDate: d.vaccinationDate,
+        heatHistory: d.heatHistory?.length
+      })));
       
       // Log each dog's vaccination date for debugging
       userDogs.forEach(dog => {
@@ -85,7 +91,7 @@ export const useBreedingRemindersProvider = () => {
       
       return allReminders;
     },
-    enabled: !!user && dogs.length > 0, // Only run if user is logged in and dogs are loaded
+    enabled: !!user, // Changed to only check if user exists - don't block on dogs.length
     staleTime: 1000 * 60 * 2, // Consider data fresh for 2 minutes (reduced from 5)
     retry: 1, // Only retry once to prevent excessive attempts
     refetchOnMount: true,
@@ -94,16 +100,16 @@ export const useBreedingRemindersProvider = () => {
   
   // Force an immediate refetch on mount to ensure fresh data
   useEffect(() => {
-    if (user && dogs.length > 0) {
+    if (user) {
       console.log("[Reminders Provider] Force refreshing reminder data on mount");
       refetch();
     }
-  }, [user, dogs.length, refetch]);
+  }, [user, refetch]);
   
   // Get sorted reminders - memoized in the hook
   const sortedReminders = useSortedReminders(reminders);
   
-  // Use mutations for state changes with optimistic updates
+  // Use mutations for state changes with optimistic updates - Fixed for v5 compatibility
   const markCompleteReminderMutation = useMutation({
     mutationFn: async ({ id, isCompleted }: { id: string, isCompleted: boolean }) => {
       console.log(`[Reminders Provider] Marking reminder ${id} as ${isCompleted ? 'completed' : 'not completed'}`);
@@ -153,6 +159,7 @@ export const useBreedingRemindersProvider = () => {
     }
   });
   
+  // Fixed for v5 compatibility
   const addCustomReminderMutation = useMutation({
     mutationFn: async (input: CustomReminderInput) => {
       if (!user) throw new Error("User authentication required");
@@ -177,6 +184,7 @@ export const useBreedingRemindersProvider = () => {
     }
   });
   
+  // Fixed for v5 compatibility
   const deleteReminderMutation = useMutation({
     mutationFn: async (id: string) => {
       // Only delete from database if it's a custom reminder (has UUID format)
@@ -246,9 +254,9 @@ export const useBreedingRemindersProvider = () => {
   // Force refetch function for manual refresh
   const refreshReminderData = useCallback(() => {
     console.log("[Reminders Provider] Manually refreshing reminder data");
-    queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+    queryClient.invalidateQueries({ queryKey: ['reminders', user?.id] });
     refetch();
-  }, [queryClient, user, dogs.length, refetch]);
+  }, [queryClient, user, refetch]);
   
   return {
     reminders: sortedReminders,

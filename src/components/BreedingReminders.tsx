@@ -69,21 +69,30 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
   
   // Log all reminders for debugging
   useEffect(() => {
-    if (reminders.length > 0) {
+    console.log(`Reminders component received ${reminders?.length || 0} reminders`);
+    
+    if (reminders && reminders.length > 0) {
       console.log("All Reminders:", reminders.map(r => 
-        `${r.title} (${r.type}) - Due: ${r.dueDate.toISOString()} - Priority: ${r.priority} - Completed: ${r.isCompleted}`
+        `${r.title} (${r.type}) - Due: ${r.dueDate?.toISOString()} - Priority: ${r.priority} - Completed: ${r.isCompleted}`
       ));
       
       // Specifically log vaccination reminders
       const vaccinationReminders = reminders.filter(r => r.type === 'vaccination');
       console.log(`Found ${vaccinationReminders.length} vaccination reminders:`, 
-        vaccinationReminders.map(r => `${r.title} - Due: ${r.dueDate.toISOString()} - RelatedId: ${r.relatedId}`)
+        vaccinationReminders.map(r => `${r.title} - Due: ${r.dueDate?.toISOString()} - RelatedId: ${r.relatedId}`)
       );
+    } else {
+      console.log("No reminders to display");
     }
   }, [reminders]);
   
   // Memoize the priority filtering logic to avoid recalculating on every render
   const displayReminders = React.useMemo(() => {
+    if (!reminders || !Array.isArray(reminders)) {
+      console.warn("Reminders component received invalid reminders:", reminders);
+      return [];
+    }
+    
     console.log("Calculating display reminders from", reminders.length, "reminders");
     
     // First prioritize vaccination reminders regardless of priority (this is the key change)
@@ -91,6 +100,8 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
       .filter(r => r.type === 'vaccination' && !r.isCompleted)
       .slice(0, 3);
       
+    console.log(`Found ${vaccinationReminders.length} vaccination reminders for display`);
+    
     // Then high priority reminders that aren't vaccinations
     const highPriorityReminders = reminders
       .filter(r => r.priority === 'high' && !r.isCompleted && r.type !== 'vaccination')
@@ -189,7 +200,7 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
                   className="text-xs text-primary hover:text-primary/70 font-medium flex items-center gap-1"
                 >
                   <Bell className="h-3 w-3" />
-                  View All Reminders {reminders.length > 0 && `(${reminders.length})`}
+                  View All Reminders {reminders?.length > 0 && `(${reminders.length})`}
                 </Button>
               </div>
             </>
