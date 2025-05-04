@@ -13,7 +13,7 @@ import {
   generateDogReminders, 
   generateLitterReminders, 
   generateGeneralReminders 
-} from '@/services/ReminderService';
+} from '@/services/reminders/DogReminderService';
 import { useSortedReminders } from './useSortedReminders';
 import { toast } from '@/components/ui/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
