@@ -120,7 +120,7 @@ const Login: React.FC = () => {
   const effectiveLoading = isLoading || authLoading;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-greige-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-warmbeige-50/70 p-4">
       <div className="text-center mb-8">
         {/* Removed the Breeding Journey text */}
       </div>
