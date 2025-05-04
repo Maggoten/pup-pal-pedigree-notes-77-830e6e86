@@ -7,3 +7,4 @@ export type { Reminder, CustomReminderInput } from '@/types/reminders';
 
 // Re-export the hook with the same name for backward compatibility
 const useBreedingReminders = useBreedingRemindersProvider;
+export default useBreedingReminders;
