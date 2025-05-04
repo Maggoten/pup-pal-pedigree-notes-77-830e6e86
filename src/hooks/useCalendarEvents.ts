@@ -34,7 +34,10 @@ export const useCalendarEvents = (dogs: Dog[]) => {
   
   // Convert reminders to calendar events
   const reminderToCalendarEvents = useCallback(() => {
-    if (!reminders || reminders.length === 0) return [];
+    if (!reminders || reminders.length === 0) {
+      console.log("[Calendar] No reminders to convert to calendar events");
+      return [];
+    }
     
     console.log("[Calendar] Converting reminders to calendar events:", reminders.length);
     
@@ -82,12 +85,16 @@ export const useCalendarEvents = (dogs: Dog[]) => {
     error: fetchError,
     refetch
   } = useQuery({
-    queryKey: ['calendar-events', user?.id, dogs.length],
+    queryKey: ['calendar-events', user?.id, dogs.length, reminders?.length],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user) {
+        console.log("[Calendar] No user found, returning empty events array");
+        return [];
+      }
       
       console.log("[Calendar] Loading calendar events for user:", user.id);
       console.log("[Calendar] Dogs data:", dogs.map(d => ({id: d.id, name: d.name})));
+      console.log("[Calendar] Reminders data:", reminders?.length || 0, "reminders available");
       
       // Ensure migration happens before fetching
       await migrateEventsIfNeeded();
@@ -117,32 +124,34 @@ export const useCalendarEvents = (dogs: Dog[]) => {
         vaccinationEvents.map(e => `${e.title} - ${new Date(e.date).toISOString()} - Dog ID: ${e.dogId}`));
       
       // Return all events at once
-      return [...heatEvents, ...customEvents, ...reminderEvents];
+      const allEvents = [...heatEvents, ...customEvents, ...reminderEvents];
+      console.log("[Calendar] Total events:", allEvents.length);
+      return allEvents;
     },
-    enabled: !!user, // Only enabled when user is available
-    staleTime: 1000 * 60 * 2, // Consider data fresh for 2 minutes (reduced from 5)
-    retry: 1, // Only retry once to prevent excessive attempts
+    enabled: !!user && dogs?.length > 0, // Enable when both user and dogs are available
+    staleTime: 1000 * 30, // Consider data fresh for just 30 seconds to ensure frequent updates
+    retry: 2, // Increased retry attempts
     refetchOnMount: true,
     refetchOnWindowFocus: true // Enable refetching when window regains focus
   });
   
-  // Force a refresh when reminders change
+  // Force a refresh when dogs or reminders change
   useEffect(() => {
-    if (user && reminders.length > 0) {
-      console.log("[Calendar] Force refreshing calendar events after reminders updated");
+    if (user && (dogs.length > 0 || reminders?.length > 0)) {
+      console.log("[Calendar] Force refreshing calendar events after dogs or reminders updated");
       refetch();
     }
-  }, [user, reminders, refetch]);
+  }, [user, dogs, reminders, refetch]);
   
   // Memoize getEventsForDate to reduce re-renders
   const getEventsForDate = useCallback((date: Date) => {
-    if (!calendarEvents) {
+    if (!calendarEvents || !Array.isArray(calendarEvents)) {
       console.log("[Calendar] No calendar events available");
       return [];
     }
     
     const eventsForDate = calendarEvents.filter(event => 
-      new Date(event.date).toDateString() === date.toDateString()
+      event && event.date && new Date(event.date).toDateString() === date.toDateString()
     );
     
     if (date.toDateString() === new Date().toDateString()) {

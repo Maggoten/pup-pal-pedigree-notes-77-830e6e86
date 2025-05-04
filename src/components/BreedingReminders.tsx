@@ -41,6 +41,7 @@ const RemindersListSkeleton = () => (
 const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersData }) => {
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
   const [showLoading, setShowLoading] = useState(true);
+  const [forceReady, setForceReady] = useState(false);
   
   // Use provided data or empty defaults
   const { 
@@ -52,55 +53,65 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
   
   // Force show content after a timeout to prevent infinite loading
   useEffect(() => {
+    // Short timeout to show loading state briefly
     const timer = setTimeout(() => {
       if (isLoading) {
-        console.log("Forcing reminders to show after timeout");
+        console.log("BreedingReminders: Setting loading state to false after timeout");
         setShowLoading(false);
       }
-    }, 3000);
+    }, 2000);
+    
+    // Longer timeout as fallback to make sure content appears
+    const forceTimer = setTimeout(() => {
+      console.log("BreedingReminders: Forcing ready state after longer timeout");
+      setForceReady(true);
+    }, 5000);
     
     // If not loading, immediately show content
     if (!isLoading) {
       setShowLoading(false);
     }
     
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(forceTimer);
+    };
   }, [isLoading]);
   
   // Log all reminders for debugging
   useEffect(() => {
-    console.log(`Reminders component received ${reminders?.length || 0} reminders`);
+    console.log(`BreedingReminders component received ${reminders?.length || 0} reminders`);
     
     if (reminders && reminders.length > 0) {
-      console.log("All Reminders:", reminders.map(r => 
+      console.log("BreedingReminders - All Reminders:", reminders.map(r => 
         `${r.title} (${r.type}) - Due: ${r.dueDate?.toISOString()} - Priority: ${r.priority} - Completed: ${r.isCompleted}`
       ));
       
       // Specifically log vaccination reminders
       const vaccinationReminders = reminders.filter(r => r.type === 'vaccination');
-      console.log(`Found ${vaccinationReminders.length} vaccination reminders:`, 
+      console.log(`BreedingReminders - Found ${vaccinationReminders.length} vaccination reminders:`, 
         vaccinationReminders.map(r => `${r.title} - Due: ${r.dueDate?.toISOString()} - RelatedId: ${r.relatedId}`)
       );
     } else {
-      console.log("No reminders to display");
+      console.log("BreedingReminders - No reminders to display");
     }
   }, [reminders]);
   
   // Memoize the priority filtering logic to avoid recalculating on every render
   const displayReminders = React.useMemo(() => {
     if (!reminders || !Array.isArray(reminders)) {
-      console.warn("Reminders component received invalid reminders:", reminders);
+      console.warn("BreedingReminders component received invalid reminders:", reminders);
       return [];
     }
     
-    console.log("Calculating display reminders from", reminders.length, "reminders");
+    console.log("BreedingReminders - Calculating display reminders from", reminders.length, "reminders");
     
     // First prioritize vaccination reminders regardless of priority (this is the key change)
     const vaccinationReminders = reminders
       .filter(r => r.type === 'vaccination' && !r.isCompleted)
       .slice(0, 3);
       
-    console.log(`Found ${vaccinationReminders.length} vaccination reminders for display`);
+    console.log(`BreedingReminders - Found ${vaccinationReminders.length} vaccination reminders for display`);
     
     // Then high priority reminders that aren't vaccinations
     const highPriorityReminders = reminders
@@ -134,11 +145,12 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
       result.push(...completedReminders);
     }
 
-    console.log("Displaying reminders:", result.map(r => `${r.title} (${r.type}) - Priority: ${r.priority}`));
+    console.log("BreedingReminders - Displaying reminders:", result.map(r => `${r.title} (${r.type}) - Priority: ${r.priority}`));
     return result;
   }, [reminders]);
   
   const hasReminders = displayReminders.length > 0;
+  const showContent = !showLoading || forceReady;
   
   return (
     <>
@@ -167,7 +179,7 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0 flex flex-col overflow-hidden">
-          {showLoading ? (
+          {!showContent ? (
             <div className="flex flex-col items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
               <span className="text-sm text-muted-foreground">Loading reminders...</span>

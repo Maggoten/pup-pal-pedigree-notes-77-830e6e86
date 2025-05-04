@@ -60,13 +60,13 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
         
         console.log(`[VACCINATION DEBUG] Parsed last vaccination: ${format(lastVaccination, 'yyyy-MM-dd')}`);
         
-        // FIXED: Calculate next vaccination properly accounting for the current year
-        // Get the month and day from the last vaccination
+        // Calculate next vaccination date based on annual schedule
+        // Create a date for this year's vaccination
+        const currentYear = today.getFullYear();
         const lastVaccinationMonth = lastVaccination.getMonth();
         const lastVaccinationDay = lastVaccination.getDate();
-        const currentYear = today.getFullYear();
         
-        // Create a date for this year's vaccination using month and day from last vaccination
+        // Create a date for this year's vaccination
         const thisYearsVaccination = new Date(currentYear, lastVaccinationMonth, lastVaccinationDay);
         
         // Create a date for next year's vaccination
@@ -87,8 +87,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
         
         console.log(`[VACCINATION DEBUG] Dog ${dog.name}: Next vaccination date: ${format(nextVaccination, 'yyyy-MM-dd')}, Days until: ${daysUntilVaccination}`);
         
-        // Updated condition: Create reminder if vaccination is due within the next 60 days 
-        // or up to 14 days overdue
+        // Create reminder if vaccination is within the next 60 days or overdue by up to 14 days
         if (daysUntilVaccination >= -14 && daysUntilVaccination <= 60) {
           const isOverdue = daysUntilVaccination < 0;
           

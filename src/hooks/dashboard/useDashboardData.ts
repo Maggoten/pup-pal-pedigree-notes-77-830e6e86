@@ -57,26 +57,28 @@ export const useDashboardData = () => {
   useEffect(() => {
     console.log("Dashboard data load state:", {
       dogsCount: dogs.length,
-      remindersCount: reminders.length,
+      remindersCount: reminders?.length || 0,
       eventsCount: calendarEvents?.length || 0,
       dogsLoading,
       remindersLoading,
       calendarLoading
     });
     
-    // Force refresh data on first load
-    if (dogs.length > 0 && reminders.length === 0 && !remindersLoading) {
-      console.log("Forcing refresh of reminders data");
-      refreshReminderData();
-    }
-    
-    if (dogs.length > 0 && (!calendarEvents || calendarEvents.length === 0) && !calendarLoading) {
-      console.log("Forcing refresh of calendar data");
-      refreshCalendarData();
+    // Force refresh data on first load if dogs are available
+    if (dogs.length > 0) {
+      if ((!reminders || reminders.length === 0) && !remindersLoading) {
+        console.log("Forcing refresh of reminders data - missing reminders");
+        refreshReminderData();
+      }
+      
+      if ((!calendarEvents || calendarEvents.length === 0) && !calendarLoading) {
+        console.log("Forcing refresh of calendar data - missing events");
+        refreshCalendarData();
+      }
     }
   }, [
     dogs.length, 
-    reminders.length, 
+    reminders, 
     calendarEvents, 
     dogsLoading, 
     remindersLoading, 
