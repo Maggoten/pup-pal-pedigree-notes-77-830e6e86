@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import type {
   ToastActionElement,
@@ -155,8 +154,8 @@ function toast({ ...props }: Toast) {
 
   // Process custom action object format to JSX
   let processedProps = { ...props };
-  if (props.action && !React.isValidElement(props.action) && 'label' in props.action) {
-    const { label, onClick, className } = props.action;
+  if (props.action && !React.isValidElement(props.action) && typeof props.action === 'object' && 'label' in props.action) {
+    const { label, onClick, className } = props.action as { label: string; onClick: () => void; className?: string };
     processedProps.action = (
       <button
         className={className || "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"}

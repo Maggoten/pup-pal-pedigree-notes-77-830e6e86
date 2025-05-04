@@ -86,19 +86,16 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
       errorMessage = error.message;
     }
     
-    // Show toast with retry option
+    // Show toast with retry option - using object format instead of JSX
     toast({
       title: "Error loading dogs",
       description: errorMessage,
       variant: "destructive",
-      action: (
-        <button 
-          className="bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
-          onClick={() => fetchDogs(userId)}
-        >
-          Retry
-        </button>
-      )
+      action: {
+        label: "Retry",
+        onClick: () => fetchDogs(userId),
+        className: "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
+      }
     });
     
     throw new Error(errorMessage);
