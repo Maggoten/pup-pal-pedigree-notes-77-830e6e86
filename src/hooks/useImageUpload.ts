@@ -49,6 +49,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       
       startTimeout();
 
+      // Call uploadToStorage without the onProgress parameter
       const { data, error } = await uploadToStorage(fileName, file);
       
       clearTimeout();
