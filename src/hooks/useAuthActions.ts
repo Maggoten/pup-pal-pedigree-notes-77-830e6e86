@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
@@ -51,7 +52,8 @@ export const useAuthActions = () => {
           data: {
             firstName: userData.firstName,
             lastName: userData.lastName,
-            address: userData.address
+            // Pass empty string for address since we removed the field
+            address: ''
           }
         }
       });

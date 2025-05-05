@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -20,7 +20,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 const registrationSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   subscriptionType: z.enum(['free', 'premium']),
@@ -42,7 +41,6 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
     defaultValues: {
       firstName: '',
       lastName: '',
-      address: '',
       email: '',
       password: '',
       subscriptionType: 'free',
@@ -82,20 +80,6 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
             )}
           />
         </div>
-        
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-brown-800">Address</FormLabel>
-              <FormControl>
-                <Input placeholder="123 Main St, City" {...field} className="border-warmbeige-300 focus:border-warmgreen-600 bg-white" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         
         <FormField
           control={form.control}

@@ -55,7 +55,6 @@ const Login: React.FC = () => {
         password: values.password,
         firstName: values.firstName,
         lastName: values.lastName,
-        address: values.address
       };
       
       console.log('Login page: Attempting free registration');
@@ -88,7 +87,6 @@ const Login: React.FC = () => {
           password: registrationData.password,
           firstName: registrationData.firstName,
           lastName: registrationData.lastName,
-          address: registrationData.address
         };
         
         console.log('Login page: Attempting premium registration');

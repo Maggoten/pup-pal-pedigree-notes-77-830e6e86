@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { StorageError } from '@supabase/storage-js';
 import { fetchWithRetry } from '@/utils/fetchUtils';
@@ -71,7 +70,7 @@ export const uploadToStorage = async (
     );
   } catch (error) {
     console.error('Upload error:', error);
-    return { data: null, error: new StorageError('Upload failed', 500) };
+    return { data: null, error: new StorageError('Upload failed') };
   }
 };
 

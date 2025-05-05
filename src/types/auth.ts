@@ -15,7 +15,6 @@ export interface RegisterData {
   password: string;
   firstName: string;
   lastName: string;
-  address: string;
 }
 
 export interface AuthContextType {
