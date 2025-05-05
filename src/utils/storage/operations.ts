@@ -13,7 +13,7 @@ export const checkBucketExists = async (): Promise<boolean> => {
       return false;
     }
 
-    console.log('Checking if bucket exists:', BUCKET_NAME);
+    console.log(`Checking if bucket '${BUCKET_NAME}' exists...`);
     
     try {
       // Using our retry utility for more reliable bucket checking
@@ -23,18 +23,18 @@ export const checkBucketExists = async (): Promise<boolean> => {
       );
       
       if (result.error) {
-        console.error('Error checking bucket existence:', result.error);
+        console.error(`Bucket '${BUCKET_NAME}' check failed:`, result.error);
         return false;
       }
       
-      console.log('Bucket exists, can list files:', result.data);
+      console.log(`Bucket '${BUCKET_NAME}' exists, can list files:`, result.data);
       return true;
     } catch (listError) {
-      console.error('Error or timeout when listing bucket contents:', listError);
+      console.error(`Error or timeout when listing bucket '${BUCKET_NAME}' contents:`, listError);
       return false;
     }
   } catch (err) {
-    console.error('Error in bucket verification:', err);
+    console.error(`Error in bucket '${BUCKET_NAME}' verification:`, err);
     return false;
   }
 };
@@ -49,11 +49,19 @@ export const uploadToStorage = async (
     // First verify auth session
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
+      console.error('Upload failed: No active session');
       throw new Error(STORAGE_ERRORS.NO_SESSION);
     }
     
     // Log attempt for debugging
-    console.log(`[Storage] Attempting to upload ${fileName}, size: ${file.size} bytes`);
+    console.log(`[Storage] Attempting to upload ${fileName} to bucket '${BUCKET_NAME}', size: ${file.size} bytes`);
+    
+    // Verify bucket exists before attempting upload
+    const bucketExists = await checkBucketExists();
+    if (!bucketExists) {
+      console.error(`Upload failed: Bucket '${BUCKET_NAME}' not found or not accessible`);
+      throw new Error(STORAGE_ERRORS.BUCKET_NOT_FOUND(BUCKET_NAME));
+    }
     
     // Upload with retry logic
     return await fetchWithRetry(
@@ -64,17 +72,17 @@ export const uploadToStorage = async (
           upsert: true
         }),
       { 
-        maxRetries: 2,
+        maxRetries: 3, // Increased from 2 to 3 for better mobile resilience
         initialDelay: 2000,
         onRetry: (attempt) => {
-          console.log(`Retrying upload attempt ${attempt}`);
+          console.log(`Retrying upload to '${BUCKET_NAME}', attempt ${attempt}`);
           if (onProgress) onProgress(-1); // Signal retry to UI
         }
       }
     );
   } catch (error) {
-    console.error('Upload error:', error);
-    return { data: null, error: new StorageError('Upload failed') };
+    console.error(`Upload error to bucket '${BUCKET_NAME}':`, error);
+    return { data: null, error: new StorageError(error instanceof Error ? error.message : 'Upload failed') };
   }
 };
 
@@ -91,19 +99,27 @@ export const removeFromStorage = async (storagePath: string) => {
     // Verify session first
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
+      console.error('Remove failed: No active session');
       throw new Error(STORAGE_ERRORS.NO_SESSION);
     }
     
-    console.log(`[Storage] Attempting to remove ${storagePath}`);
+    // Verify bucket exists before attempting removal
+    const bucketExists = await checkBucketExists();
+    if (!bucketExists) {
+      console.error(`Remove failed: Bucket '${BUCKET_NAME}' not found or not accessible`);
+      throw new Error(STORAGE_ERRORS.BUCKET_NOT_FOUND(BUCKET_NAME));
+    }
+    
+    console.log(`[Storage] Attempting to remove ${storagePath} from bucket '${BUCKET_NAME}'`);
     
     return await fetchWithRetry(
       () => supabase.storage
         .from(BUCKET_NAME)
         .remove([storagePath]),
-      { maxRetries: 1, initialDelay: 1000 }
+      { maxRetries: 2, initialDelay: 1000 }
     );
   } catch (error) {
-    console.error('Remove from storage error:', error);
+    console.error(`Remove from storage error (bucket '${BUCKET_NAME}'):`, error);
     throw error;
   }
 };

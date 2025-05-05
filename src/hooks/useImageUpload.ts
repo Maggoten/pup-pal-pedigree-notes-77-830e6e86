@@ -6,6 +6,7 @@ import { StorageError } from '@supabase/storage-js';
 import { validateImageFile } from '@/utils/imageValidation';
 import { 
   BUCKET_NAME, 
+  STORAGE_ERRORS,
   checkBucketExists, 
   uploadToStorage, 
   getPublicUrl, 
@@ -37,7 +38,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     if (!validateImageFile(file)) return;
     
     setIsUploading(true);
-    console.log('Starting image upload to bucket:', BUCKET_NAME);
+    console.log(`Starting image upload to bucket: '${BUCKET_NAME}'`);
     
     try {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -46,6 +47,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       }
       console.log('Active session found for user:', sessionData.session.user.id);
       
+      // Verify bucket exists before proceeding
       const bucketExists = await checkBucketExists();
       if (!bucketExists) {
         throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
@@ -72,6 +74,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         console.error('Upload error:', {
           error,
           message: errorMessage,
+          bucket: BUCKET_NAME,
           details: error instanceof StorageError ? error.message : 'Unknown error'
         });
 
@@ -152,7 +155,8 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         
         console.error('Error details:', {
           error,
-          message: errorMessage
+          message: errorMessage,
+          bucket: BUCKET_NAME
         });
         
         throw error;

@@ -1,6 +1,6 @@
 
 // Core configuration for storage operations
-export const BUCKET_NAME = 'Dog Photos';
+export const BUCKET_NAME = 'dog-photos';
 
 // Common error messages
 export const STORAGE_ERRORS = {

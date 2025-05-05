@@ -2,7 +2,7 @@
 import { isMobileDevice } from '@/utils/fetchUtils';
 
 // Helper function to compress images for mobile uploads
-export async function compressImageForUpload(file: File, maxSizeKB = 500): Promise<File> {
+export async function compressImageForUpload(file: File, maxSizeKB = 800): Promise<File> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -83,6 +83,7 @@ export const processImageForUpload = async (file: File): Promise<File> => {
   // For mobile devices, compress images before upload if it's an image file
   if (isMobileDevice() && file.type.startsWith('image/')) {
     try {
+      console.log('Mobile device detected, compressing image before upload');
       const compressedFile = await compressImageForUpload(file);
       console.log(`Compressed image from ${file.size} to ${compressedFile.size} bytes`);
       return compressedFile;
