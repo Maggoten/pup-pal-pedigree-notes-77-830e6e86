@@ -11,8 +11,10 @@ import { toast } from '@/hooks/use-toast';
 const MOBILE_TIMEOUT = 15000; // 15 seconds for mobile devices
 const MAX_RETRIES = 2;
 const RETRY_DELAY = 2000;
+const MOBILE_PAGE_SIZE = 5; // Smaller page size for mobile devices
+const DESKTOP_PAGE_SIZE = 20; // Larger page size for desktop devices
 
-export async function fetchDogs(userId: string): Promise<Dog[]> {
+export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
   if (!userId) {
     console.error('[Dogs Debug] fetchDogs called without userId');
     return [];
@@ -20,19 +22,23 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
 
   const deviceType = isMobileDevice() ? 'Mobile' : 'Desktop';
   const effectiveTimeout = isMobileDevice() ? MOBILE_TIMEOUT : TIMEOUT;
+  const pageSize = isMobileDevice() ? MOBILE_PAGE_SIZE : DESKTOP_PAGE_SIZE;
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize - 1;
   
-  console.log(`[Dogs Debug] Fetching dogs for user ${userId} on ${deviceType}`);
+  console.log(`[Dogs Debug] Fetching dogs for user ${userId} on ${deviceType} (page ${page}, range ${start}-${end})`);
   console.log(`[Dogs Debug] Using timeout: ${effectiveTimeout}ms with ${MAX_RETRIES} retries`);
   
   try {
-    // Use our new retry wrapper for the fetch operation
+    // Use our retry wrapper for the fetch operation with pagination and specific columns
     const response = await fetchWithRetry<PostgrestResponse<DbDog>>(
-      // Fetch function - with type assertion to avoid Promise compatibility issues
+      // Fetch function with specific fields instead of select('*')
       () => supabase
         .from('dogs')
-        .select('*')
+        .select('id, name, breed, gender, birthdate, color, image_url, heatHistory, heatInterval, owner_id, created_at')
         .eq('owner_id', userId)
-        .order('created_at', { ascending: false }) as unknown as Promise<PostgrestResponse<DbDog>>,
+        .order('created_at', { ascending: false })
+        .range(start, end) as unknown as Promise<PostgrestResponse<DbDog>>,
       // Retry options
       {
         maxRetries: MAX_RETRIES,
@@ -58,10 +64,10 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
     }
     
     const dogCount = response.data?.length || 0;
-    console.log(`[Dogs Debug] Retrieved ${dogCount} dogs from database`);
+    console.log(`[Dogs Debug] Retrieved ${dogCount} dogs from database (page ${page})`);
     
     if (dogCount === 0) {
-      console.log(`[Dogs Debug] No dogs found for user ${userId}`);
+      console.log(`[Dogs Debug] No dogs found for user ${userId} on page ${page}`);
       return [];
     }
     
@@ -99,5 +105,28 @@ export async function fetchDogs(userId: string): Promise<Dog[]> {
     });
     
     throw new Error(errorMessage);
+  }
+}
+
+// Add a new function to fetch total count for pagination
+export async function fetchDogsCount(userId: string): Promise<number> {
+  if (!userId) {
+    return 0;
+  }
+  
+  try {
+    const { count, error } = await supabase
+      .from('dogs')
+      .select('id', { count: 'exact', head: true })
+      .eq('owner_id', userId);
+    
+    if (error) {
+      throw error;
+    }
+    
+    return count || 0;
+  } catch (error) {
+    console.error('[Dogs Debug] Failed to fetch dog count:', error);
+    return 0;
   }
 }

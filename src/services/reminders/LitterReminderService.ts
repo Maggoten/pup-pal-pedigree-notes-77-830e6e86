@@ -3,6 +3,7 @@ import { Reminder } from '@/types/reminders';
 import { createPawPrintIcon } from '@/utils/iconUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { differenceInDays, startOfDay } from 'date-fns';
+import { isMobileDevice } from '@/utils/fetchUtils';
 
 // Generate litter-related reminders for a specific user
 export const generateLitterReminders = async (userId: string): Promise<Reminder[]> => {
@@ -11,12 +12,13 @@ export const generateLitterReminders = async (userId: string): Promise<Reminder[
   const today = startOfDay(new Date());
   
   try {
-    // Fetch active pregnancies from Supabase for the current user
+    // Fetch active pregnancies from Supabase for the current user with specific fields
     const { data: pregnancies, error: pregnancyError } = await supabase
       .from('pregnancies')
-      .select('*')
+      .select('id, expected_due_date, status, user_id')
       .eq('user_id', userId)
-      .eq('status', 'active');
+      .eq('status', 'active')
+      .limit(isMobileDevice() ? 5 : 20); // Limit results based on device type
       
     if (pregnancyError) {
       console.error("Error fetching pregnancies for reminders:", pregnancyError);

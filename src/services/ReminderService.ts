@@ -11,6 +11,7 @@ import { enrichDog } from '@/utils/dogUtils';
 import { generateDogReminders } from './reminders/DogReminderService';
 import { generateLitterReminders } from './reminders/LitterReminderService';
 import { generateGeneralReminders } from './reminders/GeneralReminderService';
+import { isMobileDevice } from '@/utils/fetchUtils';
 
 // Add a new manual trigger function with explicit type
 export const triggerAllReminders: TriggerAllRemindersFunction = async (userId: string): Promise<Reminder[]> => {
@@ -22,11 +23,12 @@ export const triggerAllReminders: TriggerAllRemindersFunction = async (userId: s
   }
   
   try {
-    // First fetch the user's dogs
+    // First fetch the user's dogs with specific fields instead of select('*')
     const { data: dogsData, error: dogsError } = await supabase
       .from('dogs')
-      .select('*')
-      .eq('owner_id', userId);
+      .select('id, name, breed, gender, birthdate, dewormingDate, vaccinationDate, owner_id')
+      .eq('owner_id', userId)
+      .limit(isMobileDevice() ? 5 : 20); // Limit results based on device
       
     if (dogsError) {
       console.error('[Manual Reminder Generation] Error fetching dogs:', dogsError);

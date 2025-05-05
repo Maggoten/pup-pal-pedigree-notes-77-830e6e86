@@ -17,7 +17,7 @@ export const loginUser = async (email: string, password: string): Promise<User |
   // Get user profile from database
   const { data: profile } = await supabase
     .from('profiles')
-    .select('*')
+    .select('id, email, first_name, last_name, address')
     .eq('id', data.user.id)
     .single();
   
@@ -45,7 +45,8 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
         data: {
           firstName: userData.firstName,
           lastName: userData.lastName,
-          address: userData.address
+          // Since address was removed from RegisterData, use empty string
+          address: ''
         }
       }
     });
@@ -61,7 +62,7 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
       email: userData.email,
       firstName: userData.firstName,
       lastName: userData.lastName,
-      address: userData.address
+      address: '' // Use empty string since address field was removed
     };
   } catch (error) {
     console.error("Registration error:", error);
