@@ -1,12 +1,12 @@
 
 import { useState } from 'react';
-import { Litter } from '@/types/breeding';
+import { Litter, PlannedLitter } from '@/types/breeding';
 
 export function useLitterState() {
   // Lists of litters
   const [activeLitters, setActiveLitters] = useState<Litter[]>([]);
   const [archivedLitters, setArchivedLitters] = useState<Litter[]>([]);
-  const [plannedLitters, setPlannedLitters] = useState<any[]>([]);
+  const [plannedLitters, setPlannedLitters] = useState<PlannedLitter[]>([]);
   
   // Selection and UI state
   const [selectedLitterId, setSelectedLitterId] = useState<string | null>(null);

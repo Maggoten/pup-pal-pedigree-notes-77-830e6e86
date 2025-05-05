@@ -3,6 +3,8 @@ import { useCallback, useState, useEffect } from 'react';
 import { litterService } from '@/services/LitterService';
 import { Litter } from '@/types/breeding';
 import { toast } from '@/components/ui/use-toast';
+import { plannedLittersService } from '@/services/PlannedLitterService';
+import { fetchWithRetry } from '@/utils/fetchUtils';
 
 export function useLitterLoading(
   setActiveLitters,
@@ -15,6 +17,7 @@ export function useLitterLoading(
 ) {
   const [selectedLitterDetails, setSelectedLitterDetails] = useState<Litter | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [isLoadingPlannedLitters, setIsLoadingPlannedLitters] = useState(false);
 
   // Fetch all litters (basic data without puppies for better performance)
   const loadLittersData = useCallback(async () => {
@@ -50,9 +53,43 @@ export function useLitterLoading(
 
   // Fetch planned litters
   const loadPlannedLitters = useCallback(async () => {
-    // This function would fetch planned litters if they are implemented
-    setPlannedLitters([]);
-  }, [setPlannedLitters]);
+    if (!userId) {
+      console.log("Cannot load planned litters: No user ID provided");
+      setPlannedLitters([]);
+      return;
+    }
+
+    try {
+      setIsLoadingPlannedLitters(true);
+      console.log("Loading planned litters for user:", userId);
+      
+      // Use fetchWithRetry for more reliable loading
+      const plannedLittersData = await fetchWithRetry(
+        () => plannedLittersService.loadPlannedLitters(),
+        { 
+          maxRetries: 2, 
+          initialDelay: 1000,
+          onRetry: (attempt) => {
+            console.log(`Retry attempt ${attempt} loading planned litters`);
+          }
+        }
+      );
+      
+      console.log("Loaded planned litters:", plannedLittersData?.length || 0);
+      setPlannedLitters(plannedLittersData || []);
+    } catch (error) {
+      console.error('Error loading planned litters:', error);
+      toast({
+        title: "Warning",
+        description: "Could not load planned litters. Some features may be limited.",
+        variant: "destructive"
+      });
+      // Set empty array as fallback
+      setPlannedLitters([]);
+    } finally {
+      setIsLoadingPlannedLitters(false);
+    }
+  }, [userId, setPlannedLitters]);
 
   // Load detailed litter data including puppies
   const loadLitterDetails = useCallback(async (litterId: string) => {
@@ -88,6 +125,7 @@ export function useLitterLoading(
     loadPlannedLitters,
     loadLitterDetails,
     selectedLitterDetails,
-    isLoadingDetails
+    isLoadingDetails,
+    isLoadingPlannedLitters
   };
 }

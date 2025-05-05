@@ -1,6 +1,6 @@
 
-import { useEffect, useCallback } from 'react';
-import { Litter, Puppy } from '@/types/breeding';
+import { useEffect, useCallback, useState } from 'react';
+import { Litter, Puppy, PlannedLitter } from '@/types/breeding';
 import { useAuth } from '@/hooks/useAuth';
 import { useLitterState } from './useLitterState';
 import { useLitterLoading } from './useLitterLoading';
@@ -37,7 +37,8 @@ export function useLitterManagement() {
     loadLittersData, 
     loadPlannedLitters,
     loadLitterDetails,
-    selectedLitterDetails: loadedLitterDetails
+    selectedLitterDetails: loadedLitterDetails,
+    isLoadingPlannedLitters
   } = useLitterLoading(
     setActiveLitters,
     setArchivedLitters,
@@ -140,6 +141,12 @@ export function useLitterManagement() {
   const handleDeletePuppy = useCallback((puppyId: string) => {
     return deletePuppy(selectedLitterId, puppyId);
   }, [deletePuppy, selectedLitterId]);
+
+  // Add a function to refresh planned litters
+  const refreshPlannedLitters = useCallback(() => {
+    console.log("Manually refreshing planned litters");
+    return loadPlannedLitters();
+  }, [loadPlannedLitters]);
   
   return {
     activeLitters,
@@ -152,6 +159,7 @@ export function useLitterManagement() {
     selectedLitter,
     isLoading,
     isLoadingDetails,
+    isLoadingPlannedLitters,
     handleAddLitter,
     handleUpdateLitter,
     handleAddPuppy,
@@ -160,7 +168,8 @@ export function useLitterManagement() {
     handleDeleteLitter: deleteLitter,
     handleArchiveLitter: archiveLitter,
     handleSelectLitter,
-    getAvailableYears
+    getAvailableYears,
+    refreshPlannedLitters
   };
 }
 

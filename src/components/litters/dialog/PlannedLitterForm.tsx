@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,14 +43,14 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
   setExternalSireRegistration,
   onSubmit,
 }) => {
-  if (plannedLitters.length === 0) {
-    return (
-      <div className="text-center py-4">
-        <p className="text-muted-foreground">No planned litters available.</p>
-        <p className="text-sm mt-2">Create a planned litter first in the Planned Litters section.</p>
-      </div>
-    );
-  }
+  // Set initial selection if none is set
+  useEffect(() => {
+    if (plannedLitters.length > 0 && !selectedPlannedLitterId) {
+      setSelectedPlannedLitterId(plannedLitters[0].id);
+    }
+  }, [plannedLitters, selectedPlannedLitterId, setSelectedPlannedLitterId]);
+
+  console.log("PlannedLitterForm rendering with", plannedLitters.length, "planned litters");
 
   return (
     <form onSubmit={onSubmit} className="space-y-4 mt-4">
