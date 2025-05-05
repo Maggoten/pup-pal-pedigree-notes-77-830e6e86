@@ -9,7 +9,8 @@ import {
   Drawer,
   DrawerContent,
   DrawerTrigger,
-  DrawerClose
+  DrawerClose,
+  DrawerTitle
 } from '@/components/ui/drawer';
 import SettingsDialog from '@/components/settings/SettingsDialog';
 
@@ -52,6 +53,7 @@ export const Navbar: React.FC = () => {
               </Button>
             </DrawerTrigger>
             <DrawerContent className="pt-10">
+              <DrawerTitle className="sr-only">Mobile Navigation</DrawerTitle>
               <nav className="flex flex-col space-y-2 p-4">
                 {navItems.map((item) => (
                   <DrawerClose key={item.path} asChild>
