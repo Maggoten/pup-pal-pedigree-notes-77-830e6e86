@@ -3,6 +3,7 @@ import { litterService } from '@/services/LitterService';
 import { toast } from '@/components/ui/use-toast';
 import { Litter } from '@/types/breeding';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export function useAddLitter(
   loadLittersData,
@@ -10,8 +11,20 @@ export function useAddLitter(
   setArchivedLitters,
   setSelectedLitterId
 ) {
+  const { isAuthReady } = useAuth();
+  
   // Handler for adding a new litter
   const handleAddLitter = async (newLitter: Litter) => {
+    // Check if auth is ready before proceeding
+    if (!isAuthReady) {
+      console.log('[LitterOps] Auth not ready yet, delaying litter addition');
+      toast({
+        title: "Please wait",
+        description: "Preparing your account. Please try again in a moment.",
+      });
+      return;
+    }
+    
     newLitter.puppies = [];
     newLitter.archived = false;
     

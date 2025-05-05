@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
 export const useDogsMutations = (): UseDogsMutations => {
-  const { user } = useAuth();
+  const { user, isAuthReady } = useAuth();
   const userId = user?.id;
   const { toast } = useToast();
   const addDogMutation = useAddDog(userId);
@@ -16,6 +16,26 @@ export const useDogsMutations = (): UseDogsMutations => {
 
   const addDog = useCallback(async (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      // Check if auth is ready before proceeding
+      if (!isAuthReady) {
+        console.log('Auth not ready yet, delaying dog addition');
+        toast({
+          title: "Please wait",
+          description: "Preparing your account. Please try again in a moment.",
+        });
+        return null;
+      }
+
+      if (!user?.id) {
+        console.error('Cannot add dog: No authenticated user found');
+        toast({
+          title: "Authentication required",
+          description: "You need to be logged in to add a dog",
+          variant: "destructive"
+        });
+        return null;
+      }
+
       console.log('useDogsMutations.addDog called with:', dog);
       return await addDogMutation.mutateAsync(dog);
     } catch (error) {
@@ -27,10 +47,30 @@ export const useDogsMutations = (): UseDogsMutations => {
       });
       throw error;
     }
-  }, [addDogMutation, toast]);
+  }, [addDogMutation, toast, user, isAuthReady]);
 
   const updateDog = useCallback(async (id: string, updates: Partial<Dog>) => {
     try {
+      // Check if auth is ready before proceeding
+      if (!isAuthReady) {
+        console.log('Auth not ready yet, delaying dog update');
+        toast({
+          title: "Please wait",
+          description: "Preparing your account. Please try again in a moment.",
+        });
+        return null;
+      }
+
+      if (!user?.id) {
+        console.error('Cannot update dog: No authenticated user found');
+        toast({
+          title: "Authentication required",
+          description: "You need to be logged in to update a dog",
+          variant: "destructive"
+        });
+        return null;
+      }
+
       console.log('useDogsMutations.updateDog called with ID:', id, 'Updates:', updates);
       return await updateDogMutation.mutateAsync({ id, updates });
     } catch (error) {
@@ -42,10 +82,30 @@ export const useDogsMutations = (): UseDogsMutations => {
       });
       return null;
     }
-  }, [updateDogMutation, toast]);
+  }, [updateDogMutation, toast, user, isAuthReady]);
 
   const deleteDog = useCallback(async (id: string) => {
     try {
+      // Check if auth is ready before proceeding
+      if (!isAuthReady) {
+        console.log('Auth not ready yet, delaying dog deletion');
+        toast({
+          title: "Please wait",
+          description: "Preparing your account. Please try again in a moment.",
+        });
+        return false;
+      }
+
+      if (!user?.id) {
+        console.error('Cannot delete dog: No authenticated user found');
+        toast({
+          title: "Authentication required",
+          description: "You need to be logged in to delete a dog",
+          variant: "destructive"
+        });
+        return false;
+      }
+
       console.log('useDogsMutations.deleteDog called with ID:', id);
       await deleteDogMutation.mutateAsync(id);
       return true;
@@ -58,7 +118,7 @@ export const useDogsMutations = (): UseDogsMutations => {
       });
       return false;
     }
-  }, [deleteDogMutation, toast]);
+  }, [deleteDogMutation, toast, user, isAuthReady]);
 
   return {
     addDog,

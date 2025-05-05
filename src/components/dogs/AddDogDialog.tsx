@@ -19,6 +19,7 @@ import HeatRecordsField from './HeatRecordsField';
 import { toast } from '@/hooks/use-toast';
 import { useDogs } from '@/context/DogsContext';
 import { Dog } from '@/types/dogs';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AddDogDialogProps {
   open: boolean;
@@ -30,6 +31,7 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
   onOpenChange
 }) => {
   const { addDog, loading } = useDogs();
+  const { isAuthReady } = useAuth();
   
   const form = useForm<z.infer<typeof dogFormSchema>>({
     resolver: zodResolver(dogFormSchema),
@@ -48,6 +50,16 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
 
   const handleSubmit = async (data: z.infer<typeof dogFormSchema>) => {
     if (loading) return;
+    
+    // First check if auth is ready
+    if (!isAuthReady) {
+      console.log('[AddDog] Auth not ready yet, delaying dog addition');
+      toast({
+        title: "Please wait",
+        description: "Preparing your account. Please try again in a moment.",
+      });
+      return;
+    }
     
     try {
       const result = await addDog({

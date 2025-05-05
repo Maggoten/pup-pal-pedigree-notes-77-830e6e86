@@ -19,7 +19,7 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
   plannedLitters
 }) => {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAuthReady } = useAuth();
   
   // Planned litter form state
   const [selectedPlannedLitterId, setSelectedPlannedLitterId] = useState('');
@@ -34,6 +34,16 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
 
   const handlePlannedLitterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // First check if auth is ready
+    if (!isAuthReady) {
+      console.log('[PlannedLitter] Auth not ready yet, delaying litter creation');
+      toast({
+        title: "Please wait",
+        description: "Preparing your account. Please try again in a moment.",
+      });
+      return;
+    }
     
     if (!selectedPlannedLitterId || !plannedLitterName) {
       toast({

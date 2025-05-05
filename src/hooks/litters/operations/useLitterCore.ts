@@ -2,6 +2,7 @@
 import { litterService } from '@/services/LitterService';
 import { toast } from '@/components/ui/use-toast';
 import { Litter } from '@/types/breeding';
+import { useAuth } from '@/hooks/useAuth';
 
 export function useLitterCore(
   loadLittersData,
@@ -11,8 +12,20 @@ export function useLitterCore(
   activeLitters,
   archivedLitters
 ) {
+  const { isAuthReady } = useAuth();
+  
   // Handlers for basic litter operations
   async function deleteLitter(litterId: string) {
+    // Check if auth is ready before proceeding
+    if (!isAuthReady) {
+      console.log('[LitterOps] Auth not ready yet, delaying litter deletion');
+      toast({
+        title: "Please wait",
+        description: "Preparing your account. Please try again in a moment.",
+      });
+      return;
+    }
+    
     if (confirm('Are you sure you want to delete this litter? This action cannot be undone.')) {
       try {
         await litterService.deleteLitter(litterId);
@@ -35,6 +48,16 @@ export function useLitterCore(
   }
   
   async function archiveLitter(litterId: string, archive: boolean) {
+    // Check if auth is ready before proceeding
+    if (!isAuthReady) {
+      console.log('[LitterOps] Auth not ready yet, delaying litter archiving');
+      toast({
+        title: "Please wait",
+        description: "Preparing your account. Please try again in a moment.",
+      });
+      return;
+    }
+    
     try {
       await litterService.toggleArchiveLitter(litterId, archive);
       await loadLittersData();
@@ -56,6 +79,16 @@ export function useLitterCore(
   }
 
   async function updateLitter(updatedLitter: Litter) {
+    // Check if auth is ready before proceeding
+    if (!isAuthReady) {
+      console.log('[LitterOps] Auth not ready yet, delaying litter update');
+      toast({
+        title: "Please wait",
+        description: "Preparing your account. Please try again in a moment.",
+      });
+      return;
+    }
+    
     try {
       await litterService.updateLitter(updatedLitter);
       await loadLittersData();

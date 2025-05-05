@@ -30,7 +30,7 @@ interface LitterFormValues {
 const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLitterAdded }) => {
   const { dogs } = useDogs();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAuthReady } = useAuth();
   
   // Set up React Hook Form with typed form values
   const methods = useForm<LitterFormValues>({
@@ -49,6 +49,16 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
   const handleNewLitterSubmit = async (values: LitterFormValues) => {
     try {
       console.log("Form submission started with values:", values);
+      
+      // First check if auth is ready
+      if (!isAuthReady) {
+        console.log('[NewLitter] Auth not ready yet, delaying litter creation');
+        toast({
+          title: "Please wait",
+          description: "Preparing your account. Please try again in a moment.",
+        });
+        return;
+      }
       
       // Validation checks
       if (!values.litterName) {

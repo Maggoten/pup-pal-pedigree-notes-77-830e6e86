@@ -226,7 +226,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         loading: isLoading,
         isLoading,
         isLoggedIn,
-        isAuthReady,  // New property to signal when auth is fully ready
+        isAuthReady,  // Expose the isAuthReady flag
         login,
         register,
         logout

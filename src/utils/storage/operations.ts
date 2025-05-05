@@ -52,6 +52,9 @@ export const uploadToStorage = async (
       throw new Error(STORAGE_ERRORS.NO_SESSION);
     }
     
+    // Log attempt for debugging
+    console.log(`[Storage] Attempting to upload ${fileName}, size: ${file.size} bytes`);
+    
     // Upload with retry logic
     return await fetchWithRetry(
       () => supabase.storage
@@ -90,6 +93,8 @@ export const removeFromStorage = async (storagePath: string) => {
     if (!sessionData.session) {
       throw new Error(STORAGE_ERRORS.NO_SESSION);
     }
+    
+    console.log(`[Storage] Attempting to remove ${storagePath}`);
     
     return await fetchWithRetry(
       () => supabase.storage

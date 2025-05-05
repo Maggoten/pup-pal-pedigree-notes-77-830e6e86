@@ -5,11 +5,45 @@ import { format } from 'date-fns';
 import { UsePlannedLitterMutations } from './types';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export const usePlannedLitterMutations = (
   refreshLitters: () => Promise<void>
 ): UsePlannedLitterMutations => {
+  const { isAuthReady, session } = useAuth();
+  
+  const verifyAuth = async () => {
+    // Check if auth is ready
+    if (!isAuthReady) {
+      console.log('[PlannedLitters] Auth not ready yet, delaying operation');
+      toast({
+        title: "Please wait",
+        description: "Preparing your account. Please try again in a moment.",
+      });
+      return false;
+    }
+    
+    // Check if session exists
+    if (!session) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        console.error('[PlannedLitters] No active session found');
+        toast({
+          title: "Authentication required",
+          description: "You need to be logged in to perform this action",
+          variant: "destructive"
+        });
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
   const handleAddPlannedLitter = async (values: PlannedLitterFormValues) => {
+    // Verify authentication first
+    if (!(await verifyAuth())) return;
+    
     try {
       const newLitter = await plannedLittersService.createPlannedLitter(values);
       if (newLitter) {
@@ -30,6 +64,9 @@ export const usePlannedLitterMutations = (
   };
 
   const handleAddMatingDate = async (litterId: string, date: Date) => {
+    // Verify authentication first
+    if (!(await verifyAuth())) return;
+    
     try {
       console.log("Adding mating date:", date, "for litter:", litterId);
       await plannedLittersService.addMatingDate(litterId, date);
@@ -50,6 +87,9 @@ export const usePlannedLitterMutations = (
   };
 
   const handleEditMatingDate = async (litterId: string, dateIndex: number, newDate: Date) => {
+    // Verify authentication first
+    if (!(await verifyAuth())) return;
+    
     try {
       console.log("Editing mating date at index:", dateIndex, "to:", newDate, "for litter:", litterId);
       await plannedLittersService.editMatingDate(litterId, dateIndex, newDate);
@@ -70,6 +110,9 @@ export const usePlannedLitterMutations = (
   };
 
   const handleDeleteMatingDate = async (litterId: string, dateIndex: number) => {
+    // Verify authentication first
+    if (!(await verifyAuth())) return;
+    
     try {
       console.log("Deleting mating date at index:", dateIndex, "for litter:", litterId);
       await plannedLittersService.deleteMatingDate(litterId, dateIndex);
@@ -90,6 +133,9 @@ export const usePlannedLitterMutations = (
   };
 
   const handleDeleteLitter = async (litterId: string) => {
+    // Verify authentication first
+    if (!(await verifyAuth())) return;
+    
     try {
       console.log("Deleting litter:", litterId);
       const { error } = await supabase
