@@ -96,8 +96,22 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
     
     // Call the Supabase Edge Function to handle the deletion with proper dependency management
     try {
+      // Get current session for authorization header
+      const { data: sessionData } = await supabase.auth.getSession();
+      const authHeader = sessionData?.session?.access_token 
+        ? `Bearer ${sessionData.session.access_token}`
+        : null;
+      
+      if (!authHeader) {
+        throw new Error("No active session found");
+      }
+      
+      // Call edge function with proper authorization
       const { data, error } = await supabase.functions.invoke('delete-user', {
         method: 'POST',
+        headers: {
+          Authorization: authHeader
+        }
       });
       
       if (error) {
@@ -117,8 +131,13 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
       if (data && data.success === true) {
         console.log("Account deletion successful:", data.message);
         
+        // Additional check for email availability
+        if (data.emailAvailable === false) {
+          console.warn("Warning: Email may not be available for re-registration");
+        }
+        
         // Force a page reload to clear any lingering state
-        window.location.reload();
+        window.location.href = '/login';
         
         return true;
       } else {
@@ -141,20 +160,52 @@ export const saveUserToStorage = (user: User) => {
   localStorage.setItem('isLoggedIn', 'true');
 };
 
-// Remove user data from local storage - not needed with Supabase but kept for compatibility
+// Enhanced version to ensure thorough cleanup of all auth-related items
 export const removeUserFromStorage = () => {
-  localStorage.removeItem('user');
-  localStorage.removeItem('isLoggedIn');
-  // Clear all Supabase-related storage
-  localStorage.removeItem('supabase.auth.token');
-  localStorage.removeItem('supabase.auth.refreshToken');
-  localStorage.removeItem('supabase.auth.user');
-  // Clear any other potential auth-related items
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && (key.includes('supabase') || key.includes('auth'))) {
-      localStorage.removeItem(key);
+  try {
+    // Clear user data
+    localStorage.removeItem('user');
+    localStorage.removeItem('isLoggedIn');
+    
+    // Clear all Supabase-related storage items
+    localStorage.removeItem('supabase.auth.token');
+    localStorage.removeItem('supabase.auth.refreshToken');
+    localStorage.removeItem('supabase.auth.user');
+    localStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+    
+    // Clear any session/local storage items that contain these keys
+    const itemsToRemove = [];
+    
+    // Identify items to remove
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (
+        key.includes('supabase') || 
+        key.includes('auth') || 
+        key.includes('sb-') ||
+        key.includes('token')
+      )) {
+        itemsToRemove.push(key);
+      }
     }
+    
+    // Remove items separately to avoid index shifting issues
+    itemsToRemove.forEach(key => {
+      console.log(`Removing storage item: ${key}`);
+      localStorage.removeItem(key);
+    });
+    
+    // Also clear cookies that might be related to authentication
+    document.cookie.split(';').forEach(cookie => {
+      const [name] = cookie.trim().split('=');
+      if (name.includes('supabase') || name.includes('auth') || name.includes('sb-')) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
+      }
+    });
+    
+    console.log('All auth-related storage items cleared');
+  } catch (e) {
+    console.error('Error during storage cleanup:', e);
   }
 };
 

@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
@@ -6,6 +7,9 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Maximum number of deletion attempts
+const MAX_AUTH_DELETION_ATTEMPTS = 3;
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -48,7 +52,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
     
-    console.log(`Starting account deletion process for user: ${user.id}`);
+    console.log(`Starting account deletion process for user: ${user.id}, email: ${user.email}`);
     
     try {
       // Step 1: Clean up all dependent records in a specific order to prevent foreign key constraint violations
@@ -289,50 +293,123 @@ serve(async (req) => {
         console.error('Error deleting profile:', profileError);
       }
 
-      // Store the user's email before deletion to check if it was properly removed
-      const userEmail = user.email;
+      // Store the user email for verification after deletion
+      const userEmail = user.email || '';
+      const userId = user.id;
 
-      // Finally, delete the auth user properly with hard_delete parameter
-      // This ensures the email can be re-registered
-      console.log('Deleting auth user...');
-      const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id, {
-        shouldSoftDelete: false // Force hard delete to make email available again
-      });
+      // Implement retry logic for auth user deletion
+      let authDeleted = false;
+      let deletionAttempt = 0;
+      let lastError = null;
 
-      if (authDeleteError) {
-        console.error('Error deleting auth user:', authDeleteError);
+      while (!authDeleted && deletionAttempt < MAX_AUTH_DELETION_ATTEMPTS) {
+        deletionAttempt++;
+        console.log(`Auth user deletion attempt ${deletionAttempt}/${MAX_AUTH_DELETION_ATTEMPTS}`);
+
+        try {
+          // Use admin.deleteUser with explicit hard delete parameter
+          const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(
+            userId, 
+            { shouldSoftDelete: false }  // Force hard delete to ensure email can be reused
+          );
+
+          if (authDeleteError) {
+            console.error(`Auth deletion attempt ${deletionAttempt} failed:`, authDeleteError);
+            lastError = authDeleteError;
+            
+            // Wait briefly before retrying
+            if (deletionAttempt < MAX_AUTH_DELETION_ATTEMPTS) {
+              await new Promise(resolve => setTimeout(resolve, 1000 * deletionAttempt));
+            }
+          } else {
+            authDeleted = true;
+            console.log('Auth user successfully deleted');
+          }
+        } catch (attemptError) {
+          console.error(`Unexpected error during auth deletion attempt ${deletionAttempt}:`, attemptError);
+          lastError = attemptError;
+          
+          // Wait briefly before retrying
+          if (deletionAttempt < MAX_AUTH_DELETION_ATTEMPTS) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * deletionAttempt));
+          }
+        }
+      }
+
+      // If we couldn't delete the auth user after all attempts
+      if (!authDeleted) {
         return new Response(JSON.stringify({ 
-          error: 'Failed to delete auth user',
-          details: authDeleteError.message,
-          userId: user.id 
+          error: 'Failed to delete auth user after multiple attempts',
+          details: lastError ? String(lastError) : 'Unknown error',
+          userId: userId,
+          userEmail: userEmail
         }), {
           status: 500,
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
         });
       }
 
-      // Do a quick check if the email is available by trying to get the user by email
+      // Verify email availability by checking if the user still exists
       console.log('Verifying email is available for re-registration...');
-      const { data: emailCheck } = await supabaseAdmin.auth.admin.listUsers({
-        filter: {
-          email: userEmail,
-        },
-        page: 1,
-        perPage: 1,
-      });
+      let emailIsAvailable = false;
+      let verificationAttempt = 0;
+      const MAX_VERIFICATION_ATTEMPTS = 3;
 
-      if (emailCheck && emailCheck.users && emailCheck.users.length > 0) {
-        console.warn('Warning: Email still exists in auth system after deletion attempt');
-      } else {
-        console.log('Email successfully removed from auth system and available for re-registration');
+      while (!emailIsAvailable && verificationAttempt < MAX_VERIFICATION_ATTEMPTS) {
+        verificationAttempt++;
+        
+        try {
+          // Try to find the user by email - if deleted properly, this should return empty results
+          const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+            filter: {
+              email: userEmail,
+            },
+            page: 1,
+            perPage: 1
+          });
+
+          if (listError) {
+            console.error(`Email verification attempt ${verificationAttempt} error:`, listError);
+          } else {
+            // Check if no users with this email exist
+            emailIsAvailable = !users || users.users.length === 0;
+            
+            if (emailIsAvailable) {
+              console.log('Email successfully verified as available for re-registration');
+              break;
+            } else {
+              console.warn(`Email still exists in auth system after deletion (attempt ${verificationAttempt})`);
+              
+              // On last attempt, try one final forced deletion
+              if (verificationAttempt === MAX_VERIFICATION_ATTEMPTS - 1) {
+                console.log('Final forced deletion attempt...');
+                await supabaseAdmin.auth.admin.deleteUser(userId, { shouldSoftDelete: false });
+                // Wait a moment for deletion to process
+                await new Promise(resolve => setTimeout(resolve, 1000));
+              } else {
+                // Wait before checking again
+                await new Promise(resolve => setTimeout(resolve, 1000));
+              }
+            }
+          }
+        } catch (verifyError) {
+          console.error(`Error during email verification attempt ${verificationAttempt}:`, verifyError);
+          // Wait before retrying
+          if (verificationAttempt < MAX_VERIFICATION_ATTEMPTS) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
       }
 
-      console.log('User deleted successfully');
+      console.log(`Account deletion process completed. Email availability: ${emailIsAvailable}`);
+      
+      // Return success with email availability status
       return new Response(JSON.stringify({ 
         success: true, 
         message: 'User account deleted successfully',
-        userId: user.id,
-        emailAvailable: true
+        userId: userId,
+        emailAvailable: emailIsAvailable,
+        email: userEmail
       }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
@@ -341,10 +418,11 @@ serve(async (req) => {
       
       // Try to force delete the auth user even if data cleanup had issues
       try {
-        // Use hard delete to ensure email can be re-registered
-        const { error: forceDeleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id, {
-          shouldSoftDelete: false // Force hard delete
-        });
+        // Use hard delete with explicit parameter
+        const { error: forceDeleteError } = await supabaseAdmin.auth.admin.deleteUser(
+          user.id, 
+          { shouldSoftDelete: false }
+        );
         
         if (forceDeleteError) {
           console.error('Failed to force delete auth user after cleanup error:', forceDeleteError);
@@ -357,11 +435,30 @@ serve(async (req) => {
             headers: { 'Content-Type': 'application/json', ...corsHeaders },
           });
         } else {
+          // Verify email availability one final time
+          let finalEmailCheck = false;
+          
+          try {
+            const { data: finalCheck } = await supabaseAdmin.auth.admin.listUsers({
+              filter: {
+                email: user.email || '',
+              },
+              page: 1,
+              perPage: 1
+            });
+            
+            finalEmailCheck = !finalCheck || finalCheck.users.length === 0;
+          } catch (e) {
+            console.error('Error during final email availability check:', e);
+          }
+          
           return new Response(JSON.stringify({ 
             success: true,
             message: 'User account deleted with some data cleanup issues',
             details: `Cleanup had issues but auth user was successfully deleted: ${String(cleanupError)}`,
-            userId: user.id
+            userId: user.id,
+            emailAvailable: finalEmailCheck,
+            email: user.email
           }), {
             headers: { 'Content-Type': 'application/json', ...corsHeaders },
           });

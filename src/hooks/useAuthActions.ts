@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
@@ -41,11 +40,30 @@ export const useAuthActions = () => {
     }
   };
 
-  // Register function with improved implementation
+  // Register function with improved implementation to handle existing user errors
   const register = async (userData: RegisterData): Promise<boolean> => {
     setIsLoading(true);
     try {
       console.log('Attempting registration for:', userData.email);
+      
+      // Before attempting to register, check if the email exists in the auth system
+      const { data: emailCheck, error: emailCheckError } = await supabase.auth.signInWithOtp({
+        email: userData.email,
+        options: {
+          shouldCreateUser: false // Just checking if user exists
+        }
+      });
+      
+      // If we get an error about the user not existing, that's good!
+      // It means we can proceed with registration
+      if (emailCheckError && emailCheckError.message.includes('User not found')) {
+        console.log('Email is available for registration');
+      } else if (!emailCheckError) {
+        // If there's no error, that means the email exists in the system
+        console.warn('Email may already be registered:', userData.email);
+      }
+      
+      // Proceed with registration
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
@@ -61,12 +79,22 @@ export const useAuthActions = () => {
 
       if (error) {
         console.error('Registration error from Supabase:', error);
-        // Keep this toast for registration errors as users need to know why registration failed
-        toast({
-          title: "Registration failed",
-          description: error.message,
-          variant: "destructive"
-        });
+        
+        // Specific handling for "User already registered" error
+        if (error.message.includes('already registered')) {
+          toast({
+            title: "Registration failed",
+            description: "This email is already registered. Please try to log in instead.",
+            variant: "destructive"
+          });
+        } else {
+          // Keep this toast for other registration errors
+          toast({
+            title: "Registration failed",
+            description: error.message,
+            variant: "destructive"
+          });
+        }
         return false;
       }
 
@@ -89,7 +117,7 @@ export const useAuthActions = () => {
     }
   };
 
-  // Logout function with improved error handling and force refresh
+  // Logout function with enhanced error handling and force refresh
   const logout = async (): Promise<void> => {
     setIsLoading(true);
     try {
@@ -121,7 +149,7 @@ export const useAuthActions = () => {
     }
   };
 
-  // Get user profile from database
+  // Get user profile from database with improved error handling
   const getUserProfile = async (userId: string): Promise<Profile | null> => {
     try {
       console.log('Fetching profile for user:', userId);
