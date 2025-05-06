@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -23,7 +22,7 @@ interface UseImageUploadProps {
 
 export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
-  const { startTimeout, clearTimeout } = useUploadTimeout(() => setIsLoading(false));
+  const { startTimeout, clearTimeout } = useUploadTimeout(() => setIsUploading(false));
   const [uploadRetryCount, setUploadRetryCount] = useState(0);
 
   const uploadImage = async (file: File) => {
