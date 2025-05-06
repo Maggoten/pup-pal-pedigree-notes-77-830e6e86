@@ -93,10 +93,6 @@ const Pregnancy: React.FC = () => {
     setDataFetched(false);
   };
 
-  const handleNavigateToPlannedLitters = () => {
-    navigate('/planned-litters');
-  };
-
   return (
     <PageLayout 
       title="Pregnancy" 
@@ -123,7 +119,7 @@ const Pregnancy: React.FC = () => {
           <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
             <ActivePregnanciesList 
               pregnancies={activePregnancies} 
-              onAddPregnancy={handleNavigateToPlannedLitters}
+              onAddPregnancy={handleAddPregnancyClick}
               isLoading={false}
             />
           </div>
@@ -132,7 +128,7 @@ const Pregnancy: React.FC = () => {
             <Baby className="h-12 w-12 text-primary mb-4" />
             <h3 className="text-xl font-medium text-gray-700 mb-2">Add a Pregnancy</h3>
             <p className="text-gray-500 mb-6 max-w-sm">
-              Already mated your dog? Add the pregnancy directly to track its development.
+              Track your dog's pregnancy journey, from mating to whelping.
             </p>
             <div className="flex gap-4">
               <Button 
@@ -142,12 +138,6 @@ const Pregnancy: React.FC = () => {
               >
                 <Plus className="h-4 w-4" />
                 Add Pregnancy
-              </Button>
-              <Button 
-                onClick={handleNavigateToPlannedLitters} 
-                variant="outline"
-              >
-                Plan a Litter
               </Button>
             </div>
           </div>
@@ -165,12 +155,6 @@ const Pregnancy: React.FC = () => {
             >
               <Plus className="h-4 w-4" />
               Add Pregnancy
-            </Button>
-            <Button 
-              onClick={handleNavigateToPlannedLitters} 
-              variant="outline"
-            >
-              Plan a Litter
             </Button>
           </div>
         </div>

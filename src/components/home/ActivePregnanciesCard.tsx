@@ -9,19 +9,17 @@ import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 
 interface ActivePregnanciesCardProps {
   pregnancies: ActivePregnancy[];
+  onAddPregnancy: () => void;
 }
 
 const ActivePregnanciesCard: React.FC<ActivePregnanciesCardProps> = ({ 
-  pregnancies 
+  pregnancies,
+  onAddPregnancy
 }) => {
   const navigate = useNavigate();
 
   const handlePregnancyClick = (pregnancyId: string) => {
     navigate(`/pregnancy/${pregnancyId}`);
-  };
-
-  const handleAddPregnancy = () => {
-    navigate('/planned-litters');
   };
 
   return (
@@ -70,7 +68,7 @@ const ActivePregnanciesCard: React.FC<ActivePregnanciesCardProps> = ({
             <PawPrint className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No Active Pregnancies</h3>
             <p className="text-muted-foreground mb-4">Add a pregnancy to start tracking</p>
-            <Button onClick={handleAddPregnancy}>Add Pregnancy</Button>
+            <Button onClick={onAddPregnancy}>Add Pregnancy</Button>
           </div>
         )}
       </CardContent>

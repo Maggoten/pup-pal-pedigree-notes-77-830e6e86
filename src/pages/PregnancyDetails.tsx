@@ -22,6 +22,7 @@ const PregnancyDetails = () => {
   useEffect(() => {
     const fetchPregnancies = async () => {
       try {
+        setLoadingPregnancies(true);
         const pregnancies = await getActivePregnancies();
         console.log("Fetched pregnancies for dropdown:", pregnancies.length);
         setActivePregnancies(pregnancies);
