@@ -75,7 +75,7 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
 export const deleteUserAccount = async (password: string): Promise<boolean> => {
   try {
     // Show initial toast to inform user the process has started
-    const processingToast = toast({
+    const processingToastId = toast({
       title: "Processing",
       description: "Account deletion in progress...",
     });
@@ -130,7 +130,6 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
       
       // Dismiss the processing toast
       toast({
-        id: processingToast.id,
         title: "Account deleted",
         description: "Your account has been successfully deleted.",
         variant: "default"
@@ -152,7 +151,7 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
           toast({
             title: "Account partially deleted",
             description: "Your data was removed, but your email might not be available for re-registration immediately. Please try again later or contact support.",
-            variant: "warning"
+            variant: "destructive"
           });
         }
         
