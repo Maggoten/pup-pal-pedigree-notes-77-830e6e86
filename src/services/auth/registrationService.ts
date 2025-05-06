@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
+import { toast } from '@/hooks/use-toast';
 
 // Handle registration functionality
 export const registerUser = async (userData: RegisterData): Promise<User | null> => {
@@ -19,8 +20,29 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
       }
     });
     
-    if (error || !data.user) {
+    if (error) {
       console.error("Registration error:", error);
+      
+      // Handle specific error cases
+      if (error.message.includes('already registered')) {
+        toast({
+          title: "Email already in use",
+          description: "This email address is already registered. Please try to log in instead.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Registration failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
+      
+      return null;
+    }
+    
+    if (!data.user) {
+      console.error("Registration error: No user returned from Supabase");
       return null;
     }
     
@@ -34,6 +56,11 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
     };
   } catch (error) {
     console.error("Registration error:", error);
+    toast({
+      title: "Registration failed",
+      description: "An unexpected error occurred. Please try again.",
+      variant: "destructive"
+    });
     return null;
   }
 };

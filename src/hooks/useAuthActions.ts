@@ -57,32 +57,13 @@ export const useAuthActions = () => {
     }
   };
 
-  // Register function with improved email availability checking
+  // Register function with fixed email handling logic
   const register = async (userData: RegisterData): Promise<boolean> => {
     setIsLoading(true);
     try {
       console.log('Attempting registration for:', userData.email);
       
-      // Pre-check if email exists in the auth system
-      const { data: { session: existingSession }, error: existingUserError } = await supabase.auth.signInWithOtp({
-        email: userData.email,
-        options: {
-          shouldCreateUser: false
-        }
-      });
-      
-      // If we didn't get an error about the user not existing, the email might be in use
-      if (!existingUserError || !existingUserError.message.includes('User not found')) {
-        console.warn('Email may already be registered:', userData.email);
-        toast({
-          title: "Email already in use",
-          description: "This email address is already registered. Please try to log in instead.",
-          variant: "destructive"
-        });
-        return false;
-      }
-      
-      // Proceed with registration since the email seems available
+      // Directly attempt to register the user without pre-checking email
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
