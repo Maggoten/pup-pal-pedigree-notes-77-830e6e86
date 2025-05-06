@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UserSettings } from '@/types/settings';
 import { format } from 'date-fns';
-import { AlertTriangle, CreditCard, Shield, Star, AlertCircle } from 'lucide-react';
+import { UserCheck, CreditCard, Shield, Star, AlertCircle, Loader2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,7 +17,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useSettings } from '@/hooks/useSettings';
 
@@ -31,6 +32,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
   const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmText, setConfirmText] = useState('');
+  const [deleteInProgress, setDeleteInProgress] = useState(false);
   
   // Function to handle subscription upgrade
   const handleUpgradeSubscription = () => {
@@ -43,6 +45,10 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
     try {
       await cancelSubscription();
       setCancelSubscriptionDialogOpen(false);
+      toast({
+        title: "Subscription cancelled",
+        description: "Your subscription has been cancelled successfully. You'll still have access until the end of the billing period.",
+      });
     } catch (error) {
       toast({
         title: "Error cancelling subscription",
@@ -52,32 +58,43 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
     }
   };
   
-  // Function to handle account deletion
+  // Function to handle account deletion with improved UX
   const handleDeleteAccount = async () => {
+    if (deleteInProgress) return;
+    
+    setDeleteInProgress(true);
     try {
+      toast({
+        title: "Account deletion initiated",
+        description: "We're processing your request to delete your account...",
+      });
+      
       // Call the deleteAccount function and properly await the Promise
       const success = await deleteAccount(confirmPassword);
       
       if (success) {
         toast({
           title: "Account deleted",
-          description: "Your account has been deleted. You will be logged out.",
+          description: "Your account has been deleted successfully. You will be logged out now.",
         });
         setDeleteAccountDialogOpen(false);
         
         // Log the user out after account deletion
         setTimeout(() => {
           logout();
-        }, 2000);
+        }, 1500);
       } else {
         throw new Error("Failed to delete account. Please check your password and try again.");
       }
     } catch (error) {
+      console.error("Account deletion error:", error);
       toast({
         title: "Error deleting account",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description: error instanceof Error ? error.message : "An error occurred during the account deletion process.",
         variant: "destructive",
       });
+    } finally {
+      setDeleteInProgress(false);
     }
   };
   
@@ -187,8 +204,16 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
                 variant="outline" 
                 className="text-rustbrown-600 border-rustbrown-600 hover:bg-rustbrown-50" 
                 onClick={() => setCancelSubscriptionDialogOpen(true)}
+                disabled={isCancellingSubscription}
               >
-                Cancel Subscription
+                {isCancellingSubscription ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Cancel Subscription"
+                )}
               </Button>
             </>
           )}
@@ -204,7 +229,17 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-rustbrown-500 mt-0.5" />
+            <UserCheck className="h-5 w-5 text-warmgreen-600 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-medium">Account Status</h4>
+              <p className="text-sm text-muted-foreground mt-1">
+                Your account is active and verified
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-3">
+            <Shield className="h-5 w-5 text-warmgreen-600 mt-0.5" />
             <div>
               <h4 className="text-sm font-medium">Password</h4>
               <p className="text-sm text-muted-foreground mt-1">
@@ -234,16 +269,24 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
             <div className="flex flex-col gap-2">
               <h4 className="text-sm font-medium">Delete Your Account</h4>
               <p className="text-sm text-muted-foreground">
-                Once you delete your account, all of your data will be permanently removed. 
-                This action cannot be undone.
+                Deleting your account will permanently remove all your data including dogs, litters, breeding records, and settings. 
+                This action cannot be undone and you will not be able to recover any information.
               </p>
               <div className="mt-2">
                 <Button 
                   variant="outline" 
                   className="text-red-600 border-red-600 hover:bg-red-50"
                   onClick={() => setDeleteAccountDialogOpen(true)}
+                  disabled={deleteInProgress || isDeletingAccount}
                 >
-                  Delete Account
+                  {deleteInProgress || isDeletingAccount ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Delete Account"
+                  )}
                 </Button>
               </div>
             </div>
@@ -290,19 +333,41 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
               className="bg-rustbrown-600 hover:bg-rustbrown-700"
               disabled={isCancellingSubscription || confirmText.toLowerCase() !== 'cancel'}
             >
-              {isCancellingSubscription ? "Processing..." : "Cancel Subscription"}
+              {isCancellingSubscription ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Cancel Subscription"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
       
-      {/* Delete Account Dialog */}
-      <AlertDialog open={deleteAccountDialogOpen} onOpenChange={setDeleteAccountDialogOpen}>
+      {/* Delete Account Dialog with improved UX */}
+      <AlertDialog open={deleteAccountDialogOpen} onOpenChange={(open) => {
+        if (!deleteInProgress && !isDeletingAccount) {
+          setDeleteAccountDialogOpen(open);
+          if (!open) {
+            setConfirmPassword('');
+            setConfirmText('');
+          }
+        }
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-red-600">Delete Your Account</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your account and all associated data.
+              <p className="mb-2">This action cannot be undone. This will permanently delete your account and all associated data including:</p>
+              <ul className="list-disc pl-5 space-y-1 mb-2">
+                <li>All your dogs and their records</li>
+                <li>Breeding history and litter information</li>
+                <li>Calendar events and reminders</li>
+                <li>Personal settings and preferences</li>
+              </ul>
+              <p>Once deleted, you will need to register again if you wish to use the application in the future.</p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="py-2 space-y-4">
@@ -329,7 +394,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
             </div>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeletingAccount}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteInProgress || isDeletingAccount}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
@@ -344,9 +409,16 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
                 }
               }}
               className="bg-red-600 hover:bg-red-700"
-              disabled={isDeletingAccount || confirmPassword.length === 0 || confirmText !== 'DELETE MY ACCOUNT'}
+              disabled={deleteInProgress || isDeletingAccount || confirmPassword.length === 0 || confirmText !== 'DELETE MY ACCOUNT'}
             >
-              {isDeletingAccount ? "Processing..." : "Delete Account"}
+              {deleteInProgress || isDeletingAccount ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Delete Account"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

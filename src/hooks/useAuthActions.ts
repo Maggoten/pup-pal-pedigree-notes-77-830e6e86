@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
@@ -26,6 +27,18 @@ export const useAuthActions = () => {
             description: "Please check your email and password",
             variant: "destructive"
           });
+        } else if (error.message.includes('Email not confirmed')) {
+          toast({
+            title: "Email not confirmed",
+            description: "Please check your inbox and confirm your email address",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Login failed",
+            description: "An error occurred. Please try again later.",
+            variant: "destructive"
+          });
         }
         return false;
       }
@@ -34,36 +47,43 @@ export const useAuthActions = () => {
       return !!data.session;
     } catch (error) {
       console.error("Login error:", error);
+      toast({
+        title: "Login failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Register function with improved implementation to handle existing user errors
+  // Register function with improved email availability checking
   const register = async (userData: RegisterData): Promise<boolean> => {
     setIsLoading(true);
     try {
       console.log('Attempting registration for:', userData.email);
       
-      // Before attempting to register, check if the email exists in the auth system
-      const { data: emailCheck, error: emailCheckError } = await supabase.auth.signInWithOtp({
+      // Pre-check if email exists in the auth system
+      const { data: { session: existingSession }, error: existingUserError } = await supabase.auth.signInWithOtp({
         email: userData.email,
         options: {
-          shouldCreateUser: false // Just checking if user exists
+          shouldCreateUser: false
         }
       });
       
-      // If we get an error about the user not existing, that's good!
-      // It means we can proceed with registration
-      if (emailCheckError && emailCheckError.message.includes('User not found')) {
-        console.log('Email is available for registration');
-      } else if (!emailCheckError) {
-        // If there's no error, that means the email exists in the system
+      // If we didn't get an error about the user not existing, the email might be in use
+      if (!existingUserError || !existingUserError.message.includes('User not found')) {
         console.warn('Email may already be registered:', userData.email);
+        toast({
+          title: "Email already in use",
+          description: "This email address is already registered. Please try to log in instead.",
+          variant: "destructive"
+        });
+        return false;
       }
       
-      // Proceed with registration
+      // Proceed with registration since the email seems available
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
@@ -71,7 +91,6 @@ export const useAuthActions = () => {
           data: {
             firstName: userData.firstName,
             lastName: userData.lastName,
-            // Pass empty string for address since we removed the field
             address: ''
           }
         }
@@ -88,7 +107,6 @@ export const useAuthActions = () => {
             variant: "destructive"
           });
         } else {
-          // Keep this toast for other registration errors
           toast({
             title: "Registration failed",
             description: error.message,
@@ -101,9 +119,17 @@ export const useAuthActions = () => {
       // Check if email confirmation is required
       if (data.user && !data.session) {
         console.log('Registration successful but email confirmation required');
+        toast({
+          title: "Registration successful",
+          description: "Please check your email to confirm your account.",
+        });
         return true;
       } else if (data.session) {
         console.log('Registration successful with immediate session');
+        toast({
+          title: "Registration successful",
+          description: "Your account has been created successfully.",
+        });
         return true;
       } else {
         console.warn('Registration returned unexpected state');
@@ -111,6 +137,11 @@ export const useAuthActions = () => {
       }
     } catch (error) {
       console.error("Registration error:", error);
+      toast({
+        title: "Registration failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
       return false;
     } finally {
       setIsLoading(false);
@@ -135,6 +166,12 @@ export const useAuthActions = () => {
       
       // Force-clear any remaining auth state from storage
       removeUserFromStorage();
+      
+      // Display success message
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
       
       // Force page reload to ensure clean state
       window.location.href = '/login';
@@ -166,7 +203,6 @@ export const useAuthActions = () => {
       
       if (error) {
         console.error('Error fetching user profile:', error);
-        // Removed toast for profile errors - just log to console for debugging
         throw error;
       }
       

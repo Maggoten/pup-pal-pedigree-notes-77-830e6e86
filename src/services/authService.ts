@@ -1,6 +1,7 @@
 
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
+import { toast } from '@/hooks/use-toast';
 
 // Handle login functionality
 export const loginUser = async (email: string, password: string): Promise<User | null> => {
@@ -70,9 +71,15 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
   }
 };
 
-// Delete user account - enhanced implementation with improved error handling and immediate session cleanup
+// Delete user account - enhanced implementation with improved error handling, verification, and feedback
 export const deleteUserAccount = async (password: string): Promise<boolean> => {
   try {
+    // Show initial toast to inform user the process has started
+    const processingToast = toast({
+      title: "Processing",
+      description: "Account deletion in progress...",
+    });
+    
     // First verify the user's password
     const currentUser = await supabase.auth.getUser();
     if (!currentUser.data.user) {
@@ -121,6 +128,14 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
       
       console.log("Edge function response:", data);
       
+      // Dismiss the processing toast
+      toast({
+        id: processingToast.id,
+        title: "Account deleted",
+        description: "Your account has been successfully deleted.",
+        variant: "default"
+      });
+      
       // Immediately sign out the user to clear the session
       await supabase.auth.signOut({ scope: 'global' });
       
@@ -131,13 +146,20 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
       if (data && data.success === true) {
         console.log("Account deletion successful:", data.message);
         
-        // Additional check for email availability
+        // Check email availability status
         if (data.emailAvailable === false) {
-          console.warn("Warning: Email may not be available for re-registration");
+          console.warn("Warning: Email may not be available for re-registration. Showing toast.");
+          toast({
+            title: "Account partially deleted",
+            description: "Your data was removed, but your email might not be available for re-registration immediately. Please try again later or contact support.",
+            variant: "warning"
+          });
         }
         
         // Force a page reload to clear any lingering state
-        window.location.href = '/login';
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 1500);
         
         return true;
       } else {
@@ -146,18 +168,22 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
       }
     } catch (funcError) {
       console.error("Edge function failed:", funcError);
+      toast({
+        title: "Account deletion failed",
+        description: funcError instanceof Error ? funcError.message : "An unexpected error occurred",
+        variant: "destructive"
+      });
       throw new Error(`Failed to delete account: ${funcError instanceof Error ? funcError.message : String(funcError)}`);
     }
   } catch (error) {
     console.error("Delete account error:", error);
+    toast({
+      title: "Account deletion failed",
+      description: error instanceof Error ? error.message : "An unexpected error occurred",
+      variant: "destructive"
+    });
     throw error;
   }
-};
-
-// Save user data to local storage - not needed with Supabase but kept for compatibility
-export const saveUserToStorage = (user: User) => {
-  localStorage.setItem('user', JSON.stringify(user));
-  localStorage.setItem('isLoggedIn', 'true');
 };
 
 // Enhanced version to ensure thorough cleanup of all auth-related items
@@ -218,4 +244,10 @@ export const getUserFromStorage = (): User | null => {
 // Check if user is logged in from local storage - not needed with Supabase but kept for compatibility
 export const getLoggedInStateFromStorage = (): boolean => {
   return localStorage.getItem('isLoggedIn') === 'true';
+};
+
+// Save user data to local storage - not needed with Supabase but kept for compatibility
+export const saveUserToStorage = (user: User) => {
+  localStorage.setItem('user', JSON.stringify(user));
+  localStorage.setItem('isLoggedIn', 'true');
 };
