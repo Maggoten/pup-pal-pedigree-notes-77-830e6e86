@@ -21,7 +21,12 @@ export const Navbar: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   
   const isActive = (path: string) => {
-    return location.pathname === path;
+    // Special case for home path to avoid matching all routes
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    // For all other routes, check if the current path starts with the nav item path
+    return location.pathname.startsWith(path);
   };
   
   const handleLogout = () => {
