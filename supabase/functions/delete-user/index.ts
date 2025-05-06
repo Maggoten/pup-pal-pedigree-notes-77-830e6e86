@@ -307,11 +307,8 @@ serve(async (req) => {
         console.log(`Auth user deletion attempt ${deletionAttempt}/${MAX_AUTH_DELETION_ATTEMPTS}`);
 
         try {
-          // Use admin.deleteUser with explicit hard delete parameter
-          const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(
-            userId, 
-            { shouldSoftDelete: false }  // Force hard delete to ensure email can be reused
-          );
+          // Fixed: Use correct parameter format for deleteUser
+          const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
           if (authDeleteError) {
             console.error(`Auth deletion attempt ${deletionAttempt} failed:`, authDeleteError);
@@ -383,7 +380,7 @@ serve(async (req) => {
               // On last attempt, try one final forced deletion
               if (verificationAttempt === MAX_VERIFICATION_ATTEMPTS - 1) {
                 console.log('Final forced deletion attempt...');
-                await supabaseAdmin.auth.admin.deleteUser(userId, { shouldSoftDelete: false });
+                await supabaseAdmin.auth.admin.deleteUser(userId);
                 // Wait a moment for deletion to process
                 await new Promise(resolve => setTimeout(resolve, 1000));
               } else {
@@ -418,11 +415,8 @@ serve(async (req) => {
       
       // Try to force delete the auth user even if data cleanup had issues
       try {
-        // Use hard delete with explicit parameter
-        const { error: forceDeleteError } = await supabaseAdmin.auth.admin.deleteUser(
-          user.id, 
-          { shouldSoftDelete: false }
-        );
+        // Fixed: Use correct parameter format for deleteUser
+        const { error: forceDeleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
         
         if (forceDeleteError) {
           console.error('Failed to force delete auth user after cleanup error:', forceDeleteError);
