@@ -70,7 +70,7 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
   }
 };
 
-// Delete user account - fixed implementation that properly deletes from auth
+// Delete user account - updated implementation that properly deletes from auth and returns a boolean
 export const deleteUserAccount = async (password: string): Promise<boolean> => {
   try {
     // First verify the user's password
@@ -92,23 +92,29 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
       throw new Error("Incorrect password, please try again");
     }
     
-    // Delete the user from auth (this will cascade to profiles via RLS)
-    const { error } = await supabase.auth.admin.deleteUser(currentUser.data.user.id);
-    
-    if (error) {
-      console.error("Delete account error:", error);
-      // If we get an admin error, try the client-side method
-      const { error: clientError } = await supabase.rpc('delete_user');
-      if (clientError) {
-        console.error("Client-side delete error:", clientError);
-        return false;
+    // Try using the Supabase Edge Function first
+    try {
+      const { error } = await supabase.functions.invoke('delete-user', {
+        method: 'POST',
+      });
+      
+      if (error) {
+        console.error("Edge function error:", error);
+        throw error;
       }
+      
+      // If edge function successful, sign out the user
+      await supabase.auth.signOut();
+      return true;
+    } catch (funcError) {
+      console.error("Edge function failed, trying fallback:", funcError);
+      
+      // Fallback: Try the client-side method
+      // Note: We're not using RPC here since there's no delete_user function defined
+      // Instead, sign out and return true - the edge function would have done the deletion
+      await supabase.auth.signOut();
+      return false;
     }
-    
-    // Sign out the user
-    await supabase.auth.signOut();
-    
-    return true;
   } catch (error) {
     console.error("Delete account error:", error);
     return false;

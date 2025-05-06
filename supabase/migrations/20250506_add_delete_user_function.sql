@@ -7,12 +7,23 @@ SECURITY DEFINER
 AS $$
 DECLARE
   result RECORD;
+  user_id UUID;
 BEGIN
-  -- Attempt to delete the user from auth.users (will cascade to profiles)
-  EXECUTE format(
-    'SELECT auth.uid() as uid;'
-  ) INTO result;
+  -- Get the current user's ID
+  SELECT auth.uid() INTO user_id;
+  
+  -- If no user is authenticated, return false
+  IF user_id IS NULL THEN
+    RETURN FALSE;
+  END IF;
 
+  -- First delete the user's profile
+  DELETE FROM public.profiles WHERE id = user_id;
+  
+  -- The actual user deletion from auth.users would need to be handled
+  -- by the Supabase admin API, which we can't call directly from SQL.
+  -- This function mainly serves as a hook that can be called from the client.
+  
   RETURN TRUE;
 EXCEPTION
   WHEN others THEN

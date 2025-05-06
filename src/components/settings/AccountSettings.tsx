@@ -55,23 +55,27 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
   // Function to handle account deletion
   const handleDeleteAccount = async () => {
     try {
-      // Call the actual deleteAccount function from useSettings hook
-      const success = await deleteAccount(confirmPassword);
-      
-      if (success) {
-        toast({
-          title: "Account deleted",
-          description: "Your account has been deleted. You will be logged out.",
+      // Call the deleteAccount function from useSettings hook
+      deleteAccount(confirmPassword)
+        .then(success => {
+          if (success) {
+            toast({
+              title: "Account deleted",
+              description: "Your account has been deleted. You will be logged out.",
+            });
+            setDeleteAccountDialogOpen(false);
+            
+            // Log the user out after account deletion
+            setTimeout(() => {
+              logout();
+            }, 2000);
+          } else {
+            throw new Error("Failed to delete account. Please check your password and try again.");
+          }
+        })
+        .catch(err => {
+          throw err;
         });
-        setDeleteAccountDialogOpen(false);
-        
-        // Log the user out after account deletion
-        setTimeout(() => {
-          logout();
-        }, 2000);
-      } else {
-        throw new Error("Failed to delete account. Please check your password and try again.");
-      }
     } catch (error) {
       toast({
         title: "Error deleting account",
