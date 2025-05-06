@@ -1,4 +1,3 @@
-
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
 
@@ -70,7 +69,7 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
   }
 };
 
-// Delete user account - updated implementation that properly deletes from auth and returns a boolean
+// Delete user account - corrected implementation that properly deletes from auth and returns a boolean
 export const deleteUserAccount = async (password: string): Promise<boolean> => {
   try {
     // First verify the user's password

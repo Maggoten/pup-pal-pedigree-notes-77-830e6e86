@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { 
@@ -182,7 +181,9 @@ export const useSettings = () => {
       addSharedUserMutation.mutate({ email, role }),
     removeSharedUser: (sharedUserId: string) => removeSharedUserMutation.mutate(sharedUserId),
     cancelSubscription: () => cancelSubscriptionMutation.mutate(),
-    deleteAccount: (password: string) => deleteAccountMutation.mutate(password),
+    deleteAccount: (password: string): Promise<boolean> => {
+      return deleteAccountMutation.mutateAsync(password);
+    },
     isUpdatingKennel: updateKennelInfoMutation.isPending,
     isUpdatingPersonal: updatePersonalInfoMutation.isPending,
     isAddingSharedUser: addSharedUserMutation.isPending,
