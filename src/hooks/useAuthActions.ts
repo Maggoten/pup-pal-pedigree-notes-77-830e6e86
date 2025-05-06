@@ -1,9 +1,8 @@
-
 import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
 import { toast } from '@/hooks/use-toast';
-import { removeUserFromStorage } from '@/services/authService';
+import { clearAuthStorage as removeUserFromStorage } from '@/services/auth';
 
 export const useAuthActions = () => {
   const [isLoading, setIsLoading] = useState(false);
