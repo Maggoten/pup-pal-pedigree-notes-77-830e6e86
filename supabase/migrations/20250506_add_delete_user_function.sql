@@ -1,12 +1,13 @@
 
 -- Function to allow users to delete their own account
+-- This function is primarily a hook that can be called from client
+-- The actual deletion is performed by the Edge Function for better error handling
 CREATE OR REPLACE FUNCTION public.delete_user()
 RETURNS boolean
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  result RECORD;
   user_id UUID;
 BEGIN
   -- Get the current user's ID
@@ -17,12 +18,9 @@ BEGIN
     RETURN FALSE;
   END IF;
 
-  -- First delete the user's profile
-  DELETE FROM public.profiles WHERE id = user_id;
-  
-  -- The actual user deletion from auth.users would need to be handled
-  -- by the Supabase admin API, which we can't call directly from SQL.
-  -- This function mainly serves as a hook that can be called from the client.
+  -- Note: The actual deletion is handled by the Edge Function
+  -- This function is kept for compatibility and as a hook point
+  -- that can be called directly from SQL if needed
   
   RETURN TRUE;
 EXCEPTION

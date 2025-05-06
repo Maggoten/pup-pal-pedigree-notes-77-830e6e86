@@ -69,7 +69,7 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
   }
 };
 
-// Delete user account - corrected implementation that properly deletes from auth and returns a boolean
+// Delete user account - enhanced implementation that handles dependencies
 export const deleteUserAccount = async (password: string): Promise<boolean> => {
   try {
     // First verify the user's password
@@ -91,9 +91,11 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
       throw new Error("Incorrect password, please try again");
     }
     
-    // Try using the Supabase Edge Function first
+    console.log("Password verified, proceeding with account deletion");
+    
+    // Call the Supabase Edge Function to handle the deletion with proper dependency management
     try {
-      const { error } = await supabase.functions.invoke('delete-user', {
+      const { data, error } = await supabase.functions.invoke('delete-user', {
         method: 'POST',
       });
       
@@ -102,21 +104,18 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
         throw error;
       }
       
+      console.log("Edge function response:", data);
+      
       // If edge function successful, sign out the user
       await supabase.auth.signOut();
       return true;
     } catch (funcError) {
-      console.error("Edge function failed, trying fallback:", funcError);
-      
-      // Fallback: Try the client-side method
-      // Note: We're not using RPC here since there's no delete_user function defined
-      // Instead, sign out and return true - the edge function would have done the deletion
-      await supabase.auth.signOut();
-      return false;
+      console.error("Edge function failed:", funcError);
+      throw new Error(`Failed to delete account: ${funcError instanceof Error ? funcError.message : String(funcError)}`);
     }
   } catch (error) {
     console.error("Delete account error:", error);
-    return false;
+    throw error;
   }
 };
 
