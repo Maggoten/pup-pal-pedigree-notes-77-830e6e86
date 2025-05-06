@@ -1,3 +1,4 @@
+
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
 
@@ -69,7 +70,7 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
   }
 };
 
-// Delete user account - enhanced implementation that handles dependencies
+// Delete user account - enhanced implementation with improved error handling
 export const deleteUserAccount = async (password: string): Promise<boolean> => {
   try {
     // First verify the user's password
@@ -108,7 +109,15 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
       
       // If edge function successful, sign out the user
       await supabase.auth.signOut();
-      return true;
+      
+      // Check response for success indicator
+      if (data && data.success === true) {
+        console.log("Account deletion successful:", data.message);
+        return true;
+      } else {
+        console.error("Unexpected edge function response:", data);
+        throw new Error(`Unexpected response: ${JSON.stringify(data)}`);
+      }
     } catch (funcError) {
       console.error("Edge function failed:", funcError);
       throw new Error(`Failed to delete account: ${funcError instanceof Error ? funcError.message : String(funcError)}`);
