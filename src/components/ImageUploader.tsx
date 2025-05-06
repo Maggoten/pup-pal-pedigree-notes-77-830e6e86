@@ -1,11 +1,12 @@
 
 import React, { useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { UploadIcon, XIcon } from 'lucide-react';
+import { UploadIcon, XIcon, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import ImagePreviewDisplay from './image-upload/ImagePreviewDisplay';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
+import { isSafari } from '@/utils/storage/config';
 
 interface ImageUploaderProps {
   currentImage?: string;
@@ -23,6 +24,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   
   const PLACEHOLDER_IMAGE_PATH = '/placeholder.svg';
   const isPlaceholder = !currentImage || currentImage === PLACEHOLDER_IMAGE_PATH;
+  const isSafariBrowser = isSafari();
 
   // Pass the current user ID to useImageUpload
   const { isUploading, uploadImage, removeImage } = useImageUpload({
@@ -35,9 +37,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     console.log('ImageUploader: User authentication status:', {
       isAuthenticated: !!user,
       userId: user?.id,
-      currentImage: currentImage || 'none'
+      currentImage: currentImage || 'none',
+      browser: isSafariBrowser ? 'Safari' : 'Other'
     });
-  }, [user, currentImage]);
+  }, [user, currentImage, isSafariBrowser]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -56,8 +59,19 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       return;
     }
     
-    console.log('File selected:', file.name, 'size:', file.size, 'type:', file.type);
-    await uploadImage(file);
+    console.log('File selected:', file.name, 'size:', file.size, 'type:', file.type, 'browser:', isSafariBrowser ? 'Safari' : 'Other');
+    
+    try {
+      await uploadImage(file);
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast({
+        title: "Upload Failed",
+        description: "There was a problem uploading your image. Please try again.",
+        variant: "destructive"
+      });
+    }
+    
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -88,10 +102,32 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
     
     console.log('Removing image:', currentImage);
-    await removeImage(currentImage, user.id);
+    try {
+      await removeImage(currentImage, user.id);
+    } catch (error) {
+      console.error('Image remove error:', error);
+      toast({
+        title: "Remove Failed",
+        description: "Failed to remove image. Please try again.",
+        variant: "destructive"
+      });
+    }
+    
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  // Show Safari-specific guidance if needed
+  const renderSafariHelp = () => {
+    if (!isSafariBrowser) return null;
+    
+    return (
+      <div className="mt-1 flex items-center text-xs text-amber-600">
+        <AlertTriangle className="h-3 w-3 mr-1 flex-shrink-0" />
+        <span>For best results, use smaller images (under 2MB)</span>
+      </div>
+    );
   };
 
   return (
@@ -123,11 +159,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         )}
       </div>
       
+      {renderSafariHelp()}
+      
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
-        accept="image/jpeg,image/png,image/webp,image/heic"
+        accept="image/*"
         className="hidden"
       />
     </div>

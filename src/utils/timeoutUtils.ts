@@ -1,7 +1,9 @@
 
 import { PostgrestResponse } from '@supabase/supabase-js';
+import { isSafari } from '@/utils/storage/config';
 
-const TIMEOUT = 30000; // Increasing from 15s to 30s for better handling of slow networks
+// Increase timeout for Safari browsers
+const TIMEOUT = isSafari() ? 45000 : 30000; // 45s for Safari, 30s for others
 
 export async function withTimeout<T>(promise: Promise<T> | { then(onfulfilled: (value: T) => any): any }, timeoutMs: number): Promise<T> {
   // For Supabase query builders, we need to convert them to promises first
@@ -21,7 +23,23 @@ export async function withTimeout<T>(promise: Promise<T> | { then(onfulfilled: (
 
 // Export a function to check if an error is a timeout error
 export const isTimeoutError = (error: unknown): boolean => {
-  return error instanceof Error && error.name === 'TimeoutError';
+  if (error instanceof Error && error.name === 'TimeoutError') {
+    return true;
+  }
+  
+  // Safari sometimes handles network timeouts differently
+  if (isSafari() && error instanceof Error) {
+    const errorMessage = error.message.toLowerCase();
+    if (
+      errorMessage.includes('time') && errorMessage.includes('out') ||
+      errorMessage.includes('timed') && errorMessage.includes('out') ||
+      errorMessage.includes('timeout')
+    ) {
+      return true;
+    }
+  }
+  
+  return false;
 };
 
 export { TIMEOUT };

@@ -1,5 +1,6 @@
 
 import { withTimeout, TIMEOUT, isTimeoutError } from '@/utils/timeoutUtils';
+import { isSafari } from '@/utils/storage/config';
 
 /**
  * Retry configuration options
@@ -19,6 +20,7 @@ interface RetryOptions {
 
 /**
  * Fetches data with retry logic, timeout handling, and error handling
+ * Enhanced for Safari compatibility
  * @param fetchFn The async function to execute and potentially retry
  * @param options Retry configuration options
  * @returns Promise resolving to the fetch result
@@ -36,11 +38,19 @@ export async function fetchWithRetry<T>(
   } = options;
 
   let lastError: any;
+  const isSafariBrowser = isSafari();
   
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+  // Safari may need more attempts due to connection issues
+  const effectiveMaxRetries = isSafariBrowser ? Math.max(maxRetries, 3) : maxRetries;
+  
+  for (let attempt = 0; attempt <= effectiveMaxRetries; attempt++) {
     try {
       // Apply timeout to the fetch function
-      const timeoutDuration = attempt === 0 ? TIMEOUT : TIMEOUT * 1.5; // Increase timeout for retries
+      // Increase timeout for Safari and for retries
+      const timeoutMultiplier = isSafariBrowser ? 1.5 : 1.0;
+      const attemptMultiplier = attempt === 0 ? 1.0 : 1.5;
+      const timeoutDuration = TIMEOUT * timeoutMultiplier * attemptMultiplier;
+      
       const result = await withTimeout(fetchFn(), timeoutDuration);
       
       // Validate result if validation function is provided
@@ -53,18 +63,24 @@ export async function fetchWithRetry<T>(
       lastError = error;
       
       // Don't retry after the last attempt
-      if (attempt === maxRetries) break;
+      if (attempt === effectiveMaxRetries) break;
       
       // Call the onRetry callback if provided
       if (onRetry) onRetry(attempt + 1, error);
       
       // Calculate the delay with exponential backoff if enabled
-      const delay = useBackoff ? 
+      let delay = useBackoff ? 
         initialDelay * Math.pow(2, attempt) : 
         initialDelay;
+        
+      // Add jitter for Safari to prevent connection conflicts
+      if (isSafariBrowser) {
+        const jitter = Math.random() * 1000;
+        delay += jitter;
+      }
       
       // Log the retry for debugging
-      console.log(`Retry ${attempt + 1}/${maxRetries} after ${delay}ms due to:`, 
+      console.log(`Retry ${attempt + 1}/${effectiveMaxRetries} after ${delay}ms due to:`, 
         error instanceof Error ? error.message : 'Unknown error');
       
       // Wait before the next retry
@@ -78,6 +94,7 @@ export async function fetchWithRetry<T>(
 
 /**
  * Determines if a failed request should be retried based on the error
+ * Enhanced for Safari compatibility
  * @param error The error that occurred
  * @returns true if the request should be retried, false otherwise
  */
@@ -86,12 +103,50 @@ export function shouldRetryRequest(error: unknown): boolean {
   if (isTimeoutError(error)) return true;
   
   if (error instanceof Error) {
-    // Retry on connection errors
-    if (error.message.includes('Failed to fetch') || 
-        error.message.includes('Network request failed') ||
-        error.message.includes('network error') ||
-        error.message.includes('Network error')) {
-      return true;
+    // Standard network error patterns
+    const networkErrorPatterns = [
+      'Failed to fetch',
+      'Network request failed',
+      'network error',
+      'Network error',
+      'timeout', 
+      'Timeout',
+      'aborted',
+      'Aborted'
+    ];
+    
+    // Safari-specific error patterns
+    const safariErrorPatterns = [
+      'load failed',
+      'Load failed',
+      'cancelled',
+      'Cancelled',
+      'The Internet connection appears to be offline',
+      'resource blocked',
+      'Resource blocked'
+    ];
+    
+    const errorMessage = error.message.toLowerCase();
+    
+    // Check standard patterns
+    for (const pattern of networkErrorPatterns) {
+      if (errorMessage.includes(pattern.toLowerCase())) {
+        return true;
+      }
+    }
+    
+    // Check Safari-specific patterns if on Safari
+    if (isSafari()) {
+      for (const pattern of safariErrorPatterns) {
+        if (errorMessage.includes(pattern.toLowerCase())) {
+          return true;
+        }
+      }
+      
+      // Safari may also throw DOMException
+      if (error instanceof DOMException) {
+        return true;
+      }
     }
   }
   
@@ -109,15 +164,26 @@ export function isMobileDevice(): boolean {
 
 /**
  * Gets an appropriate timeout value based on the device type and operation
+ * Enhanced for Safari compatibility
  * @param isLongOperation Whether this is a long-running operation
  * @returns Timeout duration in milliseconds
  */
 export function getDeviceAwareTimeout(isLongOperation = false): number {
   const isMobile = isMobileDevice();
+  const browserIsSafari = isSafari();
   
+  // Base timeouts
+  let timeout = isLongOperation ? 30000 : 15000;
+  
+  // Adjust for mobile
   if (isMobile) {
-    return isLongOperation ? 20000 : 10000; // 20s for long ops, 10s for regular on mobile
-  } else {
-    return isLongOperation ? 30000 : 15000; // 30s for long ops, 15s for regular on desktop
+    timeout = isLongOperation ? 20000 : 10000;
   }
+  
+  // Further adjust for Safari (increase by 50%)
+  if (browserIsSafari) {
+    timeout = Math.round(timeout * 1.5);
+  }
+  
+  return timeout;
 }

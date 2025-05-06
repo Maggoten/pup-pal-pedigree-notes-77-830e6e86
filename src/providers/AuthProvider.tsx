@@ -24,7 +24,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Log device info immediately
   useEffect(() => {
     const deviceType = isMobileDevice() ? 'Mobile' : 'Desktop';
-    console.log(`[Auth Debug] Device type: ${deviceType}, User Agent: ${navigator.userAgent}`);
+    const browserType = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome') ? 'Safari' : 
+                        navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other';
+    console.log(`[Auth Debug] Device type: ${deviceType}, Browser: ${browserType}, User Agent: ${navigator.userAgent}`);
   }, []);
 
   // Set up auth state listener and check for existing session
@@ -35,7 +37,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       try {
         // First set up the auth state listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (event, currentSession) => {
+          (event, currentSession) => {
             console.log(`[Auth Debug] Auth state change event: ${event}`);
             console.log(`[Auth Debug] Session exists: ${!!currentSession}`);
             console.log(`[Auth Debug] User ID from session: ${currentSession?.user?.id || 'none'}`);
@@ -60,7 +62,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                   let retryCount = 0;
                   let profile = null;
                   
-                  while (retryCount < 3 && !profile) {
+                  while (retryCount < 4 && !profile) { // Increased from 3 to 4 retries
                     try {
                       profile = await getUserProfile(currentSession.user.id);
                       if (profile) {
@@ -70,7 +72,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                       console.log(`[Auth Debug] Profile fetch attempt ${retryCount + 1} returned null`);
                     } catch (err) {
                       console.log(`[Auth Debug] Profile fetch attempt ${retryCount + 1} failed:`, err);
-                      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between retries
+                      await new Promise(resolve => setTimeout(resolve, 1500)); // Increased from 1000ms to 1500ms
                     }
                     retryCount++;
                   }
@@ -118,6 +120,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 setIsLoggedIn(false);
                 setIsAuthReady(true);
                 console.log(`[Auth Debug] Sign out event processed, state cleared`);
+                
+                // Safari needs explicit storage clearing in some cases
+                try {
+                  localStorage.removeItem('supabase.auth.token');
+                  sessionStorage.removeItem('supabase.auth.token');
+                } catch (e) {
+                  console.log('[Auth Debug] Error clearing auth storage:', e);
+                }
               }
             }
 
@@ -127,10 +137,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         // THEN check for existing session
         try {
-          const { data: { session: initialSession } } = await fetchWithRetry(
+          const { data: { session: initialSession }, error } = await fetchWithRetry(
             () => supabase.auth.getSession(),
-            { maxRetries: 2, initialDelay: 1000 }
+            { maxRetries: 3, initialDelay: 1500 }  // Increased retries and delay
           );
+          
+          if (error) {
+            console.log('[Auth Debug] Error getting session:', error);
+            
+            // Try a fallback approach for Safari
+            if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
+              console.log('[Auth Debug] Safari detected, trying session refresh');
+              await supabase.auth.refreshSession();
+              const refreshResult = await supabase.auth.getSession();
+              if (!refreshResult.error && refreshResult.data.session) {
+                console.log('[Auth Debug] Safari session refresh successful');
+              }
+            }
+          }
           
           console.log(`[Auth Debug] Initial session check: ${initialSession ? 'Session exists' : 'No session'}`);
           console.log(`[Auth Debug] Initial user ID: ${initialSession?.user?.id || 'none'}`);
@@ -140,20 +164,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setSupabaseUser(initialSession.user);
             setIsLoggedIn(true);
             
-            console.log(`[Auth Debug] Initial auth token length: ${initialSession.access_token.length}`);
+            if (initialSession.access_token) {
+              console.log(`[Auth Debug] Initial auth token length: ${initialSession.access_token.length}`);
+            } else {
+              console.warn('[Auth Debug] No access token in session');
+            }
             
             // Get user profile from database with retry logic
             let retryCount = 0;
             let profile = null;
             
-            while (retryCount < 3 && !profile) {
+            while (retryCount < 4 && !profile) {  // Increased from 3 to 4 retries
               try {
                 console.log(`[Auth Debug] Initial profile fetch attempt ${retryCount + 1}`);
                 profile = await getUserProfile(initialSession.user.id);
                 if (profile) break;
               } catch (err) {
                 console.log(`[Auth Debug] Initial profile fetch attempt ${retryCount + 1} failed:`, err);
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, 1500));  // Increased from 1000ms to 1500ms
               }
               retryCount++;
             }
@@ -209,11 +237,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsLoading(false);
         setIsAuthReady(true);
       }
-    }, 10000); // 10 second safety timeout
+    }, 8000); // Reduced from 10s to 8s for faster recovery
+    
+    // Safari may need periodic session refreshes to maintain authentication
+    let refreshTimer: NodeJS.Timeout | null = null;
+    if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
+      refreshTimer = setInterval(async () => {
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data.session) {
+            console.log('[Auth Debug] Safari periodic session refresh');
+            await supabase.auth.refreshSession();
+          }
+        } catch (e) {
+          console.error('[Auth Debug] Error in periodic session refresh:', e);
+        }
+      }, 4 * 60 * 1000); // Every 4 minutes
+    }
     
     return () => {
       isSubscribed = false;
       clearTimeout(safetyTimer);
+      if (refreshTimer) clearInterval(refreshTimer);
     };
   }, [getUserProfile]);
 
@@ -226,7 +271,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         loading: isLoading,
         isLoading,
         isLoggedIn,
-        isAuthReady,  // Expose the isAuthReady flag
+        isAuthReady,
         login,
         register,
         logout

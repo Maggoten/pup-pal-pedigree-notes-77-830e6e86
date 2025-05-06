@@ -6,11 +6,18 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://yqcgqriecxtppuvcguyj.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2dxcmllY3h0cHB1dmNndXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTI4NjksImV4cCI6MjA2MDI2ODg2OX0.PD0W-rLpQBHUGm9--nv4-3PVYQFMAsRujmExBDuP5oA";
 
+// Safari detection - used only for logging purposes here
+const isSafari = () => {
+  const userAgent = navigator.userAgent;
+  return userAgent.includes('Safari') && !userAgent.includes('Chrome') && !userAgent.includes('Android');
+};
+
 // Log configuration details for debugging
 console.log('Supabase client configuration:', { 
   url: SUPABASE_URL,
   keyLength: SUPABASE_PUBLISHABLE_KEY?.length ?? 0,
-  isConfigured: !!SUPABASE_URL && !!SUPABASE_PUBLISHABLE_KEY
+  isConfigured: !!SUPABASE_URL && !!SUPABASE_PUBLISHABLE_KEY,
+  isSafari: isSafari()
 });
 
 // Import the supabase client like this:
@@ -19,19 +26,80 @@ console.log('Supabase client configuration:', {
 // Define profile type that can be used in the app
 export type Profile = Database['public']['Tables']['profiles']['Row'];
 
-// Create and export the supabase client
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-
-// Setup a health check for the Supabase connection
-(async () => {
-  try {
-    const { error } = await supabase.auth.getSession();
-    if (error) {
-      console.error('Supabase connection check failed:', error.message);
-    } else {
-      console.log('Supabase connection check successful');
+// Create and export the supabase client with explicit auth storage configuration
+// This helps with Safari's Intelligent Tracking Prevention and storage limitations
+export const supabase = createClient<Database>(
+  SUPABASE_URL, 
+  SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      storage: {
+        // Explicitly use localStorage to ensure consistency
+        getItem: (key) => {
+          try {
+            const item = localStorage.getItem(key);
+            return item;
+          } catch (error) {
+            console.error('localStorage access error:', error);
+            return null;
+          }
+        },
+        setItem: (key, value) => {
+          try {
+            localStorage.setItem(key, value);
+          } catch (error) {
+            console.error('localStorage write error:', error);
+            // Don't throw to avoid breaking auth - just log the error
+          }
+        },
+        removeItem: (key) => {
+          try {
+            localStorage.removeItem(key);
+          } catch (error) {
+            console.error('localStorage remove error:', error);
+          }
+        }
+      }
     }
-  } catch (err) {
-    console.error('Supabase client initialization error:', err);
+  }
+);
+
+// Setup a health check for the Supabase connection with timeout and retry
+(async () => {
+  const maxRetries = isSafari() ? 3 : 2;
+  let attempt = 0;
+  
+  const checkConnection = async () => {
+    try {
+      const { error } = await supabase.auth.getSession();
+      if (error) {
+        throw error;
+      }
+      console.log('Supabase connection check successful');
+      return true;
+    } catch (err) {
+      console.error(`Supabase connection check failed (attempt ${attempt + 1}/${maxRetries}):`, err);
+      return false;
+    }
+  };
+  
+  while (attempt < maxRetries) {
+    const success = await checkConnection();
+    if (success) break;
+    
+    attempt++;
+    if (attempt < maxRetries) {
+      // Wait with exponential backoff
+      const delay = Math.pow(2, attempt) * 1000;
+      console.log(`Retrying Supabase connection in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  if (attempt === maxRetries) {
+    console.error('Supabase client initialization failed after multiple attempts');
   }
 })();
