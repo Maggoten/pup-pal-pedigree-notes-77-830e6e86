@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
 import { toast } from '@/hooks/use-toast';
+import { removeUserFromStorage } from '@/services/authService';
 
 export const useAuthActions = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -88,20 +89,33 @@ export const useAuthActions = () => {
     }
   };
 
-  // Logout function
+  // Logout function with improved error handling and force refresh
   const logout = async (): Promise<void> => {
     setIsLoading(true);
     try {
       console.log('Attempting logout');
-      const { error } = await supabase.auth.signOut();
+      // Use global scope to sign out from all devices
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       
       if (error) {
         console.error('Logout error from Supabase:', error);
+        // If logout fails via API, force cleanup manually
+        removeUserFromStorage();
       } else {
         console.log('Logout successful');
       }
+      
+      // Force-clear any remaining auth state from storage
+      removeUserFromStorage();
+      
+      // Force page reload to ensure clean state
+      window.location.href = '/login';
     } catch (error) {
       console.error("Logout error:", error);
+      // Even if there's an error, try to clear local storage
+      removeUserFromStorage();
+      // Redirect to login page as a fallback
+      window.location.href = '/login';
     } finally {
       setIsLoading(false);
     }

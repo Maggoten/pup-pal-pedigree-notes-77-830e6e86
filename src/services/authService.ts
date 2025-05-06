@@ -70,7 +70,7 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
   }
 };
 
-// Delete user account - enhanced implementation with improved error handling
+// Delete user account - enhanced implementation with improved error handling and immediate session cleanup
 export const deleteUserAccount = async (password: string): Promise<boolean> => {
   try {
     // First verify the user's password
@@ -107,12 +107,19 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
       
       console.log("Edge function response:", data);
       
-      // If edge function successful, sign out the user
-      await supabase.auth.signOut();
+      // Immediately sign out the user to clear the session
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      // Also clear local storage manually to ensure all traces of the session are gone
+      removeUserFromStorage();
       
       // Check response for success indicator
       if (data && data.success === true) {
         console.log("Account deletion successful:", data.message);
+        
+        // Force a page reload to clear any lingering state
+        window.location.reload();
+        
         return true;
       } else {
         console.error("Unexpected edge function response:", data);
@@ -138,6 +145,17 @@ export const saveUserToStorage = (user: User) => {
 export const removeUserFromStorage = () => {
   localStorage.removeItem('user');
   localStorage.removeItem('isLoggedIn');
+  // Clear all Supabase-related storage
+  localStorage.removeItem('supabase.auth.token');
+  localStorage.removeItem('supabase.auth.refreshToken');
+  localStorage.removeItem('supabase.auth.user');
+  // Clear any other potential auth-related items
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (key.includes('supabase') || key.includes('auth'))) {
+      localStorage.removeItem(key);
+    }
+  }
 };
 
 // Get user data from local storage - not needed with Supabase but kept for compatibility

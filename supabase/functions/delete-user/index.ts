@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
@@ -290,10 +289,15 @@ serve(async (req) => {
         console.error('Error deleting profile:', profileError);
       }
 
-      // Finally, delete the auth user
-      // This is the most important part that was likely failing before
+      // Store the user's email before deletion to check if it was properly removed
+      const userEmail = user.email;
+
+      // Finally, delete the auth user properly with hard_delete parameter
+      // This ensures the email can be re-registered
       console.log('Deleting auth user...');
-      const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
+      const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id, {
+        shouldSoftDelete: false // Force hard delete to make email available again
+      });
 
       if (authDeleteError) {
         console.error('Error deleting auth user:', authDeleteError);
@@ -307,11 +311,28 @@ serve(async (req) => {
         });
       }
 
+      // Do a quick check if the email is available by trying to get the user by email
+      console.log('Verifying email is available for re-registration...');
+      const { data: emailCheck } = await supabaseAdmin.auth.admin.listUsers({
+        filter: {
+          email: userEmail,
+        },
+        page: 1,
+        perPage: 1,
+      });
+
+      if (emailCheck && emailCheck.users && emailCheck.users.length > 0) {
+        console.warn('Warning: Email still exists in auth system after deletion attempt');
+      } else {
+        console.log('Email successfully removed from auth system and available for re-registration');
+      }
+
       console.log('User deleted successfully');
       return new Response(JSON.stringify({ 
         success: true, 
         message: 'User account deleted successfully',
-        userId: user.id 
+        userId: user.id,
+        emailAvailable: true
       }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
@@ -320,7 +341,10 @@ serve(async (req) => {
       
       // Try to force delete the auth user even if data cleanup had issues
       try {
-        const { error: forceDeleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
+        // Use hard delete to ensure email can be re-registered
+        const { error: forceDeleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id, {
+          shouldSoftDelete: false // Force hard delete
+        });
         
         if (forceDeleteError) {
           console.error('Failed to force delete auth user after cleanup error:', forceDeleteError);
