@@ -70,13 +70,18 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
   }
 };
 
-// Delete user account
+// Delete user account - fixed implementation that properly deletes from auth
 export const deleteUserAccount = async (password: string): Promise<boolean> => {
   try {
     // First verify the user's password
-    const user = await supabase.auth.getUser();
-    const email = user.data.user?.email || '';
+    const currentUser = await supabase.auth.getUser();
+    if (!currentUser.data.user) {
+      throw new Error("No authenticated user found");
+    }
     
+    const email = currentUser.data.user.email || '';
+    
+    // Verify the password by attempting to sign in
     const { error: verifyError } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -84,17 +89,24 @@ export const deleteUserAccount = async (password: string): Promise<boolean> => {
     
     if (verifyError) {
       console.error("Password verification error:", verifyError);
-      return false;
+      throw new Error("Incorrect password, please try again");
     }
     
-    // Delete user account from Supabase Auth (this will cascade to profiles via RLS)
-    const userId = user.data.user?.id || '';
-    const { error } = await supabase.auth.admin.deleteUser(userId);
+    // Delete the user from auth (this will cascade to profiles via RLS)
+    const { error } = await supabase.auth.admin.deleteUser(currentUser.data.user.id);
     
     if (error) {
       console.error("Delete account error:", error);
-      return false;
+      // If we get an admin error, try the client-side method
+      const { error: clientError } = await supabase.rpc('delete_user');
+      if (clientError) {
+        console.error("Client-side delete error:", clientError);
+        return false;
+      }
     }
+    
+    // Sign out the user
+    await supabase.auth.signOut();
     
     return true;
   } catch (error) {

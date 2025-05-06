@@ -1,1 +1,100 @@
+
 project_id = "yqcgqriecxtppuvcguyj"
+
+[api]
+# Enabled APIs and their configs
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+# Database config
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[db.pooler]
+enabled = false
+port = 54329
+pool_mode = "transaction"
+default_pool_size = 20
+max_client_conn = 100
+
+[realtime]
+enabled = true
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://localhost"
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+
+[auth.email]
+enable_confirmations = false
+
+[auth.external.github]
+enabled = false
+client_id = ""
+secret = ""
+# Overrides the default auth redirectUrl.
+redirect_uri = ""
+# Overrides the default auth provider URL. Used to support self-hosted gitlab instances.
+url = ""
+
+[auth.external.google]
+enabled = false
+client_id = ""
+secret = ""
+# Overrides the default auth redirectUrl.
+redirect_uri = ""
+
+[auth.external.facebook]
+enabled = false
+client_id = ""
+secret = ""
+# Overrides the default auth redirectUrl.
+redirect_uri = ""
+
+[auth.external.azure]
+enabled = false
+client_id = ""
+secret = ""
+# Overrides the default auth redirectUrl.
+redirect_uri = ""
+
+[auth.external.twitter]
+enabled = false
+client_id = ""
+secret = ""
+# Overrides the default auth redirectUrl.
+redirect_uri = ""
+
+[analytics]
+enabled = false
+port = 54327
+vector_port = 54328
+backend = "postgres"
+
+# Configure PostgREST
+[postgres]
+port = 54326
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[functions]
+enabled = true
+[functions.delete-user]
+verify_jwt = true

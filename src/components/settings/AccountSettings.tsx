@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useSettings } from '@/hooks/useSettings';
 
 interface AccountSettingsProps {
   settings: UserSettings;
@@ -26,11 +26,11 @@ interface AccountSettingsProps {
 
 const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
   const { user, logout } = useAuth();
+  const { deleteAccount, cancelSubscription, isCancellingSubscription, isDeletingAccount } = useSettings();
   const [cancelSubscriptionDialogOpen, setCancelSubscriptionDialogOpen] = useState(false);
   const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmText, setConfirmText] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
   
   // Function to handle subscription upgrade
   const handleUpgradeSubscription = () => {
@@ -40,53 +40,44 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
   
   // Function to handle subscription cancellation
   const handleCancelSubscription = async () => {
-    setIsProcessing(true);
     try {
-      // This would connect to a Supabase edge function to cancel subscription
-      // For now we'll just simulate success
-      setTimeout(() => {
-        toast({
-          title: "Subscription cancelled",
-          description: "Your subscription has been cancelled. You'll still have access until the end of your billing period.",
-        });
-        setCancelSubscriptionDialogOpen(false);
-        setIsProcessing(false);
-      }, 1000);
+      await cancelSubscription();
+      setCancelSubscriptionDialogOpen(false);
     } catch (error) {
       toast({
         title: "Error cancelling subscription",
         description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
-      setIsProcessing(false);
     }
   };
   
   // Function to handle account deletion
   const handleDeleteAccount = async () => {
-    setIsProcessing(true);
     try {
-      // This would connect to a Supabase function to delete account data
-      // For now we'll just simulate success
-      setTimeout(() => {
+      // Call the actual deleteAccount function from useSettings hook
+      const success = await deleteAccount(confirmPassword);
+      
+      if (success) {
         toast({
           title: "Account deleted",
           description: "Your account has been deleted. You will be logged out.",
         });
         setDeleteAccountDialogOpen(false);
-        setIsProcessing(false);
+        
         // Log the user out after account deletion
         setTimeout(() => {
           logout();
         }, 2000);
-      }, 1000);
+      } else {
+        throw new Error("Failed to delete account. Please check your password and try again.");
+      }
     } catch (error) {
       toast({
         title: "Error deleting account",
         description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
-      setIsProcessing(false);
     }
   };
   
@@ -282,7 +273,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
             />
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isCancellingSubscription}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
@@ -297,9 +288,9 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
                 }
               }}
               className="bg-rustbrown-600 hover:bg-rustbrown-700"
-              disabled={isProcessing || confirmText.toLowerCase() !== 'cancel'}
+              disabled={isCancellingSubscription || confirmText.toLowerCase() !== 'cancel'}
             >
-              {isProcessing ? "Processing..." : "Cancel Subscription"}
+              {isCancellingSubscription ? "Processing..." : "Cancel Subscription"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -338,7 +329,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
             </div>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeletingAccount}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
@@ -353,9 +344,9 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
                 }
               }}
               className="bg-red-600 hover:bg-red-700"
-              disabled={isProcessing || confirmPassword.length === 0 || confirmText !== 'DELETE MY ACCOUNT'}
+              disabled={isDeletingAccount || confirmPassword.length === 0 || confirmText !== 'DELETE MY ACCOUNT'}
             >
-              {isProcessing ? "Processing..." : "Delete Account"}
+              {isDeletingAccount ? "Processing..." : "Delete Account"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
