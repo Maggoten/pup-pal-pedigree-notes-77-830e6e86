@@ -13,11 +13,13 @@ import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 interface PregnancyDropdownSelectorProps {
   pregnancies: ActivePregnancy[];
   currentPregnancyId?: string;
+  fullWidth?: boolean;
 }
 
 const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({ 
   pregnancies, 
-  currentPregnancyId 
+  currentPregnancyId,
+  fullWidth = false
 }) => {
   const navigate = useNavigate();
   
@@ -39,12 +41,12 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
   };
 
   return (
-    <div className="flex items-center">
+    <div className={`flex items-center ${fullWidth ? 'w-full' : ''}`}>
       <Select 
         value={currentPregnancy?.id} 
         onValueChange={handlePregnancyChange}
       >
-        <SelectTrigger className="min-w-[200px] bg-white">
+        <SelectTrigger className={`min-w-[200px] bg-white ${fullWidth ? 'w-full' : ''}`}>
           <SelectValue placeholder="Select a pregnancy">
             {currentPregnancy 
               ? `${currentPregnancy.femaleName}'s Pregnancy` 

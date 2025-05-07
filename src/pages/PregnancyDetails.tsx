@@ -12,6 +12,7 @@ import AddPregnancyDialog from '@/components/pregnancy/AddPregnancyDialog';
 import ManagePregnancyDialog from '@/components/pregnancy/ManagePregnancyDialog';
 import { Button } from '@/components/ui/button';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const PregnancyDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,7 @@ const PregnancyDetails = () => {
   const [loadingPregnancies, setLoadingPregnancies] = useState(true);
   const [addPregnancyDialogOpen, setAddPregnancyDialogOpen] = useState(false);
   const [managePregnancyDialogOpen, setManagePregnancyDialogOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchPregnancies = async () => {
@@ -100,27 +102,52 @@ const PregnancyDetails = () => {
       description="Track pregnancy progress and development"
       icon={<Heart className="h-6 w-6" />}
     >
-      <div className="flex justify-end items-center gap-4 mb-6">
-        <Button 
-          onClick={handleManagePregnancyClick} 
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <Settings className="h-4 w-4" />
-          Manage Pregnancy
-        </Button>
-        <Button 
-          onClick={handleAddPregnancyClick} 
-          variant="default"
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add Pregnancy
-        </Button>
-        <PregnancyDropdownSelector 
-          pregnancies={activePregnancies} 
-          currentPregnancyId={pregnancy.id}
-        />
+      {/* Redesigned button layout for better mobile usability */}
+      <div className="flex flex-col gap-4 mb-6">
+        {/* Pregnancy selection dropdown - moved to top */}
+        <div className={`${isMobile ? 'w-full' : 'self-end'}`}>
+          <PregnancyDropdownSelector 
+            pregnancies={activePregnancies} 
+            currentPregnancyId={pregnancy.id}
+            fullWidth={isMobile}
+          />
+        </div>
+        
+        {/* Add Pregnancy - primary action on its own row */}
+        <div className={`${isMobile ? 'w-full' : 'self-end'}`}>
+          <Button 
+            onClick={handleAddPregnancyClick} 
+            variant="default"
+            className={`flex items-center gap-2 ${isMobile ? 'w-full justify-center py-3' : ''}`}
+          >
+            <Plus className="h-4 w-4" />
+            Add Pregnancy
+          </Button>
+        </div>
+        
+        {/* Manage Pregnancy - secondary action */}
+        <div className={`${isMobile ? 'w-full' : 'self-end'}`}>
+          {isMobile ? (
+            <Button 
+              onClick={handleManagePregnancyClick} 
+              variant="outline"
+              size="icon"
+              className="w-full flex items-center justify-center gap-2 py-3"
+            >
+              <Settings className="h-5 w-5" />
+              <span>Manage Pregnancy</span>
+            </Button>
+          ) : (
+            <Button 
+              onClick={handleManagePregnancyClick} 
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              Manage Pregnancy
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-8">
