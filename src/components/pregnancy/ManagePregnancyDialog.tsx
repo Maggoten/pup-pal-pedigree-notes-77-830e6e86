@@ -186,7 +186,7 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
             <AlertDialogAction 
               onClick={handleDelete}
               disabled={isProcessing}
-              variant="destructive"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isProcessing ? "Deleting..." : "Delete Permanently"}
             </AlertDialogAction>
