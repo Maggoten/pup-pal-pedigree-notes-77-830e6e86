@@ -238,3 +238,61 @@ export const getFirstActivePregnancy = async (): Promise<string | null> => {
     return null;
   }
 };
+
+export const archivePregnancy = async (pregnancyId: string): Promise<boolean> => {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.log("No active session found");
+      return false;
+    }
+
+    console.log(`Archiving pregnancy with ID: ${pregnancyId}`);
+    
+    const { error } = await supabase
+      .from('pregnancies')
+      .update({ status: 'archived' })
+      .eq('id', pregnancyId)
+      .eq('user_id', sessionData.session.user.id);
+    
+    if (error) {
+      console.error("Error archiving pregnancy:", error);
+      throw error;
+    }
+    
+    console.log("Successfully archived pregnancy");
+    return true;
+  } catch (err) {
+    console.error('Error in archivePregnancy:', err);
+    return false;
+  }
+};
+
+export const deletePregnancy = async (pregnancyId: string): Promise<boolean> => {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.log("No active session found");
+      return false;
+    }
+
+    console.log(`Deleting pregnancy with ID: ${pregnancyId}`);
+    
+    const { error } = await supabase
+      .from('pregnancies')
+      .delete()
+      .eq('id', pregnancyId)
+      .eq('user_id', sessionData.session.user.id);
+    
+    if (error) {
+      console.error("Error deleting pregnancy:", error);
+      throw error;
+    }
+    
+    console.log("Successfully deleted pregnancy");
+    return true;
+  } catch (err) {
+    console.error('Error in deletePregnancy:', err);
+    return false;
+  }
+};

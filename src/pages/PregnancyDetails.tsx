@@ -2,13 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
-import { Loader2, Heart, Plus } from 'lucide-react';
+import { Loader2, Heart, Plus, Settings } from 'lucide-react';
 import { usePregnancyDetails } from '@/hooks/usePregnancyDetails';
 import { getActivePregnancies } from '@/services/PregnancyService';
 import PregnancyTabs from '@/components/pregnancy/PregnancyTabs';
 import PregnancySummaryCards from '@/components/pregnancy/PregnancySummaryCards';
 import PregnancyDropdownSelector from '@/components/pregnancy/PregnancyDropdownSelector';
 import AddPregnancyDialog from '@/components/pregnancy/AddPregnancyDialog';
+import ManagePregnancyDialog from '@/components/pregnancy/ManagePregnancyDialog';
 import { Button } from '@/components/ui/button';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 
@@ -18,6 +19,7 @@ const PregnancyDetails = () => {
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
   const [loadingPregnancies, setLoadingPregnancies] = useState(true);
   const [addPregnancyDialogOpen, setAddPregnancyDialogOpen] = useState(false);
+  const [managePregnancyDialogOpen, setManagePregnancyDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchPregnancies = async () => {
@@ -40,6 +42,10 @@ const PregnancyDetails = () => {
     setAddPregnancyDialogOpen(true);
   };
 
+  const handleManagePregnancyClick = () => {
+    setManagePregnancyDialogOpen(true);
+  };
+
   const handleAddPregnancyDialogClose = () => {
     setAddPregnancyDialogOpen(false);
     // Refresh pregnancies list after adding a new pregnancy
@@ -52,6 +58,10 @@ const PregnancyDetails = () => {
       }
     };
     fetchPregnancies();
+  };
+
+  const handleManagePregnancyDialogClose = () => {
+    setManagePregnancyDialogOpen(false);
   };
 
   if (loading || loadingPregnancies) {
@@ -92,6 +102,14 @@ const PregnancyDetails = () => {
     >
       <div className="flex justify-end items-center gap-4 mb-6">
         <Button 
+          onClick={handleManagePregnancyClick} 
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <Settings className="h-4 w-4" />
+          Manage Pregnancy
+        </Button>
+        <Button 
           onClick={handleAddPregnancyClick} 
           variant="default"
           className="flex items-center gap-2"
@@ -129,6 +147,16 @@ const PregnancyDetails = () => {
         onOpenChange={setAddPregnancyDialogOpen}
         onClose={handleAddPregnancyDialogClose}
       />
+
+      {pregnancy && (
+        <ManagePregnancyDialog
+          pregnancyId={pregnancy.id}
+          femaleName={pregnancy.femaleName}
+          open={managePregnancyDialogOpen}
+          onOpenChange={setManagePregnancyDialogOpen}
+          onClose={handleManagePregnancyDialogClose}
+        />
+      )}
     </PageLayout>
   );
 };
