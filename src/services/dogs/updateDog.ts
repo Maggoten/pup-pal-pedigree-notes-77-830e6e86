@@ -6,6 +6,7 @@ import { PostgrestResponse } from '@supabase/supabase-js';
 import { withTimeout, TIMEOUT, isTimeoutError } from '@/utils/timeoutUtils';
 import { cleanupStorageImage } from '@/utils/storageUtils';
 import { dateToISOString } from '@/utils/dateUtils';
+import { ReminderCalendarSyncService } from '@/services/ReminderCalendarSyncService';
 
 export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog | null> {
   if (!id) {
@@ -76,6 +77,8 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
       .eq('id', id)
       .select('*');
     
+    let updatedDog: Dog | null = null;
+    
     // Execute the update with timeout protection but with retry mechanism
     try {
       const updateResponse = await withTimeout<PostgrestResponse<DbDog>>(
@@ -106,8 +109,41 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
       }
 
       // Convert DB response to Dog object
-      const updatedDog = enrichDog(updateResponse.data[0]);
+      updatedDog = enrichDog(updateResponse.data[0]);
       console.log('Successfully updated dog:', updatedDog);
+      
+      // Create or update calendar events based on dog data changes
+      try {
+        const needsBirthdaySync = updates.dateOfBirth !== undefined;
+        const needsVaccinationSync = updates.vaccinationDate !== undefined;
+        const needsHeatSync = updates.heatHistory !== undefined || updates.heatInterval !== undefined;
+        
+        // Only sync events if relevant data was updated
+        if (needsBirthdaySync || needsVaccinationSync || needsHeatSync) {
+          console.log('Syncing calendar events after dog update');
+          
+          if (needsBirthdaySync && updatedDog.dateOfBirth) {
+            await ReminderCalendarSyncService.syncBirthdayEvents(updatedDog);
+          }
+          
+          if (needsVaccinationSync && updatedDog.vaccinationDate) {
+            await ReminderCalendarSyncService.syncVaccinationEvents(updatedDog);
+          }
+          
+          if (needsHeatSync && updatedDog.gender === 'female') {
+            const { calculateUpcomingHeats } = await import('@/utils/heatCalculator');
+            const upcomingHeats = calculateUpcomingHeats([updatedDog]);
+            
+            for (const heat of upcomingHeats) {
+              await ReminderCalendarSyncService.syncHeatCycleEvents(heat);
+            }
+          }
+        }
+      } catch (syncError) {
+        console.error('Error syncing calendar events during dog update:', syncError);
+        // Don't fail the whole operation if calendar sync fails
+      }
+      
       return updatedDog;
     } catch (error) {
       // If it's a timeout error, provide a specific message
