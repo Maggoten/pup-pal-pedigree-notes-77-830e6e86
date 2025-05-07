@@ -793,6 +793,10 @@ export type Database = {
         Args: { dog_id: string }
         Returns: Json
       }
+      delete_old_heat_entries: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

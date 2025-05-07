@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PlannedLittersList from '@/components/planned-litters/PlannedLittersList';
 import MatingSection from '@/components/planned-litters/mating/MatingSection';
 import { usePlannedLitters } from '../hooks/usePlannedLitters';
-import { RecentMating } from '../types';
+import { HeatService } from '@/services/HeatService';
 
 const PlannedLittersContent: React.FC = () => {
   const {
@@ -16,8 +16,24 @@ const PlannedLittersContent: React.FC = () => {
     handleAddMatingDate,
     handleEditMatingDate,
     handleDeleteMatingDate,
-    handleDeleteLitter
+    handleDeleteLitter,
+    refreshLitters
   } = usePlannedLitters();
+
+  // Run cleanup of old heat entries when the page loads
+  useEffect(() => {
+    const cleanup = async () => {
+      await HeatService.deleteOldHeatEntries();
+    };
+    
+    cleanup();
+    // Only run once when the component mounts
+  }, []);
+
+  const handleHeatDeleted = () => {
+    // Refresh data after a heat entry is deleted
+    refreshLitters();
+  };
 
   return (
     <>
@@ -37,6 +53,7 @@ const PlannedLittersContent: React.FC = () => {
       <MatingSection 
         upcomingHeats={upcomingHeats}
         recentMatings={recentMatings}
+        onHeatDeleted={handleHeatDeleted}
       />
     </>
   );

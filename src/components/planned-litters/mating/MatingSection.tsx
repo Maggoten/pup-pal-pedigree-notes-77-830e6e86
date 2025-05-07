@@ -1,22 +1,34 @@
 
 import React from 'react';
+import { Separator } from '@/components/ui/separator';
+import { UpcomingHeat, RecentMating } from '@/types/reminders';
 import UpcomingHeatCard from './UpcomingHeatCard';
-import RecentMatingsCard from './RecentMatingsCard';
-import MatingTipsCard from './MatingTipsCard';
-import { MatingProps } from '../types';
+import RecentMatingCard from './RecentMatingCard';
 
-const MatingSection: React.FC<MatingProps> = ({ upcomingHeats, recentMatings }) => {
+interface MatingSectionProps {
+  upcomingHeats: UpcomingHeat[];
+  recentMatings: RecentMating[];
+  onHeatDeleted?: () => void;
+}
+
+const MatingSection: React.FC<MatingSectionProps> = ({ 
+  upcomingHeats, 
+  recentMatings,
+  onHeatDeleted
+}) => {
   return (
-    <div className="mt-10 space-y-6">
-      <h2 className="text-2xl font-bold">Mating</h2>
+    <section className="mt-12">
+      <h2 className="text-2xl font-semibold mb-2">Heat Cycles & Recent Matings</h2>
+      <p className="text-muted-foreground mb-6">
+        Track upcoming heat cycles and manage recent matings
+      </p>
+      <Separator className="mb-6" />
       
       <div className="grid gap-6 md:grid-cols-2">
-        <UpcomingHeatCard upcomingHeats={upcomingHeats} />
-        <RecentMatingsCard recentMatings={recentMatings} />
+        <UpcomingHeatCard upcomingHeats={upcomingHeats} onHeatDeleted={onHeatDeleted} />
+        <RecentMatingCard recentMatings={recentMatings} />
       </div>
-      
-      <MatingTipsCard />
-    </div>
+    </section>
   );
 };
 
