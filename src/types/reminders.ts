@@ -5,7 +5,7 @@ export interface Reminder {
   description: string;
   dueDate: Date;
   priority: 'high' | 'medium' | 'low';
-  type: 'pregnancy' | 'litter' | 'breeding' | 'health';
+  type: 'pregnancy' | 'litter' | 'breeding' | 'health' | 'heat' | 'vaccination' | 'birthday' | 'other';
   icon?: React.ReactNode;
   relatedId?: string;
   isCompleted?: boolean;
@@ -23,4 +23,11 @@ export interface RecentMating {
   maleName: string;
   femaleName: string;
   date: Date;
+}
+
+export interface CustomReminderInput {
+  title: string;
+  description: string;
+  dueDate: Date;
+  priority: 'high' | 'medium' | 'low';
 }

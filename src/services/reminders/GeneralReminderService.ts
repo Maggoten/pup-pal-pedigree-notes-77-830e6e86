@@ -35,7 +35,7 @@ export const generateGeneralReminders = (dogs: Dog[]): Reminder[] => {
       icon: createCalendarClockIcon('purple-500'),
       dueDate: today,
       priority: 'low',
-      type: 'other',
+      type: 'breeding', // Changed from 'other' to 'breeding'
       relatedId: dog.id
     });
   });

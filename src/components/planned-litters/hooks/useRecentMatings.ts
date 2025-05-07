@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { parseISO, isBefore } from 'date-fns';
 import { PlannedLitter } from '@/types/breeding';
-import { RecentMating } from '../types';
+import { RecentMating } from '@/types/reminders';
 
 export const useRecentMatings = (plannedLitters: PlannedLitter[]) => {
   const [recentMatings, setRecentMatings] = useState<RecentMating[]>([]);
@@ -16,7 +16,7 @@ export const useRecentMatings = (plannedLitters: PlannedLitter[]) => {
           const matingDate = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
           if (isBefore(matingDate, new Date())) {
             matings.push({
-              id: `${litter.id}-${dateStr}`,
+              litterId: litter.id,
               maleName: litter.maleName || 'Unknown',
               femaleName: litter.femaleName,
               date: matingDate

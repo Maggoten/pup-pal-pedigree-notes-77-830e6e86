@@ -40,7 +40,7 @@ export const generateLitterReminders = async (userId: string): Promise<Reminder[
               : `Due in ${daysUntilBirth} days`,
             dueDate,
             priority: 'high',
-            type: 'other',
+            type: 'pregnancy', // Changed from 'other' to 'pregnancy'
             icon: createPawPrintIcon('rose-500'),
             relatedId: pregnancy.id
           });
