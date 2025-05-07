@@ -1,3 +1,4 @@
+
 import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
 import { UpcomingHeat } from '@/types/reminders';
@@ -25,6 +26,16 @@ export class ReminderCalendarSyncService {
         });
         return false;
       }
+
+      // Get current user ID
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !authData.user) {
+        console.error('Error getting user for calendar events:', authError);
+        return false;
+      }
+      
+      const userId = authData.user.id;
 
       const eventId = `event-birthday-${dog.id}`;
       const birthDate = typeof dog.dateOfBirth === 'string' ? 
@@ -54,7 +65,8 @@ export class ReminderCalendarSyncService {
         type: 'birthday',
         dog_id: dog.id,
         dog_name: dog.name,
-        notes: `Birthday celebration for ${dog.name}`
+        notes: `Birthday celebration for ${dog.name}`,
+        user_id: userId
       };
 
       // If event exists, update it
@@ -96,7 +108,8 @@ export class ReminderCalendarSyncService {
         type: 'birthday-reminder',
         dog_id: dog.id,
         dog_name: dog.name,
-        notes: `Reminder to prepare for ${dog.name}'s birthday in 2 weeks`
+        notes: `Reminder to prepare for ${dog.name}'s birthday in 2 weeks`,
+        user_id: userId
       };
 
       if (existingReminders && existingReminders.length > 0) {
@@ -143,6 +156,16 @@ export class ReminderCalendarSyncService {
         });
         return false;
       }
+      
+      // Get current user ID
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !authData.user) {
+        console.error('Error getting user for calendar events:', authError);
+        return false;
+      }
+      
+      const userId = authData.user.id;
 
       const eventId = `event-vaccination-${dog.id}`;
       const vaccinationDate = typeof dog.vaccinationDate === 'string' ? 
@@ -170,7 +193,8 @@ export class ReminderCalendarSyncService {
         type: 'vaccination',
         dog_id: dog.id,
         dog_name: dog.name,
-        notes: `Annual vaccination due for ${dog.name}`
+        notes: `Annual vaccination due for ${dog.name}`,
+        user_id: userId
       };
 
       // If event exists, update it
@@ -212,7 +236,8 @@ export class ReminderCalendarSyncService {
         type: 'vaccination-reminder',
         dog_id: dog.id,
         dog_name: dog.name,
-        notes: `Reminder to schedule vaccination for ${dog.name} in 2 weeks`
+        notes: `Reminder to schedule vaccination for ${dog.name} in 2 weeks`,
+        user_id: userId
       };
 
       if (existingReminders && existingReminders.length > 0) {
@@ -255,6 +280,16 @@ export class ReminderCalendarSyncService {
         console.log('Missing required heat data for events:', heat);
         return false;
       }
+      
+      // Get current user ID
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !authData.user) {
+        console.error('Error getting user for calendar events:', authError);
+        return false;
+      }
+      
+      const userId = authData.user.id;
 
       const eventId = `event-heat-${heat.dogId}-${heat.date.getTime()}`;
       
@@ -272,7 +307,8 @@ export class ReminderCalendarSyncService {
         type: 'heat',
         dog_id: heat.dogId,
         dog_name: heat.dogName,
-        notes: `Expected heat cycle for ${heat.dogName}`
+        notes: `Expected heat cycle for ${heat.dogName}`,
+        user_id: userId
       };
 
       // If event exists, update it
@@ -315,7 +351,8 @@ export class ReminderCalendarSyncService {
         type: 'heat-reminder',
         dog_id: heat.dogId,
         dog_name: heat.dogName,
-        notes: `Reminder about ${heat.dogName}'s upcoming heat cycle in 2 weeks`
+        notes: `Reminder about ${heat.dogName}'s upcoming heat cycle in 2 weeks`,
+        user_id: userId
       };
 
       if (existingReminders && existingReminders.length > 0) {
