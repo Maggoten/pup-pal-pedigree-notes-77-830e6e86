@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { add, format, isWithinInterval } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
-import { EventFormValues } from '@/components/calendar/EventForm';
+import { AddEventFormValues } from '@/components/calendar/types';
 
 const useCalendarEvents = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -21,7 +22,7 @@ const useCalendarEvents = () => {
     localStorage.setItem('calendarEvents', JSON.stringify(events));
   }, [events]);
 
-  const addEvent = (eventData: EventFormValues) => {
+  const addEvent = (eventData: AddEventFormValues) => {
     const newEvent: CalendarEvent = {
       id: Date.now().toString(), // Generate a unique ID
       title: eventData.title,
@@ -37,7 +38,7 @@ const useCalendarEvents = () => {
     });
   };
 
-  const updateEvent = (eventId: string, updatedEventData: EventFormValues) => {
+  const updateEvent = (eventId: string, updatedEventData: AddEventFormValues) => {
     const updatedEvents = events.map(event => {
       if (event.id === eventId) {
         return {

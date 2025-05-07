@@ -1,4 +1,6 @@
 
+import React from 'react';
+
 export interface Reminder {
   id: string;
   title: string;
