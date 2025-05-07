@@ -102,51 +102,35 @@ const PregnancyDetails = () => {
       description="Track pregnancy progress and development"
       icon={<Heart className="h-6 w-6" />}
     >
-      {/* Redesigned button layout for better mobile usability */}
-      <div className="flex flex-col gap-4 mb-6">
-        {/* Pregnancy selection dropdown - moved to top */}
-        <div className={`${isMobile ? 'w-full' : 'self-end'}`}>
+      {/* Updated vertically stacked action section */}
+      <div className="flex flex-col gap-4 mb-6 max-w-xs">
+        {/* 1. Add Pregnancy button (primary action) */}
+        <Button 
+          onClick={handleAddPregnancyClick} 
+          variant="default"
+          className="flex items-center gap-2 w-full justify-center py-3"
+        >
+          <Plus className="h-4 w-4" />
+          Add Pregnancy
+        </Button>
+        
+        {/* 2. Manage Pregnancy button (secondary action) */}
+        <Button 
+          onClick={handleManagePregnancyClick} 
+          variant="outline"
+          className="flex items-center gap-2 w-full justify-center py-3"
+        >
+          <Settings className="h-4 w-4" />
+          Manage Pregnancy
+        </Button>
+        
+        {/* 3. Pregnancy selection dropdown */}
+        <div className="w-full">
           <PregnancyDropdownSelector 
             pregnancies={activePregnancies} 
             currentPregnancyId={pregnancy.id}
-            fullWidth={isMobile}
+            fullWidth={true}
           />
-        </div>
-        
-        {/* Add Pregnancy - primary action on its own row */}
-        <div className={`${isMobile ? 'w-full' : 'self-end'}`}>
-          <Button 
-            onClick={handleAddPregnancyClick} 
-            variant="default"
-            className={`flex items-center gap-2 ${isMobile ? 'w-full justify-center py-3' : ''}`}
-          >
-            <Plus className="h-4 w-4" />
-            Add Pregnancy
-          </Button>
-        </div>
-        
-        {/* Manage Pregnancy - secondary action */}
-        <div className={`${isMobile ? 'w-full' : 'self-end'}`}>
-          {isMobile ? (
-            <Button 
-              onClick={handleManagePregnancyClick} 
-              variant="outline"
-              size="icon"
-              className="w-full flex items-center justify-center gap-2 py-3"
-            >
-              <Settings className="h-5 w-5" />
-              <span>Manage Pregnancy</span>
-            </Button>
-          ) : (
-            <Button 
-              onClick={handleManagePregnancyClick} 
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Settings className="h-4 w-4" />
-              Manage Pregnancy
-            </Button>
-          )}
         </div>
       </div>
 
