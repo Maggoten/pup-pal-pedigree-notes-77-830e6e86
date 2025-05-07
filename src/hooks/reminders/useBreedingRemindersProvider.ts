@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Reminder, CustomReminderInput } from '@/types/reminders';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,9 +13,16 @@ import {
 import { generateDogReminders } from '@/services/reminders/DogReminderService';
 import { generateLitterReminders } from '@/services/reminders/LitterReminderService';
 import { generateGeneralReminders } from '@/services/reminders/GeneralReminderService';
+import { 
+  generatePlannedHeatReminders, 
+  generateEnhancedBirthdayReminders, 
+  generateVaccinationReminders,
+  mergeReminders 
+} from '@/services/reminders/AutoRemindersService';
 import { useSortedReminders } from './useSortedReminders';
 import { toast } from '@/components/ui/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { plannedLittersService } from '@/services/PlannedLitterService';
 
 // Add device detection
 const isMobileDevice = () => {
@@ -40,6 +48,23 @@ export const useBreedingRemindersProvider = () => {
       console.log("[Reminders Debug] Migration completed.");
     }
   }, [hasMigrated, user]);
+
+  // Add a query to get planned litters for automatic reminders
+  const { data: plannedLitters = [] } = useQuery({
+    queryKey: ['planned-litters', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      console.log(`[Reminders Debug] Fetching planned litters for reminders`);
+      try {
+        return await plannedLittersService.loadPlannedLitters();
+      } catch (error) {
+        console.error(`[Reminders Debug] Error loading planned litters:`, error);
+        return [];
+      }
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+  });
   
   // Use React Query for data fetching with proper caching
   const { 
@@ -47,7 +72,7 @@ export const useBreedingRemindersProvider = () => {
     isLoading, 
     error: hasError 
   } = useQuery({
-    queryKey: ['reminders', user?.id, dogs.length],
+    queryKey: ['reminders', user?.id, dogs.length, plannedLitters.length],
     queryFn: async () => {
       if (!user) {
         console.log(`[Reminders Debug] No user available, skipping reminders fetch`);
@@ -56,6 +81,7 @@ export const useBreedingRemindersProvider = () => {
       
       console.log(`[Reminders Debug] Fetching reminders for user: ${user.id} on ${deviceType}`);
       console.log(`[Reminders Debug] Available dogs for reminders: ${dogs.length}`);
+      console.log(`[Reminders Debug] Available planned litters: ${plannedLitters.length}`);
       
       // Ensure migration happens before fetching
       await migrateRemindersIfNeeded();
@@ -73,8 +99,8 @@ export const useBreedingRemindersProvider = () => {
       const userDogs = dogs.filter(dog => dog.owner_id === user.id);
       console.log(`[Reminders Debug] Found ${userDogs.length} dogs belonging to user ${user.id}`);
       
-      if (userDogs.length === 0) {
-        console.log(`[Reminders Debug] No user dogs available, showing only custom reminders`);
+      if (userDogs.length === 0 && plannedLitters.length === 0) {
+        console.log(`[Reminders Debug] No user data available, showing only custom reminders`);
         return supabaseReminders;
       }
       
@@ -92,8 +118,30 @@ export const useBreedingRemindersProvider = () => {
         const generalReminders = generateGeneralReminders(userDogs);
         console.log(`[Reminders Debug] Generated ${generalReminders.length} general reminders`);
         
-        // Return all reminders at once
-        const allReminders = [...supabaseReminders, ...dogReminders, ...litterReminders, ...generalReminders];
+        // Generate the new automatic reminders
+        console.log(`[Reminders Debug] Generating planned heat reminders`);
+        const plannedHeatReminders = generatePlannedHeatReminders(plannedLitters);
+        console.log(`[Reminders Debug] Generated ${plannedHeatReminders.length} planned heat reminders`);
+        
+        console.log(`[Reminders Debug] Generating enhanced birthday reminders`);
+        const birthdayReminders = generateEnhancedBirthdayReminders(userDogs);
+        console.log(`[Reminders Debug] Generated ${birthdayReminders.length} birthday reminders`);
+        
+        console.log(`[Reminders Debug] Generating vaccination reminders`);
+        const vaccinationReminders = generateVaccinationReminders(userDogs);
+        console.log(`[Reminders Debug] Generated ${vaccinationReminders.length} vaccination reminders`);
+        
+        // Use our mergeReminders function to combine all reminders without duplicates
+        const allReminders = mergeReminders(
+          supabaseReminders,
+          dogReminders,
+          litterReminders,
+          generalReminders,
+          plannedHeatReminders,
+          birthdayReminders,
+          vaccinationReminders
+        );
+        
         console.log(`[Reminders Debug] Total: ${allReminders.length} reminders loaded`);
         
         return allReminders;

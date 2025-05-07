@@ -37,7 +37,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
           icon: createPawPrintIcon("rose-500"),
           dueDate: nextHeatDate,
           priority: 'high',
-          type: 'breeding', // Changed from 'heat' to 'breeding'
+          type: 'breeding', 
           relatedId: dog.id
         });
         console.log(`Created heat reminder for dog ${dog.name}`);
@@ -66,7 +66,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
           icon: createCalendarClockIcon("amber-500"),
           dueDate: nextVaccination,
           priority: isOverdue ? 'high' : 'medium',
-          type: 'health', // Changed from 'vaccination' to 'health'
+          type: 'health', 
           relatedId: dog.id
         });
         console.log(`Created vaccination reminder for dog ${dog.name}`);
@@ -106,7 +106,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
           icon: createPawPrintIcon("blue-500"),
           dueDate: nextBirthday,
           priority: 'low',
-          type: 'breeding', // Changed from 'birthday' to 'breeding'
+          type: 'breeding',
           relatedId: dog.id
         });
         console.log(`Created birthday reminder for dog ${dog.name}`);

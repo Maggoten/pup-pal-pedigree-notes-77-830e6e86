@@ -1,35 +1,16 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
-import { Dog } from '@/types/dogs';
 
-export const HeatService = {
+export class HeatService {
   /**
-   * Delete old heat entries (older than 30 days) from the database
+   * Deletes a specific heat entry from a dog's heat history
+   * @param dogId The ID of the dog
+   * @param heatIndex The index of the heat entry in the dog's heatHistory array
+   * @returns A boolean indicating whether the operation was successful
    */
-  async deleteOldHeatEntries(): Promise<void> {
+  static async deleteHeatEntry(dogId: string, heatIndex: number): Promise<boolean> {
     try {
-      console.log('Running function to delete old heat entries...');
-      const { data, error } = await supabase.rpc('delete_old_heat_entries');
-      
-      if (error) {
-        console.error('Error deleting old heat entries:', error);
-      } else {
-        console.log('Successfully cleaned up old heat entries');
-      }
-    } catch (err) {
-      console.error('Exception in deleteOldHeatEntries:', err);
-    }
-  },
-
-  /**
-   * Delete a specific heat entry from a dog
-   */
-  async deleteHeatEntry(dogId: string, heatIndex: number): Promise<boolean> {
-    try {
-      console.log(`Deleting heat at index ${heatIndex} for dog ${dogId}`);
-      
-      // First, get the current dog data
+      // First, fetch the current dog data
       const { data: dog, error: fetchError } = await supabase
         .from('dogs')
         .select('heatHistory')
@@ -37,36 +18,37 @@ export const HeatService = {
         .single();
       
       if (fetchError || !dog) {
-        console.error('Error fetching dog:', fetchError);
+        console.error('Error fetching dog heat history:', fetchError);
         return false;
       }
       
-      // Get the current heat history and remove the specified index
-      const heatHistory = Array.isArray(dog.heatHistory) ? [...dog.heatHistory] : [];
+      // Make a copy of the heat history
+      const heatHistory = [...(dog.heatHistory || [])];
+      
+      // Validate the index
       if (heatIndex < 0 || heatIndex >= heatHistory.length) {
         console.error('Invalid heat index:', heatIndex);
         return false;
       }
       
-      // Remove the entry at the specified index
+      // Remove the specified heat entry
       heatHistory.splice(heatIndex, 1);
       
-      // Update the dog record with the modified heat history
+      // Update the dog with the modified heat history
       const { error: updateError } = await supabase
         .from('dogs')
         .update({ heatHistory })
         .eq('id', dogId);
       
       if (updateError) {
-        console.error('Error updating heat history:', updateError);
+        console.error('Error updating dog heat history:', updateError);
         return false;
       }
       
-      console.log('Successfully deleted heat entry');
       return true;
-    } catch (err) {
-      console.error('Exception in deleteHeatEntry:', err);
+    } catch (error) {
+      console.error('Unexpected error in deleteHeatEntry:', error);
       return false;
     }
   }
-};
+}

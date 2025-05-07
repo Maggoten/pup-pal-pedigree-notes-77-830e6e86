@@ -1,43 +1,46 @@
 
-import { addDays } from 'date-fns';
-import { UpcomingHeat } from '@/types/reminders';
 import { Dog } from '@/types/dogs';
+import { UpcomingHeat } from '@/types/reminders';
+import { addDays, parseISO } from 'date-fns';
 
+/**
+ * Calculate upcoming heats based on dogs' heat histories
+ */
 export const calculateUpcomingHeats = (dogs: Dog[]): UpcomingHeat[] => {
-  const femaleDogs = dogs.filter(dog => dog.gender === 'female');
-  
   const upcomingHeats: UpcomingHeat[] = [];
+  const today = new Date();
   
-  for (const dog of femaleDogs) {
-    if (!dog.heatHistory || !Array.isArray(dog.heatHistory) || dog.heatHistory.length === 0) {
-      continue;
-    }
-    
-    // Get the most recent heat date
-    const sortedHeats = [...dog.heatHistory].sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      return dateB.getTime() - dateA.getTime();
-    });
-    
-    const latestHeat = sortedHeats[0];
-    const latestHeatDate = new Date(latestHeat.date);
-    
-    // Calculate next heat date using the dog's heat interval (in days) or a default of 180 days
-    const heatInterval = dog.heatInterval || 180;
-    const nextHeatDate = addDays(latestHeatDate, heatInterval);
-    
-    // Only include heats that are in the future
-    if (nextHeatDate > new Date()) {
-      upcomingHeats.push({
-        dogId: dog.id,
-        dogName: dog.name,
-        date: nextHeatDate,
-        heatIndex: dog.heatHistory.findIndex(heat => heat.date === latestHeat.date)
-      });
-    }
-  }
+  // Filter for female dogs with heat history
+  const femaleDogs = dogs.filter(dog => 
+    dog.gender === 'female' && 
+    dog.heatHistory && 
+    dog.heatHistory.length > 0
+  );
   
-  // Sort by date (earliest first)
+  femaleDogs.forEach(dog => {
+    // Sort heat history by date (most recent first)
+    const sortedHeatDates = [...dog.heatHistory].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    if (sortedHeatDates.length > 0) {
+      const lastHeatDate = parseISO(sortedHeatDates[0].date);
+      // Use dog's heat interval or default to 180 days (6 months)
+      const intervalDays = dog.heatInterval || 180;
+      const nextHeatDate = addDays(lastHeatDate, intervalDays);
+      
+      // Only include if the next heat date is in the future
+      if (nextHeatDate > today) {
+        upcomingHeats.push({
+          dogId: dog.id,
+          dogName: dog.name,
+          date: nextHeatDate,
+          heatIndex: dog.heatHistory.findIndex(h => h.date === sortedHeatDates[0].date) // Store the index for deletion
+        });
+      }
+    }
+  });
+  
+  // Sort by date (closest first)
   return upcomingHeats.sort((a, b) => a.date.getTime() - b.date.getTime());
 };
