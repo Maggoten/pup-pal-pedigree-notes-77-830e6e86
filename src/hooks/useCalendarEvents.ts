@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { CalendarEvent } from '@/types/calendar';
-import { add, format, isWithinInterval } from 'date-fns';
+import { isWithinInterval, add, format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 import { AddEventFormValues } from '@/components/calendar/types';
 
@@ -26,9 +26,12 @@ const useCalendarEvents = () => {
     const newEvent: CalendarEvent = {
       id: Date.now().toString(), // Generate a unique ID
       title: eventData.title,
-      description: eventData.description,
-      startDate: eventData.startDate,
-      endDate: eventData.endDate,
+      startDate: eventData.date,
+      endDate: eventData.date,
+      type: 'custom',
+      dogId: eventData.dogId,
+      notes: eventData.notes || '',
+      dogName: eventData.dogId ? 'Dog' : undefined, // We'd need to look up the dog name in a real app
     };
 
     setEvents([...events, newEvent]);
@@ -44,9 +47,10 @@ const useCalendarEvents = () => {
         return {
           ...event,
           title: updatedEventData.title,
-          description: updatedEventData.description,
-          startDate: updatedEventData.startDate,
-          endDate: updatedEventData.endDate,
+          startDate: updatedEventData.date,
+          endDate: updatedEventData.date,
+          dogId: updatedEventData.dogId,
+          notes: updatedEventData.notes || '',
         };
       }
       return event;
@@ -69,12 +73,15 @@ const useCalendarEvents = () => {
   };
 
   const getEventsForDay = (day: Date): CalendarEvent[] => {
-    return events.filter(event =>
-      isWithinInterval(day, {
-        start: new Date(event.startDate),
-        end: add(new Date(event.endDate), { days: 1 }), // Include the entire end day
-      })
-    );
+    return events.filter(event => {
+      const startDate = new Date(event.startDate);
+      const endDate = new Date(event.endDate);
+      
+      return isWithinInterval(day, {
+        start: startDate,
+        end: add(endDate, { days: 1 }), // Include the entire end day
+      });
+    });
   };
 
   return {

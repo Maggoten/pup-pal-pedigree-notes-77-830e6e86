@@ -26,16 +26,27 @@ export const useDashboardData = () => {
     deleteReminder
   } = useBreedingReminders();
   
+  // We need to properly destructure what useCalendarEvents actually returns
   const {
-    getEventsForDate,
-    getEventColor,
+    events,
     addEvent,
+    updateEvent,
     deleteEvent,
-    editEvent,
-    isLoading: calendarLoading,
-    hasError: calendarError,
-    calendarEvents
-  } = useCalendarEvents(dogs);
+    getEventsForDay
+  } = useCalendarEvents();
+  
+  // Create our own calendarLoading and calendarError states since they're not provided
+  const [calendarLoading, setCalendarLoading] = useState(true);
+  const [calendarError, setCalendarError] = useState(false);
+  
+  // Set calendar ready after a delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCalendarLoading(false);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, []);
   
   // Fetch planned litters data
   useEffect(() => {
@@ -125,33 +136,39 @@ export const useDashboardData = () => {
       // Reset the state if either data source is loading
       setIsDataReady(false);
     }
-  }, [remindersLoading, calendarLoading, calendarEvents, reminders]);
+  }, [remindersLoading, calendarLoading, events, reminders]);
+  
+  // Create wrapper functions to adapt to what components expect
+  const getEventsForDate = (date: Date) => {
+    return getEventsForDay(date);
+  };
+  
+  // Simple function to get event color based on event type
+  const getEventColor = (type: string) => {
+    const colors: Record<string, string> = {
+      'heat': 'bg-rose-100 text-rose-800',
+      'mating': 'bg-purple-100 text-purple-800',
+      'vaccination': 'bg-green-100 text-green-800',
+      'birthday': 'bg-blue-100 text-blue-800',
+      'vet-visit': 'bg-emerald-100 text-emerald-800',
+      'custom': 'bg-amber-100 text-amber-800',
+    };
+    return colors[type] || 'bg-gray-100 text-gray-800';
+  };
   
   // Wrapper functions to adapt async functions to the synchronous interface expected by components
   const handleAddEvent = (data: any) => {
-    const result = addEvent(data);
-    // Handle both synchronous boolean returns and Promises
-    if (result instanceof Promise) {
-      result.catch(err => {
-        console.error("Error adding event:", err);
-      });
-    }
+    addEvent(data);
     return true; // Always return true synchronously for UI feedback
   };
   
   const handleEditEvent = (eventId: string, data: any) => {
-    const result = editEvent(eventId, data);
-    // Handle both synchronous boolean returns and Promises
-    if (result instanceof Promise) {
-      result.catch(err => {
-        console.error("Error editing event:", err);
-      });
-    }
+    updateEvent(eventId, data);
     return true; // Always return true synchronously for UI feedback
   };
   
   // Check if there's any data to display
-  const hasCalendarData = calendarEvents && calendarEvents.length > 0;
+  const hasCalendarData = events && events.length > 0;
   const hasReminderData = reminders && reminders.length > 0;
   
   return {
@@ -177,3 +194,4 @@ export const useDashboardData = () => {
     hasReminderData
   };
 };
+

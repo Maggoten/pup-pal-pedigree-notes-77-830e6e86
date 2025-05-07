@@ -1,32 +1,52 @@
 
 import React from 'react';
-import { Separator } from '@/components/ui/separator';
-import { UpcomingHeat, RecentMating } from '@/types/reminders';
+import { UpcomingHeat } from '@/types/reminders';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import UpcomingHeatCard from './UpcomingHeatCard';
-import RecentMatingCard from './RecentMatingCard';
+import { RecentMating } from '@/types/reminders';
+import RecentMatingsCard from './RecentMatingsCard';
+import MatingTipsCard from './MatingTipsCard';
 
 interface MatingSectionProps {
   upcomingHeats: UpcomingHeat[];
   recentMatings: RecentMating[];
-  onHeatDeleted?: () => void;
 }
 
-const MatingSection: React.FC<MatingSectionProps> = ({ 
-  upcomingHeats, 
-  recentMatings,
-  onHeatDeleted
-}) => {
+const MatingSection: React.FC<MatingSectionProps> = ({ upcomingHeats, recentMatings }) => {
   return (
-    <section className="mt-12">
-      <h2 className="text-2xl font-semibold mb-2">Heat Cycles & Recent Matings</h2>
-      <p className="text-muted-foreground mb-6">
-        Track upcoming heat cycles and manage recent matings
-      </p>
-      <Separator className="mb-6" />
+    <section className="mt-6">
+      <h2 className="text-xl font-semibold mb-4">Mating Management</h2>
       
-      <div className="grid gap-6 md:grid-cols-2">
-        <UpcomingHeatCard upcomingHeats={upcomingHeats} onHeatDeleted={onHeatDeleted} />
-        <RecentMatingCard recentMatings={recentMatings} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Upcoming Heats Card */}
+        <div>
+          {upcomingHeats.length > 0 ? (
+            <div className="grid gap-3">
+              {upcomingHeats.map((heat, index) => (
+                <UpcomingHeatCard key={`${heat.dogId}-${index}`} heat={heat} />
+              ))}
+            </div>
+          ) : (
+            <Card className="bg-white border-warmbeige-200">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold">Upcoming Heats</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500">No upcoming heats detected.</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+        
+        {/* Recent Matings Card */}
+        <div>
+          <RecentMatingsCard recentMatings={recentMatings} />
+        </div>
+        
+        {/* Mating Tips Card */}
+        <div>
+          <MatingTipsCard />
+        </div>
       </div>
     </section>
   );
