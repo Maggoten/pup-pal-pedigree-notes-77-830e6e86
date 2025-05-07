@@ -102,9 +102,19 @@ const PregnancyDetails = () => {
       description="Track pregnancy progress and development"
       icon={<Heart className="h-6 w-6" />}
     >
-      {/* Add Pregnancy - primary CTA now at the top */}
-      <div className="mb-6">
-        <div className={`${isMobile ? 'w-full' : 'max-w-[200px]'}`}>
+      {/* Redesigned button layout for better mobile usability */}
+      <div className="flex flex-col gap-4 mb-6">
+        {/* Pregnancy selection dropdown - moved to top */}
+        <div className={`${isMobile ? 'w-full' : 'self-end'}`}>
+          <PregnancyDropdownSelector 
+            pregnancies={activePregnancies} 
+            currentPregnancyId={pregnancy.id}
+            fullWidth={isMobile}
+          />
+        </div>
+        
+        {/* Add Pregnancy - primary action on its own row */}
+        <div className={`${isMobile ? 'w-full' : 'self-end'}`}>
           <Button 
             onClick={handleAddPregnancyClick} 
             variant="default"
@@ -114,37 +124,39 @@ const PregnancyDetails = () => {
             Add Pregnancy
           </Button>
         </div>
+        
+        {/* Manage Pregnancy - secondary action */}
+        <div className={`${isMobile ? 'w-full' : 'self-end'}`}>
+          {isMobile ? (
+            <Button 
+              onClick={handleManagePregnancyClick} 
+              variant="outline"
+              size="icon"
+              className="w-full flex items-center justify-center gap-2 py-3"
+            >
+              <Settings className="h-5 w-5" />
+              <span>Manage Pregnancy</span>
+            </Button>
+          ) : (
+            <Button 
+              onClick={handleManagePregnancyClick} 
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              Manage Pregnancy
+            </Button>
+          )}
+        </div>
       </div>
 
-      <div className="space-y-8 relative">
-        {/* Settings icon button positioned absolutely in the hero section */}
-        <div className="absolute top-2 right-2 z-10">
-          <Button
-            onClick={handleManagePregnancyClick}
-            variant="ghost"
-            size="icon"
-            className="rounded-full hover:bg-accent/20"
-            aria-label="Manage Pregnancy"
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
-        </div>
-        
+      <div className="space-y-8">
         {/* Hero Section with Pregnancy Summary Cards */}
         <PregnancySummaryCards
           matingDate={pregnancy.matingDate}
           expectedDueDate={pregnancy.expectedDueDate}
           daysLeft={pregnancy.daysLeft}
         />
-        
-        {/* Pregnancy dropdown below hero section */}
-        <div className={`${isMobile ? 'w-full' : 'max-w-[250px]'}`}>
-          <PregnancyDropdownSelector 
-            pregnancies={activePregnancies} 
-            currentPregnancyId={pregnancy.id}
-            fullWidth={isMobile}
-          />
-        </div>
         
         {/* Full Width Pregnancy Journey Tabs */}
         <div className="w-full">
