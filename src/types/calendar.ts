@@ -8,4 +8,5 @@ export interface CalendarEvent {
   type?: string;
   dogId?: string;
   dogName?: string;
+  notes?: string; // Add the missing 'notes' property
 }

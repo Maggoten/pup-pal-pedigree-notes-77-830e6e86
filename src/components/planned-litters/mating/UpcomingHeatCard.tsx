@@ -19,14 +19,18 @@ import { toast } from '@/hooks/use-toast';
 import { HeatService } from '@/services/HeatService';
 
 interface UpcomingHeatCardProps {
-  upcomingHeats: UpcomingHeat[];
+  upcomingHeats?: UpcomingHeat[];
+  heat?: UpcomingHeat; // Add this prop to match how it's used in MatingSection
   onHeatDeleted?: () => void;
 }
 
-const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ upcomingHeats, onHeatDeleted }) => {
+const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ upcomingHeats = [], heat, onHeatDeleted }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [heatToDelete, setHeatToDelete] = useState<{dogId: string, index: number} | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // If a single heat is provided, use that, otherwise use upcomingHeats array
+  const heatsToDisplay = heat ? [heat] : upcomingHeats;
 
   const handleDeleteClick = (dogId: string, heatIndex: number) => {
     setHeatToDelete({ dogId, index: heatIndex });
@@ -80,9 +84,9 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ upcomingHeats, onHe
           <CardDescription>Track your bitches' heat cycles</CardDescription>
         </CardHeader>
         <CardContent>
-          {upcomingHeats.length > 0 ? (
+          {heatsToDisplay.length > 0 ? (
             <div className="space-y-3">
-              {upcomingHeats.map((heat, index) => (
+              {heatsToDisplay.map((heat, index) => (
                 <div
                   key={`${heat.dogId}-${index}`}
                   className="flex items-start gap-3 p-3 rounded-lg border bg-warmbeige-100/80 border-warmbeige-200"

@@ -10,9 +10,10 @@ import MatingTipsCard from './MatingTipsCard';
 interface MatingSectionProps {
   upcomingHeats: UpcomingHeat[];
   recentMatings: RecentMating[];
+  onHeatDeleted?: () => void;
 }
 
-const MatingSection: React.FC<MatingSectionProps> = ({ upcomingHeats, recentMatings }) => {
+const MatingSection: React.FC<MatingSectionProps> = ({ upcomingHeats, recentMatings, onHeatDeleted }) => {
   return (
     <section className="mt-6">
       <h2 className="text-xl font-semibold mb-4">Mating Management</h2>
