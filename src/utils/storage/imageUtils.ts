@@ -4,6 +4,12 @@ import { isSafari } from '@/utils/storage/config';
 
 // Helper function to compress images for mobile uploads - improved for Safari
 export async function compressImageForUpload(file: File, maxSizeKB = 800): Promise<File> {
+  // Skip compression for HEIC files in Safari as it often fails
+  if (isSafari() && (file.name.toLowerCase().endsWith('.heic') || file.type.includes('heic'))) {
+    console.log('Skipping compression for HEIC file in Safari');
+    return file;
+  }
+  
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -28,7 +34,8 @@ export async function compressImageForUpload(file: File, maxSizeKB = 800): Promi
       
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        reject(new Error('Could not get canvas context'));
+        console.warn('Could not get canvas context, skipping compression');
+        resolve(file);
         return;
       }
       
@@ -36,17 +43,16 @@ export async function compressImageForUpload(file: File, maxSizeKB = 800): Promi
       ctx.imageSmoothingQuality = 'medium'; // Compatible with Safari
       ctx.drawImage(img, 0, 0, width, height);
       
-      // Start with lower quality for Safari
-      let quality = isSafari() ? 0.7 : 0.9;
+      // Start with higher quality for Safari to avoid over-compression
+      let quality = isSafari() ? 0.85 : 0.9;
       let compressedFile: File;
-      let dataUrl: string;
       
       // Try progressively lower qualities until we're under target size
       const tryCompress = () => {
         try {
-          // Safari has issues with toDataURL at high quality, so we use a safer format
-          const imageFormat = isSafari() ? 'image/jpeg' : 'image/jpeg';
-          dataUrl = canvas.toDataURL(imageFormat, quality);
+          // Safari has issues with toDataURL, so we use a safer format
+          const imageFormat = 'image/jpeg';
+          const dataUrl = canvas.toDataURL(imageFormat, quality);
           
           const binaryData = atob(dataUrl.split(',')[1]);
           const array = new Uint8Array(binaryData.length);
@@ -64,11 +70,18 @@ export async function compressImageForUpload(file: File, maxSizeKB = 800): Promi
           const currentSizeKB = compressedFile.size / 1024;
           console.log(`Compressed to ${currentSizeKB.toFixed(2)}KB with quality ${quality}`);
           
-          if (currentSizeKB > maxSizeKB && quality > 0.2) {
-            quality -= 0.1;
+          // Check if we should recompress with lower quality
+          if (currentSizeKB > maxSizeKB && quality > 0.3) {
+            // Use smaller quality reduction steps in Safari
+            quality -= isSafari() ? 0.05 : 0.1;
             console.log(`Still too large, retrying with quality ${quality}`);
             tryCompress();
+          } else if (compressedFile.size >= file.size * 0.95) {
+            // If compression didn't reduce size meaningfully, use original
+            console.log('Compression ineffective, using original file');
+            resolve(file);
           } else {
+            console.log(`Final compression: ${(compressedFile.size / 1024).toFixed(2)}KB, original: ${(file.size / 1024).toFixed(2)}KB`);
             resolve(compressedFile);
           }
         } catch (error) {
@@ -94,14 +107,24 @@ export async function compressImageForUpload(file: File, maxSizeKB = 800): Promi
     
     // Cleanup object URL after loading or on error
     const cleanup = () => URL.revokeObjectURL(objectUrl);
-    img.onload = () => {
+    
+    // Override onload and onerror with versions that clean up
+    const originalOnload = img.onload;
+    img.onload = function() {
       cleanup();
-      img.onload = null;
+      if (originalOnload) {
+        // @ts-ignore - we know originalOnload is a function
+        originalOnload.call(this);
+      }
     };
-    img.onerror = () => {
+    
+    const originalOnerror = img.onerror;
+    img.onerror = function() {
       cleanup();
-      console.error('Failed to load image for compression');
-      resolve(file);
+      if (originalOnerror) {
+        // @ts-ignore - we know originalOnerror is a function
+        originalOnerror.call(this);
+      }
     };
   });
 }
@@ -141,16 +164,32 @@ export const prefetchImage = async (url: string): Promise<void> => {
 
 // Function to handle image compression based on device type - improved for Safari
 export const processImageForUpload = async (file: File): Promise<File> => {
+  const isImageType = file.type.startsWith('image/') || 
+                     file.name.toLowerCase().match(/\.(jpe?g|png|webp|heic|heif)$/i);
+  
   // For mobile devices or Safari, compress images before upload if it's an image file
-  if ((isMobileDevice() || isSafari()) && file.type.startsWith('image/')) {
+  if ((isMobileDevice() || isSafari()) && isImageType) {
     try {
       console.log(`${isSafari() ? 'Safari' : 'Mobile'} device detected, compressing image before upload`);
       
-      // Use a more aggressive compression for Safari
-      const maxSizeKB = isSafari() ? 600 : 800;
+      // Skip compression for certain file types on Safari
+      if (isSafari() && file.name.toLowerCase().endsWith('.heic')) {
+        console.log('Skipping compression for HEIC file on Safari');
+        return file;
+      }
+      
+      // Use a more moderate compression for Safari
+      const maxSizeKB = isSafari() ? 700 : 800;
       const compressedFile = await compressImageForUpload(file, maxSizeKB);
       
-      console.log(`Compressed image from ${file.size} to ${compressedFile.size} bytes`);
+      console.log(`Compressed image from ${file.size} to ${compressedFile.size} bytes (${Math.round(compressedFile.size / file.size * 100)}%)`);
+      
+      // If compression actually made the file larger (happens sometimes with Safari), use original
+      if (compressedFile.size > file.size) {
+        console.log('Compression increased file size, using original file');
+        return file;
+      }
+      
       return compressedFile;
     } catch (compressError) {
       console.warn('Image compression failed, using original file:', compressError);

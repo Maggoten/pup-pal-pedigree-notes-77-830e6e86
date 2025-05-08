@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { UploadIcon, XIcon, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,6 +21,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 }) => {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isInitialRender, setIsInitialRender] = useState(true);
   
   const PLACEHOLDER_IMAGE_PATH = '/placeholder.svg';
   const isPlaceholder = !currentImage || currentImage === PLACEHOLDER_IMAGE_PATH;
@@ -40,6 +41,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       currentImage: currentImage || 'none',
       browser: isSafariBrowser ? 'Safari' : 'Other'
     });
+    
+    // Set initial render flag to false after first render
+    setIsInitialRender(false);
   }, [user, currentImage, isSafariBrowser]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,11 +69,21 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       await uploadImage(file);
     } catch (error) {
       console.error('Image upload error:', error);
-      toast({
-        title: "Upload Failed",
-        description: "There was a problem uploading your image. Please try again.",
-        variant: "destructive"
-      });
+      
+      // Show more specific error messages based on browser
+      if (isSafariBrowser) {
+        toast({
+          title: "Safari Upload Issue",
+          description: "There was a problem uploading your image. Try using a smaller image or switch to Chrome.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Upload Failed",
+          description: "There was a problem uploading your image. Please try again.",
+          variant: "destructive"
+        });
+      }
     }
     
     if (fileInputRef.current) {

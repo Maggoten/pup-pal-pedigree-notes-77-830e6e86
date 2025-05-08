@@ -11,6 +11,8 @@ export const STORAGE_ERRORS = {
   REMOVE_FAILED: 'Failed to remove file',
   SAFARI_STORAGE_ERROR: 'Safari storage access error, trying alternative method',
   RETRY_EXCEEDED: 'Maximum retry attempts exceeded',
+  FILE_TOO_LARGE: (size: number) => `File size (${(size/1024/1024).toFixed(1)}MB) exceeds the maximum allowed`,
+  INVALID_FILE_TYPE: 'Invalid file type. Please upload an image file.'
 };
 
 // Safari detection utility
@@ -29,7 +31,22 @@ export const EXTENDED_MIME_TYPES = {
   JPEG: ['image/jpeg', 'image/jpg'],
   PNG: ['image/png'],
   WEBP: ['image/webp'],
-  HEIC: ['image/heic', 'image/heif'],
+  HEIC: ['image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence'],
   // Safari sometimes uses these generic types
-  GENERIC: ['application/octet-stream', 'image', 'image/generic'],
+  GENERIC: [
+    'application/octet-stream', 
+    'image', 
+    'image/generic', 
+    'binary/octet-stream',
+    ''  // Empty string is sometimes returned by Safari
+  ],
+};
+
+// Get supported image extensions
+export const SUPPORTED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
+
+// Check if a file is an image based on extension
+export const isImageByExtension = (fileName: string): boolean => {
+  const extension = fileName.split('.').pop()?.toLowerCase() || '';
+  return SUPPORTED_IMAGE_EXTENSIONS.includes(extension);
 };

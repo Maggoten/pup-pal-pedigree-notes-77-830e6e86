@@ -4,7 +4,7 @@ import { toast } from '@/components/ui/use-toast';
 import { isSafari } from '@/utils/storage/config';
 
 // Increase timeout for Safari 
-export const UPLOAD_TIMEOUT = isSafari() ? 45000 : 30000; // 45s for Safari, 30s for others
+export const UPLOAD_TIMEOUT = isSafari() ? 60000 : 45000; // 60s for Safari, 45s for others
 
 export const useUploadTimeout = (onTimeout: () => void) => {
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -20,13 +20,23 @@ export const useUploadTimeout = (onTimeout: () => void) => {
       
       // Customize the message for Safari
       const timeoutMessage = isSafari() 
-        ? "The upload took too long in Safari. Try a smaller image or switch to Chrome."
+        ? "The upload took too long in Safari. Try a smaller image (under 2MB) or switch to Chrome."
         : "The upload took too long. Please try again with a smaller file.";
       
       toast({
         title: "Upload timeout",
         description: timeoutMessage,
-        variant: "destructive"
+        variant: "destructive",
+        action: {
+          label: "Help",
+          onClick: () => {
+            toast({
+              title: "Image Upload Tips",
+              description: "For best results, try uploading images under 2MB. HEIC images from iPhones might cause issues - consider converting them to JPEG first.",
+              duration: 8000,
+            });
+          }
+        }
       });
     }, UPLOAD_TIMEOUT);
   };
@@ -34,6 +44,7 @@ export const useUploadTimeout = (onTimeout: () => void) => {
   const clearUploadTimeout = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+      timeoutRef.current = undefined;
     }
   };
 
