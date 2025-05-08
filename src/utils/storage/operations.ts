@@ -43,9 +43,15 @@ export const checkBucketExists = async (): Promise<boolean> => {
         console.error(`Bucket '${BUCKET_NAME}' check failed:`, result.error);
         // Log more details about the error for troubleshooting
         console.error('Error details:', {
-          message: isStorageError(result.error) ? result.error.message : 'Unknown error',
-          status: isStorageError(result.error) ? result.error.status : 'unknown',
-          details: isStorageError(result.error) ? result.error.details : 'none'
+          message: result.error && typeof result.error === 'object' && 'message' in result.error 
+            ? (result.error as any).message 
+            : 'Unknown error',
+          status: result.error && typeof result.error === 'object' && 'status' in result.error 
+            ? (result.error as any).status 
+            : 'unknown',
+          details: result.error && typeof result.error === 'object' && 'details' in result.error 
+            ? (result.error as any).details 
+            : 'none'
         });
         return false;
       }
@@ -77,9 +83,15 @@ const logUploadDetails = (fileName: string, file: File, response: any, startTime
     mobile: platform.mobile,
     success: !response.error,
     error: response.error ? {
-      message: isStorageError(response.error) ? response.error.message : 'Unknown error',
-      status: isStorageError(response.error) ? response.error.status : 'unknown',
-      details: isStorageError(response.error) ? response.error.details : 'none'
+      message: response.error && typeof response.error === 'object' && 'message' in response.error 
+        ? (response.error as any).message 
+        : 'Unknown error',
+      status: response.error && typeof response.error === 'object' && 'status' in response.error 
+        ? (response.error as any).status 
+        : 'unknown',
+      details: response.error && typeof response.error === 'object' && 'details' in response.error 
+        ? (response.error as any).details 
+        : 'none'
     } : null,
     response: response.data ? {
       path: response.data.path || 'unknown'
@@ -162,12 +174,19 @@ export const uploadToStorage = async (
         useBackoff: true,
         shouldRetry: (error) => {
           // More selective retry logic for different error types
-          if (isStorageError(error)) {
+          if (error && typeof error === 'object') {
             // Don't retry 413 (payload too large) errors
-            if (error.status === 413 || error.statusCode === 413) return false;
+            if (('status' in error && (error as any).status === 413) || 
+                ('statusCode' in error && (error as any).statusCode === 413)) {
+              return false;
+            }
             // Don't retry 400 errors that indicate malformed requests
-            if ((error.status === 400 || error.statusCode === 400) && 
-                error.message?.includes('Invalid')) return false;
+            if ((('status' in error && (error as any).status === 400) || 
+                 ('statusCode' in error && (error as any).statusCode === 400)) && 
+                 'message' in error && typeof (error as any).message === 'string' &&
+                 (error as any).message.includes('Invalid')) {
+              return false;
+            }
           }
           return true;
         },
