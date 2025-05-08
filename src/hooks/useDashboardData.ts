@@ -9,10 +9,12 @@ import { litterService } from '@/services/LitterService';
 import { getEventColor } from '@/services/CalendarEventService';
 
 export const useDashboardData = () => {
-  // State for controlled loading
+  // State for data tracking
   const [isDataReady, setIsDataReady] = useState<boolean>(false);
   const [plannedLittersData, setPlannedLittersData] = useState({ count: 0, nextDate: null as Date | null });
   const [recentLittersData, setRecentLittersData] = useState({ count: 0, latest: null as Date | null });
+  const [isLoadingPlannedLitters, setIsLoadingPlannedLitters] = useState<boolean>(true);
+  const [isLoadingRecentLitters, setIsLoadingRecentLitters] = useState<boolean>(true);
   
   // Centralized data fetching for calendar and reminders
   const { dogs } = useDogs();
@@ -27,11 +29,11 @@ export const useDashboardData = () => {
     deleteReminder
   } = useBreedingReminders();
   
-  // Use the new Supabase-based calendar hook instead of the localStorage-based hook
+  // Use the Supabase-based calendar hook
   const {
     events,
     isLoading: calendarLoading,
-    hasError: calendarError, // Now this is a boolean value
+    hasError: calendarError,
     addEvent,
     updateEvent: editEvent,
     deleteEvent,
@@ -42,6 +44,7 @@ export const useDashboardData = () => {
   useEffect(() => {
     const fetchPlannedLittersData = async () => {
       try {
+        setIsLoadingPlannedLitters(true);
         const plannedLitters = await plannedLittersService.loadPlannedLitters();
         
         // Sort planned litters by expected heat date to find the next one
@@ -61,6 +64,8 @@ export const useDashboardData = () => {
       } catch (error) {
         console.error('Error fetching planned litters:', error);
         setPlannedLittersData({ count: 0, nextDate: null });
+      } finally {
+        setIsLoadingPlannedLitters(false);
       }
     };
     
@@ -71,6 +76,7 @@ export const useDashboardData = () => {
   useEffect(() => {
     const fetchRecentLittersData = async () => {
       try {
+        setIsLoadingRecentLitters(true);
         // Get all litters
         const activeLitters = await litterService.getActiveLitters();
         const archivedLitters = await litterService.getArchivedLitters();
@@ -98,6 +104,8 @@ export const useDashboardData = () => {
       } catch (error) {
         console.error('Error fetching recent litters:', error);
         setRecentLittersData({ count: 0, latest: null });
+      } finally {
+        setIsLoadingRecentLitters(false);
       }
     };
     
@@ -112,21 +120,20 @@ export const useDashboardData = () => {
     };
   }, [reminders]);
   
-  // Controlled data loading with transition delay
+  // Update data ready state based on actual data loading states
   useEffect(() => {
-    if (!remindersLoading && !calendarLoading) {
-      // Set a moderate delay for stable transition
-      const timer = setTimeout(() => {
-        setIsDataReady(true);
-      }, 300);
+    const allDataLoaded = 
+      !remindersLoading && 
+      !calendarLoading && 
+      !isLoadingPlannedLitters && 
+      !isLoadingRecentLitters;
       
-      // Clear timeout on cleanup
-      return () => clearTimeout(timer);
+    if (allDataLoaded) {
+      setIsDataReady(true);
     } else {
-      // Reset the state if either data source is loading
       setIsDataReady(false);
     }
-  }, [remindersLoading, calendarLoading, events, reminders]);
+  }, [remindersLoading, calendarLoading, isLoadingPlannedLitters, isLoadingRecentLitters]);
   
   // Create wrapper functions to adapt to what components expect
   const getEventsForDate = (date: Date) => {
@@ -163,7 +170,7 @@ export const useDashboardData = () => {
     deleteEvent,
     handleEditEvent,
     calendarLoading,
-    calendarError, // Now a boolean
+    calendarError,
     plannedLittersData,
     recentLittersData,
     remindersSummary,

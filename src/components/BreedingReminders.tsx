@@ -38,16 +38,6 @@ const RemindersListSkeleton = () => (
 // Use memo to prevent unnecessary re-renders
 const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersData }) => {
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
-  const [componentsLoading, setComponentsLoading] = useState(true);
-  
-  // Effect to simulate the content loading (replacing Suspense behavior)
-  React.useEffect(() => {
-    // Small timeout to simulate dynamic import load time
-    const timer = setTimeout(() => {
-      setComponentsLoading(false);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
   
   // Use provided data or empty defaults
   const { 
@@ -122,7 +112,7 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0 flex flex-col overflow-hidden">
-          {isLoading || componentsLoading ? (
+          {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
               <span className="text-sm text-muted-foreground">Loading reminders...</span>
@@ -138,7 +128,7 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
           ) : (
             <>
               <div className="overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-                {componentsLoading ? <RemindersListSkeleton /> : (
+                {isLoading ? <RemindersListSkeleton /> : (
                   <RemindersList 
                     reminders={displayReminders} 
                     onComplete={handleMarkComplete} 

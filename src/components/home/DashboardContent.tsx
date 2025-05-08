@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddEventFormValues } from '@/components/calendar/types';
 
@@ -83,21 +83,10 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   calendarProps, 
   remindersProps 
 }) => {
-  const [componentsLoaded, setComponentsLoaded] = useState(false);
-  
-  // Effect to simulate the component loading (replacing Suspense behavior)
-  useEffect(() => {
-    if (isDataReady) {
-      // Small timeout to simulate dynamic import load time
-      const timer = setTimeout(() => {
-        setComponentsLoaded(true);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isDataReady]);
-  
-  const showComponents = isDataReady && componentsLoaded;
-  
+  const showCalendarSkeleton = !isDataReady || calendarProps.isLoading;
+  const showRemindersSkeleton = !isDataReady || remindersProps.isLoading;
+  const showStatsSkeleton = !isDataReady;
+
   return (
     <div className="space-y-12 pb-12">
       {/* Calendar and Reminders section */}
@@ -105,7 +94,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendar taking 2/3 of the width */}
           <div className="lg:col-span-2">
-            {!showComponents ? (
+            {showCalendarSkeleton ? (
               <CalendarSkeleton />
             ) : (
               <BreedingCalendar eventsData={calendarProps} />
@@ -114,7 +103,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
           
           {/* Reminders taking 1/3 of the width */}
           <div className="lg:col-span-1">
-            {!showComponents ? (
+            {showRemindersSkeleton ? (
               <RemindersSkeleton />
             ) : (
               <BreedingReminders remindersData={remindersProps} />
@@ -125,7 +114,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       
       {/* Annual Breeding Statistics in a separate section */}
       <section>
-        {!showComponents ? (
+        {showStatsSkeleton ? (
           <StatsSkeleton />
         ) : (
           <BreedingStats />
