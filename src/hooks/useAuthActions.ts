@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
@@ -129,19 +128,43 @@ export const useAuthActions = () => {
     }
   };
 
-  // Logout function with enhanced error handling and standardized redirection approach
+  // Enhanced logout function with improved storage cleanup and recovery mechanisms
   const logout = async (): Promise<void> => {
     setIsLoading(true);
     try {
       console.log('[Auth Action] Attempting logout');
+      
+      // First perform thorough storage cleanup before signout (helps with Safari issues)
+      clearAuthStorage();
       
       // Use global scope to sign out from all devices
       const { error } = await supabase.auth.signOut({ scope: 'global' });
       
       if (error) {
         console.error('[Auth Action] Logout error from Supabase:', error);
-        // If logout fails via API, force cleanup manually
-        clearAuthStorage();
+        
+        // If logout API fails, try directly removing session from all storage locations
+        try {
+          console.log('[Auth Action] Attempting direct session removal as fallback');
+          ['localStorage', 'sessionStorage'].forEach(storageType => {
+            try {
+              const storage = window[storageType as 'localStorage' | 'sessionStorage'];
+              if (storage) {
+                // Remove all Supabase related items
+                for (let i = 0; i < storage.length; i++) {
+                  const key = storage.key(i);
+                  if (key && (key.includes('supabase') || key.includes('sb-'))) {
+                    storage.removeItem(key);
+                  }
+                }
+              }
+            } catch (e) {
+              console.log(`[Auth Action] Error clearing ${storageType}:`, e);
+            }
+          });
+        } catch (e) {
+          console.error('[Auth Action] Error during fallback storage cleanup:', e);
+        }
       } else {
         console.log('[Auth Action] Logout successful via Supabase API');
       }

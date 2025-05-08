@@ -1,5 +1,5 @@
 
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { User } from '@/types/auth';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase, Profile } from '@/integrations/supabase/client';
@@ -19,6 +19,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // Track focus & visibility state
+  const [isActive, setIsActive] = useState(true);
+  const lastActiveTime = useRef(Date.now());
+  const sessionCheckInterval = useRef<NodeJS.Timeout | null>(null);
+  
   const { login, register, logout, getUserProfile } = useAuthActions();
 
   // Log device info immediately
@@ -28,6 +34,185 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                         navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other';
     console.log(`[Auth Debug] Device type: ${deviceType}, Browser: ${browserType}, User Agent: ${navigator.userAgent}`);
   }, []);
+  
+  // Helper to check if a session is expired or near expiration
+  const isSessionExpiredOrNearExpiry = useCallback((currentSession: Session | null): boolean => {
+    if (!currentSession || !currentSession.expires_at) return true;
+    
+    // Convert expires_at to milliseconds
+    const expiryTime = currentSession.expires_at * 1000;
+    const now = Date.now();
+    
+    // Check if expired or within 5 minutes of expiry
+    const fiveMinutesMs = 5 * 60 * 1000;
+    return now >= expiryTime - fiveMinutesMs;
+  }, []);
+  
+  // Function to refresh the session
+  const refreshSession = useCallback(async () => {
+    try {
+      console.log('[Auth Debug] Refreshing session...');
+      
+      // Check for existing session first
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error('[Auth Debug] Error getting session during refresh:', sessionError);
+        return false;
+      }
+      
+      if (!sessionData.session) {
+        console.log('[Auth Debug] No session to refresh');
+        return false;
+      }
+      
+      // Only refresh if needed
+      if (isSessionExpiredOrNearExpiry(sessionData.session)) {
+        console.log('[Auth Debug] Session needs refresh, refreshing...');
+        const { data, error } = await supabase.auth.refreshSession();
+        
+        if (error) {
+          console.error('[Auth Debug] Session refresh failed:', error);
+          return false;
+        }
+        
+        if (data?.session) {
+          console.log('[Auth Debug] Session refreshed successfully');
+          return true;
+        }
+      } else {
+        console.log('[Auth Debug] Session still valid, no refresh needed');
+        return true;
+      }
+    } catch (err) {
+      console.error('[Auth Debug] Error during session refresh:', err);
+      return false;
+    }
+    
+    return false;
+  }, [isSessionExpiredOrNearExpiry]);
+  
+  // Function to check session status across storage locations
+  const validateSessionAcrossStorages = useCallback(async () => {
+    try {
+      // Check localStorage, sessionStorage and cookies for session fragments
+      let hasLocalStorageSession = false;
+      let hasSessionStorageSession = false;
+      
+      try {
+        // Look for known session keys in localStorage
+        hasLocalStorageSession = !!localStorage.getItem('supabase.auth.token') || 
+                                !!localStorage.getItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+      } catch (e) {
+        console.log('[Auth Debug] Error checking localStorage:', e);
+      }
+      
+      try {
+        // Look for known session keys in sessionStorage
+        hasSessionStorageSession = !!sessionStorage.getItem('supabase.auth.token') || 
+                                   !!sessionStorage.getItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+      } catch (e) {
+        console.log('[Auth Debug] Error checking sessionStorage:', e);
+      }
+      
+      // If session found in any storage but getSession returns no session, 
+      // there might be a storage fragmentation issue
+      const { data } = await supabase.auth.getSession();
+      if ((hasLocalStorageSession || hasSessionStorageSession) && !data.session) {
+        console.log('[Auth Debug] Storage fragmentation detected: session in storage but not in memory');
+        
+        // Try to fix by forcing a recovery refresh
+        const { data: refreshData } = await supabase.auth.refreshSession();
+        return !!refreshData.session;
+      }
+      
+      return !!data.session;
+    } catch (e) {
+      console.error('[Auth Debug] Error during cross-storage validation:', e);
+      return false;
+    }
+  }, []);
+  
+  // Handle window focus/blur events (tab switching)
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      const isNowVisible = document.visibilityState === 'visible';
+      setIsActive(isNowVisible);
+      
+      if (isNowVisible) {
+        const now = Date.now();
+        const inactiveTime = now - lastActiveTime.current;
+        lastActiveTime.current = now;
+        
+        console.log(`[Auth Debug] App returned to foreground after ${Math.round(inactiveTime / 1000)}s`);
+        
+        // If inactive for more than 30 seconds, refresh session
+        if (inactiveTime > 30 * 1000) {
+          console.log('[Auth Debug] Long inactivity detected, refreshing session...');
+          
+          // First validate session across storage locations (important for Safari)
+          const hasValidSession = await validateSessionAcrossStorages();
+          
+          if (!hasValidSession) {
+            console.log('[Auth Debug] No valid session found, attempting refresh...');
+          }
+          
+          // Refresh regardless to ensure tokens are up to date
+          await refreshSession();
+        }
+      } else {
+        // Going inactive - record time
+        lastActiveTime.current = Date.now();
+      }
+    };
+    
+    // On first load
+    handleVisibilityChange();
+    
+    // Listen for visibility changes
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // For Safari, also listen to focus/blur events
+    window.addEventListener('focus', handleVisibilityChange);
+    window.addEventListener('blur', () => setIsActive(false));
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleVisibilityChange);
+      window.removeEventListener('blur', () => {});
+    };
+  }, [refreshSession, validateSessionAcrossStorages]);
+  
+  // Periodically check session when app is active
+  useEffect(() => {
+    // Clear any existing interval
+    if (sessionCheckInterval.current) {
+      clearInterval(sessionCheckInterval.current);
+      sessionCheckInterval.current = null;
+    }
+    
+    // Only set up interval when app is active and we have a session
+    if (isActive && session) {
+      // Check session more frequently on Safari
+      const isSafari = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome');
+      const interval = isSafari ? 2 * 60 * 1000 : 4 * 60 * 1000; // 2 min for Safari, 4 min otherwise
+      
+      sessionCheckInterval.current = setInterval(async () => {
+        console.log(`[Auth Debug] Periodic session check (${isSafari ? 'Safari' : 'Standard'} interval)`);
+        
+        if (isSessionExpiredOrNearExpiry(session)) {
+          console.log('[Auth Debug] Session is expired or near expiry, refreshing...');
+          await refreshSession();
+        }
+      }, interval);
+    }
+    
+    return () => {
+      if (sessionCheckInterval.current) {
+        clearInterval(sessionCheckInterval.current);
+        sessionCheckInterval.current = null;
+      }
+    };
+  }, [isActive, session, refreshSession, isSessionExpiredOrNearExpiry]);
 
   // Set up auth state listener and check for existing session
   useEffect(() => {
@@ -121,12 +306,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 setIsAuthReady(true);
                 console.log(`[Auth Debug] Sign out event processed, state cleared`);
                 
-                // Safari needs explicit storage clearing in some cases
+                // Perform thorough storage cleanup for all browsers, especially Safari
                 try {
-                  localStorage.removeItem('supabase.auth.token');
-                  sessionStorage.removeItem('supabase.auth.token');
+                  // Clear specific Supabase auth items in all storage locations
+                  ['localStorage', 'sessionStorage'].forEach(storageType => {
+                    try {
+                      const storage = window[storageType as 'localStorage' | 'sessionStorage'];
+                      if (storage) {
+                        storage.removeItem('supabase.auth.token');
+                        storage.removeItem('supabase.auth.refreshToken');
+                        storage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+                      }
+                    } catch (e) {
+                      console.log(`[Auth Debug] Error clearing ${storageType}:`, e);
+                    }
+                  });
                 } catch (e) {
-                  console.log('[Auth Debug] Error clearing auth storage:', e);
+                  console.log('[Auth Debug] Error during thorough storage cleanup:', e);
                 }
               }
             }
@@ -137,24 +333,35 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         // THEN check for existing session
         try {
-          const { data: { session: initialSession }, error } = await fetchWithRetry(
-            () => supabase.auth.getSession(),
-            { maxRetries: 3, initialDelay: 1500 }  // Increased retries and delay
-          );
-          
-          if (error) {
-            console.log('[Auth Debug] Error getting session:', error);
+          // Enhanced session check with retry and cross-storage validation
+          const getInitialSession = async () => {
+            // First check standard session
+            const { data: { session: initialSession }, error } = await fetchWithRetry(
+              () => supabase.auth.getSession(),
+              { maxRetries: 3, initialDelay: 1500 }  // Increased retries and delay
+            );
             
-            // Try a fallback approach for Safari
-            if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
-              console.log('[Auth Debug] Safari detected, trying session refresh');
-              await supabase.auth.refreshSession();
-              const refreshResult = await supabase.auth.getSession();
-              if (!refreshResult.error && refreshResult.data.session) {
-                console.log('[Auth Debug] Safari session refresh successful');
+            if (error) {
+              console.log('[Auth Debug] Error getting session:', error);
+              
+              // Try cross-storage validation for Safari
+              if (navigator.userAgent.includes('Safari')) {
+                console.log('[Auth Debug] Safari detected, trying cross-storage validation');
+                await validateSessionAcrossStorages();
+                
+                // After validation attempt, try session refresh
+                console.log('[Auth Debug] Attempting session refresh after validation');
+                const refreshResult = await supabase.auth.refreshSession();
+                return refreshResult.data.session;
               }
+              
+              return null;
             }
-          }
+            
+            return initialSession;
+          };
+          
+          const initialSession = await getInitialSession();
           
           console.log(`[Auth Debug] Initial session check: ${initialSession ? 'Session exists' : 'No session'}`);
           console.log(`[Auth Debug] Initial user ID: ${initialSession?.user?.id || 'none'}`);
@@ -252,7 +459,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         } catch (e) {
           console.error('[Auth Debug] Error in periodic session refresh:', e);
         }
-      }, 4 * 60 * 1000); // Every 4 minutes
+      }, 3 * 60 * 1000); // Every 3 minutes (reduced from 4 minutes)
     }
     
     return () => {
@@ -260,7 +467,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       clearTimeout(safetyTimer);
       if (refreshTimer) clearInterval(refreshTimer);
     };
-  }, [getUserProfile]);
+  }, [getUserProfile, validateSessionAcrossStorages]);
 
   return (
     <AuthContext.Provider

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
@@ -13,21 +13,42 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
   const { isLoggedIn, supabaseUser, isAuthReady, isLoading } = useAuth();
   const { toast } = useToast();
+  const [showingToast, setShowingToast] = useState(false);
+  const [delayComplete, setDelayComplete] = useState(false);
 
   // Check if user is on the login page
   const isLoginPage = location.pathname === '/login';
 
+  // Add a small delay before showing authentication errors
+  // This helps prevent flash of auth errors during initialization
   useEffect(() => {
-    // Only show authentication toast when auth is fully ready
-    // and user is not logged in and not on login page
-    if (isAuthReady && !isLoggedIn && !isLoginPage && !supabaseUser) {
+    const timer = setTimeout(() => {
+      setDelayComplete(true);
+    }, 500); // Short delay to allow auth to fully initialize
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  useEffect(() => {
+    // Only show authentication toast when:
+    // 1. Auth is fully ready
+    // 2. User is not logged in
+    // 3. Not on login page
+    // 4. No user object exists
+    // 5. Delay has completed (prevents flash)
+    // 6. No toast is currently showing
+    if (isAuthReady && !isLoggedIn && !isLoginPage && !supabaseUser && delayComplete && !showingToast) {
+      setShowingToast(true);
       toast({
         title: "Authentication required",
         description: "Please log in to access this page",
-        variant: "destructive"
+        variant: "destructive",
+        onOpenChange: (open) => {
+          if (!open) setShowingToast(false);
+        }
       });
     }
-  }, [isLoggedIn, isLoginPage, supabaseUser, toast, isAuthReady]);
+  }, [isLoggedIn, isLoginPage, supabaseUser, toast, isAuthReady, delayComplete, showingToast]);
 
   // Show loading state while auth is not ready
   if (!isAuthReady || isLoading) {
