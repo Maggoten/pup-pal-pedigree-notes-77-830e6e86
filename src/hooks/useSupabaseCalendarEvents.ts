@@ -14,7 +14,7 @@ const useSupabaseCalendarEvents = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [hasError, setHasError] = useState(false); // New boolean flag for error state
+  const [hasError, setHasError] = useState(false); // Boolean flag for error state
   const { dogs } = useDogs();
   const { user } = useAuth();
   
@@ -47,7 +47,7 @@ const useSupabaseCalendarEvents = () => {
     } catch (err) {
       console.error('[Calendar] Error fetching calendar events:', err);
       setError(err as Error);
-      setHasError(true); // Set boolean flag to true on error
+      setHasError(true);
       toast({
         title: 'Error',
         description: 'Failed to load calendar events. Please try again.',
@@ -56,9 +56,9 @@ const useSupabaseCalendarEvents = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user?.id]); // Changed from [user] to [user?.id] to prevent infinite loop
 
-  // Initial fetch on mount and when user changes
+  // Initial fetch on mount and when user ID changes
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
@@ -172,12 +172,12 @@ const useSupabaseCalendarEvents = () => {
     events,
     isLoading,
     error,
-    hasError, // Export the boolean error flag
+    hasError,
     addEvent,
     updateEvent,
     deleteEvent,
     getEventsForDay,
-    refreshEvents
+    refreshEvents: fetchEvents
   };
 };
 
