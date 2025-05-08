@@ -198,7 +198,8 @@ export const uploadToStorage = async (
     // Log detailed response information
     logUploadDetails(fileName, file, result, startTime);
     
-    if (result.error) {
+    // Type guard check for error property
+    if (hasError(result) && result.error) {
       console.error(`Upload error to bucket '${BUCKET_NAME}':`, result.error);
       
       // Enhanced error reporting
