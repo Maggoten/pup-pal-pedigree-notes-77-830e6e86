@@ -31,7 +31,7 @@ export const useDashboardData = () => {
   const {
     events,
     isLoading: calendarLoading,
-    error: calendarError,
+    hasError: calendarError, // Now this is a boolean value
     addEvent,
     updateEvent: editEvent,
     deleteEvent,
@@ -163,7 +163,7 @@ export const useDashboardData = () => {
     deleteEvent,
     handleEditEvent,
     calendarLoading,
-    calendarError,
+    calendarError, // Now a boolean
     plannedLittersData,
     recentLittersData,
     remindersSummary,

@@ -14,6 +14,7 @@ const useSupabaseCalendarEvents = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [hasError, setHasError] = useState(false); // New boolean flag for error state
   const { dogs } = useDogs();
   const { user } = useAuth();
   
@@ -31,18 +32,22 @@ const useSupabaseCalendarEvents = () => {
       const fetchedEvents = await fetchCalendarEvents();
       console.log(`[Calendar] Fetched ${fetchedEvents.length} events from Supabase`);
       
-      // Convert date strings to Date objects
+      // Convert date strings to Date objects and ensure compatibility
       const processedEvents = fetchedEvents.map(event => ({
         ...event,
-        startDate: new Date(event.date),
-        endDate: new Date(event.date),
+        // Ensure all events have both date and startDate/endDate fields for compatibility
+        date: event.date,
+        startDate: event.startDate || event.date,
+        endDate: event.endDate || event.date,
       }));
       
       setEvents(processedEvents);
       setError(null);
+      setHasError(false);
     } catch (err) {
       console.error('[Calendar] Error fetching calendar events:', err);
       setError(err as Error);
+      setHasError(true); // Set boolean flag to true on error
       toast({
         title: 'Error',
         description: 'Failed to load calendar events. Please try again.',
@@ -68,8 +73,10 @@ const useSupabaseCalendarEvents = () => {
         // Update local state with the new event
         setEvents(prev => [...prev, {
           ...newEvent,
-          startDate: new Date(newEvent.date),
-          endDate: new Date(newEvent.date)
+          // Ensure compatibility with both date systems
+          date: newEvent.date,
+          startDate: newEvent.startDate || newEvent.date,
+          endDate: newEvent.endDate || newEvent.date
         }]);
         return true;
       }
@@ -98,8 +105,10 @@ const useSupabaseCalendarEvents = () => {
             ? {
                 ...event,
                 ...updatedEvent,
-                startDate: new Date(updatedEvent.date),
-                endDate: new Date(updatedEvent.date)
+                // Ensure compatibility with both date systems
+                date: updatedEvent.date,
+                startDate: updatedEvent.startDate || updatedEvent.date,
+                endDate: updatedEvent.endDate || updatedEvent.date
               } 
             : event
         ));
@@ -143,9 +152,9 @@ const useSupabaseCalendarEvents = () => {
   // Get events for a specific day
   const getEventsForDay = (day: Date): CalendarEvent[] => {
     return events.filter(event => {
-      if (!event.startDate) return false;
+      // Use startDate if available, fall back to date for compatibility
+      const eventDate = new Date(event.startDate || event.date);
       
-      const eventDate = new Date(event.startDate);
       return (
         eventDate.getDate() === day.getDate() &&
         eventDate.getMonth() === day.getMonth() &&
@@ -163,6 +172,7 @@ const useSupabaseCalendarEvents = () => {
     events,
     isLoading,
     error,
+    hasError, // Export the boolean error flag
     addEvent,
     updateEvent,
     deleteEvent,

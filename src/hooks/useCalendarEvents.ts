@@ -26,8 +26,9 @@ const useCalendarEvents = () => {
     const newEvent: CalendarEvent = {
       id: Date.now().toString(), // Generate a unique ID
       title: eventData.title,
-      startDate: eventData.date,
-      endDate: eventData.date,
+      date: eventData.date, // For backward compatibility
+      startDate: eventData.date, // New field
+      endDate: eventData.date, // New field
       type: 'custom',
       dogId: eventData.dogId,
       notes: eventData.notes || '',
@@ -47,8 +48,9 @@ const useCalendarEvents = () => {
         return {
           ...event,
           title: updatedEventData.title,
-          startDate: updatedEventData.date,
-          endDate: updatedEventData.date,
+          date: updatedEventData.date, // For backward compatibility
+          startDate: updatedEventData.date, // New field
+          endDate: updatedEventData.date, // New field
           dogId: updatedEventData.dogId,
           notes: updatedEventData.notes || '',
         };
@@ -74,8 +76,9 @@ const useCalendarEvents = () => {
 
   const getEventsForDay = (day: Date): CalendarEvent[] => {
     return events.filter(event => {
-      const startDate = new Date(event.startDate);
-      const endDate = new Date(event.endDate);
+      // Use startDate if available, fall back to date for compatibility
+      const startDate = new Date(event.startDate || event.date);
+      const endDate = new Date(event.endDate || event.date);
       
       return isWithinInterval(day, {
         start: startDate,

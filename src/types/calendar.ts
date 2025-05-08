@@ -2,9 +2,9 @@
 export interface CalendarEvent {
   id: string;
   title: string;
-  date: string | Date;
-  startDate?: string | Date; // Added for compatibility with both systems
-  endDate?: string | Date;   // Added for compatibility with both systems
+  date: string | Date;         // Keep for backward compatibility
+  startDate: string | Date;    // Primary date field for event start
+  endDate: string | Date;      // Primary date field for event end
   type?: string;
   dogId?: string;
   dogName?: string;

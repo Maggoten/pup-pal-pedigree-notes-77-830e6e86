@@ -62,7 +62,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     deleteEvent: dashboardData.deleteEvent,
     editEvent: dashboardData.handleEditEvent,
     isLoading: dashboardData.calendarLoading,
-    hasError: dashboardData.calendarError
+    hasError: dashboardData.calendarError // This now receives a boolean value
   };
   
   const remindersProps = {

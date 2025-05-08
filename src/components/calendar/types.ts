@@ -8,6 +8,8 @@ export interface CalendarEvent {
   dogId?: string;
   dogName?: string;
   notes?: string;
+  startDate?: Date; // Added for new format compatibility
+  endDate?: Date;   // Added for new format compatibility
 }
 
 export interface AddEventFormValues {
