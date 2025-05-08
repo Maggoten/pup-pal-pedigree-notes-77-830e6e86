@@ -12,12 +12,18 @@ const isSafari = () => {
   return userAgent.includes('Safari') && !userAgent.includes('Chrome') && !userAgent.includes('Android');
 };
 
+// Detect mobile devices for logging and handling
+const isMobileDevice = () => {
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+};
+
 // Log configuration details for debugging
 console.log('Supabase client configuration:', { 
   url: SUPABASE_URL,
   keyLength: SUPABASE_PUBLISHABLE_KEY?.length ?? 0,
   isConfigured: !!SUPABASE_URL && !!SUPABASE_PUBLISHABLE_KEY,
-  isSafari: isSafari()
+  isSafari: isSafari(),
+  isMobile: isMobileDevice()
 });
 
 // Import the supabase client like this:
@@ -41,25 +47,39 @@ export const supabase = createClient<Database>(
         getItem: (key) => {
           try {
             const item = localStorage.getItem(key);
+            console.log(`[Auth Storage] Retrieved ${key}: ${item ? 'exists' : 'null'}`);
             return item;
           } catch (error) {
-            console.error('localStorage access error:', error);
+            console.error('[Auth Storage] localStorage access error:', error);
             return null;
           }
         },
         setItem: (key, value) => {
           try {
+            console.log(`[Auth Storage] Setting ${key}`);
             localStorage.setItem(key, value);
+            // On Safari, verify the write succeeded
+            if (isSafari() || isMobileDevice()) {
+              const verifyValue = localStorage.getItem(key);
+              if (verifyValue !== value) {
+                console.warn('[Auth Storage] Storage verification failed - value may not have been saved correctly');
+              }
+            }
           } catch (error) {
-            console.error('localStorage write error:', error);
+            console.error('[Auth Storage] localStorage write error:', error);
             // Don't throw to avoid breaking auth - just log the error
           }
         },
         removeItem: (key) => {
           try {
+            console.log(`[Auth Storage] Removing ${key}`);
             localStorage.removeItem(key);
+            // Verify removal on problematic browsers
+            if ((isSafari() || isMobileDevice()) && localStorage.getItem(key)) {
+              console.warn(`[Auth Storage] Failed to remove item ${key}`);
+            }
           } catch (error) {
-            console.error('localStorage remove error:', error);
+            console.error('[Auth Storage] localStorage remove error:', error);
           }
         }
       }

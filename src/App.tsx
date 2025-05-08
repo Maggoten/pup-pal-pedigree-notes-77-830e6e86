@@ -13,18 +13,19 @@ import PregnancyDetails from "./pages/PregnancyDetails";
 import MyLitters from "./pages/MyLitters";
 import Login from "./pages/Login";
 import AuthGuard from "./components/AuthGuard";
-import { AuthProvider } from "./hooks/useAuth";
+import { AuthProvider } from "./providers/AuthProvider";
 import { DogsProvider } from "./context/DogsContext";
 import { getFirstActivePregnancy } from "./services/PregnancyService";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Pregnancy from "./pages/Pregnancy";
 import MobileDebugPanel from "./components/diagnostics/MobileDebugPanel";
+import { isMobileDevice } from "./utils/fetchUtils";
 
 // Configure React Query with error handling
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2, // Increase retry count for mobile networks
+      retry: isMobileDevice() ? 3 : 2, // Increase retry count for mobile networks
       // Use meta for error handling in newer versions of React Query
       meta: {
         onError: (error: Error) => {
@@ -34,11 +35,6 @@ const queryClient = new QueryClient({
     }
   }
 });
-
-// Detect if we're on mobile for logging purposes
-const isMobileDevice = () => {
-  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-};
 
 const App = () => {
   const [firstPregnancyId, setFirstPregnancyId] = useState<string | null>(null);
@@ -70,13 +66,28 @@ const App = () => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         console.log(`[App Debug] App returned to foreground on ${deviceType}`);
-        // Could trigger data refreshes here when app returns to foreground
+        // Trigger fetch if needed when returning to app
+        queryClient.invalidateQueries();
       }
     };
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Monitor for network connectivity changes (important on mobile)
+    window.addEventListener('online', () => {
+      console.log('[App Debug] Network connection restored');
+      queryClient.invalidateQueries();
+    });
+    
+    window.addEventListener('offline', () => {
+      console.log('[App Debug] Network connection lost');
+    });
+    
+    // Cleanup event listeners
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', () => {});
+      window.removeEventListener('offline', () => {});
     };
   }, [deviceType]);
   

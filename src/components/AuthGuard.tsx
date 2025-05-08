@@ -1,8 +1,9 @@
 
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import { Loader2 } from 'lucide-react';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -10,7 +11,7 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn, supabaseUser, isAuthReady } = useAuth();
+  const { isLoggedIn, supabaseUser, isAuthReady, isLoading } = useAuth();
   const { toast } = useToast();
 
   // Check if user is on the login page
@@ -29,10 +30,11 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   }, [isLoggedIn, isLoginPage, supabaseUser, toast, isAuthReady]);
 
   // Show loading state while auth is not ready
-  if (!isAuthReady) {
+  if (!isAuthReady || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-center">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">Checking authentication...</p>
         </div>
       </div>

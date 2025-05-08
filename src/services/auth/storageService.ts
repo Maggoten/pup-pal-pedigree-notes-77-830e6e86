@@ -4,6 +4,8 @@
 // Enhanced version to ensure thorough cleanup of all auth-related items
 export const clearAuthStorage = () => {
   try {
+    console.log('[Auth Storage] Beginning storage cleanup process');
+    
     // Clear user data
     localStorage.removeItem('user');
     localStorage.removeItem('isLoggedIn');
@@ -13,6 +15,14 @@ export const clearAuthStorage = () => {
     localStorage.removeItem('supabase.auth.refreshToken');
     localStorage.removeItem('supabase.auth.user');
     localStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+    
+    // Also try removing from sessionStorage as fallback for some browsers
+    try {
+      sessionStorage.removeItem('supabase.auth.token');
+      sessionStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+    } catch (e) {
+      console.warn('[Auth Storage] Session storage cleanup failed:', e);
+    }
     
     // Clear any session/local storage items that contain these keys
     const itemsToRemove = [];
@@ -32,21 +42,26 @@ export const clearAuthStorage = () => {
     
     // Remove items separately to avoid index shifting issues
     itemsToRemove.forEach(key => {
-      console.log(`Removing storage item: ${key}`);
+      console.log(`[Auth Storage] Removing storage item: ${key}`);
       localStorage.removeItem(key);
     });
     
     // Also clear cookies that might be related to authentication
     document.cookie.split(';').forEach(cookie => {
       const [name] = cookie.trim().split('=');
-      if (name.includes('supabase') || name.includes('auth') || name.includes('sb-')) {
+      if (name && (
+        name.includes('supabase') || 
+        name.includes('auth') || 
+        name.includes('sb-')
+      )) {
+        console.log(`[Auth Storage] Clearing cookie: ${name}`);
         document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
       }
     });
     
-    console.log('All auth-related storage items cleared');
+    console.log('[Auth Storage] All auth-related storage items cleared');
   } catch (e) {
-    console.error('Error during storage cleanup:', e);
+    console.error('[Auth Storage] Error during storage cleanup:', e);
   }
 };
 

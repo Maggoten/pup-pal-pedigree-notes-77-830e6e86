@@ -1,10 +1,9 @@
 
 import React, { useState } from 'react';
 import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar, Heart } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/context/AuthContext';
 import {
   Drawer,
   DrawerContent,
@@ -16,7 +15,6 @@ import SettingsDialog from '@/components/settings/SettingsDialog';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { logout } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   
@@ -29,13 +27,14 @@ export const Navbar: React.FC = () => {
     return location.pathname.startsWith(path);
   };
   
-  const handleLogout = () => {
-    logout();
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out."
-    });
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // The navigation will be handled by AuthGuard component
+      // when the auth state changes, preventing the need for navigate() here
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
   
   const navItems = [
