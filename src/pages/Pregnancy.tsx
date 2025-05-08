@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
-import { Heart, AlertCircle, Loader2, Baby, Plus } from 'lucide-react';
+import { Heart, AlertCircle, Loader2, Baby } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDogs } from '@/context/DogsContext';
@@ -114,49 +114,13 @@ const Pregnancy: React.FC = () => {
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <span className="ml-2 text-lg">Loading pregnancy details...</span>
         </div>
-      ) : activePregnancies.length === 0 ? (
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
-            <ActivePregnanciesList 
-              pregnancies={activePregnancies} 
-              onAddPregnancy={handleAddPregnancyClick}
-              isLoading={false}
-            />
-          </div>
-
-          <div className="bg-greige-50 border border-greige-200 rounded-lg p-6 flex flex-col items-center justify-center text-center">
-            <Baby className="h-12 w-12 text-primary mb-4" />
-            <h3 className="text-xl font-medium text-gray-700 mb-2">Add a Pregnancy</h3>
-            <p className="text-gray-500 mb-6 max-w-sm">
-              Track your dog's pregnancy journey, from mating to whelping.
-            </p>
-            <div className="flex gap-4">
-              <Button 
-                onClick={handleAddPregnancyClick} 
-                variant="default"
-                className="flex items-center gap-1"
-              >
-                <Plus className="h-4 w-4" />
-                Add Pregnancy
-              </Button>
-            </div>
-          </div>
-        </div>
       ) : (
-        <div className="text-center py-12">
-          <Baby className="h-12 w-12 mx-auto text-greige-400 mb-4" />
-          <h3 className="text-xl font-medium text-greige-700">Redirecting to Pregnancy Details</h3>
-          <p className="text-greige-500 mt-2">You will be redirected to view pregnancy details...</p>
-          <div className="flex items-center justify-center gap-4 mt-4">
-            <Button 
-              onClick={handleAddPregnancyClick} 
-              variant="default"
-              className="flex items-center gap-1"
-            >
-              <Plus className="h-4 w-4" />
-              Add Pregnancy
-            </Button>
-          </div>
+        <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
+          <ActivePregnanciesList 
+            pregnancies={activePregnancies} 
+            onAddPregnancy={handleAddPregnancyClick}
+            isLoading={false}
+          />
         </div>
       )}
       
