@@ -22,7 +22,7 @@ export const getUploadTimeout = () => {
 export const UPLOAD_TIMEOUT = getUploadTimeout();
 
 export const useUploadTimeout = (onTimeout: () => void) => {
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>();
   const platform = getPlatformInfo();
 
   const startTimeout = () => {

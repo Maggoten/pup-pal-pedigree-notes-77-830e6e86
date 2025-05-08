@@ -6,7 +6,12 @@ import {
   BUCKET_NAME, 
   STORAGE_ERRORS,
   isSafari,
-  getStorageTimeout
+  getStorageTimeout,
+  isStorageError,
+  isSupabaseStorageError,
+  getSafeErrorMessage,
+  StorageErrorDetails,
+  SupabaseStorageError
 } from './config';
 import { getPlatformInfo } from './mobileUpload';
 
@@ -38,9 +43,9 @@ export const checkBucketExists = async (): Promise<boolean> => {
         console.error(`Bucket '${BUCKET_NAME}' check failed:`, result.error);
         // Log more details about the error for troubleshooting
         console.error('Error details:', {
-          message: result.error.message,
-          status: result.error.status || 'unknown',
-          details: result.error.details || 'none'
+          message: isStorageError(result.error) ? result.error.message : 'Unknown error',
+          status: isStorageError(result.error) ? result.error.status : 'unknown',
+          details: isStorageError(result.error) ? result.error.details : 'none'
         });
         return false;
       }
@@ -72,9 +77,9 @@ const logUploadDetails = (fileName: string, file: File, response: any, startTime
     mobile: platform.mobile,
     success: !response.error,
     error: response.error ? {
-      message: response.error.message,
-      status: response.error.status || 'unknown',
-      details: response.error.details || 'none'
+      message: isStorageError(response.error) ? response.error.message : 'Unknown error',
+      status: isStorageError(response.error) ? response.error.status : 'unknown',
+      details: isStorageError(response.error) ? response.error.details : 'none'
     } : null,
     response: response.data ? {
       path: response.data.path || 'unknown'
@@ -157,11 +162,12 @@ export const uploadToStorage = async (
         useBackoff: true,
         shouldRetry: (error) => {
           // More selective retry logic for different error types
-          if (error && typeof error === 'object' && 'statusCode' in error) {
+          if (isStorageError(error)) {
             // Don't retry 413 (payload too large) errors
-            if (error.statusCode === 413) return false;
+            if (error.status === 413 || error.statusCode === 413) return false;
             // Don't retry 400 errors that indicate malformed requests
-            if (error.statusCode === 400 && error.message?.includes('Invalid')) return false;
+            if ((error.status === 400 || error.statusCode === 400) && 
+                error.message?.includes('Invalid')) return false;
           }
           return true;
         },
@@ -179,14 +185,14 @@ export const uploadToStorage = async (
       console.error(`Upload error to bucket '${BUCKET_NAME}':`, result.error);
       
       // Enhanced error reporting
-      let errorMessage = result.error instanceof Error ? result.error.message : 'Upload failed';
+      let errorMessage = getSafeErrorMessage(result.error);
       if (platform.safari && errorMessage.includes('timeout')) {
         errorMessage = 'Upload timed out. Please try a smaller file or switch browsers.';
       }
       
       return { 
         data: null, 
-        error: new StorageError(errorMessage, result.error.status, result.error.details)
+        error: new StorageError(errorMessage) 
       };
     }
     
@@ -196,7 +202,7 @@ export const uploadToStorage = async (
     console.error(`Upload error to bucket '${BUCKET_NAME}':`, error);
     
     // Enhanced error reporting for mobile/Safari
-    let errorMessage = error instanceof Error ? error.message : 'Upload failed';
+    let errorMessage = getSafeErrorMessage(error);
     if (platform.mobile || platform.safari) {
       if (errorMessage.includes('timeout')) {
         errorMessage = `${platform.device} upload timed out. Try a smaller file (under 2MB).`;

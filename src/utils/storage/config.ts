@@ -18,6 +18,34 @@ export const STORAGE_ERRORS = {
   CANVAS_ERROR: 'Browser could not process this image. Try a different image format.'
 };
 
+// Storage error interfaces
+export interface StorageErrorDetails {
+  message?: string;
+  status?: number;
+  statusCode?: number;
+  details?: string;
+}
+
+export interface SupabaseStorageError {
+  error: string | Error;
+  status?: number;
+  details?: string;
+}
+
+// Type guard for checking if an object is a storage error
+export function isStorageError(error: unknown): error is StorageErrorDetails {
+  return typeof error === 'object' && 
+         error !== null && 
+         ('message' in error || 'status' in error || 'details' in error);
+}
+
+// Type guard for checking if an object is a Supabase storage error
+export function isSupabaseStorageError(error: unknown): error is SupabaseStorageError {
+  return typeof error === 'object' && 
+         error !== null && 
+         'error' in error;
+}
+
 // Enhanced Safari detection
 export const isSafari = (): boolean => {
   const userAgent = navigator.userAgent.toLowerCase();
@@ -67,4 +95,19 @@ export const SUPPORTED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'heic',
 export const isImageByExtension = (fileName: string): boolean => {
   const extension = fileName.split('.').pop()?.toLowerCase() || '';
   return SUPPORTED_IMAGE_EXTENSIONS.includes(extension);
+};
+
+// Safe error extraction utility
+export const getSafeErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  } else if (isSupabaseStorageError(error)) {
+    return typeof error.error === 'string' ? error.error : error.error.message;
+  } else if (isStorageError(error)) {
+    return error.message || 'Unknown storage error';
+  } else if (typeof error === 'string') {
+    return error;
+  } else {
+    return 'Unknown error occurred';
+  }
 };

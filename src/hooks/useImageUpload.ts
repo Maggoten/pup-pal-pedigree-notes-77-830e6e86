@@ -10,7 +10,10 @@ import {
   checkBucketExists, 
   uploadToStorage, 
   getPublicUrl, 
-  removeFromStorage
+  removeFromStorage,
+  isStorageError,
+  isSupabaseStorageError,
+  getSafeErrorMessage
 } from '@/utils/storage';
 import { processImageForUpload } from '@/utils/storage/imageUtils';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
@@ -127,7 +130,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       if (uploadResult.error) {
         const errorMessage = uploadResult.error instanceof StorageError 
           ? uploadResult.error.message 
-          : "Could not upload the image";
+          : getSafeErrorMessage(uploadResult.error);
         
         console.error('Upload error:', {
           error: uploadResult.error,
@@ -157,11 +160,11 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       setUploadRetryCount(0); // Reset retry counter on success
     } catch (error) {
       console.error('Error uploading image:', error);
-      setLastError(error instanceof Error ? error.message : 'Unknown error');
+      setLastError(error instanceof Error ? error.message : getSafeErrorMessage(error));
       
       const errorMessage = error instanceof Error 
         ? error.message 
-        : "An unexpected error occurred";
+        : getSafeErrorMessage(error);
       
       // Platform-specific error messages
       let friendlyMessage = errorMessage;

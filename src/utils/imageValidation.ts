@@ -74,7 +74,7 @@ const isImageFile = (file: File): boolean => {
   return hasValidMimeType || (hasValidExtension && isGenericImageType);
 };
 
-export const validateImageFile = (file: File) => {
+export const validateImageFile = (file: File): boolean => {
   const platform = getPlatformInfo();
   const maxSize = getMaxFileSize();
   
