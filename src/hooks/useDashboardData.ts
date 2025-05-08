@@ -3,9 +3,10 @@ import { useMemo, useEffect, useState } from 'react';
 import { subDays } from 'date-fns';
 import { useDogs } from '@/context/DogsContext';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
-import useCalendarEvents from '@/hooks/useCalendarEvents';
+import useSupabaseCalendarEvents from '@/hooks/useSupabaseCalendarEvents';
 import { plannedLittersService } from '@/services/PlannedLitterService';
 import { litterService } from '@/services/LitterService';
+import { getEventColor } from '@/services/CalendarEventService';
 
 export const useDashboardData = () => {
   // State for controlled loading
@@ -26,27 +27,16 @@ export const useDashboardData = () => {
     deleteReminder
   } = useBreedingReminders();
   
-  // We need to properly destructure what useCalendarEvents actually returns
+  // Use the new Supabase-based calendar hook instead of the localStorage-based hook
   const {
     events,
+    isLoading: calendarLoading,
+    error: calendarError,
     addEvent,
-    updateEvent,
+    updateEvent: editEvent,
     deleteEvent,
     getEventsForDay
-  } = useCalendarEvents();
-  
-  // Create our own calendarLoading and calendarError states since they're not provided
-  const [calendarLoading, setCalendarLoading] = useState(true);
-  const [calendarError, setCalendarError] = useState(false);
-  
-  // Set calendar ready after a delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setCalendarLoading(false);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, []);
+  } = useSupabaseCalendarEvents();
   
   // Fetch planned litters data
   useEffect(() => {
@@ -142,20 +132,7 @@ export const useDashboardData = () => {
   const getEventsForDate = (date: Date) => {
     return getEventsForDay(date);
   };
-  
-  // Simple function to get event color based on event type
-  const getEventColor = (type: string) => {
-    const colors: Record<string, string> = {
-      'heat': 'bg-rose-100 text-rose-800',
-      'mating': 'bg-purple-100 text-purple-800',
-      'vaccination': 'bg-green-100 text-green-800',
-      'birthday': 'bg-blue-100 text-blue-800',
-      'vet-visit': 'bg-emerald-100 text-emerald-800',
-      'custom': 'bg-amber-100 text-amber-800',
-    };
-    return colors[type] || 'bg-gray-100 text-gray-800';
-  };
-  
+
   // Wrapper functions to adapt async functions to the synchronous interface expected by components
   const handleAddEvent = (data: any) => {
     addEvent(data);
@@ -163,7 +140,7 @@ export const useDashboardData = () => {
   };
   
   const handleEditEvent = (eventId: string, data: any) => {
-    updateEvent(eventId, data);
+    editEvent(eventId, data);
     return true; // Always return true synchronously for UI feedback
   };
   
@@ -194,4 +171,3 @@ export const useDashboardData = () => {
     hasReminderData
   };
 };
-

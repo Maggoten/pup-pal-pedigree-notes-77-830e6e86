@@ -1,4 +1,3 @@
-
 import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
 import { UpcomingHeat } from '@/types/reminders';
@@ -37,7 +36,6 @@ export class ReminderCalendarSyncService {
       
       const userId = authData.user.id;
 
-      const eventId = `event-birthday-${dog.id}`;
       const birthDate = typeof dog.dateOfBirth === 'string' ? 
         new Date(dog.dateOfBirth) : dog.dateOfBirth;
 
@@ -92,9 +90,8 @@ export class ReminderCalendarSyncService {
         }
       }
 
-      // Create reminder event 14 days before (if not already exists)
-      const reminderDate = addDays(targetDate, -14);
-      const reminderId = `event-birthday-reminder-${dog.id}`;
+      // Create reminder event 7 days before (changed from 14 to 7 as per requirements)
+      const reminderDate = addDays(targetDate, -7);
       
       const { data: existingReminders } = await supabase
         .from('calendar_events')
@@ -108,7 +105,7 @@ export class ReminderCalendarSyncService {
         type: 'birthday-reminder',
         dog_id: dog.id,
         dog_name: dog.name,
-        notes: `Reminder to prepare for ${dog.name}'s birthday in 2 weeks`,
+        notes: `Reminder to prepare for ${dog.name}'s birthday in 1 week`,
         user_id: userId
       };
 
@@ -167,7 +164,6 @@ export class ReminderCalendarSyncService {
       
       const userId = authData.user.id;
 
-      const eventId = `event-vaccination-${dog.id}`;
       const vaccinationDate = typeof dog.vaccinationDate === 'string' ? 
         new Date(dog.vaccinationDate) : dog.vaccinationDate;
 
@@ -220,9 +216,8 @@ export class ReminderCalendarSyncService {
         }
       }
 
-      // Create reminder event 14 days before (if not already exists)
-      const reminderDate = addDays(nextVaccinationDate, -14);
-      const reminderId = `event-vaccination-reminder-${dog.id}`;
+      // Create reminder event 7 days before (changed from 14 to 7 as per requirements)
+      const reminderDate = addDays(nextVaccinationDate, -7);
       
       const { data: existingReminders } = await supabase
         .from('calendar_events')
@@ -236,7 +231,7 @@ export class ReminderCalendarSyncService {
         type: 'vaccination-reminder',
         dog_id: dog.id,
         dog_name: dog.name,
-        notes: `Reminder to schedule vaccination for ${dog.name} in 2 weeks`,
+        notes: `Reminder to schedule vaccination for ${dog.name} in 1 week`,
         user_id: userId
       };
 
@@ -291,8 +286,6 @@ export class ReminderCalendarSyncService {
       
       const userId = authData.user.id;
 
-      const eventId = `event-heat-${heat.dogId}-${heat.date.getTime()}`;
-      
       // First, check if event already exists
       const { data: existingEvents } = await supabase
         .from('calendar_events')
@@ -334,9 +327,8 @@ export class ReminderCalendarSyncService {
         }
       }
 
-      // Create reminder event 14 days before (if not already exists)
-      const reminderDate = addDays(heat.date, -14);
-      const reminderId = `event-heat-reminder-${heat.dogId}-${heat.date.getTime()}`;
+      // Create reminder event 30 days before (changed from 14 to 30 as per requirements)
+      const reminderDate = addDays(heat.date, -30);
 
       const { data: existingReminders } = await supabase
         .from('calendar_events')
@@ -351,7 +343,7 @@ export class ReminderCalendarSyncService {
         type: 'heat-reminder',
         dog_id: heat.dogId,
         dog_name: heat.dogName,
-        notes: `Reminder about ${heat.dogName}'s upcoming heat cycle in 2 weeks`,
+        notes: `Reminder about ${heat.dogName}'s upcoming heat cycle in 30 days`,
         user_id: userId
       };
 

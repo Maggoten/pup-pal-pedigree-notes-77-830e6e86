@@ -2,11 +2,13 @@
 export interface CalendarEvent {
   id: string;
   title: string;
-  description?: string;
-  startDate: string | Date;
-  endDate: string | Date;
+  date: string | Date;
+  startDate?: string | Date; // Added for compatibility with both systems
+  endDate?: string | Date;   // Added for compatibility with both systems
   type?: string;
   dogId?: string;
   dogName?: string;
-  notes?: string; // Add the missing 'notes' property
+  notes?: string;
+  time?: string;
+  description?: string;
 }
