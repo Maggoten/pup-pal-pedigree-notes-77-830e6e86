@@ -2,8 +2,11 @@
 import { toast } from '@/components/ui/use-toast';
 import { EXTENDED_MIME_TYPES } from '@/utils/storage';
 import { isSafari } from '@/utils/storage/config';
+
+// Import getPlatformInfo directly from mobileUpload.ts
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 
+// Define allowed file types based on extended MIME types
 export const ALLOWED_FILE_TYPES = [
   ...EXTENDED_MIME_TYPES.JPEG,
   ...EXTENDED_MIME_TYPES.PNG,
@@ -13,7 +16,7 @@ export const ALLOWED_FILE_TYPES = [
   ...EXTENDED_MIME_TYPES.GENERIC
 ];
 
-// Dynamically set max file size based on platform - more permissive for Safari
+// Get maximum file size based on platform detection
 export const getMaxFileSize = () => {
   const platform = getPlatformInfo();
   

@@ -1,4 +1,3 @@
-
 import { isSafari } from './config';
 import { MAX_FILE_SIZE } from '@/utils/imageValidation';
 import { toast } from '@/components/ui/use-toast';
@@ -109,7 +108,8 @@ export async function safeImageCompression(file: File): Promise<File> {
   console.log(`Processing image on ${platform.device}`, platform);
   
   // Skip compression for already small files and problematic formats on mobile
-  if (file.size < MAX_FILE_SIZE / 2) {
+  const smallFileThreshold = 2.5 * 1024 * 1024; // 2.5MB
+  if (file.size < smallFileThreshold) {
     console.log(`File already small (${file.size} bytes), skipping compression`);
     return file;
   }
