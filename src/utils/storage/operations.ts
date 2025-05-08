@@ -235,6 +235,13 @@ export const uploadToStorage = async (
   }
 };
 
+// Type guard for response objects that have an error property
+const hasError = (obj: unknown): obj is { error: unknown } => {
+  return obj !== null && 
+         typeof obj === 'object' && 
+         'error' in obj;
+};
+
 // Get public URL for a file - with cache-busting when needed
 export const getPublicUrl = (fileName: string) => {
   const result = supabase.storage.from(BUCKET_NAME).getPublicUrl(fileName);
@@ -270,7 +277,7 @@ export const removeFromStorage = async (storagePath: string) => {
     console.log(`[Storage] Attempting to remove ${storagePath} from bucket '${BUCKET_NAME}'`);
     
     // Use more retries for mobile/Safari
-    return await fetchWithRetry(
+    const result = await fetchWithRetry(
       () => supabase.storage
         .from(BUCKET_NAME)
         .remove([storagePath]),
@@ -280,6 +287,17 @@ export const removeFromStorage = async (storagePath: string) => {
         useBackoff: true
       }
     );
+    
+    // Safely check for errors
+    if (hasError(result) && result.error) {
+      console.error(`Error removing file from '${BUCKET_NAME}':`, result.error);
+      return {
+        data: null,
+        error: result.error
+      };
+    }
+    
+    return result;
   } catch (error) {
     console.error(`Remove from storage error (bucket '${BUCKET_NAME}'):`, error);
     throw error;
