@@ -22,34 +22,72 @@ const MyDogsContent: React.FC = () => {
   const { dogs, activeDog, loading, error, fetchDogs } = useDogs();
   const [showAddDogDialog, setShowAddDogDialog] = useState(false);
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
-  const { isAuthReady } = useAuth();
+  const { isAuthReady, isLoggedIn } = useAuth();
   const [pageReady, setPageReady] = useState(false);
+  const [retryAttempts, setRetryAttempts] = useState(0);
+  const [showError, setShowError] = useState(false);
   
-  // Add a slight delay to ensure auth is ready
+  // Enhanced delay after auth is ready to avoid premature fetching
   useEffect(() => {
-    if (isAuthReady) {
+    if (isAuthReady && isLoggedIn) {
       const timer = setTimeout(() => {
         setPageReady(true);
-      }, 300);
+      }, 500); // Increased from 300ms for more stability
       return () => clearTimeout(timer);
     }
-  }, [isAuthReady]);
+  }, [isAuthReady, isLoggedIn]);
+  
+  // Add visibility change handler to refresh data when tab becomes active
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && pageReady) {
+        console.log('MyDogs: Document became visible, refreshing data');
+        fetchDogs(false).catch(err => {
+          console.error('Error refreshing dogs on visibility change:', err);
+        });
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchDogs, pageReady]);
+  
+  // Add timeout before showing errors to allow recovery
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setShowError(true);
+      }, 2000); // Only show errors after 2 seconds of failure
+      
+      return () => clearTimeout(timer);
+    } else {
+      setShowError(false);
+    }
+  }, [error]);
   
   // Filter dogs based on selected gender
   const filteredDogs = genderFilter === 'all' 
     ? dogs 
     : dogs.filter(dog => dog.gender === genderFilter);
 
-  // Handle retry for loading dogs
+  // Handle retry for loading dogs with incremental backoff
   const handleRetry = () => {
-    fetchDogs(true); // true to skip cache
+    setRetryAttempts(prev => prev + 1);
+    setShowError(false); // Hide error while retrying
+    
+    const backoffTime = Math.min(500 * Math.pow(1.5, retryAttempts), 3000);
+    setTimeout(() => {
+      fetchDogs(true); // Use skipCache=true to force refresh
+    }, backoffTime);
   };
 
   // Formatting the error message
   const errorMessage = typeof error === 'string' ? error : 'Failed to load dogs';
   const isNetworkError = errorMessage.includes('Failed to fetch') || 
-                        errorMessage.includes('Network error') ||
-                        errorMessage.includes('timeout');
+                         errorMessage.includes('Network error') ||
+                         errorMessage.includes('timeout');
 
   return (
     <PageLayout 
@@ -57,7 +95,7 @@ const MyDogsContent: React.FC = () => {
       description="Manage your breeding dogs"
       className="bg-warmbeige-50"
     >
-      {error && (
+      {error && showError && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4 mr-2" />
           <AlertDescription className="flex items-center justify-between w-full">
@@ -77,10 +115,12 @@ const MyDogsContent: React.FC = () => {
         </Alert>
       )}
       
-      {loading || !pageReady ? (
+      {(loading || !pageReady || !isAuthReady) ? (
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
-          <p className="text-muted-foreground">Loading your dogs...</p>
+          <p className="text-muted-foreground">
+            {!isAuthReady ? "Preparing connection..." : "Loading your dogs..."}
+          </p>
         </div>
       ) : activeDog ? (
         <DogDetails dog={activeDog} />

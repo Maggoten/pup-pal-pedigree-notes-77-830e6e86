@@ -24,6 +24,8 @@ const MyLitters: React.FC = () => {
   const [contentLoading, setContentLoading] = useState(true);
   const { isAuthReady } = useAuth();
   const { isError, error, refreshLitters } = useLitterQueries();
+  const [showError, setShowError] = useState(false);
+  const [retryAttempt, setRetryAttempt] = useState(0);
   
   // Effect to simulate the content loading (replacing Suspense behavior)
   useEffect(() => {
@@ -33,6 +35,47 @@ const MyLitters: React.FC = () => {
     }, 200);
     return () => clearTimeout(timer);
   }, []);
+  
+  // Add visibility change handler to refresh data when tab becomes active
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isAuthReady) {
+        console.log('MyLitters: Document became visible, refreshing data');
+        refreshLitters().catch(err => {
+          console.error('Error refreshing litters on visibility change:', err);
+        });
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [refreshLitters, isAuthReady]);
+  
+  // Add timeout before showing errors to allow recovery
+  useEffect(() => {
+    if (isError) {
+      const timer = setTimeout(() => {
+        setShowError(true);
+      }, 2000); // Only show errors after 2 seconds of failure
+      
+      return () => clearTimeout(timer);
+    } else {
+      setShowError(false);
+    }
+  }, [isError]);
+  
+  // Handle retry with incremental backoff
+  const handleRetry = () => {
+    setRetryAttempt(prev => prev + 1);
+    setShowError(false);
+    
+    const backoffTime = Math.min(500 * Math.pow(1.5, retryAttempt), 3000);
+    setTimeout(() => {
+      refreshLitters();
+    }, backoffTime);
+  };
   
   // Handle error state display
   const errorMessage = error instanceof Error ? error.message : 'Failed to load litters';
@@ -47,7 +90,7 @@ const MyLitters: React.FC = () => {
       icon={<PawPrint className="h-6 w-6" />}
       className="bg-warmbeige-50/50"
     >
-      {isError && (
+      {isError && showError && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4 mr-2" />
           <AlertDescription className="flex items-center justify-between w-full">
@@ -58,7 +101,7 @@ const MyLitters: React.FC = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => refreshLitters()}
+              onClick={handleRetry}
               className="ml-2 bg-white"
             >
               Try Again
@@ -71,7 +114,9 @@ const MyLitters: React.FC = () => {
         {contentLoading || !isAuthReady ? (
           <div className="flex flex-col items-center justify-center py-8">
             <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
-            <p className="text-muted-foreground">Loading litter data...</p>
+            <p className="text-muted-foreground">
+              {!isAuthReady ? "Preparing connection..." : "Loading litter data..."}
+            </p>
           </div>
         ) : (
           <MyLittersContent />

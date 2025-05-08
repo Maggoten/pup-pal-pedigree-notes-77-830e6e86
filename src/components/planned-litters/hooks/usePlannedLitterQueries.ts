@@ -16,48 +16,76 @@ export const usePlannedLitterQueries = () => {
   const [upcomingHeats, setUpcomingHeats] = useState(calculateUpcomingHeats([]));
   const [isLoading, setIsLoading] = useState(true);
   const [loadAttempted, setLoadAttempted] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   
   const males = dogs.filter(dog => dog.gender === 'male');
   const females = dogs.filter(dog => dog.gender === 'female');
   
   const { recentMatings, setRecentMatings } = useRecentMatings(plannedLitters);
   
+  // Function to handle visibility change for reloading
   useEffect(() => {
-    const loadLitters = async () => {
-      // Skip if auth isn't ready yet
-      if (!isAuthReady || !user) {
-        console.log('Skipping planned litters load - auth not ready or no user');
-        return;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isAuthReady && user) {
+        // Reload data when page becomes visible again
+        console.log('Page became visible, checking if planned litters need refresh');
+        loadLitters(true);
       }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isAuthReady, user]);
 
-      if (loadAttempted) {
-        // Already tried loading once, don't spam attempts
-        return;
-      }
-      
-      try {
+  const loadLitters = async (isRefresh = false) => {
+    // Skip if auth isn't ready yet
+    if (!isAuthReady || !user) {
+      console.log('Skipping planned litters load - auth not ready or no user');
+      return;
+    }
+
+    if (loadAttempted && !isRefresh) {
+      // Already tried loading once, don't spam attempts unless it's a refresh
+      return;
+    }
+    
+    try {
+      if (!isRefresh) {
         setIsLoading(true);
-        setLoadAttempted(true);
-        
-        console.log("Loading planned litters with retry logic...");
-        
-        // Use fetchWithRetry for more reliable loading
-        const litters = await fetchWithRetry(
-          () => plannedLittersService.loadPlannedLitters(),
-          {
-            maxRetries: 2,
-            initialDelay: 2000,
-            onRetry: (attempt) => {
-              console.log(`Retry attempt ${attempt} for loading planned litters`);
-            }
+      }
+      setLoadAttempted(true);
+      
+      console.log("Loading planned litters with retry logic...");
+      
+      // Use fetchWithRetry for more reliable loading
+      const litters = await fetchWithRetry(
+        () => plannedLittersService.loadPlannedLitters(),
+        {
+          maxRetries: 3, // Increased from 2 to 3
+          initialDelay: 1500, // Decreased from 2000 for faster first retry
+          onRetry: (attempt) => {
+            setRetryCount(attempt);
+            console.log(`Retry attempt ${attempt} for loading planned litters`);
           }
-        );
-        
-        setPlannedLitters(litters);
-        console.log("Planned litters loaded successfully:", litters.length);
-      } catch (error) {
-        console.error('Error loading planned litters:', error);
-        
+        }
+      );
+      
+      setPlannedLitters(litters);
+      console.log("Planned litters loaded successfully:", litters.length);
+    } catch (error) {
+      console.error('Error loading planned litters:', error);
+      
+      // Check if error is auth-related
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      const isAuthError = ['401', 'JWT', 'auth', 'unauthorized', 'token'].some(code => 
+        errorMsg.toLowerCase().includes(code.toLowerCase()));
+      
+      if (isAuthError) {
+        console.warn('Auth-related error detected, not showing toast');
+        // For auth errors, don't show toast as the auth system will handle it
+      } else {
         toast({
           title: "Loading error",
           description: "Failed to load planned litters",
@@ -71,21 +99,24 @@ export const usePlannedLitterQueries = () => {
             className: "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
           }
         });
-        
-        // Set empty array as fallback
-        setPlannedLitters([]);
-      } finally {
-        setIsLoading(false);
       }
-    };
+      
+      // Set empty array as fallback
+      setPlannedLitters([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  // Initial load
+  useEffect(() => {
     // Only load litters when auth is ready and we have a user
     if (isAuthReady && user) {
       loadLitters();
     }
     
     setUpcomingHeats(calculateUpcomingHeats(dogs));
-  }, [dogs, isAuthReady, user, loadAttempted]);
+  }, [dogs, isAuthReady, user]);
 
   // Add an effect to retry loading if needed after a timeout
   useEffect(() => {
@@ -108,5 +139,6 @@ export const usePlannedLitterQueries = () => {
     females,
     isLoading,
     setPlannedLitters,
+    refreshLitters: () => loadLitters(true),
   };
 };

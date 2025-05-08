@@ -12,6 +12,12 @@ export const useArchivedLittersQuery = () => {
   return useQuery({
     queryKey: archivedLittersQueryKey,
     queryFn: async () => {
+      // Verify auth state before fetching
+      if (!isAuthReady) {
+        console.log('Skipping archived litters fetch - auth not ready');
+        return [];
+      }
+      
       // Add more debug logging
       console.log('Fetching archived litters for user:', user?.id);
       try {
@@ -19,6 +25,16 @@ export const useArchivedLittersQuery = () => {
         console.log('Retrieved archived litters:', litters.length);
         return litters;
       } catch (error) {
+        // Check if error is auth-related
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        const isAuthError = ['401', 'JWT', 'auth', 'unauthorized', 'token'].some(code => 
+          errorMsg.toLowerCase().includes(code.toLowerCase()));
+        
+        if (isAuthError) {
+          console.warn('Auth-related error detected in archived litters query');
+          return []; // Return empty array for auth errors
+        }
+        
         console.error('Error fetching archived litters:', error);
         throw error;
       }

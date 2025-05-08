@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 
 export const useDogsQueries = (): UseDogsQueries => {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isAuthReady } = useAuth();
   const userId = user?.id;
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { toast } = useToast();
@@ -30,6 +30,13 @@ export const useDogsQueries = (): UseDogsQueries => {
         console.log('useDogsQueries: No userId provided, returning empty dogs array');
         return [];
       }
+      
+      // Only proceed if auth is ready and we have a valid session
+      if (!isAuthReady) {
+        console.log('useDogsQueries: Auth not ready yet, delaying fetch');
+        return [];
+      }
+      
       try {
         console.log('Fetching dogs from service for user:', userId);
         const data = await fetchDogs(userId);
@@ -43,7 +50,7 @@ export const useDogsQueries = (): UseDogsQueries => {
         setIsInitialLoad(false);
       }
     },
-    enabled: !!userId && !authLoading, // Only run query when userId is available AND auth is done loading
+    enabled: !!userId && isAuthReady, // Only run query when userId is available AND auth is done loading
     staleTime: 60 * 1000, // Consider data fresh for 1 minute
     gcTime: 5 * 60 * 1000, // Keep unused data in cache for 5 minutes
     retry: 2, // Retry failed queries twice
@@ -53,12 +60,36 @@ export const useDogsQueries = (): UseDogsQueries => {
   // Add detailed logging about query status
   useEffect(() => {
     console.log('Dogs query status:', status, 'fetchStatus:', fetchStatus, 'isLoading:', isLoading);
-    console.log('Auth loading:', authLoading, 'Query is enabled:', !!userId && !authLoading);
-  }, [status, fetchStatus, isLoading, userId, authLoading]);
+    console.log('Auth loading:', authLoading, 'Auth ready:', isAuthReady, 'Query is enabled:', !!userId && isAuthReady);
+  }, [status, fetchStatus, isLoading, userId, authLoading, isAuthReady]);
+
+  // Add visibility change listener to handle page resume/wake
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && userId && isAuthReady) {
+        console.log('Page became visible, checking if dogs data needs refresh');
+        // Small delay to allow auth to fully stabilize
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
+        }, 500);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [userId, isAuthReady, queryClient]);
 
   // Improved refresh function with optional skipCache parameter and retry logic
   const refreshDogs = useCallback(async (skipCache = false) => {
     console.log('refreshDogs called with skipCache:', skipCache);
+    
+    // Only proceed if auth is ready
+    if (!isAuthReady) {
+      console.log('refreshDogs: Auth not ready yet, will not attempt refresh');
+      return [];
+    }
     
     if (skipCache) {
       console.log('Invalidating dogs query cache');
@@ -72,13 +103,15 @@ export const useDogsQueries = (): UseDogsQueries => {
       const result = await fetchWithRetry(
         () => refetch(), 
         {
-          maxRetries: 2,
-          initialDelay: 2000,
+          maxRetries: 3, // Increased from 2 to 3 retries for better recovery
+          initialDelay: 1000, // Start with a shorter delay
           onRetry: (attempt) => {
-            toast({
-              title: `Retry ${attempt}/2`,
-              description: "Retrying to fetch dog data..."
-            });
+            if (attempt > 1) { // Only show toast after first retry
+              toast({
+                title: `Retry ${attempt}/3`,
+                description: "Reconnecting to fetch dog data..."
+              });
+            }
           }
         }
       );
@@ -99,13 +132,13 @@ export const useDogsQueries = (): UseDogsQueries => {
       });
       return [];
     }
-  }, [refetch, queryClient, userId, toast]);
+  }, [refetch, queryClient, userId, toast, isAuthReady]);
 
   // Add a timeout for the initial load to prevent infinite loading
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
     
-    if (userId && isInitialLoad && !authLoading) {
+    if (userId && isInitialLoad && isAuthReady) {
       console.log('Initial load - fetching dogs');
       refetch();
       
@@ -135,13 +168,13 @@ export const useDogsQueries = (): UseDogsQueries => {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [userId, refetch, isInitialLoad, dogs.length, error, toast, refreshDogs, authLoading]);
+  }, [userId, refetch, isInitialLoad, dogs.length, error, toast, refreshDogs, isAuthReady]);
 
   return {
     dogs,
-    isLoading: isLoading || isInitialLoad || authLoading,
+    isLoading: isLoading || isInitialLoad || authLoading || !isAuthReady,
     error: error ? (error instanceof Error ? error.message : 'Unknown error') : null,
     fetchDogs: refreshDogs,
-    useDogs: () => ({ data: dogs, isLoading: isLoading || isInitialLoad || authLoading, error })
+    useDogs: () => ({ data: dogs, isLoading: isLoading || isInitialLoad || authLoading || !isAuthReady, error })
   };
 };
