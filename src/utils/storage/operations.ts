@@ -11,9 +11,19 @@ import {
   isSupabaseStorageError,
   getSafeErrorMessage,
   StorageErrorDetails,
-  SupabaseStorageError
+  SupabaseStorageError,
+  isApiErrorResponse,
+  ApiErrorResponse
 } from './config';
 import { getPlatformInfo } from './mobileUpload';
+
+// Safe error property access helper
+const safeGetErrorProperty = <T>(error: unknown, property: string, defaultValue: T): T => {
+  if (error && typeof error === 'object' && property in error) {
+    return (error as any)[property];
+  }
+  return defaultValue;
+};
 
 // Check if bucket exists and is accessible with retries
 export const checkBucketExists = async (): Promise<boolean> => {
@@ -43,15 +53,9 @@ export const checkBucketExists = async (): Promise<boolean> => {
         console.error(`Bucket '${BUCKET_NAME}' check failed:`, result.error);
         // Log more details about the error for troubleshooting
         console.error('Error details:', {
-          message: result.error && typeof result.error === 'object' && 'message' in result.error 
-            ? (result.error as any).message 
-            : 'Unknown error',
-          status: result.error && typeof result.error === 'object' && 'status' in result.error 
-            ? (result.error as any).status 
-            : 'unknown',
-          details: result.error && typeof result.error === 'object' && 'details' in result.error 
-            ? (result.error as any).details 
-            : 'none'
+          message: safeGetErrorProperty(result.error, 'message', 'Unknown error'),
+          status: safeGetErrorProperty(result.error, 'status', 'unknown'),
+          details: safeGetErrorProperty(result.error, 'details', 'none')
         });
         return false;
       }
@@ -83,15 +87,9 @@ const logUploadDetails = (fileName: string, file: File, response: any, startTime
     mobile: platform.mobile,
     success: !response.error,
     error: response.error ? {
-      message: response.error && typeof response.error === 'object' && 'message' in response.error 
-        ? (response.error as any).message 
-        : 'Unknown error',
-      status: response.error && typeof response.error === 'object' && 'status' in response.error 
-        ? (response.error as any).status 
-        : 'unknown',
-      details: response.error && typeof response.error === 'object' && 'details' in response.error 
-        ? (response.error as any).details 
-        : 'none'
+      message: safeGetErrorProperty(response.error, 'message', 'Unknown error'),
+      status: safeGetErrorProperty(response.error, 'status', 'unknown'),
+      details: safeGetErrorProperty(response.error, 'details', 'none')
     } : null,
     response: response.data ? {
       path: response.data.path || 'unknown'

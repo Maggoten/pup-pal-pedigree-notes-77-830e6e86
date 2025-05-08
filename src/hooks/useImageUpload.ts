@@ -13,7 +13,9 @@ import {
   removeFromStorage,
   isStorageError,
   isSupabaseStorageError,
-  getSafeErrorMessage
+  getSafeErrorMessage,
+  isApiErrorResponse,
+  ApiErrorResponse
 } from '@/utils/storage';
 import { processImageForUpload } from '@/utils/storage/imageUtils';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
@@ -23,6 +25,13 @@ interface UseImageUploadProps {
   user_id: string | undefined;
   onImageChange: (imageUrl: string) => void;
 }
+
+// Type guard for response objects
+const hasErrorProperty = (obj: unknown): obj is { error: unknown } => {
+  return typeof obj === 'object' && 
+         obj !== null && 
+         'error' in obj;
+};
 
 export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -65,7 +74,9 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       if (!sessionData.session) {
         // Try to refresh session
         console.log('No active session, attempting to refresh');
-        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+        const refreshResult = await supabase.auth.refreshSession();
+        const refreshError = refreshResult.error;
+        const refreshData = refreshResult.data;
         
         if (refreshError) {
           console.error('Session refresh error:', refreshError);
@@ -127,7 +138,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       clearTimeout();
       
       // Handle upload result
-      if (uploadResult.error) {
+      if (hasErrorProperty(uploadResult) && uploadResult.error) {
         const errorMessage = uploadResult.error instanceof StorageError 
           ? uploadResult.error.message 
           : getSafeErrorMessage(uploadResult.error);
@@ -175,7 +186,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         friendlyMessage = "Safari upload issue. Try a smaller image or use Chrome.";
       } else if (platform.mobile) {
         friendlyMessage = "Mobile upload failed. Try using WiFi or a smaller image file.";
-      } else if (errorMessage.includes("storage")) {
+      } else if (typeof errorMessage === 'string' && errorMessage.includes("storage")) {
         friendlyMessage = "Could not upload image. Please try again with a smaller file.";
       }
       
@@ -214,7 +225,9 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       if (!sessionData.session) {
         // Try to refresh session
         console.log('No active session, attempting to refresh before image removal');
-        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+        const refreshResult = await supabase.auth.refreshSession();
+        const refreshError = refreshResult.error;
+        const refreshData = refreshResult.data;
         
         if (refreshError) {
           console.error('Session refresh error during removal:', refreshError);
@@ -255,11 +268,11 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       console.log('Removing image from storage path:', storagePath);
       
       // Remove file with enhanced logging
-      const { error } = await removeFromStorage(storagePath);
+      const removeResult = await removeFromStorage(storagePath);
       
-      if (error) {
-        console.error('Error removing image:', error);
-        throw error;
+      if (hasErrorProperty(removeResult) && removeResult.error) {
+        console.error('Error removing image:', removeResult.error);
+        throw removeResult.error;
       }
       
       console.log('Image successfully removed');

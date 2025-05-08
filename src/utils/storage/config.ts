@@ -18,7 +18,7 @@ export const STORAGE_ERRORS = {
   CANVAS_ERROR: 'Browser could not process this image. Try a different image format.'
 };
 
-// Storage error interfaces
+// Enhanced error interfaces
 export interface StorageErrorDetails {
   message?: string;
   status?: number;
@@ -32,6 +32,14 @@ export interface SupabaseStorageError {
   details?: string;
 }
 
+export interface ApiErrorResponse {
+  error: string | Error | unknown;
+  status?: number;
+  statusCode?: number;
+  message?: string;
+  details?: string;
+}
+
 // Type guard for checking if an object is a storage error
 export function isStorageError(error: unknown): error is StorageErrorDetails {
   return typeof error === 'object' && 
@@ -41,6 +49,13 @@ export function isStorageError(error: unknown): error is StorageErrorDetails {
 
 // Type guard for checking if an object is a Supabase storage error
 export function isSupabaseStorageError(error: unknown): error is SupabaseStorageError {
+  return typeof error === 'object' && 
+         error !== null && 
+         'error' in error;
+}
+
+// Type guard for API error responses
+export function isApiErrorResponse(error: unknown): error is ApiErrorResponse {
   return typeof error === 'object' && 
          error !== null && 
          'error' in error;
@@ -107,6 +122,8 @@ export const getSafeErrorMessage = (error: unknown): string => {
     return error.message || 'Unknown storage error';
   } else if (typeof error === 'string') {
     return error;
+  } else if (error && typeof error === 'object' && 'message' in error) {
+    return String((error as any).message);
   } else {
     return 'Unknown error occurred';
   }
