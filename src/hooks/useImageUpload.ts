@@ -10,10 +10,10 @@ import {
   checkBucketExists, 
   uploadToStorage, 
   getPublicUrl, 
-  removeFromStorage,
-  processImageForUpload,
-  isSafari
+  removeFromStorage
 } from '@/utils/storage';
+import { processImageForUpload } from '@/utils/storage/imageUtils';
+import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { useUploadTimeout } from '@/hooks/useUploadTimeout';
 
 interface UseImageUploadProps {
@@ -25,8 +25,11 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   const [isUploading, setIsUploading] = useState(false);
   const { startTimeout, clearTimeout } = useUploadTimeout(() => setIsUploading(false));
   const [uploadRetryCount, setUploadRetryCount] = useState(0);
+  const [lastError, setLastError] = useState<string | null>(null);
 
   const uploadImage = async (file: File) => {
+    const platform = getPlatformInfo();
+    
     if (!user_id) {
       console.error('Upload failed: No user ID provided');
       toast({
@@ -41,23 +44,39 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     if (!validateImageFile(file)) return;
     
     setIsUploading(true);
-    console.log(`Starting image upload to bucket: '${BUCKET_NAME}'`);
+    setLastError(null);
+    console.log(`Starting image upload to bucket: '${BUCKET_NAME}'`, {
+      platform: platform.device,
+      fileSize: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+      fileType: file.type || 'unknown'
+    });
     
     try {
       // First check session and refresh if needed
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        throw new Error('Authentication error: ' + sessionError.message);
+      }
+      
       if (!sessionData.session) {
         // Try to refresh session
         console.log('No active session, attempting to refresh');
-        const { data: refreshData } = await supabase.auth.refreshSession();
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+        
+        if (refreshError) {
+          console.error('Session refresh error:', refreshError);
+          throw new Error('Session refresh failed: ' + refreshError.message);
+        }
+        
         if (!refreshData.session) {
-          if (isSafari()) {
-            // Special handling for Safari which has more session issues
-            console.log('Safari detected, making extra refresh attempt');
+          if (platform.safari || platform.mobile) {
+            // Special handling for mobile browsers which have more session issues
+            console.log(`${platform.device} detected, making extra refresh attempt`);
             await new Promise(resolve => setTimeout(resolve, 1000));
             const secondRefresh = await supabase.auth.refreshSession();
             if (!secondRefresh.data.session) {
-              throw new Error('No active session. User authentication is required for uploads.');
+              throw new Error('No active session after multiple refresh attempts. Please login again.');
             }
           } else {
             throw new Error('No active session. User authentication is required for uploads.');
@@ -74,76 +93,49 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       }
       
       // Create a unique filename
-      const fileExt = file.name.split('.').pop() || 'jpg';
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       let fileName = `${user_id}/${Date.now()}.${fileExt}`;
       
-      // Add browser info to filename for troubleshooting
-      if (isSafari()) {
+      // Add platform info to filename for troubleshooting
+      if (platform.mobile) {
+        fileName = `${user_id}/${Date.now()}_${platform.iOS ? 'ios' : 'mobile'}.${fileExt}`;
+      } else if (platform.safari) {
         fileName = `${user_id}/${Date.now()}_safari.${fileExt}`;
       }
       
       // Start timeout monitor
       startTimeout();
       
-      // Process the image (compress if on mobile or Safari)
+      // Process the image with enhanced mobile support
       console.log('Processing image before upload...');
-      const processedFile = await processImageForUpload(file);
-      console.log(`Image processed: original size ${file.size} bytes, processed size ${processedFile.size} bytes`);
-
-      // Upload with retry logic
-      const maxRetries = isSafari() ? 3 : 2;
-      let uploadResult;
-      let retryCount = 0;
-      let lastError;
-      
-      while (retryCount <= maxRetries) {
-        try {
-          console.log(`Upload attempt ${retryCount + 1}/${maxRetries + 1}`);
-          uploadResult = await uploadToStorage(fileName, processedFile);
-          
-          if (!uploadResult.error) {
-            console.log('Upload successful!');
-            break;
-          }
-          
-          lastError = uploadResult.error;
-          console.log(`Upload attempt ${retryCount + 1} failed:`, lastError);
-          
-          // Check if it's worth retrying
-          if (retryCount < maxRetries) {
-            const retryDelay = 1000 * Math.pow(1.5, retryCount);
-            console.log(`Retrying in ${retryDelay}ms...`);
-            await new Promise(resolve => setTimeout(resolve, retryDelay));
-          }
-          
-          retryCount++;
-        } catch (err) {
-          lastError = err;
-          console.error(`Upload attempt ${retryCount + 1} error:`, err);
-          
-          if (retryCount < maxRetries) {
-            const retryDelay = 1000 * Math.pow(1.5, retryCount);
-            console.log(`Retrying in ${retryDelay}ms...`);
-            await new Promise(resolve => setTimeout(resolve, retryDelay));
-          }
-          
-          retryCount++;
-        }
+      let processedFile;
+      try {
+        processedFile = await processImageForUpload(file);
+        console.log(`Image processed: original size ${file.size} bytes, processed size ${processedFile.size} bytes`);
+      } catch (processError) {
+        console.error('Image processing failed, using original file:', processError);
+        processedFile = file;
       }
+
+      // Upload with enhanced logging
+      const uploadResult = await uploadToStorage(fileName, processedFile);
       
       // Clear the upload timeout
       clearTimeout();
       
-      // Handle final upload result
-      if (!uploadResult || uploadResult.error) {
-        const errorMessage = lastError instanceof StorageError 
-          ? lastError.message 
+      // Handle upload result
+      if (uploadResult.error) {
+        const errorMessage = uploadResult.error instanceof StorageError 
+          ? uploadResult.error.message 
           : "Could not upload the image";
         
-        console.error('Final upload error:', {
-          error: lastError,
+        console.error('Upload error:', {
+          error: uploadResult.error,
           message: errorMessage,
-          bucket: BUCKET_NAME
+          bucket: BUCKET_NAME,
+          fileName,
+          fileSize: `${(processedFile.size / 1024 / 1024).toFixed(2)}MB`,
+          platform: platform.device
         });
 
         throw new Error(errorMessage);
@@ -151,7 +143,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       
       console.log('Upload successful, getting public URL');
       
-      // Get the public URL with cache busting for Safari
+      // Get the public URL with cache busting
       const { data: { publicUrl } } = getPublicUrl(fileName);
       
       console.log('Generated public URL:', publicUrl);
@@ -165,17 +157,24 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       setUploadRetryCount(0); // Reset retry counter on success
     } catch (error) {
       console.error('Error uploading image:', error);
+      setLastError(error instanceof Error ? error.message : 'Unknown error');
       
       const errorMessage = error instanceof Error 
         ? error.message 
         : "An unexpected error occurred";
       
-      // More helpful error messages based on browser
-      const friendlyMessage = isSafari() 
-        ? "Safari upload issue. Try a smaller image or use Chrome."
-        : errorMessage.includes("storage") 
-          ? "Could not upload image. Please try again with a smaller file."
-          : errorMessage;
+      // Platform-specific error messages
+      let friendlyMessage = errorMessage;
+      
+      if (platform.iOS) {
+        friendlyMessage = "iOS upload issue. Try a smaller image (under 2MB) or use a different device.";
+      } else if (platform.safari) {
+        friendlyMessage = "Safari upload issue. Try a smaller image or use Chrome.";
+      } else if (platform.mobile) {
+        friendlyMessage = "Mobile upload failed. Try using WiFi or a smaller image file.";
+      } else if (errorMessage.includes("storage")) {
+        friendlyMessage = "Could not upload image. Please try again with a smaller file.";
+      }
       
       toast({
         title: "Upload Failed",
@@ -189,6 +188,8 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   };
 
   const removeImage = async (imageUrl: string, userId: string) => {
+    const platform = getPlatformInfo();
+    
     if (!imageUrl || !imageUrl.includes(BUCKET_NAME) || !userId) {
       console.log('Skipping image removal: Invalid image URL or user ID', {
         imageUrl,
@@ -201,18 +202,29 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     
     try {
       // Verify session and refresh if needed
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error('Session error during removal:', sessionError);
+        throw new Error('Authentication error: ' + sessionError.message);
+      }
+      
       if (!sessionData.session) {
         // Try to refresh session
         console.log('No active session, attempting to refresh before image removal');
-        const { data: refreshData } = await supabase.auth.refreshSession();
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+        
+        if (refreshError) {
+          console.error('Session refresh error during removal:', refreshError);
+          throw new Error('Session refresh failed: ' + refreshError.message);
+        }
+        
         if (!refreshData.session) {
-          if (isSafari()) {
-            // Extra attempt for Safari
+          if (platform.safari || platform.mobile) {
+            // Extra attempt for mobile browsers
             await new Promise(resolve => setTimeout(resolve, 1000));
             const secondRefresh = await supabase.auth.refreshSession();
             if (!secondRefresh.data.session) {
-              throw new Error('No active session. User authentication is required.');
+              throw new Error('No active session after multiple refresh attempts. Please login again.');
             }
           } else {
             throw new Error('No active session. User authentication is required.');
@@ -239,43 +251,15 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       const storagePath = urlParts.slice(storageIndex + 1).join('/');
       console.log('Removing image from storage path:', storagePath);
       
-      // Remove file with retry for Safari
-      const maxRetries = isSafari() ? 2 : 1;
-      let retryCount = 0;
-      let lastError;
+      // Remove file with enhanced logging
+      const { error } = await removeFromStorage(storagePath);
       
-      while (retryCount <= maxRetries) {
-        try {
-          const { error } = await removeFromStorage(storagePath);
-          
-          if (!error) {
-            console.log('Image successfully removed');
-            break;
-          }
-          
-          lastError = error;
-          
-          if (retryCount < maxRetries) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-          
-          retryCount++;
-        } catch (err) {
-          lastError = err;
-          
-          if (retryCount < maxRetries) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-          
-          retryCount++;
-        }
+      if (error) {
+        console.error('Error removing image:', error);
+        throw error;
       }
       
-      if (lastError) {
-        console.error('Error removing image after all retries:', lastError);
-        throw lastError;
-      }
-      
+      console.log('Image successfully removed');
       onImageChange('');
       
       toast({
@@ -285,6 +269,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     } catch (error) {
       console.error('Error removing image:', error);
       
+      // Don't block UI flow even if removal fails
       toast({
         title: "Remove Failed",
         description: "Failed to remove image. The update will continue without removing the old image.",
@@ -297,6 +282,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
   return {
     isUploading,
     uploadImage,
-    removeImage
+    removeImage,
+    lastError
   };
 };

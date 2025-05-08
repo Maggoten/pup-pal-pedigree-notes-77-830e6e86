@@ -8,6 +8,7 @@ import {
   isSafari,
   getStorageTimeout
 } from './config';
+import { getPlatformInfo } from './mobileUpload';
 
 // Check if bucket exists and is accessible with retries
 export const checkBucketExists = async (): Promise<boolean> => {
@@ -35,6 +36,12 @@ export const checkBucketExists = async (): Promise<boolean> => {
       
       if (result.error) {
         console.error(`Bucket '${BUCKET_NAME}' check failed:`, result.error);
+        // Log more details about the error for troubleshooting
+        console.error('Error details:', {
+          message: result.error.message,
+          status: result.error.status || 'unknown',
+          details: result.error.details || 'none'
+        });
         return false;
       }
       
@@ -50,12 +57,40 @@ export const checkBucketExists = async (): Promise<boolean> => {
   }
 };
 
+// Log detailed upload request and response information
+const logUploadDetails = (fileName: string, file: File, response: any, startTime: number) => {
+  const duration = Date.now() - startTime;
+  const platform = getPlatformInfo();
+  
+  console.log('Upload details:', {
+    fileName,
+    fileSize: `${(file.size / 1024).toFixed(1)}KB`,
+    fileType: file.type || 'unknown',
+    duration: `${duration}ms`,
+    platform: platform.device,
+    safari: platform.safari,
+    mobile: platform.mobile,
+    success: !response.error,
+    error: response.error ? {
+      message: response.error.message,
+      status: response.error.status || 'unknown',
+      details: response.error.details || 'none'
+    } : null,
+    response: response.data ? {
+      path: response.data.path || 'unknown'
+    } : 'no data'
+  });
+};
+
 // Safari-optimized upload function with enhanced retry logic
 export const uploadToStorage = async (
   fileName: string, 
   file: File, 
   onProgress?: (progress: number) => void
 ) => {
+  const startTime = Date.now();
+  const platform = getPlatformInfo();
+  
   try {
     // First verify auth session
     const { data: sessionData } = await supabase.auth.getSession();
@@ -65,7 +100,13 @@ export const uploadToStorage = async (
     }
     
     // Log attempt for debugging
-    console.log(`[Storage] Attempting to upload ${fileName} to bucket '${BUCKET_NAME}', size: ${file.size} bytes, browser: ${isSafari() ? 'Safari' : 'Other'}`);
+    console.log(`[Storage] Attempting to upload ${fileName} to bucket '${BUCKET_NAME}'`, {
+      size: `${(file.size / 1024).toFixed(1)}KB`,
+      type: file.type || 'unknown',
+      platform: platform.device,
+      safari: platform.safari,
+      mobile: platform.mobile
+    });
     
     // Verify bucket exists before attempting upload
     const bucketExists = await checkBucketExists();
@@ -74,30 +115,34 @@ export const uploadToStorage = async (
       throw new Error(STORAGE_ERRORS.BUCKET_NOT_FOUND(BUCKET_NAME));
     }
     
-    // Adjust timeout and retry count for Safari
-    const maxRetries = isSafari() || isMobileDevice() ? 4 : 3;
-    const initialDelay = isSafari() ? 3000 : 2000;
+    // Adjust timeout and retry count for mobile/Safari
+    const maxRetries = platform.mobile || platform.safari ? 4 : 3;
+    const initialDelay = platform.safari ? 3000 : 2000;
     
-    // Upload with enhanced retry logic for Safari
-    return await fetchWithRetry(
-      () => {
-        // For Safari, we'll use a slightly different approach
-        if (isSafari()) {
-          console.log('Using Safari-optimized upload approach');
-          // In Safari, sometimes the upload can stall, so we'll use a custom timeout
-          return Promise.race([
-            supabase.storage
-              .from(BUCKET_NAME)
-              .upload(fileName, file, {
-                cacheControl: '3600',
-                upsert: true
-              }),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Safari upload timeout')), getStorageTimeout())
-            )
-          ]);
+    // Upload with enhanced retry logic
+    const result = await fetchWithRetry(
+      async () => {
+        // Special handling for Safari and mobile devices
+        if (platform.mobile || platform.safari) {
+          console.log('Using mobile-optimized upload approach');
+          
+          // Use a custom timeout for mobile uploads
+          const uploadPromise = supabase.storage
+            .from(BUCKET_NAME)
+            .upload(fileName, file, {
+              cacheControl: '3600',
+              upsert: true
+            });
+            
+          // Race against a timeout
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error(`Upload timeout after ${getStorageTimeout()}ms`)), 
+            getStorageTimeout())
+          );
+          
+          return Promise.race([uploadPromise, timeoutPromise]);
         } else {
-          // Standard upload for other browsers
+          // Standard upload for desktop browsers
           return supabase.storage
             .from(BUCKET_NAME)
             .upload(fileName, file, {
@@ -110,19 +155,54 @@ export const uploadToStorage = async (
         maxRetries,
         initialDelay,
         useBackoff: true,
+        shouldRetry: (error) => {
+          // More selective retry logic for different error types
+          if (error && typeof error === 'object' && 'statusCode' in error) {
+            // Don't retry 413 (payload too large) errors
+            if (error.statusCode === 413) return false;
+            // Don't retry 400 errors that indicate malformed requests
+            if (error.statusCode === 400 && error.message?.includes('Invalid')) return false;
+          }
+          return true;
+        },
         onRetry: (attempt, error) => {
           console.log(`Retrying upload to '${BUCKET_NAME}', attempt ${attempt}, error:`, error);
           if (onProgress) onProgress(-1); // Signal retry to UI
         }
       }
     );
+    
+    // Log detailed response information
+    logUploadDetails(fileName, file, result, startTime);
+    
+    if (result.error) {
+      console.error(`Upload error to bucket '${BUCKET_NAME}':`, result.error);
+      
+      // Enhanced error reporting
+      let errorMessage = result.error instanceof Error ? result.error.message : 'Upload failed';
+      if (platform.safari && errorMessage.includes('timeout')) {
+        errorMessage = 'Upload timed out. Please try a smaller file or switch browsers.';
+      }
+      
+      return { 
+        data: null, 
+        error: new StorageError(errorMessage, result.error.status, result.error.details)
+      };
+    }
+    
+    return result;
+    
   } catch (error) {
     console.error(`Upload error to bucket '${BUCKET_NAME}':`, error);
     
-    // Enhanced error reporting for Safari
+    // Enhanced error reporting for mobile/Safari
     let errorMessage = error instanceof Error ? error.message : 'Upload failed';
-    if (isSafari() && errorMessage.includes('timeout')) {
-      errorMessage = 'Safari upload timed out. Please try again with a smaller file or using Chrome.';
+    if (platform.mobile || platform.safari) {
+      if (errorMessage.includes('timeout')) {
+        errorMessage = `${platform.device} upload timed out. Try a smaller file (under 2MB).`;
+      } else if (file.size > 3 * 1024 * 1024) { // 3MB
+        errorMessage = `File may be too large (${(file.size/1024/1024).toFixed(1)}MB) for ${platform.device}.`;
+      }
     }
     
     return { 
@@ -132,20 +212,22 @@ export const uploadToStorage = async (
   }
 };
 
-// Get public URL for a file - with Safari cache-busting when needed
+// Get public URL for a file - with cache-busting when needed
 export const getPublicUrl = (fileName: string) => {
   const result = supabase.storage.from(BUCKET_NAME).getPublicUrl(fileName);
   
-  // For Safari, add a cache-busting parameter to prevent caching issues
-  if (isSafari() && result.data?.publicUrl) {
-    const separator = result.data.publicUrl.includes('?') ? '&' : '?';
-    result.data.publicUrl += `${separator}_t=${Date.now()}`;
+  // For Safari/mobile, add a cache-busting parameter
+  if (isSafari() || isMobileDevice()) {
+    if (result.data?.publicUrl) {
+      const separator = result.data.publicUrl.includes('?') ? '&' : '?';
+      result.data.publicUrl += `${separator}_t=${Date.now()}`;
+    }
   }
   
   return result;
 };
 
-// Remove file from storage with enhanced retry logic for Safari
+// Remove file from storage with enhanced retry logic
 export const removeFromStorage = async (storagePath: string) => {
   try {
     // Verify session first
@@ -164,13 +246,13 @@ export const removeFromStorage = async (storagePath: string) => {
     
     console.log(`[Storage] Attempting to remove ${storagePath} from bucket '${BUCKET_NAME}'`);
     
-    // Use more retries for Safari
+    // Use more retries for mobile/Safari
     return await fetchWithRetry(
       () => supabase.storage
         .from(BUCKET_NAME)
         .remove([storagePath]),
       { 
-        maxRetries: isSafari() ? 3 : 2, 
+        maxRetries: isSafari() || isMobileDevice() ? 3 : 2, 
         initialDelay: isSafari() ? 2000 : 1000,
         useBackoff: true
       }

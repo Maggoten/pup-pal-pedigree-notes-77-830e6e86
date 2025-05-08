@@ -12,18 +12,36 @@ export const STORAGE_ERRORS = {
   SAFARI_STORAGE_ERROR: 'Safari storage access error, trying alternative method',
   RETRY_EXCEEDED: 'Maximum retry attempts exceeded',
   FILE_TOO_LARGE: (size: number) => `File size (${(size/1024/1024).toFixed(1)}MB) exceeds the maximum allowed`,
-  INVALID_FILE_TYPE: 'Invalid file type. Please upload an image file.'
+  INVALID_FILE_TYPE: 'Invalid file type. Please upload an image file.',
+  COMPRESSION_ERROR: 'Failed to compress image. Trying direct upload.',
+  MOBILE_UPLOAD_ERROR: 'Mobile upload issue. Try using a smaller image (under 2MB).',
+  CANVAS_ERROR: 'Browser could not process this image. Try a different image format.'
 };
 
-// Safari detection utility
+// Enhanced Safari detection
 export const isSafari = (): boolean => {
-  const userAgent = navigator.userAgent;
-  return userAgent.includes('Safari') && !userAgent.includes('Chrome') && !userAgent.includes('Android');
+  const userAgent = navigator.userAgent.toLowerCase();
+  return (
+    (userAgent.includes('safari') && !userAgent.includes('chrome') && !userAgent.includes('android')) ||
+    // iPad on iOS 13+ detection
+    (userAgent.includes('macintosh') && navigator.maxTouchPoints > 1 && !userAgent.includes('chrome'))
+  );
 };
 
-// Increase timeouts for Safari browsers
+// Mobile-aware timeouts
 export const getStorageTimeout = (): number => {
-  return isSafari() ? 45000 : 30000; // 45 seconds for Safari, 30 for others
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isMobile = /iphone|ipad|ipod|android/i.test(userAgent);
+  
+  if (isSafari() && isMobile) {
+    return 60000; // 60 seconds for mobile Safari
+  } else if (isSafari()) {
+    return 45000; // 45 seconds for desktop Safari
+  } else if (isMobile) {
+    return 50000; // 50 seconds for other mobile browsers
+  } else {
+    return 30000; // 30 seconds for desktop browsers
+  }
 };
 
 // Extended MIME types Safari might use

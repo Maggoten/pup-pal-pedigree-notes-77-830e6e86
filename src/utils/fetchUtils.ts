@@ -1,104 +1,100 @@
 
-/**
- * Utility for making fetch requests with automatic retries
- */
+// Enhanced fetch utilities with better mobile support
 
-// Detect if we're on a mobile device
+// Check if we're on a mobile device
 export const isMobileDevice = (): boolean => {
-  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  return /iphone|ipad|ipod|android|blackberry|windows phone/i.test(navigator.userAgent) ||
+    // iPad detection on iOS 13+
+    (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 };
 
-// Returns an appropriate timeout value based on device type
-export const getDeviceAwareTimeout = (): number => {
-  return isMobileDevice() ? 15000 : 10000; // 15s for mobile, 10s for desktop
-};
-
-// Options for fetch retry
-interface RetryOptions {
-  maxRetries: number;
-  initialDelay: number;
-  retryStatusCodes?: number[];
-  onRetry?: (attempt: number, error?: any) => void;
-  useBackoff?: boolean;
-}
-
-// Default retry options
-const defaultRetryOptions: RetryOptions = {
-  maxRetries: 2,
-  initialDelay: 1000,
-  retryStatusCodes: [408, 429, 500, 502, 503, 504], // Common retry-able status codes
-  useBackoff: true
-};
-
-/**
- * Determines if a request should be retried based on the error
- * @param error The error from the failed request
- * @param retryStatusCodes Array of status codes that should be retried
- * @returns Boolean indicating if the request should be retried
- */
-export const shouldRetryRequest = (error: any, retryStatusCodes: number[] = []): boolean => {
-  // If no status code is present, retry (network error)
-  if (!error.status && !error.statusCode && !error.response?.status) {
-    return true;
+// Get device-aware timeout values
+export const getDeviceAwareTimeout = (baseTimeout: number): number => {
+  if (isMobileDevice()) {
+    // Mobile devices get more generous timeouts due to potential network issues
+    return baseTimeout * 1.5;
   }
-  
-  // Get the status code from various error formats
-  const statusCode = error.status || error.statusCode || error.response?.status;
-  
-  // Retry if status code is in the retry list
-  return retryStatusCodes.includes(statusCode);
+  return baseTimeout;
 };
 
-/**
- * Execute a fetch operation with automatic retries
- * @param fetchFn The fetch function to execute (returns a Promise)
- * @param options Retry options
- * @returns Result of the fetch operation
- */
-export const fetchWithRetry = async <T>(
-  fetchFn: () => Promise<T>,
-  options?: Partial<RetryOptions>
-): Promise<T> => {
-  const retryOptions = { ...defaultRetryOptions, ...options };
-  let lastError: Error | null = null;
+type RetryOptions = {
+  maxRetries?: number;
+  initialDelay?: number;
+  useBackoff?: boolean;
+  onRetry?: (attempt: number, error?: any) => void;
+  shouldRetry?: (error: any) => boolean;
+};
+
+// General retry utility for any async operation
+export async function fetchWithRetry<T>(
+  operation: () => Promise<T>,
+  options: RetryOptions = {}
+): Promise<T> {
+  const {
+    maxRetries = 2,
+    initialDelay = 1000,
+    useBackoff = true,
+    onRetry,
+    shouldRetry = () => true
+  } = options;
   
-  for (let attempt = 0; attempt <= retryOptions.maxRetries; attempt++) {
+  let attempt = 0;
+  let lastError: any;
+  
+  while (attempt <= maxRetries) {
     try {
-      if (attempt > 0) {
-        console.log(`[Fetch] Retry attempt ${attempt}/${retryOptions.maxRetries}`);
-        
-        // Call onRetry callback if provided
-        if (retryOptions.onRetry) {
-          retryOptions.onRetry(attempt, lastError);
-        }
-      }
-      
-      return await fetchFn();
-    } catch (error: any) {
+      return await operation();
+    } catch (error) {
       lastError = error;
-      console.error(`[Fetch] Attempt ${attempt + 1} failed:`, error);
       
-      // Check if we should retry based on status code
-      const statusCode = error.status || error.statusCode || (error.response?.status);
-      const shouldRetry = !statusCode || 
-        (retryOptions.retryStatusCodes?.includes(statusCode));
-      
-      // Stop if no more retries or shouldn't retry this type of error
-      if (attempt >= retryOptions.maxRetries || !shouldRetry) {
+      // Check if we should retry this error
+      if (!shouldRetry(error)) {
+        console.log('Not retrying based on error type:', error);
         break;
       }
       
-      // Wait with exponential backoff before retrying if useBackoff is enabled
-      let delay = retryOptions.initialDelay;
-      if (retryOptions.useBackoff) {
-        delay = retryOptions.initialDelay * Math.pow(1.5, attempt);
+      if (attempt < maxRetries) {
+        // Calculate delay with exponential backoff if enabled
+        const delay = useBackoff 
+          ? initialDelay * Math.pow(2, attempt)
+          : initialDelay;
+        
+        console.log(`Operation failed, retry ${attempt + 1}/${maxRetries} in ${delay}ms`, error);
+        
+        if (onRetry) {
+          onRetry(attempt + 1, error);
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
       
-      console.log(`[Fetch] Waiting ${delay}ms before retry...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      attempt++;
     }
   }
   
-  // If we got here, all attempts failed
-  throw lastError || new Error('All fetch attempts failed');
+  throw lastError;
+}
+
+// Determine if a request error should be retried
+export const shouldRetryRequest = (error: any): boolean => {
+  // Don't retry 4xx errors (client errors)
+  if (error && typeof error === 'object') {
+    // For Supabase errors with status codes
+    if ('statusCode' in error && error.statusCode >= 400 && error.statusCode < 500) {
+      // Don't retry client errors except for 408 (timeout)
+      if (error.statusCode !== 408) {
+        return false;
+      }
+    }
+    
+    // For fetch Response objects
+    if ('status' in error && error.status >= 400 && error.status < 500) {
+      // Don't retry client errors except for 408 (timeout)
+      if (error.status !== 408) {
+        return false;
+      }
+    }
+  }
+  
+  return true;
 };
