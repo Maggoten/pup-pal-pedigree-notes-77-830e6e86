@@ -57,7 +57,7 @@ export const formatStorageError = (error: unknown, fileSize?: number): string =>
  */
 export const createStorageError = (message: string): { error: StorageError } => {
   return { 
-    data: null, 
     error: new StorageError(message) 
   };
 };
+
