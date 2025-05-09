@@ -41,6 +41,12 @@ const safeGetErrorProperty = <T>(obj: unknown, prop: string, defaultValue: T): T
   return defaultValue;
 };
 
+// Type for UploadResult to help with type safety
+interface UploadResult {
+  data?: { path: string };
+  error?: unknown;
+}
+
 export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const { startTimeout, clearTimeout } = useUploadTimeout(() => setIsUploading(false));
@@ -153,11 +159,18 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
 
       // Upload with enhanced logging
       console.log(`Starting upload of file ${fileName} to storage...`);
-      const uploadResult = await uploadToStorage(fileName, processedFile);
+      const uploadResult = await uploadToStorage(fileName, processedFile) as UploadResult;
+      
+      // Properly check properties with type safety
+      const hasError = hasErrorProperty(uploadResult);
+      const errorMessage = hasError ? getSafeErrorMessage(uploadResult.error) : 'none';
+      const hasData = uploadResult && typeof uploadResult === 'object' && 'data' in uploadResult;
+      const statusCode = hasError ? safeGetErrorProperty(uploadResult.error, 'statusCode', null) : null;
+      
       console.log('Upload result received:', {
-        error: uploadResult.error ? getSafeErrorMessage(uploadResult.error) : 'none',
-        data: uploadResult.data ? 'success' : 'no data',
-        statusCode: safeGetErrorProperty(uploadResult.error, 'statusCode', null)
+        error: errorMessage,
+        data: hasData ? 'success' : 'no data',
+        statusCode: statusCode
       });
       
       // Clear the upload timeout
