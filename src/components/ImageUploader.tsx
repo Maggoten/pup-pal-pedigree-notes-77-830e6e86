@@ -149,22 +149,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
-  // Show platform-specific guidance if needed
+  // Remove mobile help warning completely by returning null
   const renderMobileHelp = () => {
-    if (!platform.mobile && !platform.safari) return null;
-    
-    return (
-      <div className="mt-1 flex items-center text-xs text-amber-600">
-        <AlertTriangle className="h-3 w-3 mr-1 flex-shrink-0" />
-        {platform.iOS ? (
-          <span>For best results on iOS, use smaller images (under 2MB)</span>
-        ) : platform.safari ? (
-          <span>For best results in Safari, use smaller images (under 2MB)</span>
-        ) : (
-          <span>For best results on mobile, use smaller images (under 2MB)</span>
-        )}
-      </div>
-    );
+    return null;
   };
 
   return (
@@ -213,7 +200,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         onChange={handleFileChange}
         accept="image/*"
         className="hidden"
-        capture={platform.mobile ? "environment" : undefined}
       />
     </div>
   );

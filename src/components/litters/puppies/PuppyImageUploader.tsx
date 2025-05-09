@@ -137,16 +137,9 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
     ? "bottom-2 right-2"
     : "bottom-0 right-0";
 
-  // Show Safari-specific guidance if needed
+  // Remove Safari help by returning null
   const renderSafariHelp = () => {
-    if (!isSafariBrowser) return null;
-    
-    return (
-      <div className="mt-1 flex items-center text-xs text-amber-600 justify-center">
-        <AlertTriangle className="h-3 w-3 mr-1 flex-shrink-0" />
-        <span>Use small images in Safari</span>
-      </div>
-    );
+    return null;
   };
 
   return (
