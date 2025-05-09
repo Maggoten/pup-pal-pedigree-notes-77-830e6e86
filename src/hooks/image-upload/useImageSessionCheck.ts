@@ -25,7 +25,8 @@ export const useImageSessionCheck = () => {
     // For mobile, add additional delay to ensure auth is fully ready
     if (isMobile && !isAuthReady) {
       console.log(`[ImageSessionCheck] Mobile detected (${platform.device}), adding extra delay before validation`);
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Increased delay from 1500ms to 3000ms for mobile devices
+      await new Promise(resolve => setTimeout(resolve, 3000));
       
       // Recheck auth readiness after delay
       if (!isAuthReady) {
@@ -37,7 +38,8 @@ export const useImageSessionCheck = () => {
     return verifySession({
       respectAuthReady: true,
       authReady: isAuthReady,
-      skipThrow: false,
+      // Changed to true to avoid throwing errors on mobile
+      skipThrow: isMobile ? true : false,
       platform: platform
     });
   };

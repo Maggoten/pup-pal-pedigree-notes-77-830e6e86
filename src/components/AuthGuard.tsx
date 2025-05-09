@@ -26,10 +26,11 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // This helps prevent flash of auth errors during initialization
   // Use longer delay for mobile devices
   useEffect(() => {
+    // Increased delay from 2500ms to 3500ms for mobile
     const timer = setTimeout(() => {
       setDelayComplete(true);
       console.log('[AuthGuard] Initial delay complete, can show auth errors now');
-    }, isMobile ? 2500 : 1000); // Increased delay for mobile
+    }, isMobile ? 3500 : 1000); // Increased delay for mobile
     
     return () => clearTimeout(timer);
   }, [isMobile]);
@@ -41,6 +42,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     // On mobile, we add extra time before forcing a redirect
     // This helps prevent premature redirects during slow session restoration
     if (isMobile && !isLoggedIn && !isLoginPage) {
+      // Increased timeout from 4000ms to 6000ms
       const timer = setTimeout(() => {
         console.log('[AuthGuard] Mobile auth timeout reached, checking auth state again');
         // Only set timeout if auth is actually ready - prevents premature redirects
@@ -50,6 +52,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         } else if (!isAuthReady) {
           console.log('[AuthGuard] Auth not ready yet, delaying redirect decision');
           // If auth is not ready yet, give it more time
+          // Increased extended timeout from 2500ms to 3500ms
           const extendedTimer = setTimeout(() => {
             console.log('[AuthGuard] Extended timeout reached, proceeding with redirect decision');
             // After extended timeout, only proceed if auth is ready
@@ -58,15 +61,16 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             } else {
               // If auth still not ready, give one more extended chance
               console.log('[AuthGuard] Auth still not ready after extended timeout, giving one more chance');
+              // Increased final timer from 2000ms to 3000ms
               const finalTimer = setTimeout(() => {
                 setMobileAuthTimeout(true);
-              }, 2000);
+              }, 3000);
               return () => clearTimeout(finalTimer);
             }
-          }, 2500); // Additional 2.5s
+          }, 3500); // Additional 3.5s
           return () => clearTimeout(extendedTimer);
         }
-      }, 4000); // Increased from 3.5s to 4s for mobile devices
+      }, 6000); // Increased from 4s to 6s for mobile devices
       
       return () => clearTimeout(timer);
     }
@@ -101,9 +105,15 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       });
       
       setShowingToast(true);
+      
+      // Customize message for mobile
+      const message = isMobile 
+        ? "Please log in to continue. If you were previously logged in, please try refreshing the page."
+        : "Please log in to access this page";
+      
       toast({
         title: "Authentication required",
-        description: "Please log in to access this page",
+        description: message,
         variant: "destructive",
         onOpenChange: (open) => {
           if (!open) setShowingToast(false);

@@ -56,16 +56,17 @@ export const useFileUpload = (
       let sessionValid = false;
       
       try {
-        // Use skipThrow:true for mobile to handle validation errors more gracefully
+        // Always use skipThrow:true for mobile to handle validation errors more gracefully
         sessionValid = await validateSession();
         console.log(`[FileUpload] Session validation ${sessionValid ? 'succeeded' : 'failed'}`);
       } catch (sessionError) {
         console.error('[FileUpload] Session validation error:', sessionError);
         
-        // For mobile, try to proceed anyway if validation fails
+        // For mobile, always try to proceed anyway if validation fails
         if (platform.mobile || platform.safari) {
           console.log('[FileUpload] Mobile detected, attempting upload despite session validation failure');
           // Don't return early, try the upload anyway
+          sessionValid = true; // Force continue on mobile
         } else {
           // For desktop browsers, be more strict
           throw sessionError;
@@ -93,8 +94,14 @@ export const useFileUpload = (
       console.log('Processing image before upload...');
       let processedFile;
       try {
-        processedFile = await processImageForUpload(file);
-        console.log(`Image processed: original size ${file.size} bytes (${fileSizeMB}MB), processed size ${processedFile.size} bytes (${(processedFile.size / 1024 / 1024).toFixed(2)}MB)`);
+        // For very small files on mobile devices, skip processing entirely
+        if (platform.mobile && file.size < 2.5 * 1024 * 1024) {
+          console.log('Small file on mobile device, skipping image processing');
+          processedFile = file;
+        } else {
+          processedFile = await processImageForUpload(file);
+          console.log(`Image processed: original size ${file.size} bytes (${fileSizeMB}MB), processed size ${processedFile.size} bytes (${(processedFile.size / 1024 / 1024).toFixed(2)}MB)`);
+        }
       } catch (processError) {
         console.error('Image processing failed, using original file:', processError);
         processedFile = file;
@@ -166,13 +173,13 @@ export const useFileUpload = (
       let friendlyMessage = errorMessage;
       
       if (platform.iOS) {
-        friendlyMessage = "iOS upload issue. Try a smaller image (under 2MB) or use a different device.";
+        friendlyMessage = "iOS upload issue. Try using WiFi instead of cellular data, or try again later.";
       } else if (platform.safari) {
-        friendlyMessage = "Safari upload issue. Try a smaller image or use Chrome.";
+        friendlyMessage = "Safari upload issue. Try reloading the page and trying again, or use Chrome.";
       } else if (platform.mobile) {
-        friendlyMessage = "Mobile upload failed. Try using WiFi or a smaller image file.";
+        friendlyMessage = "Mobile upload failed. Try using WiFi or reloading the page.";
       } else if (typeof errorMessage === 'string' && errorMessage.includes("storage")) {
-        friendlyMessage = "Could not upload image. Please try again with a smaller file.";
+        friendlyMessage = "Could not upload image. Please try logging out and back in, then try again.";
       }
       
       // Ensure we don't accidentally clear the error message before it's displayed

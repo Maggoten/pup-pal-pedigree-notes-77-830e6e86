@@ -57,7 +57,11 @@ export const uploadToStorage = async (
   try {
     // Verify session and bucket exist
     try {
-      await verifySession();
+      // For mobile, skip session validation errors
+      await verifySession({
+        skipThrow: platform.mobile || platform.safari,
+        platform: platform
+      });
       
       const bucketExists = await checkBucketExists();
       if (!bucketExists) {
@@ -65,8 +69,13 @@ export const uploadToStorage = async (
         throw new Error(STORAGE_ERRORS.BUCKET_NOT_FOUND(BUCKET_NAME));
       }
     } catch (error) {
-      console.error('Pre-upload checks failed:', error);
-      throw error;
+      // For mobile, proceed even if pre-checks fail
+      if (platform.mobile || platform.safari) {
+        console.log('Pre-upload checks failed on mobile, but proceeding with upload anyway:', error);
+      } else {
+        console.error('Pre-upload checks failed:', error);
+        throw error;
+      }
     }
     
     // Log attempt for debugging
@@ -79,8 +88,10 @@ export const uploadToStorage = async (
     });
     
     // Adjust timeout and retry count for mobile/Safari
-    const maxRetries = platform.mobile || platform.safari ? 4 : 3;
-    const initialDelay = platform.safari ? 3000 : 2000;
+    // Increased maxRetries from 4 to 5 for mobile
+    const maxRetries = platform.mobile || platform.safari ? 5 : 3;
+    // Increased initial delay from 3000ms to 4000ms for Safari
+    const initialDelay = platform.safari ? 4000 : 2000;
     
     // Upload with enhanced retry logic
     const result = await fetchWithRetry(
@@ -99,8 +110,10 @@ export const uploadToStorage = async (
               upsert: true
             });
             
-          // Race against a timeout
-          const timeout = getStorageTimeout();
+          // Race against a timeout - Increased timeout for mobile
+          // Get from config but ensure it's at least 60 seconds on mobile
+          const configTimeout = getStorageTimeout();
+          const timeout = platform.mobile ? Math.max(configTimeout, 60000) : configTimeout;
           console.log(`Setting timeout for upload: ${timeout}ms`);
           
           const timeoutPromise = new Promise((_, reject) => 

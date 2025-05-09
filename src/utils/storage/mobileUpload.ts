@@ -116,7 +116,8 @@ export async function safeImageCompression(file: File): Promise<File> {
   });
   
   // Skip compression for already small files and problematic formats on mobile
-  const smallFileThreshold = 2.5 * 1024 * 1024; // 2.5MB
+  // Increased threshold from 2.5MB to 3MB to skip more files on mobile
+  const smallFileThreshold = 3 * 1024 * 1024; // 3MB
   if (file.size < smallFileThreshold) {
     console.log(`File already small (${fileSizeMB}MB), skipping compression`);
     return file;
@@ -137,8 +138,8 @@ export async function safeImageCompression(file: File): Promise<File> {
           try {
             console.log(`Image loaded successfully: ${img.width}x${img.height}`);
             const canvas = document.createElement('canvas');
-            // Calculate scaled dimensions (max 1200px for mobile)
-            const maxDim = platform.mobile ? 1200 : 1600;
+            // Calculate scaled dimensions (reduced from 1200px to 1000px for mobile)
+            const maxDim = platform.mobile ? 1000 : 1600;
             let { width, height } = img;
             
             if (width > maxDim || height > maxDim) {
@@ -169,8 +170,9 @@ export async function safeImageCompression(file: File): Promise<File> {
             ctx.drawImage(img, 0, 0, width, height);
             console.log('Image drawn to canvas, converting to blob...');
             
-            // Try to get blob with safe fallbacks
-            const compressionQuality = platform.safari ? 0.85 : 0.8;
+            // Try to get blob with safe fallbacks - Lower quality for better compression
+            // Reduced quality for better performance
+            const compressionQuality = platform.safari ? 0.75 : 0.7;
             console.log(`Using compression quality: ${compressionQuality}`);
             
             const blob = await safeCanvasToBlob(
@@ -198,7 +200,7 @@ export async function safeImageCompression(file: File): Promise<File> {
             
             console.log(`Compression result: ${originalSizeMB}MB → ${newSizeMB}MB (${percentSize}% of original)`);
             
-            // If compression didn't help, use original
+            // If compression didn't help or made file larger, use original
             if (compressedFile.size >= file.size) {
               console.log('Compression ineffective, using original file');
               resolve(file);

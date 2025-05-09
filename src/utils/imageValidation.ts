@@ -119,11 +119,13 @@ export const validateImageFile = (file: File): boolean => {
   const bufferMultiplier = platform.iOS ? 1.1 : 
                            platform.safari ? 1.05 : 1.02;
   
-  const adjustedSize = file.size * bufferMultiplier;
+  // For small files on mobile (under 1MB), skip buffer multiplier
+  const shouldApplyBuffer = !(platform.mobile && file.size < 1 * 1024 * 1024);
+  const adjustedSize = shouldApplyBuffer ? file.size * bufferMultiplier : file.size;
   
   console.log('Size validation details:', {
     originalSize: file.size,
-    bufferMultiplier,
+    bufferMultiplier: shouldApplyBuffer ? bufferMultiplier : 'none (small mobile file)',
     adjustedSize,
     maxAllowedSize: maxSize,
     willPass: adjustedSize <= maxSize
