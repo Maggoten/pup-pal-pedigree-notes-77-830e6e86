@@ -4,6 +4,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
+import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -15,19 +16,39 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const { toast } = useToast();
   const [showingToast, setShowingToast] = useState(false);
   const [delayComplete, setDelayComplete] = useState(false);
+  const platform = getPlatformInfo();
+  const isMobile = platform.mobile || platform.safari;
 
   // Check if user is on the login page
   const isLoginPage = location.pathname === '/login';
 
-  // Add a small delay before showing authentication errors
+  // Add a delay before showing authentication errors
   // This helps prevent flash of auth errors during initialization
+  // Use longer delay for mobile devices
   useEffect(() => {
     const timer = setTimeout(() => {
       setDelayComplete(true);
-    }, 500); // Short delay to allow auth to fully initialize
+      console.log('[AuthGuard] Initial delay complete, can show auth errors now');
+    }, isMobile ? 1200 : 500); // Longer delay for mobile
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [isMobile]);
+  
+  // Add more tolerant redirect behavior for mobile
+  const [mobileAuthTimeout, setMobileAuthTimeout] = useState(false);
+  
+  useEffect(() => {
+    // On mobile, we add extra time before forcing a redirect
+    // This helps prevent premature redirects during slow session restoration
+    if (isMobile && !isLoggedIn && !isLoginPage) {
+      const timer = setTimeout(() => {
+        console.log('[AuthGuard] Mobile auth timeout reached, user still not logged in');
+        setMobileAuthTimeout(true);
+      }, 2500); // Give mobile devices 2.5s to restore session
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isMobile, isLoggedIn, isLoginPage]);
   
   useEffect(() => {
     // Only show authentication toast when:
@@ -38,6 +59,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     // 5. Delay has completed (prevents flash)
     // 6. No toast is currently showing
     if (isAuthReady && !isLoggedIn && !isLoginPage && !supabaseUser && delayComplete && !showingToast) {
+      console.log('[AuthGuard] Showing auth required toast');
       setShowingToast(true);
       toast({
         title: "Authentication required",
@@ -56,19 +78,27 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center justify-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Checking authentication...</p>
+          <p className="text-sm text-muted-foreground">
+            {isMobile ? 'Initializing mobile authentication...' : 'Checking authentication...'}
+          </p>
         </div>
       </div>
     );
   }
 
   // Only redirect if auth is ready and user is not logged in and not on login page
-  if (isAuthReady && !isLoggedIn && !isLoginPage) {
+  // For mobile, wait for the extra timeout before redirecting
+  const shouldRedirectToLogin = isAuthReady && !isLoggedIn && !isLoginPage && 
+                              (!isMobile || (isMobile && mobileAuthTimeout));
+  
+  if (shouldRedirectToLogin) {
+    console.log('[AuthGuard] Redirecting to login page');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Only redirect if auth is ready and user is logged in and on login page
   if (isAuthReady && isLoggedIn && isLoginPage) {
+    console.log('[AuthGuard] User already logged in, redirecting from login page');
     return <Navigate to="/" replace />;
   }
 
