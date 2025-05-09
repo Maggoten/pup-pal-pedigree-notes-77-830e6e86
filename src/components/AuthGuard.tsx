@@ -29,7 +29,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     const timer = setTimeout(() => {
       setDelayComplete(true);
       console.log('[AuthGuard] Initial delay complete, can show auth errors now');
-    }, isMobile ? 2000 : 500); // Longer delay for mobile
+    }, isMobile ? 2500 : 1000); // Increased delay for mobile
     
     return () => clearTimeout(timer);
   }, [isMobile]);
@@ -52,11 +52,21 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
           // If auth is not ready yet, give it more time
           const extendedTimer = setTimeout(() => {
             console.log('[AuthGuard] Extended timeout reached, proceeding with redirect decision');
-            setMobileAuthTimeout(true);
-          }, 2000);
+            // After extended timeout, only proceed if auth is ready
+            if (isAuthReady) {
+              setMobileAuthTimeout(true);
+            } else {
+              // If auth still not ready, give one more extended chance
+              console.log('[AuthGuard] Auth still not ready after extended timeout, giving one more chance');
+              const finalTimer = setTimeout(() => {
+                setMobileAuthTimeout(true);
+              }, 2000);
+              return () => clearTimeout(finalTimer);
+            }
+          }, 2500); // Additional 2.5s
           return () => clearTimeout(extendedTimer);
         }
-      }, 3500); // Increased from 2.5s to 3.5s for mobile devices
+      }, 4000); // Increased from 3.5s to 4s for mobile devices
       
       return () => clearTimeout(timer);
     }
@@ -70,8 +80,26 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     // 4. No user object exists
     // 5. Delay has completed (prevents flash)
     // 6. No toast is currently showing
-    if (isAuthReady && !isLoggedIn && !isLoginPage && !supabaseUser && delayComplete && !showingToast) {
-      console.log('[AuthGuard] Showing auth required toast');
+    // 7. Mobile timeout has been reached (if mobile)
+    const shouldShowToast = 
+      isAuthReady && 
+      !isLoggedIn && 
+      !isLoginPage && 
+      !supabaseUser && 
+      delayComplete && 
+      !showingToast &&
+      (!isMobile || (isMobile && mobileAuthTimeout));
+    
+    if (shouldShowToast) {
+      console.log('[AuthGuard] Showing auth required toast, details:', {
+        isAuthReady,
+        isLoggedIn,
+        delayComplete,
+        isMobile,
+        mobileAuthTimeout,
+        currentPath: location.pathname
+      });
+      
       setShowingToast(true);
       toast({
         title: "Authentication required",
@@ -82,7 +110,18 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         }
       });
     }
-  }, [isLoggedIn, isLoginPage, supabaseUser, toast, isAuthReady, delayComplete, showingToast]);
+  }, [
+    isLoggedIn, 
+    isLoginPage, 
+    supabaseUser, 
+    toast, 
+    isAuthReady, 
+    delayComplete, 
+    showingToast, 
+    mobileAuthTimeout,
+    isMobile,
+    location.pathname
+  ]);
 
   // Show loading state while auth is not ready
   if (!isAuthReady || isLoading) {
@@ -104,7 +143,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                               (!isMobile || (isMobile && mobileAuthTimeout));
   
   if (shouldRedirectToLogin) {
-    console.log('[AuthGuard] Redirecting to login page');
+    console.log('[AuthGuard] Redirecting to login page from:', location.pathname);
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

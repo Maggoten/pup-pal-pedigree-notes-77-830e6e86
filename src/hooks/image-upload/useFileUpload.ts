@@ -49,8 +49,28 @@ export const useFileUpload = (
     }
     
     try {
-      // Validate and refresh session if needed
-      await validateSession();
+      // Validate and refresh session if needed - with enhanced mobile handling
+      console.log(`[FileUpload] Validating session before upload on ${platform.device}`);
+      
+      // Set a flag to indicate whether session validation was successful
+      let sessionValid = false;
+      
+      try {
+        // Use skipThrow:true for mobile to handle validation errors more gracefully
+        sessionValid = await validateSession();
+        console.log(`[FileUpload] Session validation ${sessionValid ? 'succeeded' : 'failed'}`);
+      } catch (sessionError) {
+        console.error('[FileUpload] Session validation error:', sessionError);
+        
+        // For mobile, try to proceed anyway if validation fails
+        if (platform.mobile || platform.safari) {
+          console.log('[FileUpload] Mobile detected, attempting upload despite session validation failure');
+          // Don't return early, try the upload anyway
+        } else {
+          // For desktop browsers, be more strict
+          throw sessionError;
+        }
+      }
       
       // Verify bucket exists before proceeding
       const bucketExists = await checkBucketExists();
@@ -126,10 +146,13 @@ export const useFileUpload = (
       console.log('Generated public URL:', publicUrl);
       onImageChange(publicUrl);
       
-      toast({
-        title: "Success",
-        description: "Image uploaded successfully"
-      });
+      // Show success toast using setTimeout to ensure it appears after any component state updates
+      setTimeout(() => {
+        toast({
+          title: "Success",
+          description: "Image uploaded successfully"
+        });
+      }, 100);
       
       return true;
     } catch (error) {

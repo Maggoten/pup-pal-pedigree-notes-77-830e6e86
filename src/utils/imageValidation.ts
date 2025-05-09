@@ -115,11 +115,9 @@ export const validateImageFile = (file: File): boolean => {
   
   console.log('MIME type validation passed, proceeding to size check');
   
-  // TEMPORARILY set bufferMultiplier to 1.0 for testing as requested
-  const bufferMultiplier = 1.0;
-  // Original code was:
-  // const bufferMultiplier = platform.iOS ? 1.1 : 
-  //                          platform.safari ? 1.05 : 1.02;
+  // Restore the buffer multiplier with graduated values by platform
+  const bufferMultiplier = platform.iOS ? 1.1 : 
+                           platform.safari ? 1.05 : 1.02;
   
   const adjustedSize = file.size * bufferMultiplier;
   
