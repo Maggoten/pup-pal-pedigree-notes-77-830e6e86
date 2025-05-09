@@ -33,6 +33,14 @@ const hasErrorProperty = (obj: unknown): obj is { error: unknown } => {
          'error' in obj;
 };
 
+// Safely get property from an error object
+const safeGetErrorProperty = <T>(obj: unknown, prop: string, defaultValue: T): T => {
+  if (obj && typeof obj === 'object' && prop in obj) {
+    return (obj as any)[prop];
+  }
+  return defaultValue;
+};
+
 export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const { startTimeout, clearTimeout } = useUploadTimeout(() => setIsUploading(false));
@@ -149,7 +157,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       console.log('Upload result received:', {
         error: uploadResult.error ? getSafeErrorMessage(uploadResult.error) : 'none',
         data: uploadResult.data ? 'success' : 'no data',
-        status: uploadResult.error?.status
+        statusCode: safeGetErrorProperty(uploadResult.error, 'statusCode', null)
       });
       
       // Clear the upload timeout
@@ -157,7 +165,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       
       // Handle upload result
       if (hasErrorProperty(uploadResult) && uploadResult.error) {
-        const errorMessage = uploadResult.error instanceof StorageError 
+        const errorMessage = isStorageError(uploadResult.error) 
           ? uploadResult.error.message 
           : getSafeErrorMessage(uploadResult.error);
         

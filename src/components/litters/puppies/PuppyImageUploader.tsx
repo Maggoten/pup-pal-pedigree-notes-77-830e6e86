@@ -9,6 +9,7 @@ import { processImageForUpload } from '@/utils/storage';
 import { toast } from '@/components/ui/use-toast';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 import { BUCKET_NAME } from '@/utils/storage/config'; // Import the bucket name from config
+import { getPlatformInfo } from '@/utils/storage/mobileUpload'; // Import getPlatformInfo directly
 
 interface PuppyImageUploaderProps {
   puppyName: string;
@@ -27,22 +28,6 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
   const [imageUrl, setImageUrl] = useState<string>(currentImage || '');
   const [error, setError] = useState<string>('');
   const { safari: isSafariBrowser, device: platformDevice } = getPlatformInfo();
-
-  // Import getPlatformInfo from storage
-  const getPlatformInfo = () => {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const safari = userAgent.includes('safari') && !userAgent.includes('chrome');
-    const iOS = /iphone|ipad|ipod/.test(userAgent);
-    const mobile = /iphone|ipad|ipod|android/.test(userAgent);
-    const device = mobile ? (iOS ? 'iOS' : 'Android') : 'Desktop';
-    
-    return {
-      safari,
-      iOS,
-      mobile,
-      device
-    };
-  };
 
   // Update local state when prop changes
   useEffect(() => {
@@ -130,7 +115,7 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
       console.log('PuppyImageUploader: Upload result:', {
         error: uploadResult.error || 'none',
         data: uploadResult.data ? 'success' : 'no data',
-        status: uploadResult.error?.status || 'unknown'
+        statusCode: uploadResult.error ? (uploadResult.error as any).statusCode || 'unknown' : 'none'
       });
 
       if (uploadResult.error) {
