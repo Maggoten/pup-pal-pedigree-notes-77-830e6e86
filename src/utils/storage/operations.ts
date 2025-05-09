@@ -110,10 +110,34 @@ export const uploadToStorage = async (
   
   try {
     // First verify auth session
-    const { data: sessionData } = await supabase.auth.getSession();
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.error('Session error before upload:', sessionError);
+      throw new Error(`Authentication error: ${sessionError.message}`);
+    }
+    
     if (!sessionData.session) {
       console.error('Upload failed: No active session');
-      throw new Error(STORAGE_ERRORS.NO_SESSION);
+      
+      // Try to refresh session for Safari users
+      if (platform.safari || platform.mobile) {
+        console.log(`${platform.device} detected: Attempting to refresh session before upload`);
+        const refreshResult = await supabase.auth.refreshSession();
+        
+        if (refreshResult.error || !refreshResult.data.session) {
+          console.error('Session refresh failed:', refreshResult.error);
+          throw new Error(STORAGE_ERRORS.NO_SESSION);
+        } else {
+          console.log('Session successfully refreshed');
+        }
+      } else {
+        throw new Error(STORAGE_ERRORS.NO_SESSION);
+      }
+    } else {
+      console.log('Using active session for upload:', {
+        userId: sessionData.session.user.id,
+        expiresAt: sessionData.session.expires_at
+      });
     }
     
     // Log attempt for debugging

@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { processImageForUpload, isSafari } from '@/utils/storage';
+import { processImageForUpload } from '@/utils/storage';
 import { toast } from '@/components/ui/use-toast';
 import { fetchWithRetry } from '@/utils/fetchUtils';
+import { BUCKET_NAME } from '@/utils/storage/config'; // Import the bucket name from config
 
 interface PuppyImageUploaderProps {
   puppyName: string;
@@ -25,7 +26,23 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>(currentImage || '');
   const [error, setError] = useState<string>('');
-  const isSafariBrowser = isSafari();
+  const { safari: isSafariBrowser, device: platformDevice } = getPlatformInfo();
+
+  // Import getPlatformInfo from storage
+  const getPlatformInfo = () => {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const safari = userAgent.includes('safari') && !userAgent.includes('chrome');
+    const iOS = /iphone|ipad|ipod/.test(userAgent);
+    const mobile = /iphone|ipad|ipod|android/.test(userAgent);
+    const device = mobile ? (iOS ? 'iOS' : 'Android') : 'Desktop';
+    
+    return {
+      safari,
+      iOS,
+      mobile,
+      device
+    };
+  };
 
   // Update local state when prop changes
   useEffect(() => {
@@ -38,10 +55,22 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
     }
 
     const file = e.target.files[0];
+    const platformInfo = getPlatformInfo();
+    
+    console.log('PuppyImageUploader: File selected for upload', {
+      name: file.name,
+      size: `${(file.size / 1024).toFixed(1)}KB`,
+      type: file.type || 'unknown',
+      platform: platformInfo.device
+    });
     
     // More forgiving size check (+5% for Safari)
-    const effectiveMaxSize = isSafariBrowser ? 5.25 * 1024 * 1024 : 5 * 1024 * 1024;
+    const effectiveMaxSize = platformInfo.safari ? 5.25 * 1024 * 1024 : 5 * 1024 * 1024;
     if (file.size > effectiveMaxSize) {
+      console.log('PuppyImageUploader: File too large', {
+        size: file.size,
+        limit: effectiveMaxSize
+      });
       setError('File is too large. Maximum size is 5MB.');
       return;
     }
@@ -53,72 +82,110 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
       // First check session
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) {
+        console.log('PuppyImageUploader: No session found, attempting to refresh');
         // Try to refresh session for Safari
-        if (isSafariBrowser) {
+        if (platformInfo.safari) {
           console.log('Safari detected, attempting to refresh auth session');
           await supabase.auth.refreshSession();
+          
+          const refreshedSession = await supabase.auth.getSession();
+          console.log('Session refresh result:', {
+            success: !!refreshedSession.data.session,
+            error: refreshedSession.error
+          });
         }
       }
 
       // Process image (compress) before uploading
       const processedFile = await processImageForUpload(file);
-      console.log(`Original file: ${file.size} bytes, processed: ${processedFile.size} bytes`);
+      console.log(`PuppyImageUploader: Original file: ${file.size} bytes, processed: ${processedFile.size} bytes`);
 
       // Create a unique filename with uuid
       const fileExt = file.name.split('.').pop() || 'jpg';
       const fileName = `puppies/${uuidv4()}.${fileExt}`;
 
+      console.log(`PuppyImageUploader: Uploading to ${BUCKET_NAME}/${fileName}`, {
+        fileSize: processedFile.size,
+        platform: platformInfo.device
+      });
+
       // Upload with retry logic for better Safari support
       const uploadWithRetry = async () => {
         return fetchWithRetry(
           () => supabase.storage
-            .from('breeding-app-images')
+            .from(BUCKET_NAME) // Use the constant from config
             .upload(fileName, processedFile, {
               cacheControl: '3600',
               upsert: true
             }),
           { 
-            maxRetries: isSafariBrowser ? 3 : 2,
+            maxRetries: platformInfo.safari ? 3 : 2,
             initialDelay: 2000,
             useBackoff: true
           }
         );
       };
 
-      const { data, error } = await uploadWithRetry();
+      const uploadResult = await uploadWithRetry();
+      console.log('PuppyImageUploader: Upload result:', {
+        error: uploadResult.error || 'none',
+        data: uploadResult.data ? 'success' : 'no data',
+        status: uploadResult.error?.status || 'unknown'
+      });
 
-      if (error) {
-        throw error;
+      if (uploadResult.error) {
+        console.error('PuppyImageUploader: Upload error:', uploadResult.error);
+        throw uploadResult.error;
       }
 
       // Get the public URL for the uploaded file
       const { data: publicUrl } = supabase.storage
-        .from('breeding-app-images')
+        .from(BUCKET_NAME) // Use the constant from config
         .getPublicUrl(fileName);
+
+      console.log('PuppyImageUploader: Got public URL:', {
+        url: publicUrl?.publicUrl || 'undefined',
+        fileName
+      });
 
       if (publicUrl) {
         // Add cache busting for Safari
         let finalUrl = publicUrl.publicUrl;
-        if (isSafariBrowser) {
+        if (platformInfo.safari) {
           const separator = finalUrl.includes('?') ? '&' : '?';
           finalUrl += `${separator}_t=${Date.now()}`;
         }
         
+        console.log('PuppyImageUploader: Setting image URL:', finalUrl);
+        
         setImageUrl(finalUrl);
         onImageChange(finalUrl);
+        
+        toast({
+          title: "Success",
+          description: "Image uploaded successfully"
+        });
+      } else {
+        throw new Error('Failed to get public URL');
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('PuppyImageUploader: Error uploading image:', error);
       setError('Error uploading image. Please try again.');
 
       // Safari-specific error message
-      if (isSafariBrowser) {
+      if (platformInfo.safari) {
         setError('Safari upload issue. Try a smaller image or use Chrome.');
       }
+      
+      toast({
+        title: "Upload Failed",
+        description: "There was a problem uploading your image",
+        variant: "destructive"
+      });
     } finally {
       setIsUploading(false);
     }
-  }, [onImageChange, isSafariBrowser]);
+  }, [onImageChange]);
 
   const handleRemoveImage = useCallback(() => {
     setImageUrl('');

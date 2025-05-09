@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { UploadIcon, XIcon, AlertTriangle, Loader2 } from 'lucide-react';
+import { UploadIcon, XIcon, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import ImagePreviewDisplay from './image-upload/ImagePreviewDisplay';
@@ -63,7 +63,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       return;
     }
     
-    console.log('File selected:', {
+    console.log('ImageUploader: File selected:', {
       name: file.name, 
       size: `${(file.size / 1024).toFixed(1)}KB`, 
       type: file.type || 'unknown',
@@ -71,9 +71,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     });
     
     try {
+      console.log('ImageUploader: Calling uploadImage function...');
       await uploadImage(file);
+      console.log('ImageUploader: Upload function completed');
     } catch (error) {
-      console.error('Image upload error:', error);
+      console.error('ImageUploader: Image upload error:', error);
       
       // Show more specific error messages based on platform
       if (platform.iOS) {
@@ -118,6 +120,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       });
       return;
     }
+    console.log('ImageUploader: Upload button clicked, opening file picker');
     fileInputRef.current?.click();
   };
   
@@ -132,11 +135,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       return;
     }
     
-    console.log('Removing image:', currentImage);
+    console.log('ImageUploader: Removing image:', currentImage);
     try {
       await removeImage(currentImage, user.id);
     } catch (error) {
-      console.error('Image remove error:', error);
+      console.error('ImageUploader: Image remove error:', error);
       toast({
         title: "Remove Failed",
         description: "Failed to remove image. Please try again.",

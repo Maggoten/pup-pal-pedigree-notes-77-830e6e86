@@ -146,7 +146,11 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       // Upload with enhanced logging
       console.log(`Starting upload of file ${fileName} to storage...`);
       const uploadResult = await uploadToStorage(fileName, processedFile);
-      console.log('Upload result received:', uploadResult);
+      console.log('Upload result received:', {
+        error: uploadResult.error ? getSafeErrorMessage(uploadResult.error) : 'none',
+        data: uploadResult.data ? 'success' : 'no data',
+        status: uploadResult.error?.status
+      });
       
       // Clear the upload timeout
       clearTimeout();
@@ -173,6 +177,11 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       
       // Get the public URL with cache busting
       const { data: { publicUrl } } = getPublicUrl(fileName);
+      
+      if (!publicUrl) {
+        console.error('Failed to get public URL');
+        throw new Error('Failed to get public URL for uploaded image');
+      }
       
       console.log('Generated public URL:', publicUrl);
       onImageChange(publicUrl);
@@ -204,11 +213,14 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
         friendlyMessage = "Could not upload image. Please try again with a smaller file.";
       }
       
-      toast({
-        title: "Upload Failed",
-        description: friendlyMessage,
-        variant: "destructive"
-      });
+      // Ensure we don't accidentally clear the error message before it's displayed
+      setTimeout(() => {
+        toast({
+          title: "Upload Failed",
+          description: friendlyMessage,
+          variant: "destructive"
+        });
+      }, 100);
     } finally {
       setIsUploading(false);
       clearTimeout();
