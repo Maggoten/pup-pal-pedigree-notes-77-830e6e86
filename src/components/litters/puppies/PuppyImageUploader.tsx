@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Camera, X, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,8 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { processImageForUpload } from '@/utils/storage';
 import { toast } from '@/components/ui/use-toast';
 import { fetchWithRetry } from '@/utils/fetchUtils';
-import { BUCKET_NAME } from '@/utils/storage/config'; // Import the bucket name from config
-import { getPlatformInfo } from '@/utils/storage/mobileUpload'; // Import getPlatformInfo directly
+import { BUCKET_NAME } from '@/utils/storage/config';
+import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 
 interface PuppyImageUploaderProps {
   puppyName: string;

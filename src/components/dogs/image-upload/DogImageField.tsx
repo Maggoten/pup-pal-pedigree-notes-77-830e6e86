@@ -1,18 +1,17 @@
 
 import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import ImageUploader from '@/components/ImageUploader';
 import { UseFormReturn } from 'react-hook-form';
 import { DogFormValues } from '../DogFormFields';
-import ImageUploader from '@/components/ImageUploader';
-import ImagePreview from './ImagePreview';
-import ImageUploadButtons from './ImageUploadButtons';
 
 interface DogImageFieldProps {
   form: UseFormReturn<DogFormValues>;
   handleImageChange: (imageBase64: string) => void;
+  disabled?: boolean;
 }
 
-const DogImageField: React.FC<DogImageFieldProps> = ({ form, handleImageChange }) => {
+const DogImageField: React.FC<DogImageFieldProps> = ({ form, handleImageChange, disabled }) => {
   return (
     <FormField
       control={form.control}
@@ -21,10 +20,13 @@ const DogImageField: React.FC<DogImageFieldProps> = ({ form, handleImageChange }
         <FormItem>
           <FormLabel>Dog Photo</FormLabel>
           <FormControl>
-            <ImageUploader 
-              currentImage={field.value} 
-              onImageChange={handleImageChange}
-            />
+            <div className="max-w-[200px] w-full">
+              <ImageUploader 
+                currentImage={field.value} 
+                onImageChange={handleImageChange}
+                className={disabled ? "opacity-70 pointer-events-none" : ""}
+              />
+            </div>
           </FormControl>
           <FormMessage />
         </FormItem>
