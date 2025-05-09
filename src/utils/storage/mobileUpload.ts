@@ -1,3 +1,4 @@
+
 import { isSafari } from './config';
 import { MAX_FILE_SIZE } from '@/utils/imageValidation';
 import { toast } from '@/components/ui/use-toast';
@@ -42,6 +43,7 @@ export const safeCanvasToBlob = async (
     try {
       // First try the most compatible method
       if (typeof canvas.toBlob === 'function') {
+        console.log('Using canvas.toBlob method for conversion');
         canvas.toBlob(
           (blob) => {
             if (blob) {
@@ -67,6 +69,7 @@ export const safeCanvasToBlob = async (
     // Fallback using dataURL when toBlob fails
     function fallbackToDataURL() {
       try {
+        console.log('Attempting dataURL fallback method');
         const dataUrl = canvas.toDataURL(type, quality);
         if (!dataUrl || dataUrl === 'data:,') {
           console.error('Canvas.toDataURL returned invalid data');
@@ -105,12 +108,17 @@ export const safeCanvasToBlob = async (
 // Process image with fallbacks for mobile/Safari
 export async function safeImageCompression(file: File): Promise<File> {
   const platform = getPlatformInfo();
-  console.log(`Processing image on ${platform.device}`, platform);
+  const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+  console.log(`Processing image on ${platform.device}`, {
+    platform,
+    fileSize: `${fileSizeMB}MB (${file.size} bytes)`,
+    fileType: file.type || 'unknown'
+  });
   
   // Skip compression for already small files and problematic formats on mobile
   const smallFileThreshold = 2.5 * 1024 * 1024; // 2.5MB
   if (file.size < smallFileThreshold) {
-    console.log(`File already small (${file.size} bytes), skipping compression`);
+    console.log(`File already small (${fileSizeMB}MB), skipping compression`);
     return file;
   }
   
@@ -121,11 +129,13 @@ export async function safeImageCompression(file: File): Promise<File> {
   
   // For Safari or mobile, use a more robust method
   if (platform.mobile || platform.safari) {
+    console.log(`Starting enhanced compression for ${platform.device} browser`);
     return new Promise((resolve) => {
       try {
         const img = new Image();
         img.onload = async () => {
           try {
+            console.log(`Image loaded successfully: ${img.width}x${img.height}`);
             const canvas = document.createElement('canvas');
             // Calculate scaled dimensions (max 1200px for mobile)
             const maxDim = platform.mobile ? 1200 : 1600;
@@ -139,6 +149,9 @@ export async function safeImageCompression(file: File): Promise<File> {
                 width = Math.round((width * maxDim) / height);
                 height = maxDim;
               }
+              console.log(`Image resized to ${width}x${height}`);
+            } else {
+              console.log(`Image size maintained at ${width}x${height} (below max dimension of ${maxDim}px)`);
             }
             
             canvas.width = width;
@@ -154,12 +167,16 @@ export async function safeImageCompression(file: File): Promise<File> {
             // Simple drawing with basic options
             ctx.imageSmoothingQuality = 'medium';
             ctx.drawImage(img, 0, 0, width, height);
+            console.log('Image drawn to canvas, converting to blob...');
             
             // Try to get blob with safe fallbacks
+            const compressionQuality = platform.safari ? 0.85 : 0.8;
+            console.log(`Using compression quality: ${compressionQuality}`);
+            
             const blob = await safeCanvasToBlob(
               canvas, 
               'image/jpeg', 
-              platform.safari ? 0.85 : 0.8
+              compressionQuality
             );
             
             if (!blob) {
@@ -175,13 +192,18 @@ export async function safeImageCompression(file: File): Promise<File> {
               { type: 'image/jpeg', lastModified: Date.now() }
             );
             
-            console.log(`Compression result: ${file.size} → ${compressedFile.size} bytes (${Math.round(compressedFile.size / file.size * 100)}%)`);
+            const originalSizeMB = fileSizeMB;
+            const newSizeMB = (compressedFile.size / 1024 / 1024).toFixed(2);
+            const percentSize = Math.round(compressedFile.size / file.size * 100);
+            
+            console.log(`Compression result: ${originalSizeMB}MB → ${newSizeMB}MB (${percentSize}% of original)`);
             
             // If compression didn't help, use original
             if (compressedFile.size >= file.size) {
               console.log('Compression ineffective, using original file');
               resolve(file);
             } else {
+              console.log('Compressed file will be used for upload');
               resolve(compressedFile);
             }
           } catch (err) {
@@ -195,6 +217,7 @@ export async function safeImageCompression(file: File): Promise<File> {
           resolve(file); // Fallback to original
         };
         
+        console.log('Creating object URL for image loading...');
         img.src = URL.createObjectURL(file);
         
         // Set a timeout in case img.onload never fires
@@ -213,12 +236,14 @@ export async function safeImageCompression(file: File): Promise<File> {
   }
   
   // For desktop browsers, return the original file
+  console.log('Using original file (desktop browser)');
   return file;
 }
 
 // Universal direct upload without compression
 export const directUpload = async (file: File): Promise<File> => {
   // Log details about the file being uploaded directly
-  console.log(`Direct upload: ${file.name}, Size: ${file.size} bytes, Type: ${file.type}`);
+  const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+  console.log(`Direct upload: ${file.name}, Size: ${fileSizeMB}MB (${file.size} bytes), Type: ${file.type}`);
   return file;
 };

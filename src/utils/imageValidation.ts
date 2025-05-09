@@ -51,7 +51,7 @@ const isImageFile = (file: File): boolean => {
   const isGenericImageType = file.type.startsWith('image/') || file.type === 'application/octet-stream';
   
   // Log detailed validation info
-  console.log('Image validation details:', {
+  console.log('Image type validation details:', {
     name: file.name,
     extension: fileExtension,
     type: file.type || 'unknown',
@@ -65,32 +65,44 @@ const isImageFile = (file: File): boolean => {
   
   // For mobile Safari, be very permissive
   if (platform.iOS && platform.safari) {
+    console.log('Using very permissive iOS Safari image type validation');
     return hasValidExtension || hasValidMimeType || isGenericImageType;
   }
   
   // For other mobile browsers or Safari, be quite permissive
   if (platform.mobile || platform.safari) {
+    console.log('Using permissive mobile image type validation');
     return hasValidExtension || hasValidMimeType || isGenericImageType;
   }
   
   // For desktop browsers, be more strict but still allow valid extensions with generic types
+  console.log('Using standard desktop image type validation');
   return hasValidMimeType || (hasValidExtension && isGenericImageType);
 };
 
 export const validateImageFile = (file: File): boolean => {
   const platform = getPlatformInfo();
   const maxSize = getMaxFileSize();
+  const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
   
   // Log file details for debugging
-  console.log('Validating file:', {
+  console.log('Validating image file:', {
     name: file.name, 
-    size: `${(file.size / 1024 / 1024).toFixed(2)}MB`, 
+    size: `${fileSizeMB}MB (${file.size} bytes)`, 
     type: file.type || 'unknown',
-    platform: platform.device
+    maxSize: `${(maxSize / 1024 / 1024).toFixed(2)}MB (${maxSize} bytes)`,
+    platform: platform.device,
+    safari: platform.safari,
+    mobile: platform.mobile
   });
   
+  // First check file type
+  console.log('Starting MIME type validation');
   if (!isImageFile(file)) {
-    console.log('File validation failed, type:', file.type);
+    console.log('MIME TYPE VALIDATION FAILED:', {
+      filename: file.name,
+      type: file.type || 'unknown'
+    });
     
     // More specific error message showing the file type
     toast({
@@ -101,19 +113,34 @@ export const validateImageFile = (file: File): boolean => {
     return false;
   }
   
-  // More lenient size check for different platforms
-  const bufferMultiplier = platform.iOS ? 1.1 : 
-                           platform.safari ? 1.05 : 1.02;
+  console.log('MIME type validation passed, proceeding to size check');
+  
+  // TEMPORARILY set bufferMultiplier to 1.0 for testing as requested
+  const bufferMultiplier = 1.0;
+  // Original code was:
+  // const bufferMultiplier = platform.iOS ? 1.1 : 
+  //                          platform.safari ? 1.05 : 1.02;
+  
   const adjustedSize = file.size * bufferMultiplier;
   
+  console.log('Size validation details:', {
+    originalSize: file.size,
+    bufferMultiplier,
+    adjustedSize,
+    maxAllowedSize: maxSize,
+    willPass: adjustedSize <= maxSize
+  });
+  
   if (adjustedSize > maxSize) {
-    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-    const maxSizeMB = (maxSize / 1024 / 1024).toFixed(1);
-    
-    console.log(`File too large: ${fileSizeMB}MB exceeds limit of ${maxSizeMB}MB`);
+    console.log('SIZE VALIDATION FAILED:', {
+      originalSize: `${fileSizeMB}MB`,
+      adjustedSize: `${(adjustedSize / 1024 / 1024).toFixed(2)}MB`,
+      maxSize: `${(maxSize / 1024 / 1024).toFixed(2)}MB`,
+      difference: `${((adjustedSize - maxSize) / 1024 / 1024).toFixed(2)}MB over limit`
+    });
     
     // Platform-specific error message
-    let sizeMessage = `Your image is ${fileSizeMB}MB but the maximum allowed size is ${maxSizeMB}MB.`;
+    let sizeMessage = `Your image is ${fileSizeMB}MB but the maximum allowed size is ${(maxSize / 1024 / 1024).toFixed(1)}MB.`;
     
     if (platform.iOS) {
       sizeMessage += ' On iOS devices, try using a smaller image or the Photos app to reduce size.';
@@ -133,5 +160,6 @@ export const validateImageFile = (file: File): boolean => {
     return false;
   }
 
+  console.log('Image validation PASSED, proceeding with upload');
   return true;
 };

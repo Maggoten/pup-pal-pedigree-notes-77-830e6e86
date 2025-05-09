@@ -41,6 +41,13 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
 
   const uploadImage = async (file: File) => {
     const platform = getPlatformInfo();
+    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+    
+    console.log(`Beginning upload process for file: ${file.name} (${fileSizeMB}MB) on ${platform.device}`, {
+      platform,
+      fileSize: file.size,
+      fileType: file.type || 'unknown'
+    });
     
     if (!user_id) {
       console.error('Upload failed: No user ID provided');
@@ -53,13 +60,17 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     }
     
     // First validate the file - if it fails validation, stop here
-    if (!validateImageFile(file)) return;
+    console.log('Running file validation checks...');
+    if (!validateImageFile(file)) {
+      console.log('File validation failed, aborting upload');
+      return;
+    }
     
     setIsUploading(true);
     setLastError(null);
     console.log(`Starting image upload to bucket: '${BUCKET_NAME}'`, {
       platform: platform.device,
-      fileSize: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+      fileSize: `${fileSizeMB}MB`,
       fileType: file.type || 'unknown'
     });
     
@@ -125,14 +136,17 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
       let processedFile;
       try {
         processedFile = await processImageForUpload(file);
-        console.log(`Image processed: original size ${file.size} bytes, processed size ${processedFile.size} bytes`);
+        console.log(`Image processed: original size ${file.size} bytes (${fileSizeMB}MB), processed size ${processedFile.size} bytes (${(processedFile.size / 1024 / 1024).toFixed(2)}MB)`);
       } catch (processError) {
         console.error('Image processing failed, using original file:', processError);
         processedFile = file;
+        console.log('Using original unprocessed file for upload');
       }
 
       // Upload with enhanced logging
+      console.log(`Starting upload of file ${fileName} to storage...`);
       const uploadResult = await uploadToStorage(fileName, processedFile);
+      console.log('Upload result received:', uploadResult);
       
       // Clear the upload timeout
       clearTimeout();

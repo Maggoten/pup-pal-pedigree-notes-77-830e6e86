@@ -60,7 +60,7 @@ export const checkBucketExists = async (): Promise<boolean> => {
         return false;
       }
       
-      console.log(`Bucket '${BUCKET_NAME}' exists, can list files:`, result.data);
+      console.log(`Bucket '${BUCKET_NAME}' exists and is accessible, can list files:`, result.data);
       return true;
     } catch (listError) {
       console.error(`Error or timeout when listing bucket '${BUCKET_NAME}' contents:`, listError);
@@ -76,10 +76,11 @@ export const checkBucketExists = async (): Promise<boolean> => {
 const logUploadDetails = (fileName: string, file: File, response: any, startTime: number) => {
   const duration = Date.now() - startTime;
   const platform = getPlatformInfo();
+  const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
   
   console.log('Upload details:', {
     fileName,
-    fileSize: `${(file.size / 1024).toFixed(1)}KB`,
+    fileSize: `${fileSizeMB}MB (${file.size} bytes)`,
     fileType: file.type || 'unknown',
     duration: `${duration}ms`,
     platform: platform.device,
@@ -105,6 +106,7 @@ export const uploadToStorage = async (
 ) => {
   const startTime = Date.now();
   const platform = getPlatformInfo();
+  const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
   
   try {
     // First verify auth session
@@ -116,7 +118,7 @@ export const uploadToStorage = async (
     
     // Log attempt for debugging
     console.log(`[Storage] Attempting to upload ${fileName} to bucket '${BUCKET_NAME}'`, {
-      size: `${(file.size / 1024).toFixed(1)}KB`,
+      size: `${fileSizeMB}MB (${file.size} bytes)`,
       type: file.type || 'unknown',
       platform: platform.device,
       safari: platform.safari,
@@ -137,6 +139,8 @@ export const uploadToStorage = async (
     // Upload with enhanced retry logic
     const result = await fetchWithRetry(
       async () => {
+        console.log(`Making upload request for file: ${fileName} (${fileSizeMB}MB)`);
+        
         // Special handling for Safari and mobile devices
         if (platform.mobile || platform.safari) {
           console.log('Using mobile-optimized upload approach');
@@ -150,9 +154,11 @@ export const uploadToStorage = async (
             });
             
           // Race against a timeout
+          const timeout = getStorageTimeout();
+          console.log(`Setting timeout for upload: ${timeout}ms`);
+          
           const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error(`Upload timeout after ${getStorageTimeout()}ms`)), 
-            getStorageTimeout())
+            setTimeout(() => reject(new Error(`Upload timeout after ${timeout}ms`)), timeout)
           );
           
           return Promise.race([uploadPromise, timeoutPromise]);
@@ -171,11 +177,14 @@ export const uploadToStorage = async (
         initialDelay,
         useBackoff: true,
         shouldRetry: (error) => {
+          console.log('Evaluating if upload error should trigger retry:', error);
+          
           // More selective retry logic for different error types
           if (error && typeof error === 'object') {
             // Don't retry 413 (payload too large) errors
             if (('status' in error && (error as any).status === 413) || 
                 ('statusCode' in error && (error as any).statusCode === 413)) {
+              console.log('Will not retry 413 Payload Too Large error');
               return false;
             }
             // Don't retry 400 errors that indicate malformed requests
@@ -183,9 +192,11 @@ export const uploadToStorage = async (
                  ('statusCode' in error && (error as any).statusCode === 400)) && 
                  'message' in error && typeof (error as any).message === 'string' &&
                  (error as any).message.includes('Invalid')) {
+              console.log('Will not retry 400 Invalid Request error');
               return false;
             }
           }
+          console.log('Will retry upload');
           return true;
         },
         onRetry: (attempt, error) => {
