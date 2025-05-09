@@ -29,7 +29,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     const timer = setTimeout(() => {
       setDelayComplete(true);
       console.log('[AuthGuard] Initial delay complete, can show auth errors now');
-    }, isMobile ? 1200 : 500); // Longer delay for mobile
+    }, isMobile ? 2000 : 500); // Longer delay for mobile
     
     return () => clearTimeout(timer);
   }, [isMobile]);
@@ -42,13 +42,25 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     // This helps prevent premature redirects during slow session restoration
     if (isMobile && !isLoggedIn && !isLoginPage) {
       const timer = setTimeout(() => {
-        console.log('[AuthGuard] Mobile auth timeout reached, user still not logged in');
-        setMobileAuthTimeout(true);
-      }, 2500); // Give mobile devices 2.5s to restore session
+        console.log('[AuthGuard] Mobile auth timeout reached, checking auth state again');
+        // Only set timeout if auth is actually ready - prevents premature redirects
+        if (isAuthReady && !isLoggedIn) {
+          console.log('[AuthGuard] Auth is ready and user is not logged in, proceeding with redirect');
+          setMobileAuthTimeout(true);
+        } else if (!isAuthReady) {
+          console.log('[AuthGuard] Auth not ready yet, delaying redirect decision');
+          // If auth is not ready yet, give it more time
+          const extendedTimer = setTimeout(() => {
+            console.log('[AuthGuard] Extended timeout reached, proceeding with redirect decision');
+            setMobileAuthTimeout(true);
+          }, 2000);
+          return () => clearTimeout(extendedTimer);
+        }
+      }, 3500); // Increased from 2.5s to 3.5s for mobile devices
       
       return () => clearTimeout(timer);
     }
-  }, [isMobile, isLoggedIn, isLoginPage]);
+  }, [isMobile, isLoggedIn, isLoginPage, isAuthReady]);
   
   useEffect(() => {
     // Only show authentication toast when:

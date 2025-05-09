@@ -15,10 +15,13 @@ export const useImageSessionCheck = () => {
    * Has special handling for mobile devices and Safari which have more session issues
    */
   const validateSession = async (): Promise<boolean> => {
+    console.log('[ImageSessionCheck] Validating session, auth ready:', isAuthReady);
+    
     // Use the enhanced verifySession function with auth ready state
     return verifySession({
       respectAuthReady: true,
-      authReady: isAuthReady
+      authReady: isAuthReady,
+      skipThrow: false
     });
   };
 

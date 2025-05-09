@@ -6,6 +6,8 @@ import { useAuthActions } from '@/hooks/useAuthActions';
 import AuthContext from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { fetchWithRetry, isMobileDevice } from '@/utils/fetchUtils';
+import { getPlatformInfo } from '@/utils/storage/mobileUpload';
+import { verifySession } from '@/utils/storage/core/session';
 
 interface AuthProviderProps {
   children: ReactNode;

@@ -18,10 +18,14 @@ export const verifySession = async (options?: {
   const isMobile = platform.mobile || platform.safari;
   const maxRetries = isMobile ? 3 : 1;
   
-  // If authReady flag is respected and it's false, add delay for mobile
-  if (options?.respectAuthReady && !options.authReady && isMobile) {
-    console.log(`[Session] Auth not ready yet, delaying verification on ${platform.device}`);
-    await new Promise(resolve => setTimeout(resolve, 800));
+  // If respectAuthReady is true and authReady is false, don't verify session yet
+  if (options?.respectAuthReady && !options.authReady) {
+    console.log(`[Session] Auth not ready yet, skipping verification on ${platform.device}`);
+    // For mobile devices, add a delay before continuing to allow session to initialize
+    if (isMobile) {
+      await new Promise(resolve => setTimeout(resolve, 1200));
+    }
+    return options.skipThrow ? false : true;
   }
   
   try {
@@ -32,7 +36,7 @@ export const verifySession = async (options?: {
       () => supabase.auth.getSession(),
       { 
         maxRetries: maxRetries,
-        initialDelay: isMobile ? 1200 : 800,
+        initialDelay: isMobile ? 1500 : 800,
         useBackoff: true
       }
     );
@@ -51,8 +55,9 @@ export const verifySession = async (options?: {
       const refreshResult = await fetchWithRetry(
         () => supabase.auth.refreshSession(),
         { 
-          maxRetries: isMobile ? 2 : 1,
-          initialDelay: isMobile ? 1200 : 800
+          maxRetries: isMobile ? 3 : 1,
+          initialDelay: isMobile ? 1500 : 800,
+          useBackoff: true
         }
       );
       
@@ -71,19 +76,24 @@ export const verifySession = async (options?: {
         if (platform.safari || platform.mobile) {
           // Special handling for mobile browsers which have more session issues
           console.log(`[Session] ${platform.device} detected, making extra refresh attempt`);
-          await new Promise(resolve => setTimeout(resolve, 1500)); // Increased delay
+          await new Promise(resolve => setTimeout(resolve, 1800)); // Increased delay for mobile
           const secondRefresh = await supabase.auth.refreshSession();
           
           if (!secondRefresh.data.session) {
             console.log('[Session] Second refresh attempt failed');
             
             // Last ditch effort - check if we have fragments in storage
-            const hasLocalStorageSession = localStorage.getItem('supabase.auth.token') || 
-                                         localStorage.getItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+            let hasLocalStorageSession = false;
+            try {
+              hasLocalStorageSession = !!localStorage.getItem('supabase.auth.token') || 
+                                     !!localStorage.getItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+            } catch (e) {
+              console.warn('[Session] Error accessing localStorage:', e);
+            }
             
             if (isMobile && hasLocalStorageSession) {
               console.log('[Session] Found token fragments in storage, trying one more refresh');
-              await new Promise(resolve => setTimeout(resolve, 800));
+              await new Promise(resolve => setTimeout(resolve, 1200));
               const finalRefresh = await supabase.auth.refreshSession();
               
               if (finalRefresh.data.session) {
@@ -117,4 +127,3 @@ export const verifySession = async (options?: {
     throw error;
   }
 };
-
