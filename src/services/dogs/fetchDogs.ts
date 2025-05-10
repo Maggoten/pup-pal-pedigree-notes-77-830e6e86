@@ -15,6 +15,9 @@ const MOBILE_PAGE_SIZE = 5; // Smaller page size for mobile devices
 const DESKTOP_PAGE_SIZE = 20; // Larger page size for desktop devices
 const AUTH_ERROR_CODES = ['401', 'JWT', 'auth', 'unauthorized', 'token'];
 
+
+
+
 // Function to fetch total count without data
 export async function fetchDogsCount(userId: string): Promise<number> {
   if (!userId) {
@@ -47,6 +50,7 @@ export async function fetchDogsCount(userId: string): Promise<number> {
 
 // Primary function to fetch dogs with pagination
 export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
+    console.log('[Dogs Debug] Enter fetchDogs, userId=', userId);
   if (!userId) {
     console.error('[Dogs Debug] fetchDogs called without userId');
     return [];
