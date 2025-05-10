@@ -1,8 +1,6 @@
 
-import { supabase } from '@/integrations/supabase/client';
 import { STORAGE_ERRORS } from '../config';
 import { getPlatformInfo } from '../mobileUpload';
-import { fetchWithRetry } from '@/utils/fetchUtils';
 import { verifySession as centralVerifySession } from '@/utils/auth/sessionManager';
 
 /**
@@ -23,7 +21,12 @@ export const verifySession = async (options?: {
   
   try {
     // Use the central session management utility for consistency
-    const isSessionValid = await centralVerifySession();
+    const isSessionValid = await centralVerifySession({
+      force: false,
+      respectAuthReady: options?.respectAuthReady,
+      authReady: options?.authReady,
+      skipThrow: options?.skipThrow
+    });
     
     if (!isSessionValid) {
       console.log('[Session] Session invalid, checking if we should throw');

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useDogs } from '@/context/DogsContext';
 import { PlannedLitter } from '@/types/breeding';
 import { plannedLittersService } from '@/services/PlannedLitterService';
@@ -8,6 +8,7 @@ import { useRecentMatings } from './useRecentMatings';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 import { toast } from '@/hooks/use-toast';
+import { verifySession } from '@/utils/auth/sessionManager';
 
 export const usePlannedLitterQueries = () => {
   const { dogs } = useDogs();
@@ -17,6 +18,7 @@ export const usePlannedLitterQueries = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadAttempted, setLoadAttempted] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const lastSuccessfulFetch = useRef<number>(0);
   
   const males = dogs.filter(dog => dog.gender === 'male');
   const females = dogs.filter(dog => dog.gender === 'female');
@@ -25,11 +27,18 @@ export const usePlannedLitterQueries = () => {
   
   // Function to handle visibility change for reloading
   useEffect(() => {
-    const handleVisibilityChange = () => {
+    const handleVisibilityChange = async () => {
       if (document.visibilityState === 'visible' && isAuthReady && user) {
-        // Reload data when page becomes visible again
-        console.log('Page became visible, checking if planned litters need refresh');
-        loadLitters(true);
+        // Don't reload too frequently - add a 30s cooldown
+        const now = Date.now();
+        const minTimeBetweenFetches = 30000; // 30 seconds
+        
+        if (now - lastSuccessfulFetch.current > minTimeBetweenFetches) {
+          console.log('Page became visible, refreshing planned litters');
+          loadLitters(true);
+        } else {
+          console.log('Page became visible, but skipping refresh (too recent)');
+        }
       }
     };
     
@@ -41,14 +50,32 @@ export const usePlannedLitterQueries = () => {
 
   const loadLitters = async (isRefresh = false) => {
     // Skip if auth isn't ready yet
-    if (!isAuthReady || !user) {
-      console.log('Skipping planned litters load - auth not ready or no user');
+    if (!isAuthReady) {
+      console.log('Skipping planned litters load - auth not ready');
+      return;
+    }
+    
+    // Skip if no user
+    if (!user) {
+      console.log('Skipping planned litters load - no user');
       return;
     }
 
     if (loadAttempted && !isRefresh) {
       // Already tried loading once, don't spam attempts unless it's a refresh
       return;
+    }
+    
+    // Verify session is valid first
+    try {
+      const isSessionValid = await verifySession({ skipThrow: true });
+      if (!isSessionValid) {
+        console.warn('No valid session for loading planned litters');
+        setIsLoading(false);
+        return;
+      }
+    } catch (error) {
+      console.error('Session verification failed:', error);
     }
     
     try {
@@ -74,6 +101,9 @@ export const usePlannedLitterQueries = () => {
       
       setPlannedLitters(litters);
       console.log("Planned litters loaded successfully:", litters.length);
+      
+      // Track successful fetch time
+      lastSuccessfulFetch.current = Date.now();
     } catch (error) {
       console.error('Error loading planned litters:', error);
       

@@ -1,100 +1,145 @@
 
-// Enhanced fetch utilities with better mobile support
+import { verifySession } from './auth/sessionManager';
 
-// Check if we're on a mobile device
+// Utility to check if running on mobile device
 export const isMobileDevice = (): boolean => {
-  return /iphone|ipad|ipod|android|blackberry|windows phone/i.test(navigator.userAgent) ||
-    // iPad detection on iOS 13+
-    (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 };
 
-// Get device-aware timeout values
-export const getDeviceAwareTimeout = (baseTimeout: number): number => {
-  if (isMobileDevice()) {
-    // Mobile devices get more generous timeouts due to potential network issues
-    return baseTimeout * 1.5;
-  }
-  return baseTimeout;
-};
-
-type RetryOptions = {
+export interface RetryOptions {
   maxRetries?: number;
   initialDelay?: number;
   useBackoff?: boolean;
-  onRetry?: (attempt: number, error?: any) => void;
-  shouldRetry?: (error: any) => boolean;
-};
+  onRetry?: (attempt: number, error: any) => void;
+  verifySession?: boolean;
+  authRequired?: boolean;
+}
 
-// General retry utility for any async operation
+// Advanced fetch with retry capabilities
 export async function fetchWithRetry<T>(
-  operation: () => Promise<T>,
+  fetchFn: () => Promise<T>,
   options: RetryOptions = {}
 ): Promise<T> {
   const {
     maxRetries = 2,
-    initialDelay = 1000,
+    initialDelay = 2000,
     useBackoff = true,
     onRetry,
-    shouldRetry = () => true
+    verifySession: shouldVerifySession = true,
+    authRequired = true
   } = options;
-  
-  let attempt = 0;
+
   let lastError: any;
   
-  while (attempt <= maxRetries) {
+  // Verify session if required
+  if (shouldVerifySession && authRequired) {
     try {
-      return await operation();
+      const isSessionValid = await verifySession({ skipThrow: true });
+      if (!isSessionValid) {
+        console.warn('[fetchWithRetry] No valid session for authenticated request');
+        throw new Error('Authentication required');
+      }
+    } catch (error) {
+      console.error('[fetchWithRetry] Session verification failed:', error);
+      throw error;
+    }
+  }
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      if (attempt > 0 && onRetry) {
+        onRetry(attempt, lastError);
+      }
+      
+      // Attempt to perform the fetch operation
+      return await fetchFn();
     } catch (error) {
       lastError = error;
       
-      // Check if we should retry this error
-      if (!shouldRetry(error)) {
-        console.log('Not retrying based on error type:', error);
-        break;
+      // Check if we should retry or not
+      if (attempt >= maxRetries) {
+        console.error(`[fetchWithRetry] All ${maxRetries} retries failed:`, error);
+        throw error;
       }
       
-      if (attempt < maxRetries) {
-        // Calculate delay with exponential backoff if enabled
-        const delay = useBackoff 
-          ? initialDelay * Math.pow(2, attempt)
-          : initialDelay;
-        
-        console.log(`Operation failed, retry ${attempt + 1}/${maxRetries} in ${delay}ms`, error);
-        
-        if (onRetry) {
-          onRetry(attempt + 1, error);
-        }
-        
-        await new Promise(resolve => setTimeout(resolve, delay));
+      // Check for auth errors - don't retry these
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      const isAuthError = ['401', 'JWT', 'auth', 'unauthorized', 'token'].some(code => 
+        errorMsg.toLowerCase().includes(code.toLowerCase()));
+      
+      if (isAuthError) {
+        console.log('[fetchWithRetry] Auth error detected, not retrying:', errorMsg);
+        throw error;
       }
       
-      attempt++;
+      // Calculate delay with exponential backoff if enabled
+      const delay = useBackoff 
+        ? initialDelay * Math.pow(1.5, attempt)
+        : initialDelay;
+        
+      console.log(`[fetchWithRetry] Attempt ${attempt + 1} failed. Retrying in ${delay}ms...`);
+      
+      // Wait before next attempt
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
   
+  // This should never be reached due to the throw in the loop
   throw lastError;
 }
 
-// Determine if a request error should be retried
-export const shouldRetryRequest = (error: any): boolean => {
-  // Don't retry 4xx errors (client errors)
-  if (error && typeof error === 'object') {
-    // For Supabase errors with status codes
-    if ('statusCode' in error && error.statusCode >= 400 && error.statusCode < 500) {
-      // Don't retry client errors except for 408 (timeout)
-      if (error.statusCode !== 408) {
-        return false;
-      }
-    }
-    
-    // For fetch Response objects
-    if ('status' in error && error.status >= 400 && error.status < 500) {
-      // Don't retry client errors except for 408 (timeout)
-      if (error.status !== 408) {
-        return false;
-      }
-    }
+// Parse error messages from Supabase or generic errors
+export function parseErrorMessage(error: any): string {
+  if (!error) return 'An unknown error occurred';
+  
+  // Handle Supabase specific errors
+  if (error.code && error.message) {
+    return `${error.message} (${error.code})`;
   }
   
-  return true;
-};
+  // Handle Error objects
+  if (error instanceof Error) {
+    return error.message;
+  }
+  
+  // Handle string errors
+  if (typeof error === 'string') {
+    return error;
+  }
+  
+  // Handle unexpected error formats
+  return JSON.stringify(error);
+}
+
+// Track loading states for multiple fetches
+export class LoadingTracker {
+  private loadingStates: Map<string, boolean> = new Map();
+  private callbacks: Set<() => void> = new Set();
+  
+  setLoading(key: string, isLoading: boolean) {
+    this.loadingStates.set(key, isLoading);
+    this.notifyListeners();
+  }
+  
+  isLoading(key?: string): boolean {
+    if (key) {
+      return !!this.loadingStates.get(key);
+    }
+    
+    // If any key is loading, return true
+    for (const [_, isLoading] of this.loadingStates.entries()) {
+      if (isLoading) return true;
+    }
+    
+    return false;
+  }
+  
+  subscribe(callback: () => void): () => void {
+    this.callbacks.add(callback);
+    return () => this.callbacks.delete(callback);
+  }
+  
+  private notifyListeners() {
+    this.callbacks.forEach(callback => callback());
+  }
+}

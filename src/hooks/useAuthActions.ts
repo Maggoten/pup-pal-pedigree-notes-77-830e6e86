@@ -1,230 +1,195 @@
 
 import { useState } from 'react';
-import { supabase, Profile } from '@/integrations/supabase/client';
-import { User, RegisterData } from '@/types/auth';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { clearAuthStorage } from '@/services/auth/storageService';
-import { clearSessionState } from '@/utils/auth/sessionManager';
+import { clearAuthStorage } from '@/services/auth';
+import { queryClient, resetQueryClient } from '@/utils/reactQueryConfig';
 
 export const useAuthActions = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [registerLoading, setRegisterLoading] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
-  // Login function
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
+  /**
+   * Log in a user with email and password
+   */
+  const login = async (email: string, password: string) => {
+    if (!email || !password) return false;
+    
+    setLoginLoading(true);
     try {
-      console.log('[Auth Action] Attempting login for:', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
-      
+
       if (error) {
-        console.error('[Auth Action] Login error from Supabase:', error);
-        // Only show toast for user-facing errors, not technical ones
-        if (error.message.includes('Invalid login credentials')) {
-          toast({
-            title: "Invalid credentials",
-            description: "Please check your email and password",
-            variant: "destructive"
-          });
-        } else if (error.message.includes('Email not confirmed')) {
-          toast({
-            title: "Email not confirmed",
-            description: "Please check your inbox and confirm your email address",
-            variant: "destructive"
-          });
-        } else {
-          toast({
-            title: "Login failed",
-            description: "An error occurred. Please try again later.",
-            variant: "destructive"
-          });
-        }
+        console.error('Login error:', error);
+        toast({
+          title: 'Login failed',
+          description: error.message,
+          variant: 'destructive'
+        });
         return false;
       }
       
-      console.log('[Auth Action] Login successful, session established:', !!data.session);
-      return !!data.session;
-    } catch (error) {
-      console.error("[Auth Action] Login error:", error);
+      if (data.session) {
+        console.log('User logged in successfully');
+        
+        // Prefetch common data for the user
+        setTimeout(() => {
+          queryClient.invalidateQueries();
+        }, 0);
+        
+        toast({
+          title: 'Welcome back!',
+          description: 'You have successfully logged in.'
+        });
+        
+        return true;
+      } else {
+        toast({
+          title: 'Login failed',
+          description: 'No session was created. Please try again.',
+          variant: 'destructive'
+        });
+        return false;
+      }
+    } catch (err) {
+      console.error('Unexpected login error:', err);
       toast({
-        title: "Login failed",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
+        title: 'Login failed',
+        description: 'An unexpected error occurred. Please try again.',
+        variant: 'destructive'
       });
       return false;
     } finally {
-      setIsLoading(false);
+      setLoginLoading(false);
     }
   };
 
-  // Registration function with improved error handling
-  const register = async (userData: RegisterData): Promise<boolean> => {
-    setIsLoading(true);
+  /**
+   * Register a new user
+   */
+  const register = async ({
+    firstName,
+    lastName,
+    email,
+    password,
+    address = ''
+  }: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    address?: string;
+  }) => {
+    setRegisterLoading(true);
     try {
-      console.log('[Auth Action] Attempting registration for:', userData.email);
-      
-      // Directly attempt to register the user without pre-checking email
       const { data, error } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
+        email,
+        password,
         options: {
           data: {
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-            address: ''
+            firstName,
+            lastName,
+            address
           }
         }
       });
 
       if (error) {
-        console.error('[Auth Action] Registration error from Supabase:', error);
-        
-        // Specific handling for "User already registered" error
-        if (error.message.includes('already registered')) {
-          toast({
-            title: "Registration failed",
-            description: "This email is already registered. Please try to log in instead.",
-            variant: "destructive"
-          });
-        } else {
-          toast({
-            title: "Registration failed",
-            description: error.message,
-            variant: "destructive"
-          });
-        }
+        console.error('Registration error:', error);
+        toast({
+          title: 'Registration failed',
+          description: error.message,
+          variant: 'destructive'
+        });
         return false;
       }
 
-      // Check if email confirmation is required
-      if (data.user && !data.session) {
-        console.log('[Auth Action] Registration successful but email confirmation required');
-        toast({
-          title: "Registration successful",
-          description: "Please check your email to confirm your account.",
-        });
-        return true;
-      } else if (data.session) {
-        console.log('[Auth Action] Registration successful with immediate session');
-        toast({
-          title: "Registration successful",
-          description: "Your account has been created successfully.",
-        });
-        return true;
-      } else {
-        console.warn('[Auth Action] Registration returned unexpected state');
-        return false;
-      }
-    } catch (error) {
-      console.error("[Auth Action] Registration error:", error);
       toast({
-        title: "Registration failed",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
+        title: 'Registration successful',
+        description: 'Your account has been created. Welcome!'
+      });
+      
+      // Reset query cache for the new user
+      resetQueryClient();
+      
+      return true;
+    } catch (err) {
+      console.error('Unexpected registration error:', err);
+      toast({
+        title: 'Registration failed',
+        description: 'An unexpected error occurred. Please try again.',
+        variant: 'destructive'
       });
       return false;
     } finally {
-      setIsLoading(false);
+      setRegisterLoading(false);
     }
   };
 
-  // Enhanced logout function with improved storage cleanup and session termination
-  const logout = async (): Promise<void> => {
-    setIsLoading(true);
+  /**
+   * Log out the current user
+   */
+  const logout = async () => {
+    setLogoutLoading(true);
     try {
-      console.log('[Auth Action] Attempting logout');
+      // Clear all query cache before logout
+      resetQueryClient();
       
-      // First perform thorough storage cleanup before signout (helps with Safari issues)
-      clearAuthStorage();
-      clearSessionState();
-      
-      // Use global scope to sign out from all devices
-      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error('[Auth Action] Logout error from Supabase:', error);
-        
-        // If logout API fails, try directly removing session from all storage locations
-        try {
-          console.log('[Auth Action] Attempting direct session removal as fallback');
-          ['localStorage', 'sessionStorage'].forEach(storageType => {
-            try {
-              const storage = window[storageType as 'localStorage' | 'sessionStorage'];
-              if (storage) {
-                // Remove all Supabase related items
-                for (let i = 0; i < storage.length; i++) {
-                  const key = storage.key(i);
-                  if (key && (key.includes('supabase') || key.includes('sb-'))) {
-                    storage.removeItem(key);
-                  }
-                }
-              }
-            } catch (e) {
-              console.log(`[Auth Action] Error clearing ${storageType}:`, e);
-            }
-          });
-        } catch (e) {
-          console.error('[Auth Action] Error during fallback storage cleanup:', e);
-        }
-      } else {
-        console.log('[Auth Action] Logout successful via Supabase API');
+        console.error('Logout error:', error);
+        toast({
+          title: 'Logout failed',
+          description: error.message,
+          variant: 'destructive'
+        });
+        return;
       }
-      
-      // Force-clear any remaining auth state from storage
+
+      // Clear auth storage
       clearAuthStorage();
-      clearSessionState();
       
-      // Display success message
       toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
+        title: 'Goodbye!',
+        description: 'You have been logged out successfully.'
       });
-      
-      // Force a manual location redirect to ensure logout is complete
-      // This bypasses any potential issues with AuthGuard's state handling
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 300);
-      
-    } catch (error) {
-      console.error("[Auth Action] Logout error:", error);
-      // Even if there's an error, try to clear local storage
-      clearAuthStorage();
-      clearSessionState();
-      // In case of critical error, fall back to location redirect
-      window.location.href = '/login';
+    } catch (err) {
+      console.error('Unexpected logout error:', err);
+      toast({
+        title: 'Logout problem',
+        description: 'An error occurred during logout. Your session may still be active.',
+        variant: 'destructive'
+      });
     } finally {
-      setIsLoading(false);
+      setLogoutLoading(false);
     }
   };
 
-  // Get user profile from database with improved error handling
-  const getUserProfile = async (userId: string): Promise<Profile | null> => {
+  /**
+   * Get user profile by ID
+   */
+  const getUserProfile = async (userId: string) => {
     try {
-      console.log('[Auth Action] Fetching profile for user:', userId);
-      if (!userId) {
-        console.error('[Auth Action] getUserProfile called with no userId');
-        return null;
-      }
-
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .maybeSingle();
-      
+        .single();
+
       if (error) {
-        console.error('[Auth Action] Error fetching user profile:', error);
-        throw error;
+        console.error('Error fetching profile:', error);
+        return null;
       }
       
-      console.log('[Auth Action] Profile retrieved:', data ? 'success' : 'not found');
       return data;
-    } catch (error) {
-      console.error("[Auth Action] Error fetching user profile:", error);
-      throw error;
+    } catch (err) {
+      console.error('Unexpected error fetching profile:', err);
+      return null;
     }
   };
 
@@ -233,6 +198,8 @@ export const useAuthActions = () => {
     register,
     logout,
     getUserProfile,
-    isLoading
+    loginLoading,
+    registerLoading,
+    logoutLoading
   };
 };

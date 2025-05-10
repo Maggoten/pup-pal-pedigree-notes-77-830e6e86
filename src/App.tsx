@@ -2,7 +2,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Index from "./pages/Index";
@@ -21,22 +21,7 @@ import Pregnancy from "./pages/Pregnancy";
 import MobileDebugPanel from "./components/diagnostics/MobileDebugPanel";
 import { isMobileDevice } from "./utils/fetchUtils";
 import { clearSessionState } from "./utils/auth/sessionManager";
-
-// Configure React Query with error handling
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: isMobileDevice() ? 3 : 2, // Increase retry count for mobile networks
-      retryDelay: attempt => Math.min(1000 * Math.pow(2, attempt), 30000), // Exponential backoff
-      // Use meta for error handling in newer versions of React Query
-      meta: {
-        onError: (error: Error) => {
-          console.error('[React Query Error]:', error);
-        }
-      }
-    }
-  }
-});
+import { queryClient } from "./utils/reactQueryConfig";
 
 const App = () => {
   const [firstPregnancyId, setFirstPregnancyId] = useState<string | null>(null);

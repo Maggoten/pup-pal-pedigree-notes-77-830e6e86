@@ -1,14 +1,15 @@
+
 import { useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { User } from '@/types/auth';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
-import { supabase, Profile } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import AuthContext from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { fetchWithRetry, isMobileDevice } from '@/utils/fetchUtils';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
-import { verifySession } from '@/utils/storage/core/session';
-import { clearSessionState } from '@/utils/auth/sessionManager';
+import { verifySession, refreshSession, clearSessionState } from '@/utils/auth/sessionManager';
+import { handleAuthStateChange } from '@/utils/reactQueryConfig';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -74,82 +75,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return isExpiring;
   }, [isAuthReady]);
   
-  // Function to refresh the session with improved mobile handling
-  const refreshSession = useCallback(async () => {
-    const platform = getPlatformInfo();
-    const isMobile = platform.mobile || platform.safari;
-    
-    try {
-      console.log('[Auth Debug] Refreshing session...');
-      
-      // Use verifySession with appropriate options
-      const sessionValid = await verifySession({
-        respectAuthReady: true,
-        authReady: isAuthReady,
-        skipThrow: true
-      });
-      
-      if (sessionValid) {
-        console.log('[Auth Debug] Session verified or refreshed successfully');
-        // Get the updated session to update the React state
-        const { data } = await supabase.auth.getSession();
-        if (data.session) {
-          setSession(data.session);
-          setSupabaseUser(data.session.user);
-          setIsLoggedIn(true);
-        }
-        return true;
-      } else {
-        console.log('[Auth Debug] Session verification failed');
-        return false;
-      }
-    } catch (err) {
-      console.error('[Auth Debug] Error during session refresh:', err);
-      return false;
-    }
-  }, [isAuthReady]);
-
-  // Function to check session status across storage locations
-  const validateSessionAcrossStorages = useCallback(async () => {
-    try {
-      // Check localStorage, sessionStorage and cookies for session fragments
-      let hasLocalStorageSession = false;
-      let hasSessionStorageSession = false;
-      
-      try {
-        // Look for known session keys in localStorage
-        hasLocalStorageSession = !!localStorage.getItem('supabase.auth.token') || 
-                                !!localStorage.getItem('sb-yqcgqriecxtppuvcguyj-auth-token');
-      } catch (e) {
-        console.log('[Auth Debug] Error checking localStorage:', e);
-      }
-      
-      try {
-        // Look for known session keys in sessionStorage
-        hasSessionStorageSession = !!sessionStorage.getItem('supabase.auth.token') || 
-                                   !!sessionStorage.getItem('sb-yqcgqriecxtppuvcguyj-auth-token');
-      } catch (e) {
-        console.log('[Auth Debug] Error checking sessionStorage:', e);
-      }
-      
-      // If session found in any storage but getSession returns no session, 
-      // there might be a storage fragmentation issue
-      const { data } = await supabase.auth.getSession();
-      if ((hasLocalStorageSession || hasSessionStorageSession) && !data.session) {
-        console.log('[Auth Debug] Storage fragmentation detected: session in storage but not in memory');
-        
-        // Try to fix by forcing a recovery refresh
-        const { data: refreshData } = await supabase.auth.refreshSession();
-        return !!refreshData.session;
-      }
-      
-      return !!data.session;
-    } catch (e) {
-      console.error('[Auth Debug] Error during cross-storage validation:', e);
-      return false;
-    }
-  }, []);
-  
   // Handle window focus/blur events (tab switching)
   useEffect(() => {
     const handleVisibilityChange = async () => {
@@ -167,15 +92,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (isAuthReady && inactiveTime > 30 * 1000) {
           console.log('[Auth Debug] Long inactivity detected, refreshing session...');
           
-          // First validate session across storage locations (important for Safari)
-          const hasValidSession = await validateSessionAcrossStorages();
+          // Refresh session
+          const refreshed = await refreshSession();
           
-          if (!hasValidSession) {
-            console.log('[Auth Debug] No valid session found, attempting refresh...');
+          if (refreshed && session && supabaseUser) {
+            // Trigger data refresh upon successful session refresh
+            handleAuthStateChange('REFRESHED', supabaseUser.id);
           }
-          
-          // Refresh regardless to ensure tokens are up to date
-          await refreshSession();
         }
       } else {
         // Going inactive - record time
@@ -198,7 +121,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       window.removeEventListener('focus', handleVisibilityChange);
       window.removeEventListener('blur', () => {});
     };
-  }, [refreshSession, validateSessionAcrossStorages, isAuthReady]);
+  }, [refreshSession, isAuthReady, session, supabaseUser]);
   
   // Periodically check session when app is active
   useEffect(() => {
@@ -255,6 +178,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 setSession(null);
                 setIsAuthReady(true);
                 console.log(`[Auth Debug] Sign out event processed, state cleared`);
+                
+                // Trigger React Query cleanup on sign out
+                handleAuthStateChange(event);
               }
               return;
             }
@@ -286,6 +212,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                       address: profile.address
                     });
                     console.log(`[Auth Debug] User profile loaded`);
+                    
+                    // Trigger React Query data prefetching on sign in
+                    if (event === 'SIGNED_IN') {
+                      handleAuthStateChange(event, currentSession.user.id);
+                    }
                   } else if (isSubscribed) {
                     // Fallback user
                     setUser({
@@ -296,6 +227,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                       address: ''
                     });
                     console.log(`[Auth Debug] Using fallback user data`);
+                    
+                    // Still trigger data prefetching with fallback user
+                    if (event === 'SIGNED_IN') {
+                      handleAuthStateChange(event, currentSession.user.id);
+                    }
                   }
                   
                   setIsAuthReady(true);

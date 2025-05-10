@@ -6,6 +6,7 @@ import { PostgrestResponse } from '@supabase/supabase-js';
 import { withTimeout, TIMEOUT, isTimeoutError } from '@/utils/timeoutUtils';
 import { fetchWithRetry, isMobileDevice } from '@/utils/fetchUtils';
 import { toast } from '@/hooks/use-toast';
+import { verifySession } from '@/utils/auth/sessionManager';
 
 // Constants for timeouts and retries
 const MOBILE_TIMEOUT = 15000; // 15 seconds for mobile devices
@@ -15,6 +16,37 @@ const MOBILE_PAGE_SIZE = 5; // Smaller page size for mobile devices
 const DESKTOP_PAGE_SIZE = 20; // Larger page size for desktop devices
 const AUTH_ERROR_CODES = ['401', 'JWT', 'auth', 'unauthorized', 'token'];
 
+// Function to fetch total count without data
+export async function fetchDogsCount(userId: string): Promise<number> {
+  if (!userId) {
+    console.error('[Dogs Debug] fetchDogsCount called without userId');
+    return 0;
+  }
+
+  try {
+    // Verify session first
+    await verifySession({ skipThrow: true });
+    
+    // Use a separate call with count but no data
+    const { count, error } = await supabase
+      .from('dogs')
+      .select('id', { count: 'exact', head: true }) // head: true = no data, just count
+      .eq('owner_id', userId);
+    
+    if (error) {
+      console.error('[Dogs Debug] Error fetching dog count:', error);
+      throw error;
+    }
+    
+    console.log(`[Dogs Debug] Found ${count} dogs for user ${userId}`);
+    return count || 0;
+  } catch (error) {
+    console.error('[Dogs Debug] Failed to fetch dog count:', error);
+    return 0;
+  }
+}
+
+// Primary function to fetch dogs with pagination
 export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
   if (!userId) {
     console.error('[Dogs Debug] fetchDogs called without userId');
@@ -30,18 +62,16 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
   console.log(`[Dogs Debug] Fetching dogs for user ${userId} on ${deviceType} (page ${page}, range ${start}-${end})`);
   console.log(`[Dogs Debug] Using timeout: ${effectiveTimeout}ms with ${MAX_RETRIES} retries`);
   
+  // Verify session first before making data requests
   try {
-    // Get current session before making data request
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
-      console.warn('[Dogs Debug] No active session found before fetching dogs');
-      
-      // Return empty array instead of showing error immediately
-      // This allows the auth system to recover the session first
+    const isSessionValid = await verifySession({ skipThrow: true });
+    if (!isSessionValid) {
+      console.warn('[Dogs Debug] No valid session before fetching dogs, returning empty array');
+      // Return empty array as we'll let the auth system recover the session
       return [];
     }
     
-    // Use our retry wrapper for the fetch operation with pagination and specific columns
+    // Use our retry wrapper for the fetch operation with pagination
     const response = await fetchWithRetry<PostgrestResponse<DbDog>>(
       // Fetch function with specific fields instead of select('*')
       () => supabase
@@ -49,7 +79,7 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
         .select('id, name, breed, gender, birthdate, color, image_url, heatHistory, heatInterval, owner_id, created_at')
         .eq('owner_id', userId)
         .order('created_at', { ascending: false })
-        .range(start, end) as unknown as Promise<PostgrestResponse<DbDog>>,
+        .range(start, end), // Pagination without head:true to get actual data
       // Retry options
       {
         maxRetries: MAX_RETRIES,
@@ -65,7 +95,6 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
           
           if (isAuthError) {
             console.log('[Dogs Debug] Auth-related error detected, allowing auth system to recover');
-            // Don't show toast for auth errors, let auth system handle it
             return;
           }
           
@@ -88,7 +117,6 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
       
       if (isAuthError) {
         console.warn('[Dogs Debug] Auth error from Supabase:', errorMsg);
-        // For auth errors, just return empty array and let auth system handle recovery
         return [];
       }
       
@@ -122,7 +150,6 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
     
     if (isAuthError) {
       console.warn('[Dogs Debug] Auth-related error detected, returning empty array');
-      // For auth errors, just return empty array and let auth system handle it
       return [];
     }
     
@@ -150,28 +177,5 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
     }
     
     throw new Error(errorMessage);
-  }
-}
-
-// Add a new function to fetch total count for pagination
-export async function fetchDogsCount(userId: string): Promise<number> {
-  if (!userId) {
-    return 0;
-  }
-  
-  try {
-    const { count, error } = await supabase
-      .from('dogs')
-      .select('id', { count: 'exact', head: true })
-      .eq('owner_id', userId);
-    
-    if (error) {
-      throw error;
-    }
-    
-    return count || 0;
-  } catch (error) {
-    console.error('[Dogs Debug] Failed to fetch dog count:', error);
-    return 0;
   }
 }

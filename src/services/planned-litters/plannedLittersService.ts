@@ -3,44 +3,77 @@ import { supabase } from '@/integrations/supabase/client';
 import { PlannedLitter } from '@/types/breeding';
 import { PlannedLitterFormValues } from './types';
 import { matingDatesService } from './matingDatesService';
+import { verifySession } from '@/utils/auth/sessionManager';
+import { fetchWithRetry } from '@/utils/fetchUtils';
 
 class PlannedLittersService {
   async loadPlannedLitters(): Promise<PlannedLitter[]> {
+    // First verify session is valid
+    const isSessionValid = await verifySession({ skipThrow: true });
+    if (!isSessionValid) {
+      console.warn('[PlannedLittersService] No valid session for fetching planned litters');
+      return [];
+    }
+    
+    // Then fetch the session data
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
-      console.error('No active session found');
+      console.error('[PlannedLittersService] No active session found');
       return [];
     }
 
-    const { data: litters, error } = await supabase
-      .from('planned_litters')
-      .select(`
-        *,
-        mating_dates(*)
-      `)
-      .eq('user_id', sessionData.session.user.id);
+    // Use fetchWithRetry for more resilient data loading
+    try {
+      const { data: litters, error } = await fetchWithRetry(() => 
+        supabase
+          .from('planned_litters')
+          .select(`
+            *,
+            mating_dates(*)
+          `)
+          .eq('user_id', sessionData.session!.user.id),
+        {
+          maxRetries: 2,
+          initialDelay: 1000,
+          verifySession: false // Already verified above
+        }
+      );
 
-    if (error) {
-      console.error('Error loading planned litters:', error);
-      return [];
+      if (error) {
+        throw error;
+      }
+
+      if (!litters) {
+        return [];
+      }
+
+      return litters.map(litter => ({
+        id: litter.id,
+        maleId: litter.male_id || '',
+        femaleId: litter.female_id,
+        maleName: litter.male_name || '',
+        femaleName: litter.female_name,
+        expectedHeatDate: litter.expected_heat_date,
+        notes: litter.notes,
+        matingDates: litter.mating_dates?.map(date => date.mating_date) || [],
+        externalMale: litter.external_male || false,
+        externalMaleBreed: litter.external_male_breed || '',
+        externalMaleRegistration: litter.external_male_registration || ''
+      }));
+    } catch (error) {
+      console.error('[PlannedLittersService] Error loading planned litters:', error);
+      throw error;
     }
-
-    return litters.map(litter => ({
-      id: litter.id,
-      maleId: litter.male_id || '',
-      femaleId: litter.female_id,
-      maleName: litter.male_name || '',
-      femaleName: litter.female_name,
-      expectedHeatDate: litter.expected_heat_date,
-      notes: litter.notes,
-      matingDates: litter.mating_dates?.map(date => date.mating_date) || [],
-      externalMale: litter.external_male || false,
-      externalMaleBreed: litter.external_male_breed || '',
-      externalMaleRegistration: litter.external_male_registration || ''
-    }));
   }
 
   async createPlannedLitter(formValues: PlannedLitterFormValues): Promise<PlannedLitter | null> {
+    // Verify session before creating
+    const isSessionValid = await verifySession({ skipThrow: true });
+    if (!isSessionValid) {
+      console.warn('[PlannedLittersService] No valid session for creating litter');
+      throw new Error('Authentication required. Please log in again.');
+    }
+    
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
       throw new Error('No active session');
@@ -64,7 +97,7 @@ class PlannedLittersService {
       .single();
 
     if (error) {
-      console.error('Error creating planned litter:', error);
+      console.error('[PlannedLittersService] Error creating planned litter:', error);
       return null;
     }
 
@@ -81,6 +114,37 @@ class PlannedLittersService {
       externalMaleBreed: litter.external_male_breed || '',
       externalMaleRegistration: litter.external_male_registration || ''
     };
+  }
+
+  // Count method for pagination - avoids fetchhing data just for count
+  async getPlannedLittersCount(): Promise<number> {
+    // First verify session is valid
+    const isSessionValid = await verifySession({ skipThrow: true });
+    if (!isSessionValid) {
+      return 0;
+    }
+    
+    // Then fetch the session data
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      return 0;
+    }
+    
+    try {
+      const { count, error } = await supabase
+        .from('planned_litters')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', sessionData.session.user.id);
+      
+      if (error) {
+        throw error;
+      }
+      
+      return count || 0;
+    } catch (error) {
+      console.error('[PlannedLittersService] Error counting planned litters:', error);
+      return 0;
+    }
   }
 
   // Re-export mating dates methods for backward compatibility
