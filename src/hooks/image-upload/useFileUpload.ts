@@ -7,7 +7,7 @@ import { verifySession, refreshSession } from '@/utils/auth/sessionManager';
 import { uploadToStorage, getPublicUrl } from '@/utils/storage';
 import { processImageForUpload } from '@/utils/storage';
 import { uploadStateManager, setUploadPending } from '@/components/AuthGuard';
-import { BUCKET_NAME, DEFAULT_IMAGE } from '@/utils/storage/config';
+import { BUCKET_NAME, STORAGE_ERRORS } from '@/utils/storage/config';
 
 export const useFileUpload = (user_id: string | null, onImageChange: (url: string) => void) => {
   const [uploadProgress, setUploadProgress] = useState(0);

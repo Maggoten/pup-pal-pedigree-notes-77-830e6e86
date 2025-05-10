@@ -50,7 +50,7 @@ export const useImageSessionCheck = () => {
         // For mobile devices, attempt an explicit refresh
         await refreshSession();
         // Try verification again
-        isValid = await verifySession(true);
+        isValid = await verifySession();
       }
       
       if (!isValid) {
