@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
  * with enhanced mobile support
  */
 export const useImageSessionCheck = () => {
-  const { isAuthReady } = useAuth();
+  const { isAuthReady, session } = useAuth();
 
   /**
    * Validates the current authentication session and attempts to refresh if needed
@@ -21,27 +21,44 @@ export const useImageSessionCheck = () => {
     const isMobile = platform.mobile || platform.safari;
     
     console.log('[ImageSessionCheck] Validating session, auth ready:', isAuthReady, 'platform:', platform.device);
+    console.log('[ImageSessionCheck] Current session state:', session ? 'exists' : 'none');
     
-    // For mobile, add additional delay to ensure auth is fully ready
-    if (isMobile && !isAuthReady) {
-      console.log(`[ImageSessionCheck] Mobile detected (${platform.device}), adding extra delay before validation`);
-      // Increased delay from 1500ms to 3000ms for mobile devices
-      await new Promise(resolve => setTimeout(resolve, 3000));
+    if (!isAuthReady) {
+      console.log(`[ImageSessionCheck] Auth not ready yet, delaying validation`);
+      // Increased delay from 3000ms to 4000ms for auth readiness
+      await new Promise(resolve => setTimeout(resolve, 4000));
       
-      // Recheck auth readiness after delay
-      if (!isAuthReady) {
-        console.log('[ImageSessionCheck] Auth still not ready after delay, proceeding with caution');
+      // Force check current session state after delay
+      const { data } = await supabase.auth.getSession();
+      const hasSession = !!data.session;
+      
+      console.log(`[ImageSessionCheck] After delay, session exists: ${hasSession}`);
+      
+      // For mobile, be more permissive about session requirements
+      if (isMobile && !hasSession) {
+        console.log(`[ImageSessionCheck] Mobile device with no session after delay, proceeding anyway`);
+        return true; // Allow mobile uploads to proceed even without session
       }
     }
     
     // Use the enhanced verifySession function with auth ready state and mobile awareness
-    return verifySession({
-      respectAuthReady: true,
-      authReady: isAuthReady,
-      // Changed to true to avoid throwing errors on mobile
-      skipThrow: isMobile ? true : false,
-      platform: platform
-    });
+    try {
+      return verifySession({
+        respectAuthReady: true,
+        authReady: isAuthReady,
+        // Always skip throwing errors on mobile
+        skipThrow: isMobile,
+        platform: platform
+      });
+    } catch (error) {
+      console.error('[ImageSessionCheck] Session validation error:', error);
+      // For mobile, continue despite errors
+      if (isMobile) {
+        console.log('[ImageSessionCheck] Allowing operation despite validation error on mobile');
+        return true;
+      }
+      return false;
+    }
   };
 
   return { validateSession };

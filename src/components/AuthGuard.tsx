@@ -6,6 +6,23 @@ import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 
+// Add a global state to track active uploads across components
+let activeUploadsCount = 0;
+
+// Expose functions to manage the upload state
+export const uploadStateManager = {
+  incrementUploads: () => { 
+    activeUploadsCount++;
+    console.log('[AuthGuard] Active uploads increased to:', activeUploadsCount);
+  },
+  decrementUploads: () => {
+    if (activeUploadsCount > 0) activeUploadsCount--;
+    console.log('[AuthGuard] Active uploads decreased to:', activeUploadsCount);
+  },
+  getActiveUploads: () => activeUploadsCount,
+  hasActiveUploads: () => activeUploadsCount > 0
+};
+
 interface AuthGuardProps {
   children: React.ReactNode;
 }
@@ -21,16 +38,28 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
   // Check if user is on the login page
   const isLoginPage = location.pathname === '/login';
+  
+  // Track if there are active uploads to prevent premature redirects
+  const [hasActiveUploads, setHasActiveUploads] = useState(false);
+  
+  // Check for active uploads every 500ms
+  useEffect(() => {
+    const uploadCheckInterval = setInterval(() => {
+      setHasActiveUploads(uploadStateManager.hasActiveUploads());
+    }, 500);
+    
+    return () => clearInterval(uploadCheckInterval);
+  }, []);
 
   // Add a delay before showing authentication errors
   // This helps prevent flash of auth errors during initialization
   // Use longer delay for mobile devices
   useEffect(() => {
-    // Increased delay from 2500ms to 3500ms for mobile
+    // Increased delay from 3500ms to 5000ms for mobile
     const timer = setTimeout(() => {
       setDelayComplete(true);
       console.log('[AuthGuard] Initial delay complete, can show auth errors now');
-    }, isMobile ? 3500 : 1000); // Increased delay for mobile
+    }, isMobile ? 5000 : 1000);
     
     return () => clearTimeout(timer);
   }, [isMobile]);
@@ -41,8 +70,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   useEffect(() => {
     // On mobile, we add extra time before forcing a redirect
     // This helps prevent premature redirects during slow session restoration
-    if (isMobile && !isLoggedIn && !isLoginPage) {
-      // Increased timeout from 4000ms to 6000ms
+    if (isMobile && !isLoggedIn && !isLoginPage && !hasActiveUploads) {
+      // Increased timeout from 6000ms to 8000ms
       const timer = setTimeout(() => {
         console.log('[AuthGuard] Mobile auth timeout reached, checking auth state again');
         // Only set timeout if auth is actually ready - prevents premature redirects
@@ -52,7 +81,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         } else if (!isAuthReady) {
           console.log('[AuthGuard] Auth not ready yet, delaying redirect decision');
           // If auth is not ready yet, give it more time
-          // Increased extended timeout from 2500ms to 3500ms
+          // Increased extended timeout from 3500ms to 5000ms
           const extendedTimer = setTimeout(() => {
             console.log('[AuthGuard] Extended timeout reached, proceeding with redirect decision');
             // After extended timeout, only proceed if auth is ready
@@ -61,20 +90,20 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             } else {
               // If auth still not ready, give one more extended chance
               console.log('[AuthGuard] Auth still not ready after extended timeout, giving one more chance');
-              // Increased final timer from 2000ms to 3000ms
+              // Increased final timer from 3000ms to 5000ms
               const finalTimer = setTimeout(() => {
                 setMobileAuthTimeout(true);
-              }, 3000);
+              }, 5000);
               return () => clearTimeout(finalTimer);
             }
-          }, 3500); // Additional 3.5s
+          }, 5000);
           return () => clearTimeout(extendedTimer);
         }
-      }, 6000); // Increased from 4s to 6s for mobile devices
+      }, 8000);
       
       return () => clearTimeout(timer);
     }
-  }, [isMobile, isLoggedIn, isLoginPage, isAuthReady]);
+  }, [isMobile, isLoggedIn, isLoginPage, isAuthReady, hasActiveUploads]);
   
   useEffect(() => {
     // Only show authentication toast when:
@@ -85,6 +114,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     // 5. Delay has completed (prevents flash)
     // 6. No toast is currently showing
     // 7. Mobile timeout has been reached (if mobile)
+    // 8. No active uploads are in progress
     const shouldShowToast = 
       isAuthReady && 
       !isLoggedIn && 
@@ -92,7 +122,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       !supabaseUser && 
       delayComplete && 
       !showingToast &&
-      (!isMobile || (isMobile && mobileAuthTimeout));
+      (!isMobile || (isMobile && mobileAuthTimeout)) &&
+      !hasActiveUploads;
     
     if (shouldShowToast) {
       console.log('[AuthGuard] Showing auth required toast, details:', {
@@ -101,6 +132,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         delayComplete,
         isMobile,
         mobileAuthTimeout,
+        hasActiveUploads,
         currentPath: location.pathname
       });
       
@@ -129,6 +161,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     delayComplete, 
     showingToast, 
     mobileAuthTimeout,
+    hasActiveUploads,
     isMobile,
     location.pathname
   ]);
@@ -147,10 +180,17 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     );
   }
 
-  // Only redirect if auth is ready and user is not logged in and not on login page
-  // For mobile, wait for the extra timeout before redirecting
-  const shouldRedirectToLogin = isAuthReady && !isLoggedIn && !isLoginPage && 
-                              (!isMobile || (isMobile && mobileAuthTimeout));
+  // Only redirect if:
+  // 1. Auth is ready
+  // 2. User is not logged in 
+  // 3. Not on login page
+  // 4. For mobile, wait for the extra timeout
+  // 5. No active uploads are in progress
+  const shouldRedirectToLogin = isAuthReady && 
+                              !isLoggedIn && 
+                              !isLoginPage && 
+                              (!isMobile || (isMobile && mobileAuthTimeout)) &&
+                              !hasActiveUploads;
   
   if (shouldRedirectToLogin) {
     console.log('[AuthGuard] Redirecting to login page from:', location.pathname);

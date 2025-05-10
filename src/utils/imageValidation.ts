@@ -22,11 +22,11 @@ export const getMaxFileSize = () => {
   
   // For iOS devices, be more permissive
   if (platform.iOS) {
-    return 6 * 1024 * 1024; // 6MB for iOS
+    return 8 * 1024 * 1024; // 8MB for iOS - increased from 6MB
   }
   // For Safari or any mobile device
   else if (platform.safari || platform.mobile) {
-    return 5.5 * 1024 * 1024; // 5.5MB for other mobile/Safari
+    return 7 * 1024 * 1024; // 7MB for other mobile/Safari - increased from 5.5MB
   }
   // For desktop browsers
   else {
@@ -66,7 +66,7 @@ const isImageFile = (file: File): boolean => {
   // For mobile Safari, be very permissive
   if (platform.iOS && platform.safari) {
     console.log('Using very permissive iOS Safari image type validation');
-    return hasValidExtension || hasValidMimeType || isGenericImageType;
+    return hasValidExtension || hasValidMimeType || isGenericImageType || fileExtension.length > 0;
   }
   
   // For other mobile browsers or Safari, be quite permissive
@@ -115,12 +115,24 @@ export const validateImageFile = (file: File): boolean => {
   
   console.log('MIME type validation passed, proceeding to size check');
   
-  // Restore the buffer multiplier with graduated values by platform
-  const bufferMultiplier = platform.iOS ? 1.1 : 
-                           platform.safari ? 1.05 : 1.02;
+  // For mobile, be extremely permissive about file sizes
+  if (platform.mobile) {
+    // Skip buffer multiplier entirely on mobile - new approach!
+    const shouldSkipSizeCheck = platform.iOS && file.size < 5 * 1024 * 1024;
+    
+    // Skip size check completely for small iOS files
+    if (shouldSkipSizeCheck) {
+      console.log('Size validation BYPASSED for small iOS file');
+      return true;
+    }
+  }
   
-  // For small files on mobile (under 1MB), skip buffer multiplier
-  const shouldApplyBuffer = !(platform.mobile && file.size < 1 * 1024 * 1024);
+  // Reduced buffer multipliers
+  const bufferMultiplier = platform.iOS ? 1.05 : 
+                           platform.safari ? 1.03 : 1.01;
+  
+  // For small files on mobile (under 2MB), skip buffer multiplier completely
+  const shouldApplyBuffer = !(platform.mobile && file.size < 2 * 1024 * 1024);
   const adjustedSize = shouldApplyBuffer ? file.size * bufferMultiplier : file.size;
   
   console.log('Size validation details:', {

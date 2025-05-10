@@ -9,17 +9,20 @@ import {
   checkBucketExists, 
   uploadToStorage, 
   getPublicUrl,
-  processImageForUpload
+  processImageForUpload,
+  isValidPublicUrl
 } from '@/utils/storage';
 import { validateImageFile } from '@/utils/imageValidation';
 import { useImageSessionCheck } from './useImageSessionCheck';
 import { UploadResult, hasErrorProperty, safeGetErrorProperty } from './types';
+import { useAuth } from '@/context/AuthContext';
 
 export const useFileUpload = (
   user_id: string | undefined,
   onImageChange: (imageUrl: string) => void
 ) => {
   const { validateSession } = useImageSessionCheck();
+  const { isAuthReady } = useAuth();
 
   const performUpload = async (file: File): Promise<boolean> => {
     const platform = getPlatformInfo();
@@ -28,7 +31,8 @@ export const useFileUpload = (
     console.log(`Beginning upload process for file: ${file.name} (${fileSizeMB}MB) on ${platform.device}`, {
       platform,
       fileSize: file.size,
-      fileType: file.type || 'unknown'
+      fileType: file.type || 'unknown',
+      authReady: isAuthReady
     });
     
     if (!user_id) {
@@ -52,11 +56,10 @@ export const useFileUpload = (
       // Validate and refresh session if needed - with enhanced mobile handling
       console.log(`[FileUpload] Validating session before upload on ${platform.device}`);
       
-      // Set a flag to indicate whether session validation was successful
+      // Attempt session validation but don't block mobile uploads if it fails
       let sessionValid = false;
       
       try {
-        // Always use skipThrow:true for mobile to handle validation errors more gracefully
         sessionValid = await validateSession();
         console.log(`[FileUpload] Session validation ${sessionValid ? 'succeeded' : 'failed'}`);
       } catch (sessionError) {
@@ -65,11 +68,9 @@ export const useFileUpload = (
         // For mobile, always try to proceed anyway if validation fails
         if (platform.mobile || platform.safari) {
           console.log('[FileUpload] Mobile detected, attempting upload despite session validation failure');
-          // Don't return early, try the upload anyway
           sessionValid = true; // Force continue on mobile
         } else {
-          // For desktop browsers, be more strict
-          throw sessionError;
+          throw new Error('Session validation failed. Please try logging in again.');
         }
       }
       
@@ -79,15 +80,22 @@ export const useFileUpload = (
         throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
       }
       
-      // Create a unique filename
+      // Create a unique filename with better platform identification
       const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      let fileName = `${user_id}/${Date.now()}.${fileExt}`;
+      const timestamp = Date.now();
+      let fileName = '';
       
-      // Add platform info to filename for troubleshooting
-      if (platform.mobile) {
-        fileName = `${user_id}/${Date.now()}_${platform.iOS ? 'ios' : 'mobile'}.${fileExt}`;
+      // More specific platform identification in filename
+      if (platform.iOS && platform.safari) {
+        fileName = `${user_id}/${timestamp}_ios_safari.${fileExt}`;
+      } else if (platform.iOS) {
+        fileName = `${user_id}/${timestamp}_ios.${fileExt}`;
       } else if (platform.safari) {
-        fileName = `${user_id}/${Date.now()}_safari.${fileExt}`;
+        fileName = `${user_id}/${timestamp}_safari.${fileExt}`;
+      } else if (platform.mobile) {
+        fileName = `${user_id}/${timestamp}_mobile.${fileExt}`;
+      } else {
+        fileName = `${user_id}/${timestamp}.${fileExt}`;
       }
       
       // Process the image with enhanced mobile support
@@ -145,21 +153,22 @@ export const useFileUpload = (
       // Get the public URL with cache busting
       const { data: { publicUrl } } = getPublicUrl(fileName);
       
-      if (!publicUrl) {
-        console.error('Failed to get public URL');
-        throw new Error('Failed to get public URL for uploaded image');
+      // Validate the public URL is legitimate before proceeding
+      if (!publicUrl || !isValidPublicUrl(publicUrl)) {
+        console.error('Failed to get valid public URL:', publicUrl);
+        throw new Error('Failed to get valid public URL for uploaded image');
       }
       
-      console.log('Generated public URL:', publicUrl);
-      onImageChange(publicUrl);
+      console.log('Successfully generated public URL:', publicUrl.substring(0, 100) + '...');
       
-      // Show success toast using setTimeout to ensure it appears after any component state updates
-      setTimeout(() => {
-        toast({
-          title: "Success",
-          description: "Image uploaded successfully"
-        });
-      }, 100);
+      // Show upload success toast immediately
+      toast({
+        title: "Upload Success",
+        description: "Image uploaded successfully to storage"
+      });
+      
+      // Update the image in UI with the new URL
+      onImageChange(publicUrl);
       
       return true;
     } catch (error) {
@@ -182,14 +191,11 @@ export const useFileUpload = (
         friendlyMessage = "Could not upload image. Please try logging out and back in, then try again.";
       }
       
-      // Ensure we don't accidentally clear the error message before it's displayed
-      setTimeout(() => {
-        toast({
-          title: "Upload Failed",
-          description: friendlyMessage,
-          variant: "destructive"
-        });
-      }, 100);
+      toast({
+        title: "Upload Failed",
+        description: friendlyMessage,
+        variant: "destructive"
+      });
       
       return false;
     }

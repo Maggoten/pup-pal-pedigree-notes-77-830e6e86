@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { UploadIcon, XIcon, Loader2 } from 'lucide-react';
@@ -6,6 +7,7 @@ import { useImageUpload } from '@/hooks/image-upload';
 import ImagePreviewDisplay from './image-upload/ImagePreviewDisplay';
 import { toast } from '@/components/ui/use-toast';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
+import { uploadStateManager } from '@/components/AuthGuard';
 
 interface ImageUploaderProps {
   currentImage?: string;
@@ -18,7 +20,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   onImageChange,
   className = ''
 }) => {
-  const { user } = useAuth();
+  const { user, isAuthReady } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isInitialRender, setIsInitialRender] = useState(true);
   
@@ -29,21 +31,42 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   // Pass the current user ID to useImageUpload
   const { isUploading, uploadImage, removeImage } = useImageUpload({
     user_id: user?.id,
-    onImageChange
+    onImageChange: (url: string) => {
+      console.log('ImageUploader: Image change callback received URL:', 
+                 url.substring(0, 50) + (url.length > 50 ? '...' : ''));
+      onImageChange(url);
+    }
   });
+
+  // Track upload state in the global manager
+  useEffect(() => {
+    if (isUploading) {
+      uploadStateManager.incrementUploads();
+    } else {
+      uploadStateManager.decrementUploads();
+    }
+    
+    return () => {
+      // Make sure we decrement if component unmounts during upload
+      if (isUploading) {
+        uploadStateManager.decrementUploads();
+      }
+    };
+  }, [isUploading]);
 
   // Log user authentication status when component mounts
   useEffect(() => {
     console.log('ImageUploader: User authentication status:', {
       isAuthenticated: !!user,
       userId: user?.id,
-      currentImage: currentImage || 'none',
+      authReady: isAuthReady,
+      currentImage: currentImage ? (currentImage.length > 50 ? currentImage.substring(0, 50) + '...' : currentImage) : 'none',
       platform: platform.device
     });
     
     // Set initial render flag to false after first render
     setIsInitialRender(false);
-  }, [user, currentImage]);
+  }, [user, currentImage, isAuthReady]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -71,6 +94,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     
     try {
       console.log('ImageUploader: Calling uploadImage function...');
+      // Set a flag to prevent auth redirect during upload
       await uploadImage(file);
       console.log('ImageUploader: Upload function completed');
     } catch (error) {
@@ -110,6 +134,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   const handleUploadClick = () => {
+    if (!isAuthReady) {
+      console.log('Auth not ready, delaying upload');
+      toast({
+        title: "Please Wait",
+        description: "Authentication is being initialized. Please try again in a moment.",
+        variant: "default"
+      });
+      return;
+    }
+    
     if (!user) {
       console.log('User not logged in, cannot upload');
       toast({
@@ -127,14 +161,15 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     // Only proceed if there's a valid image to remove
     if (!currentImage || !user || isPlaceholder) {
       console.log('Cannot remove image: missing image URL or user ID', {
-        currentImage: currentImage || 'none',
+        currentImage: currentImage ? (currentImage.length > 50 ? currentImage.substring(0, 50) + '...' : currentImage) : 'none',
         userId: user?.id || 'not logged in',
         isPlaceholder
       });
       return;
     }
     
-    console.log('ImageUploader: Removing image:', currentImage);
+    console.log('ImageUploader: Removing image:', 
+                currentImage.substring(0, 50) + (currentImage.length > 50 ? '...' : ''));
     try {
       await removeImage(currentImage, user.id);
     } catch (error) {

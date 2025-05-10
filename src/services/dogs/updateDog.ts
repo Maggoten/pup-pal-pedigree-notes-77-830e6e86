@@ -7,6 +7,8 @@ import { withTimeout, TIMEOUT, isTimeoutError } from '@/utils/timeoutUtils';
 import { cleanupStorageImage } from '@/utils/storageUtils';
 import { dateToISOString } from '@/utils/dateUtils';
 import { ReminderCalendarSyncService } from '@/services/ReminderCalendarSyncService';
+import { isValidPublicUrl } from '@/utils/storage';
+import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 
 export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog | null> {
   if (!id) {
@@ -31,6 +33,26 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
 
     // Convert Dog object to database format
     const dbUpdates = sanitizeDogForDb(updates);
+    
+    // Validate image URL if present to prevent invalid URLs from being saved
+    if (dbUpdates.image_url) {
+      console.log('Validating new image URL before update:', 
+        dbUpdates.image_url.substring(0, 100) + (dbUpdates.image_url.length > 100 ? '...' : ''));
+        
+      if (!isValidPublicUrl(dbUpdates.image_url)) {
+        console.error('Invalid image URL detected:', dbUpdates.image_url.substring(0, 50) + '...');
+        
+        // Handle invalid URLs differently based on platform
+        const platform = getPlatformInfo();
+        if (platform.mobile || platform.safari) {
+          console.log('Mobile/Safari detected, falling back to previous image URL');
+          // Fall back to the previous image URL if available
+          dbUpdates.image_url = currentDog.image_url || undefined;
+        } else {
+          throw new Error('Invalid image URL format. Please try uploading again.');
+        }
+      }
+    }
 
     // Ensure dates are stored without time components
     if (dbUpdates.birthdate) {
@@ -70,6 +92,20 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
     // Add explicit updated_at timestamp to force update detection
     cleanUpdates.updated_at = new Date().toISOString();
     
+    // Verify session is active before updating
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.error('Session not found during dog update, attempting refresh');
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError || !refreshData.session) {
+        console.error('Failed to refresh session during dog update:', refreshError);
+        throw new Error('Your session has expired. Please login again to save changes.');
+      }
+      
+      console.log('Session refreshed successfully, continuing with update');
+    }
+    
     // Use a separated query builder for better control
     const updateQuery = supabase
       .from('dogs')
@@ -99,13 +135,21 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
       }
 
       // Check if the image was changed and cleanup old image if needed
-      if (cleanUpdates.image_url && currentDog.image_url !== cleanUpdates.image_url) {
+      if (cleanUpdates.image_url && currentDog.image_url && 
+          currentDog.image_url !== cleanUpdates.image_url && 
+          isValidPublicUrl(currentDog.image_url) && 
+          isValidPublicUrl(cleanUpdates.image_url)) {
         console.log('Image changed, cleaning up old image');
-        await cleanupStorageImage({
-          oldImageUrl: currentDog.image_url,
-          userId: currentDog.owner_id,
-          excludeDogId: id
-        });
+        try {
+          await cleanupStorageImage({
+            oldImageUrl: currentDog.image_url,
+            userId: currentDog.owner_id,
+            excludeDogId: id
+          });
+        } catch (cleanupError) {
+          // Don't fail the update if cleanup fails
+          console.error('Failed to cleanup old image:', cleanupError);
+        }
       }
 
       // Convert DB response to Dog object
