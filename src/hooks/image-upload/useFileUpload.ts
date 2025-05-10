@@ -8,6 +8,7 @@ import { uploadToStorage, getPublicUrl } from '@/utils/storage';
 import { processImageForUpload } from '@/utils/storage';
 import { uploadStateManager, setUploadPending } from '@/components/AuthGuard';
 import { BUCKET_NAME, STORAGE_ERRORS } from '@/utils/storage/config';
+import { UploadResult } from './types';
 
 export const useFileUpload = (user_id: string | null, onImageChange: (url: string) => void) => {
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -76,10 +77,9 @@ export const useFileUpload = (user_id: string | null, onImageChange: (url: strin
       setUploadProgress(10);
       console.log(`[FileUpload] Uploading to storage: ${fileName}`);
       
-      // Perform the upload
-      const uploadResult = await uploadToStorage(fileName, processedFile);
+      // Perform the upload with proper typing
+      const uploadResult = await uploadToStorage(fileName, processedFile) as UploadResult;
       
-      // Fix for TS2322 error - Check if uploadResult is an object with an error property
       if (uploadResult && typeof uploadResult === 'object' && 'error' in uploadResult && uploadResult.error) {
         console.error("[FileUpload] Upload failed:", uploadResult.error);
         
@@ -114,8 +114,8 @@ export const useFileUpload = (user_id: string | null, onImageChange: (url: strin
         return false;
       }
       
-      // Fix for TS2339 - Now TypeScript knows uploadResult.data exists
-      const fileData = uploadResult.data;
+      // Access data with proper typing
+      const fileData = uploadResult.data as { path: string };
       
       // Get the public URL - Fix for TS2554 - removing the second argument as it's not needed
       const publicUrlResult = await getPublicUrl(fileData.path);

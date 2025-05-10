@@ -16,6 +16,7 @@ export interface ImageUploadState {
   isUploading: boolean;
   uploadRetryCount: number;
   lastError: string | null;
+  isUploadActive: boolean;
 }
 
 // Type guards for response objects
