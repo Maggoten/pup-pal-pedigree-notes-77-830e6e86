@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Dog } from '@/types/dogs';
 import { useAuth } from '@/context/AuthContext';
@@ -58,7 +59,7 @@ export function useDogs() {
       const count = await fetchDogsCount(userId);
       setTotalDogs(count);
       
-      // Then fetch actual dog data - Fixed line 100 by passing both arguments
+      // Then fetch actual dog data - Fixed: pass skipCache as the second argument
       const fetchedDogs = await fetchDogsService(userId, skipCache);
       setDogs(fetchedDogs);
       
@@ -179,7 +180,8 @@ export function useDogs() {
   useEffect(() => {
     // Only load when auth is ready and we have a user
     if (isAuthReady && user?.id) {
-      fetchDogs(user.id).catch(err => {
+      // Fixed: Changed from string to boolean parameter
+      fetchDogs(false).catch(err => {
         console.error('[useDogs] Initial fetch error:', err);
       });
     } else if (isAuthReady && !user) {
@@ -197,7 +199,8 @@ export function useDogs() {
         console.log('[useDogs] Document became visible, refreshing data');
         // Invalidate React Query cache and reload
         queryClient.invalidateQueries({ queryKey: ['dogs', user.id] });
-        fetchDogs(user.id, true).catch(err => {
+        // Fixed: Changed to pass true to the skipCache parameter
+        fetchDogs(true).catch(err => {
           console.error('[useDogs] Visibility refresh error:', err);
         });
       }

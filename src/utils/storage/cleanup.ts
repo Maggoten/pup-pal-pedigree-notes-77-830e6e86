@@ -5,9 +5,22 @@ import { deleteStorageObject } from './operations/remove';
 import { isValidPublicUrl } from './operations/validate';
 
 /**
- * Cleans up a storage image based on its URL
+ * Interface for image cleanup options
  */
-export const cleanupStorageImage = async (imageUrl: string | null | undefined): Promise<boolean> => {
+export interface CleanupImageOptions {
+  oldImageUrl: string;
+  userId: string;
+  excludeDogId?: string;
+}
+
+/**
+ * Cleans up a storage image based on its URL
+ * @param options String URL or cleanup options object
+ */
+export const cleanupStorageImage = async (options: string | CleanupImageOptions): Promise<boolean> => {
+  // Handle both string and object format for backward compatibility
+  const imageUrl = typeof options === 'string' ? options : options.oldImageUrl;
+
   if (!imageUrl || !isValidPublicUrl(imageUrl)) {
     console.log('No valid image URL to clean up');
     return false;

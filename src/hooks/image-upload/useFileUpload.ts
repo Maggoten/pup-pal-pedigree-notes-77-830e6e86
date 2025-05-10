@@ -120,26 +120,29 @@ export const useFileUpload = (user_id: string | null, onImageChange: (url: strin
       // Get the public URL - Fix for TS2554 - removing the second argument as it's not needed
       const publicUrlResult = await getPublicUrl(fileData.path);
       
+      // Add null checks for publicUrlResult
       if (!publicUrlResult) {
         console.error("[FileUpload] Failed to get public URL: Result is null");
         return false;
       }
       
-      if (publicUrlResult && typeof publicUrlResult === 'object' && 'error' in publicUrlResult && publicUrlResult.error) {
+      if ('error' in publicUrlResult && publicUrlResult.error) {
         console.error("[FileUpload] Failed to get public URL:", publicUrlResult.error);
         return false;
       }
       
-      if (!publicUrlResult || typeof publicUrlResult !== 'object' || !('data' in publicUrlResult)) {
+      if (!('data' in publicUrlResult)) {
         console.error("[FileUpload] Invalid public URL result");
         return false;
       }
       
-      if (publicUrlResult?.data?.publicUrl) {
-        console.log("[FileUpload] Retrieved public URL:", publicUrlResult.data.publicUrl);
+      // Safely access the publicUrl with null checks
+      const publicUrl = publicUrlResult?.data?.publicUrl;
+      if (publicUrl) {
+        console.log("[FileUpload] Retrieved public URL:", publicUrl);
         
         // Pass the URL to the callback
-        onImageChange(publicUrlResult.data.publicUrl);
+        onImageChange(publicUrl);
         
         return true;
       } else {

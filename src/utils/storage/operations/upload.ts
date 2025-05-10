@@ -67,7 +67,8 @@ export async function uploadImage(
     let fileToUpload = file;
     if (!skipCompression && file.size > 300 * 1024) {
       try {
-        fileToUpload = await compressImage(file, { maxSizeMB });
+        // Fixed: Pass maxSizeMB directly as the second argument
+        fileToUpload = await compressImage(file, maxSizeMB);
         console.log(`Compressed from ${Math.round(file.size / 1024)}KB to ${Math.round(fileToUpload.size / 1024)}KB`);
       } catch (compressionError) {
         console.warn('Image compression failed:', compressionError);
