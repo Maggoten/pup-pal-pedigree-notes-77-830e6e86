@@ -1,4 +1,3 @@
-
 import { toast } from '@/hooks/use-toast';
 import { plannedLittersService } from '@/services/PlannedLitterService';
 import { format } from 'date-fns';
@@ -6,6 +5,7 @@ import { UsePlannedLitterMutations } from './types';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { verifySession } from '@/utils/auth/sessionManager';
 
 export const usePlannedLitterMutations = (
   refreshLitters: () => Promise<void>
@@ -23,18 +23,16 @@ export const usePlannedLitterMutations = (
       return false;
     }
     
-    // Check if session exists
-    if (!session) {
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData.session) {
-        console.error('[PlannedLitters] No active session found');
-        toast({
-          title: "Authentication required",
-          description: "You need to be logged in to perform this action",
-          variant: "destructive"
-        });
-        return false;
-      }
+    // Verify session is valid using central session manager
+    const sessionValid = await verifySession();
+    if (!sessionValid) {
+      console.error('[PlannedLitters] No valid session found');
+      toast({
+        title: "Authentication required",
+        description: "You need to be logged in to perform this action",
+        variant: "destructive"
+      });
+      return false;
     }
     
     return true;

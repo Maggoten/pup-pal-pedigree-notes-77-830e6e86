@@ -8,6 +8,7 @@ import { useRecentMatings } from '@/components/planned-litters/hooks/useRecentMa
 import { useAuth } from '@/hooks/useAuth';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 import { toast } from '@/hooks/use-toast';
+import { verifySession } from '@/utils/auth/sessionManager';
 
 export const usePlannedLitterQueries = () => {
   const { dogs } = useDogs();
@@ -27,9 +28,14 @@ export const usePlannedLitterQueries = () => {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && isAuthReady && user) {
-        // Reload data when page becomes visible again
-        console.log('Page became visible, checking if planned litters need refresh');
-        loadLitters(true);
+        // Verify session is valid before reloading
+        verifySession().then(isValid => {
+          if (isValid) {
+            // Reload data when page becomes visible again
+            console.log('Page became visible, checking if planned litters need refresh');
+            loadLitters(true);
+          }
+        });
       }
     };
     
@@ -43,6 +49,14 @@ export const usePlannedLitterQueries = () => {
     // Skip if auth isn't ready yet
     if (!isAuthReady || !user) {
       console.log('Skipping planned litters load - auth not ready or no user');
+      return;
+    }
+
+    // Verify session is valid before loading
+    const sessionValid = await verifySession();
+    if (!sessionValid && !isRefresh) {
+      console.log('Session invalid, skipping planned litters load');
+      setIsLoading(false);
       return;
     }
 
@@ -125,6 +139,13 @@ export const usePlannedLitterQueries = () => {
       const timer = setTimeout(() => {
         console.log('Automatically retrying planned litters load after timeout');
         setLoadAttempted(false); // Reset the flag to allow another attempt
+        
+        // Verify session is valid before retrying
+        verifySession().then(isValid => {
+          if (isValid) {
+            loadLitters(true);
+          }
+        });
       }, 3000);
       
       return () => clearTimeout(timer);
@@ -139,6 +160,13 @@ export const usePlannedLitterQueries = () => {
     females,
     isLoading,
     setPlannedLitters,
-    refreshLitters: () => loadLitters(true),
+    refreshLitters: () => {
+      // Verify session is valid before refreshing
+      verifySession().then(isValid => {
+        if (isValid) {
+          loadLitters(true);
+        }
+      });
+    },
   };
 };

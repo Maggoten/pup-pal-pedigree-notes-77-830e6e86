@@ -6,12 +6,12 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 1000 * 60 * 5, // 5 minutes - increase stale time to reduce fetches
+      retry: 2,
+      staleTime: 1000 * 60 * 2, // 2 minutes - optimal stale time to reduce fetches
       gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
       // Modern error handling approach
       throwOnError: false,
-      refetchOnMount: 'always'
+      refetchOnMount: true
     },
     mutations: {
       // Modern error handling approach
@@ -42,13 +42,23 @@ export const prefetchCommonData = async (userId: string) => {
   if (!userId) return;
   
   try {
+    // Prefetch dogs
+    await queryClient.prefetchQuery({
+      queryKey: ['dogs', userId],
+      queryFn: () => fetch('/api/dogs').then(res => res.json())
+    });
+    
     // Prefetch active litters
     await queryClient.prefetchQuery({
       queryKey: ['litters', 'active'],
       queryFn: () => fetch('/api/litters/active').then(res => res.json())
     });
     
-    // You can add more prefetch operations here for other commonly accessed data
+    // Prefetch planned litters
+    await queryClient.prefetchQuery({
+      queryKey: ['planned_litters'],
+      queryFn: () => fetch('/api/planned-litters').then(res => res.json())
+    });
   } catch (error) {
     console.error('Error prefetching data:', error);
   }

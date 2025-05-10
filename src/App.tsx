@@ -20,12 +20,14 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import Pregnancy from "./pages/Pregnancy";
 import MobileDebugPanel from "./components/diagnostics/MobileDebugPanel";
 import { isMobileDevice } from "./utils/fetchUtils";
+import { clearSessionState } from "./utils/auth/sessionManager";
 
 // Configure React Query with error handling
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: isMobileDevice() ? 3 : 2, // Increase retry count for mobile networks
+      retryDelay: attempt => Math.min(1000 * Math.pow(2, attempt), 30000), // Exponential backoff
       // Use meta for error handling in newer versions of React Query
       meta: {
         onError: (error: Error) => {
@@ -41,10 +43,14 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const deviceType = isMobileDevice() ? 'Mobile' : 'Desktop';
   
+  // Clear existing session state on app load
   useEffect(() => {
     console.log(`[App Debug] App initialized on ${deviceType}`);
     console.log(`[App Debug] User agent: ${navigator.userAgent}`);
     console.log(`[App Debug] Screen size: ${window.innerWidth}x${window.innerHeight}`);
+    
+    // Clear any leftover session state from previous runs
+    clearSessionState();
     
     const fetchFirstPregnancy = async () => {
       try {

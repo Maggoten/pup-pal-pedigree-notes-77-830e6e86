@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { UseDogsQueries } from './types';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchWithRetry } from '@/utils/fetchUtils';
+import { verifySession } from '@/utils/auth/sessionManager';
 
 export const useDogsQueries = (): UseDogsQueries => {
   const { user, isLoading: authLoading, isAuthReady } = useAuth();
@@ -37,6 +38,13 @@ export const useDogsQueries = (): UseDogsQueries => {
         return [];
       }
       
+      // Verify the session is valid before fetching
+      const sessionValid = await verifySession(true);
+      if (!sessionValid) {
+        console.log('useDogsQueries: Session verification failed, skipping fetch');
+        return [];
+      }
+      
       try {
         console.log('Fetching dogs from service for user:', userId);
         const data = await fetchDogs(userId);
@@ -51,7 +59,7 @@ export const useDogsQueries = (): UseDogsQueries => {
       }
     },
     enabled: !!userId && isAuthReady, // Only run query when userId is available AND auth is done loading
-    staleTime: 60 * 1000, // Consider data fresh for 1 minute
+    staleTime: 30 * 1000, // Consider data fresh for 30 seconds
     gcTime: 5 * 60 * 1000, // Keep unused data in cache for 5 minutes
     retry: 2, // Retry failed queries twice
     retryDelay: attempt => Math.min(1000 * Math.pow(2, attempt), 30000), // Exponential backoff
@@ -68,10 +76,15 @@ export const useDogsQueries = (): UseDogsQueries => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && userId && isAuthReady) {
         console.log('Page became visible, checking if dogs data needs refresh');
-        // Small delay to allow auth to fully stabilize
-        setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
-        }, 500);
+        // Verify session is valid before refreshing
+        verifySession().then(isValid => {
+          if (isValid) {
+            // Small delay to allow auth to fully stabilize
+            setTimeout(() => {
+              queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
+            }, 500);
+          }
+        });
       }
     };
 
@@ -88,6 +101,13 @@ export const useDogsQueries = (): UseDogsQueries => {
     // Only proceed if auth is ready
     if (!isAuthReady) {
       console.log('refreshDogs: Auth not ready yet, will not attempt refresh');
+      return [];
+    }
+    
+    // Verify session is valid before refreshing
+    const sessionValid = await verifySession();
+    if (!sessionValid) {
+      console.log('refreshDogs: Session verification failed, will not attempt refresh');
       return [];
     }
     
@@ -140,7 +160,16 @@ export const useDogsQueries = (): UseDogsQueries => {
     
     if (userId && isInitialLoad && isAuthReady) {
       console.log('Initial load - fetching dogs');
-      refetch();
+      
+      // Verify session is valid before refreshing
+      verifySession().then(isValid => {
+        if (isValid) {
+          refetch();
+        } else {
+          console.log('Initial load - session invalid, skipping fetch');
+          setIsInitialLoad(false);
+        }
+      });
       
       // Set a timeout to stop the initial loading state after 10 seconds
       timeoutId = setTimeout(() => {

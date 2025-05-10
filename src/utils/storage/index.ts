@@ -8,6 +8,6 @@ export * from './core/errors';
 export * from './operations/upload';
 export * from './operations/remove';
 export * from './operations/retrieve';
-export * from './operations/validate';
+export * from './operations/validate';  // Make sure this is exported
 export * from './imageUtils';
 export * from './cleanup';
