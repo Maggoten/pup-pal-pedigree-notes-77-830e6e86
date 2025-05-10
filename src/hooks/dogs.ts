@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Dog } from '@/types/dogs';
 import { useAuth } from '@/context/AuthContext';
@@ -99,8 +98,8 @@ export function useDogs() {
     }
     
     try {
-      // Fixed: Add missing second parameter to addDogService
-      const newDog = await addDogService(dog, false);
+      // Fixed: Change false boolean to correct string parameter (skipCache = "false")
+      const newDog = await addDogService(dog, "false");
       
       if (newDog) {
         // Update local state

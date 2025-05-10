@@ -1,4 +1,3 @@
-
 import { isMobileDevice } from '@/utils/fetchUtils';
 import { isSafari } from '@/utils/storage/config';
 import { safeImageCompression, directUpload, getPlatformInfo } from './mobileUpload';
@@ -119,7 +118,7 @@ export const compressImage = async (file: File, maxSizeMB?: number): Promise<Fil
     // Extract maxSizeMB parameter with default value
     const maxSize = maxSizeMB || 1;
     
-    // Use the existing safeImageCompression function
+    // Pass both parameters to safeImageCompression
     return await safeImageCompression(file, maxSize);
   } catch (error) {
     console.warn('Image compression failed:', error);
