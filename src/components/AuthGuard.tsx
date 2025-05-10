@@ -48,13 +48,22 @@ export const shouldPreserveAuth = () => {
          (authDuringUpload.wasAuthenticated && activeUploadsCount > 0);
 };
 
+// Track manual logout to ensure proper handling
+let manualLogoutInProgress = false;
+
+// Set when logout starts and clear after redirect
+export const setManualLogout = (inProgress: boolean) => {
+  manualLogoutInProgress = inProgress;
+  console.log('[AuthGuard] Manual logout in progress:', inProgress);
+};
+
 interface AuthGuardProps {
   children: React.ReactNode;
 }
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn, supabaseUser, isAuthReady, isLoading } = useAuth();
+  const { isLoggedIn, supabaseUser, isAuthReady, isLoading, session } = useAuth();
   const { toast } = useToast();
   const [showingToast, setShowingToast] = useState(false);
   const [delayComplete, setDelayComplete] = useState(false);
@@ -66,6 +75,14 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   
   // Track if there are active uploads to prevent premature redirects
   const [hasActiveUploads, setHasActiveUploads] = useState(false);
+  
+  // Keep track of if a manual logout redirect is happening
+  const [isManualLogout, setIsManualLogout] = useState(false);
+
+  // Set manual logout state from the global tracking variable
+  useEffect(() => {
+    setIsManualLogout(manualLogoutInProgress);
+  }, [location.pathname]);
   
   // Check for active uploads every 500ms
   useEffect(() => {
@@ -141,6 +158,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     // 7. Mobile timeout has been reached (if mobile)
     // 8. No active uploads are in progress
     // 9. No auth was active during upload
+    // 10. Not during manual logout
     const shouldShowToast = 
       isAuthReady && 
       !isLoggedIn && 
@@ -150,7 +168,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       !showingToast &&
       (!isMobile || (isMobile && mobileAuthTimeout)) &&
       !hasActiveUploads && 
-      !shouldPreserveAuth(); // NEW: Check if auth should be preserved
+      !shouldPreserveAuth() &&
+      !isManualLogout;
     
     if (shouldShowToast) {
       console.log('[AuthGuard] Showing auth required toast, details:', {
@@ -161,7 +180,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         mobileAuthTimeout,
         hasActiveUploads,
         shouldPreserveAuth: shouldPreserveAuth(),
-        currentPath: location.pathname
+        currentPath: location.pathname,
+        isManualLogout
       });
       
       setShowingToast(true);
@@ -191,7 +211,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     mobileAuthTimeout,
     hasActiveUploads,
     isMobile,
-    location.pathname
+    location.pathname,
+    isManualLogout
   ]);
 
   // Show loading state while auth is not ready
@@ -208,6 +229,12 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     );
   }
 
+  // If we're in a manual logout, don't redirect yet - the logout function will handle it
+  if (isManualLogout) {
+    console.log('[AuthGuard] Manual logout in progress, skipping redirect logic');
+    return <>{children}</>;
+  }
+
   // Only redirect if:
   // 1. Auth is ready
   // 2. User is not logged in 
@@ -220,7 +247,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                              !isLoginPage && 
                              (!isMobile || (isMobile && mobileAuthTimeout)) &&
                              !hasActiveUploads &&
-                             !shouldPreserveAuth(); // NEW: Check if auth should be preserved
+                             !shouldPreserveAuth();
   
   if (shouldRedirectToLogin) {
     console.log('[AuthGuard] Redirecting to login page from:', location.pathname);

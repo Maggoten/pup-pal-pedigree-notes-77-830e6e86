@@ -128,7 +128,7 @@ export const useAuthActions = () => {
     }
   };
 
-  // Enhanced logout function with improved storage cleanup and recovery mechanisms
+  // Enhanced logout function with improved storage cleanup and session termination
   const logout = async (): Promise<void> => {
     setIsLoading(true);
     try {
@@ -178,15 +178,17 @@ export const useAuthActions = () => {
         description: "You have been successfully logged out.",
       });
       
-      // Don't use window.location.href - let the auth change event handle navigation
-      // This avoids the full page reload and potential loss of React state
-      console.log('[Auth Action] Logout complete - relying on AuthGuard for navigation');
+      // Force a manual location redirect to ensure logout is complete
+      // This bypasses any potential issues with AuthGuard's state handling
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 300);
       
     } catch (error) {
       console.error("[Auth Action] Logout error:", error);
       // Even if there's an error, try to clear local storage
       clearAuthStorage();
-      // In case of critical error only, fall back to location redirect
+      // In case of critical error, fall back to location redirect
       window.location.href = '/login';
     } finally {
       setIsLoading(false);

@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { verifySession } from '@/utils/storage/core/session';
 import { useAuth } from '@/context/AuthContext';
+import { useEffect, useState } from 'react';
 
 /**
  * Hook for handling Supabase authentication session validation and refresh
@@ -10,6 +11,17 @@ import { useAuth } from '@/context/AuthContext';
  */
 export const useImageSessionCheck = () => {
   const { isAuthReady, session } = useAuth();
+  const [sessionValidated, setSessionValidated] = useState(false);
+
+  // Check session on mount and when auth state changes
+  useEffect(() => {
+    if (isAuthReady) {
+      // Validate session asynchronously
+      validateSession().then(isValid => {
+        setSessionValidated(isValid);
+      });
+    }
+  }, [isAuthReady, session]);
 
   /**
    * Validates the current authentication session and attempts to refresh if needed
@@ -59,13 +71,45 @@ export const useImageSessionCheck = () => {
     
     // Use the enhanced verifySession function with auth ready state and mobile awareness
     try {
-      return verifySession({
-        respectAuthReady: true,
-        authReady: isAuthReady,
-        // Always skip throwing errors on mobile
-        skipThrow: isMobile,
-        platform: platform
-      });
+      // Retry session validation up to 3 times with delay
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const valid = await verifySession({
+            respectAuthReady: true,
+            authReady: isAuthReady,
+            // Always skip throwing errors on mobile
+            skipThrow: isMobile,
+            platform: platform
+          });
+          
+          if (valid) {
+            return true;
+          }
+          
+          // If not valid and we have more attempts, wait and try again
+          if (attempt < 2) {
+            console.log(`[ImageSessionCheck] Session validation attempt ${attempt + 1} failed, retrying...`);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+          }
+        } catch (attemptError) {
+          console.warn(`[ImageSessionCheck] Session validation attempt ${attempt + 1} error:`, attemptError);
+          // Wait before retry
+          if (attempt < 2) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+          }
+        }
+      }
+      
+      // If we get here, all attempts failed
+      console.error('[ImageSessionCheck] All session validation attempts failed');
+      
+      // For mobile, continue despite errors
+      if (isMobile) {
+        console.log('[ImageSessionCheck] Allowing operation despite validation errors on mobile');
+        return true;
+      }
+      return false;
+      
     } catch (error) {
       console.error('[ImageSessionCheck] Session validation error:', error);
       // For mobile, continue despite errors
@@ -77,5 +121,5 @@ export const useImageSessionCheck = () => {
     }
   };
 
-  return { validateSession };
+  return { validateSession, sessionValidated };
 };

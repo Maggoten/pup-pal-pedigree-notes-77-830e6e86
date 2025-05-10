@@ -12,6 +12,7 @@ import {
   DrawerTitle
 } from '@/components/ui/drawer';
 import SettingsDialog from '@/components/settings/SettingsDialog';
+import { setManualLogout } from './AuthGuard';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
@@ -29,11 +30,14 @@ export const Navbar: React.FC = () => {
   
   const handleLogout = async () => {
     try {
+      // Set the manual logout flag to true before logging out
+      setManualLogout(true);
       await logout();
-      // The navigation will be handled by AuthGuard component
-      // when the auth state changes, preventing the need for navigate() here
+      // The logout function now handles the redirect directly
     } catch (error) {
       console.error("Error during logout:", error);
+      // Ensure flag is reset even on error
+      setManualLogout(false);
     }
   };
   
