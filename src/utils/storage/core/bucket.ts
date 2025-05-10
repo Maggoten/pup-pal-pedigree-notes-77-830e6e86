@@ -1,64 +1,53 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { BUCKET_NAME, isStorageError } from '../config';
-import { fetchWithRetry } from '@/utils/fetchUtils';
-import { getPlatformInfo } from '../mobileUpload';
-
-// Safe error property access helper
-const safeGetErrorProperty = <T>(error: unknown, property: string, defaultValue: T): T => {
-  if (error && typeof error === 'object' && property in error) {
-    return (error as any)[property];
-  }
-  return defaultValue;
-};
+import { BUCKET_NAME, STORAGE_ERRORS } from '../config';
 
 /**
- * Check if bucket exists and is accessible with retries
- * @returns boolean indicating if bucket exists and is accessible
+ * Check if a storage bucket exists
  */
 export const checkBucketExists = async (): Promise<boolean> => {
   try {
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !sessionData.session) {
-      console.error('Storage bucket check failed: No active session', sessionError);
-      return false;
-    }
-
-    console.log(`Checking if bucket '${BUCKET_NAME}' exists...`);
+    const { data, error } = await supabase.storage.getBucket(BUCKET_NAME);
     
-    const platform = getPlatformInfo();
-    try {
-      // Using our retry utility for more reliable bucket checking
-      const result = await fetchWithRetry(
-        () => supabase.storage.from(BUCKET_NAME).list('', { limit: 1 }),
-        { 
-          maxRetries: platform.safari ? 3 : 2, 
-          initialDelay: platform.safari ? 2000 : 1000,
-          onRetry: (attempt) => {
-            console.log(`Bucket check retry attempt ${attempt} - Safari: ${platform.safari}`);
-          }
-        }
-      );
-      
-      if (result.error) {
-        console.error(`Bucket '${BUCKET_NAME}' check failed:`, result.error);
-        // Log more details about the error for troubleshooting
-        console.error('Error details:', {
-          message: safeGetErrorProperty(result.error, 'message', 'Unknown error'),
-          status: safeGetErrorProperty(result.error, 'status', 'unknown'),
-          details: safeGetErrorProperty(result.error, 'details', 'none')
-        });
-        return false;
-      }
-      
-      console.log(`Bucket '${BUCKET_NAME}' exists and is accessible, can list files:`, result.data);
-      return true;
-    } catch (listError) {
-      console.error(`Error or timeout when listing bucket '${BUCKET_NAME}' contents:`, listError);
+    if (error) {
+      console.error('Error checking bucket existence:', error);
       return false;
     }
-  } catch (err) {
-    console.error(`Error in bucket '${BUCKET_NAME}' verification:`, err);
+    
+    return !!data;
+  } catch (error) {
+    console.error('Failed to check bucket existence:', error);
+    return false;
+  }
+};
+
+/**
+ * Create a bucket if it doesn't exist
+ */
+export const createBucketIfNotExists = async (): Promise<boolean> => {
+  try {
+    // First check if bucket exists
+    const bucketExists = await checkBucketExists();
+    
+    if (bucketExists) {
+      return true;
+    }
+    
+    // Create the bucket if it doesn't exist
+    const { error } = await supabase.storage.createBucket(BUCKET_NAME, {
+      public: true,
+      fileSizeLimit: 10485760 // 10MB
+    });
+    
+    if (error) {
+      console.error('Failed to create bucket:', error);
+      return false;
+    }
+    
+    console.log(`Bucket "${BUCKET_NAME}" created successfully`);
+    return true;
+  } catch (error) {
+    console.error('Error creating bucket:', error);
     return false;
   }
 };

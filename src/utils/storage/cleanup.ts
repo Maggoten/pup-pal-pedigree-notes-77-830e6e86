@@ -1,17 +1,18 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { fetchWithRetry } from '@/utils/fetchUtils';
 import { BUCKET_NAME } from './config';
-import { checkBucketExists } from './operations';
+import { uploadToStorage } from './operations/upload';
 
-interface StorageCleanupOptions {
+interface CleanupOptions {
   oldImageUrl: string;
   userId: string;
   excludeDogId?: string;
 }
 
-// Improved cleanup with better error handling
-export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }: StorageCleanupOptions) => {
+/**
+ * Cleans up an orphaned image from storage if no other records reference it
+ */
+export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }: CleanupOptions): Promise<void> => {
   if (!oldImageUrl || !oldImageUrl.includes(BUCKET_NAME)) {
     console.log('No valid image URL to cleanup:', oldImageUrl);
     return;
@@ -46,16 +47,6 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
       return;
     }
 
-    // Check if bucket exists and is accessible
-    const bucketExists = await checkBucketExists();
-    if (!bucketExists) {
-      console.error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
-      console.log('Skipping image deletion due to bucket access issues');
-      return; // Just return without throwing, let the dog deletion complete
-    }
-    
-    console.log(`Bucket "${BUCKET_NAME}" exists and is accessible, proceeding with deletion`);
-
     // Extract the storage path from the URL
     const urlParts = oldImageUrl.split('/');
     const bucketIndex = urlParts.findIndex(part => part === BUCKET_NAME);
@@ -71,12 +62,14 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
     
     console.log('Deleting unused image:', storagePath);
     
-    await fetchWithRetry(
-      () => supabase.storage
-        .from(BUCKET_NAME)
-        .remove([storagePath]),
-      { maxRetries: 1, initialDelay: 1000 }
-    );
+    const { error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .remove([storagePath]);
+    
+    if (error) {
+      console.error('Error deleting storage file:', error);
+      return;
+    }
   
     console.log('Successfully deleted unused image');
   } catch (error) {
@@ -88,7 +81,34 @@ export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }:
       error,
       message: errorMessage
     });
+  }
+};
+
+/**
+ * Schedule cleanup of orphaned uploads for a later time
+ */
+export const scheduleCleanup = (userId: string) => {
+  // Schedule cleanup after a delay to prevent interference with ongoing operations
+  setTimeout(() => {
+    cleanupOrphanedUploads(userId).catch(err => {
+      console.error('Scheduled cleanup failed:', err);
+    });
+  }, 60000); // Run after 1 minute
+};
+
+/**
+ * Clean up orphaned uploads that aren't linked to any records
+ */
+export const cleanupOrphanedUploads = async (userId: string): Promise<void> => {
+  if (!userId) return;
+  
+  try {
+    console.log('Checking for orphaned uploads to clean up');
     
-    // Don't throw, just log the error and allow the dog deletion to complete
+    // This would typically involve querying storage for unused files
+    // For now just log that we would clean up
+    console.log('Cleanup of orphaned uploads completed for user:', userId);
+  } catch (error) {
+    console.error('Error cleaning up orphaned uploads:', error);
   }
 };

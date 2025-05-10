@@ -4,8 +4,46 @@ import { BUCKET_NAME, STORAGE_ERRORS } from '../config';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 import { getPlatformInfo } from '../mobileUpload';
 import { checkBucketExists } from '../core/bucket';
-import { verifySession } from '../core/session';
+import { verifyStorageSession } from '../core/session';
 import { hasError } from '../core/errors';
+
+/**
+ * Remove image from storage
+ * @param imageUrl URL of the image to remove
+ */
+export const removeImage = async (imageUrl: string): Promise<{ data: any; error: any } | null> => {
+  if (!imageUrl || !imageUrl.includes(BUCKET_NAME)) {
+    console.log('No valid image URL to remove:', imageUrl);
+    return null;
+  }
+
+  try {
+    // Extract the storage path from the URL
+    const urlParts = imageUrl.split('/');
+    const bucketIndex = urlParts.findIndex(part => part === BUCKET_NAME);
+    
+    if (bucketIndex === -1) {
+      console.error('Could not find bucket name in URL:', imageUrl);
+      return { data: null, error: { message: 'Invalid storage URL' } };
+    }
+    
+    const storagePath = urlParts
+      .slice(bucketIndex + 1)
+      .join('/');
+      
+    return await removeFromStorage(storagePath);
+  } catch (error) {
+    console.error('Error removing image:', error);
+    return { data: null, error };
+  }
+};
+
+/**
+ * Delete a specific object from storage
+ */
+export const deleteStorageObject = async (path: string): Promise<{ data: any; error: any }> => {
+  return await removeFromStorage(path);
+};
 
 /**
  * Remove file from storage with enhanced retry logic
@@ -18,7 +56,7 @@ export const removeFromStorage = async (storagePath: string) => {
     
     // Verify session first
     try {
-      await verifySession();
+      await verifyStorageSession();
       
       // Verify bucket exists before attempting removal
       const bucketExists = await checkBucketExists();

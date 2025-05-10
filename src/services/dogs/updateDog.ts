@@ -4,7 +4,7 @@ import { Dog } from '@/types/dogs';
 import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
 import { PostgrestResponse } from '@supabase/supabase-js';
 import { withTimeout, TIMEOUT, isTimeoutError } from '@/utils/timeoutUtils';
-import { cleanupStorageImage } from '@/utils/storageUtils';
+import { cleanupStorageImage } from '@/utils/storage';
 import { dateToISOString } from '@/utils/dateUtils';
 import { ReminderCalendarSyncService } from '@/services/ReminderCalendarSyncService';
 import { isValidPublicUrl } from '@/utils/storage';

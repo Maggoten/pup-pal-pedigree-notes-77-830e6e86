@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { BUCKET_NAME, STORAGE_ERRORS, isImageByExtension } from '../config';
 import { compressImage } from '../imageUtils';

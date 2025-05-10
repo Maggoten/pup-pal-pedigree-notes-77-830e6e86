@@ -1,63 +1,51 @@
 
+import { supabase } from '@/integrations/supabase/client';
 import { STORAGE_ERRORS } from '../config';
-import { getPlatformInfo } from '../mobileUpload';
-import { verifySession as centralVerifySession } from '@/utils/auth/sessionManager';
+
+interface VerifyOptions {
+  skipThrow?: boolean;
+}
 
 /**
- * Verifies and refreshes authentication session if needed
- * This is a wrapper around the central session manager to maintain compatibility
- * 
- * @param options Optional configuration for verification
- * @returns true if session is valid, throws error if not
+ * Verify that a valid storage session exists
  */
-export const verifySession = async (options?: { 
-  respectAuthReady?: boolean, 
-  authReady?: boolean,
-  skipThrow?: boolean,
-  platform?: ReturnType<typeof getPlatformInfo>
-}): Promise<boolean> => {
-  const platform = options?.platform || getPlatformInfo();
-  const isMobile = platform.mobile || platform.safari;
-  
+export const verifyStorageSession = async (options: VerifyOptions = {}): Promise<boolean> => {
   try {
-    // Use the central session management utility for consistency
-    const isSessionValid = await centralVerifySession({
-      force: false,
-      respectAuthReady: options?.respectAuthReady,
-      authReady: options?.authReady,
-      skipThrow: options?.skipThrow
-    });
+    const { data, error } = await supabase.auth.getSession();
     
-    if (!isSessionValid) {
-      console.log('[Session] Session invalid, checking if we should throw');
+    if (error) {
+      console.error('Session verification error:', error);
       
-      // Special handling for mobile devices - allow operations even with invalid sessions
-      if (isMobile && options?.skipThrow) {
-        console.log(`[Session] ${platform.device} detected, allowing operation despite invalid session`);
-        return true;
+      if (!options.skipThrow) {
+        throw new Error(STORAGE_ERRORS.NO_SESSION);
       }
       
-      if (options?.skipThrow) {
-        return false;
-      }
-      
-      throw new Error(STORAGE_ERRORS.NO_SESSION);
-    }
-    
-    console.log('[Session] Active session confirmed');
-    return true;
-  } catch (error) {
-    console.error('[Session] Verification failed:', error);
-    
-    // For mobile browsers, especially iOS Safari, be more forgiving with session errors
-    if ((platform.iOS || platform.mobile) && options?.skipThrow) {
-      console.warn(`[Session] ${platform.device} session error but allowing operation`);
-      return true;
-    }
-    
-    if (options?.skipThrow) {
       return false;
     }
-    throw error;
+    
+    if (!data.session) {
+      // Try to refresh the session
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError || !refreshData.session) {
+        console.error('Session refresh failed:', refreshError || 'No session after refresh');
+        
+        if (!options.skipThrow) {
+          throw new Error(STORAGE_ERRORS.NO_SESSION);
+        }
+        
+        return false;
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error verifying session:', error);
+    
+    if (!options.skipThrow) {
+      throw error;
+    }
+    
+    return false;
   }
 };

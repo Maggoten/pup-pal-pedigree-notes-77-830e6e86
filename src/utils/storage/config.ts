@@ -1,4 +1,3 @@
-
 // Core configuration for storage operations
 export const BUCKET_NAME = 'dog-photos';
 

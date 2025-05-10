@@ -1,9 +1,15 @@
 
-// Main entry point for storage utilities - with explicit exports to avoid conflicts
+// Main entry point for storage utilities with explicit exports to avoid conflicts
+
+// Export configuration
 export { 
   BUCKET_NAME, 
   STORAGE_ERRORS,
-  isSafari 
+  isSafari,
+  EXTENDED_MIME_TYPES,
+  SUPPORTED_IMAGE_EXTENSIONS,
+  isImageByExtension,
+  getSafeErrorMessage
 } from './config';
 
 // Export from mobileUpload
@@ -26,6 +32,10 @@ export {
 
 // Export from error handling
 export {
+  formatStorageError,
+  createStorageError,
+  hasError,
+  safeGetErrorProperty,
   handleStorageError
 } from './core/errors';
 
@@ -38,6 +48,7 @@ export {
 // Export from remove operations
 export {
   removeImage,
+  removeFromStorage,
   deleteStorageObject
 } from './operations/remove';
 
@@ -51,7 +62,8 @@ export {
 export {
   validateStorageObject,
   validateFileSize,
-  validateFileType
+  validateFileType,
+  isValidPublicUrl
 } from './operations/validate';
 
 // Export from imageUtils
@@ -59,16 +71,12 @@ export {
   prefetchImage,
   processImageForUpload,
   createSafariCompatibleFile,
-  compressImage,
-  formatStorageError,
-  createStorageError,
-  hasError,
-  safeGetErrorProperty,
-  getStorageTimeout
+  compressImage
 } from './imageUtils';
 
 // Export from cleanup
 export {
+  cleanupStorageImage,
   cleanupOrphanedUploads,
   scheduleCleanup
 } from './cleanup';

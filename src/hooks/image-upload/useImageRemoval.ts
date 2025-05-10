@@ -4,9 +4,7 @@ import { toast } from '@/components/ui/use-toast';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { 
   BUCKET_NAME,
-  getSafeErrorMessage
-} from '@/utils/storage/config';
-import { 
+  getSafeErrorMessage,
   checkBucketExists,
   removeFromStorage
 } from '@/utils/storage';

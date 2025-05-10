@@ -112,9 +112,14 @@ export const createSafariCompatibleFile = (blob: Blob, filename: string, mimeTyp
   }
 };
 
-// Updated compressImage utility function to accept maxSizeMB parameter
-export const compressImage = async (file: File, maxSizeMB = 1): Promise<File> => {
+// Updated compressImage utility function to accept options object
+export const compressImage = async (file: File, options?: number | { maxSizeMB?: number }): Promise<File> => {
   try {
+    // Extract maxSizeMB from options, whether it's a number or an object
+    const maxSizeMB = typeof options === 'number' 
+      ? options 
+      : (options?.maxSizeMB || 1);
+    
     // Use the existing safeImageCompression function
     return await safeImageCompression(file, maxSizeMB);
   } catch (error) {

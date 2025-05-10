@@ -1,25 +1,40 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { BUCKET_NAME } from '../config';
-import { getPlatformInfo } from '../mobileUpload';
+import { fetchWithRetry } from '@/utils/fetchUtils';
 
 /**
- * Get a public URL for a file in storage
- * 
- * @param filePath The path to the file in storage
- * @returns Object containing the public URL or error
+ * Get public URL for a storage object
  */
-export const getPublicUrl = (filePath: string) => {
-  const platform = getPlatformInfo();
-  const result = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
-  
-  // Add cache-busting for Safari/mobile
-  if (platform.safari || platform.mobile) {
-    if (result.data?.publicUrl) {
-      const separator = result.data.publicUrl.includes('?') ? '&' : '?';
-      result.data.publicUrl += `${separator}_t=${Date.now()}`;
-    }
+export const getPublicUrl = (path: string): string => {
+  const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(path);
+  return data.publicUrl;
+};
+
+/**
+ * List objects in storage with pagination support
+ */
+export const listStorageObjects = async (
+  folder: string = '',
+  options: { limit?: number; offset?: number; sortBy?: { column: string; order: string } } = {}
+) => {
+  try {
+    const { limit = 100, offset = 0, sortBy } = options;
+    
+    // Use fetchWithRetry for better reliability
+    const result = await fetchWithRetry(() => 
+      supabase.storage
+        .from(BUCKET_NAME)
+        .list(folder, {
+          limit,
+          offset,
+          sortBy: sortBy ? { column: sortBy.column, order: sortBy.order as any } : undefined
+        })
+    );
+    
+    return result;
+  } catch (error) {
+    console.error('Error listing storage objects:', error);
+    throw error;
   }
-  
-  return result;
 };

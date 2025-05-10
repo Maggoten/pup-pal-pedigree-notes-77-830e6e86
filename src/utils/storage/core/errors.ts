@@ -1,63 +1,67 @@
 
-import { StorageError } from '@supabase/storage-js';
-import { 
-  StorageErrorDetails, 
-  SupabaseStorageError,
-  isStorageError, 
-  isSupabaseStorageError
-} from '../config';
+import { STORAGE_ERRORS } from '../config';
 
-// Type guards for response objects
-export const hasError = (obj: unknown): obj is { error: unknown } => {
-  return typeof obj === 'object' && 
-         obj !== null && 
-         'error' in obj;
+/**
+ * Formats a storage error for display
+ */
+export const formatStorageError = (error: unknown): string => {
+  if (!error) return 'Unknown storage error';
+  
+  if (error instanceof Error) {
+    return error.message;
+  }
+  
+  if (typeof error === 'object' && error !== null) {
+    if ('message' in error && typeof (error as any).message === 'string') {
+      return (error as any).message;
+    }
+    if ('error' in error && typeof (error as any).error === 'string') {
+      return (error as any).error;
+    }
+    if ('error' in error && typeof (error as any).error === 'object' && (error as any).error !== null) {
+      const errorObj = (error as any).error;
+      if ('message' in errorObj && typeof errorObj.message === 'string') {
+        return errorObj.message;
+      }
+    }
+  }
+  
+  return String(error);
 };
 
 /**
- * Safely extracts a property from a potentially complex error object
- * @param error The error object to extract from
- * @param prop The property name to extract
- * @param defaultValue Default value if property doesn't exist
- * @returns The extracted property value or default
+ * Creates a standardized storage error object
  */
-export const safeGetErrorProperty = <T>(error: unknown, prop: string, defaultValue: T): T => {
-  if (error && typeof error === 'object' && prop in error) {
-    return (error as any)[prop];
+export const createStorageError = (message: string) => {
+  return { data: null, error: { message } };
+};
+
+/**
+ * Checks if an object has an error property
+ */
+export const hasError = (result: unknown): result is { error: unknown } => {
+  return typeof result === 'object' && 
+         result !== null && 
+         'error' in result && 
+         result.error !== null && 
+         result.error !== undefined;
+};
+
+/**
+ * Safely gets a property from an error object, with a default value if not found
+ */
+export const safeGetErrorProperty = <T>(obj: unknown, prop: string, defaultValue: T): T => {
+  if (obj && typeof obj === 'object' && prop in obj) {
+    return (obj as any)[prop];
   }
   return defaultValue;
 };
 
 /**
- * Formats storage errors into user-friendly messages with enhanced platform-specific handling
- * @param error The original error object
- * @param platform Device platform information
- * @returns A user-friendly error message
+ * Generic handler for storage errors
  */
-export const formatStorageError = (error: unknown, fileSize?: number): string => {
-  if (error instanceof Error) {
-    return error.message;
-  } else if (isSupabaseStorageError(error)) {
-    return typeof error.error === 'string' ? error.error : error.error.message;
-  } else if (isStorageError(error)) {
-    return error.message || 'Unknown storage error';
-  } else if (typeof error === 'string') {
-    return error;
-  } else if (error && typeof error === 'object' && 'message' in error) {
-    return String((error as any).message);
-  } else {
-    return 'Unknown error occurred';
-  }
+export const handleStorageError = (error: unknown): never => {
+  const message = formatStorageError(error);
+  console.error('Storage error:', message);
+  throw new Error(message);
 };
-
-/**
- * Creates a standardized storage error object
- * @param message The error message
- * @returns Storage error object
- */
-export const createStorageError = (message: string): { error: StorageError } => {
-  return { 
-    error: new StorageError(message) 
-  };
-};
-

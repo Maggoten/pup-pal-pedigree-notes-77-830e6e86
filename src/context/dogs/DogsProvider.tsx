@@ -24,7 +24,6 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     dogs, 
     isLoading: dogsLoading, 
     error, 
-    refreshDogs,
     totalDogs,
     fetchDogs: fetchDogsBase,
     addDog: addDogBase, 
@@ -38,7 +37,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   const { updateDog, removeDog } = useDogOperations({
     updateDogBase,
     deleteDog: deleteDogBase,
-    refreshDogs: async () => { await fetchDogsBase(true); },
+    refreshDogs: async () => { await fetchDogs(true); },
     activeDog,
     setActiveDog
   });
@@ -48,7 +47,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     try {
       if (!user?.id) return [];
       
-      const result = await fetchDogsBase(user.id, skipCache || false);
+      const result = await fetchDogsBase(skipCache || false);
       return result;
     } catch (e) {
       console.error('Error in fetchDogs:', e);
@@ -61,7 +60,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     }
   };
 
-  const wrappedRefreshDogs = async (): Promise<void> => {
+  const refreshDogs = async (): Promise<void> => {
     try {
       await fetchDogs(true);
     } catch (e) {
@@ -110,7 +109,8 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     error: error ? (error instanceof Error ? error.message : String(error)) : (authLoading ? null : (!isLoggedIn && !user?.id && dogLoadingAttempted ? 'Authentication required' : null)),
     activeDog,
     setActiveDog,
-    refreshDogs: wrappedRefreshDogs,
+    refreshDogs,
+    totalDogs,
     fetchDogs,
     addDog,
     updateDog,
