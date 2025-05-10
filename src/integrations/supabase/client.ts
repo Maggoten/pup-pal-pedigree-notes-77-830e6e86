@@ -3,15 +3,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-//Under de här - TA BORT ron
-export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-if (typeof window !== 'undefined') {
-  // @ts-ignore
-  window.supabase = supabase;
-}
-///Ovan de där - TA BORT ron
-
 
 const SUPABASE_URL = "https://yqcgqriecxtppuvcguyj.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2dxcmllY3h0cHB1dmNndXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTI4NjksImV4cCI6MjA2MDI2ODg2OX0.PD0W-rLpQBHUGm9--nv4-3PVYQFMAsRujmExBDuP5oA";
