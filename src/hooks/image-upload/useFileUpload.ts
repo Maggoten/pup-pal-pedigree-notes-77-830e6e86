@@ -79,11 +79,12 @@ export const useFileUpload = (user_id: string | null, onImageChange: (url: strin
       // Perform the upload
       const uploadResult = await uploadToStorage(fileName, processedFile);
       
-      if ('error' in uploadResult && uploadResult.error) {
+      // Fix for TS2322 error - Check if uploadResult is an object with an error property
+      if (uploadResult && typeof uploadResult === 'object' && 'error' in uploadResult && uploadResult.error) {
         console.error("[FileUpload] Upload failed:", uploadResult.error);
         
         // Special handling for mobile auth errors
-        if (isMobile && String(uploadResult.error).includes('auth')) {
+        if (isMobile && uploadResult.error && String(uploadResult.error).includes('auth')) {
           toast({
             title: "Upload Error",
             description: "Authentication issue. Try saving again or refreshing the page.",
@@ -107,17 +108,25 @@ export const useFileUpload = (user_id: string | null, onImageChange: (url: strin
       console.log("[FileUpload] Upload completed successfully");
       setUploadProgress(100);
       
-      // Get the public URL
-      const fileData = uploadResult.data;
-      if (!fileData) {
+      // Type guard for uploadResult to ensure it has data property
+      if (!uploadResult || typeof uploadResult !== 'object' || !('data' in uploadResult) || !uploadResult.data) {
         console.error("[FileUpload] No file data returned");
         return false;
       }
       
-      const publicUrlResult = await getPublicUrl(BUCKET_NAME, fileData.path);
+      // Fix for TS2339 - Now TypeScript knows uploadResult.data exists
+      const fileData = uploadResult.data;
       
-      if ('error' in publicUrlResult && publicUrlResult.error) {
+      // Get the public URL - Fix for TS2554 - removing the second argument as it's not needed
+      const publicUrlResult = await getPublicUrl(fileData.path);
+      
+      if (publicUrlResult && typeof publicUrlResult === 'object' && 'error' in publicUrlResult && publicUrlResult.error) {
         console.error("[FileUpload] Failed to get public URL:", publicUrlResult.error);
+        return false;
+      }
+      
+      if (!publicUrlResult || typeof publicUrlResult !== 'object' || !('data' in publicUrlResult)) {
+        console.error("[FileUpload] Invalid public URL result");
         return false;
       }
       
