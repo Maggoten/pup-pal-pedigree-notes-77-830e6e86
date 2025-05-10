@@ -2,7 +2,7 @@
 import { toast } from '@/hooks/use-toast';
 import { plannedLittersService } from '@/services/PlannedLitterService';
 import { format } from 'date-fns';
-import { UsePlannedLitterMutations } from './types';
+import { UsePlannedLitterMutations } from '@/components/planned-litters/hooks/types';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
