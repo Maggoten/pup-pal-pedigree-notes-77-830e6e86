@@ -11,16 +11,16 @@ export const useDogs = (): UseDogs => {
   return {
     ...queries,
     ...mutations,
-    fetchDogs: (skipCache?: boolean): Promise<Dog[]> => {
+    fetchDogs: async (skipCache?: boolean): Promise<Dog[]> => {
       return queries.fetchDogs(skipCache); 
     },
-    addDog: (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>): Promise<Dog | undefined> => {
+    addDog: async (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>): Promise<Dog | undefined> => {
       return mutations.addDog(dog);
     },
-    updateDog: (id: string, updates: Partial<Dog>): Promise<Dog | null> => {
+    updateDog: async (id: string, updates: Partial<Dog>): Promise<Dog | null> => {
       return mutations.updateDog(id, updates);
     },
-    deleteDog: (id: string): Promise<boolean> => {
+    deleteDog: async (id: string): Promise<boolean> => {
       return mutations.deleteDog(id);
     }
   };

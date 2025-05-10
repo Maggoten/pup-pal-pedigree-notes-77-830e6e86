@@ -1,13 +1,74 @@
 
-// Main entry point for storage utilities
-export * from './config';
-export * from './mobileUpload';
-export * from './core/bucket';
-export * from './core/session';
-export * from './core/errors';
-export * from './operations/upload';
-export * from './operations/remove';
-export * from './operations/retrieve';
-export * from './operations/validate';  // Make sure this is exported
-export * from './imageUtils';
-export * from './cleanup';
+// Main entry point for storage utilities - with explicit exports to avoid conflicts
+export { 
+  BUCKET_NAME, 
+  STORAGE_ERRORS,
+  isSafari 
+} from './config';
+
+// Export from mobileUpload
+export { 
+  safeImageCompression,
+  directUpload, 
+  getPlatformInfo 
+} from './mobileUpload';
+
+// Export from bucket operations
+export {
+  checkBucketExists,
+  createBucketIfNotExists
+} from './core/bucket';
+
+// Export from session operations
+export {
+  verifyStorageSession
+} from './core/session';
+
+// Export from error handling
+export {
+  handleStorageError
+} from './core/errors';
+
+// Export from upload operations
+export {
+  uploadImage,
+  uploadToStorage
+} from './operations/upload';
+
+// Export from remove operations
+export {
+  removeImage,
+  deleteStorageObject
+} from './operations/remove';
+
+// Export from retrieve operations
+export {
+  getPublicUrl,
+  listStorageObjects
+} from './operations/retrieve';
+
+// Export validation utilities
+export {
+  validateStorageObject,
+  validateFileSize,
+  validateFileType
+} from './operations/validate';
+
+// Export from imageUtils
+export {
+  prefetchImage,
+  processImageForUpload,
+  createSafariCompatibleFile,
+  compressImage,
+  formatStorageError,
+  createStorageError,
+  hasError,
+  safeGetErrorProperty,
+  getStorageTimeout
+} from './imageUtils';
+
+// Export from cleanup
+export {
+  cleanupOrphanedUploads,
+  scheduleCleanup
+} from './cleanup';

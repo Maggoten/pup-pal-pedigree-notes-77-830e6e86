@@ -1,70 +1,64 @@
 
 import { useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import { Dog } from '@/types/dogs';
 
 interface UseDogOperationsProps {
   updateDogBase: (id: string, updates: Partial<Dog>) => Promise<Dog | null>;
-  deleteDog: (id: string) => Promise<boolean>; // Updated from Promise<void> to Promise<boolean>
+  deleteDog: (id: string) => Promise<boolean>;
   refreshDogs: () => Promise<void>;
   activeDog: Dog | null;
   setActiveDog: (dog: Dog | null) => void;
 }
 
-export const useDogOperations = ({
-  updateDogBase,
+export const useDogOperations = ({ 
+  updateDogBase, 
   deleteDog,
   refreshDogs,
   activeDog,
   setActiveDog
 }: UseDogOperationsProps) => {
-  const { toast } = useToast();
-
+  
+  // Update a dog, potentially resetting activeDog if it's the one being updated
   const updateDog = useCallback(async (id: string, updates: Partial<Dog>): Promise<Dog | null> => {
     try {
-      if (!id) {
-        throw new Error("Invalid dog ID provided");
-      }
-      
       const updatedDog = await updateDogBase(id, updates);
       
-      if (updatedDog && activeDog?.id === id) {
-        setActiveDog(updatedDog);
+      // If the active dog is the one being updated, update the activeDog as well
+      if (activeDog && activeDog.id === id && updatedDog) {
+        setActiveDog({ ...activeDog, ...updatedDog });
       }
       
-      await refreshDogs();
-      
       return updatedDog;
-    } catch (e) {
-      console.error('Error updating dog:', e);
-      toast({
-        title: "Update failed",
-        description: "Could not update dog information. Please try again.",
-        variant: "destructive"
-      });
-      return null;
+    } catch (error) {
+      console.error('Error in updateDog:', error);
+      throw error;
     }
-  }, [updateDogBase, activeDog, setActiveDog, refreshDogs, toast]);
-
+  }, [updateDogBase, activeDog, setActiveDog]);
+  
+  // Delete a dog and clear activeDog if it's the one being deleted
   const removeDog = useCallback(async (id: string): Promise<boolean> => {
     try {
-      await deleteDog(id);
+      const result = await deleteDog(id);
       
-      if (activeDog?.id === id) {
+      // If the active dog is the one being deleted, clear it
+      if (activeDog && activeDog.id === id && result) {
         setActiveDog(null);
       }
       
-      return true;
-    } catch (e) {
-      console.error('Error removing dog:', e);
-      toast({
-        title: "Remove failed",
-        description: "Could not remove dog. Please try again.",
-        variant: "destructive"
-      });
-      return false;
+      // Refresh the dog list after deletion
+      if (result) {
+        await refreshDogs();
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error in removeDog:', error);
+      throw error;
     }
-  }, [deleteDog, activeDog, setActiveDog, toast]);
-
-  return { updateDog, removeDog };
+  }, [deleteDog, activeDog, setActiveDog, refreshDogs]);
+  
+  return {
+    updateDog,
+    removeDog
+  };
 };

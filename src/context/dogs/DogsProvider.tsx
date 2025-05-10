@@ -3,7 +3,8 @@ import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useDogs as useDogsHook } from '@/hooks/dogs';
-import { DogsContextType } from './types';
+import type { DogsContextType } from './types';
+import type { Dog } from '@/types/dogs';
 import { useForceReload } from './useForceReload';
 import { useActiveDog } from './useActiveDog';
 import { useDogOperations } from './useDogOperations';
@@ -25,26 +26,44 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     error, 
     refreshDogs,
     totalDogs,
-    fetchDogs,
-    addDog, 
+    fetchDogs: fetchDogsBase,
+    addDog: addDogBase, 
     updateDog: updateDogBase,
-    deleteDog
+    deleteDog: deleteDogBase
   } = useDogsHook();
 
   const { activeDog, setActiveDog } = useActiveDog(dogs);
-  const forceReload = useForceReload(user?.id, fetchDogs);
+  const forceReload = useForceReload(user?.id, fetchDogsBase);
   
   const { updateDog, removeDog } = useDogOperations({
     updateDogBase,
-    deleteDog,
-    refreshDogs: async () => { await fetchDogs(); },
+    deleteDog: deleteDogBase,
+    refreshDogs: async () => { await fetchDogsBase(true); },
     activeDog,
     setActiveDog
   });
 
+  // Create properly typed wrapper functions that match the DogsContextType interface
+  const fetchDogs = async (skipCache?: boolean): Promise<Dog[]> => {
+    try {
+      if (!user?.id) return [];
+      
+      const result = await fetchDogsBase(user.id, skipCache || false);
+      return result;
+    } catch (e) {
+      console.error('Error in fetchDogs:', e);
+      toast({
+        title: "Error fetching dogs",
+        description: e instanceof Error ? e.message : 'Unknown error',
+        variant: "destructive"
+      });
+      return [];
+    }
+  };
+
   const wrappedRefreshDogs = async (): Promise<void> => {
     try {
-      await fetchDogs();
+      await fetchDogs(true);
     } catch (e) {
       console.error('Error refreshing dogs:', e);
       toast({
@@ -55,6 +74,25 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     }
   };
 
+  const addDog = async (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>): Promise<Dog | undefined> => {
+    try {
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
+      const newDog = await addDogBase(dog);
+      await fetchDogs(true); // Refresh the list after adding
+      return newDog;
+    } catch (e) {
+      console.error('Error adding dog:', e);
+      toast({
+        title: "Add failed",
+        description: e instanceof Error ? e.message : 'Unknown error',
+        variant: "destructive"
+      });
+      return undefined;
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && isLoggedIn && user?.id && !dogLoadingAttempted) {
       setDogLoadingAttempted(true);
@@ -62,23 +100,18 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
         console.error('Initial dogs fetch failed:', err);
       });
     }
-  }, [authLoading, isLoggedIn, user?.id, dogLoadingAttempted, fetchDogs]);
+  }, [authLoading, isLoggedIn, user?.id, dogLoadingAttempted]);
 
   const isLoading = authLoading || (isLoggedIn && dogsLoading && !dogLoadingAttempted);
-
-  // Create properly typed wrapper functions that match the DogsContextType interface
-  const fetchDogsWrapper = (skipCache?: boolean): Promise<Dog[]> => {
-    return fetchDogs(skipCache);
-  };
 
   const value: DogsContextType = {
     dogs,
     loading: isLoading,
-    error: error ? (error instanceof Error ? error.message : error) : (authLoading ? null : (!isLoggedIn && !user?.id && dogLoadingAttempted ? 'Authentication required' : null)),
+    error: error ? (error instanceof Error ? error.message : String(error)) : (authLoading ? null : (!isLoggedIn && !user?.id && dogLoadingAttempted ? 'Authentication required' : null)),
     activeDog,
     setActiveDog,
     refreshDogs: wrappedRefreshDogs,
-    fetchDogs: fetchDogsWrapper,
+    fetchDogs,
     addDog,
     updateDog,
     removeDog
