@@ -266,17 +266,64 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           console.log(`[Auth Debug] Initial session check: ${initialSession ? 'Session exists' : 'No session'}`);
           
           if (initialSession?.user && isSubscribed) {
-            // Don't set user here to avoid race with auth state change
-            // Just ensure isAuthReady is set if the onAuthStateChange doesn't fire
+            // Mirror the SIGNED_IN callback logic to ensure user state is populated immediately
+            setSession(initialSession);
+            setSupabaseUser(initialSession.user);
+            setIsLoggedIn(true);
             
-            // Safety timeout to ensure isAuthReady gets set
-            setTimeout(() => {
-              if (isSubscribed && !isAuthReady) {
-                console.log('[Auth Debug] Safety timeout triggered, setting isAuthReady');
+            console.log(`[Auth Debug] User ID from initial session: ${initialSession.user.id}`);
+            console.log(`[Auth Debug] Initial session expires: ${new Date(initialSession.expires_at! * 1000).toISOString()}`);
+            
+            // Fetch user profile and populate state
+            try {
+              console.log(`[Auth Debug] Fetching profile for user from initial session: ${initialSession.user.id}`);
+              const profile = await getUserProfile(initialSession.user.id);
+              
+              if (profile && isSubscribed) {
+                setUser({
+                  id: initialSession.user.id,
+                  email: initialSession.user.email || '',
+                  firstName: profile.first_name,
+                  lastName: profile.last_name,
+                  address: profile.address
+                });
+                console.log(`[Auth Debug] User profile loaded from initial session`);
+              } else if (isSubscribed) {
+                // Fallback user when profile fetch fails
+                setUser({
+                  id: initialSession.user.id,
+                  email: initialSession.user.email || '',
+                  firstName: '',
+                  lastName: '',
+                  address: ''
+                });
+                console.log(`[Auth Debug] Using fallback user data for initial session`);
+              }
+              
+              // Trigger React Query data prefetching
+              handleAuthStateChange('SIGNED_IN', initialSession.user.id);
+              setIsAuthReady(true);
+              setIsLoading(false);
+            } catch (profileError) {
+              console.error('[Auth Debug] Error fetching profile from initial session:', profileError);
+              
+              // Set fallback user even on profile fetch error
+              if (isSubscribed) {
+                setUser({
+                  id: initialSession.user.id,
+                  email: initialSession.user.email || '',
+                  firstName: '',
+                  lastName: '',
+                  address: ''
+                });
+                console.log(`[Auth Debug] Using fallback user data after profile fetch error`);
+                
+                // Still trigger data prefetching with fallback user
+                handleAuthStateChange('SIGNED_IN', initialSession.user.id);
                 setIsAuthReady(true);
                 setIsLoading(false);
               }
-            }, 3000);
+            }
           } else {
             // No session, set auth ready and not loading
             setIsAuthReady(true);
