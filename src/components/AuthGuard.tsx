@@ -1,9 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
+import { verifySession } from '@/utils/auth/sessionManager';
 
 // Add a global state to track active uploads across components
 let activeUploadsCount = 0;
@@ -97,51 +99,44 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // This helps prevent flash of auth errors during initialization
   // Use longer delay for mobile devices
   useEffect(() => {
-    // Increased delay for mobile
+    // Reduced delay for faster feedback
     const timer = setTimeout(() => {
       setDelayComplete(true);
       console.log('[AuthGuard] Initial delay complete, can show auth errors now');
-    }, isMobile ? 5000 : 1000);
+    }, isMobile ? 3000 : 500);
     
     return () => clearTimeout(timer);
   }, [isMobile]);
   
-  // Add more tolerant redirect behavior for mobile
+  // Add safer redirect behavior for mobile
   const [mobileAuthTimeout, setMobileAuthTimeout] = useState(false);
   
   useEffect(() => {
     // On mobile, we add extra time before forcing a redirect
     // This helps prevent premature redirects during slow session restoration
     if (isMobile && !isLoggedIn && !isLoginPage && !hasActiveUploads) {
-      // Increased timeout from 6000ms to 8000ms
-      const timer = setTimeout(() => {
-        console.log('[AuthGuard] Mobile auth timeout reached, checking auth state again');
-        // Only set timeout if auth is actually ready - prevents premature redirects
-        if (isAuthReady && !isLoggedIn) {
-          console.log('[AuthGuard] Auth is ready and user is not logged in, proceeding with redirect');
+      // Verify the session status with the centralized function
+      const checkSession = async () => {
+        try {
+          const isValid = await verifySession(true);
+          if (!isValid && isAuthReady) {
+            console.log('[AuthGuard] Mobile session verification confirms user is not logged in');
+            setMobileAuthTimeout(true);
+          } else if (isValid) {
+            console.log('[AuthGuard] Mobile session verification found valid session');
+          }
+        } catch (error) {
+          console.error('[AuthGuard] Error during mobile session check:', error);
+          // Set timeout anyway to prevent hanging
           setMobileAuthTimeout(true);
-        } else if (!isAuthReady) {
-          console.log('[AuthGuard] Auth not ready yet, delaying redirect decision');
-          // If auth is not ready yet, give it more time
-          // Increased extended timeout from 3500ms to 5000ms
-          const extendedTimer = setTimeout(() => {
-            console.log('[AuthGuard] Extended timeout reached, proceeding with redirect decision');
-            // After extended timeout, only proceed if auth is ready
-            if (isAuthReady) {
-              setMobileAuthTimeout(true);
-            } else {
-              // If auth still not ready, give one more extended chance
-              console.log('[AuthGuard] Auth still not ready after extended timeout, giving one more chance');
-              // Increased final timer from 3000ms to 5000ms
-              const finalTimer = setTimeout(() => {
-                setMobileAuthTimeout(true);
-              }, 5000);
-              return () => clearTimeout(finalTimer);
-            }
-          }, 5000);
-          return () => clearTimeout(extendedTimer);
         }
-      }, 8000);
+      };
+      
+      // Wait a bit and then check the session
+      const timer = setTimeout(() => {
+        console.log('[AuthGuard] Mobile auth timeout reached, checking auth state with session manager');
+        checkSession();
+      }, 5000); // Reduced from 8000ms to 5000ms for faster feedback
       
       return () => clearTimeout(timer);
     }
@@ -195,6 +190,12 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         title: "Authentication required",
         description: message,
         variant: "destructive",
+        action: {
+          label: "Login",
+          onClick: () => {
+            window.location.href = '/login';
+          }
+        },
         onOpenChange: (open) => {
           if (!open) setShowingToast(false);
         }

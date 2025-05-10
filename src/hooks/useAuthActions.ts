@@ -1,8 +1,10 @@
+
 import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
 import { toast } from '@/hooks/use-toast';
 import { clearAuthStorage } from '@/services/auth/storageService';
+import { clearSessionState } from '@/utils/auth/sessionManager';
 
 export const useAuthActions = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -57,7 +59,7 @@ export const useAuthActions = () => {
     }
   };
 
-  // Register function with fixed email handling logic
+  // Registration function with improved error handling
   const register = async (userData: RegisterData): Promise<boolean> => {
     setIsLoading(true);
     try {
@@ -136,6 +138,7 @@ export const useAuthActions = () => {
       
       // First perform thorough storage cleanup before signout (helps with Safari issues)
       clearAuthStorage();
+      clearSessionState();
       
       // Use global scope to sign out from all devices
       const { error } = await supabase.auth.signOut({ scope: 'global' });
@@ -171,6 +174,7 @@ export const useAuthActions = () => {
       
       // Force-clear any remaining auth state from storage
       clearAuthStorage();
+      clearSessionState();
       
       // Display success message
       toast({
@@ -188,6 +192,7 @@ export const useAuthActions = () => {
       console.error("[Auth Action] Logout error:", error);
       // Even if there's an error, try to clear local storage
       clearAuthStorage();
+      clearSessionState();
       // In case of critical error, fall back to location redirect
       window.location.href = '/login';
     } finally {

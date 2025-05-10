@@ -1,205 +1,152 @@
 
-import { toast } from '@/components/ui/use-toast';
-import { 
-  BUCKET_NAME, 
-  getSafeErrorMessage
-} from '@/utils/storage/config';
+import { useState } from 'react';
+import { toast } from '@/hooks/use-toast';
+import { generateUniqueId } from '@/utils/uniqueId';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
-import { 
-  checkBucketExists, 
-  uploadToStorage, 
-  getPublicUrl,
-  processImageForUpload,
-  isValidPublicUrl
-} from '@/utils/storage';
-import { validateImageFile } from '@/utils/imageValidation';
-import { useImageSessionCheck } from './useImageSessionCheck';
-import { UploadResult, hasErrorProperty, safeGetErrorProperty } from './types';
-import { useAuth } from '@/context/AuthContext';
+import { verifySession, refreshSession } from '@/utils/auth/sessionManager';
+import { uploadToStorage, getPublicUrl } from '@/utils/storage';
+import { processImageForUpload } from '@/utils/storage';
+import { uploadStateManager, setUploadPending } from '@/components/AuthGuard';
+import { BUCKET_NAME, DEFAULT_IMAGE } from '@/utils/storage/config';
 
-export const useFileUpload = (
-  user_id: string | undefined,
-  onImageChange: (imageUrl: string) => void
-) => {
-  const { validateSession } = useImageSessionCheck();
-  const { isAuthReady } = useAuth();
-
+export const useFileUpload = (user_id: string | null, onImageChange: (url: string) => void) => {
+  const [uploadProgress, setUploadProgress] = useState(0);
+  
   const performUpload = async (file: File): Promise<boolean> => {
-    const platform = getPlatformInfo();
-    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-    
-    console.log(`Beginning upload process for file: ${file.name} (${fileSizeMB}MB) on ${platform.device}`, {
-      platform,
-      fileSize: file.size,
-      fileType: file.type || 'unknown',
-      authReady: isAuthReady
-    });
-    
-    if (!user_id) {
-      console.error('Upload failed: No user ID provided');
-      toast({
-        title: "Authentication Error",
-        description: "Please login again to upload images",
-        variant: "destructive"
-      });
+    if (!file) {
+      console.error("[FileUpload] No file provided");
       return false;
     }
     
-    // First validate the file - if it fails validation, stop here
-    console.log('Running file validation checks...');
-    if (!validateImageFile(file)) {
-      console.log('File validation failed, aborting upload');
+    const platform = getPlatformInfo();
+    const isMobile = platform.mobile || platform.safari;
+    
+    if (!user_id) {
+      console.error("[FileUpload] No user ID provided");
+      toast({
+        title: "Upload Error",
+        description: "You must be logged in to upload files.",
+        variant: "destructive"
+      });
       return false;
     }
     
     try {
-      // Validate and refresh session if needed - with enhanced mobile handling
-      console.log(`[FileUpload] Validating session before upload on ${platform.device}`);
+      console.log(`[FileUpload] Starting upload for file: ${file.name}`);
       
-      // Attempt session validation but don't block mobile uploads if it fails
-      let sessionValid = false;
+      // Track upload is active in the auth guard system
+      uploadStateManager.incrementUploads();
+      setUploadPending(true);
       
-      try {
-        sessionValid = await validateSession();
-        console.log(`[FileUpload] Session validation ${sessionValid ? 'succeeded' : 'failed'}`);
-      } catch (sessionError) {
-        console.error('[FileUpload] Session validation error:', sessionError);
+      // Verify session status before upload
+      const sessionValid = await verifySession();
+      
+      if (!sessionValid) {
+        console.log("[FileUpload] Session invalid, attempting refresh");
+        const refreshed = await refreshSession();
         
-        // For mobile, always try to proceed anyway if validation fails
-        if (platform.mobile || platform.safari) {
-          console.log('[FileUpload] Mobile detected, attempting upload despite session validation failure');
-          sessionValid = true; // Force continue on mobile
-        } else {
-          throw new Error('Session validation failed. Please try logging in again.');
+        if (!refreshed && !isMobile) {
+          console.error("[FileUpload] Failed to refresh session, cannot upload");
+          toast({
+            title: "Authentication Error",
+            description: "Your session has expired. Please log in again.",
+            variant: "destructive"
+          });
+          return false;
         }
       }
       
-      // Verify bucket exists before proceeding
-      const bucketExists = await checkBucketExists();
-      if (!bucketExists) {
-        throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
-      }
-      
-      // Create a unique filename with better platform identification
-      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const timestamp = Date.now();
-      let fileName = '';
-      
-      // More specific platform identification in filename
-      if (platform.iOS && platform.safari) {
-        fileName = `${user_id}/${timestamp}_ios_safari.${fileExt}`;
-      } else if (platform.iOS) {
-        fileName = `${user_id}/${timestamp}_ios.${fileExt}`;
-      } else if (platform.safari) {
-        fileName = `${user_id}/${timestamp}_safari.${fileExt}`;
-      } else if (platform.mobile) {
-        fileName = `${user_id}/${timestamp}_mobile.${fileExt}`;
-      } else {
-        fileName = `${user_id}/${timestamp}.${fileExt}`;
-      }
-      
-      // Process the image with enhanced mobile support
-      console.log('Processing image before upload...');
-      let processedFile;
-      try {
-        // For very small files on mobile devices, skip processing entirely
-        if (platform.mobile && file.size < 2.5 * 1024 * 1024) {
-          console.log('Small file on mobile device, skipping image processing');
-          processedFile = file;
-        } else {
-          processedFile = await processImageForUpload(file);
-          console.log(`Image processed: original size ${file.size} bytes (${fileSizeMB}MB), processed size ${processedFile.size} bytes (${(processedFile.size / 1024 / 1024).toFixed(2)}MB)`);
-        }
-      } catch (processError) {
-        console.error('Image processing failed, using original file:', processError);
-        processedFile = file;
-        console.log('Using original unprocessed file for upload');
-      }
-
-      // Upload with enhanced logging
-      console.log(`Starting upload of file ${fileName} to storage...`);
-      const uploadResult = await uploadToStorage(fileName, processedFile) as UploadResult;
-      
-      // Properly check properties with type safety
-      const hasError = hasErrorProperty(uploadResult);
-      const errorMessage = hasError ? getSafeErrorMessage(uploadResult.error) : 'none';
-      const hasData = uploadResult && typeof uploadResult === 'object' && 'data' in uploadResult;
-      const statusCode = hasError ? safeGetErrorProperty(uploadResult.error, 'statusCode', null) : null;
-      
-      console.log('Upload result received:', {
-        error: errorMessage,
-        data: hasData ? 'success' : 'no data',
-        statusCode: statusCode
-      });
-      
-      // Handle upload result
-      if (hasErrorProperty(uploadResult) && uploadResult.error) {
-        const errorMessage = getSafeErrorMessage(uploadResult.error);
-        
-        console.error('Upload error:', {
-          error: uploadResult.error,
-          message: errorMessage,
-          bucket: BUCKET_NAME,
-          fileName,
-          fileSize: `${(processedFile.size / 1024 / 1024).toFixed(2)}MB`,
-          platform: platform.device
+      // Process image for upload (resize if needed)
+      const processedFile = await processImageForUpload(file);
+      if (!processedFile) {
+        console.error("[FileUpload] Failed to process image");
+        toast({
+          title: "Upload Error",
+          description: "Failed to process image. Please try a different file.",
+          variant: "destructive"
         });
-
-        throw new Error(errorMessage);
+        return false;
       }
       
-      console.log('Upload successful, getting public URL');
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `${user_id}/${generateUniqueId()}.${fileExt}`;
       
-      // Get the public URL with cache busting
-      const { data: { publicUrl } } = getPublicUrl(fileName);
+      // Perform upload with progress tracking (mocked for now)
+      setUploadProgress(10);
+      console.log(`[FileUpload] Uploading to storage: ${fileName}`);
       
-      // Validate the public URL is legitimate before proceeding
-      if (!publicUrl || !isValidPublicUrl(publicUrl)) {
-        console.error('Failed to get valid public URL:', publicUrl);
-        throw new Error('Failed to get valid public URL for uploaded image');
+      // Perform the upload
+      const uploadResult = await uploadToStorage(fileName, processedFile);
+      
+      if ('error' in uploadResult && uploadResult.error) {
+        console.error("[FileUpload] Upload failed:", uploadResult.error);
+        
+        // Special handling for mobile auth errors
+        if (isMobile && String(uploadResult.error).includes('auth')) {
+          toast({
+            title: "Upload Error",
+            description: "Authentication issue. Try saving again or refreshing the page.",
+            variant: "destructive",
+            action: {
+              label: "Refresh",
+              onClick: () => window.location.reload()
+            }
+          });
+        } else {
+          toast({
+            title: "Upload Error",
+            description: String(uploadResult.error),
+            variant: "destructive"
+          });
+        }
+        
+        return false;
       }
       
-      console.log('Successfully generated public URL:', publicUrl.substring(0, 100) + '...');
+      console.log("[FileUpload] Upload completed successfully");
+      setUploadProgress(100);
       
-      // Show upload success toast immediately
-      toast({
-        title: "Upload Success",
-        description: "Image uploaded successfully to storage"
-      });
+      // Get the public URL
+      const fileData = uploadResult.data;
+      if (!fileData) {
+        console.error("[FileUpload] No file data returned");
+        return false;
+      }
       
-      // Update the image in UI with the new URL
-      onImageChange(publicUrl);
+      const publicUrlResult = await getPublicUrl(BUCKET_NAME, fileData.path);
+      
+      if ('error' in publicUrlResult && publicUrlResult.error) {
+        console.error("[FileUpload] Failed to get public URL:", publicUrlResult.error);
+        return false;
+      }
+      
+      console.log("[FileUpload] Retrieved public URL:", publicUrlResult.data.publicUrl);
+      
+      // Pass the URL to the callback
+      onImageChange(publicUrlResult.data.publicUrl);
       
       return true;
+      
     } catch (error) {
-      console.error('Error uploading image:', error);
-      
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : getSafeErrorMessage(error);
-      
-      // Platform-specific error messages
-      let friendlyMessage = errorMessage;
-      
-      if (platform.iOS) {
-        friendlyMessage = "iOS upload issue. Try using WiFi instead of cellular data, or try again later.";
-      } else if (platform.safari) {
-        friendlyMessage = "Safari upload issue. Try reloading the page and trying again, or use Chrome.";
-      } else if (platform.mobile) {
-        friendlyMessage = "Mobile upload failed. Try using WiFi or reloading the page.";
-      } else if (typeof errorMessage === 'string' && errorMessage.includes("storage")) {
-        friendlyMessage = "Could not upload image. Please try logging out and back in, then try again.";
-      }
+      console.error("[FileUpload] Unhandled error during upload:", error);
       
       toast({
-        title: "Upload Failed",
-        description: friendlyMessage,
+        title: "Upload Error",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive"
       });
       
       return false;
+    } finally {
+      // Ensure upload tracking is decremented even on error
+      uploadStateManager.decrementUploads();
+      // Clear upload pending flag with a small delay
+      setTimeout(() => {
+        setUploadPending(false);
+      }, 1000);
     }
   };
-
-  return { performUpload };
+  
+  return { performUpload, uploadProgress };
 };
