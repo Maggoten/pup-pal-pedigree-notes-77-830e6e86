@@ -4,7 +4,7 @@ import { useDogs } from '@/context/DogsContext';
 import { PlannedLitter } from '@/types/breeding';
 import { plannedLittersService } from '@/services/PlannedLitterService';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
-import { useRecentMatings } from './useRecentMatings';
+import { useRecentMatings } from '@/components/planned-litters/hooks/useRecentMatings';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 import { toast } from '@/hooks/use-toast';
