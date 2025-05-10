@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { UploadIcon, XIcon, Loader2 } from 'lucide-react';
@@ -7,7 +6,7 @@ import { useImageUpload } from '@/hooks/image-upload';
 import ImagePreviewDisplay from './image-upload/ImagePreviewDisplay';
 import { toast } from '@/components/ui/use-toast';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
-import { uploadStateManager } from '@/components/AuthGuard';
+import { uploadStateManager, setUploadPending } from '@/components/AuthGuard';
 
 interface ImageUploaderProps {
   currentImage?: string;
@@ -29,7 +28,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const platform = getPlatformInfo();
 
   // Pass the current user ID to useImageUpload
-  const { isUploading, uploadImage, removeImage } = useImageUpload({
+  const { isUploading, uploadImage, removeImage, isUploadActive } = useImageUpload({
     user_id: user?.id,
     onImageChange: (url: string) => {
       console.log('ImageUploader: Image change callback received URL:', 
@@ -38,21 +37,29 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   });
 
-  // Track upload state in the global manager
+  // Track upload state in the global manager and AuthGuard
   useEffect(() => {
     if (isUploading) {
       uploadStateManager.incrementUploads();
+      setUploadPending(true);
     } else {
-      uploadStateManager.decrementUploads();
+      // Add a short delay before marking upload as complete
+      setTimeout(() => {
+        uploadStateManager.decrementUploads();
+        if (!isUploadActive) {
+          setUploadPending(false);
+        }
+      }, 1000);
     }
     
     return () => {
       // Make sure we decrement if component unmounts during upload
       if (isUploading) {
         uploadStateManager.decrementUploads();
+        setUploadPending(false);
       }
     };
-  }, [isUploading]);
+  }, [isUploading, isUploadActive]);
 
   // Log user authentication status when component mounts
   useEffect(() => {
@@ -94,7 +101,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     
     try {
       console.log('ImageUploader: Calling uploadImage function...');
-      // Set a flag to prevent auth redirect during upload
+      // Notify AuthGuard that we're starting an upload
+      setUploadPending(true);
       await uploadImage(file);
       console.log('ImageUploader: Upload function completed');
     } catch (error) {
@@ -126,6 +134,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           variant: "destructive"
         });
       }
+      
+      // Release upload pending state
+      setUploadPending(false);
     }
     
     if (fileInputRef.current) {

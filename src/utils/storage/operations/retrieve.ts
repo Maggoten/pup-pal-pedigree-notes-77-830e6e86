@@ -46,10 +46,20 @@ export const getPublicUrl = (fileName: string) => {
 export const isValidPublicUrl = (url: string | undefined | null): boolean => {
   if (!url) return false;
   
+  // More permissive validation for mobile devices
+  const platform = getPlatformInfo();
+  
   // Basic validation - must be a string with reasonable length containing the bucket name
-  const isValidFormat = url.length > 20 && 
+  let isValidFormat = url.length > 20 && 
                       url.includes(BUCKET_NAME) && 
                       (url.startsWith('http://') || url.startsWith('https://'));
+  
+  // Be more permissive with URL validation on mobile devices
+  if ((platform.mobile || platform.safari) && url.length > 20 && 
+      (url.startsWith('http://') || url.startsWith('https://'))) {
+    // More relaxed validation for mobile - just ensure it's a URL
+    isValidFormat = true;
+  }
   
   console.log(`[Storage] URL validation: ${isValidFormat ? 'valid' : 'invalid'} -`, 
               url.substring(0, 50) + (url.length > 50 ? '...' : ''));

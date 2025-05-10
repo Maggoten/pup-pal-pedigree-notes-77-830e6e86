@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ImageIcon } from 'lucide-react';
+import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 
 interface ImagePreviewDisplayProps {
   imageUrl?: string;
@@ -10,6 +11,8 @@ const ImagePreviewDisplay: React.FC<ImagePreviewDisplayProps> = ({ imageUrl }) =
   const [displayUrl, setDisplayUrl] = useState<string | undefined>(imageUrl);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const platform = getPlatformInfo();
   
   const PLACEHOLDER_IMAGE_PATH = '/placeholder.svg';
   const isPlaceholder = !imageUrl || imageUrl === PLACEHOLDER_IMAGE_PATH;
@@ -28,10 +31,34 @@ const ImagePreviewDisplay: React.FC<ImagePreviewDisplayProps> = ({ imageUrl }) =
     }
   }, [imageUrl, displayUrl]);
 
+  // Auto-retry loading for mobile devices
+  useEffect(() => {
+    if (error && retryCount < 3 && (platform.mobile || platform.safari)) {
+      const timer = setTimeout(() => {
+        console.log(`ImagePreviewDisplay: Auto-retrying image load (${retryCount + 1}/3)`);
+        setError(false);
+        setIsLoading(true);
+        
+        // Add cache-busting parameter for retries
+        if (displayUrl && !isPlaceholder) {
+          const cacheBustedUrl = displayUrl.includes('?') 
+            ? `${displayUrl}&_retry=${Date.now()}` 
+            : `${displayUrl}?_retry=${Date.now()}`;
+          setDisplayUrl(cacheBustedUrl);
+        }
+        
+        setRetryCount(prev => prev + 1);
+      }, 1500); // Retry after 1.5 seconds
+      
+      return () => clearTimeout(timer);
+    }
+  }, [error, retryCount, platform, displayUrl, isPlaceholder]);
+
   const handleImageLoad = () => {
     console.log('ImagePreviewDisplay: Image loaded successfully');
     setIsLoading(false);
     setError(false);
+    setRetryCount(0);
   };
 
   const handleImageError = () => {
@@ -42,7 +69,7 @@ const ImagePreviewDisplay: React.FC<ImagePreviewDisplayProps> = ({ imageUrl }) =
     
     // If the image fails to load and it's not a placeholder,
     // try adding a cache-busting parameter and retry
-    if (displayUrl && displayUrl !== PLACEHOLDER_IMAGE_PATH && !displayUrl.includes('_cb=')) {
+    if (displayUrl && displayUrl !== PLACEHOLDER_IMAGE_PATH && !displayUrl.includes('_cb=') && retryCount === 0) {
       console.log('ImagePreviewDisplay: Retrying with cache busting parameter');
       const cacheBustedUrl = displayUrl.includes('?') 
         ? `${displayUrl}&_cb=${Date.now()}` 
@@ -73,7 +100,7 @@ const ImagePreviewDisplay: React.FC<ImagePreviewDisplayProps> = ({ imageUrl }) =
         </div>
       )}
       
-      {error && !isLoading && (
+      {error && !isLoading && retryCount >= 3 && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-20">
           <div className="text-center p-2">
             <ImageIcon className="h-8 w-8 text-destructive mx-auto mb-2" />

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -21,6 +20,32 @@ export const uploadStateManager = {
   },
   getActiveUploads: () => activeUploadsCount,
   hasActiveUploads: () => activeUploadsCount > 0
+};
+
+// Also track authentication state during uploads to prevent logout flicker
+let authDuringUpload = {
+  wasAuthenticated: false,
+  pendingUpload: false
+};
+
+// Reset auth state after upload completion
+export const setUploadPending = (isPending: boolean) => {
+  authDuringUpload.pendingUpload = isPending;
+  console.log('[AuthGuard] Upload pending state changed to:', isPending);
+  if (isPending) {
+    authDuringUpload.wasAuthenticated = true;
+  } else {
+    // Clear the auth state after a delay
+    setTimeout(() => {
+      authDuringUpload.wasAuthenticated = false;
+    }, 3000);
+  }
+};
+
+// Check if auth should be preserved during upload
+export const shouldPreserveAuth = () => {
+  return authDuringUpload.pendingUpload || 
+         (authDuringUpload.wasAuthenticated && activeUploadsCount > 0);
 };
 
 interface AuthGuardProps {
@@ -55,7 +80,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // This helps prevent flash of auth errors during initialization
   // Use longer delay for mobile devices
   useEffect(() => {
-    // Increased delay from 3500ms to 5000ms for mobile
+    // Increased delay for mobile
     const timer = setTimeout(() => {
       setDelayComplete(true);
       console.log('[AuthGuard] Initial delay complete, can show auth errors now');
@@ -115,6 +140,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     // 6. No toast is currently showing
     // 7. Mobile timeout has been reached (if mobile)
     // 8. No active uploads are in progress
+    // 9. No auth was active during upload
     const shouldShowToast = 
       isAuthReady && 
       !isLoggedIn && 
@@ -123,7 +149,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       delayComplete && 
       !showingToast &&
       (!isMobile || (isMobile && mobileAuthTimeout)) &&
-      !hasActiveUploads;
+      !hasActiveUploads && 
+      !shouldPreserveAuth(); // NEW: Check if auth should be preserved
     
     if (shouldShowToast) {
       console.log('[AuthGuard] Showing auth required toast, details:', {
@@ -133,6 +160,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         isMobile,
         mobileAuthTimeout,
         hasActiveUploads,
+        shouldPreserveAuth: shouldPreserveAuth(),
         currentPath: location.pathname
       });
       
@@ -186,11 +214,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // 3. Not on login page
   // 4. For mobile, wait for the extra timeout
   // 5. No active uploads are in progress
+  // 6. No auth was active during upload
   const shouldRedirectToLogin = isAuthReady && 
-                              !isLoggedIn && 
-                              !isLoginPage && 
-                              (!isMobile || (isMobile && mobileAuthTimeout)) &&
-                              !hasActiveUploads;
+                             !isLoggedIn && 
+                             !isLoginPage && 
+                             (!isMobile || (isMobile && mobileAuthTimeout)) &&
+                             !hasActiveUploads &&
+                             !shouldPreserveAuth(); // NEW: Check if auth should be preserved
   
   if (shouldRedirectToLogin) {
     console.log('[AuthGuard] Redirecting to login page from:', location.pathname);

@@ -7,7 +7,7 @@ import { UseImageUploadProps } from './types';
 export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) => {
   // Get state management for upload process
   const [
-    { isUploading, uploadRetryCount, lastError },
+    { isUploading, uploadRetryCount, lastError, isUploadActive },
     { startUpload, completeUpload, setError, resetRetryCount }
   ] = useImageUploadState();
 
@@ -39,6 +39,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     uploadImage,
     removeImage,
     lastError,
-    uploadRetryCount
+    uploadRetryCount,
+    isUploadActive // Expose the new state
   };
 };

@@ -25,8 +25,8 @@ export const useImageSessionCheck = () => {
     
     if (!isAuthReady) {
       console.log(`[ImageSessionCheck] Auth not ready yet, delaying validation`);
-      // Increased delay from 3000ms to 4000ms for auth readiness
-      await new Promise(resolve => setTimeout(resolve, 4000));
+      // Increased delay for auth readiness
+      await new Promise(resolve => setTimeout(resolve, 5000));
       
       // Force check current session state after delay
       const { data } = await supabase.auth.getSession();
@@ -34,10 +34,26 @@ export const useImageSessionCheck = () => {
       
       console.log(`[ImageSessionCheck] After delay, session exists: ${hasSession}`);
       
-      // For mobile, be more permissive about session requirements
-      if (isMobile && !hasSession) {
-        console.log(`[ImageSessionCheck] Mobile device with no session after delay, proceeding anyway`);
-        return true; // Allow mobile uploads to proceed even without session
+      // More permissive session handling for mobile
+      if (isMobile) {
+        console.log(`[ImageSessionCheck] Mobile device detected, proceeding with upload regardless of session state`);
+        return true; // Always allow mobile uploads to proceed
+      }
+    }
+    
+    // For mobile devices, attempt to refresh session first
+    if (isMobile && session) {
+      try {
+        console.log('[ImageSessionCheck] Mobile device detected, attempting session refresh');
+        const { data, error } = await supabase.auth.refreshSession();
+        if (!error && data.session) {
+          console.log('[ImageSessionCheck] Session refreshed successfully');
+        } else {
+          console.warn('[ImageSessionCheck] Session refresh failed:', error);
+        }
+      } catch (refreshError) {
+        console.error('[ImageSessionCheck] Error during session refresh:', refreshError);
+        // Continue despite refresh errors on mobile
       }
     }
     

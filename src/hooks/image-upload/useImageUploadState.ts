@@ -1,10 +1,10 @@
-
 import { useState, useCallback } from 'react';
 
 type UploadState = {
   isUploading: boolean;
   uploadRetryCount: number;
   lastError: string | null;
+  isUploadActive: boolean;
 };
 
 type UploadStateActions = {
@@ -19,16 +19,21 @@ export const useImageUploadState = (): [UploadState, UploadStateActions] => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadRetryCount, setUploadRetryCount] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
+  const [isUploadActive, setIsUploadActive] = useState(false);
 
   const startUpload = useCallback(() => {
     console.log('Starting upload process');
     setIsUploading(true);
+    setIsUploadActive(true);
     setLastError(null);
   }, []);
 
   const completeUpload = useCallback(() => {
     console.log('Upload process complete');
     setIsUploading(false);
+    setTimeout(() => {
+      setIsUploadActive(false);
+    }, 1000);
   }, []);
 
   const setError = useCallback((error: string) => {
@@ -50,7 +55,7 @@ export const useImageUploadState = (): [UploadState, UploadStateActions] => {
   }, []);
 
   return [
-    { isUploading, uploadRetryCount, lastError },
+    { isUploading, uploadRetryCount, lastError, isUploadActive },
     { startUpload, completeUpload, setError, incrementRetryCount, resetRetryCount }
   ];
 };
