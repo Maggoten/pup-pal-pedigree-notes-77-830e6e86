@@ -149,7 +149,7 @@ const MyDogsContent: React.FC = () => {
             <Button 
               onClick={() => setShowAddDogDialog(true)} 
               className="flex items-center gap-1.5"
-              disabled={loading}
+              disabled={loading || !isAuthReady}
             >
               <PlusCircle className="h-4 w-4" />
               Add New Dog
@@ -179,6 +179,7 @@ const MyDogsContent: React.FC = () => {
                     variant="outline" 
                     onClick={() => setShowAddDogDialog(true)}
                     className="mt-4"
+                    disabled={!isAuthReady}
                   >
                     <PlusCircle className="h-4 w-4 mr-2" />
                     Add Your First Dog

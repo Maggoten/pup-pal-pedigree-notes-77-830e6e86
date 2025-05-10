@@ -7,8 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
 export const useDogsMutations = (): UseDogsMutations => {
-  const { user, isAuthReady } = useAuth();
-  const userId = user?.id;
+  const { user, supabaseUser, isAuthReady } = useAuth();
+  const userId = user?.id || supabaseUser?.id;
   const { toast } = useToast();
   const addDogMutation = useAddDog(userId);
   const updateDogMutation = useUpdateDog(userId);
@@ -26,7 +26,9 @@ export const useDogsMutations = (): UseDogsMutations => {
         return null;
       }
 
-      if (!user?.id) {
+      // Use either user.id or supabaseUser.id
+      const ownerId = user?.id || supabaseUser?.id;
+      if (!ownerId) {
         console.error('Cannot add dog: No authenticated user found');
         toast({
           title: "Authentication required",
@@ -47,7 +49,7 @@ export const useDogsMutations = (): UseDogsMutations => {
       });
       throw error;
     }
-  }, [addDogMutation, toast, user, isAuthReady]);
+  }, [addDogMutation, toast, user, supabaseUser, isAuthReady]);
 
   const updateDog = useCallback(async (id: string, updates: Partial<Dog>) => {
     try {
@@ -61,7 +63,9 @@ export const useDogsMutations = (): UseDogsMutations => {
         return null;
       }
 
-      if (!user?.id) {
+      // Use either user.id or supabaseUser.id
+      const ownerId = user?.id || supabaseUser?.id;
+      if (!ownerId) {
         console.error('Cannot update dog: No authenticated user found');
         toast({
           title: "Authentication required",
@@ -82,7 +86,7 @@ export const useDogsMutations = (): UseDogsMutations => {
       });
       return null;
     }
-  }, [updateDogMutation, toast, user, isAuthReady]);
+  }, [updateDogMutation, toast, user, supabaseUser, isAuthReady]);
 
   const deleteDog = useCallback(async (id: string) => {
     try {
@@ -96,7 +100,9 @@ export const useDogsMutations = (): UseDogsMutations => {
         return false;
       }
 
-      if (!user?.id) {
+      // Use either user.id or supabaseUser.id
+      const ownerId = user?.id || supabaseUser?.id;
+      if (!ownerId) {
         console.error('Cannot delete dog: No authenticated user found');
         toast({
           title: "Authentication required",
@@ -118,7 +124,7 @@ export const useDogsMutations = (): UseDogsMutations => {
       });
       return false;
     }
-  }, [deleteDogMutation, toast, user, isAuthReady]);
+  }, [deleteDogMutation, toast, user, supabaseUser, isAuthReady]);
 
   return {
     addDog,

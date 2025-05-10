@@ -16,7 +16,7 @@ interface DogsProviderProps {
 }
 
 export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
-  const { user, isLoggedIn, isLoading: authLoading } = useAuth();
+  const { user, supabaseUser, isLoggedIn, isLoading: authLoading, isAuthReady } = useAuth();
   const [dogLoadingAttempted, setDogLoadingAttempted] = useState(false);
   const { toast } = useToast();
   
@@ -32,7 +32,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   } = useDogsHook();
 
   const { activeDog, setActiveDog } = useActiveDog(dogs);
-  const forceReload = useForceReload(user?.id, fetchDogsBase);
+  const forceReload = useForceReload(user?.id || supabaseUser?.id, fetchDogsBase);
   
   const { updateDog, removeDog } = useDogOperations({
     updateDogBase,
@@ -45,7 +45,9 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   // Create properly typed wrapper functions that match the DogsContextType interface
   const fetchDogs = async (skipCache?: boolean): Promise<Dog[]> => {
     try {
-      if (!user?.id) return [];
+      // Use either user.id or supabaseUser.id
+      const ownerId = user?.id || supabaseUser?.id;
+      if (!ownerId) return [];
       
       const result = await fetchDogsBase(skipCache || false);
       return result;
@@ -75,9 +77,12 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
 
   const addDog = async (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>): Promise<Dog | undefined> => {
     try {
-      if (!user?.id) {
+      // Use either user.id or supabaseUser.id for the owner ID
+      const ownerId = user?.id || supabaseUser?.id;
+      if (!ownerId) {
         throw new Error('User not authenticated');
       }
+      
       const newDog = await addDogBase(dog);
       await fetchDogs(true); // Refresh the list after adding
       return newDog;
@@ -93,20 +98,20 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    if (!authLoading && isLoggedIn && user?.id && !dogLoadingAttempted) {
+    if (!authLoading && isLoggedIn && (user?.id || supabaseUser?.id) && !dogLoadingAttempted) {
       setDogLoadingAttempted(true);
       fetchDogs().catch(err => {
         console.error('Initial dogs fetch failed:', err);
       });
     }
-  }, [authLoading, isLoggedIn, user?.id, dogLoadingAttempted]);
+  }, [authLoading, isLoggedIn, user?.id, supabaseUser?.id, dogLoadingAttempted]);
 
   const isLoading = authLoading || (isLoggedIn && dogsLoading && !dogLoadingAttempted);
 
   const value: DogsContextType = {
     dogs,
     loading: isLoading,
-    error: error ? (error instanceof Error ? error.message : String(error)) : (authLoading ? null : (!isLoggedIn && !user?.id && dogLoadingAttempted ? 'Authentication required' : null)),
+    error: error ? (error instanceof Error ? error.message : String(error)) : (authLoading ? null : (!isLoggedIn && !(user?.id || supabaseUser?.id) && dogLoadingAttempted ? 'Authentication required' : null)),
     activeDog,
     setActiveDog,
     refreshDogs,
