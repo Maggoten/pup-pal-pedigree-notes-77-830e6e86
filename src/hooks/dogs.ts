@@ -59,8 +59,8 @@ export function useDogs() {
       const count = await fetchDogsCount(userId);
       setTotalDogs(count);
       
-      // Then fetch actual dog data - Fixed: pass skipCache as the second argument
-      const fetchedDogs = await fetchDogsService(userId, skipCache);
+      // Fixed: change skipCache parameter type to match fetchDogsService signature
+      const fetchedDogs = await fetchDogsService(userId, skipCache ? 1 : 0);
       setDogs(fetchedDogs);
       
       // Update the React Query cache
@@ -99,7 +99,8 @@ export function useDogs() {
     }
     
     try {
-      const newDog = await addDogService(dog);
+      // Fixed: Add missing second parameter to addDogService
+      const newDog = await addDogService(dog, false);
       
       if (newDog) {
         // Update local state

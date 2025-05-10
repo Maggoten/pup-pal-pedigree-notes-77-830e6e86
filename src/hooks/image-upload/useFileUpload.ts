@@ -10,6 +10,14 @@ import { uploadStateManager, setUploadPending } from '@/components/AuthGuard';
 import { BUCKET_NAME, STORAGE_ERRORS } from '@/utils/storage/config';
 import { UploadResult } from './types';
 
+// Define an interface for the public URL result
+interface PublicUrlResult {
+  data?: {
+    publicUrl: string;
+  };
+  error?: any;
+}
+
 export const useFileUpload = (user_id: string | null, onImageChange: (url: string) => void) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   
@@ -117,8 +125,8 @@ export const useFileUpload = (user_id: string | null, onImageChange: (url: strin
       // Access data with proper typing
       const fileData = uploadResult.data as { path: string };
       
-      // Get the public URL - Fix for TS2554 - removing the second argument as it's not needed
-      const publicUrlResult = await getPublicUrl(fileData.path);
+      // Get the public URL - Fixed: properly type the result
+      const publicUrlResult = await getPublicUrl(fileData.path) as PublicUrlResult;
       
       // Add null checks for publicUrlResult
       if (!publicUrlResult) {
@@ -126,6 +134,7 @@ export const useFileUpload = (user_id: string | null, onImageChange: (url: strin
         return false;
       }
       
+      // Fixed: Ensure correct type checks for publicUrlResult
       if ('error' in publicUrlResult && publicUrlResult.error) {
         console.error("[FileUpload] Failed to get public URL:", publicUrlResult.error);
         return false;
@@ -136,7 +145,7 @@ export const useFileUpload = (user_id: string | null, onImageChange: (url: strin
         return false;
       }
       
-      // Safely access the publicUrl with null checks
+      // Safely access the publicUrl with null checks and proper typing
       const publicUrl = publicUrlResult?.data?.publicUrl;
       if (publicUrl) {
         console.log("[FileUpload] Retrieved public URL:", publicUrl);

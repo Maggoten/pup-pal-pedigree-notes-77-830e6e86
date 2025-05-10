@@ -1,3 +1,4 @@
+
 import { isMobileDevice } from '@/utils/fetchUtils';
 import { isSafari } from '@/utils/storage/config';
 import { safeImageCompression, directUpload, getPlatformInfo } from './mobileUpload';
@@ -112,10 +113,10 @@ export const createSafariCompatibleFile = (blob: Blob, filename: string, mimeTyp
   }
 };
 
-// Updated compressImage utility function to accept options object
+// Updated compressImage utility function to accept maxSizeMB parameter
 export const compressImage = async (file: File, maxSizeMB?: number): Promise<File> => {
   try {
-    // Extract maxSizeMB parameter
+    // Extract maxSizeMB parameter with default value
     const maxSize = maxSizeMB || 1;
     
     // Use the existing safeImageCompression function
