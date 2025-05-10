@@ -66,6 +66,11 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
 
   const isLoading = authLoading || (isLoggedIn && dogsLoading && !dogLoadingAttempted);
 
+  // Create properly typed wrapper functions that match the DogsContextType interface
+  const fetchDogsWrapper = (skipCache?: boolean): Promise<Dog[]> => {
+    return fetchDogs(skipCache);
+  };
+
   const value: DogsContextType = {
     dogs,
     loading: isLoading,
@@ -73,7 +78,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     activeDog,
     setActiveDog,
     refreshDogs: wrappedRefreshDogs,
-    fetchDogs,
+    fetchDogs: fetchDogsWrapper,
     addDog,
     updateDog,
     removeDog

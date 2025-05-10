@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { BUCKET_NAME, STORAGE_ERRORS } from './config';
 import { isSafari, getStorageTimeout } from './config';
@@ -63,7 +64,6 @@ export async function uploadFile(
   file: File,
   path: string = '',
   options: {
-    onProgress?: (progress: number) => void;
     maxRetries?: number;
     useCompression?: boolean;
   } = {}
@@ -74,7 +74,7 @@ export async function uploadFile(
     throw new Error('Authentication required for file upload');
   }
   
-  const { onProgress, maxRetries = 2 } = options;
+  const { maxRetries = 2 } = options;
   const platform = getPlatformInfo();
   
   try {
@@ -98,11 +98,7 @@ export async function uploadFile(
           .from(BUCKET_NAME)
           .upload(filePath, file, {
             cacheControl: '3600',
-            upsert: true,
-            onUploadProgress: onProgress ? (event) => {
-              const progress = event.loaded / event.total;
-              onProgress(progress);
-            } : undefined
+            upsert: true
           });
       },
       {
@@ -191,7 +187,13 @@ export async function downloadFile(filePath: string): Promise<File | null> {
     
     if (data) {
       console.log('Download successful');
-      return data;
+      // Convert blob to File with name
+      const filename = filePath.split('/').pop() || 'downloaded-file';
+      // Create a new File from the blob
+      return new File([data], filename, { 
+        type: data.type,
+        lastModified: Date.now()
+      });
     }
     
     return null;

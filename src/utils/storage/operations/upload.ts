@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { BUCKET_NAME, STORAGE_ERRORS, isImageByExtension } from '../config';
 import { compressImage } from '../imageUtils';
@@ -6,6 +7,7 @@ import { fetchWithRetry } from '@/utils/fetchUtils';
 import { verifySession } from '@/utils/auth/sessionManager';
 import { getPlatformInfo } from '../mobileUpload';
 import { toast } from '@/hooks/use-toast';
+import { hasError, formatStorageError, getStorageTimeout, safeGetErrorProperty, createStorageError } from '../imageUtils';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -17,7 +19,6 @@ export async function uploadImage(
   options: {
     folder?: string;
     customFileName?: string;
-    onProgress?: (progress: number) => void;
     maxSizeMB?: number;
     skipCompression?: boolean;
     maxRetries?: number;
@@ -32,7 +33,6 @@ export async function uploadImage(
   const { 
     folder = '', 
     customFileName, 
-    onProgress,
     maxSizeMB = 1,
     skipCompression = false,
     maxRetries = 2
@@ -80,14 +80,15 @@ export async function uploadImage(
     // Upload with retry
     console.log(`Uploading to ${storagePath}`);
     const platform = getPlatformInfo();
-    let uploadToast = null;
+    let toastId: string | number | undefined;
     
     if (platform.mobile) {
-      uploadToast = toast({
+      const toastResult = toast({
         title: "Uploading image...",
         description: "Please keep the app open",
         duration: 10000,
       });
+      toastId = toastResult?.id;
     }
     
     const { data, error } = await fetchWithRetry(
@@ -95,11 +96,7 @@ export async function uploadImage(
         return await supabase.storage.from(BUCKET_NAME)
           .upload(storagePath, fileToUpload, {
             cacheControl: '3600',
-            upsert: true,
-            onUploadProgress: onProgress ? (progress) => {
-              const percent = (progress.loaded / progress.total) * 100;
-              onProgress(percent);
-            } : undefined
+            upsert: true
           });
       },
       {
@@ -117,11 +114,10 @@ export async function uploadImage(
       }
     );
     
-    if (uploadToast) {
+    if (toastId) {
       toast({
-        id: uploadToast,
         title: error ? "Upload failed" : "Upload complete",
-        description: error ? error.message : "Image uploaded successfully",
+        description: error ? formatStorageError(error) : "Image uploaded successfully",
         duration: 3000,
       });
     }
@@ -140,7 +136,7 @@ export async function uploadImage(
     
   } catch (error: any) {
     console.error('Image upload failed:', error);
-    const errorMessage = error?.message || 'Image upload failed';
+    const errorMessage = formatStorageError(error);
     
     toast({
       title: "Upload failed",
@@ -156,13 +152,11 @@ export async function uploadImage(
  * Upload a file to storage with enhanced retry logic and platform-specific optimizations
  * @param fileName The name to save the file as
  * @param file The file to upload
- * @param onProgress Optional progress callback
  * @returns Upload result with data or error
  */
 export const uploadToStorage = async (
   fileName: string, 
-  file: File, 
-  onProgress?: (progress: number) => void
+  file: File
 ) => {
   const startTime = Date.now();
   const platform = getPlatformInfo();
@@ -173,8 +167,7 @@ export const uploadToStorage = async (
     try {
       // For mobile, skip session validation errors
       await verifySession({
-        skipThrow: platform.mobile || platform.safari,
-        platform: platform
+        skipThrow: platform.mobile || platform.safari
       });
       
       const bucketExists = await checkBucketExists();
@@ -202,9 +195,7 @@ export const uploadToStorage = async (
     });
     
     // Adjust timeout and retry count for mobile/Safari
-    // Increased maxRetries from 4 to 5 for mobile
     const maxRetries = platform.mobile || platform.safari ? 5 : 3;
-    // Increased initial delay from 3000ms to 4000ms for Safari
     const initialDelay = platform.safari ? 4000 : 2000;
     
     // Upload with enhanced retry logic
@@ -224,10 +215,8 @@ export const uploadToStorage = async (
               upsert: true
             });
             
-          // Race against a timeout - Increased timeout for mobile
-          // Get from config but ensure it's at least 60 seconds on mobile
-          const configTimeout = getStorageTimeout();
-          const timeout = platform.mobile ? Math.max(configTimeout, 60000) : configTimeout;
+          // Race against a timeout
+          const timeout = getStorageTimeout();
           console.log(`Setting timeout for upload: ${timeout}ms`);
           
           const timeoutPromise = new Promise((_, reject) => 
@@ -249,32 +238,8 @@ export const uploadToStorage = async (
         maxRetries,
         initialDelay,
         useBackoff: true,
-        shouldRetry: (error) => {
-          console.log('Evaluating if upload error should trigger retry:', error);
-          
-          // More selective retry logic for different error types
-          if (error && typeof error === 'object') {
-            // Don't retry 413 (payload too large) errors
-            if (('status' in error && (error as any).status === 413) || 
-                ('statusCode' in error && (error as any).statusCode === 413)) {
-              console.log('Will not retry 413 Payload Too Large error');
-              return false;
-            }
-            // Don't retry 400 errors that indicate malformed requests
-            if ((('status' in error && (error as any).status === 400) || 
-                 ('statusCode' in error && (error as any).statusCode === 400)) && 
-                 'message' in error && typeof (error as any).message === 'string' &&
-                 (error as any).message.includes('Invalid')) {
-              console.log('Will not retry 400 Invalid Request error');
-              return false;
-            }
-          }
-          console.log('Will retry upload');
-          return true;
-        },
         onRetry: (attempt, error) => {
           console.log(`Retrying upload to '${BUCKET_NAME}', attempt ${attempt}, error:`, error);
-          if (onProgress) onProgress(-1); // Signal retry to UI
         }
       }
     );
@@ -282,7 +247,7 @@ export const uploadToStorage = async (
     // Log detailed response information
     logUploadDetails(fileName, file, result, startTime);
     
-    if (hasError(result) && result.error) {
+    if (hasError(result)) {
       console.error(`Upload error to bucket '${BUCKET_NAME}':`, result.error);
       
       // Enhanced error reporting
@@ -327,14 +292,14 @@ const logUploadDetails = (fileName: string, file: File, response: any, startTime
     platform: platform.device,
     safari: platform.safari,
     mobile: platform.mobile,
-    success: !response.error,
-    error: response.error ? {
+    success: !hasError(response),
+    error: hasError(response) ? {
       message: safeGetErrorProperty(response.error, 'message', 'Unknown error'),
       status: safeGetErrorProperty(response.error, 'status', 'unknown'),
       details: safeGetErrorProperty(response.error, 'details', 'none')
     } : null,
-    response: response.data ? {
-      path: response.data.path || 'unknown'
+    response: 'data' in response ? {
+      path: response.data?.path || 'unknown'
     } : 'no data'
   });
 };

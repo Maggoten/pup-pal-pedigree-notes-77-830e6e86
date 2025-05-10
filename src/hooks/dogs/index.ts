@@ -2,6 +2,7 @@
 import { useDogsMutations } from './useDogsMutations';
 import { useDogsQueries } from './useDogsQueries';
 import { UseDogs, UseDogsMutations, UseDogsQueries } from './types';
+import { Dog } from '@/types/dogs';
 
 export const useDogs = (): UseDogs => {
   const queries = useDogsQueries();
@@ -9,7 +10,19 @@ export const useDogs = (): UseDogs => {
 
   return {
     ...queries,
-    ...mutations
+    ...mutations,
+    fetchDogs: (skipCache?: boolean): Promise<Dog[]> => {
+      return queries.fetchDogs(skipCache); 
+    },
+    addDog: (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>): Promise<Dog | undefined> => {
+      return mutations.addDog(dog);
+    },
+    updateDog: (id: string, updates: Partial<Dog>): Promise<Dog | null> => {
+      return mutations.updateDog(id, updates);
+    },
+    deleteDog: (id: string): Promise<boolean> => {
+      return mutations.deleteDog(id);
+    }
   };
 };
 
