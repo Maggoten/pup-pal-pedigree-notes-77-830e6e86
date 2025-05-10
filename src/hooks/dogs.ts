@@ -102,7 +102,7 @@ export function useDogs() {
       if (document.visibilityState === 'visible' && user?.id && isAuthReady) {
         console.log('[useDogs] Document became visible, refreshing data');
         // Invalidate React Query cache and reload
-        queryClient.invalidateQueries(['dogs', user.id]);
+        queryClient.invalidateQueries({ queryKey: ['dogs', user.id] });
         loadDogs(user.id, true);
       }
     };
@@ -118,7 +118,11 @@ export function useDogs() {
     isLoading,
     error,
     refreshDogs: () => user?.id ? loadDogs(user.id, true) : Promise.resolve(),
-    totalDogs
+    totalDogs,
+    fetchDogs: loadDogs,
+    addDog: async () => { /* To be implemented */ },
+    updateDog: async () => { /* To be implemented */ },
+    deleteDog: async () => { /* To be implemented */ }
   };
 }
 

@@ -39,7 +39,7 @@ export const useDogsQueries = (): UseDogsQueries => {
       }
       
       // Verify the session is valid before fetching
-      const sessionValid = await verifySession(true);
+      const sessionValid = await verifySession({ skipThrow: true });
       if (!sessionValid) {
         console.log('useDogsQueries: Session verification failed, skipping fetch');
         return [];
@@ -77,7 +77,7 @@ export const useDogsQueries = (): UseDogsQueries => {
       if (document.visibilityState === 'visible' && userId && isAuthReady) {
         console.log('Page became visible, checking if dogs data needs refresh');
         // Verify session is valid before refreshing
-        verifySession().then(isValid => {
+        verifySession({ skipThrow: true }).then(isValid => {
           if (isValid) {
             // Small delay to allow auth to fully stabilize
             setTimeout(() => {

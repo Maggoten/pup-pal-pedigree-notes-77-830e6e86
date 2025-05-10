@@ -118,7 +118,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       // Verify the session status with the centralized function
       const checkSession = async () => {
         try {
-          const isValid = await verifySession(true);
+          const isValid = await verifySession({ skipThrow: true });  // Using correct options object
           if (!isValid && isAuthReady) {
             console.log('[AuthGuard] Mobile session verification confirms user is not logged in');
             setMobileAuthTimeout(true);

@@ -24,21 +24,25 @@ class PlannedLittersService {
 
     // Use fetchWithRetry for more resilient data loading
     try {
-      const { data: litters, error } = await fetchWithRetry(() => 
-        supabase
-          .from('planned_litters')
-          .select(`
-            *,
-            mating_dates(*)
-          `)
-          .eq('user_id', sessionData.session!.user.id),
+      const response = await fetchWithRetry(
+        async () => {
+          return await supabase
+            .from('planned_litters')
+            .select(`
+              *,
+              mating_dates(*)
+            `)
+            .eq('user_id', sessionData.session!.user.id);
+        },
         {
           maxRetries: 2,
           initialDelay: 1000,
           verifySession: false // Already verified above
         }
       );
-
+      
+      const { data: litters, error } = response;
+      
       if (error) {
         throw error;
       }

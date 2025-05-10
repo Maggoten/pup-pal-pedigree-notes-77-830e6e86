@@ -1,42 +1,156 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { StorageError } from '@supabase/storage-js';
+import { BUCKET_NAME, STORAGE_ERRORS, isImageByExtension } from '../config';
+import { compressImage } from '../imageUtils';
+import { checkBucketExists, createBucketIfNotExists } from '../operations';
 import { fetchWithRetry } from '@/utils/fetchUtils';
-import { 
-  BUCKET_NAME, 
-  STORAGE_ERRORS,
-  getStorageTimeout,
-} from '../config';
+import { verifySession } from '@/utils/auth/sessionManager';
 import { getPlatformInfo } from '../mobileUpload';
-import { checkBucketExists } from '../core/bucket';
-import { verifySession } from '../core/session';
-import { hasError, safeGetErrorProperty, createStorageError, formatStorageError } from '../core/errors';
+import { toast } from '@/hooks/use-toast';
 
-// Log detailed upload request and response information
-const logUploadDetails = (fileName: string, file: File, response: any, startTime: number) => {
-  const duration = Date.now() - startTime;
-  const platform = getPlatformInfo();
-  const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+/**
+ * Enhanced file upload function with compression, retry, and progress reporting
+ */
+export async function uploadImage(
+  file: File, 
+  options: {
+    folder?: string;
+    customFileName?: string;
+    onProgress?: (progress: number) => void;
+    maxSizeMB?: number;
+    skipCompression?: boolean;
+    maxRetries?: number;
+  } = {}
+): Promise<string | null> {
+  // Verify session before uploading
+  const sessionValid = await verifySession({ skipThrow: true });
+  if (!sessionValid) {
+    throw new Error(STORAGE_ERRORS.NO_SESSION);
+  }
   
-  console.log('Upload details:', {
-    fileName,
-    fileSize: `${fileSizeMB}MB (${file.size} bytes)`,
-    fileType: file.type || 'unknown',
-    duration: `${duration}ms`,
-    platform: platform.device,
-    safari: platform.safari,
-    mobile: platform.mobile,
-    success: !response.error,
-    error: response.error ? {
-      message: safeGetErrorProperty(response.error, 'message', 'Unknown error'),
-      status: safeGetErrorProperty(response.error, 'status', 'unknown'),
-      details: safeGetErrorProperty(response.error, 'details', 'none')
-    } : null,
-    response: response.data ? {
-      path: response.data.path || 'unknown'
-    } : 'no data'
-  });
-};
+  const { 
+    folder = '', 
+    customFileName, 
+    onProgress,
+    maxSizeMB = 1,
+    skipCompression = false,
+    maxRetries = 2
+  } = options;
+  
+  try {
+    // Validate file
+    if (!file) {
+      throw new Error('No file provided');
+    }
+    
+    if (file.size > MAX_FILE_SIZE) {
+      throw new Error(STORAGE_ERRORS.FILE_TOO_LARGE(file.size));
+    }
+    
+    if (!isImageByExtension(file.name) && !file.type.startsWith('image/')) {
+      throw new Error(STORAGE_ERRORS.INVALID_FILE_TYPE);
+    }
+    
+    // Check or create bucket
+    const bucketExists = await checkBucketExists();
+    if (!bucketExists) {
+      await createBucketIfNotExists();
+    }
+    
+    // Setup storage path
+    let fileName = customFileName || `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+    const storagePath = folder ? `${folder}/${fileName}` : fileName;
+    
+    console.log(`Processing ${file.name} (${Math.round(file.size / 1024)}KB) for upload to ${storagePath}`);
+    
+    // Try to compress image if it's not too small already
+    let fileToUpload = file;
+    if (!skipCompression && file.size > 300 * 1024) {
+      try {
+        fileToUpload = await compressImage(file, { maxSizeMB });
+        console.log(`Compressed from ${Math.round(file.size / 1024)}KB to ${Math.round(fileToUpload.size / 1024)}KB`);
+      } catch (compressionError) {
+        console.warn('Image compression failed:', compressionError);
+        console.log('Falling back to original file');
+        fileToUpload = file;
+      }
+    }
+    
+    // Upload with retry
+    console.log(`Uploading to ${storagePath}`);
+    const platform = getPlatformInfo();
+    let uploadToast = null;
+    
+    if (platform.mobile) {
+      uploadToast = toast({
+        title: "Uploading image...",
+        description: "Please keep the app open",
+        duration: 10000,
+      });
+    }
+    
+    const { data, error } = await fetchWithRetry(
+      async () => {
+        return await supabase.storage.from(BUCKET_NAME)
+          .upload(storagePath, fileToUpload, {
+            cacheControl: '3600',
+            upsert: true,
+            onUploadProgress: onProgress ? (progress) => {
+              const percent = (progress.loaded / progress.total) * 100;
+              onProgress(percent);
+            } : undefined
+          });
+      },
+      {
+        maxRetries,
+        initialDelay: 1000,
+        onRetry: (attempt) => {
+          if (platform.mobile) {
+            toast({
+              title: `Retry ${attempt}/${maxRetries}`,
+              description: "Slow connection detected. Please wait...",
+            });
+          }
+          console.log(`Upload retry ${attempt} for ${storagePath}`);
+        }
+      }
+    );
+    
+    if (uploadToast) {
+      toast({
+        id: uploadToast,
+        title: error ? "Upload failed" : "Upload complete",
+        description: error ? error.message : "Image uploaded successfully",
+        duration: 3000,
+      });
+    }
+    
+    if (error) {
+      throw error;
+    }
+    
+    // Get the public URL
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(storagePath);
+      
+    console.log('Upload successful, URL:', publicUrlData.publicUrl);
+    return publicUrlData.publicUrl;
+    
+  } catch (error: any) {
+    console.error('Image upload failed:', error);
+    const errorMessage = error?.message || 'Image upload failed';
+    
+    toast({
+      title: "Upload failed",
+      description: errorMessage,
+      variant: "destructive",
+    });
+    
+    throw error;
+  }
+}
 
 /**
  * Upload a file to storage with enhanced retry logic and platform-specific optimizations
@@ -197,4 +311,30 @@ export const uploadToStorage = async (
     
     return createStorageError(errorMessage);
   }
+};
+
+// Log detailed upload request and response information
+const logUploadDetails = (fileName: string, file: File, response: any, startTime: number) => {
+  const duration = Date.now() - startTime;
+  const platform = getPlatformInfo();
+  const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+  
+  console.log('Upload details:', {
+    fileName,
+    fileSize: `${fileSizeMB}MB (${file.size} bytes)`,
+    fileType: file.type || 'unknown',
+    duration: `${duration}ms`,
+    platform: platform.device,
+    safari: platform.safari,
+    mobile: platform.mobile,
+    success: !response.error,
+    error: response.error ? {
+      message: safeGetErrorProperty(response.error, 'message', 'Unknown error'),
+      status: safeGetErrorProperty(response.error, 'status', 'unknown'),
+      details: safeGetErrorProperty(response.error, 'details', 'none')
+    } : null,
+    response: response.data ? {
+      path: response.data.path || 'unknown'
+    } : 'no data'
+  });
 };

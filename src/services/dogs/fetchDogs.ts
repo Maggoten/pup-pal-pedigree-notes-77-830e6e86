@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dogs';
 import { enrichDog, DbDog } from '@/utils/dogUtils';
@@ -74,12 +73,14 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
     // Use our retry wrapper for the fetch operation with pagination
     const response = await fetchWithRetry<PostgrestResponse<DbDog>>(
       // Fetch function with specific fields instead of select('*')
-      () => supabase
-        .from('dogs')
-        .select('id, name, breed, gender, birthdate, color, image_url, heatHistory, heatInterval, owner_id, created_at')
-        .eq('owner_id', userId)
-        .order('created_at', { ascending: false })
-        .range(start, end), // Pagination without head:true to get actual data
+      async () => {
+        return await supabase
+          .from('dogs')
+          .select('id, name, breed, gender, birthdate, color, image_url, heatHistory, heatInterval, owner_id, created_at')
+          .eq('owner_id', userId)
+          .order('created_at', { ascending: false })
+          .range(start, end); // Pagination without head:true to get actual data
+      },
       // Retry options
       {
         maxRetries: MAX_RETRIES,

@@ -23,10 +23,12 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     dogs, 
     isLoading: dogsLoading, 
     error, 
-    fetchDogs, 
-    addDog,
+    refreshDogs,
+    totalDogs,
+    fetchDogs,
+    addDog, 
     updateDog: updateDogBase,
-    deleteDog 
+    deleteDog
   } = useDogsHook();
 
   const { activeDog, setActiveDog } = useActiveDog(dogs);
@@ -67,11 +69,11 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   const value: DogsContextType = {
     dogs,
     loading: isLoading,
-    error: error ? error : (authLoading ? null : (!isLoggedIn && !user?.id && dogLoadingAttempted ? 'Authentication required' : null)),
+    error: error ? (error instanceof Error ? error.message : error) : (authLoading ? null : (!isLoggedIn && !user?.id && dogLoadingAttempted ? 'Authentication required' : null)),
     activeDog,
     setActiveDog,
     refreshDogs: wrappedRefreshDogs,
-    fetchDogs, // Expose the raw fetchDogs function with proper type
+    fetchDogs,
     addDog,
     updateDog,
     removeDog
