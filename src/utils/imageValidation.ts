@@ -1,6 +1,10 @@
+
 import { SUPPORTED_IMAGE_EXTENSIONS } from '@/utils/storage';
 import { EXTENDED_MIME_TYPES } from '@/utils/storage';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
+
+// Export the max file size constant
+export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 /**
  * Validates if a file is an image based on its MIME type or extension.

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Dog } from '@/types/dogs';
 import { useAuth } from '@/context/AuthContext';
@@ -18,7 +17,9 @@ export function useDogs() {
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
 
   // Handle dogs data fetching
-  const fetchDogs = useCallback(async (userId?: string, forceRefresh = false): Promise<Dog[]> => {
+  const fetchDogs = useCallback(async (skipCache = false): Promise<Dog[]> => {
+    const userId = user?.id;
+    
     if (!userId) {
       console.log('[useDogs] No user ID provided, skipping fetch');
       setIsLoading(false);
@@ -26,7 +27,7 @@ export function useDogs() {
     }
 
     // Skip duplicate loading unless forced
-    if (hasAttemptedLoad && !forceRefresh) {
+    if (hasAttemptedLoad && !skipCache) {
       return dogs;
     }
 
@@ -40,7 +41,7 @@ export function useDogs() {
       // Use React Query cache if available, otherwise fetch
       const cachedDogs = queryClient.getQueryData<Dog[]>(['dogs', userId]);
       
-      if (cachedDogs && !forceRefresh) {
+      if (cachedDogs && !skipCache) {
         console.log('[useDogs] Using cached dogs data:', cachedDogs.length);
         setDogs(cachedDogs);
         setIsLoading(false);
@@ -57,8 +58,8 @@ export function useDogs() {
       const count = await fetchDogsCount(userId);
       setTotalDogs(count);
       
-      // Then fetch actual dog data
-      const fetchedDogs = await fetchDogsService(userId);
+      // Then fetch actual dog data - Fixed line 100 by passing both arguments
+      const fetchedDogs = await fetchDogsService(userId, skipCache);
       setDogs(fetchedDogs);
       
       // Update the React Query cache
@@ -87,7 +88,7 @@ export function useDogs() {
       setIsLoading(false);
       return [];
     }
-  }, [dogs, hasAttemptedLoad]);
+  }, [dogs, hasAttemptedLoad, user, queryClient]);
 
   // Add a dog
   const addDog = async (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>): Promise<Dog | undefined> => {
@@ -214,7 +215,7 @@ export function useDogs() {
     error,
     refreshDogs: async () => {
       if (!user?.id) return;
-      await fetchDogs(user.id, true);
+      await fetchDogs(true);
     },
     totalDogs,
     fetchDogs,

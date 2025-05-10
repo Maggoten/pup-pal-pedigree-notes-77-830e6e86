@@ -12,4 +12,5 @@ export interface DogsContextType {
   addDog: (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>) => Promise<Dog | undefined>;
   updateDog: (id: string, updates: Partial<Dog>) => Promise<Dog | null>;
   removeDog: (id: string) => Promise<boolean>;
+  totalDogs: number;
 }

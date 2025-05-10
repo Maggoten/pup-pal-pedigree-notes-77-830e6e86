@@ -1,64 +1,53 @@
 
-import { BUCKET_NAME, STORAGE_ERRORS, SUPPORTED_IMAGE_EXTENSIONS } from '../config';
-
-const MAX_FILE_SIZE_MB = 10; // 10MB maximum file size
+import { StorageError } from '@supabase/storage-js';
+import { STORAGE_ERRORS } from '../config';
 
 /**
- * Validates if a storage object path exists and is accessible
+ * Validates a storage object exists
  */
-export const validateStorageObject = async (path: string): Promise<boolean> => {
-  if (!path || typeof path !== 'string') {
-    return false;
-  }
-  
-  // Simple path validation
-  return path.trim().length > 0 && !path.includes('..') && !path.startsWith('/');
+export const validateStorageObject = async (bucket: string, path: string): Promise<boolean> => {
+  // Simple validation - in a real implementation, would check against storage
+  return !!bucket && !!path;
 };
 
 /**
  * Validates file size against maximum allowed size
- * @param size File size in bytes
- * @param maxSizeMB Optional custom maximum size in MB
  */
-export const validateFileSize = (size: number, maxSizeMB: number = MAX_FILE_SIZE_MB): boolean => {
-  const maxSizeBytes = maxSizeMB * 1024 * 1024;
-  return size > 0 && size <= maxSizeBytes;
-};
-
-/**
- * Validates file type based on extension or MIME type
- * @param file File to validate
- * @param allowedTypes Optional array of allowed MIME types (defaults to images)
- */
-export const validateFileType = (
-  file: File | { name: string; type: string },
-  allowedTypes: string[] = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
-): boolean => {
-  if (!file) return false;
-
-  // Check by MIME type
-  if (file.type && allowedTypes.some(type => file.type.toLowerCase() === type.toLowerCase())) {
-    return true;
+export const validateFileSize = (fileSize: number, maxSize: number = 10 * 1024 * 1024): boolean => {
+  if (fileSize > maxSize) {
+    console.warn(`File size (${(fileSize/1024/1024).toFixed(1)}MB) exceeds the maximum allowed size of ${(maxSize/1024/1024).toFixed(1)}MB`);
+    return false;
   }
-
-  // Check by extension as fallback
-  const extension = file.name.split('.').pop()?.toLowerCase() || '';
-  return SUPPORTED_IMAGE_EXTENSIONS.includes(extension);
+  return true;
 };
 
 /**
- * Checks if a URL is a valid public storage URL
+ * Validates file type against allowed MIME types
+ */
+export const validateFileType = (fileType: string, allowedTypes: string[]): boolean => {
+  const isAllowed = allowedTypes.some(type => 
+    fileType === type || 
+    fileType.startsWith(`${type.split('/')[0]}/`) // Allow subtypes
+  );
+  
+  if (!isAllowed) {
+    console.warn(`File type ${fileType} is not in the allowed types list`);
+  }
+  
+  return isAllowed;
+};
+
+/**
+ * Validates if a URL is a valid public URL from our storage
  */
 export const isValidPublicUrl = (url: string): boolean => {
-  if (!url || typeof url !== 'string') return false;
-  
-  // Basic URL validation
+  if (!url) return false;
+  // Basic validation - checks if URL is from our storage domain
+  // In a real implementation, would be more specific to your Supabase project
   try {
-    new URL(url);
+    const urlObj = new URL(url);
+    return urlObj.hostname.includes('supabase') || urlObj.hostname.includes('supabasestorage');
   } catch (e) {
     return false;
   }
-  
-  // Check if it's a storage URL (contains bucket name)
-  return url.includes(BUCKET_NAME) && url.startsWith('http');
 };
