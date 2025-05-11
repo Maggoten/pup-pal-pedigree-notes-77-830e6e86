@@ -1,51 +1,34 @@
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import MyDogs from "./pages/MyDogs";
-import PlannedLitters from "./pages/PlannedLitters";
-import PregnancyDetails from "./pages/PregnancyDetails";
-import MyLitters from "./pages/MyLitters";
-import Login from "./pages/Login";
-import AuthGuard from "./components/AuthGuard";
-import { AuthProvider } from "./providers/AuthProvider";
-import { DogsProvider } from "./context/DogsContext";
-import ErrorBoundary from "./components/ErrorBoundary";
-import Pregnancy from "./pages/Pregnancy";
-import MobileDebugPanel from "./components/diagnostics/MobileDebugPanel";
-import { queryClient } from "./utils/reactQueryConfig";
+import { useEffect, useState, useContext } from "react";
+import { AuthContext } from "./providers/AuthProvider";
+import { getFirstActivePregnancy } from "./services/PregnancyService";
+// ... (alla andra imports som i din nuvarande App.tsx)
 
-const App = () => {
+const AppContent = () => {
+  const { user } = useContext(AuthContext);
+  const [firstPregnancyId, setFirstPregnancyId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPregnancy = async () => {
+      if (!user) return;
+      try {
+        const id = await getFirstActivePregnancy();
+        setFirstPregnancyId(id);
+      } catch (err) {
+        console.error("Failed to fetch active pregnancy:", err);
+      }
+    };
+
+    fetchPregnancy();
+  }, [user]);
+
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <BrowserRouter>
-              <AuthGuard>
-                <DogsProvider>
-                  <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/" element={<Index />} />
-                    <Route path="/my-dogs" element={<MyDogs />} />
-                    <Route path="/planned-litters" element={<PlannedLitters />} />
-                    <Route path="/pregnancy" element={<Pregnancy />} />
-                    <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
-                    <Route path="/my-litters" element={<MyLitters />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                  <MobileDebugPanel />
-                </DogsProvider>
-              </AuthGuard>
-            </BrowserRouter>
-          </TooltipProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <Routes>
+      <Route path="/pregnancy" element={
+        firstPregnancyId
+          ? <Navigate to={`/pregnancy/${firstPregnancyId}`} replace />
+          : <Pregnancy />
+      } />
+      {/* alla andra routes */}
+    </Routes>
   );
 };
-
-export default App;
