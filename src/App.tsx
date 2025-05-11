@@ -4,6 +4,9 @@ import { useAuth } from './hooks/useAuth';
 import { getFirstActivePregnancy } from "./services/PregnancyService";
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { DogsProvider } from './context/DogsContext';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './utils/reactQueryConfig';
+import { AuthProvider } from './providers/AuthProvider';
 import Index from './pages/Index';
 import MyDogs from './pages/MyDogs';
 import PlannedLitters from './pages/PlannedLitters';
@@ -55,9 +58,13 @@ const AppContent = () => {
 // Export a default component
 const App = () => {
   return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 };
 
