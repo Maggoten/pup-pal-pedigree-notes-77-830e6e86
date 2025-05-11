@@ -10,12 +10,16 @@ import { fetchWithRetry, isMobileDevice } from '@/utils/fetchUtils';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { verifySession, refreshSession, clearSessionState } from '@/utils/auth/sessionManager';
 import { handleAuthStateChange, resetQueryClient } from '@/utils/reactQueryConfig';
+import { useSessionManager } from '@/hooks/useSessionManager';
+import { handleLogoutState } from '@/utils/auth/logoutManager';
+import { mapUserProfile } from '@/utils/auth/sessionUtils';
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+  // Core auth state
   const [user, setUser] = useState<User | null>(null);
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -23,16 +27,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
-  // Track focus & visibility state
-  const [isActive, setIsActive] = useState(true);
-  const lastActiveTime = useRef(Date.now());
-  const sessionCheckInterval = useRef<NodeJS.Timeout | null>(null);
+  // Get session management functions
+  const {
+    isActive,
+    setIsActive,
+    lastActiveTime,
+    sessionCheckInterval,
+    isSessionExpiredOrNearExpiry,
+    clearSessionIntervals
+  } = useSessionManager(session, isAuthReady);
   
   const { login, register, logout: baseLogout, getUserProfile } = useAuthActions();
 
   /**
    * Fetches user profile and maps it to our app user shape
-   * Handles missing profile data with sensible defaults
    */
   const fetchAndMapUserProfile = async (
     userId: string, 
@@ -43,43 +51,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       console.log(`[Auth Debug] Fetching profile for user: ${userId}`);
       const profile = await getUserProfile(userId);
-      
-      if (profile) {
-        return {
-          id: userId,
-          email: userEmail || '',
-          firstName: profile.first_name,
-          lastName: profile.last_name,
-          address: profile.address
-        };
-      } else {
-        // Fallback user when profile fetch returns no data
-        console.log(`[Auth Debug] Using fallback user data (no profile found)`);
-        return {
-          id: userId,
-          email: userEmail || '',
-          firstName: '',
-          lastName: '',
-          address: ''
-        };
-      }
+      return mapUserProfile(profile, userId, userEmail);
     } catch (error) {
       console.error('[Auth Debug] Error fetching profile:', error);
-      
-      // Fallback user on error
-      return {
-        id: userId,
-        email: userEmail || '',
-        firstName: '',
-        lastName: '',
-        address: ''
-      };
+      return mapUserProfile(null, userId, userEmail);
     }
   };
 
   /**
    * Shared helper function to process authentication changes
-   * Handles all session state updates and user profile fetching
    */
   const processAuthChange = useCallback(async (
     event: string,
@@ -145,35 +125,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [fetchAndMapUserProfile]);
   
-  // Helper to check if a session is expired or near expiration
-  const isSessionExpiredOrNearExpiry = useCallback((currentSession: Session | null, options?: { ignoreAuthReady?: boolean }): boolean => {
-    // Do not perform expiry checks until auth is ready, unless explicitly overridden
-    if (!options?.ignoreAuthReady && !isAuthReady) {
-      console.log('[Auth Debug] Skipping expiry check as auth is not ready yet');
-      return false;
-    }
-    
-    if (!currentSession || !currentSession.expires_at) return true;
-    
-    // Convert expires_at to milliseconds
-    const expiryTime = currentSession.expires_at * 1000;
-    const now = Date.now();
-    
-    // Check if expired or within 5 minutes of expiry
-    const fiveMinutesMs = 5 * 60 * 1000;
-    const isExpiring = now >= expiryTime - fiveMinutesMs;
-    
-    if (isExpiring) {
-      console.log('[Auth Debug] Session is expired or near expiry', {
-        now: new Date(now).toISOString(),
-        expiry: new Date(expiryTime).toISOString(),
-        timeLeft: (expiryTime - now) / 1000 / 60 + ' minutes'
-      });
-    }
-    
-    return isExpiring;
-  }, [isAuthReady]);
-
   // Log device info immediately
   useEffect(() => {
     const deviceType = isMobileDevice() ? 'Mobile' : 'Desktop';
@@ -236,7 +187,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       window.removeEventListener('focus', handleVisibilityChange);
       window.removeEventListener('blur', () => {});
     };
-  }, [refreshSession, isAuthReady, session, supabaseUser]);
+  }, [refreshSession, isAuthReady, session, supabaseUser, setIsActive, lastActiveTime]);
   
   // Periodically check session when app is active
   useEffect(() => {
@@ -269,7 +220,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         sessionCheckInterval.current = null;
       }
     };
-  }, [isActive, session, refreshSession, isSessionExpiredOrNearExpiry, isAuthReady]);
+  }, [isActive, session, refreshSession, isSessionExpiredOrNearExpiry, isAuthReady, sessionCheckInterval]);
 
   // Set up auth state listener and check for existing session
   useEffect(() => {
@@ -357,63 +308,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   
   /**
    * Enhanced logout function that properly resets all application state
-   * to ensure consistent UI behavior after logout
    */
   const wrappedLogout = useCallback(async () => {
-    console.log('[Auth Debug] Enhanced logout starting - clearing all auth state');
-    
-    // Clear query cache before logout
-    resetQueryClient();
-    
-    try {
-      // First, clear any active session check intervals
-      if (sessionCheckInterval.current) {
-        clearInterval(sessionCheckInterval.current);
-        sessionCheckInterval.current = null;
-      }
-      
-      // Call the base logout function from useAuthActions
-      await baseLogout();
-      
-      // Clear session state in the central manager
-      clearSessionState();
-      
-      // Force reset all auth-related React state immediately
-      // This ensures the UI is updated right away
+    // Create a state reset function that resets all auth state
+    const resetAuthState = () => {
       setUser(null);
       setSupabaseUser(null);
       setSession(null);
       setIsLoggedIn(false);
       setIsLoading(false);
       setIsAuthReady(true);
-      
-      // Explicitly trigger the auth state change handler
-      handleAuthStateChange('SIGNED_OUT');
-      
-      console.log('[Auth Debug] Enhanced logout complete - all auth state cleared');
-      
-      toast({
-        title: 'Logout successful',
-        description: 'You have been logged out successfully.',
-      });
-      
-    } catch (error) {
-      console.error('[Auth Debug] Error during enhanced logout:', error);
-      
-      // Even if the logout fails at the API level, reset UI state
-      // to prevent user confusion
-      setUser(null);
-      setSupabaseUser(null);
-      setSession(null);
-      setIsLoggedIn(false);
-      
-      toast({
-        title: 'Logout problem',
-        description: 'There was an issue during logout. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  }, [baseLogout]);
+    };
+    
+    // Use the central logout manager
+    await handleLogoutState(baseLogout, resetAuthState, {
+      clearIntervals: clearSessionIntervals
+    });
+  }, [baseLogout, clearSessionIntervals]);
   
   return (
     <AuthContext.Provider

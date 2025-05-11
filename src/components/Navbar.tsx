@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar, Heart } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -15,6 +15,7 @@ import SettingsDialog from '@/components/settings/SettingsDialog';
 import { setManualLogout } from './AuthGuard';
 
 export const Navbar: React.FC = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -32,8 +33,12 @@ export const Navbar: React.FC = () => {
     try {
       // Set the manual logout flag to true before logging out
       setManualLogout(true);
+      
+      // Call the enhanced logout function from AuthContext
       await logout();
-      // The logout function now handles the redirect directly
+      
+      // Navigate to login page after successful logout
+      navigate('/login');
     } catch (error) {
       console.error("Error during logout:", error);
       // Ensure flag is reset even on error
