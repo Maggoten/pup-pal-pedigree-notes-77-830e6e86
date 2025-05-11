@@ -105,7 +105,7 @@ export const useFileUpload = (
   const uploadToStorage = async (file: File, userId: string): Promise<{ publicUrl?: string; error?: Error }> => {
     // Get device/platform information for error handling
     const platform = getPlatformInfo();
-    console.log(`Uploading from: ${platform.mobile ? 'Mobile' : 'Desktop'}, Browser: ${platform.browser}`);
+    console.log(`Uploading from: ${platform.mobile ? 'Mobile' : 'Desktop'}, Browser: ${platform.safari ? 'Safari' : 'Other'}`);
     
     try {
       // Create a unique file path
