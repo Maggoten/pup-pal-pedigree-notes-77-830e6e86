@@ -1,261 +1,189 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
-import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/use-toast';
-import { Puppy, PuppyNote } from '@/types/breeding';
-import PuppyDetailsForm from './puppies/PuppyDetailsForm';
-import PuppyImageUploader from './puppies/PuppyImageUploader';
-import { Trash2, MessageSquarePlus } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { format } from 'date-fns';
-import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+import { CalendarIcon } from "lucide-react"
+import { toast } from '@/hooks/use-toast';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updatePuppy } from '@/services/PuppyService';
+import { Puppy } from '@/types/puppies';
+import { useAuth } from '@/hooks/useAuth';
+import PuppyImageUploader, { PuppyImageUploaderProps } from './puppies/PuppyImageUploader';
 
 interface PuppyDetailsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   puppy: Puppy;
-  onClose?: () => void;
-  onUpdatePuppy: (updatedPuppy: Puppy) => void;
-  onDeletePuppy: (puppyId: string) => void;
 }
 
-const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({ 
-  puppy, 
-  onClose, 
-  onUpdatePuppy,
-  onDeletePuppy
-}) => {
-  const [imageUrl, setImageUrl] = useState<string>(puppy.imageUrl || '');
-  const [displayName, setDisplayName] = useState<string>(puppy.name);
-  const [activeTab, setActiveTab] = useState<string>('details');
-  const [newNote, setNewNote] = useState<string>('');
-  
-  // Update display name when puppy prop changes
+const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({ open, onOpenChange, puppy }) => {
+  const [name, setName] = useState(puppy.name || '');
+  const [birthDate, setBirthDate] = useState<Date | undefined>(puppy.birth_date ? new Date(puppy.birth_date) : undefined);
+  const [gender, setGender] = useState(puppy.gender || '');
+  const [imageUrl, setImageUrl] = useState(puppy.imageUrl || '');
+  const { user } = useAuth();
+
+  const queryClient = useQueryClient();
+
   useEffect(() => {
-    setDisplayName(puppy.name);
-  }, [puppy.name]);
-  
-  const handleImageChange = useCallback((newImageUrl: string) => {
-    setImageUrl(newImageUrl);
-  }, []);
-  
-  const handleSubmit = useCallback((updatedPuppyData: Puppy) => {
-    // Clone the puppy data to avoid reference issues
-    const updatedPuppy = {
-      ...updatedPuppyData,
-      imageUrl: imageUrl
-    };
-    
-    onUpdatePuppy(updatedPuppy);
-    if (onClose) onClose();
-  }, [imageUrl, onUpdatePuppy, onClose]);
+    setName(puppy.name || '');
+    setBirthDate(puppy.birth_date ? new Date(puppy.birth_date) : undefined);
+    setGender(puppy.gender || '');
+    setImageUrl(puppy.imageUrl || '');
+  }, [puppy]);
 
-  const handleDelete = useCallback(() => {
-    if (confirm(`Do you want to delete "${displayName}"?`)) {
-      onDeletePuppy(puppy.id);
-      if (onClose) onClose();
+  const handleFieldChange = (field: string, value: any) => {
+    switch (field) {
+      case 'name':
+        setName(value);
+        break;
+      case 'birth_date':
+        setBirthDate(value);
+        break;
+      case 'gender':
+        setGender(value);
+        break;
+      case 'imageUrl':
+        setImageUrl(value);
+        break;
+      default:
+        break;
     }
-  }, [puppy.id, displayName, onDeletePuppy, onClose]);
+  };
 
-  const handleAddNote = useCallback(() => {
-    if (!newNote.trim()) return;
+  const { mutate: updatePuppyMutation, isLoading: isUpdating } = useMutation(
+    async (updatedPuppyData: Partial<Puppy>) => {
+      if (!puppy.id) {
+        throw new Error("Puppy ID is missing");
+      }
+      return updatePuppy(puppy.id, updatedPuppyData);
+    },
+    {
+      onSuccess: () => {
+        toast({
+          title: "Success",
+          description: "Puppy details updated successfully.",
+        });
+        queryClient.invalidateQueries({ queryKey: ['puppies', puppy.litter_id] });
+        onOpenChange(false);
+      },
+      onError: (error: any) => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: `Failed to update puppy details: ${error.message || 'Unknown error'}`,
+        });
+      },
+    }
+  );
 
-    const now = new Date();
-    const newNoteObj: PuppyNote = {
-      date: now.toISOString(),
-      content: newNote.trim()
+  const handleSaveChanges = async () => {
+    const updatedPuppyData: Partial<Puppy> = {
+      name,
+      birth_date: birthDate ? birthDate.toISOString() : null,
+      gender,
+      imageUrl,
+      updated_by: user?.id
     };
 
-    const updatedPuppy = {
-      ...puppy,
-      notes: [...(puppy.notes || []), newNoteObj]
-    };
-
-    onUpdatePuppy(updatedPuppy);
-    setNewNote('');
-    if (onClose) onClose(); // Close dialog after adding a note
-  }, [newNote, puppy, onUpdatePuppy, onClose]);
-
-  // Add a handler for the close button
-  const handleClose = useCallback(() => {
-    if (onClose) onClose();
-  }, [onClose]);
+    updatePuppyMutation(updatedPuppyData);
+  };
 
   return (
-    <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto bg-white border-2 border-warmbeige-400" onInteractOutside={handleClose} onEscapeKeyDown={handleClose}>
-      <DialogHeader>
-        <DialogTitle className="text-xl font-semibold text-warmgreen-800">Puppy Profile</DialogTitle>
-        <DialogDescription className="text-darkgray-700">
-          View and manage information for {displayName}.
-        </DialogDescription>
-      </DialogHeader>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Edit Puppy Details</AlertDialogTitle>
+          <AlertDialogDescription>
+            Make changes to your puppy here. Click save when you're done.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">
+              Name
+            </Label>
+            <Input id="name" value={name} onChange={(e) => handleFieldChange('name', e.target.value)} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="birthdate" className="text-right">
+              Birthdate
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "col-span-3 pl-3 text-left font-normal",
+                    !birthDate && "text-muted-foreground"
+                  )}
+                >
+                  {birthDate ? format(birthDate, "PPP") : (
+                    <span>Pick a date</span>
+                  )}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={birthDate}
+                  onSelect={(date) => handleFieldChange('birth_date', date)}
+                  disabled={(date) =>
+                    date > new Date()
+                  }
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="gender" className="text-right">
+              Gender
+            </Label>
+            <Input id="gender" value={gender} onChange={(e) => handleFieldChange('gender', e.target.value)} className="col-span-3" />
+          </div>
 
-      <div className="space-y-4">
-        {/* Profile Image Section */}
-        <div className="flex justify-center mb-4">
-          <div className="w-40 h-40">
-            <PuppyImageUploader 
-              puppyName={displayName}
-              currentImage={imageUrl}
-              onImageChange={handleImageChange}
-              large={true}
-            />
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="image" className="text-right">
+              Image
+            </Label>
+            <div className="col-span-3">
+              <PuppyImageUploader
+                puppyId={puppy.id}
+                litterId={puppy.litter_id}
+                puppyName={puppy.name}
+                currentImage={puppy.imageUrl}
+                onImageChange={(newUrl) => handleFieldChange('imageUrl', newUrl)}
+                large={true}
+              />
+            </div>
           </div>
         </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-3 mb-4 bg-warmbeige-200 p-1 rounded-lg">
-            <TabsTrigger 
-              value="details" 
-              className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md rounded-md"
-            >
-              Details
-            </TabsTrigger>
-            <TabsTrigger 
-              value="growth" 
-              className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md rounded-md"
-            >
-              Growth
-            </TabsTrigger>
-            <TabsTrigger 
-              value="notes" 
-              className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md rounded-md"
-            >
-              Notes
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="details" className="space-y-4">
-            <PuppyDetailsForm 
-              puppy={{...puppy, imageUrl}} 
-              onSubmit={handleSubmit} 
-            />
-          </TabsContent>
-          
-          <TabsContent value="growth" className="space-y-4">
-            <div className="space-y-4">
-              <h3 className="font-medium text-warmgreen-800">Weight Log</h3>
-              {puppy.weightLog && puppy.weightLog.length > 0 ? (
-                <div className="border rounded-md overflow-hidden bg-white shadow">
-                  <table className="w-full">
-                    <thead className="bg-warmbeige-200">
-                      <tr>
-                        <th className="py-2 px-4 text-left text-warmgreen-800">Date</th>
-                        <th className="py-2 px-4 text-left text-warmgreen-800">Weight (kg)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[...puppy.weightLog]
-                        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                        .map((log, idx) => (
-                          <tr key={idx} className="border-t">
-                            <td className="py-2 px-4">{format(new Date(log.date), 'MMM d, yyyy')}</td>
-                            <td className="py-2 px-4">{log.weight} kg</td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="text-muted-foreground bg-warmbeige-50 p-3 rounded-md">No weight records yet.</p>
-              )}
-
-              <h3 className="font-medium text-warmgreen-800">Height Log</h3>
-              {puppy.heightLog && puppy.heightLog.length > 0 ? (
-                <div className="border rounded-md overflow-hidden bg-white shadow">
-                  <table className="w-full">
-                    <thead className="bg-warmbeige-200">
-                      <tr>
-                        <th className="py-2 px-4 text-left text-warmgreen-800">Date</th>
-                        <th className="py-2 px-4 text-left text-warmgreen-800">Height (cm)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[...puppy.heightLog]
-                        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                        .map((log, idx) => (
-                          <tr key={idx} className="border-t">
-                            <td className="py-2 px-4">{format(new Date(log.date), 'MMM d, yyyy')}</td>
-                            <td className="py-2 px-4">{log.height} cm</td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="text-muted-foreground bg-warmbeige-50 p-3 rounded-md">No height records yet.</p>
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="notes" className="space-y-4">
-            <div className="space-y-4">
-              <h3 className="font-medium text-warmgreen-800">Notes</h3>
-              
-              <div className="flex space-x-2">
-                <Textarea 
-                  placeholder="Add a new note about this puppy..."
-                  value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
-                  className="flex-1 border-2 border-warmbeige-300 focus:border-warmgreen-600"
-                />
-                <Button 
-                  type="button" 
-                  onClick={handleAddNote}
-                  className="self-end bg-warmgreen-600 hover:bg-warmgreen-700"
-                >
-                  <MessageSquarePlus className="h-4 w-4 mr-2" />
-                  Add
-                </Button>
-              </div>
-              
-              {puppy.notes && puppy.notes.length > 0 ? (
-                <div className="space-y-3 mt-4">
-                  {[...puppy.notes]
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .map((note, idx) => (
-                      <div key={idx} className="bg-white rounded-lg border-2 border-warmbeige-300 p-3 shadow-sm">
-                        <div className="text-sm text-muted-foreground mb-1">
-                          {format(new Date(note.date), 'MMM d, yyyy - h:mm a')}
-                        </div>
-                        <p>{note.content}</p>
-                      </div>
-                    ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground bg-warmbeige-50 p-3 rounded-md mt-2">No notes yet.</p>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      <DialogFooter className="mt-6 flex items-center justify-between">
-        <Button 
-          type="button" 
-          variant="destructive" 
-          onClick={handleDelete}
-          className="flex items-center"
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Delete Puppy
-        </Button>
-        <div>
-          {activeTab === 'details' && (
-            <DialogClose asChild>
-              <Button 
-                type="submit" 
-                form="puppy-form" 
-                className="bg-warmgreen-600 hover:bg-warmgreen-700"
-              >
-                Save Changes
-              </Button>
-            </DialogClose>
-          )}
-        </div>
-      </DialogFooter>
-    </DialogContent>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleSaveChanges} disabled={isUpdating}>
+            {isUpdating ? "Saving..." : "Save Changes"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 
-export default React.memo(PuppyDetailsDialog);
+export default PuppyDetailsDialog;

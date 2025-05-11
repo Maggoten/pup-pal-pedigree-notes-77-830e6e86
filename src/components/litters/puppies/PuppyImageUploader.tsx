@@ -1,308 +1,147 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { Camera, X, AlertTriangle, Loader2 } from 'lucide-react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
-import { v4 as uuidv4 } from 'uuid';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { processImageForUpload } from '@/utils/storage';
-import { toast } from '@/components/ui/use-toast';
-import { fetchWithRetry } from '@/utils/fetchUtils';
-import { BUCKET_NAME } from '@/utils/storage/config';
-import { getPlatformInfo } from '@/utils/storage/mobileUpload';
-import { useUpdatePuppyMutation } from '@/hooks/puppies/queries/useUpdatePuppyMutation';
+import { ImageUpload, Trash } from 'lucide-react';
+import { useImageUpload } from '@/hooks/image-upload';
+import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from '@/hooks/use-toast';
+import { Puppy } from '@/types/puppies';
 
-interface PuppyImageUploaderProps {
-  puppyName: string;
+export interface PuppyImageUploaderProps {
   puppyId: string;
   litterId: string;
+  puppyName: string;
   currentImage?: string;
-  onImageChange: (url: string) => void;
+  onImageChange: (newImageUrl: string) => void;
   large?: boolean;
 }
 
 const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
-  puppyName,
   puppyId,
   litterId,
+  puppyName,
   currentImage,
   onImageChange,
   large = false
 }) => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>(currentImage || '');
-  const [error, setError] = useState<string>('');
-  const { safari: isSafariBrowser, device: platformDevice } = getPlatformInfo();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   
-  // Get the update mutation to save images directly to database
-  const updatePuppyMutation = useUpdatePuppyMutation(litterId);
-
-  // Update local state when prop changes
-  useEffect(() => {
-    setImageUrl(currentImage || '');
-  }, [currentImage]);
-
-  const saveImageToDatabase = useCallback(async (url: string) => {
-    if (!puppyId || !litterId) {
-      console.error('Cannot save image: missing puppy ID or litter ID');
-      return;
-    }
+  // Save the image URL to the database after upload
+  const saveImageToDatabase = async (url: string) => {
+    if (!puppyId || !user?.id) return;
     
     try {
-      await updatePuppyMutation.mutateAsync({
-        id: puppyId,
-        image_url: url
+      // Update the puppy record with the new image URL
+      const response = await fetch(`/api/puppies/${puppyId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageUrl: url, // Use imageUrl instead of image_url
+          updated_by: user.id
+        })
       });
       
-      console.log('Image URL saved to database for puppy:', puppyId);
+      if (!response.ok) {
+        throw new Error('Failed to update puppy image');
+      }
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['puppies', litterId] });
+      
+      return;
     } catch (error) {
-      console.error('Failed to save image URL to database:', error);
+      console.error('Failed to save puppy image:', error);
       throw error;
     }
-  }, [puppyId, litterId, updatePuppyMutation]);
-
-  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) {
-      return;
-    }
-
-    const file = e.target.files[0];
-    const platformInfo = getPlatformInfo();
-    
-    console.log('PuppyImageUploader: File selected for upload', {
-      name: file.name,
-      size: `${(file.size / 1024).toFixed(1)}KB`,
-      type: file.type || 'unknown',
-      platform: platformInfo.device
-    });
-    
-    // More forgiving size check (+5% for Safari)
-    const effectiveMaxSize = platformInfo.safari ? 5.25 * 1024 * 1024 : 5 * 1024 * 1024;
-    if (file.size > effectiveMaxSize) {
-      console.log('PuppyImageUploader: File too large', {
-        size: file.size,
-        limit: effectiveMaxSize
-      });
-      setError('File is too large. Maximum size is 5MB.');
-      return;
-    }
-
-    setIsUploading(true);
-    setError('');
-
-    try {
-      // First check session
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData.session) {
-        console.log('PuppyImageUploader: No session found, attempting to refresh');
-        // Try to refresh session for Safari
-        if (platformInfo.safari) {
-          console.log('Safari detected, attempting to refresh auth session');
-          await supabase.auth.refreshSession();
-          
-          const refreshedSession = await supabase.auth.getSession();
-          console.log('Session refresh result:', {
-            success: !!refreshedSession.data.session,
-            error: refreshedSession.error
-          });
-        }
-      }
-
-      // Process image (compress) before uploading
-      const processedFile = await processImageForUpload(file);
-      console.log(`PuppyImageUploader: Original file: ${file.size} bytes, processed: ${processedFile.size} bytes`);
-
-      // Create a unique filename with uuid
-      const fileExt = file.name.split('.').pop() || 'jpg';
-      const fileName = `puppies/${uuidv4()}.${fileExt}`;
-
-      console.log(`PuppyImageUploader: Uploading to ${BUCKET_NAME}/${fileName}`, {
-        fileSize: processedFile.size,
-        platform: platformInfo.device
-      });
-
-      // Upload with retry logic for better Safari support
-      const uploadWithRetry = async () => {
-        return fetchWithRetry(
-          () => supabase.storage
-            .from(BUCKET_NAME) // Use the constant from config
-            .upload(fileName, processedFile, {
-              cacheControl: '3600',
-              upsert: true
-            }),
-          { 
-            maxRetries: platformInfo.safari ? 3 : 2,
-            initialDelay: 2000,
-            useBackoff: true
-          }
-        );
-      };
-
-      const uploadResult = await uploadWithRetry();
-      console.log('PuppyImageUploader: Upload result:', {
-        error: uploadResult.error || 'none',
-        data: uploadResult.data ? 'success' : 'no data',
-        statusCode: uploadResult.error ? (uploadResult.error as any).statusCode || 'unknown' : 'none'
-      });
-
-      if (uploadResult.error) {
-        console.error('PuppyImageUploader: Upload error:', uploadResult.error);
-        throw uploadResult.error;
-      }
-
-      // Get the public URL for the uploaded file
-      const { data: publicUrl } = supabase.storage
-        .from(BUCKET_NAME) // Use the constant from config
-        .getPublicUrl(fileName);
-
-      console.log('PuppyImageUploader: Got public URL:', {
-        url: publicUrl?.publicUrl || 'undefined',
-        fileName
-      });
-
-      if (publicUrl) {
-        // Add cache busting for Safari
-        let finalUrl = publicUrl.publicUrl;
-        if (platformInfo.safari) {
-          const separator = finalUrl.includes('?') ? '&' : '?';
-          finalUrl += `${separator}_t=${Date.now()}`;
-        }
-        
-        console.log('PuppyImageUploader: Setting image URL:', finalUrl);
-        
-        // Update local state
-        setImageUrl(finalUrl);
-        
-        // Update UI via callback
-        onImageChange(finalUrl);
-        
-        // Save to database
-        await saveImageToDatabase(finalUrl);
-        
-        toast({
-          title: "Success",
-          description: "Image uploaded successfully"
-        });
-      } else {
-        throw new Error('Failed to get public URL');
-      }
-    } catch (error) {
-      console.error('PuppyImageUploader: Error uploading image:', error);
-      setError('Error uploading image. Please try again.');
-
-      // Safari-specific error message
-      if (platformInfo.safari) {
-        setError('Safari upload issue. Try a smaller image or use Chrome.');
-      }
-      
-      toast({
-        title: "Upload Failed",
-        description: "There was a problem uploading your image",
-        variant: "destructive"
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  }, [onImageChange, saveImageToDatabase]);
-
-  const handleRemoveImage = useCallback(async () => {
-    // If we have an image URL, try to remove it from database
-    if (imageUrl) {
-      try {
-        // Clear the image in the database
-        await saveImageToDatabase('');
-        
-        // Clear the UI
-        setImageUrl('');
-        onImageChange('');
-      } catch (error) {
-        console.error('Error removing image from database:', error);
-        toast({
-          title: "Error",
-          description: "Failed to remove image. Please try again.",
-          variant: "destructive"
-        });
-      }
-    } else {
-      setImageUrl('');
-      onImageChange('');
-    }
-  }, [imageUrl, onImageChange, saveImageToDatabase]);
-
-  const initials = puppyName
-    ? puppyName.substring(0, 2).toUpperCase()
-    : 'PU';
-
-  const avatarSizeClass = large 
-    ? "w-40 h-40 text-3xl"
-    : "w-16 h-16 text-sm";
-    
-  const buttonSizeClass = large
-    ? "bottom-2 right-2"
-    : "bottom-0 right-0";
-
-  // Remove Safari help by returning null
-  const renderSafariHelp = () => {
-    return null;
   };
-
+  
+  const { uploadImage, removeImage, isUploading } = useImageUpload({
+    user_id: user?.id,
+    onImageChange,
+    onImageSaved: saveImageToDatabase
+  });
+  
+  const handleImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    try {
+      await uploadImage(file);
+      toast({
+        title: 'Image uploaded',
+        description: `Picture for ${puppyName} was successfully uploaded.`
+      });
+    } catch (error) {
+      toast({
+        title: 'Upload failed',
+        description: 'There was a problem uploading the image.',
+        variant: 'destructive'
+      });
+    }
+  };
+  
+  const handleRemoveImage = async () => {
+    if (!currentImage) return;
+    
+    try {
+      await removeImage();
+      await saveImageToDatabase(''); // Clear the image URL in the database
+      toast({
+        title: 'Image removed',
+        description: `Picture for ${puppyName} was successfully removed.`
+      });
+    } catch (error) {
+      toast({
+        title: 'Failed to remove image',
+        description: 'There was a problem removing the image.',
+        variant: 'destructive'
+      });
+    }
+  };
+  
   return (
-    <div className={`relative ${large ? 'mx-auto' : ''}`}>
-      <Avatar className={`${avatarSizeClass} bg-primary/10 text-primary`}>
-        {imageUrl ? (
-          <AvatarImage src={imageUrl} alt={puppyName} />
-        ) : (
-          <AvatarFallback className="bg-primary/10 text-primary">
-            {initials}
-          </AvatarFallback>
-        )}
-      </Avatar>
-
-      <div className={`absolute ${buttonSizeClass} flex gap-1`}>
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          className="h-8 w-8 rounded-full p-0 shadow-md"
-          onClick={() => document.getElementById(`puppy-image-upload-${puppyId}`)?.click()}
-          disabled={isUploading}
-        >
-          {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-          <span className="sr-only">Upload image</span>
-        </Button>
-
-        {imageUrl && (
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            className="h-8 w-8 rounded-full p-0 shadow-md"
-            onClick={handleRemoveImage}
-            disabled={isUploading}
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Remove image</span>
-          </Button>
-        )}
-      </div>
-
+    <div className={`relative ${large ? 'w-full' : 'w-24'} flex flex-col gap-2`}>
       <input
         type="file"
-        id={`puppy-image-upload-${puppyId}`}
-        onChange={handleFileChange}
-        accept="image/*"
+        ref={fileInputRef}
         className="hidden"
+        accept="image/*"
+        onChange={handleImageSelect}
       />
-
-      {error && (
-        <p className="text-destructive text-xs mt-1">{error}</p>
-      )}
-
-      {isUploading && (
-        <p className="text-muted-foreground text-xs mt-1">Uploading...</p>
-      )}
       
-      {renderSafariHelp()}
+      {currentImage ? (
+        <div className="relative">
+          <img
+            src={currentImage}
+            alt={`${puppyName} photo`}
+            className={`rounded-lg object-cover ${large ? 'w-full h-64' : 'w-24 h-24'}`}
+          />
+          
+          <Button
+            variant="destructive"
+            size="icon"
+            className="absolute top-1 right-1 h-6 w-6"
+            onClick={handleRemoveImage}
+          >
+            <Trash size={14} />
+          </Button>
+        </div>
+      ) : (
+        <Button
+          variant="outline"
+          className={`border-dashed border-2 ${large ? 'h-64 w-full' : 'h-24 w-24'} flex flex-col justify-center items-center gap-2`}
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+        >
+          <ImageUpload size={24} />
+          <span className="text-xs">{isUploading ? 'Uploading...' : 'Add Photo'}</span>
+        </Button>
+      )}
     </div>
   );
 };

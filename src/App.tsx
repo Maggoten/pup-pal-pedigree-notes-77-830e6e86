@@ -1,10 +1,16 @@
 
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from './hooks/useAuth';
 import { getFirstActivePregnancy } from "./services/PregnancyService";
-// ... (alla andra imports som i din nuvarande App.tsx)
-import { Routes, Route, Navigate } from "react-router-dom";
-import { Pregnancy } from "./pages/Pregnancy";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Index from './pages/Index';
+import MyDogs from './pages/MyDogs';
+import PlannedLitters from './pages/PlannedLitters';
+import Pregnancy from './pages/Pregnancy';
+import PregnancyDetails from './pages/PregnancyDetails';
+import MyLitters from './pages/MyLitters';
+import Login from './pages/Login';
+import NotFound from './pages/NotFound';
 
 const AppContent = () => {
   const { user } = useAuth();
@@ -26,19 +32,29 @@ const AppContent = () => {
 
   return (
     <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/dogs" element={<MyDogs />} />
+      <Route path="/planned-litters" element={<PlannedLitters />} />
       <Route path="/pregnancy" element={
         firstPregnancyId
           ? <Navigate to={`/pregnancy/${firstPregnancyId}`} replace />
           : <Pregnancy />
       } />
-      {/* alla andra routes */}
+      <Route path="/pregnancy/:pregnancyId" element={<PregnancyDetails />} />
+      <Route path="/litters" element={<MyLitters />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
 
-// Export a default component
+// Wrap the entire app with BrowserRouter
 const App = () => {
-  return <AppContent />;
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  );
 };
 
 export default App;
