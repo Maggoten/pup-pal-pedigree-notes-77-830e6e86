@@ -1,10 +1,13 @@
+
 import { useEffect, useState, useContext } from "react";
-import { AuthContext } from "./providers/AuthProvider";
+import { useAuth } from './hooks/useAuth';
 import { getFirstActivePregnancy } from "./services/PregnancyService";
 // ... (alla andra imports som i din nuvarande App.tsx)
+import { Routes, Route, Navigate } from "react-router-dom";
+import { Pregnancy } from "./pages/Pregnancy";
 
 const AppContent = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const [firstPregnancyId, setFirstPregnancyId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,3 +35,10 @@ const AppContent = () => {
     </Routes>
   );
 };
+
+// Export a default component
+const App = () => {
+  return <AppContent />;
+};
+
+export default App;

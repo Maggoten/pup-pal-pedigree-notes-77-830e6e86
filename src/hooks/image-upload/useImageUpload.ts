@@ -5,7 +5,11 @@ import { useImageRemoval } from './useImageRemoval';
 import { UseImageUploadProps } from './types';
 import { useImageSessionCheck } from './useImageSessionCheck';
 
-export const useImageUpload = ({ user_id, onImageChange, onImageSaved }: UseImageUploadProps) => {
+export const useImageUpload = ({ 
+  user_id, 
+  onImageChange, 
+  onImageSaved 
+}: UseImageUploadProps) => {
   // Get session validation
   const { isSessionValid } = useImageSessionCheck();
   

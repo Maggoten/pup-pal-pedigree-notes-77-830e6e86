@@ -11,3 +11,12 @@ export interface UploadResult {
   };
   error?: any;
 }
+
+export interface PuppyImageUploaderProps {
+  puppyId: string;
+  litterId: string;
+  puppyName: string;
+  currentImage?: string;
+  onImageChange: (newImageUrl: string) => void;
+  large?: boolean;
+}

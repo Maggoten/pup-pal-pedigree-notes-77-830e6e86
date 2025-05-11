@@ -49,6 +49,6 @@ export const useImageUploadState = (): [
 
   return [
     { isUploading, uploadRetryCount, lastError, isUploadActive },
-    { startUpload, completeUpload, setError, resetRetryCount, setUploadActive }
+    { startUpload, completeUpload, setError, resetRetryCount, setIsUploadActive }
   ];
 };

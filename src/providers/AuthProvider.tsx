@@ -344,3 +344,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     </AuthContext.Provider>
   );
 };
+
+// Add explicit export for AuthContext
+export { default as AuthContext } from '@/context/AuthContext';
