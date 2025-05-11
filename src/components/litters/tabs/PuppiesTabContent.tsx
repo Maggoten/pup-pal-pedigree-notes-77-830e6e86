@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
-import { Puppy } from '@/hooks/image-upload/types';
+import { Puppy } from '@/types/breeding';
 import PuppyList from '../PuppyList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';

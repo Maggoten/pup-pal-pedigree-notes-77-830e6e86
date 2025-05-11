@@ -13,7 +13,7 @@ type ImageUploadActions = {
   completeUpload: () => void;
   setError: (message: string) => void;
   resetRetryCount: () => void;
-  setUploadActive: (active: boolean) => void;
+  setIsUploadActive: (active: boolean) => void;
 };
 
 /**
@@ -49,6 +49,6 @@ export const useImageUploadState = (): [
 
   return [
     { isUploading, uploadRetryCount, lastError, isUploadActive },
-    { startUpload, completeUpload, setError, resetRetryCount, setUploadActive: setIsUploadActive }
+    { startUpload, completeUpload, setError, resetRetryCount, setIsUploadActive }
   ];
 };

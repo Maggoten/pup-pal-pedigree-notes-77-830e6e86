@@ -16,7 +16,7 @@ export const useImageUpload = ({
   // Get state management for upload process
   const [
     { isUploading, uploadRetryCount, lastError, isUploadActive },
-    { startUpload, completeUpload, setError, resetRetryCount, setUploadActive }
+    { startUpload, completeUpload, setError, resetRetryCount, setIsUploadActive }
   ] = useImageUploadState();
 
   // Get upload functionality

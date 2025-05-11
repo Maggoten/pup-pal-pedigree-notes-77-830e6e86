@@ -1,3 +1,4 @@
+
 export interface PlannedLitter {
   id: string;
   maleId: string;
@@ -32,11 +33,13 @@ export interface PuppyNote {
   content: string;
 }
 
+// Unified Puppy interface with consistent naming and optional fields
 export interface Puppy {
   id: string;
   name: string;
   gender: 'male' | 'female';
-  color: string;
+  litterId: string; // camelCase naming
+  color?: string; // optional as requested
   markings?: string;
   birthWeight?: number;
   currentWeight?: number;
@@ -51,8 +54,8 @@ export interface Puppy {
   breed?: string;
   imageUrl?: string;
   birthDateTime?: string;
-  weightLog: PuppyWeightRecord[];
-  heightLog: PuppyHeightRecord[];
+  weightLog: PuppyWeightRecord[]; // Provide defaults in components
+  heightLog: PuppyHeightRecord[]; // Provide defaults in components
   registered_name?: string;
   registration_number?: string;
   status?: 'Available' | 'Reserved' | 'Sold';

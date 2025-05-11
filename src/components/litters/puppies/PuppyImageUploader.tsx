@@ -10,6 +10,7 @@ import { fetchWithRetry } from '@/utils/fetchUtils';
 import { BUCKET_NAME } from '@/utils/storage/config';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { useUpdatePuppyMutation } from '@/hooks/puppies/queries/useUpdatePuppyMutation';
+import { PuppyImageUploaderProps } from '@/hooks/image-upload/types';
 
 interface PuppyImageUploaderProps {
   puppyName: string;
