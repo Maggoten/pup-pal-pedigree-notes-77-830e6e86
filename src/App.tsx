@@ -3,10 +3,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from './hooks/useAuth';
 import { getFirstActivePregnancy } from "./services/PregnancyService";
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { DogsProvider } from './context/DogsContext';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from './utils/reactQueryConfig';
-import { AuthProvider } from './providers/AuthProvider';
 import Index from './pages/Index';
 import MyDogs from './pages/MyDogs';
 import PlannedLitters from './pages/PlannedLitters';
@@ -35,36 +31,30 @@ const AppContent = () => {
   }, [user]);
 
   return (
-    <DogsProvider>
-      <Routes>
-        <Route path="/pregnancy" element={
-          firstPregnancyId
-            ? <Navigate to={`/pregnancy/${firstPregnancyId}`} replace />
-            : <Pregnancy />
-        } />
-        {/* all other routes */}
-        <Route path="/" element={<Index />} />
-        <Route path="/my-dogs" element={<MyDogs />} />
-        <Route path="/planned-litters" element={<PlannedLitters />} />
-        <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
-        <Route path="/my-litters" element={<MyLitters />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </DogsProvider>
+    <Routes>
+      <Route path="/pregnancy" element={
+        firstPregnancyId
+          ? <Navigate to={`/pregnancy/${firstPregnancyId}`} replace />
+          : <Pregnancy />
+      } />
+      {/* all other routes */}
+      <Route path="/" element={<Index />} />
+      <Route path="/my-dogs" element={<MyDogs />} />
+      <Route path="/planned-litters" element={<PlannedLitters />} />
+      <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
+      <Route path="/my-litters" element={<MyLitters />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };
 
 // Export a default component
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </AuthProvider>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 };
 
