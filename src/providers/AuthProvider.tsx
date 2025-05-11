@@ -1,3 +1,4 @@
+
 import { useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { User } from '@/types/auth';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
@@ -28,6 +29,53 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const sessionCheckInterval = useRef<NodeJS.Timeout | null>(null);
   
   const { login, register, logout, getUserProfile } = useAuthActions();
+
+  /**
+   * Fetches user profile and maps it to our app user shape
+   * Handles missing profile data with sensible defaults
+   */
+  const fetchAndMapUserProfile = async (
+    userId: string, 
+    userEmail?: string | null
+  ): Promise<User | null> => {
+    if (!userId) return null;
+    
+    try {
+      console.log(`[Auth Debug] Fetching profile for user: ${userId}`);
+      const profile = await getUserProfile(userId);
+      
+      if (profile) {
+        return {
+          id: userId,
+          email: userEmail || '',
+          firstName: profile.first_name,
+          lastName: profile.last_name,
+          address: profile.address
+        };
+      } else {
+        // Fallback user when profile fetch returns no data
+        console.log(`[Auth Debug] Using fallback user data (no profile found)`);
+        return {
+          id: userId,
+          email: userEmail || '',
+          firstName: '',
+          lastName: '',
+          address: ''
+        };
+      }
+    } catch (error) {
+      console.error('[Auth Debug] Error fetching profile:', error);
+      
+      // Fallback user on error
+      return {
+        id: userId,
+        email: userEmail || '',
+        firstName: '',
+        lastName: '',
+        address: ''
+      };
+    }
+  };
 
   // Log device info immediately
   useEffect(() => {
@@ -199,35 +247,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 try {
                   if (!isSubscribed) return;
                   
-                  console.log(`[Auth Debug] Fetching profile for user: ${currentSession.user.id}`);
-                  const profile = await getUserProfile(currentSession.user.id);
+                  const appUser = await fetchAndMapUserProfile(
+                    currentSession.user.id, 
+                    currentSession.user.email
+                  );
                   
-                  if (profile && isSubscribed) {
-                    setUser({
-                      id: currentSession.user.id,
-                      email: currentSession.user.email || '',
-                      firstName: profile.first_name,
-                      lastName: profile.last_name,
-                      address: profile.address
-                    });
+                  if (appUser && isSubscribed) {
+                    setUser(appUser);
                     console.log(`[Auth Debug] User profile loaded`);
                     
                     // Trigger React Query data prefetching on sign in
-                    if (event === 'SIGNED_IN') {
-                      handleAuthStateChange(event, currentSession.user.id);
-                    }
-                  } else if (isSubscribed) {
-                    // Fallback user
-                    setUser({
-                      id: currentSession.user.id,
-                      email: currentSession.user.email || '',
-                      firstName: '',
-                      lastName: '',
-                      address: ''
-                    });
-                    console.log(`[Auth Debug] Using fallback user data`);
-                    
-                    // Still trigger data prefetching with fallback user
                     if (event === 'SIGNED_IN') {
                       handleAuthStateChange(event, currentSession.user.id);
                     }
@@ -235,7 +264,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                   
                   setIsAuthReady(true);
                 } catch (error) {
-                  console.error('[Auth Debug] Error fetching profile:', error);
+                  console.error('[Auth Debug] Error in auth state change handler:', error);
                   setIsAuthReady(true);
                 }
               }, 0);
@@ -278,50 +307,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             
             // Fetch user profile and populate state
             try {
-              console.log(`[Auth Debug] Fetching profile for user from initial session: ${initialSession.user.id}`);
-              const profile = await getUserProfile(initialSession.user.id);
+              const appUser = await fetchAndMapUserProfile(
+                initialSession.user.id,
+                initialSession.user.email
+              );
               
-              if (profile && isSubscribed) {
-                setUser({
-                  id: initialSession.user.id,
-                  email: initialSession.user.email || '',
-                  firstName: profile.first_name,
-                  lastName: profile.last_name,
-                  address: profile.address
-                });
+              if (appUser && isSubscribed) {
+                setUser(appUser);
                 console.log(`[Auth Debug] User profile loaded from initial session`);
-              } else if (isSubscribed) {
-                // Fallback user when profile fetch fails
-                setUser({
-                  id: initialSession.user.id,
-                  email: initialSession.user.email || '',
-                  firstName: '',
-                  lastName: '',
-                  address: ''
-                });
-                console.log(`[Auth Debug] Using fallback user data for initial session`);
+                
+                // Trigger React Query data prefetching
+                handleAuthStateChange('SIGNED_IN', initialSession.user.id);
               }
               
-              // Trigger React Query data prefetching
-              handleAuthStateChange('SIGNED_IN', initialSession.user.id);
               setIsAuthReady(true);
               setIsLoading(false);
             } catch (profileError) {
-              console.error('[Auth Debug] Error fetching profile from initial session:', profileError);
+              console.error('[Auth Debug] Error processing initial session:', profileError);
               
-              // Set fallback user even on profile fetch error
               if (isSubscribed) {
-                setUser({
-                  id: initialSession.user.id,
-                  email: initialSession.user.email || '',
-                  firstName: '',
-                  lastName: '',
-                  address: ''
-                });
-                console.log(`[Auth Debug] Using fallback user data after profile fetch error`);
-                
-                // Still trigger data prefetching with fallback user
-                handleAuthStateChange('SIGNED_IN', initialSession.user.id);
                 setIsAuthReady(true);
                 setIsLoading(false);
               }
