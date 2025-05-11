@@ -23,7 +23,8 @@ const DogList: React.FC<DogListProps> = ({
   const [search, setSearch] = useState('');
 
   // Use the provided dogsList or fall back to all dogs from context
-  const dogs = dogsList || allDogs;
+  // Adding null/undefined check with fallback to empty array
+  const dogs = dogsList || allDogs || [];
   const filteredDogs = dogs.filter(dog => {
     // Search filter only (removed gender filter)
     return dog.name.toLowerCase().includes(search.toLowerCase()) || dog.breed.toLowerCase().includes(search.toLowerCase());

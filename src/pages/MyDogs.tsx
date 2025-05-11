@@ -1,3 +1,4 @@
+
 import { useAuth } from '@/hooks/useAuth';
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
@@ -66,10 +67,11 @@ const MyDogs: React.FC = () => {
     }
   }, [error]);
   
-  // Filter dogs based on selected gender
+  // Filter dogs based on selected gender, with proper null handling
+  const allDogs = dogs ?? [];
   const filteredDogs = genderFilter === 'all' 
-    ? dogs 
-    : dogs.filter(dog => dog.gender === genderFilter);
+    ? allDogs 
+    : allDogs.filter(dog => dog.gender === genderFilter);
 
   // Handle retry for loading dogs with incremental backoff
   const handleRetry = () => {
