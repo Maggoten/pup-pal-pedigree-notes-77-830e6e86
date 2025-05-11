@@ -1,4 +1,3 @@
-
 import { useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { User } from '@/types/auth';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
@@ -162,8 +161,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     const initAuth = async () => {
       try {
-        // First set up the auth state listener
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        // First set up the auth state listener - STORE THE SUBSCRIPTION PROPERLY
+        const authStateResponse = supabase.auth.onAuthStateChange(
           (event, currentSession) => {
             console.log(`[Auth Debug] Auth state change event: ${event}`);
             
@@ -252,6 +251,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }
         );
         
+        // Store the subscription for proper cleanup
+        const subscription = authStateResponse.data.subscription;
+        
         // Check for existing session
         try {
           const { data: { session: initialSession }, error } = await supabase.auth.getSession();
@@ -337,8 +339,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         // Return cleanup function
         return () => {
+          console.log('[Auth Debug] Unsubscribing from auth state changes');
           subscription.unsubscribe();
-          isSubscribed = false;
         };
       } catch (error) {
         console.error('[Auth Debug] Critical error:', error);
@@ -347,7 +349,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     };
     
-    initAuth();
+    const cleanupPromise = initAuth();
     
     // Safety timeout to prevent hanging
     const safetyTimer = setTimeout(() => {
@@ -361,6 +363,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => {
       clearTimeout(safetyTimer);
       isSubscribed = false;
+      
+      // Ensure we call the cleanup function returned by initAuth
+      cleanupPromise.then(cleanup => {
+        if (cleanup) cleanup();
+      });
     };
   }, [getUserProfile]);
   
