@@ -21,5 +21,5 @@ export interface PuppyImageUploaderProps {
   large?: boolean;
 }
 
-// Re-export Puppy and related types from breeding.ts
-export { Puppy, PuppyWeightRecord as PuppyWeight, PuppyHeightRecord as PuppyHeight, PuppyNote } from '@/types/breeding';
+// Re-export Puppy and related types from breeding.ts with proper "export type" syntax
+export type { Puppy, PuppyWeightRecord as PuppyWeight, PuppyHeightRecord as PuppyHeight, PuppyNote } from '@/types/breeding';

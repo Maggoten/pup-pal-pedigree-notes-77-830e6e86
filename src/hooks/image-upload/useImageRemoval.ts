@@ -10,6 +10,7 @@ export const useImageRemoval = (onImageChange: RemoveImageCallback) => {
   const [isRemoving, setIsRemoving] = useState(false);
   const [removeError, setRemoveError] = useState<string | null>(null);
 
+  // Updated to not require any parameters when called, matching the ImageUploader usage
   const removeImage = async () => {
     try {
       setIsRemoving(true);

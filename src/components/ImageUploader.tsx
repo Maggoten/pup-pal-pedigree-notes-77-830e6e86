@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { UploadIcon, XIcon, Loader2 } from 'lucide-react';
@@ -186,7 +185,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     console.log('ImageUploader: Removing image:', 
                 currentImage.substring(0, 50) + (currentImage.length > 50 ? '...' : ''));
     try {
-      await removeImage(currentImage, user.id);
+      // Update the removeImage call to match its signature (it doesn't need user.id)
+      await removeImage();
       
       // If we have an onImageSaved callback, call it with empty string to clear the image
       if (onImageSaved) {

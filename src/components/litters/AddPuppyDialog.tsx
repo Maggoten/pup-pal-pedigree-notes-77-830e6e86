@@ -86,7 +86,8 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
         imageUrl: '',
         weightLog: initialWeightLog,
         heightLog: [],
-        notes: []
+        notes: [],
+        litterId: '', // Add this as a placeholder - it will be set when the puppy is added to the litter
       };
 
       console.log("Adding new puppy:", newPuppy);

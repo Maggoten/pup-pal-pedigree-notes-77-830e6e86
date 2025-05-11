@@ -10,16 +10,8 @@ import { fetchWithRetry } from '@/utils/fetchUtils';
 import { BUCKET_NAME } from '@/utils/storage/config';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { useUpdatePuppyMutation } from '@/hooks/puppies/queries/useUpdatePuppyMutation';
+// Import the props interface from our types file instead of redefining it
 import { PuppyImageUploaderProps } from '@/hooks/image-upload/types';
-
-interface PuppyImageUploaderProps {
-  puppyName: string;
-  puppyId?: string;
-  litterId?: string;
-  currentImage?: string;
-  onImageChange: (url: string) => void;
-  large?: boolean;
-}
 
 const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
   puppyName,
@@ -49,9 +41,15 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
     }
     
     try {
+      // Pass a complete puppy object with required fields to match the Puppy interface
       await updatePuppyMutation.mutateAsync({
         id: puppyId,
-        imageUrl: url
+        litterId: litterId,
+        name: puppyName,
+        gender: 'male', // Default value, will be overwritten by the update
+        imageUrl: url,
+        weightLog: [],
+        heightLog: []
       });
       
       console.log('Image URL saved to database for puppy:', puppyId);
@@ -59,7 +57,7 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
       console.error('Failed to save image URL to database:', error);
       throw error;
     }
-  }, [puppyId, litterId, updatePuppyMutation]);
+  }, [puppyId, litterId, puppyName, updatePuppyMutation]);
 
   const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) {
