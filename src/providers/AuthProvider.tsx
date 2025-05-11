@@ -1,4 +1,3 @@
-
 import { useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { User } from '@/types/auth';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
