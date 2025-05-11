@@ -1,4 +1,3 @@
-
 import { useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { User } from '@/types/auth';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
@@ -77,21 +76,73 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  // Log device info immediately
-  useEffect(() => {
-    const deviceType = isMobileDevice() ? 'Mobile' : 'Desktop';
-    const browserType = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome') ? 'Safari' : 
-                        navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other';
-    console.log(`[Auth Debug] Device type: ${deviceType}, Browser: ${browserType}, User Agent: ${navigator.userAgent}`);
+  /**
+   * Shared helper function to process authentication changes
+   * Handles all session state updates and user profile fetching
+   */
+  const processAuthChange = useCallback(async (
+    event: string,
+    currentSession: Session | null,
+    options?: { skipProfileFetch?: boolean }
+  ) => {
+    if (!currentSession) {
+      // No session, clear user state
+      setUser(null);
+      setSupabaseUser(null);
+      setSession(null);
+      setIsLoggedIn(false);
+      setIsAuthReady(true);
+      setIsLoading(false);
+      
+      // Trigger React Query cleanup on sign out if needed
+      if (event === 'SIGNED_OUT') {
+        handleAuthStateChange(event);
+      }
+      
+      return;
+    }
     
-    // Clean up any lingering state from previous sessions
-    clearSessionState();
+    // Immediately update session state to prevent race conditions
+    setSession(currentSession);
+    setSupabaseUser(currentSession.user);
+    setIsLoggedIn(true);
     
-    // Return cleanup function
-    return () => {
-      clearSessionState();
-    };
-  }, []);
+    console.log(`[Auth Debug] User ID from session: ${currentSession.user.id}`);
+    console.log(`[Auth Debug] Session expires: ${new Date(currentSession.expires_at! * 1000).toISOString()}`);
+    
+    // Skip profile fetch if requested (useful for certain events)
+    if (options?.skipProfileFetch) {
+      setIsAuthReady(true);
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      // Fetch user profile
+      const appUser = await fetchAndMapUserProfile(
+        currentSession.user.id, 
+        currentSession.user.email
+      );
+      
+      if (appUser) {
+        setUser(appUser);
+        console.log(`[Auth Debug] User profile loaded`);
+        
+        // Trigger React Query data prefetching on sign in
+        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+          handleAuthStateChange('SIGNED_IN', currentSession.user.id);
+        } else if (event === 'REFRESHED') {
+          handleAuthStateChange(event, currentSession.user.id);
+        }
+      }
+    } catch (error) {
+      console.error('[Auth Debug] Error processing auth change:', error);
+    } finally {
+      // Ensure auth is ready and loading is complete regardless of profile fetch result
+      setIsAuthReady(true);
+      setIsLoading(false);
+    }
+  }, [fetchAndMapUserProfile]);
   
   // Helper to check if a session is expired or near expiration
   const isSessionExpiredOrNearExpiry = useCallback((currentSession: Session | null, options?: { ignoreAuthReady?: boolean }): boolean => {
@@ -121,6 +172,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     return isExpiring;
   }, [isAuthReady]);
+
+  // Log device info immediately
+  useEffect(() => {
+    const deviceType = isMobileDevice() ? 'Mobile' : 'Desktop';
+    const browserType = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome') ? 'Safari' : 
+                        navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other';
+    console.log(`[Auth Debug] Device type: ${deviceType}, Browser: ${browserType}, User Agent: ${navigator.userAgent}`);
+    
+    // Clean up any lingering state from previous sessions
+    clearSessionState();
+    
+    // Return cleanup function
+    return () => {
+      clearSessionState();
+    };
+  }, []);
   
   // Handle window focus/blur events (tab switching)
   useEffect(() => {
@@ -218,65 +285,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             
             // Handle SIGNED_OUT events immediately to prevent flicker
             if (event === 'SIGNED_OUT') {
-              if (isSubscribed) {
-                setUser(null);
-                setSupabaseUser(null);
-                setIsLoggedIn(false);
-                setSession(null);
-                setIsAuthReady(true);
-                console.log(`[Auth Debug] Sign out event processed, state cleared`);
-                
-                // Trigger React Query cleanup on sign out
-                handleAuthStateChange(event);
-              }
+              processAuthChange(event, null);
               return;
             }
             
-            console.log(`[Auth Debug] Session exists: ${!!currentSession}`);
-            if (currentSession) {
-              // Immediately update session state to prevent race conditions
-              setSession(currentSession);
-              setSupabaseUser(currentSession.user);
-              setIsLoggedIn(true);
-              
-              console.log(`[Auth Debug] User ID from session: ${currentSession.user.id}`);
-              console.log(`[Auth Debug] Session expires: ${new Date(currentSession.expires_at! * 1000).toISOString()}`);
-              
-              // Fetch profile in non-blocking way
-              setTimeout(async () => {
-                try {
-                  if (!isSubscribed) return;
-                  
-                  const appUser = await fetchAndMapUserProfile(
-                    currentSession.user.id, 
-                    currentSession.user.email
-                  );
-                  
-                  if (appUser && isSubscribed) {
-                    setUser(appUser);
-                    console.log(`[Auth Debug] User profile loaded`);
-                    
-                    // Trigger React Query data prefetching on sign in
-                    if (event === 'SIGNED_IN') {
-                      handleAuthStateChange(event, currentSession.user.id);
-                    }
-                  }
-                  
-                  setIsAuthReady(true);
-                } catch (error) {
-                  console.error('[Auth Debug] Error in auth state change handler:', error);
-                  setIsAuthReady(true);
-                }
-              }, 0);
-            } else {
-              // If no session, set auth ready and clear user
-              setUser(null);
-              setSupabaseUser(null);
-              setIsLoggedIn(false);
-              setIsAuthReady(true);
-            }
-            
-            setIsLoading(false);
+            // Process other auth events
+            processAuthChange(event, currentSession);
           }
         );
         
@@ -296,44 +310,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           console.log(`[Auth Debug] Initial session check: ${initialSession ? 'Session exists' : 'No session'}`);
           
-          if (initialSession?.user && isSubscribed) {
-            // Mirror the SIGNED_IN callback logic to ensure user state is populated immediately
-            setSession(initialSession);
-            setSupabaseUser(initialSession.user);
-            setIsLoggedIn(true);
-            
-            console.log(`[Auth Debug] User ID from initial session: ${initialSession.user.id}`);
-            console.log(`[Auth Debug] Initial session expires: ${new Date(initialSession.expires_at! * 1000).toISOString()}`);
-            
-            // Fetch user profile and populate state
-            try {
-              const appUser = await fetchAndMapUserProfile(
-                initialSession.user.id,
-                initialSession.user.email
-              );
-              
-              if (appUser && isSubscribed) {
-                setUser(appUser);
-                console.log(`[Auth Debug] User profile loaded from initial session`);
-                
-                // Trigger React Query data prefetching
-                handleAuthStateChange('SIGNED_IN', initialSession.user.id);
-              }
-              
-              setIsAuthReady(true);
-              setIsLoading(false);
-            } catch (profileError) {
-              console.error('[Auth Debug] Error processing initial session:', profileError);
-              
-              if (isSubscribed) {
-                setIsAuthReady(true);
-                setIsLoading(false);
-              }
-            }
-          } else {
-            // No session, set auth ready and not loading
-            setIsAuthReady(true);
-            setIsLoading(false);
+          // Process the initial session with appropriate event name
+          if (isSubscribed) {
+            await processAuthChange('INITIAL_SESSION', initialSession);
           }
         } catch (error) {
           console.error('[Auth Debug] Error checking initial session:', error);
@@ -373,7 +352,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (cleanup) cleanup();
       });
     };
-  }, [getUserProfile]);
+  }, [getUserProfile, processAuthChange]);
   
   return (
     <AuthContext.Provider
