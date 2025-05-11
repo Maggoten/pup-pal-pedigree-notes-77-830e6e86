@@ -1,11 +1,10 @@
-
 import { useAuth } from '@/hooks/useAuth';
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlusCircle, Filter, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useDogs, DogsProvider } from '@/context/DogsContext';
+import { useDogs } from '@/context/DogsContext';
 import DogList from '@/components/DogList';
 import DogDetails from '@/components/dogs/DogDetails';
 import AddDogDialog from '@/components/dogs/AddDogDialog';
@@ -18,7 +17,7 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-const MyDogsContent: React.FC = () => {
+const MyDogs: React.FC = () => {
   const { dogs, activeDog, loading, error, fetchDogs } = useDogs();
   const [showAddDogDialog, setShowAddDogDialog] = useState(false);
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
@@ -196,14 +195,6 @@ const MyDogsContent: React.FC = () => {
         onOpenChange={setShowAddDogDialog} 
       />
     </PageLayout>
-  );
-};
-
-const MyDogs: React.FC = () => {
-  return (
-    <DogsProvider>
-      <MyDogsContent />
-    </DogsProvider>
   );
 };
 
