@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ImageUpload, Trash } from 'lucide-react';
+import { Upload, Trash } from 'lucide-react';
 import { useImageUpload } from '@/hooks/image-upload';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -41,7 +41,7 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          imageUrl: url, // Use imageUrl instead of image_url
+          imageUrl: url,
           updated_by: user.id
         })
       });
@@ -89,7 +89,7 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
     if (!currentImage) return;
     
     try {
-      await removeImage();
+      await removeImage(currentImage);
       await saveImageToDatabase(''); // Clear the image URL in the database
       toast({
         title: 'Image removed',
@@ -138,7 +138,7 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
         >
-          <ImageUpload size={24} />
+          <Upload size={24} />
           <span className="text-xs">{isUploading ? 'Uploading...' : 'Add Photo'}</span>
         </Button>
       )}
