@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { Camera, X, AlertTriangle, Loader2 } from 'lucide-react';
+import { Camera, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,8 +14,8 @@ import { useUpdatePuppyMutation } from '@/hooks/puppies/queries/useUpdatePuppyMu
 
 interface PuppyImageUploaderProps {
   puppyName: string;
-  puppyId: string;
-  litterId: string;
+  puppyId?: string;
+  litterId?: string;
   currentImage?: string;
   onImageChange: (url: string) => void;
   large?: boolean;
@@ -35,7 +35,7 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
   const { safari: isSafariBrowser, device: platformDevice } = getPlatformInfo();
   
   // Get the update mutation to save images directly to database
-  const updatePuppyMutation = useUpdatePuppyMutation(litterId);
+  const updatePuppyMutation = litterId ? useUpdatePuppyMutation(litterId) : null;
 
   // Update local state when prop changes
   useEffect(() => {
@@ -43,8 +43,8 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
   }, [currentImage]);
 
   const saveImageToDatabase = useCallback(async (url: string) => {
-    if (!puppyId || !litterId) {
-      console.error('Cannot save image: missing puppy ID or litter ID');
+    if (!puppyId || !litterId || !updatePuppyMutation) {
+      console.error('Cannot save image: missing puppy ID, litter ID, or mutation');
       return;
     }
     
@@ -264,7 +264,7 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
           variant="secondary"
           size="sm"
           className="h-8 w-8 rounded-full p-0 shadow-md"
-          onClick={() => document.getElementById(`puppy-image-upload-${puppyId}`)?.click()}
+          onClick={() => document.getElementById(`puppy-image-upload-${puppyId || 'new'}`)?.click()}
           disabled={isUploading}
         >
           {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
@@ -288,7 +288,7 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
 
       <input
         type="file"
-        id={`puppy-image-upload-${puppyId}`}
+        id={`puppy-image-upload-${puppyId || 'new'}`}
         onChange={handleFileChange}
         accept="image/*"
         className="hidden"

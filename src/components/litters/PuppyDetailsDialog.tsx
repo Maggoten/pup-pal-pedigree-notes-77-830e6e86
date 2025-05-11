@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { Puppy, PuppyNote } from '@/types/breeding';
+import { Puppy, PuppyNote } from '@/hooks/image-upload/types';
 import PuppyDetailsForm from './puppies/PuppyDetailsForm';
 import PuppyImageUploader from './puppies/PuppyImageUploader';
 import { Trash2, MessageSquarePlus } from 'lucide-react';
@@ -96,6 +95,8 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
           <div className="w-40 h-40">
             <PuppyImageUploader 
               puppyName={displayName}
+              puppyId={puppy.id}
+              litterId={puppy.litter_id}
               currentImage={imageUrl}
               onImageChange={handleImageChange}
               large={true}
