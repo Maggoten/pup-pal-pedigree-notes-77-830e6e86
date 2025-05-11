@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Index from './pages/Index';
 import MyDogs from './pages/MyDogs';
 import PlannedLitters from './pages/PlannedLitters';
-import { Pregnancy } from "./pages/Pregnancy";
+import Pregnancy from './pages/Pregnancy';
 import PregnancyDetails from './pages/PregnancyDetails';
 import MyLitters from './pages/MyLitters';
 import Login from './pages/Login';

@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Camera, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -51,7 +50,7 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
     try {
       await updatePuppyMutation.mutateAsync({
         id: puppyId,
-        image_url: url
+        imageUrl: url
       });
       
       console.log('Image URL saved to database for puppy:', puppyId);
