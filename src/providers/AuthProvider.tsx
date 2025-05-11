@@ -1,3 +1,4 @@
+
 import { useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { User } from '@/types/auth';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
@@ -8,7 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { fetchWithRetry, isMobileDevice } from '@/utils/fetchUtils';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { verifySession, refreshSession, clearSessionState } from '@/utils/auth/sessionManager';
-import { handleAuthStateChange } from '@/utils/reactQueryConfig';
+import { handleAuthStateChange, resetQueryClient } from '@/utils/reactQueryConfig';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -27,7 +28,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const lastActiveTime = useRef(Date.now());
   const sessionCheckInterval = useRef<NodeJS.Timeout | null>(null);
   
-  const { login, register, logout, getUserProfile } = useAuthActions();
+  const { login, register, logout: baseLogout, getUserProfile } = useAuthActions();
 
   /**
    * Fetches user profile and maps it to our app user shape
@@ -354,6 +355,66 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
   }, [getUserProfile, processAuthChange]);
   
+  /**
+   * Enhanced logout function that properly resets all application state
+   * to ensure consistent UI behavior after logout
+   */
+  const wrappedLogout = useCallback(async () => {
+    console.log('[Auth Debug] Enhanced logout starting - clearing all auth state');
+    
+    // Clear query cache before logout
+    resetQueryClient();
+    
+    try {
+      // First, clear any active session check intervals
+      if (sessionCheckInterval.current) {
+        clearInterval(sessionCheckInterval.current);
+        sessionCheckInterval.current = null;
+      }
+      
+      // Call the base logout function from useAuthActions
+      await baseLogout();
+      
+      // Clear session state in the central manager
+      clearSessionState();
+      
+      // Force reset all auth-related React state immediately
+      // This ensures the UI is updated right away
+      setUser(null);
+      setSupabaseUser(null);
+      setSession(null);
+      setIsLoggedIn(false);
+      setIsLoading(false);
+      setIsAuthReady(true);
+      
+      // Explicitly trigger the auth state change handler
+      handleAuthStateChange('SIGNED_OUT');
+      
+      console.log('[Auth Debug] Enhanced logout complete - all auth state cleared');
+      
+      toast({
+        title: 'Logout successful',
+        description: 'You have been logged out successfully.',
+      });
+      
+    } catch (error) {
+      console.error('[Auth Debug] Error during enhanced logout:', error);
+      
+      // Even if the logout fails at the API level, reset UI state
+      // to prevent user confusion
+      setUser(null);
+      setSupabaseUser(null);
+      setSession(null);
+      setIsLoggedIn(false);
+      
+      toast({
+        title: 'Logout problem',
+        description: 'There was an issue during logout. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  }, [baseLogout]);
+  
   return (
     <AuthContext.Provider
       value={{
@@ -366,7 +427,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isAuthReady,
         login,
         register,
-        logout
+        logout: wrappedLogout
       }}
     >
       {children}
