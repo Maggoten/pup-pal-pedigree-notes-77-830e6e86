@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { UploadIcon, XIcon, Loader2 } from 'lucide-react';
@@ -11,12 +12,14 @@ import { uploadStateManager, setUploadPending } from '@/components/AuthGuard';
 interface ImageUploaderProps {
   currentImage?: string;
   onImageChange: (imageUrl: string) => void;
+  onImageSaved?: (imageUrl: string) => Promise<void>;
   className?: string;
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ 
   currentImage,
   onImageChange,
+  onImageSaved,
   className = ''
 }) => {
   const { user, isAuthReady } = useAuth();
@@ -34,7 +37,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       console.log('ImageUploader: Image change callback received URL:', 
                  url.substring(0, 50) + (url.length > 50 ? '...' : ''));
       onImageChange(url);
-    }
+    },
+    onImageSaved // Pass through the auto-save callback
   });
 
   // Track upload state in the global manager and AuthGuard
@@ -183,6 +187,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                 currentImage.substring(0, 50) + (currentImage.length > 50 ? '...' : ''));
     try {
       await removeImage(currentImage, user.id);
+      
+      // If we have an onImageSaved callback, call it with empty string to clear the image
+      if (onImageSaved) {
+        try {
+          await onImageSaved('');
+          console.log("Image removed from database");
+        } catch (error) {
+          console.error("Failed to remove image from database:", error);
+        }
+      }
     } catch (error) {
       console.error('ImageUploader: Image remove error:', error);
       toast({

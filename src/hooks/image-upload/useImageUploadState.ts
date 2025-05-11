@@ -1,61 +1,54 @@
-import { useState, useCallback } from 'react';
 
-type UploadState = {
+import { useState } from 'react';
+
+type ImageUploadState = {
   isUploading: boolean;
   uploadRetryCount: number;
   lastError: string | null;
   isUploadActive: boolean;
 };
 
-type UploadStateActions = {
+type ImageUploadActions = {
   startUpload: () => void;
   completeUpload: () => void;
-  setError: (error: string) => void;
-  incrementRetryCount: () => void;
+  setError: (message: string) => void;
   resetRetryCount: () => void;
+  setUploadActive: (active: boolean) => void;
 };
 
-export const useImageUploadState = (): [UploadState, UploadStateActions] => {
+/**
+ * Hook to manage the state of image uploads
+ */
+export const useImageUploadState = (): [
+  ImageUploadState,
+  ImageUploadActions
+] => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadRetryCount, setUploadRetryCount] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
   const [isUploadActive, setIsUploadActive] = useState(false);
 
-  const startUpload = useCallback(() => {
-    console.log('Starting upload process');
+  const startUpload = () => {
     setIsUploading(true);
     setIsUploadActive(true);
     setLastError(null);
-  }, []);
+  };
 
-  const completeUpload = useCallback(() => {
-    console.log('Upload process complete');
+  const completeUpload = () => {
     setIsUploading(false);
-    setTimeout(() => {
-      setIsUploadActive(false);
-    }, 1000);
-  }, []);
+  };
 
-  const setError = useCallback((error: string) => {
-    console.error('Upload error:', error);
-    setLastError(error);
-  }, []);
+  const setError = (message: string) => {
+    setLastError(message);
+    setUploadRetryCount(prev => prev + 1);
+  };
 
-  const incrementRetryCount = useCallback(() => {
-    setUploadRetryCount(prev => {
-      const newCount = prev + 1;
-      console.log(`Incremented upload retry count: ${prev} -> ${newCount}`);
-      return newCount;
-    });
-  }, []);
-
-  const resetRetryCount = useCallback(() => {
-    console.log('Reset upload retry count to 0');
+  const resetRetryCount = () => {
     setUploadRetryCount(0);
-  }, []);
+  };
 
   return [
     { isUploading, uploadRetryCount, lastError, isUploadActive },
-    { startUpload, completeUpload, setError, incrementRetryCount, resetRetryCount }
+    { startUpload, completeUpload, setError, resetRetryCount, setUploadActive }
   ];
 };

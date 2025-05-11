@@ -1,110 +1,47 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
-import { getPlatformInfo } from '@/utils/storage/mobileUpload';
-import { 
-  BUCKET_NAME,
-  getSafeErrorMessage,
-  checkBucketExists,
-  removeFromStorage
-} from '@/utils/storage';
-
-import { hasErrorProperty } from './types';
+import { toast } from '@/hooks/use-toast';
+import { removeFromStorage } from '@/utils/storage';
+import { isValidPublicUrl } from '@/utils/storage';
 
 export const useImageRemoval = (onImageChange: (url: string) => void) => {
   const removeImage = async (imageUrl: string, userId: string) => {
-    const platform = getPlatformInfo();
-    
-    if (!imageUrl || !imageUrl.includes(BUCKET_NAME) || !userId) {
-      console.log('Skipping image removal: Invalid image URL or user ID', {
-        imageUrl,
-        userId,
-        bucketInUrl: imageUrl ? imageUrl.includes(BUCKET_NAME) : false
-      });
-      onImageChange('');
-      return;
+    if (!imageUrl || !userId || !isValidPublicUrl(imageUrl)) {
+      console.error('[ImageRemoval] Invalid parameters for image removal', { imageUrl, userId });
+      return false;
     }
-    
+
     try {
-      // Verify session and refresh if needed
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) {
-        console.error('Session error during removal:', sessionError);
-        throw new Error('Authentication error: ' + sessionError.message);
-      }
+      console.log('[ImageRemoval] Removing image:', imageUrl);
       
-      if (!sessionData.session) {
-        // Try to refresh session
-        console.log('No active session, attempting to refresh before image removal');
-        const refreshResult = await supabase.auth.refreshSession();
-        const refreshError = refreshResult.error;
-        const refreshData = refreshResult.data;
-        
-        if (refreshError) {
-          console.error('Session refresh error during removal:', refreshError);
-          throw new Error('Session refresh failed: ' + refreshError.message);
-        }
-        
-        if (!refreshData.session) {
-          if (platform.safari || platform.mobile) {
-            // Extra attempt for mobile browsers
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            const secondRefresh = await supabase.auth.refreshSession();
-            if (!secondRefresh.data.session) {
-              throw new Error('No active session after multiple refresh attempts. Please login again.');
-            }
-          } else {
-            throw new Error('No active session. User authentication is required.');
-          }
-        }
-      }
-      
-      // Verify bucket exists
-      const bucketExists = await checkBucketExists();
-      if (!bucketExists) {
-        throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
-      }
-      
-      // Extract file path from URL
+      // Extract path from URL
       const urlParts = imageUrl.split('/');
-      const storageIndex = urlParts.findIndex(part => part === BUCKET_NAME);
+      const fileName = urlParts[urlParts.length - 1];
+      const result = await removeFromStorage(`${userId}/${fileName}`);
       
-      if (storageIndex === -1) {
-        console.log('No valid storage path found in URL:', imageUrl);
-        onImageChange('');
-        return;
+      if (result && 'error' in result && result.error) {
+        console.error('[ImageRemoval] Error removing image:', result.error);
+        toast({
+          title: 'Error removing image',
+          description: 'The image could not be removed from storage.',
+          variant: 'destructive'
+        });
+        return false;
       }
       
-      const storagePath = urlParts.slice(storageIndex + 1).join('/');
-      console.log('Removing image from storage path:', storagePath);
-      
-      // Remove file with enhanced logging
-      const removeResult = await removeFromStorage(storagePath);
-      
-      if (hasErrorProperty(removeResult) && removeResult.error) {
-        console.error('Error removing image:', removeResult.error);
-        throw removeResult.error;
-      }
-      
-      console.log('Image successfully removed');
+      // Clear the image URL in the form
       onImageChange('');
+      return true;
       
-      toast({
-        title: "Image Removed",
-        description: "Your image has been successfully removed"
-      });
     } catch (error) {
-      console.error('Error removing image:', error);
-      
-      // Don't block UI flow even if removal fails
+      console.error('[ImageRemoval] Error removing image:', error);
       toast({
-        title: "Remove Failed",
-        description: "Failed to remove image. The update will continue without removing the old image.",
-        variant: "destructive"
+        title: 'Error removing image',
+        description: 'The image could not be removed from storage.',
+        variant: 'destructive'
       });
-      onImageChange('');
+      return false;
     }
   };
-
+  
   return { removeImage };
 };

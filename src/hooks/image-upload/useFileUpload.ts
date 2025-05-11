@@ -18,7 +18,11 @@ interface PublicUrlResult {
   error?: any;
 }
 
-export const useFileUpload = (user_id: string | null, onImageChange: (url: string) => void) => {
+export const useFileUpload = (
+  user_id: string | null | undefined, 
+  onImageChange: (url: string) => void,
+  onImageSaved?: (url: string) => Promise<void>
+) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   
   const performUpload = async (file: File): Promise<boolean> => {
@@ -150,8 +154,23 @@ export const useFileUpload = (user_id: string | null, onImageChange: (url: strin
       if (publicUrl) {
         console.log("[FileUpload] Retrieved public URL:", publicUrl);
         
-        // Pass the URL to the callback
+        // Update the UI immediately
         onImageChange(publicUrl);
+        
+        // If we have a save callback, call it to update the database
+        if (onImageSaved) {
+          try {
+            await onImageSaved(publicUrl);
+            console.log("[FileUpload] Image URL saved to database");
+          } catch (error) {
+            console.error("[FileUpload] Failed to save image URL to database:", error);
+            toast({
+              title: "Warning",
+              description: "Image uploaded but not saved to database. Please save your changes.",
+              variant: "warning"
+            });
+          }
+        }
         
         return true;
       } else {

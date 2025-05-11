@@ -3,16 +3,20 @@ import { useImageUploadState } from './useImageUploadState';
 import { useFileUpload } from './useFileUpload';
 import { useImageRemoval } from './useImageRemoval';
 import { UseImageUploadProps } from './types';
+import { useImageSessionCheck } from './useImageSessionCheck';
 
-export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) => {
+export const useImageUpload = ({ user_id, onImageChange, onImageSaved }: UseImageUploadProps) => {
+  // Get session validation
+  const { isSessionValid } = useImageSessionCheck();
+  
   // Get state management for upload process
   const [
     { isUploading, uploadRetryCount, lastError, isUploadActive },
-    { startUpload, completeUpload, setError, resetRetryCount }
+    { startUpload, completeUpload, setError, resetRetryCount, setUploadActive }
   ] = useImageUploadState();
 
   // Get upload functionality
-  const { performUpload } = useFileUpload(user_id, onImageChange);
+  const { performUpload } = useFileUpload(user_id, onImageChange, onImageSaved);
   
   // Get image removal functionality
   const { removeImage } = useImageRemoval(onImageChange);
@@ -40,6 +44,7 @@ export const useImageUpload = ({ user_id, onImageChange }: UseImageUploadProps) 
     removeImage,
     lastError,
     uploadRetryCount,
-    isUploadActive // Expose the new state
+    isUploadActive,
+    isSessionValid
   };
 };
