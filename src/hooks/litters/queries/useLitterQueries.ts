@@ -13,48 +13,46 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Explicitly type the result from fetchWithRetry to avoid deep type instantiation
-      type SupabaseResult = {
-        data: any[] | null;
-        error: any;
+      // Define a simpler function to be passed to fetchWithRetry
+      const fetchFunction = async () => {
+        const { data, error } = await supabase
+          .from('litters')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          throw error;
+        }
+        
+        // Transform the data to match the Litter interface
+        const litters = (data || []).map(item => ({
+          id: item.id,
+          name: item.name,
+          dateOfBirth: item.date_of_birth,
+          sireId: item.sire_id || '',
+          damId: item.dam_id || '',
+          sireName: item.sire_name || '',
+          damName: item.dam_name || '',
+          puppies: [],
+          archived: item.archived || false,
+          user_id: item.user_id
+        } as Litter));
+        
+        return litters;
       };
       
-      const result = await fetchWithRetry<SupabaseResult>(
-        async () => {
-          const { data, error } = await supabase
-            .from('litters')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('status', 'active')
-            .order('created_at', { ascending: false });
-          
-          if (error) {
-            throw error;
-          }
-          
-          // Transform the data to match the Litter interface
-          const litters = (data || []).map(item => ({
-            id: item.id,
-            name: item.name,
-            dateOfBirth: item.date_of_birth,
-            sireId: item.sire_id || '',
-            damId: item.dam_id || '',
-            sireName: item.sire_name || '',
-            damName: item.dam_name || '',
-            puppies: [],
-            archived: item.archived || false,
-            user_id: item.user_id
-          } as Litter));
-          
-          return { data: litters, error: null };
-        },
+      // Call fetchWithRetry with the function
+      const result = await fetchWithRetry<Litter[]>(
+        fetchFunction,
         { 
           maxRetries: 2,
           initialDelay: 1000
         }
       );
       
-      return result.data || [];
+      return result;
     } catch (error) {
       console.error("Error fetching active litters:", error);
       return [];
@@ -65,48 +63,46 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Explicitly type the result from fetchWithRetry to avoid deep type instantiation
-      type SupabaseResult = {
-        data: any[] | null;
-        error: any;
+      // Define a simpler function to be passed to fetchWithRetry
+      const fetchFunction = async () => {
+        const { data, error } = await supabase
+          .from('litters')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('status', 'archived')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          throw error;
+        }
+        
+        // Transform the data to match the Litter interface
+        const litters = (data || []).map(item => ({
+          id: item.id,
+          name: item.name,
+          dateOfBirth: item.date_of_birth,
+          sireId: item.sire_id || '',
+          damId: item.dam_id || '',
+          sireName: item.sire_name || '',
+          damName: item.dam_name || '',
+          puppies: [],
+          archived: item.archived || false,
+          user_id: item.user_id
+        } as Litter));
+        
+        return litters;
       };
       
-      const result = await fetchWithRetry<SupabaseResult>(
-        async () => {
-          const { data, error } = await supabase
-            .from('litters')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('status', 'archived')
-            .order('created_at', { ascending: false });
-          
-          if (error) {
-            throw error;
-          }
-          
-          // Transform the data to match the Litter interface
-          const litters = (data || []).map(item => ({
-            id: item.id,
-            name: item.name,
-            dateOfBirth: item.date_of_birth,
-            sireId: item.sire_id || '',
-            damId: item.dam_id || '',
-            sireName: item.sire_name || '',
-            damName: item.dam_name || '',
-            puppies: [],
-            archived: item.archived || false,
-            user_id: item.user_id
-          } as Litter));
-          
-          return { data: litters, error: null };
-        },
+      // Call fetchWithRetry with the function
+      const result = await fetchWithRetry<Litter[]>(
+        fetchFunction,
         { 
           maxRetries: 2,
           initialDelay: 1000
         }
       );
       
-      return result.data || [];
+      return result;
     } catch (error) {
       console.error("Error fetching archived litters:", error);
       return [];
