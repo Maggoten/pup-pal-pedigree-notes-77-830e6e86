@@ -98,7 +98,13 @@ export function useLitterManagement() {
     deleteLitter,
     archiveLitter
   } = useLitterOperations(
-    loadLittersData
+    loadLittersData,
+    setActiveLitters,
+    setArchivedLitters,
+    setSelectedLitterId,
+    activeLitters,
+    archivedLitters,
+    selectedLitterId
   );
   
   // Use utility functions
@@ -110,9 +116,7 @@ export function useLitterManagement() {
     return () => {}; // Cleanup function
   }, []);
 
-  const useLitterSubscription = useCallback(() => {
-    return { setupSubscription };
-  }, [setupSubscription]);
+  const { setupSubscription: subscriptionSetup } = useLitterSubscription();
   
   // Initial data load
   useEffect(() => {

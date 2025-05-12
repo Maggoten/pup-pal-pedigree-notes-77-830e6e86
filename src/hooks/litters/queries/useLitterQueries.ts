@@ -31,14 +31,14 @@ export function useLitterQueries() {
             id: item.id,
             name: item.name,
             dateOfBirth: item.date_of_birth,
-            sireId: item.sire_id,
-            damId: item.dam_id,
-            sireName: item.sire_name,
-            damName: item.dam_name,
+            sireId: item.sire_id || '',
+            damId: item.dam_id || '',
+            sireName: item.sire_name || '',
+            damName: item.dam_name || '',
             puppies: [],
             archived: item.archived || false,
             user_id: item.user_id
-          }));
+          } as Litter));
           
           return litters;
         },
@@ -77,14 +77,14 @@ export function useLitterQueries() {
             id: item.id,
             name: item.name,
             dateOfBirth: item.date_of_birth,
-            sireId: item.sire_id,
-            damId: item.dam_id,
-            sireName: item.sire_name,
-            damName: item.dam_name,
+            sireId: item.sire_id || '',
+            damId: item.dam_id || '',
+            sireName: item.sire_name || '',
+            damName: item.dam_name || '',
             puppies: [],
             archived: item.archived || false,
             user_id: item.user_id
-          }));
+          } as Litter));
           
           return litters;
         },
