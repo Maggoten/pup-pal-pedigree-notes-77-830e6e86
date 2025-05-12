@@ -1,4 +1,2 @@
 
-export * from './types';
-export { plannedLittersService } from './plannedLittersService';
-
+export { fetchPlannedLitters } from './plannedLittersService';
