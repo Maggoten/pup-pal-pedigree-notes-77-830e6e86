@@ -5,6 +5,19 @@ import { Litter } from '@/types/breeding';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 
+// Define types for Supabase query result to avoid excessive type inference
+type LitterDbRow = {
+  id: string;
+  name: string;
+  date_of_birth: string;
+  sire_id: string | null;
+  dam_id: string | null;
+  sire_name: string | null;
+  dam_name: string | null;
+  archived: boolean | null;
+  user_id: string;
+};
+
 export function useLitterQueries() {
   const { user } = useAuth();
   const userId = user?.id;
@@ -13,8 +26,8 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Define a simpler function to be passed to fetchWithRetry
-      const fetchFunction = async () => {
+      // Create a simple function that returns a Promise<Litter[]>
+      const fetchFunction = async (): Promise<Litter[]> => {
         const { data, error } = await supabase
           .from('litters')
           .select('*')
@@ -26,8 +39,11 @@ export function useLitterQueries() {
           throw error;
         }
         
+        // Cast the data to ensure TypeScript knows what we're working with
+        const litterData = data as LitterDbRow[] | null;
+        
         // Transform the data to match the Litter interface
-        const litters = (data || []).map(item => ({
+        const litters = (litterData || []).map(item => ({
           id: item.id,
           name: item.name,
           dateOfBirth: item.date_of_birth,
@@ -43,7 +59,7 @@ export function useLitterQueries() {
         return litters;
       };
       
-      // Call fetchWithRetry with the function
+      // Use typed version of fetchWithRetry
       const result = await fetchWithRetry<Litter[]>(
         fetchFunction,
         { 
@@ -63,8 +79,8 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Define a simpler function to be passed to fetchWithRetry
-      const fetchFunction = async () => {
+      // Create a simple function that returns a Promise<Litter[]>
+      const fetchFunction = async (): Promise<Litter[]> => {
         const { data, error } = await supabase
           .from('litters')
           .select('*')
@@ -76,8 +92,11 @@ export function useLitterQueries() {
           throw error;
         }
         
+        // Cast the data to ensure TypeScript knows what we're working with
+        const litterData = data as LitterDbRow[] | null;
+        
         // Transform the data to match the Litter interface
-        const litters = (data || []).map(item => ({
+        const litters = (litterData || []).map(item => ({
           id: item.id,
           name: item.name,
           dateOfBirth: item.date_of_birth,
@@ -93,7 +112,7 @@ export function useLitterQueries() {
         return litters;
       };
       
-      // Call fetchWithRetry with the function
+      // Use typed version of fetchWithRetry
       const result = await fetchWithRetry<Litter[]>(
         fetchFunction,
         { 
