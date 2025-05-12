@@ -1,4 +1,3 @@
-const safePuppies = puppies ?? [];
 
 import React, { useMemo, useCallback, memo } from 'react';
 import { Edit, Trash2, BarChart2 } from 'lucide-react';
@@ -310,7 +309,7 @@ const PuppyList: React.FC<PuppyListProps> = ({
   if (isMobile) {
     return (
       <div className="space-y-2">
-       {safePuppies.map(puppy => (
+        {puppies.map(puppy => (
           <PuppyCard
             key={puppy.id}
             puppy={puppy}
@@ -341,7 +340,7 @@ const PuppyList: React.FC<PuppyListProps> = ({
           </tr>
         </thead>
         <tbody>
-          {safePuppies.map(puppy => (
+          {puppies.map(puppy => (
             <PuppyRow
               key={puppy.id}
               puppy={puppy}
