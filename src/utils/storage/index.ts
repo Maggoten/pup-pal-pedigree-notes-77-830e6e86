@@ -54,8 +54,7 @@ export {
 
 // Export from retrieve operations
 export {
-  getPublicUrl,
-  listStorageObjects
+  getPublicUrl
 } from './operations/retrieve';
 
 // Export validation utilities

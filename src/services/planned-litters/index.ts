@@ -1,2 +1,3 @@
 
-export { fetchPlannedLitters } from './plannedLittersService';
+export { fetchPlannedLitters, plannedLittersService } from './plannedLittersService';
+export type { PlannedLitterFormValues } from './types';
