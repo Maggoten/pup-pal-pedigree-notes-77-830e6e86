@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
@@ -15,77 +14,70 @@ interface DashboardLayoutProps {
   activePregnancies?: ActivePregnancy[];
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
-  user, 
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({
+  user,
   activePregnancies: initialActivePregnancies = []
 }) => {
-  // State for active pregnancies
-  const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>(initialActivePregnancies);
-  const [isLoadingPregnancies, setIsLoadingPregnancies] = useState(initialActivePregnancies.length === 0);
-  
-  // Use the custom hook to get all dashboard data and functions
+  // State för aktiva dräktigheter
+  const [activePregnancies, setActivePregnancies] =
+    useState<ActivePregnancy[]>(initialActivePregnancies);
+  const [isLoadingPregnancies, setIsLoadingPregnancies] = 
+    useState(initialActivePregnancies.length === 0);
+
+  // Hämtar all övrig dashboard-data (reminders, events etc)
   const dashboardData = useDashboardData();
-  
-  // Fetch active pregnancies if not provided
+
+  // 📌 Här lägger vi in auth-skydd
   useEffect(() => {
+    // Om ingen användare är inloggad eller vi redan har data, gör inget
+    if (!user || initialActivePregnancies.length > 0) {
+      return;
+    }
+
     const fetchActivePregnancies = async () => {
-      if (initialActivePregnancies.length === 0) {
-        try {
-          setIsLoadingPregnancies(true);
-          const pregnancies = await getActivePregnancies();
-          setActivePregnancies(pregnancies);
-        } catch (error) {
-          console.error("Error fetching active pregnancies:", error);
-          toast({
-            title: "Error",
-            description: "Could not load active pregnancies",
-            variant: "destructive"
-          });
-        } finally {
-          setIsLoadingPregnancies(false);
-        }
+      try {
+        setIsLoadingPregnancies(true);
+        const pregnancies = await getActivePregnancies();
+        setActivePregnancies(pregnancies);
+      } catch (error) {
+        console.error("Error fetching active pregnancies:", error);
+        toast({
+          title: "Error",
+          description: "Could not load active pregnancies",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoadingPregnancies(false);
       }
     };
-    
+
     fetchActivePregnancies();
-  }, [initialActivePregnancies.length]);
-  
-  // Get the personalized username
+  }, [user, initialActivePregnancies.length]);
+
+  // Användarnamn för hälsning
   const username = getDisplayUsername(user);
-  
-  // Prepare props for child components
+
+  // Förbered props till komponenter
   const calendarProps = {
     getEventsForDate: dashboardData.getEventsForDate,
     getEventColor: dashboardData.getEventColor,
-    addEvent: dashboardData.handleAddEvent,
-    deleteEvent: dashboardData.deleteEvent,
-    editEvent: dashboardData.handleEditEvent,
-    isLoading: dashboardData.calendarLoading,
-    hasError: dashboardData.calendarError // This now receives a boolean value
+    addEvent: dashboardData.handleAddEvent
   };
-  
   const remindersProps = {
     reminders: dashboardData.reminders,
-    isLoading: dashboardData.remindersLoading,
-    hasError: dashboardData.remindersError,
-    handleMarkComplete: dashboardData.handleMarkComplete
+    markComplete: dashboardData.markReminderComplete,
+    deleteReminder: dashboardData.deleteReminder
   };
-  
+
   return (
-    <PageLayout 
-      title="" 
-      description=""
-    >
-      <div className="space-y-6">
-        <DashboardHero 
-          username={username}
-          reminders={dashboardData.remindersSummary}
-          plannedLitters={dashboardData.plannedLittersData}
-          activePregnancies={activePregnancies}
-          recentLitters={dashboardData.recentLittersData}
-          isLoadingPregnancies={isLoadingPregnancies}
-        />
-        
+    <PageLayout>
+      <DashboardHero
+        username={username}
+        activePregnancies={activePregnancies}
+        isLoadingPregnancies={isLoadingPregnancies}
+      />
+
+      <div className="mt-8 space-y-6">
         <DashboardContent
           isDataReady={dashboardData.isDataReady}
           calendarProps={calendarProps}
