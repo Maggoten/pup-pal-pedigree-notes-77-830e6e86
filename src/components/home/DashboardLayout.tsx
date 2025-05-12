@@ -21,7 +21,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   user,
   activePregnancies: initialActivePregnancies = []
 }) => {
-  // 1) Visa loader tills användaren är klar
+  // 1) Visa loader tills auth & user finns
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -33,17 +33,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     );
   }
 
-  // 2) State för dräktigheter
+  // 2) Local state för aktiva dräktigheter
   const [activePregnancies, setActivePregnancies] =
     useState<ActivePregnancy[]>(initialActivePregnancies);
   const [isLoadingPregnancies, setIsLoadingPregnancies] =
     useState(initialActivePregnancies.length === 0);
 
-  // 3) Hämta dashboard-datan
+  // 3) Hämta dashboard‐data med inbyggda default‐värden
   const {
-    remindersSummary,
-    plannedLittersData,
-    recentLittersData,
+    remindersSummary = { count: 0, highPriority: 0 },
+    plannedLittersData = { count: 0, nextDate: null },
+    recentLittersData = { count: 0, latest: null },
     getEventsForDate,
     getEventColor,
     handleAddEvent,
@@ -51,7 +51,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     handleEditEvent,
     calendarLoading,
     calendarError,
-    reminders,
+    reminders = [],
     remindersLoading,
     remindersError,
     handleMarkComplete,
@@ -61,7 +61,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   // 4) Hälsningsnamn
   const username = getDisplayUsername(user);
 
-  // 5) Hämta aktiva dräktigheter om vi inte redan har dem
+  // 5) Hämta aktiva dräktigheter (om vi inte redan har dem)
   useEffect(() => {
     if (initialActivePregnancies.length > 0) return;
 
@@ -85,7 +85,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     fetchActivePregnancies();
   }, [initialActivePregnancies.length]);
 
-  // 6) Props till kalender och reminders-lista
+  // 6) Props till kalendern
   const calendarProps = {
     getEventsForDate,
     getEventColor,
@@ -96,6 +96,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     hasError: calendarError
   };
 
+  // 7) Props till reminders‐lista
   const remindersProps = {
     reminders,
     isLoading: remindersLoading,
@@ -103,15 +104,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     markComplete: handleMarkComplete
   };
 
+  // 8) Rendera layout + hero
   return (
     <PageLayout>
       <DashboardHero
         username={username}
-        // Här använder vi alltid ett fallback‐objekt om hooken inte hunnit ladda data
-        reminders={remindersSummary ?? { count: 0, highPriority: 0 }}
-        plannedLitters={plannedLittersData ?? { count: 0, nextDate: null }}
+        // Dessa tre använder våra default-objekt om hooken inte hunnit ladda
+        reminders={remindersSummary}
+        plannedLitters={plannedLittersData}
+        recentLitters={recentLittersData}
         activePregnancies={activePregnancies}
-        recentLitters={recentLittersData ?? { count: 0, latest: null }}
         isLoadingPregnancies={isLoadingPregnancies}
       />
 
