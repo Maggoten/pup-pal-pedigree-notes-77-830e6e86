@@ -99,8 +99,9 @@ export const usePlannedLitterQueries = () => {
         }
       );
       
-      setPlannedLitters(litters);
-      console.log("Planned litters loaded successfully:", litters.length);
+      // Type assertion to ensure TypeScript knows litters is PlannedLitter[]
+      setPlannedLitters(litters as PlannedLitter[]);
+      console.log("Planned litters loaded successfully:", (litters as PlannedLitter[]).length);
       
       // Track successful fetch time
       lastSuccessfulFetch.current = Date.now();

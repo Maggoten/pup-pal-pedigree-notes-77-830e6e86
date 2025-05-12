@@ -86,8 +86,9 @@ export const usePlannedLitterQueries = () => {
         }
       );
       
-      setPlannedLitters(litters);
-      console.log("Planned litters loaded successfully:", litters.length);
+      // Type assertion to ensure TypeScript knows litters is PlannedLitter[]
+      setPlannedLitters(litters as PlannedLitter[]);
+      console.log("Planned litters loaded successfully:", (litters as PlannedLitter[]).length);
     } catch (error) {
       console.error('Error loading planned litters:', error);
       

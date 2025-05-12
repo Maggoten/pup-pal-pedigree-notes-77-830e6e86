@@ -25,7 +25,22 @@ export function useLitterQueries() {
           if (error) {
             throw error;
           }
-          return data || [];
+          
+          // Transform the data to match the Litter interface
+          const litters = (data || []).map(item => ({
+            id: item.id,
+            name: item.name,
+            dateOfBirth: item.date_of_birth,
+            sireId: item.sire_id,
+            damId: item.dam_id,
+            sireName: item.sire_name,
+            damName: item.dam_name,
+            puppies: [],
+            archived: item.archived || false,
+            user_id: item.user_id
+          }));
+          
+          return litters;
         },
         { 
           maxRetries: 2,
@@ -56,7 +71,22 @@ export function useLitterQueries() {
           if (error) {
             throw error;
           }
-          return data || [];
+          
+          // Transform the data to match the Litter interface
+          const litters = (data || []).map(item => ({
+            id: item.id,
+            name: item.name,
+            dateOfBirth: item.date_of_birth,
+            sireId: item.sire_id,
+            damId: item.dam_id,
+            sireName: item.sire_name,
+            damName: item.dam_name,
+            puppies: [],
+            archived: item.archived || false,
+            user_id: item.user_id
+          }));
+          
+          return litters;
         },
         { 
           maxRetries: 2,
