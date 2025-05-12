@@ -3,20 +3,29 @@ import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useDogs as useDogsHook } from '@/hooks/dogs';
+import { DogsContext } from './DogsContext';
 import type { DogsContextType } from './types';
 import type { Dog } from '@/types/dogs';
 import { useForceReload } from './useForceReload';
 import { useActiveDog } from './useActiveDog';
 import { useDogOperations } from './useDogOperations';
 
-export const DogsContext = createContext<DogsContextType | undefined>(undefined);
-
 interface DogsProviderProps {
   children: ReactNode;
 }
 
 export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
+  console.log('[DogsProvider Debug] Provider initializing');
   const { user, supabaseUser, isLoggedIn, isLoading: authLoading, isAuthReady } = useAuth();
+  console.log('[DogsProvider Debug] Auth state:', { 
+    isAuthReady, 
+    isLoggedIn, 
+    authLoading, 
+    hasUser: !!user, 
+    hasSupabaseUser: !!supabaseUser,
+    userId: user?.id || supabaseUser?.id
+  });
+  
   const [dogLoadingAttempted, setDogLoadingAttempted] = useState(false);
   const { toast } = useToast();
   
@@ -30,6 +39,13 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     updateDog: updateDogBase,
     deleteDog: deleteDogBase
   } = useDogsHook();
+
+  console.log('[DogsProvider Debug] useDogsHook results:', { 
+    dogsCount: dogs?.length || 0, 
+    dogsLoading, 
+    hasError: !!error,
+    errorDetails: error ? (error instanceof Error ? error.message : String(error)) : 'none'
+  });
 
   const { activeDog, setActiveDog } = useActiveDog(dogs);
   const forceReload = useForceReload(user?.id || supabaseUser?.id, fetchDogsBase);
@@ -47,12 +63,18 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     try {
       // Use either user.id or supabaseUser.id
       const ownerId = user?.id || supabaseUser?.id;
-      if (!ownerId) return [];
+      console.log('[DogsProvider Debug] fetchDogs called with skipCache:', skipCache, 'ownerId:', ownerId);
+      
+      if (!ownerId) {
+        console.warn('[DogsProvider Debug] No owner ID available for fetching dogs');
+        return [];
+      }
       
       const result = await fetchDogsBase(skipCache || false);
+      console.log('[DogsProvider Debug] fetchDogs result:', result.length, 'dogs');
       return result;
     } catch (e) {
-      console.error('Error in fetchDogs:', e);
+      console.error('[DogsProvider Debug] Error in fetchDogs:', e);
       toast({
         title: "Error fetching dogs",
         description: e instanceof Error ? e.message : 'Unknown error',
@@ -64,9 +86,10 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
 
   const refreshDogs = async (): Promise<void> => {
     try {
+      console.log('[DogsProvider Debug] refreshDogs called');
       await fetchDogs(true);
     } catch (e) {
-      console.error('Error refreshing dogs:', e);
+      console.error('[DogsProvider Debug] Error refreshing dogs:', e);
       toast({
         title: "Refresh failed",
         description: "Could not refresh data. Please try again.",
@@ -79,6 +102,8 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     try {
       // Use either user.id or supabaseUser.id for the owner ID
       const ownerId = user?.id || supabaseUser?.id;
+      console.log('[DogsProvider Debug] addDog called with ownerId:', ownerId);
+      
       if (!ownerId) {
         throw new Error('User not authenticated');
       }
@@ -87,7 +112,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
       await fetchDogs(true); // Refresh the list after adding
       return newDog;
     } catch (e) {
-      console.error('Error adding dog:', e);
+      console.error('[DogsProvider Debug] Error adding dog:', e);
       toast({
         title: "Add failed",
         description: e instanceof Error ? e.message : 'Unknown error',
@@ -98,15 +123,24 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
+    console.log('[DogsProvider Debug] useEffect for initial dog fetch. Auth state:', { 
+      authLoading, 
+      isLoggedIn, 
+      userId: user?.id || supabaseUser?.id, 
+      dogLoadingAttempted 
+    });
+    
     if (!authLoading && isLoggedIn && (user?.id || supabaseUser?.id) && !dogLoadingAttempted) {
+      console.log('[DogsProvider Debug] Attempting initial dogs fetch');
       setDogLoadingAttempted(true);
       fetchDogs().catch(err => {
-        console.error('Initial dogs fetch failed:', err);
+        console.error('[DogsProvider Debug] Initial dogs fetch failed:', err);
       });
     }
   }, [authLoading, isLoggedIn, user?.id, supabaseUser?.id, dogLoadingAttempted]);
 
   const isLoading = authLoading || (isLoggedIn && dogsLoading && !dogLoadingAttempted);
+  console.log('[DogsProvider Debug] Final loading state:', isLoading);
 
   const value: DogsContextType = {
     dogs,
@@ -122,6 +156,8 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     removeDog
   };
 
+  console.log('[DogsProvider Debug] Rendering provider with dogs:', dogs?.length || 0);
+  
   return (
     <DogsContext.Provider value={value}>
       {children}

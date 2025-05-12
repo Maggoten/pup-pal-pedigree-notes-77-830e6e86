@@ -1,6 +1,7 @@
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
@@ -58,6 +59,16 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const platform = getPlatformInfo();
   const isMobile = platform.mobile || platform.safari;
   const isLoginPage = location.pathname === '/login';
+  
+  console.log('[AuthGuard] Rendering with:', {
+    isAuthReady,
+    isLoggedIn,
+    isLoading,
+    userId: supabaseUser?.id,
+    currentPath: location.pathname,
+    isMobile,
+    hasActiveUploads
+  });
 
   useEffect(() => {
     setIsManualLogout(manualLogoutInProgress);
@@ -109,12 +120,15 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   }, []);
 
   const shouldRedirectToLogin = useMemo(() => {
-    return isAuthReady &&
+    const shouldRedirect = isAuthReady && 
       !isLoggedIn &&
       !isLoginPage &&
       (!isMobile || mobileAuthTimeout) &&
       !hasActiveUploads &&
       !shouldPreserveAuth();
+    
+    console.log('[AuthGuard] shouldRedirectToLogin:', shouldRedirect);
+    return shouldRedirect;
   }, [
     isAuthReady,
     isLoggedIn,
@@ -125,7 +139,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   ]);
 
   const shouldShowToast = useMemo(() => {
-    return isAuthReady &&
+    const shouldShow = isAuthReady &&
       !isLoggedIn &&
       !isLoginPage &&
       !supabaseUser &&
@@ -135,6 +149,9 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       !hasActiveUploads &&
       !shouldPreserveAuth() &&
       !isManualLogout;
+    
+    console.log('[AuthGuard] shouldShowToast:', shouldShow);
+    return shouldShow;
   }, [
     isAuthReady,
     isLoggedIn,
@@ -167,15 +184,16 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         }
       });
     }
-  }, [shouldShowToast, toast]);
+  }, [shouldShowToast, toast, isMobile]);
 
   // ✅ Endast ett loader-block
   if (!isAuthReady || isLoading) {
+    console.log('[AuthGuard] Showing loading spinner');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center justify-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Initierar autentisering...</p>
+          <p className="text-sm text-muted-foreground">Initializing authentication...</p>
         </div>
       </div>
     );

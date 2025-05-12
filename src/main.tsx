@@ -1,9 +1,5 @@
 
 import { createRoot } from 'react-dom/client'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from './utils/reactQueryConfig'
-import { AuthProvider } from './providers/AuthProvider'
-import { DogsProvider } from './context/DogsContext'
 import App from './App.tsx'
 import './index.css'
 
@@ -27,15 +23,7 @@ const initializeApp = () => {
       return;
     }
     
-    createRoot(rootElement).render(
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <DogsProvider>
-            <App />
-          </DogsProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    );
+    createRoot(rootElement).render(<App />);
     console.log("[App] Successfully mounted React application");
   } catch (error) {
     console.error("[App] Failed to initialize React application:", error);

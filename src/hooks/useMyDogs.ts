@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useDogs } from '@/context/DogsContext';
+import { useDogs } from '@/context/dogs/DogsContext';
 import { Dog } from '@/types/dogs';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -14,7 +14,11 @@ export interface UseMyDogsOptions {
  * Custom hook to manage MyDogs page data, loading, error states and filters
  */
 export const useMyDogs = ({ genderFilter, isAuthReady, isLoggedIn }: UseMyDogsOptions) => {
+  console.log('[useMyDogs Debug] Hook initialized with:', { genderFilter, isAuthReady, isLoggedIn });
+  
   const { dogs, activeDog, loading, error, fetchDogs } = useDogs();
+  console.log('[useMyDogs Debug] Dogs context accessed:', { dogsCount: dogs?.length, loading, hasError: !!error });
+  
   const [showAddDogDialog, setShowAddDogDialog] = useState(false);
   const [pageReady, setPageReady] = useState(false);
   const [retryAttempts, setRetryAttempts] = useState(0);
@@ -23,6 +27,7 @@ export const useMyDogs = ({ genderFilter, isAuthReady, isLoggedIn }: UseMyDogsOp
   // Enhanced delay after auth is ready to avoid premature fetching
   useEffect(() => {
     if (isAuthReady && isLoggedIn) {
+      console.log('[useMyDogs Debug] Auth is ready and user is logged in, setting page ready');
       const timer = setTimeout(() => {
         setPageReady(true);
       }, 500); // 500ms delay for stability
@@ -34,9 +39,9 @@ export const useMyDogs = ({ genderFilter, isAuthReady, isLoggedIn }: UseMyDogsOp
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && pageReady) {
-        console.log('MyDogs: Document became visible, refreshing data');
+        console.log('[useMyDogs Debug] Document became visible, refreshing data');
         fetchDogs(false).catch(err => {
-          console.error('Error refreshing dogs on visibility change:', err);
+          console.error('[useMyDogs Debug] Error refreshing dogs on visibility change:', err);
         });
       }
     };
@@ -66,6 +71,8 @@ export const useMyDogs = ({ genderFilter, isAuthReady, isLoggedIn }: UseMyDogsOp
     ? allDogs 
     : allDogs.filter(dog => dog.gender === genderFilter);
 
+  console.log('[useMyDogs Debug] Filtered dogs:', filteredDogs.length);
+
   // Handle retry with incremental backoff
   const retry = () => {
     setRetryAttempts(prev => prev + 1);
@@ -73,6 +80,7 @@ export const useMyDogs = ({ genderFilter, isAuthReady, isLoggedIn }: UseMyDogsOp
     
     const backoffTime = Math.min(500 * Math.pow(1.5, retryAttempts), 3000);
     setTimeout(() => {
+      console.log('[useMyDogs Debug] Retrying fetch with skipCache=true');
       fetchDogs(true); // Use skipCache=true to force refresh
     }, backoffTime);
   };

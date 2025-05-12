@@ -1,6 +1,6 @@
 
 import { useAuth } from '@/hooks/useAuth';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlusCircle, Filter, AlertCircle, Loader2 } from 'lucide-react';
@@ -19,8 +19,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useMyDogs } from '@/hooks/useMyDogs';
 
 const MyDogs: React.FC = () => {
+  console.log('[MyDogs Page] Page component initializing');
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
-  const { isAuthReady, isLoggedIn } = useAuth();
+  const { isAuthReady, isLoggedIn, user } = useAuth();
+  
+  console.log('[MyDogs Page] Auth state:', { isAuthReady, isLoggedIn, hasUser: !!user });
   
   const {
     filteredDogs,
@@ -37,6 +40,19 @@ const MyDogs: React.FC = () => {
     isAuthReady,
     isLoggedIn
   });
+
+  console.log('[MyDogs Page] useMyDogs result:', { 
+    dogCount: filteredDogs?.length || 0, 
+    loading, 
+    error, 
+    showError,
+    hasActiveDog: !!activeDog
+  });
+
+  // Add effect to log when component renders with filtered dogs
+  useEffect(() => {
+    console.log('[MyDogs Page] Filtered dogs updated:', filteredDogs?.length || 0);
+  }, [filteredDogs]);
 
   return (
     <PageLayout 

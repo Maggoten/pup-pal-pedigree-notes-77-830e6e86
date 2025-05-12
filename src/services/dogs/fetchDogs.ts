@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dogs';
 import { enrichDog, DbDog } from '@/utils/dogUtils';
