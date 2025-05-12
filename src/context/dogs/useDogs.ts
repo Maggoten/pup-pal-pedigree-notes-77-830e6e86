@@ -1,7 +1,7 @@
 
 import { useContext } from 'react';
-import { DogsContext } from './DogsProvider';
-import { DogsContextType } from './types';
+import { DogsContext } from './DogsContext';
+import type { DogsContextType } from './types';
 
 export const useDogs = (): DogsContextType => {
   const context = useContext(DogsContext);
