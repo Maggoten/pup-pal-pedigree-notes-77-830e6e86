@@ -1,19 +1,21 @@
 
+// src/components/home/dashboard-hero/DashboardHero.tsx
+
 import React, { useState } from 'react';
-import MetricCardGrid from './MetricCardGrid';
+import MetricCardGrid from '../dashboard-hero/MetricCardGrid';
 import RemindersDialog from '@/components/reminders/RemindersDialog';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import WelcomeHeader from './WelcomeHeader';
-import DecorativePawprints from './DecorativePawprints';
+import WelcomeHeader from '../dashboard-hero/WelcomeHeader';
+import DecorativePawprints from '../dashboard-hero/DecorativePawprints';
 
 interface DashboardHeroProps {
   username: string;
-  reminders: { count: number; highPriority: number } | undefined;
-  plannedLitters: { count: number; nextDate: Date | null } | undefined;
+  reminders?: { count: number; highPriority: number };
+  plannedLitters?: { count: number; nextDate: Date | null };
   activePregnancies: ActivePregnancy[];
-  recentLitters: { count: number; latest: Date | null } | undefined;
+  recentLitters?: { count: number; latest: Date | null };
   isLoadingPregnancies?: boolean;
 }
 
@@ -28,7 +30,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   const navigate = useNavigate();
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
 
-  // Säkerställ att vi alltid har giltiga objekt
+  // Säkerställ alltid giltiga metric‐värden
   const safeReminders      = reminders      ?? { count: 0, highPriority: 0 };
   const safePlannedLitters = plannedLitters ?? { count: 0, nextDate: null };
   const safeRecentLitters  = recentLitters  ?? { count: 0, latest: null };
@@ -82,15 +84,12 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
     <>
       <div className="rounded-lg overflow-hidden border border-greige-300 beige-gradient relative mt-2 animate-fade-in">
         <WelcomeHeader username={username} />
-
         <DecorativePawprints />
-
         <div className="p-4 md:p-6 relative z-10">
           <MetricCardGrid metricCards={metricCardsData} />
         </div>
       </div>
-
-      <RemindersDialog 
+      <RemindersDialog
         open={remindersDialogOpen}
         onOpenChange={setRemindersDialogOpen}
       />
