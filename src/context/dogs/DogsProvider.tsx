@@ -2,13 +2,13 @@
 import React, { useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { useDogs as useDogsHook } from '@/hooks/dogs';
 import { DogsContext } from './DogsContext';
 import type { DogsContextType } from './types';
 import type { Dog } from '@/types/dogs';
 import { useForceReload } from './useForceReload';
 import { useActiveDog } from './useActiveDog';
 import { useDogOperations } from './useDogOperations';
+import { useDogsQueries } from '@/hooks/dogs/useDogsQueries';
 
 interface DogsProviderProps {
   children: ReactNode;
@@ -29,30 +29,33 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   const [dogLoadingAttempted, setDogLoadingAttempted] = useState(false);
   const { toast } = useToast();
   
+  // Use the React Query-based hook instead of the old hook
   const { 
     dogs, 
     isLoading: dogsLoading, 
-    error, 
-    totalDogs,
-    fetchDogs: fetchDogsBase,
-    addDog: addDogBase, 
-    updateDog: updateDogBase,
-    deleteDog: deleteDogBase
-  } = useDogsHook();
+    error,
+    fetchDogs: fetchDogsBase
+  } = useDogsQueries();
 
-  console.log('[DogsProvider Debug] useDogsHook results:', { 
+  console.log('[DogsProvider Debug] useDogsQueries results:', { 
     dogsCount: dogs?.length || 0, 
     dogsLoading, 
     hasError: !!error,
-    errorDetails: error ? (error instanceof Error ? error.message : String(error)) : 'none'
+    errorDetails: error ? String(error) : 'none'
   });
 
   const { activeDog, setActiveDog } = useActiveDog(dogs);
   const forceReload = useForceReload(user?.id || supabaseUser?.id, fetchDogsBase);
   
   const { updateDog, removeDog } = useDogOperations({
-    updateDogBase,
-    deleteDog: deleteDogBase,
+    updateDogBase: async (id: string, updates: Partial<Dog>) => {
+      // We'll implement this in useDogsMutations
+      throw new Error('Not implemented');
+    },
+    deleteDog: async (id: string) => {
+      // We'll implement this in useDogsMutations
+      throw new Error('Not implemented');
+    },
     refreshDogs: async () => { await fetchDogs(true); },
     activeDog,
     setActiveDog
@@ -108,9 +111,8 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
         throw new Error('User not authenticated');
       }
       
-      const newDog = await addDogBase(dog);
-      await fetchDogs(true); // Refresh the list after adding
-      return newDog;
+      // This will be implemented in useDogsMutations
+      throw new Error('Not implemented');
     } catch (e) {
       console.error('[DogsProvider Debug] Error adding dog:', e);
       toast({
@@ -145,11 +147,11 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   const value: DogsContextType = {
     dogs,
     loading: isLoading,
-    error: error ? (error instanceof Error ? error.message : String(error)) : (authLoading ? null : (!isLoggedIn && !(user?.id || supabaseUser?.id) && dogLoadingAttempted ? 'Authentication required' : null)),
+    error: error ? String(error) : (authLoading ? null : (!isLoggedIn && !(user?.id || supabaseUser?.id) && dogLoadingAttempted ? 'Authentication required' : null)),
     activeDog,
     setActiveDog,
     refreshDogs,
-    totalDogs,
+    totalDogs: dogs.length,
     fetchDogs,
     addDog,
     updateDog,
