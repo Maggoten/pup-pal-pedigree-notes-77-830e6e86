@@ -5,8 +5,8 @@ import { Litter } from '@/types/breeding';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 
-// Define types for Supabase query result to avoid excessive type inference
-type LitterDbRow = {
+// Define a raw litter row type to match database schema
+interface RawLitterRow {
   id: string;
   name: string;
   date_of_birth: string;
@@ -17,13 +17,41 @@ type LitterDbRow = {
   archived: boolean | null;
   user_id: string;
   status?: string;
-};
+  created_at?: string;
+}
 
-// Define the return type of the database query
-type SupabaseLitterResponse = {
-  data: LitterDbRow[] | null;
-  error: Error | null;
-};
+/**
+ * Maps a raw database row to the Litter domain model
+ */
+function mapRawRowToLitter(row: RawLitterRow): Litter {
+  return {
+    id: row.id,
+    name: row.name,
+    dateOfBirth: row.date_of_birth,
+    sireId: row.sire_id || '',
+    damId: row.dam_id || '',
+    sireName: row.sire_name || '',
+    damName: row.dam_name || '',
+    puppies: [],
+    archived: row.archived || false,
+    user_id: row.user_id
+  };
+}
+
+/**
+ * Fetch litters from Supabase
+ */
+async function fetchLittersFromSupabase(userId: string, status: 'active' | 'archived'): Promise<RawLitterRow[]> {
+  const { data, error } = await supabase
+    .from('litters')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('status', status)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data || []) as RawLitterRow[];
+}
 
 export function useLitterQueries() {
   const { user } = useAuth();
@@ -33,47 +61,14 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Define a function with explicit return type
-      const fetchFunction = async (): Promise<Litter[]> => {
-        // Explicitly type the response
-        const response: SupabaseLitterResponse = await supabase
-          .from('litters')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('status', 'active')
-          .order('created_at', { ascending: false });
-          
-        const { data, error } = response;
-        
-        if (error) {
-          throw error;
-        }
-        
-        // Transform the data to match the Litter interface
-        const litters: Litter[] = (data || []).map(item => ({
-          id: item.id,
-          name: item.name,
-          dateOfBirth: item.date_of_birth,
-          sireId: item.sire_id || '',
-          damId: item.dam_id || '',
-          sireName: item.sire_name || '',
-          damName: item.dam_name || '',
-          puppies: [],
-          archived: item.archived || false,
-          user_id: item.user_id
-        }));
-        
-        return litters;
-      };
-      
-      // Use fetchWithRetry with explicit return type
-      return await fetchWithRetry<Litter[]>(
-        fetchFunction,
-        { 
-          maxRetries: 2,
-          initialDelay: 1000
-        }
+      // Fetch raw litter data with retry
+      const rawLitters = await fetchWithRetry<RawLitterRow[]>(
+        () => fetchLittersFromSupabase(userId, 'active'),
+        { maxRetries: 2, initialDelay: 1000 }
       );
+      
+      // Map to domain model
+      return rawLitters.map(mapRawRowToLitter);
     } catch (error) {
       console.error("Error fetching active litters:", error);
       return [];
@@ -84,47 +79,14 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Define a function with explicit return type
-      const fetchFunction = async (): Promise<Litter[]> => {
-        // Explicitly type the response
-        const response: SupabaseLitterResponse = await supabase
-          .from('litters')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('status', 'archived')
-          .order('created_at', { ascending: false });
-          
-        const { data, error } = response;
-        
-        if (error) {
-          throw error;
-        }
-        
-        // Transform the data to match the Litter interface
-        const litters: Litter[] = (data || []).map(item => ({
-          id: item.id,
-          name: item.name,
-          dateOfBirth: item.date_of_birth,
-          sireId: item.sire_id || '',
-          damId: item.dam_id || '',
-          sireName: item.sire_name || '',
-          damName: item.dam_name || '',
-          puppies: [],
-          archived: item.archived || false,
-          user_id: item.user_id
-        }));
-        
-        return litters;
-      };
-      
-      // Use fetchWithRetry with explicit return type
-      return await fetchWithRetry<Litter[]>(
-        fetchFunction,
-        { 
-          maxRetries: 2,
-          initialDelay: 1000
-        }
+      // Fetch raw litter data with retry
+      const rawLitters = await fetchWithRetry<RawLitterRow[]>(
+        () => fetchLittersFromSupabase(userId, 'archived'),
+        { maxRetries: 2, initialDelay: 1000 }
       );
+      
+      // Map to domain model
+      return rawLitters.map(mapRawRowToLitter);
     } catch (error) {
       console.error("Error fetching archived litters:", error);
       return [];
