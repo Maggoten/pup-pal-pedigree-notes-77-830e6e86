@@ -204,6 +204,12 @@ export const useDogsQueries = (): UseDogsQueries => {
     isLoading: isLoading || isInitialLoad || authLoading || !isAuthReady,
     error: error ? (error instanceof Error ? error.message : 'Unknown error') : null,
     fetchDogs: refreshDogs,
-    useDogs: () => ({ data: dogs, isLoading: isLoading || isInitialLoad || authLoading || !isAuthReady, error })
+    useDogs: () => ({ 
+      data: dogs, 
+      isLoading: isLoading || isInitialLoad || authLoading || !isAuthReady, 
+      error,
+      totalDogs: dogs?.length || 0  // Ensure we always return totalDogs
+    }),
+    totalDogs: dogs?.length || 0  // Add the totalDogs property here too
   };
 };

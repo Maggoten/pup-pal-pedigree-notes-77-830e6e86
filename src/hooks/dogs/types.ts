@@ -6,7 +6,8 @@ export interface UseDogsQueries {
   isLoading: boolean; 
   error: string | null;
   fetchDogs: (skipCache?: boolean) => Promise<Dog[]>;
-  useDogs: () => { data: Dog[], isLoading: boolean, error: unknown };
+  useDogs: () => { data: Dog[], isLoading: boolean, error: unknown, totalDogs: number };
+  totalDogs: number;  // Add the totalDogs property to the interface
 }
 
 export interface UseDogsMutations {
