@@ -13,7 +13,13 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      const result = await fetchWithRetry(
+      // Explicitly type the result from fetchWithRetry to avoid deep type instantiation
+      type SupabaseResult = {
+        data: any[] | null;
+        error: any;
+      };
+      
+      const result = await fetchWithRetry<SupabaseResult>(
         async () => {
           const { data, error } = await supabase
             .from('litters')
@@ -40,7 +46,7 @@ export function useLitterQueries() {
             user_id: item.user_id
           } as Litter));
           
-          return litters;
+          return { data: litters, error: null };
         },
         { 
           maxRetries: 2,
@@ -48,7 +54,7 @@ export function useLitterQueries() {
         }
       );
       
-      return result as Litter[];
+      return result.data || [];
     } catch (error) {
       console.error("Error fetching active litters:", error);
       return [];
@@ -59,7 +65,13 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      const result = await fetchWithRetry(
+      // Explicitly type the result from fetchWithRetry to avoid deep type instantiation
+      type SupabaseResult = {
+        data: any[] | null;
+        error: any;
+      };
+      
+      const result = await fetchWithRetry<SupabaseResult>(
         async () => {
           const { data, error } = await supabase
             .from('litters')
@@ -86,7 +98,7 @@ export function useLitterQueries() {
             user_id: item.user_id
           } as Litter));
           
-          return litters;
+          return { data: litters, error: null };
         },
         { 
           maxRetries: 2,
@@ -94,7 +106,7 @@ export function useLitterQueries() {
         }
       );
       
-      return result as Litter[];
+      return result.data || [];
     } catch (error) {
       console.error("Error fetching archived litters:", error);
       return [];
