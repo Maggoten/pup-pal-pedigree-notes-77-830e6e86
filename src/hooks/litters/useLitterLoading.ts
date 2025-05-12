@@ -25,7 +25,7 @@ export const useLitterLoading = (loadFunction: () => Promise<Litter[]>) => {
         }
       );
       
-      // Type assertion to ensure TypeScript knows fetchedLitters is Litter[]
+      // Ensure fetchedLitters is properly typed
       const typedLitters = fetchedLitters as Litter[];
       setLitters(typedLitters);
       console.log(`Loaded ${typedLitters.length} litters`);

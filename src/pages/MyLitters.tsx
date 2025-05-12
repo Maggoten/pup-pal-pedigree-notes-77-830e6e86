@@ -4,7 +4,6 @@ import PageLayout from '@/components/PageLayout';
 import { LitterFilterProvider } from '@/components/litters/LitterFilterProvider';
 import MyLittersContent from '@/components/litters/MyLittersContent';
 import { Archive } from 'lucide-react';
-import { useLitterQueries } from '@/hooks/litters/queries/useLitterQueries';
 
 const MyLitters: React.FC = () => {
   return (

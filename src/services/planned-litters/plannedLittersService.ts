@@ -8,17 +8,21 @@ import { PlannedLitterFormValues } from './types';
 export const fetchPlannedLitters = async (userId: string): Promise<PlannedLitter[]> => {
   try {
     // Fetch planned litters from Supabase for the current user
-    const { data, error } = await fetchWithRetry(
-      () => supabase
-        .from('planned_litters')
-        .select('*, dam:dam_id(*), sire:sire_id(*)')
-        .eq('user_id', userId)
-        .order('expected_heat_date', { ascending: true }),
+    const response = await fetchWithRetry(
+      async () => {
+        return supabase
+          .from('planned_litters')
+          .select('*, dam:dam_id(*), sire:sire_id(*)')
+          .eq('user_id', userId)
+          .order('expected_heat_date', { ascending: true });
+      },
       {
         maxRetries: 3,
         initialDelay: 1000
       }
     );
+    
+    const { data, error } = await response;
     
     if (error) {
       console.error("Error fetching planned litters:", error);
@@ -26,7 +30,21 @@ export const fetchPlannedLitters = async (userId: string): Promise<PlannedLitter
     }
     
     console.log(`Found ${data?.length} planned litters for user ${userId}`);
-    return data || [];
+    
+    // Map the database fields to our frontend PlannedLitter type
+    return (data || []).map(item => ({
+      id: item.id,
+      maleId: item.male_id || '',
+      femaleId: item.female_id,
+      maleName: item.male_name || '',
+      femaleName: item.female_name,
+      expectedHeatDate: item.expected_heat_date,
+      notes: item.notes,
+      matingDates: [], // This would be populated from a join or separate query
+      externalMale: item.external_male || false,
+      externalMaleBreed: item.external_male_breed,
+      externalMaleRegistration: item.external_male_registration
+    }));
   } catch (error) {
     console.error("Error fetching planned litters:", error);
     return [];
@@ -63,7 +81,20 @@ export const createPlannedLitter = async (formValues: PlannedLitterFormValues): 
       throw error;
     }
     
-    return data as PlannedLitter;
+    // Map the DB response to our PlannedLitter type
+    return {
+      id: data.id,
+      maleId: data.male_id || '',
+      femaleId: data.female_id,
+      maleName: data.male_name || '',
+      femaleName: data.female_name,
+      expectedHeatDate: data.expected_heat_date,
+      notes: data.notes,
+      matingDates: [],
+      externalMale: data.external_male || false,
+      externalMaleBreed: data.external_male_breed,
+      externalMaleRegistration: data.external_male_registration
+    };
   } catch (error) {
     console.error('Error creating planned litter:', error);
     throw error;

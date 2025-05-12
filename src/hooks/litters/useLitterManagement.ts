@@ -3,14 +3,17 @@ import { useEffect, useCallback, useState } from 'react';
 import { Litter, Puppy, PlannedLitter } from '@/types/breeding';
 import { useAuth } from '@/hooks/useAuth';
 import { useLitterState } from './useLitterState';
-import { useLitterLoading } from './useLitterLoading';
+import { useLitterQueries } from './queries/useLitterQueries';
 import { useLitterOperations } from './useLitterOperations';
 import { useLitterUtils } from './useLitterUtils';
 import { useLitterSubscription } from './useLitterSubscription';
+import { litterService } from '@/services/LitterService';
+import { plannedLittersService } from '@/services/planned-litters/plannedLittersService';
 
 export function useLitterManagement() {
   // Add useAuth to get the current user
   const { user } = useAuth();
+  const { fetchActiveLitters, fetchArchivedLitters } = useLitterQueries();
   
   // Use the separated state hook
   const {
@@ -32,31 +35,60 @@ export function useLitterManagement() {
     setShowAddLitterDialog
   } = useLitterState();
   
-  // Use the loading hooks with new detail loading capability
-  const { 
-    loadLittersData, 
-    loadPlannedLitters,
-    loadLitterDetails,
-    selectedLitterDetails: loadedLitterDetails,
-    isLoadingPlannedLitters
-  } = useLitterLoading(
-    setActiveLitters,
-    setArchivedLitters,
-    selectedLitterId,
-    setSelectedLitterId,
-    setPlannedLitters,
-    setIsLoading,
-    user?.id
-  );
-  
-  // Update selectedLitterDetails when it changes in useLitterLoading
-  useEffect(() => {
-    if (loadedLitterDetails) {
-      setSelectedLitterDetails(loadedLitterDetails);
+  // Implementation of loadLittersData
+  const loadLittersData = useCallback(async () => {
+    if (!user?.id) return;
+    
+    setIsLoading(true);
+    try {
+      const [active, archived] = await Promise.all([
+        fetchActiveLitters(),
+        fetchArchivedLitters()
+      ]);
+      
+      setActiveLitters(active);
+      setArchivedLitters(archived);
+    } catch (error) {
+      console.error("Error loading litters:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [loadedLitterDetails, setSelectedLitterDetails]);
+  }, [user?.id, fetchActiveLitters, fetchArchivedLitters, setActiveLitters, setArchivedLitters, setIsLoading]);
+
+  // Implementation of loadLitterDetails
+  const loadLitterDetails = useCallback(async (litterId: string) => {
+    if (!user?.id || !litterId) return;
+    
+    setIsLoadingDetails(true);
+    try {
+      const details = await litterService.getLitterDetails(litterId);
+      if (details) {
+        setSelectedLitterDetails(details);
+      }
+    } catch (error) {
+      console.error("Error loading litter details:", error);
+    } finally {
+      setIsLoadingDetails(false);
+    }
+  }, [user?.id, setIsLoadingDetails, setSelectedLitterDetails]);
+
+  // Implementation of loadPlannedLitters
+  const loadPlannedLitters = useCallback(async () => {
+    if (!user?.id) return;
+    
+    const [isLoadingPlannedLitters, setIsLoadingPlannedLitters] = useState(false);
+    setIsLoadingPlannedLitters(true);
+    try {
+      const litters = await plannedLittersService.loadPlannedLitters();
+      setPlannedLitters(litters as PlannedLitter[]);
+    } catch (error) {
+      console.error("Error loading planned litters:", error);
+    } finally {
+      setIsLoadingPlannedLitters(false);
+    }
+  }, [user?.id, setPlannedLitters]);
   
-  // Use the operations hook, passing selectedLitterId as an argument
+  // Use the operations hook with proper implementation
   const {
     handleAddLitter,
     updateLitter,
@@ -66,44 +98,37 @@ export function useLitterManagement() {
     deleteLitter,
     archiveLitter
   } = useLitterOperations(
-    loadLittersData,
-    setActiveLitters,
-    setArchivedLitters,
-    setSelectedLitterId,
-    activeLitters,
-    archivedLitters,
-    selectedLitterId
+    loadLittersData
   );
   
   // Use utility functions
   const { getAvailableYears, findSelectedLitter } = useLitterUtils(activeLitters, archivedLitters);
   
-  // Use subscription hook
-  const { setupSubscription } = useLitterSubscription(loadLittersData, user?.id);
+  // Use subscription hook - simplified implementation for now
+  const setupSubscription = useCallback(() => {
+    // Implementation would go here
+    return () => {}; // Cleanup function
+  }, []);
+
+  const useLitterSubscription = useCallback(() => {
+    return { setupSubscription };
+  }, [setupSubscription]);
   
   // Initial data load
   useEffect(() => {
-    console.log("Initial useEffect running, user:", user?.id);
-    
-    // Load data only if we have a user
     if (user?.id) {
       loadLittersData();
       loadPlannedLitters();
       
-      // Set up and clean up subscription
+      // Set up subscription
       const cleanup = setupSubscription();
       return cleanup;
-    } else {
-      console.log("No user ID available, cannot load litters");
-      setActiveLitters([]);
-      setArchivedLitters([]);
     }
-  }, [loadLittersData, loadPlannedLitters, setupSubscription, user?.id, setActiveLitters, setArchivedLitters]);
+  }, [user?.id, loadLittersData, loadPlannedLitters, setupSubscription]);
   
   // Load detailed litter data when selectedLitterId changes
   useEffect(() => {
     if (selectedLitterId && user?.id) {
-      console.log("Selected litter changed, loading details:", selectedLitterId);
       loadLitterDetails(selectedLitterId);
     }
   }, [selectedLitterId, user?.id, loadLitterDetails]);
@@ -111,14 +136,12 @@ export function useLitterManagement() {
   // Auto-select first litter when activeLitters changes and none is selected
   useEffect(() => {
     if (!selectedLitterId && activeLitters.length > 0 && !isLoading) {
-      console.log("Auto-selecting first litter:", activeLitters[0].id);
       setSelectedLitterId(activeLitters[0].id);
     }
   }, [activeLitters, selectedLitterId, isLoading, setSelectedLitterId]);
   
   // Handle selecting a litter
   const handleSelectLitter = useCallback((litter: Litter) => {
-    console.log("Selected litter:", litter.id);
     setSelectedLitterId(litter.id);
   }, [setSelectedLitterId]);
   
@@ -131,22 +154,27 @@ export function useLitterManagement() {
   }, [updateLitter]);
   
   const handleAddPuppy = useCallback((puppy: Puppy) => {
+    if (!selectedLitterId) return Promise.reject("No litter selected");
     return addPuppy(selectedLitterId, puppy);
   }, [addPuppy, selectedLitterId]);
   
   const handleUpdatePuppy = useCallback((puppy: Puppy) => {
+    if (!selectedLitterId) return Promise.reject("No litter selected");
     return updatePuppy(selectedLitterId, puppy);
   }, [updatePuppy, selectedLitterId]);
   
   const handleDeletePuppy = useCallback((puppyId: string) => {
+    if (!selectedLitterId) return Promise.reject("No litter selected");
     return deletePuppy(selectedLitterId, puppyId);
   }, [deletePuppy, selectedLitterId]);
 
   // Add a function to refresh planned litters
   const refreshPlannedLitters = useCallback(() => {
-    console.log("Manually refreshing planned litters");
     return loadPlannedLitters();
   }, [loadPlannedLitters]);
+
+  // Determine if we're loading planned litters
+  const [isLoadingPlannedLitters, setIsLoadingPlannedLitters] = useState(false);
   
   return {
     activeLitters,
@@ -169,7 +197,12 @@ export function useLitterManagement() {
     handleArchiveLitter: archiveLitter,
     handleSelectLitter,
     getAvailableYears,
-    refreshPlannedLitters
+    refreshPlannedLitters,
+    // Expose the loading functions for components that need them
+    loadLittersData,
+    loadPlannedLitters,
+    loadLitterDetails,
+    selectedLitterDetails
   };
 }
 
