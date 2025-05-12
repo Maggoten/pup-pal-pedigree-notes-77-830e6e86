@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
-import { Loader2, Heart, Plus, Settings } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { usePregnancyDetails } from '@/hooks/usePregnancyDetails';
 import { getActivePregnancies } from '@/services/PregnancyService';
 import PregnancyTabs from '@/components/pregnancy/PregnancyTabs';
@@ -16,158 +16,71 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const PregnancyDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const { pregnancy, loading } = usePregnancyDetails(id);
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
   const [loadingPregnancies, setLoadingPregnancies] = useState(true);
   const [addPregnancyDialogOpen, setAddPregnancyDialogOpen] = useState(false);
   const [managePregnancyDialogOpen, setManagePregnancyDialogOpen] = useState(false);
   const isMobile = useIsMobile();
 
+  // ✅ Skydda innan hook anropas
+  if (!id) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Laddar dräktighetsdata...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { pregnancy, loading } = usePregnancyDetails(id);
+
   useEffect(() => {
     const fetchPregnancies = async () => {
       try {
-        setLoadingPregnancies(true);
-        const pregnancies = await getActivePregnancies();
-        console.log("Fetched pregnancies for dropdown:", pregnancies.length);
-        setActivePregnancies(pregnancies);
+        const result = await getActivePregnancies();
+        setActivePregnancies(result);
       } catch (error) {
-        console.error("Error fetching pregnancies:", error);
+        console.error("Error loading pregnancies:", error);
       } finally {
         setLoadingPregnancies(false);
       }
     };
-    
+
     fetchPregnancies();
   }, []);
 
-  const handleAddPregnancyClick = () => {
-    setAddPregnancyDialogOpen(true);
-  };
-
-  const handleManagePregnancyClick = () => {
-    setManagePregnancyDialogOpen(true);
-  };
-
-  const handleAddPregnancyDialogClose = () => {
-    setAddPregnancyDialogOpen(false);
-    // Refresh pregnancies list after adding a new pregnancy
-    const fetchPregnancies = async () => {
-      try {
-        const pregnancies = await getActivePregnancies();
-        setActivePregnancies(pregnancies);
-      } catch (error) {
-        console.error("Error refreshing pregnancies:", error);
-      }
-    };
-    fetchPregnancies();
-  };
-
-  const handleManagePregnancyDialogClose = () => {
-    setManagePregnancyDialogOpen(false);
-  };
-
-  if (loading || loadingPregnancies) {
-    return (
-      <PageLayout 
-        title="Pregnancy Details" 
-        description="Loading pregnancy details..."
-        icon={<Heart className="h-6 w-6" />}
-      >
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2 text-lg">Loading pregnancy details...</span>
-        </div>
-      </PageLayout>
-    );
-  }
-
-  if (!pregnancy) {
-    return (
-      <PageLayout 
-        title="Pregnancy Not Found" 
-        description="The requested pregnancy could not be found"
-        icon={<Heart className="h-6 w-6" />}
-      >
-        <div className="text-center py-12">
-          <h3 className="text-xl font-medium text-greige-700">Pregnancy Not Found</h3>
-          <p className="text-greige-500 mt-2">The pregnancy you are looking for doesn't exist or has been archived.</p>
-        </div>
-      </PageLayout>
-    );
-  }
-
   return (
-    <PageLayout 
-      title={`${pregnancy.femaleName}'s Pregnancy`} 
-      description="Track pregnancy progress and development"
-      icon={<Heart className="h-6 w-6" />}
-    >
-      {/* Updated vertically stacked action section */}
-      <div className="flex flex-col gap-4 mb-6 max-w-xs">
-        {/* 1. Add Pregnancy button (primary action) */}
-        <Button 
-          onClick={handleAddPregnancyClick} 
-          variant="default"
-          className="flex items-center gap-2 w-full justify-center py-3"
-        >
-          <Plus className="h-4 w-4" />
-          Add Pregnancy
-        </Button>
-        
-        {/* 2. Manage Pregnancy button (secondary action) */}
-        <Button 
-          onClick={handleManagePregnancyClick} 
-          variant="outline"
-          className="flex items-center gap-2 w-full justify-center py-3"
-        >
-          <Settings className="h-4 w-4" />
-          Manage Pregnancy
-        </Button>
-        
-        {/* 3. Pregnancy selection dropdown */}
-        <div className="w-full">
-          <PregnancyDropdownSelector 
-            pregnancies={activePregnancies} 
-            currentPregnancyId={pregnancy.id}
-            fullWidth={true}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-8">
-        {/* Hero Section with Pregnancy Summary Cards */}
-        <PregnancySummaryCards
-          matingDate={pregnancy.matingDate}
-          expectedDueDate={pregnancy.expectedDueDate}
-          daysLeft={pregnancy.daysLeft}
-        />
-        
-        {/* Full Width Pregnancy Journey Tabs */}
-        <div className="w-full">
-          <PregnancyTabs 
-            pregnancyId={pregnancy.id}
-            femaleName={pregnancy.femaleName}
-            matingDate={pregnancy.matingDate}
-            expectedDueDate={pregnancy.expectedDueDate}
-          />
-        </div>
-      </div>
-
-      <AddPregnancyDialog 
-        open={addPregnancyDialogOpen} 
-        onOpenChange={setAddPregnancyDialogOpen}
-        onClose={handleAddPregnancyDialogClose}
+    <PageLayout>
+      <PregnancyDropdownSelector
+        pregnancies={activePregnancies}
+        loading={loadingPregnancies}
+        currentPregnancyId={id}
       />
 
-      {pregnancy && (
-        <ManagePregnancyDialog
-          pregnancyId={pregnancy.id}
-          femaleName={pregnancy.femaleName}
-          open={managePregnancyDialogOpen}
-          onOpenChange={setManagePregnancyDialogOpen}
-          onClose={handleManagePregnancyDialogClose}
-        />
-      )}
+      <div className="my-4">
+        <PregnancySummaryCards pregnancy={pregnancy} loading={loading} />
+      </div>
+
+      <PregnancyTabs
+        pregnancy={pregnancy}
+        loading={loading}
+        onEdit={() => setManagePregnancyDialogOpen(true)}
+        onAdd={() => setAddPregnancyDialogOpen(true)}
+        isMobile={isMobile}
+      />
+
+      <AddPregnancyDialog
+        open={addPregnancyDialogOpen}
+        onOpenChange={setAddPregnancyDialogOpen}
+      />
+
+      <ManagePregnancyDialog
+        open={managePregnancyDialogOpen}
+        onOpenChange={setManagePregnancyDialogOpen}
+        pregnancy={pregnancy}
+      />
     </PageLayout>
   );
 };
