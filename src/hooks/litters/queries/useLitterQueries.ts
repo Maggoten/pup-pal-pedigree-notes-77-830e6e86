@@ -16,6 +16,13 @@ type LitterDbRow = {
   dam_name: string | null;
   archived: boolean | null;
   user_id: string;
+  status?: string;
+};
+
+// Define the return type of the database query
+type SupabaseLitterResponse = {
+  data: LitterDbRow[] | null;
+  error: Error | null;
 };
 
 export function useLitterQueries() {
@@ -26,24 +33,24 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Create a simple function that returns a Promise<Litter[]>
+      // Define a function with explicit return type
       const fetchFunction = async (): Promise<Litter[]> => {
-        const { data, error } = await supabase
+        // Explicitly type the response
+        const response: SupabaseLitterResponse = await supabase
           .from('litters')
           .select('*')
           .eq('user_id', userId)
           .eq('status', 'active')
           .order('created_at', { ascending: false });
+          
+        const { data, error } = response;
         
         if (error) {
           throw error;
         }
         
-        // Cast the data to ensure TypeScript knows what we're working with
-        const litterData = data as LitterDbRow[] | null;
-        
         // Transform the data to match the Litter interface
-        const litters = (litterData || []).map(item => ({
+        const litters: Litter[] = (data || []).map(item => ({
           id: item.id,
           name: item.name,
           dateOfBirth: item.date_of_birth,
@@ -54,21 +61,19 @@ export function useLitterQueries() {
           puppies: [],
           archived: item.archived || false,
           user_id: item.user_id
-        } as Litter));
+        }));
         
         return litters;
       };
       
-      // Use typed version of fetchWithRetry
-      const result = await fetchWithRetry<Litter[]>(
+      // Use fetchWithRetry with explicit return type
+      return await fetchWithRetry<Litter[]>(
         fetchFunction,
         { 
           maxRetries: 2,
           initialDelay: 1000
         }
       );
-      
-      return result;
     } catch (error) {
       console.error("Error fetching active litters:", error);
       return [];
@@ -79,24 +84,24 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Create a simple function that returns a Promise<Litter[]>
+      // Define a function with explicit return type
       const fetchFunction = async (): Promise<Litter[]> => {
-        const { data, error } = await supabase
+        // Explicitly type the response
+        const response: SupabaseLitterResponse = await supabase
           .from('litters')
           .select('*')
           .eq('user_id', userId)
           .eq('status', 'archived')
           .order('created_at', { ascending: false });
+          
+        const { data, error } = response;
         
         if (error) {
           throw error;
         }
         
-        // Cast the data to ensure TypeScript knows what we're working with
-        const litterData = data as LitterDbRow[] | null;
-        
         // Transform the data to match the Litter interface
-        const litters = (litterData || []).map(item => ({
+        const litters: Litter[] = (data || []).map(item => ({
           id: item.id,
           name: item.name,
           dateOfBirth: item.date_of_birth,
@@ -107,21 +112,19 @@ export function useLitterQueries() {
           puppies: [],
           archived: item.archived || false,
           user_id: item.user_id
-        } as Litter));
+        }));
         
         return litters;
       };
       
-      // Use typed version of fetchWithRetry
-      const result = await fetchWithRetry<Litter[]>(
+      // Use fetchWithRetry with explicit return type
+      return await fetchWithRetry<Litter[]>(
         fetchFunction,
         { 
           maxRetries: 2,
           initialDelay: 1000
         }
       );
-      
-      return result;
     } catch (error) {
       console.error("Error fetching archived litters:", error);
       return [];
