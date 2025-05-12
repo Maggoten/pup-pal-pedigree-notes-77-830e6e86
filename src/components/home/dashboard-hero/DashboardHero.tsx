@@ -2,13 +2,13 @@
 // src/components/home/dashboard-hero/DashboardHero.tsx
 
 import React, { useState } from 'react';
-import MetricCardGrid from '../dashboard-hero/MetricCardGrid';
+import MetricCardGrid from './MetricCardGrid';
 import RemindersDialog from '@/components/reminders/RemindersDialog';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import WelcomeHeader from '../dashboard-hero/WelcomeHeader';
-import DecorativePawprints from '../dashboard-hero/DecorativePawprints';
+import WelcomeHeader from './WelcomeHeader';
+import DecorativePawprints from './DecorativePawprints';
 
 interface DashboardHeroProps {
   username: string;
@@ -30,11 +30,12 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   const navigate = useNavigate();
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
 
-  // Säkerställ alltid giltiga metric‐värden
+  // 1) Skapa säkra fallback-objekt om något är undefined
   const safeReminders      = reminders      ?? { count: 0, highPriority: 0 };
   const safePlannedLitters = plannedLitters ?? { count: 0, nextDate: null };
   const safeRecentLitters  = recentLitters  ?? { count: 0, latest: null };
 
+  // 2) Metric-korten använder nu alltid safe*-objekt
   const metricCardsData = [
     {
       title: "Reminders",
@@ -89,7 +90,8 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
           <MetricCardGrid metricCards={metricCardsData} />
         </div>
       </div>
-      <RemindersDialog
+
+      <RemindersDialog 
         open={remindersDialogOpen}
         onOpenChange={setRemindersDialogOpen}
       />
