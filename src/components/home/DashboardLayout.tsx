@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import PageLayout from '@/components/PageLayout';
-import DashboardHero from './dashboard-hero';
+// Uppdaterad import-väg:
+import DashboardHero from './dashboard-hero/DashboardHero';
 import DashboardContent from './DashboardContent';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { getDisplayUsername } from '@/utils/userDisplayUtils';
@@ -21,7 +22,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   user,
   activePregnancies: initialActivePregnancies = []
 }) => {
-  // 1) Visa loader tills vi vet att användaren är inloggad
+  // 1) Visa loader tills användaren är klar
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -33,16 +34,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     );
   }
 
-  // 2) Local state för aktiva dräktigheter
+  // 2) State för aktiva dräktigheter
   const [activePregnancies, setActivePregnancies] =
     useState<ActivePregnancy[]>(initialActivePregnancies);
   const [isLoadingPregnancies, setIsLoadingPregnancies] =
     useState(initialActivePregnancies.length === 0);
 
-  // 3) Hämta all dashboard‐data
-  const dashboardData = useDashboardData();
-
-  // 4) Plocka ut värden, men utan default här
+  // 3) Hämta dashboard-data
   const {
     remindersSummary,
     plannedLittersData,
@@ -59,17 +57,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     remindersError,
     handleMarkComplete,
     isDataReady
-  } = dashboardData;
+  } = useDashboardData();
 
-  // 5) Skapa säkra fallback‐objekt
-  const safeReminders     = remindersSummary     ?? { count: 0, highPriority: 0 };
-  const safePlannedLitters= plannedLittersData   ?? { count: 0, nextDate: null };
-  const safeRecentLitters = recentLittersData    ?? { count: 0, latest: null };
+  // 4) Säkra fallback-objekt
+  const safeReminders      = remindersSummary     ?? { count: 0, highPriority: 0 };
+  const safePlannedLitters = plannedLittersData   ?? { count: 0, nextDate: null };
+  const safeRecentLitters  = recentLittersData    ?? { count: 0, latest: null };
 
-  // 6) Hälsningsnamn
+  // 5) Hälsningsnamn
   const username = getDisplayUsername(user);
 
-  // 7) Ladda aktiva dräktigheter om vi inte redan har dem
+  // 6) Ladda aktiva dräktigheter om vi inte redan har dem
   useEffect(() => {
     if (initialActivePregnancies.length > 0) return;
 
@@ -93,7 +91,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     fetchActivePregnancies();
   }, [initialActivePregnancies.length]);
 
-  // 8) Props till kalendern och reminders‐listan
+  // 7) Props till kalender och reminders-lista
   const calendarProps = {
     getEventsForDate,
     getEventColor,
@@ -111,15 +109,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     markComplete: handleMarkComplete
   };
 
-  // 9) Rendera layout + hero
+  // 8) Rendera layout + hero
   return (
     <PageLayout>
       <DashboardHero
         username={username}
-        reminders={safeReminders}               // inga fler undefined.count
-        plannedLitters={safePlannedLitters}     // alltid ett objekt
+        reminders={safeReminders}
+        plannedLitters={safePlannedLitters}
         activePregnancies={activePregnancies}
-        recentLitters={safeRecentLitters}       // alltid ett objekt
+        recentLitters={safeRecentLitters}
         isLoadingPregnancies={isLoadingPregnancies}
       />
 
