@@ -57,11 +57,12 @@ export function useLitterQueries() {
   const { user } = useAuth();
   const userId = user?.id;
   
+  // Explicitly type the return value to avoid deep type inference
   const fetchActiveLitters = useCallback(async (): Promise<Litter[]> => {
     if (!userId) return [];
     
     try {
-      // Fetch raw litter data with retry
+      // Simplified approach using proper type annotations
       const rawLitters = await fetchWithRetry<RawLitterRow[]>(
         () => fetchLittersFromSupabase(userId, 'active'),
         { maxRetries: 2, initialDelay: 1000 }
@@ -75,11 +76,12 @@ export function useLitterQueries() {
     }
   }, [userId]);
   
+  // Explicitly type the return value to avoid deep type inference
   const fetchArchivedLitters = useCallback(async (): Promise<Litter[]> => {
     if (!userId) return [];
     
     try {
-      // Fetch raw litter data with retry
+      // Simplified approach using proper type annotations
       const rawLitters = await fetchWithRetry<RawLitterRow[]>(
         () => fetchLittersFromSupabase(userId, 'archived'),
         { maxRetries: 2, initialDelay: 1000 }
