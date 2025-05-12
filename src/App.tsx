@@ -1,15 +1,14 @@
-
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './utils/reactQueryConfig';
 import { AuthProvider } from './providers/AuthProvider';
 import { DogsProvider } from './context/DogsContext';
-import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { getFirstActivePregnancy } from "./services/PregnancyService";
 import { useState, useEffect } from "react";
+import { Loader2 } from 'lucide-react';
 
-// Import all pages
+// Pages
 import Index from './pages/Index';
 import MyDogs from './pages/MyDogs';
 import PlannedLitters from './pages/PlannedLitters';
@@ -19,9 +18,8 @@ import MyLitters from './pages/MyLitters';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 
-// Create a separate component for the routes to access hooks
 const AppContent = () => {
-  const { user } = useAuth();
+  const { user, isAuthReady } = useAuth();
   const [firstPregnancyId, setFirstPregnancyId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,41 +33,36 @@ const AppContent = () => {
       }
     };
 
-    fetchPregnancy();
-  }, [user]);
+    if (isAuthReady && user) {
+      fetchPregnancy();
+    }
+  }, [user, isAuthReady]);
+
+  if (!isAuthReady) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Laddar autentisering...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Routes>
-      <Route path="/pregnancy" element={
-        firstPregnancyId
-          ? <Navigate to={`/pregnancy/${firstPregnancyId}`} replace />
-          : <Pregnancy />
-      } />
-      {/* all other routes */}
       <Route path="/" element={<Index />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/my-dogs" element={<MyDogs />} />
       <Route path="/planned-litters" element={<PlannedLitters />} />
+      <Route
+        path="/pregnancy"
+        element={
+          firstPregnancyId
+            ? <Navigate to={`/pregnancy/${firstPregnancyId}`} replace />
+            : <Pregnancy />
+        }
+      />
       <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
       <Route path="/my-litters" element={<MyLitters />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  );
-};
-
-// Updated App component with proper provider hierarchy
-const App = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <DogsProvider>
-            <AppContent />
-          </DogsProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
-  );
-};
-
-export default App;
+      <Route path="*" element*
