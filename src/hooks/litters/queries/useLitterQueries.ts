@@ -9,7 +9,7 @@ export function useLitterQueries() {
   const { user } = useAuth();
   const userId = user?.id;
   
-  const fetchActiveLitters = useCallback(async () => {
+  const fetchActiveLitters = useCallback(async (): Promise<Litter[]> => {
     if (!userId) return [];
     
     try {
@@ -55,7 +55,7 @@ export function useLitterQueries() {
     }
   }, [userId]);
   
-  const fetchArchivedLitters = useCallback(async () => {
+  const fetchArchivedLitters = useCallback(async (): Promise<Litter[]> => {
     if (!userId) return [];
     
     try {

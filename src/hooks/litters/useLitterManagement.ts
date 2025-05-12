@@ -1,4 +1,3 @@
-
 import { useEffect, useCallback, useState } from 'react';
 import { Litter, Puppy, PlannedLitter } from '@/types/breeding';
 import { useAuth } from '@/hooks/useAuth';
@@ -110,13 +109,8 @@ export function useLitterManagement() {
   // Use utility functions
   const { getAvailableYears, findSelectedLitter } = useLitterUtils(activeLitters, archivedLitters);
   
-  // Use subscription hook - simplified implementation for now
-  const setupSubscription = useCallback(() => {
-    // Implementation would go here
-    return () => {}; // Cleanup function
-  }, []);
-
-  const { setupSubscription: subscriptionSetup } = useLitterSubscription();
+  // Use subscription hook properly with the required arguments
+  const { setupSubscription } = useLitterSubscription(loadLittersData, user?.id);
   
   // Initial data load
   useEffect(() => {
