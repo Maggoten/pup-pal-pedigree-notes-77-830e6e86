@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './utils/reactQueryConfig';
@@ -65,4 +66,23 @@ const AppContent = () => {
       />
       <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
       <Route path="/my-litters" element={<MyLitters />} />
-      <Route path="*" element*
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <DogsProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </DogsProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
+
+export default App;
