@@ -1,9 +1,7 @@
-
 interface RetryOptions {
   maxRetries: number;
   initialDelay: number;
-  onRetry?: (attempt: number, error?: any) => void;
-  useBackoff?: boolean;
+  onRetry?: (attempt: number, error?: unknown) => void;
 }
 
 /**
@@ -18,7 +16,7 @@ export async function fetchWithRetry<T>(
   fetchFn: () => Promise<T>, 
   options: RetryOptions
 ): Promise<T> {
-  const { maxRetries, initialDelay, onRetry, useBackoff = true } = options;
+  const { maxRetries, initialDelay, onRetry } = options;
   let lastError: unknown;
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -30,10 +28,8 @@ export async function fetchWithRetry<T>(
       
       // Add delay before retries (not before the first attempt)
       if (attempt > 0) {
-        // Exponential backoff with initial delay if useBackoff is true
-        const delay = useBackoff 
-          ? initialDelay * Math.pow(2, attempt - 1)
-          : initialDelay;
+        // Exponential backoff with initial delay
+        const delay = initialDelay * Math.pow(2, attempt - 1);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
       

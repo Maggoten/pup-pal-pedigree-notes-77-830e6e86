@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 import { toast } from '@/hooks/use-toast';
@@ -6,8 +7,6 @@ interface UploadResult {
   path?: string;
   error?: Error;
 }
-
-// Fix the uploadImage function
 
 export async function uploadImage(
   file: File,
@@ -57,7 +56,6 @@ export async function uploadImage(
       maxRetries: 3,
       initialDelay: 1500,
       onRetry: (attempt) => {
-        // Update to match the correct signature with only one parameter
         console.log(`[Storage] Retrying upload (${attempt}/3)`);
         toast({
           title: "Retrying upload",

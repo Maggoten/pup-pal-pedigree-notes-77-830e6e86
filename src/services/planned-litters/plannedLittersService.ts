@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { PlannedLitter } from '@/types/breeding';
 import { fetchWithRetry } from '@/utils/fetchUtils';
@@ -14,8 +15,7 @@ export const fetchPlannedLitters = async (userId: string): Promise<PlannedLitter
         .order('expected_heat_date', { ascending: true }),
       {
         maxRetries: 3,
-        initialDelay: 1000,
-        // useBackoff: true
+        initialDelay: 1000
       }
     );
     

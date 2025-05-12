@@ -87,7 +87,6 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
       {
         maxRetries: MAX_RETRIES,
         initialDelay: RETRY_DELAY,
-        useBackoff: true,
         onRetry: (attempt, error) => {
           const errorMsg = error instanceof Error ? error.message : 'Unknown error';
           console.log(`[Dogs Debug] Retry #${attempt} after error: ${errorMsg}`);

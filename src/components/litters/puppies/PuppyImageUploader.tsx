@@ -131,7 +131,9 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
           { 
             maxRetries: platformInfo.safari ? 3 : 2,
             initialDelay: 2000,
-            useBackoff: true
+            onRetry: (attempt) => {
+              console.log(`PuppyImageUploader: Retry attempt ${attempt}`);
+            }
           }
         );
       };

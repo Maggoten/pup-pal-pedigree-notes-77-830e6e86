@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Litter } from '@/types/breeding';
@@ -28,7 +29,7 @@ export function useLitterQueries() {
         },
         { 
           maxRetries: 2,
-          initialDelay: 1000 // Add the missing initialDelay
+          initialDelay: 1000
         }
       );
       
@@ -59,7 +60,7 @@ export function useLitterQueries() {
         },
         { 
           maxRetries: 2,
-          initialDelay: 1000 // Add the missing initialDelay
+          initialDelay: 1000
         }
       );
       

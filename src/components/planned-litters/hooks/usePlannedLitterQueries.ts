@@ -90,8 +90,8 @@ export const usePlannedLitterQueries = () => {
       const litters = await fetchWithRetry(
         () => plannedLittersService.loadPlannedLitters(),
         {
-          maxRetries: 3, // Increased from 2 to 3
-          initialDelay: 1500, // Decreased from 2000 for faster first retry
+          maxRetries: 3,
+          initialDelay: 1500,
           onRetry: (attempt) => {
             setRetryCount(attempt);
             console.log(`Retry attempt ${attempt} for loading planned litters`);
