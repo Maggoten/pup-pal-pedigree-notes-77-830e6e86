@@ -55,14 +55,7 @@ const AppContent = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/my-dogs" element={<MyDogs />} />
       <Route path="/planned-litters" element={<PlannedLitters />} />
-      <Route
-        path="/pregnancy"
-        element={
-          firstPregnancyId
-            ? <Navigate to={`/pregnancy/${firstPregnancyId}`} replace />
-            : <Pregnancy />
-        }
-      />
+      <Route path="/pregnancy" element={<Pregnancy />} />
       <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
       <Route path="/my-litters" element={<MyLitters />} />
       <Route path="*" element={<NotFound />} />
