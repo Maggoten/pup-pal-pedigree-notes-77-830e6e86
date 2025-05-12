@@ -1,105 +1,77 @@
-
 import { useCallback } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { Litter } from '@/types/breeding';
-import { useActiveLittersQuery } from './useActiveLittersQuery';
-import { useArchivedLittersQuery } from './useArchivedLittersQuery';
-import { useAddLitterMutation } from './useAddLitterMutation';
-import { useUpdateLitterMutation } from './useUpdateLitterMutation';
-import { useDeleteLitterMutation } from './useDeleteLitterMutation';
-import { useArchiveLitterMutation } from './useArchiveLitterMutation';
-import { useAvailableYears } from './useAvailableYears';
-import { useQueryClient } from '@tanstack/react-query';
-import { littersQueryKey } from './useAddLitterMutation';
-import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 
-// This is the main hook that combines all the other hooks
-export const useLitterQueries = () => {
-  const activeLittersQuery = useActiveLittersQuery();
-  const archivedLittersQuery = useArchivedLittersQuery();
-  const queryClient = useQueryClient();
+export function useLitterQueries() {
+  const { user } = useAuth();
+  const userId = user?.id;
   
-  const addLitterMutation = useAddLitterMutation();
-  const updateLitterMutation = useUpdateLitterMutation();
-  const deleteLitterMutation = useDeleteLitterMutation();
-  const archiveLitterMutation = useArchiveLitterMutation();
-  
-  const getAvailableYears = useAvailableYears();
-  
-  // Helper function to determine if we have valid data
-  const isDataReady = useCallback(() => {
-    return activeLittersQuery.isSuccess && archivedLittersQuery.isSuccess;
-  }, [activeLittersQuery.isSuccess, archivedLittersQuery.isSuccess]);
-  
-  // Force refresh all litter data
-  const refreshLitters = useCallback(async () => {
+  const fetchActiveLitters = useCallback(async () => {
+    if (!userId) return [];
+    
     try {
-      console.log('Manually refreshing all litters data');
-      
-      // Invalidate the queries first
-      await queryClient.invalidateQueries({ queryKey: littersQueryKey });
-      
-      // Then refetch with retry logic
-      const [activeResult, archivedResult] = await Promise.all([
-        fetchWithRetry(() => activeLittersQuery.refetch(), { maxRetries: 2 }),
-        fetchWithRetry(() => archivedLittersQuery.refetch(), { maxRetries: 2 })
-      ]);
-      
-      console.log('Litters refresh completed', {
-        active: activeResult.data?.length || 0,
-        archived: archivedResult.data?.length || 0
-      });
-      
-      return {
-        active: activeResult.data || [],
-        archived: archivedResult.data || []
-      };
-    } catch (error) {
-      console.error('Failed to refresh litters:', error);
-      
-      // Replace JSX with a function to render the retry action
-      toast({
-        title: "Refresh failed",
-        description: "Could not reload litters data. Please try again.",
-        variant: "destructive",
-        action: {
-          label: "Retry",
-          onClick: refreshLitters,
-          className: "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
+      const result = await fetchWithRetry(
+        async () => {
+          const { data, error } = await supabase
+            .from('litters')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false });
+          
+          if (error) {
+            throw error;
+          }
+          return data || [];
+        },
+        { 
+          maxRetries: 2,
+          initialDelay: 1000 // Add the missing initialDelay
         }
-      });
+      );
       
-      // Return current data as fallback
-      return {
-        active: activeLittersQuery.data || [],
-        archived: archivedLittersQuery.data || []
-      };
+      return result as Litter[];
+    } catch (error) {
+      console.error("Error fetching active litters:", error);
+      return [];
     }
-  }, [queryClient, activeLittersQuery, archivedLittersQuery]);
-
-  // Export an object with all the queries and mutations
+  }, [userId]);
+  
+  const fetchArchivedLitters = useCallback(async () => {
+    if (!userId) return [];
+    
+    try {
+      const result = await fetchWithRetry(
+        async () => {
+          const { data, error } = await supabase
+            .from('litters')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'archived')
+            .order('created_at', { ascending: false });
+          
+          if (error) {
+            throw error;
+          }
+          return data || [];
+        },
+        { 
+          maxRetries: 2,
+          initialDelay: 1000 // Add the missing initialDelay
+        }
+      );
+      
+      return result as Litter[];
+    } catch (error) {
+      console.error("Error fetching archived litters:", error);
+      return [];
+    }
+  }, [userId]);
+  
   return {
-    activeLitters: activeLittersQuery.data || [],
-    archivedLitters: archivedLittersQuery.data || [],
-    isLoading: activeLittersQuery.isLoading || archivedLittersQuery.isLoading,
-    isError: activeLittersQuery.isError || archivedLittersQuery.isError,
-    error: activeLittersQuery.error || archivedLittersQuery.error,
-    
-    addLitter: addLitterMutation.mutate,
-    updateLitter: updateLitterMutation.mutate,
-    deleteLitter: deleteLitterMutation.mutate,
-    archiveLitter: (litterId: string, archive: boolean) => 
-      archiveLitterMutation.mutate({ litterId, archive }),
-    
-    isAddingLitter: addLitterMutation.isPending,
-    isUpdatingLitter: updateLitterMutation.isPending,
-    isDeletingLitter: deleteLitterMutation.isPending,
-    isArchivingLitter: archiveLitterMutation.isPending,
-    
-    getAvailableYears,
-    isDataReady,
-    refreshLitters // New function to manually refresh data
+    fetchActiveLitters,
+    fetchArchivedLitters
   };
-};
-
-export default useLitterQueries;
+}

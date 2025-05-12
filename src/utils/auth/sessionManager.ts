@@ -91,3 +91,26 @@ export async function refreshCurrentSession() {
     throw err;
   }
 }
+
+/**
+ * Refreshes the session and returns if it was successful
+ */
+export async function refreshSession(): Promise<boolean> {
+  try {
+    await refreshCurrentSession();
+    return true;
+  } catch (err) {
+    console.error("Failed to refresh session:", err);
+    return false;
+  }
+}
+
+/**
+ * Clears any session state that may be stored in memory
+ */
+export function clearSessionState() {
+  console.log('[Auth] Clearing session state');
+  // Clean up any stored session data if needed
+  // For example, clear local variables, cookies, etc.
+  // Currently just a placeholder for session cleanup logic
+}

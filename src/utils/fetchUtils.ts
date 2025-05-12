@@ -2,7 +2,8 @@
 interface RetryOptions {
   maxRetries: number;
   initialDelay: number;
-  onRetry?: (attempt: number) => void;
+  onRetry?: (attempt: number, error?: any) => void;
+  useBackoff?: boolean;
 }
 
 /**
@@ -17,20 +18,22 @@ export async function fetchWithRetry<T>(
   fetchFn: () => Promise<T>, 
   options: RetryOptions
 ): Promise<T> {
-  const { maxRetries, initialDelay, onRetry } = options;
+  const { maxRetries, initialDelay, onRetry, useBackoff = true } = options;
   let lastError: unknown;
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       // First attempt (attempt = 0) doesn't count as a retry
       if (attempt > 0 && onRetry) {
-        onRetry(attempt);
+        onRetry(attempt, lastError);
       }
       
       // Add delay before retries (not before the first attempt)
       if (attempt > 0) {
-        // Exponential backoff with initial delay
-        const delay = initialDelay * Math.pow(2, attempt - 1);
+        // Exponential backoff with initial delay if useBackoff is true
+        const delay = useBackoff 
+          ? initialDelay * Math.pow(2, attempt - 1)
+          : initialDelay;
         await new Promise(resolve => setTimeout(resolve, delay));
       }
       
@@ -80,4 +83,12 @@ export function withTimeout<T>(
     promise,
     timeout<T>(ms, message)
   ]);
+}
+
+/**
+ * Utility to detect if the current device is a mobile device
+ * @returns true if the current device is a mobile device
+ */
+export function isMobileDevice(): boolean {
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 }

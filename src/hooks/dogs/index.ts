@@ -1,30 +1,20 @@
 
-import { useDogsMutations } from './useDogsMutations';
 import { useDogsQueries } from './useDogsQueries';
-import { UseDogs, UseDogsMutations, UseDogsQueries } from './types';
+import { useDogsMutations } from './useDogsMutations';
 import { Dog } from '@/types/dogs';
+import { UseDogs } from './types';
 
-export const useDogs = (): UseDogs => {
-  const queries = useDogsQueries();
-  const mutations = useDogsMutations();
-
+export function useDogsFunctions(): UseDogs {
+  const dogsQueries = useDogsQueries();
+  const dogsMutations = useDogsMutations();
+  
   return {
-    ...queries,
-    ...mutations,
-    fetchDogs: async (skipCache?: boolean): Promise<Dog[]> => {
-      return queries.fetchDogs(skipCache); 
-    },
-    addDog: async (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>): Promise<Dog | undefined> => {
-      return mutations.addDog(dog);
-    },
-    updateDog: async (id: string, updates: Partial<Dog>): Promise<Dog | null> => {
-      return mutations.updateDog(id, updates);
-    },
-    deleteDog: async (id: string): Promise<boolean> => {
-      return mutations.deleteDog(id);
-    }
+    ...dogsQueries,
+    ...dogsMutations,
+    // Explicitly add totalDogs to satisfy the UseDogs interface
+    totalDogs: dogsQueries.dogs?.length || 0
   };
-};
+}
 
-// Export types
-export type { UseDogs, UseDogsMutations, UseDogsQueries } from './types';
+export { useDogsQueries } from './useDogsQueries';
+export { useDogsMutations } from './useDogsMutations';

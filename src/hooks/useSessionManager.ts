@@ -1,7 +1,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { Session } from '@supabase/supabase-js';
-import { refreshSession, verifySession } from '@/utils/auth/sessionManager';
+import { verifySession, refreshSession } from '@/utils/auth/sessionManager';
 
 /**
  * Hook to manage session check intervals and activity tracking

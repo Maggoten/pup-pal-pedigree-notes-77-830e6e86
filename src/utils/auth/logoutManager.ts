@@ -1,62 +1,83 @@
 
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { resetQueryClient, handleAuthStateChange } from '@/utils/reactQueryConfig';
 import { clearSessionState } from './sessionManager';
 
+interface LogoutOptions {
+  clearIntervals?: () => void;
+}
+
 /**
- * Central manager for handling logout operations
- * This ensures consistent state clearing and UI behavior
+ * Central function to handle logout state cleaning
+ * 
+ * @param baseLogout The base logout function from the auth provider
+ * @param resetState Optional function to reset local state
+ * @param options Additional options for cleanup
  */
-export const handleLogoutState = async (
-  logoutFn: () => Promise<void>,
-  stateResetFn: () => void,
-  options: {
-    clearIntervals?: () => void;
-  } = {}
-) => {
-  console.log('[Auth Debug] Enhanced logout starting - clearing all auth state');
-  
-  // Clear query cache before logout
-  resetQueryClient();
-  
+export async function handleLogoutState(
+  baseLogout: () => Promise<void>,
+  resetState?: () => void,
+  options?: LogoutOptions
+): Promise<void> {
   try {
-    // Clear any intervals if provided
-    if (options.clearIntervals) {
+    console.log('[Auth Debug] Logout initiated');
+    
+    // First clean up any intervals to prevent race conditions
+    if (options?.clearIntervals) {
       options.clearIntervals();
     }
     
-    // Execute the base logout function
-    await logoutFn();
-    
-    // Clear session state in the central manager
+    // Clear any session state
     clearSessionState();
     
-    // Reset all auth-related React state
-    stateResetFn();
+    // Execute base logout
+    await baseLogout();
+    console.log('[Auth Debug] Base logout completed');
     
-    // Explicitly trigger the auth state change handler
-    handleAuthStateChange('SIGNED_OUT');
+    // Reset local state if provided
+    if (resetState) {
+      resetState();
+      console.log('[Auth Debug] Local state reset');
+    }
     
-    console.log('[Auth Debug] Enhanced logout complete - all auth state cleared');
+    // Clear supabase data from storage
+    try {
+      await supabase.auth.signOut({ scope: 'local' });
+      console.log('[Auth Debug] Supabase local signout completed');
+    } catch (error) {
+      console.error('[Auth Debug] Error during supabase signout:', error);
+    }
     
-    toast({
-      title: 'Logout successful',
-      description: 'You have been logged out successfully.',
-    });
+    // Additional cleanup
+    try {
+      localStorage.removeItem('supabase.auth.token');
+    } catch (storageError) {
+      // Ignore storage errors
+      console.warn('[Auth Debug] Could not clear localStorage:', storageError);
+    }
     
-    return true;
+    // Set a small delay to ensure all async operations complete
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    console.log('[Auth Debug] Logout completed successfully');
   } catch (error) {
-    console.error('[Auth Debug] Error during enhanced logout:', error);
+    console.error('[Auth Debug] Error during logout:', error);
     
-    // Even if the logout fails at the API level, reset UI state
-    stateResetFn();
+    // Still try to reset state even if logout failed
+    if (resetState) {
+      resetState();
+    }
     
+    // Show error notification
     toast({
-      title: 'Logout problem',
-      description: 'There was an issue during logout. Please try again.',
-      variant: 'destructive',
+      title: "Logout issue",
+      description: "There was a problem during logout. Please refresh the browser.",
+      variant: "destructive",
     });
     
-    return false;
+    // Force reload as last resort
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
   }
-};
+}
