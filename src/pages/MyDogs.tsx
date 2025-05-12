@@ -1,11 +1,10 @@
 
 import { useAuth } from '@/hooks/useAuth';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlusCircle, Filter, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useDogs } from '@/context/DogsContext';
 import DogList from '@/components/DogList';
 import DogDetails from '@/components/dogs/DogDetails';
 import AddDogDialog from '@/components/dogs/AddDogDialog';
@@ -17,78 +16,27 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useMyDogs } from '@/hooks/useMyDogs';
 
 const MyDogs: React.FC = () => {
-  const { dogs, activeDog, loading, error, fetchDogs } = useDogs();
-  const [showAddDogDialog, setShowAddDogDialog] = useState(false);
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const { isAuthReady, isLoggedIn } = useAuth();
-  const [pageReady, setPageReady] = useState(false);
-  const [retryAttempts, setRetryAttempts] = useState(0);
-  const [showError, setShowError] = useState(false);
   
-  // Enhanced delay after auth is ready to avoid premature fetching
-  useEffect(() => {
-    if (isAuthReady && isLoggedIn) {
-      const timer = setTimeout(() => {
-        setPageReady(true);
-      }, 500); // Increased from 300ms for more stability
-      return () => clearTimeout(timer);
-    }
-  }, [isAuthReady, isLoggedIn]);
-  
-  // Add visibility change handler to refresh data when tab becomes active
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && pageReady) {
-        console.log('MyDogs: Document became visible, refreshing data');
-        fetchDogs(false).catch(err => {
-          console.error('Error refreshing dogs on visibility change:', err);
-        });
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [fetchDogs, pageReady]);
-  
-  // Add timeout before showing errors to allow recovery
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        setShowError(true);
-      }, 2000); // Only show errors after 2 seconds of failure
-      
-      return () => clearTimeout(timer);
-    } else {
-      setShowError(false);
-    }
-  }, [error]);
-  
-  // Filter dogs based on selected gender, with proper null handling
-  const allDogs = dogs ?? [];
-  const filteredDogs = genderFilter === 'all' 
-    ? allDogs 
-    : allDogs.filter(dog => dog.gender === genderFilter);
-
-  // Handle retry for loading dogs with incremental backoff
-  const handleRetry = () => {
-    setRetryAttempts(prev => prev + 1);
-    setShowError(false); // Hide error while retrying
-    
-    const backoffTime = Math.min(500 * Math.pow(1.5, retryAttempts), 3000);
-    setTimeout(() => {
-      fetchDogs(true); // Use skipCache=true to force refresh
-    }, backoffTime);
-  };
-
-  // Formatting the error message
-  const errorMessage = typeof error === 'string' ? error : 'Failed to load dogs';
-  const isNetworkError = errorMessage.includes('Failed to fetch') || 
-                         errorMessage.includes('Network error') ||
-                         errorMessage.includes('timeout');
+  const {
+    filteredDogs,
+    loading,
+    error,
+    showError,
+    retry,
+    isNetworkError,
+    activeDog,
+    openAddDialog,
+    setOpenAddDialog
+  } = useMyDogs({
+    genderFilter,
+    isAuthReady,
+    isLoggedIn
+  });
 
   return (
     <PageLayout 
@@ -102,12 +50,12 @@ const MyDogs: React.FC = () => {
           <AlertDescription className="flex items-center justify-between w-full">
             <span>{isNetworkError ? 
               'Network connection problem. Please check your internet connection.' : 
-              errorMessage}
+              error}
             </span>
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={handleRetry}
+              onClick={retry}
               className="ml-2 bg-white"
             >
               Try Again
@@ -116,7 +64,7 @@ const MyDogs: React.FC = () => {
         </Alert>
       )}
       
-      {(loading || !pageReady || !isAuthReady) ? (
+      {loading ? (
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
           <p className="text-muted-foreground">
@@ -148,7 +96,7 @@ const MyDogs: React.FC = () => {
             </div>
             
             <Button 
-              onClick={() => setShowAddDogDialog(true)} 
+              onClick={() => setOpenAddDialog(true)} 
               className="flex items-center gap-1.5"
               disabled={loading || !isAuthReady}
             >
@@ -178,7 +126,7 @@ const MyDogs: React.FC = () => {
                   <p className="text-muted-foreground">No dogs found.</p>
                   <Button 
                     variant="outline" 
-                    onClick={() => setShowAddDogDialog(true)}
+                    onClick={() => setOpenAddDialog(true)}
                     className="mt-4"
                     disabled={!isAuthReady}
                   >
@@ -193,8 +141,8 @@ const MyDogs: React.FC = () => {
       )}
       
       <AddDogDialog 
-        open={showAddDogDialog} 
-        onOpenChange={setShowAddDogDialog} 
+        open={openAddDialog} 
+        onOpenChange={setOpenAddDialog} 
       />
     </PageLayout>
   );
