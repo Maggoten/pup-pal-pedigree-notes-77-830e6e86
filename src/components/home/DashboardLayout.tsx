@@ -1,3 +1,5 @@
+// src/components/home/DashboardLayout.tsx
+
 import React, { useEffect, useState } from 'react';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
@@ -21,18 +23,29 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   // State för aktiva dräktigheter
   const [activePregnancies, setActivePregnancies] =
     useState<ActivePregnancy[]>(initialActivePregnancies);
-  const [isLoadingPregnancies, setIsLoadingPregnancies] = 
+  const [isLoadingPregnancies, setIsLoadingPregnancies] =
     useState(initialActivePregnancies.length === 0);
 
-  // Hämtar all övrig dashboard-data (reminders, events etc)
-  const dashboardData = useDashboardData();
+  // Hook som samlar all dashboard-data
+  const {
+    remindersSummary,
+    plannedLittersData,
+    recentLittersData,
+    getEventsForDate,
+    getEventColor,
+    handleAddEvent,
+    reminders,
+    markReminderComplete,
+    deleteReminder,
+    isDataReady
+  } = useDashboardData();
 
-  // 📌 Här lägger vi in auth-skydd
+  // Hämtar användarens namn
+  const username = getDisplayUsername(user);
+
+  // Laddar aktiva dräktigheter om användaren är inloggad
   useEffect(() => {
-    // Om ingen användare är inloggad eller vi redan har data, gör inget
-    if (!user || initialActivePregnancies.length > 0) {
-      return;
-    }
+    if (!user || initialActivePregnancies.length > 0) return;
 
     const fetchActivePregnancies = async () => {
       try {
@@ -54,32 +67,34 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     fetchActivePregnancies();
   }, [user, initialActivePregnancies.length]);
 
-  // Användarnamn för hälsning
-  const username = getDisplayUsername(user);
-
-  // Förbered props till komponenter
+  // Props till kalendern
   const calendarProps = {
-    getEventsForDate: dashboardData.getEventsForDate,
-    getEventColor: dashboardData.getEventColor,
-    addEvent: dashboardData.handleAddEvent
+    getEventsForDate,
+    getEventColor,
+    addEvent: handleAddEvent
   };
+
+  // Props till reminders-listan
   const remindersProps = {
-    reminders: dashboardData.reminders,
-    markComplete: dashboardData.markReminderComplete,
-    deleteReminder: dashboardData.deleteReminder
+    reminders,
+    markComplete: markReminderComplete,
+    deleteReminder
   };
 
   return (
     <PageLayout>
       <DashboardHero
         username={username}
+        reminders={remindersSummary}           // <-- Här
+        plannedLitters={plannedLittersData}   // <-- Här
         activePregnancies={activePregnancies}
+        recentLitters={recentLittersData}     // <-- Här
         isLoadingPregnancies={isLoadingPregnancies}
       />
 
       <div className="mt-8 space-y-6">
         <DashboardContent
-          isDataReady={dashboardData.isDataReady}
+          isDataReady={isDataReady}
           calendarProps={calendarProps}
           remindersProps={remindersProps}
         />
