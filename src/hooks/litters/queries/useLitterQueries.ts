@@ -71,37 +71,6 @@ async function fetchArchivedLittersFromDb(userId: string): Promise<RawLitterRow[
   return (data || []) as RawLitterRow[];
 }
 
-/**
- * Simple retry mechanism with explicit types
- */
-async function retryOperation<T>(
-  operation: () => Promise<T>,
-  maxRetries: number = 2,
-  initialDelay: number = 1000
-): Promise<T> {
-  let lastError: unknown;
-  
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      if (attempt > 0) {
-        const delay = initialDelay * Math.pow(2, attempt - 1);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-      
-      return await operation();
-    } catch (error) {
-      console.error(`Attempt ${attempt + 1}/${maxRetries + 1} failed:`, error);
-      lastError = error;
-      
-      if (attempt === maxRetries) {
-        throw error;
-      }
-    }
-  }
-  
-  throw lastError;
-}
-
 export function useLitterQueries() {
   const { user } = useAuth();
   const userId = user?.id;
@@ -111,10 +80,8 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Fetch with explicit typing and separate the mapping step
-      const rawLitters: RawLitterRow[] = await retryOperation(
-        () => fetchActiveLittersFromDb(userId)
-      );
+      // Direct fetch without retry wrapper
+      const rawLitters = await fetchActiveLittersFromDb(userId);
       
       // Map after fetching is complete
       return rawLitters.map(mapRawRowToLitter);
@@ -129,10 +96,8 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Fetch with explicit typing and separate the mapping step
-      const rawLitters: RawLitterRow[] = await retryOperation(
-        () => fetchArchivedLittersFromDb(userId)
-      );
+      // Direct fetch without retry wrapper
+      const rawLitters = await fetchArchivedLittersFromDb(userId);
       
       // Map after fetching is complete
       return rawLitters.map(mapRawRowToLitter);
