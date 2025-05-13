@@ -23,7 +23,7 @@ const MetricCardGrid: React.FC<MetricCardGridProps> = ({ metricCards }) => {
         <MetricCard 
           key={index}
           title={card.title}
-          count={card.count}
+          count={card.count ?? 0}
           icon={card.icon}
           highlight={card.highlight}
           action={card.action}
