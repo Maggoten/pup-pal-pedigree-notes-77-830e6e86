@@ -309,7 +309,7 @@ const PuppyList: React.FC<PuppyListProps> = ({
   if (isMobile) {
     return (
       <div className="space-y-2">
-        {puppies.map(puppy => (
+        {(puppies ?? []).map(puppy => (
           <PuppyCard
             key={puppy.id}
             puppy={puppy}
@@ -340,7 +340,7 @@ const PuppyList: React.FC<PuppyListProps> = ({
           </tr>
         </thead>
         <tbody>
-          {puppies.map(puppy => (
+          {(puppies ?? []).map(puppy => (
             <PuppyRow
               key={puppy.id}
               puppy={puppy}
