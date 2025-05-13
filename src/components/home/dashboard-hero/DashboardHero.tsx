@@ -5,7 +5,7 @@ import WelcomeHeader from './WelcomeHeader';
 import DecorativePawprints from './DecorativePawprints';
 
 interface DashboardHeroProps {
-  userName?: string;
+  username?: string;
   dogsCount: number;
   activePregnancies: number;
   plannedLitters: number;
@@ -13,7 +13,7 @@ interface DashboardHeroProps {
 }
 
 const DashboardHero: React.FC<DashboardHeroProps> = ({
-  userName,
+  username,
   dogsCount,
   activePregnancies,
   plannedLitters,
@@ -24,7 +24,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       <DecorativePawprints />
       
       <div className="relative z-10">
-        <WelcomeHeader userName={userName} />
+        <WelcomeHeader username={username} />
         
         <MetricCardGrid 
           dogsCount={dogsCount} 
