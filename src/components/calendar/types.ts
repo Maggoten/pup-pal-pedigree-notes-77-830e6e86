@@ -3,8 +3,8 @@ export interface CalendarEvent {
   id: string;
   title: string;
   date: Date;
-  startDate: Date;  // Changed from optional to required to match /types/calendar.ts
-  endDate: Date;    // Changed from optional to required to match /types/calendar.ts
+  startDate: Date;  // Required to match /types/calendar.ts
+  endDate: Date;    // Required to match /types/calendar.ts
   time?: string;
   type: string;
   dogId?: string;
