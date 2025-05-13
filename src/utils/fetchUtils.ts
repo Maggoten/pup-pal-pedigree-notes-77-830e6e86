@@ -1,3 +1,4 @@
+
 interface RetryOptions {
   maxRetries: number;
   initialDelay: number;
@@ -12,10 +13,10 @@ interface RetryOptions {
  * @returns The result of the successful fetch
  * @throws The last error encountered after all retries fail
  */
-export async function fetchWithRetry<T>(
-  fetchFn: () => Promise<T>, 
+export async function fetchWithRetry<TInput, TOutput = TInput>(
+  fetchFn: () => Promise<TInput>, 
   options: RetryOptions
-): Promise<T> {
+): Promise<TOutput> {
   const { maxRetries, initialDelay, onRetry } = options;
   let lastError: unknown;
   
@@ -34,7 +35,7 @@ export async function fetchWithRetry<T>(
       }
       
       // Attempt the fetch
-      return await fetchFn();
+      return await fetchFn() as unknown as TOutput;
     } catch (error) {
       console.error(`Fetch attempt ${attempt + 1}/${maxRetries + 1} failed:`, error);
       lastError = error;

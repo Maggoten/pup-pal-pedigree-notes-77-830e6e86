@@ -53,37 +53,29 @@ async function fetchLittersFromSupabase(userId: string, status: 'active' | 'arch
   return (data || []) as RawLitterRow[];
 }
 
-// Helper type for retry options to avoid deep inference
+// Simple type for retry options
 type RetryOptions = {
   maxRetries: number;
   initialDelay: number;
 };
 
-// Helper function with explicit typing to avoid deep type inference
-async function fetchWithRetryTyped<T>(
-  fetchFn: () => Promise<T>,
-  options: RetryOptions
-): Promise<T> {
-  return fetchWithRetry(fetchFn, options);
-}
-
 export function useLitterQueries() {
   const { user } = useAuth();
   const userId = user?.id;
   
-  // Explicitly type the return value to avoid deep type inference
+  // Explicitly type the return value
   const fetchActiveLitters = useCallback(async (): Promise<Litter[]> => {
     if (!userId) return [];
     
     try {
-      // Use the typed helper function to avoid deep inference
+      // Use explicit two-argument generics to avoid deep type inference
       const fetchFunction = () => fetchLittersFromSupabase(userId, 'active');
-      const rawLitters = await fetchWithRetryTyped<RawLitterRow[]>(
+      const rawLitters = await fetchWithRetry<RawLitterRow[], RawLitterRow[]>(
         fetchFunction, 
         { maxRetries: 2, initialDelay: 1000 }
       );
       
-      // Map to domain model
+      // Map to domain model outside the fetch call
       return rawLitters.map(mapRawRowToLitter);
     } catch (error) {
       console.error("Error fetching active litters:", error);
@@ -91,19 +83,19 @@ export function useLitterQueries() {
     }
   }, [userId]);
   
-  // Explicitly type the return value to avoid deep type inference
+  // Explicitly type the return value
   const fetchArchivedLitters = useCallback(async (): Promise<Litter[]> => {
     if (!userId) return [];
     
     try {
-      // Use the typed helper function to avoid deep inference
+      // Use explicit two-argument generics to avoid deep type inference
       const fetchFunction = () => fetchLittersFromSupabase(userId, 'archived');
-      const rawLitters = await fetchWithRetryTyped<RawLitterRow[]>(
+      const rawLitters = await fetchWithRetry<RawLitterRow[], RawLitterRow[]>(
         fetchFunction, 
         { maxRetries: 2, initialDelay: 1000 }
       );
       
-      // Map to domain model
+      // Map to domain model outside the fetch call
       return rawLitters.map(mapRawRowToLitter);
     } catch (error) {
       console.error("Error fetching archived litters:", error);
