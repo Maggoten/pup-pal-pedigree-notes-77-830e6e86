@@ -3,7 +3,6 @@ import { useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Litter } from '@/types/breeding';
 import { supabase } from '@/integrations/supabase/client';
-import { fetchWithRetry } from '@/utils/fetchUtils';
 
 // Define a raw litter row type to match database schema
 interface RawLitterRow {
@@ -39,43 +38,97 @@ function mapRawRowToLitter(row: RawLitterRow): Litter {
 }
 
 /**
- * Fetch litters from Supabase with explicit return type
+ * Fetch active litters directly from Supabase
  */
-async function fetchLittersFromSupabase(userId: string, status: 'active' | 'archived'): Promise<RawLitterRow[]> {
-  const { data, error } = await supabase
-    .from('litters')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('status', status)
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return (data || []) as RawLitterRow[];
+async function fetchActiveLittersRaw(userId: string): Promise<RawLitterRow[]> {
+  if (!userId) return [];
+  
+  try {
+    const { data, error } = await supabase
+      .from('litters')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+  
+    if (error) throw error;
+    return (data || []) as RawLitterRow[];
+  } catch (error) {
+    console.error("Error in fetchActiveLittersRaw:", error);
+    return [];
+  }
 }
 
-// Simple type for retry options
-type RetryOptions = {
-  maxRetries: number;
-  initialDelay: number;
-};
+/**
+ * Fetch archived litters directly from Supabase
+ */
+async function fetchArchivedLittersRaw(userId: string): Promise<RawLitterRow[]> {
+  if (!userId) return [];
+  
+  try {
+    const { data, error } = await supabase
+      .from('litters')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'archived')
+      .order('created_at', { ascending: false });
+  
+    if (error) throw error;
+    return (data || []) as RawLitterRow[];
+  } catch (error) {
+    console.error("Error in fetchArchivedLittersRaw:", error);
+    return [];
+  }
+}
+
+/**
+ * Simple retry mechanism without complex generics
+ */
+async function retryOperation<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 2,
+  initialDelay: number = 1000
+): Promise<T> {
+  let lastError: unknown;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      if (attempt > 0) {
+        const delay = initialDelay * Math.pow(2, attempt - 1);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+      
+      return await operation();
+    } catch (error) {
+      console.error(`Attempt ${attempt + 1}/${maxRetries + 1} failed:`, error);
+      lastError = error;
+      
+      if (attempt === maxRetries) {
+        throw error;
+      }
+    }
+  }
+  
+  throw lastError;
+}
 
 export function useLitterQueries() {
   const { user } = useAuth();
   const userId = user?.id;
   
-  // Explicitly type the return value
+  // Function to fetch and map active litters
   const fetchActiveLitters = useCallback(async (): Promise<Litter[]> => {
     if (!userId) return [];
     
     try {
-      // Use explicit two-argument generics to avoid deep type inference
-      const fetchFunction = () => fetchLittersFromSupabase(userId, 'active');
-      const rawLitters = await fetchWithRetry<RawLitterRow[], RawLitterRow[]>(
-        fetchFunction, 
-        { maxRetries: 2, initialDelay: 1000 }
+      // Use our simplified retry function with concrete return type
+      const rawLitters: RawLitterRow[] = await retryOperation(
+        () => fetchActiveLittersRaw(userId),
+        2,
+        1000
       );
       
-      // Map to domain model outside the fetch call
+      // Map after fetching is complete
       return rawLitters.map(mapRawRowToLitter);
     } catch (error) {
       console.error("Error fetching active litters:", error);
@@ -83,19 +136,19 @@ export function useLitterQueries() {
     }
   }, [userId]);
   
-  // Explicitly type the return value
+  // Function to fetch and map archived litters
   const fetchArchivedLitters = useCallback(async (): Promise<Litter[]> => {
     if (!userId) return [];
     
     try {
-      // Use explicit two-argument generics to avoid deep type inference
-      const fetchFunction = () => fetchLittersFromSupabase(userId, 'archived');
-      const rawLitters = await fetchWithRetry<RawLitterRow[], RawLitterRow[]>(
-        fetchFunction, 
-        { maxRetries: 2, initialDelay: 1000 }
+      // Use our simplified retry function with concrete return type  
+      const rawLitters: RawLitterRow[] = await retryOperation(
+        () => fetchArchivedLittersRaw(userId),
+        2,
+        1000
       );
       
-      // Map to domain model outside the fetch call
+      // Map after fetching is complete
       return rawLitters.map(mapRawRowToLitter);
     } catch (error) {
       console.error("Error fetching archived litters:", error);
