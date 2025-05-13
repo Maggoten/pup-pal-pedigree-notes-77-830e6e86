@@ -23,7 +23,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   loading = false
 }) => {
   const getIconStyles = () => {
-    return { textColor: 'text-warmgreen-600' };
+    return { textColor: 'text-rustbrown-600' };
   };
 
   const renderIcon = () => {
@@ -41,13 +41,13 @@ const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <button 
       onClick={action}
-      className="rounded-xl p-4 md:p-5 bg-white border border-warmgreen-100 transition-transform hover:scale-[1.02] flex flex-col items-start gap-2 w-full text-left shadow-md hover:shadow-lg"
+      className="rounded-xl p-4 md:p-5 bg-white border border-warmbeige-100 transition-transform hover:scale-[1.02] flex flex-col items-start gap-2 w-full text-left shadow-md hover:shadow-lg"
     >
       <div className="flex items-center gap-2">
-        <div className={`p-1.5 rounded-md bg-warmgreen-50 ${getIconStyles().textColor}`}>
+        <div className={`p-1.5 rounded-md bg-warmbeige-50 ${getIconStyles().textColor}`}>
           {renderIcon()}
         </div>
-        <p className="text-sm font-medium text-warmgreen-700">{title}</p>
+        <p className="text-sm font-medium text-darkgray-700">{title}</p>
       </div>
       
       <div className="space-y-0">
@@ -55,7 +55,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
           {loading ? <Skeleton className="h-7 w-16" /> : count}
         </h3>
         {highlight && !loading && (
-          <p className="text-xs text-warmgreen-500 mt-1">{highlight}</p>
+          <p className="text-xs text-rustbrown-500 mt-1">{highlight}</p>
         )}
         {highlight && loading && (
           <Skeleton className="h-4 w-24 mt-1" />

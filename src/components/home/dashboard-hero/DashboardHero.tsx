@@ -41,7 +41,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   const safeRecentLitters = recentLitters ?? { count: 0, latest: null };
   
   return (
-    <section className="relative bg-gradient-to-br from-warmgreen-50 to-warmgreen-100 py-8 md:py-10 px-6 rounded-xl border border-warmgreen-200 overflow-hidden shadow-sm">
+    <section className="relative bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 py-8 md:py-10 px-6 rounded-xl border border-warmbeige-200 overflow-hidden shadow-sm">
       {/* Decorative elements */}
       <DecorativePawprints />
       
