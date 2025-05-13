@@ -142,13 +142,15 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     }
   }, [authLoading, isLoggedIn, user?.id, supabaseUser?.id, dogLoadingAttempted]);
 
+  // IMPORTANT: Changed this loading state calculation
+  // Now we consider auth-ready but not-logged-in as NOT loading
   const isLoading = authLoading || (isLoggedIn && dogsLoading && !dogLoadingAttempted);
   console.log('[DogsProvider Debug] Final loading state:', isLoading);
 
   const value: DogsContextType = {
     dogs,
     loading: isLoading,
-    error: error ? String(error) : (authLoading ? null : (!isLoggedIn && !(user?.id || supabaseUser?.id) && dogLoadingAttempted ? 'Authentication required' : null)),
+    error: error ? String(error) : (authLoading ? null : (!isLoggedIn && isAuthReady ? 'Authentication required' : null)),
     activeDog,
     setActiveDog,
     refreshDogs,

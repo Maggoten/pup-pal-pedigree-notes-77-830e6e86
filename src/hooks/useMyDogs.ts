@@ -37,15 +37,20 @@ export const useMyDogs = ({ genderFilter, isAuthReady, isLoggedIn }: UseMyDogsOp
         setPageReady(true);
       }, 500); // 500ms delay for stability
       return () => clearTimeout(timer);
+    } else if (isAuthReady && !isLoggedIn) {
+      // IMPORTANT CHANGE: If auth is ready but user is not logged in, still mark page as ready
+      // This prevents infinite loading when user is not authenticated
+      console.log('[useMyDogs Debug] Auth is ready but user is not logged in, still marking page as ready');
+      setPageReady(true);
     } else {
-      console.log('[useMyDogs Debug] Auth not ready or user not logged in, page not ready', { isAuthReady, isLoggedIn });
+      console.log('[useMyDogs Debug] Auth not ready, page not ready', { isAuthReady, isLoggedIn });
     }
   }, [isAuthReady, isLoggedIn]);
   
   // Add visibility change handler to refresh data when tab becomes active
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && pageReady) {
+      if (document.visibilityState === 'visible' && pageReady && isLoggedIn) {
         console.log('[useMyDogs Debug] Document became visible, refreshing data');
         fetchDogs(false).catch(err => {
           console.error('[useMyDogs Debug] Error refreshing dogs on visibility change:', err);
@@ -57,11 +62,11 @@ export const useMyDogs = ({ genderFilter, isAuthReady, isLoggedIn }: UseMyDogsOp
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [fetchDogs, pageReady]);
+  }, [fetchDogs, pageReady, isLoggedIn]);
   
   // Add timeout before showing errors to allow recovery
   useEffect(() => {
-    if (error) {
+    if (error && isLoggedIn) { // Only show errors if logged in
       console.log('[useMyDogs Debug] Error detected:', error);
       const timer = setTimeout(() => {
         setShowError(true);
@@ -71,7 +76,7 @@ export const useMyDogs = ({ genderFilter, isAuthReady, isLoggedIn }: UseMyDogsOp
     } else {
       setShowError(false);
     }
-  }, [error]);
+  }, [error, isLoggedIn]);
   
   // Filter dogs based on selected gender, with proper null handling
   const allDogs = dogs ?? [];
@@ -99,11 +104,14 @@ export const useMyDogs = ({ genderFilter, isAuthReady, isLoggedIn }: UseMyDogsOp
                          errorMessage.includes('Network error') ||
                          errorMessage.includes('timeout');
 
-  console.log('[useMyDogs Debug] Final loading state:', loading || !pageReady || !isAuthReady);
+  // IMPORTANT CHANGE: Only show loading state if auth is not ready OR (user is logged in AND data is loading)
+  // This means we won't show loading if user is not logged in but auth is ready
+  const isLoading = !isAuthReady || (isLoggedIn && (loading || !pageReady));
+  console.log('[useMyDogs Debug] Final loading state:', isLoading);
                          
   return {
     filteredDogs,
-    loading: loading || !pageReady || !isAuthReady,
+    loading: isLoading,
     error: errorMessage,
     showError,
     retry,
