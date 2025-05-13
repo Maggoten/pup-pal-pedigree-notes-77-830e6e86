@@ -33,7 +33,7 @@ const MetricCardGrid: React.FC<MetricCardGridProps | LegacyMetricCardGridProps> 
   if ('metricCards' in props) {
     // New format with metricCards array
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {props.metricCards.map((card, index) => (
           <MetricCard 
             key={index}
@@ -103,7 +103,7 @@ const MetricCardGrid: React.FC<MetricCardGridProps | LegacyMetricCardGridProps> 
     ];
 
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {metricCards.map((card, index) => (
           <MetricCard 
             key={index}
