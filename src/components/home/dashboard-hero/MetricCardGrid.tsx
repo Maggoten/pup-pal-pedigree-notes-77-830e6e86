@@ -21,28 +21,28 @@ const MetricCardGrid: React.FC<MetricCardGridProps> = ({
     {
       title: 'Dogs',
       value: dogsCount,
-      icon: 'dog',
+      icon: 'dog' as const,
       description: 'Registered dogs',
       color: 'bg-blue-100 text-blue-700'
     },
     {
       title: 'Pregnancies',
       value: activePregnancies,
-      icon: 'heart',
+      icon: 'heart' as const,
       description: 'Active pregnancies',
       color: 'bg-pink-100 text-pink-700'
     },
     {
       title: 'Planned',
       value: plannedLitters,
-      icon: 'calendar',
+      icon: 'calendar' as const,
       description: 'Planned litters',
       color: 'bg-purple-100 text-purple-700'
     },
     {
       title: 'Litters',
       value: activeLitters,
-      icon: 'pawprint',
+      icon: 'pawprint' as const,
       description: 'Active litters',
       color: 'bg-amber-100 text-amber-700'
     }
