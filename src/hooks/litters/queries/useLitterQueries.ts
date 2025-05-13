@@ -78,34 +78,38 @@ export function useLitterQueries() {
   const { user } = useAuth();
   const userId = user?.id;
   
-  // Function to fetch and map active litters
-  const fetchActiveLitters = useCallback(async (): Promise<Litter[]> => {
+  // Function to fetch and map active litters - removed explicit Promise<Litter[]> return type
+  const fetchActiveLitters = useCallback(async () => {
     if (!userId) return [];
     
     try {
-      // Direct fetch without retry wrapper
+      // Step 1: Fetch the raw data with explicit typing
       const rawLitters: RawLitters = await fetchActiveLittersFromDb(userId);
       
-      // Map after fetching is complete with explicit typing
-      const mappedLitters: Litter[] = rawLitters.map(mapRawRowToLitter);
-      return mappedLitters;
+      // Step 2: Create an intermediate array with the mapped data
+      const intermediate = rawLitters.map(mapRawRowToLitter);
+      
+      // Step 3: Return with type assertion to break deep inference
+      return intermediate as Litter[];
     } catch (error) {
       console.error("Error fetching active litters:", error);
       return [];
     }
   }, [userId]);
   
-  // Function to fetch and map archived litters
-  const fetchArchivedLitters = useCallback(async (): Promise<Litter[]> => {
+  // Function to fetch and map archived litters - same pattern as above
+  const fetchArchivedLitters = useCallback(async () => {
     if (!userId) return [];
     
     try {
-      // Direct fetch without retry wrapper
+      // Step 1: Fetch the raw data with explicit typing
       const rawLitters: RawLitters = await fetchArchivedLittersFromDb(userId);
       
-      // Map after fetching is complete with explicit typing
-      const mappedLitters: Litter[] = rawLitters.map(mapRawRowToLitter);
-      return mappedLitters;
+      // Step 2: Create an intermediate array with the mapped data
+      const intermediate = rawLitters.map(mapRawRowToLitter);
+      
+      // Step 3: Return with type assertion to break deep inference
+      return intermediate as Litter[];
     } catch (error) {
       console.error("Error fetching archived litters:", error);
       return [];

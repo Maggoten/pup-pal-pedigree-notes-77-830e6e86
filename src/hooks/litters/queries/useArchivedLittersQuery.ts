@@ -22,9 +22,13 @@ export const useArchivedLittersQuery = () => {
       // Add more debug logging
       console.log('Fetching archived litters for user:', user?.id);
       try {
+        // Use litterService's method which returns Litter[]
+        // The typing complexity is handled inside litterService
         const litters = await litterService.getArchivedLitters();
         console.log('Retrieved archived litters:', litters.length);
-        return litters;
+        
+        // Use type assertion to break deep inference if needed
+        return litters as Litter[];
       } catch (error) {
         // Check if error is auth-related
         const errorMsg = error instanceof Error ? error.message : String(error);

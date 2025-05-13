@@ -22,9 +22,13 @@ export const useActiveLittersQuery = () => {
       // Add more debug logging
       console.log('Fetching active litters for user:', user?.id);
       try {
+        // Use litterService's method which returns Litter[] 
+        // The typing complexity is handled inside litterService
         const litters = await litterService.getActiveLitters();
         console.log('Retrieved active litters:', litters.length);
-        return litters;
+        
+        // Use type assertion to break deep inference if needed
+        return litters as Litter[];
       } catch (error) {
         // Check if error is auth-related
         const errorMsg = error instanceof Error ? error.message : String(error);
