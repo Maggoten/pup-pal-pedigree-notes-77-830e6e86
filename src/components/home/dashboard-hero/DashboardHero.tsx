@@ -35,40 +35,50 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   const navigate = useNavigate();
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
   
-  const metricCardsData = [
-    {
-      title: "Reminders",
-      count: reminders.count,
-      icon: "calendar" as const,
-      highlight: reminders.highPriority > 0 ? `${reminders.highPriority} high priority` : null,
-      action: () => setRemindersDialogOpen(true),
-      loading: false
-    },
-    {
-      title: "Planned Litters",
-      count: plannedLitters.count,
-      icon: "heart" as const,
-      highlight: plannedLitters.nextDate ? `Next: ${format(plannedLitters.nextDate, 'MMM d')}` : null,
-      action: () => navigate("/planned-litters"),
-      loading: false
-    },
-    {
-      title: "Active Pregnancies",
-      count: activePregnancies.length,
-      icon: "pawprint" as const,
-      highlight: activePregnancies.length > 0 ? `${activePregnancies[0].daysLeft} days to due date` : null,
-      action: () => navigate("/pregnancy"),
-      loading: isLoadingPregnancies
-    },
-    {
-      title: "Recent Litters",
-      count: safeRecentLitters.count,
-      icon: "dog" as const,
-      highlight: recentLitters.latest ? `Latest: ${format(recentLitters.latest, 'MMM d')}` : null,
-      action: () => navigate("/my-litters"),
-      loading: false
-    }
-  ];
+const metricCardsData = [
+  {
+    title: "Reminders",
+    count: safeReminders.count,
+    icon: "calendar" as const,
+    highlight:
+      safeReminders.highPriority > 0
+        ? `${safeReminders.highPriority} high priority`
+        : null,
+    action: () => setRemindersDialogOpen(true),
+    loading: false
+  },
+  {
+    title: "Planned Litters",
+    count: safePlannedLitters.count,
+    icon: "heart" as const,
+    highlight: safePlannedLitters.nextDate
+      ? `Next: ${format(safePlannedLitters.nextDate, 'MMM d')}`
+      : null,
+    action: () => navigate("/planned-litters"),
+    loading: false
+  },
+  {
+    title: "Active Pregnancies",
+    count: activePregnancies.length,
+    icon: "pawprint" as const,
+    highlight:
+      activePregnancies.length > 0
+        ? `${activePregnancies[0].daysLeft} days to due date`
+        : null,
+    action: () => navigate("/pregnancy"),
+    loading: isLoadingPregnancies
+  },
+  {
+    title: "Recent Litters",
+    count: safeRecentLitters.count,
+    icon: "dog" as const,
+    highlight: safeRecentLitters.latest
+      ? `Latest: ${format(safeRecentLitters.latest, 'MMM d')}`
+      : null,
+    action: () => navigate("/my-litters"),
+    loading: false
+  }
+];
   
   return (
     <>
