@@ -9,12 +9,14 @@ import { v4 as uuidv4 } from 'uuid';
  * @returns A CalendarEvent representation of the reminder
  */
 export const reminderToCalendarEvent = (reminder: Reminder): CalendarEvent => {
+  const dueDate = reminder.dueDate;
+  
   return {
     id: `reminder-${reminder.id}`, // Prefix with 'reminder-' to distinguish from regular calendar events
     title: reminder.title,
-    date: reminder.dueDate, // Use dueDate as the primary date
-    startDate: reminder.dueDate, // Map to the new CalendarEvent format
-    endDate: reminder.dueDate, // Same as startDate for single-day events
+    date: dueDate, // For backward compatibility
+    startDate: dueDate, // Required field
+    endDate: dueDate, // Required field
     type: reminder.type || 'reminder',
     dogId: reminder.relatedId,
     notes: reminder.description,

@@ -48,10 +48,10 @@ export const useDashboardData = () => {
     return remindersToCalendarEvents(activeReminders);
   }, [reminders]);
 
-  // Combine both sets of events
+  // Combine both sets of events - ensuring consistent types
   const combinedEvents = useMemo(() => {
     const calendarEvents = events || [];
-    // Ensure consistent types by explicitly typing the result
+    // Use type assertion to ensure consistent types
     return [...calendarEvents, ...reminderEvents] as CalendarEvent[];
   }, [events, reminderEvents]);
   
@@ -165,8 +165,8 @@ export const useDashboardData = () => {
       );
     });
     
-    // Return combined events for this date
-    return [...regularEvents, ...reminderEventsForDate];
+    // Return combined events for this date, with explicit type annotation
+    return [...regularEvents, ...reminderEventsForDate] as CalendarEvent[];
   };
 
   // Enhanced getEventColor function that handles reminder types
