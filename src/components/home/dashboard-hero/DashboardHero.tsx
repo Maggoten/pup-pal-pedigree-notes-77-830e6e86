@@ -7,9 +7,11 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import WelcomeHeader from './WelcomeHeader';
 import DecorativePawprints from './DecorativePawprints';
+import { User } from '@/types/auth';
 
 interface DashboardHeroProps {
   username: string;
+  user: User | null;
   reminders: { count: number; highPriority: number };
   plannedLitters: { count: number; nextDate: Date | null };
   activePregnancies: ActivePregnancy[];
@@ -19,6 +21,7 @@ interface DashboardHeroProps {
 
 const DashboardHero: React.FC<DashboardHeroProps> = ({ 
   username, 
+  user,
   reminders,
   plannedLitters,
   activePregnancies,
@@ -66,7 +69,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   return (
     <>
       <div className="rounded-lg overflow-hidden border border-greige-300 beige-gradient relative mt-2 animate-fade-in">
-        <WelcomeHeader username={username} />
+        <WelcomeHeader username={username} user={user} />
         
         <DecorativePawprints />
         

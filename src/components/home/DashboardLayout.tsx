@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
@@ -50,8 +49,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     fetchActivePregnancies();
   }, [initialActivePregnancies.length]);
   
-  // Get the personalized username
-  const username = getDisplayUsername(user);
+  // Get the personalized username for initial display while we fetch from Supabase
+  const username = user?.firstName || (user?.email ? user.email.split('@')[0] : 'Breeder');
   
   // Prepare props for child components
   const calendarProps = {
@@ -79,6 +78,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       <div className="space-y-6">
         <DashboardHero 
           username={username}
+          user={user}
           reminders={dashboardData.remindersSummary}
           plannedLitters={dashboardData.plannedLittersData}
           activePregnancies={activePregnancies}
