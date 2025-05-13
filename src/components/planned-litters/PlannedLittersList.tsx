@@ -57,7 +57,7 @@ const PlannedLittersList: React.FC<PlannedLittersListProps> = ({
 
       {plannedLitters.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {plannedLitters.map(litter => (
+         {(plannedLitters ?? []).map(litter => (
             <PlannedLitterCard 
               key={litter.id}
               litter={litter}
