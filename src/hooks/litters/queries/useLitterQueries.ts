@@ -39,7 +39,7 @@ function mapRawRowToLitter(row: RawLitterRow): Litter {
 }
 
 /**
- * Fetch litters from Supabase
+ * Fetch litters from Supabase with explicit return type
  */
 async function fetchLittersFromSupabase(userId: string, status: 'active' | 'archived'): Promise<RawLitterRow[]> {
   const { data, error } = await supabase
@@ -62,11 +62,12 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Simplified approach using proper type annotations
-      const rawLitters = await fetchWithRetry<RawLitterRow[]>(
-        () => fetchLittersFromSupabase(userId, 'active'),
-        { maxRetries: 2, initialDelay: 1000 }
-      );
+      // Use explicit type parameter when calling fetchWithRetry to avoid excessive type inference
+      const fetchFunction = () => fetchLittersFromSupabase(userId, 'active');
+      const retryOptions = { maxRetries: 2, initialDelay: 1000 };
+      
+      // Breaking apart the nested call to avoid deep type inference
+      const rawLitters = await fetchWithRetry<RawLitterRow[]>(fetchFunction, retryOptions);
       
       // Map to domain model
       return rawLitters.map(mapRawRowToLitter);
@@ -81,11 +82,12 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Simplified approach using proper type annotations
-      const rawLitters = await fetchWithRetry<RawLitterRow[]>(
-        () => fetchLittersFromSupabase(userId, 'archived'),
-        { maxRetries: 2, initialDelay: 1000 }
-      );
+      // Use explicit type parameter when calling fetchWithRetry to avoid excessive type inference
+      const fetchFunction = () => fetchLittersFromSupabase(userId, 'archived');
+      const retryOptions = { maxRetries: 2, initialDelay: 1000 };
+      
+      // Breaking apart the nested call to avoid deep type inference
+      const rawLitters = await fetchWithRetry<RawLitterRow[]>(fetchFunction, retryOptions);
       
       // Map to domain model
       return rawLitters.map(mapRawRowToLitter);
