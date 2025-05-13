@@ -3,6 +3,8 @@ import { Litter, Puppy, PlannedLitter } from '@/types/breeding';
 import { useAuth } from '@/hooks/useAuth';
 import { useLitterState } from './useLitterState';
 import { useLitterQueries } from './queries/useLitterQueries';
+import { useActiveLittersQuery } from './queries/useActiveLittersQuery';
+import { useArchivedLittersQuery } from './queries/useArchivedLittersQuery';
 import { useLitterOperations } from './useLitterOperations';
 import { useLitterUtils } from './useLitterUtils';
 import { useLitterSubscription } from './useLitterSubscription';
@@ -12,6 +14,12 @@ import { plannedLittersService } from '@/services/planned-litters/plannedLitters
 export function useLitterManagement() {
   // Add useAuth to get the current user
   const { user } = useAuth();
+  
+  // Use React Query hooks directly for data
+  const { data: activeQueryLitters, isLoading: isLoadingActive } = useActiveLittersQuery();
+  const { data: archivedQueryLitters, isLoading: isLoadingArchived } = useArchivedLittersQuery();
+  
+  // Use the facade for fetch functions that match the old API
   const { fetchActiveLitters, fetchArchivedLitters } = useLitterQueries();
   
   // Use the separated state hook
@@ -53,6 +61,19 @@ export function useLitterManagement() {
       setIsLoading(false);
     }
   }, [user?.id, fetchActiveLitters, fetchArchivedLitters, setActiveLitters, setArchivedLitters, setIsLoading]);
+
+  // Update state from React Query results when they change
+  useEffect(() => {
+    if (activeQueryLitters) {
+      setActiveLitters(activeQueryLitters);
+    }
+  }, [activeQueryLitters, setActiveLitters]);
+
+  useEffect(() => {
+    if (archivedQueryLitters) {
+      setArchivedLitters(archivedQueryLitters);
+    }
+  }, [archivedQueryLitters, setArchivedLitters]);
 
   // Implementation of loadLitterDetails
   const loadLitterDetails = useCallback(async (litterId: string) => {
@@ -183,7 +204,7 @@ export function useLitterManagement() {
     showAddLitterDialog,
     setShowAddLitterDialog,
     selectedLitter,
-    isLoading,
+    isLoading: isLoading || isLoadingActive || isLoadingArchived,
     isLoadingDetails,
     isLoadingPlannedLitters,
     handleAddLitter,
