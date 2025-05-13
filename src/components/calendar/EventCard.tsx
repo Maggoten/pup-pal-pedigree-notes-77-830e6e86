@@ -1,6 +1,8 @@
 
 import React from 'react';
-import { CalendarEvent } from './types';
+import { cn } from '@/lib/utils';
+import { CalendarEvent } from '@/types/calendar';
+import { BellRing, Calendar } from 'lucide-react';
 
 interface EventCardProps {
   event: CalendarEvent;
@@ -10,25 +12,30 @@ interface EventCardProps {
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event, colorClass, onClick, compact = false }) => {
+  // Check if this is a reminder event
+  const isReminder = event.id.startsWith('reminder-');
+  
   return (
-    <div
-      className={`
-        px-1.5 py-1 rounded-lg border text-left cursor-pointer
-        transition-all duration-200 hover:opacity-90 hover:shadow-sm
-        ${colorClass}
-        ${compact ? 'text-[9px] leading-tight' : 'text-[10px]'}
-      `}
+    <button
       onClick={onClick}
-    >
-      <div className="font-medium truncate">
-        {event.title}
-      </div>
-      {event.dogName && !compact && (
-        <div className="text-[8px] font-semibold truncate opacity-90">
-          {event.dogName}
-        </div>
+      className={cn(
+        "w-full text-left px-1.5 py-1 rounded text-xs transition-colors",
+        colorClass,
+        "hover:opacity-80"
       )}
-    </div>
+    >
+      <div className="flex items-center">
+        {isReminder && (
+          <BellRing className="h-2.5 w-2.5 mr-1 flex-shrink-0" />
+        )}
+        {!isReminder && (
+          <Calendar className="h-2.5 w-2.5 mr-1 flex-shrink-0" />
+        )}
+        <span className="truncate">
+          {event.title}
+        </span>
+      </div>
+    </button>
   );
 };
 
