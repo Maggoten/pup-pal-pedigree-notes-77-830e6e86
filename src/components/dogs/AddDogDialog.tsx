@@ -31,7 +31,7 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
   onOpenChange
 }) => {
   const { addDog, loading } = useDogs();
-  const { isAuthReady } = useAuth();
+  const { isAuthReady, user, supabaseUser } = useAuth();
   
   const form = useForm<z.infer<typeof dogFormSchema>>({
     resolver: zodResolver(dogFormSchema),
@@ -49,42 +49,78 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
   });
 
   const handleSubmit = async (data: z.infer<typeof dogFormSchema>) => {
-    if (loading) return;
+    if (loading) {
+      console.log('[AddDogDialog] Submit aborted - loading state is active');
+      return;
+    }
     
     // First check if auth is ready
     if (!isAuthReady) {
-      console.log('[AddDog] Auth not ready yet, delaying dog addition');
+      console.log('[AddDogDialog] Auth not ready yet, delaying dog addition');
       toast({
         title: "Please wait",
         description: "Preparing your account. Please try again in a moment.",
       });
       return;
     }
+
+    // Check if user is authenticated
+    const userId = user?.id || supabaseUser?.id;
+    if (!userId) {
+      console.error('[AddDogDialog] Cannot add dog: No authenticated user found');
+      toast({
+        title: "Authentication required",
+        description: "You need to be logged in to add a dog",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    console.log('[AddDogDialog] Submitting form with data:', data);
     
     try {
+      console.log('[AddDogDialog] Calling addDog with form data');
       const result = await addDog({
         name: data.name,
         breed: data.breed,
         gender: data.gender,
         dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
-        color: data.color,
-        registrationNumber: data.registrationNumber,
+        color: data.color || '',
+        registrationNumber: data.registrationNumber || '',
         notes: data.notes || '',
         image: '/placeholder.svg',
         heatHistory: data.heatHistory?.map(heat => ({ 
           date: heat.date.toISOString().split('T')[0] 
         })) || [],
         heatInterval: data.heatInterval,
-        owner_id: '', // Will be set by backend
+        owner_id: userId, // Set the owner_id to the current user's ID
         breedingHistory: { litters: [], breedings: [] }
       });
       
+      console.log('[AddDogDialog] Add dog result:', result);
+      
       if (result) {
+        toast({
+          title: "Success",
+          description: `${data.name} has been added to your dogs`
+        });
         form.reset();
         onOpenChange(false);
+      } else {
+        console.error('[AddDogDialog] Add dog returned undefined or null');
+        toast({
+          title: "Error",
+          description: "Failed to add dog. Please try again.",
+          variant: "destructive"
+        });
       }
     } catch (error) {
-      console.error('Error adding dog:', error);
+      console.error('[AddDogDialog] Error adding dog:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
+      });
     }
   };
 

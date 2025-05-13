@@ -9,6 +9,7 @@ import { useForceReload } from './useForceReload';
 import { useActiveDog } from './useActiveDog';
 import { useDogOperations } from './useDogOperations';
 import { useDogsQueries } from '@/hooks/dogs/useDogsQueries';
+import { useDogsMutations } from '@/hooks/dogs/useDogsMutations';
 
 interface DogsProviderProps {
   children: ReactNode;
@@ -29,13 +30,16 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   const [dogLoadingAttempted, setDogLoadingAttempted] = useState(false);
   const { toast } = useToast();
   
-  // Use the React Query-based hook instead of the old hook
+  // Use the React Query-based hook for queries
   const { 
     dogs, 
     isLoading: dogsLoading, 
     error,
     fetchDogs: fetchDogsBase
   } = useDogsQueries();
+
+  // Import the mutations hook to access the actual addDog functionality
+  const { addDog: addDogMutation } = useDogsMutations();
 
   console.log('[DogsProvider Debug] useDogsQueries results:', { 
     dogsCount: dogs?.length || 0, 
@@ -101,6 +105,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     }
   };
 
+  // Replace the placeholder addDog function with a proper implementation that uses the mutation
   const addDog = async (dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>): Promise<Dog | undefined> => {
     try {
       // Use either user.id or supabaseUser.id for the owner ID
@@ -111,8 +116,17 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
         throw new Error('User not authenticated');
       }
       
-      // This will be implemented in useDogsMutations
-      throw new Error('Not implemented');
+      // Use the addDogMutation from useDogsMutations hook
+      const result = await addDogMutation(dog);
+      
+      if (result) {
+        console.log('[DogsProvider Debug] Dog added successfully:', result);
+        // Refresh the dog list after adding
+        await refreshDogs();
+        return result;
+      } else {
+        throw new Error('Failed to add dog - no result returned');
+      }
     } catch (e) {
       console.error('[DogsProvider Debug] Error adding dog:', e);
       toast({
