@@ -41,7 +41,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   
   useEffect(() => {
     console.log("PuppiesTabContent rendered with puppies:", puppies);
-    if (!puppies || puppies.length === 0) {
+    if ((puppies?.length ?? 0) === 0) {
       console.log("No puppies found in this litter");
     } else {
       console.log("Puppy details:", JSON.stringify(puppies[0], null, 2));
