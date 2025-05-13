@@ -58,7 +58,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
     },
     {
       title: "Recent Litters",
-      count: recentLitters.count,
+      count: safeRecentLitters.count,
       icon: "dog" as const,
       highlight: recentLitters.latest ? `Latest: ${format(recentLitters.latest, 'MMM d')}` : null,
       action: () => navigate("/my-litters"),
