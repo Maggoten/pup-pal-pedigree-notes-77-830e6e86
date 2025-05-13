@@ -1,6 +1,11 @@
 
-import { StorageError } from '@supabase/storage-js';
 import { STORAGE_ERRORS } from '../config';
+
+// Define StorageError type locally to avoid dependency on @supabase/storage-js
+interface StorageError {
+  message: string;
+  statusCode?: number;
+}
 
 /**
  * Validates a storage object exists

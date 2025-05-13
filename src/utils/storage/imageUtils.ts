@@ -1,7 +1,13 @@
+
 import { isMobileDevice } from '@/utils/fetchUtils';
 import { isSafari } from '@/utils/storage/config';
 import { safeImageCompression, directUpload, getPlatformInfo } from './mobileUpload';
-import { StorageError } from '@supabase/storage-js';
+
+// Define StorageError type locally to avoid dependency on @supabase/storage-js
+interface StorageError {
+  message: string;
+  statusCode?: number;
+}
 
 // Improved image prefetch function with better mobile support
 export const prefetchImage = async (url: string): Promise<void> => {

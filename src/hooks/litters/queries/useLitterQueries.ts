@@ -53,6 +53,20 @@ async function fetchLittersFromSupabase(userId: string, status: 'active' | 'arch
   return (data || []) as RawLitterRow[];
 }
 
+// Helper type for retry options to avoid deep inference
+type RetryOptions = {
+  maxRetries: number;
+  initialDelay: number;
+};
+
+// Helper function with explicit typing to avoid deep type inference
+async function fetchWithRetryTyped<T>(
+  fetchFn: () => Promise<T>,
+  options: RetryOptions
+): Promise<T> {
+  return fetchWithRetry(fetchFn, options);
+}
+
 export function useLitterQueries() {
   const { user } = useAuth();
   const userId = user?.id;
@@ -62,12 +76,12 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Use explicit type parameter when calling fetchWithRetry to avoid excessive type inference
+      // Use the typed helper function to avoid deep inference
       const fetchFunction = () => fetchLittersFromSupabase(userId, 'active');
-      const retryOptions = { maxRetries: 2, initialDelay: 1000 };
-      
-      // Breaking apart the nested call to avoid deep type inference
-      const rawLitters = await fetchWithRetry<RawLitterRow[]>(fetchFunction, retryOptions);
+      const rawLitters = await fetchWithRetryTyped<RawLitterRow[]>(
+        fetchFunction, 
+        { maxRetries: 2, initialDelay: 1000 }
+      );
       
       // Map to domain model
       return rawLitters.map(mapRawRowToLitter);
@@ -82,12 +96,12 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Use explicit type parameter when calling fetchWithRetry to avoid excessive type inference
+      // Use the typed helper function to avoid deep inference
       const fetchFunction = () => fetchLittersFromSupabase(userId, 'archived');
-      const retryOptions = { maxRetries: 2, initialDelay: 1000 };
-      
-      // Breaking apart the nested call to avoid deep type inference
-      const rawLitters = await fetchWithRetry<RawLitterRow[]>(fetchFunction, retryOptions);
+      const rawLitters = await fetchWithRetryTyped<RawLitterRow[]>(
+        fetchFunction, 
+        { maxRetries: 2, initialDelay: 1000 }
+      );
       
       // Map to domain model
       return rawLitters.map(mapRawRowToLitter);
