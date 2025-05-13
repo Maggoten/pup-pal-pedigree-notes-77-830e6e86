@@ -40,49 +40,39 @@ function mapRawRowToLitter(row: RawLitterRow): Litter {
 /**
  * Fetch active litters directly from Supabase
  */
-async function fetchActiveLittersRaw(userId: string): Promise<RawLitterRow[]> {
+async function fetchActiveLittersFromDb(userId: string): Promise<RawLitterRow[]> {
   if (!userId) return [];
   
-  try {
-    const { data, error } = await supabase
-      .from('litters')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .order('created_at', { ascending: false });
-  
-    if (error) throw error;
-    return (data || []) as RawLitterRow[];
-  } catch (error) {
-    console.error("Error in fetchActiveLittersRaw:", error);
-    return [];
-  }
+  const { data, error } = await supabase
+    .from('litters')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data || []) as RawLitterRow[];
 }
 
 /**
  * Fetch archived litters directly from Supabase
  */
-async function fetchArchivedLittersRaw(userId: string): Promise<RawLitterRow[]> {
+async function fetchArchivedLittersFromDb(userId: string): Promise<RawLitterRow[]> {
   if (!userId) return [];
   
-  try {
-    const { data, error } = await supabase
-      .from('litters')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('status', 'archived')
-      .order('created_at', { ascending: false });
-  
-    if (error) throw error;
-    return (data || []) as RawLitterRow[];
-  } catch (error) {
-    console.error("Error in fetchArchivedLittersRaw:", error);
-    return [];
-  }
+  const { data, error } = await supabase
+    .from('litters')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('status', 'archived')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data || []) as RawLitterRow[];
 }
 
 /**
- * Simple retry mechanism without complex generics
+ * Simple retry mechanism with explicit types
  */
 async function retryOperation<T>(
   operation: () => Promise<T>,
@@ -121,11 +111,9 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Use our simplified retry function with concrete return type
+      // Fetch with explicit typing and separate the mapping step
       const rawLitters: RawLitterRow[] = await retryOperation(
-        () => fetchActiveLittersRaw(userId),
-        2,
-        1000
+        () => fetchActiveLittersFromDb(userId)
       );
       
       // Map after fetching is complete
@@ -141,11 +129,9 @@ export function useLitterQueries() {
     if (!userId) return [];
     
     try {
-      // Use our simplified retry function with concrete return type  
+      // Fetch with explicit typing and separate the mapping step
       const rawLitters: RawLitterRow[] = await retryOperation(
-        () => fetchArchivedLittersRaw(userId),
-        2,
-        1000
+        () => fetchArchivedLittersFromDb(userId)
       );
       
       // Map after fetching is complete

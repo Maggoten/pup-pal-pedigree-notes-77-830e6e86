@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { litterService } from '@/services/LitterService';
 import { useAuth } from '@/hooks/useAuth';
+import { Litter } from '@/types/breeding';
 
 // Query key factory
 export const archivedLittersQueryKey = ['litters', 'archived'];
@@ -9,7 +10,7 @@ export const archivedLittersQueryKey = ['litters', 'archived'];
 export const useArchivedLittersQuery = () => {
   const { user, isAuthReady } = useAuth();
   
-  return useQuery({
+  return useQuery<Litter[], Error>({
     queryKey: archivedLittersQueryKey,
     queryFn: async () => {
       // Verify auth state before fetching
