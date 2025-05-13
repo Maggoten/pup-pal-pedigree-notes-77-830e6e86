@@ -28,6 +28,10 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   recentLitters,
   isLoadingPregnancies = false
 }) => {
+  const safeReminders = reminders ?? { count: 0, highPriority: 0 };
+  const safePlannedLitters = plannedLitters ?? { count: 0, nextDate: null };
+  const safeRecentLitters = recentLitters ?? { count: 0, latest: null };
+
   const navigate = useNavigate();
   const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
   
