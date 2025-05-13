@@ -18,8 +18,7 @@ export const reminderToCalendarEvent = (reminder: Reminder): CalendarEvent => {
     type: reminder.type || 'reminder',
     dogId: reminder.relatedId,
     notes: reminder.description,
-    // Add a flag to identify this as a reminder-sourced event
-    isReminderEvent: true
+    isReminderEvent: true  // Flag to identify this as a reminder-sourced event
   };
 };
 

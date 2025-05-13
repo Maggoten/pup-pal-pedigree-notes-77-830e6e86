@@ -1,4 +1,3 @@
-
 import { useMemo, useEffect, useState } from 'react';
 import { subDays } from 'date-fns';
 import { useDogs } from '@/context/DogsContext';
@@ -52,7 +51,8 @@ export const useDashboardData = () => {
   // Combine both sets of events
   const combinedEvents = useMemo(() => {
     const calendarEvents = events || [];
-    return [...calendarEvents, ...reminderEvents];
+    // Ensure consistent types by explicitly typing the result
+    return [...calendarEvents, ...reminderEvents] as CalendarEvent[];
   }, [events, reminderEvents]);
   
   // Fetch planned litters data
