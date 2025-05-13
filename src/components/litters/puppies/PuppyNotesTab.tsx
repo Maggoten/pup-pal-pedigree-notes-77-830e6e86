@@ -26,6 +26,7 @@ const PuppyNotesTab: React.FC<PuppyNotesTabProps> = ({
   selectedTime,
   onAddNote
 }) => {
+  const safeNotes = puppy.notes ?? [];
   const [showAllNotes, setShowAllNotes] = useState(false);
   const hasNotes = puppy.notes && puppy.notes.length > 0;
 
@@ -46,7 +47,7 @@ const PuppyNotesTab: React.FC<PuppyNotesTabProps> = ({
       <div className="mt-4">
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-sm font-medium">Recent Notes</h3>
-          {hasNotes && puppy.notes.length > 5 && (
+          {hasNotes && safeNotes.length > 5 && (
             <Dialog open={showAllNotes} onOpenChange={setShowAllNotes}>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="flex items-center gap-1 h-7">
@@ -64,7 +65,7 @@ const PuppyNotesTab: React.FC<PuppyNotesTabProps> = ({
         
         {hasNotes ? (
           <div className="max-h-40 overflow-y-auto space-y-2">
-            {puppy.notes.slice(0, 5).map((note, index) => (
+            {safeNotes.slice(0, 5).map((note, index) => (
               <div key={index} className="border rounded-md p-3">
                 <div className="text-xs text-muted-foreground mb-1">
                   {format(new Date(note.date), "PPP p")}
