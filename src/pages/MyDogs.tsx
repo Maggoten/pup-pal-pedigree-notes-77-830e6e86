@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, Filter, AlertCircle, Loader2, LogIn } from 'lucide-react';
+import { PlusCircle, Filter, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import DogList from '@/components/DogList';
 import DogDetails from '@/components/dogs/DogDetails';
@@ -17,14 +17,13 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useMyDogs } from '@/hooks/useMyDogs';
-import { Link } from 'react-router-dom';
 
 const MyDogs: React.FC = () => {
   console.log('[MyDogs Page] Page component initializing');
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
-  const { isAuthReady, isLoggedIn, user } = useAuth();
+  const { isAuthReady, isLoggedIn } = useAuth();
   
-  console.log('[MyDogs Page] Auth state:', { isAuthReady, isLoggedIn, hasUser: !!user });
+  console.log('[MyDogs Page] Auth state:', { isAuthReady, isLoggedIn });
   
   const {
     filteredDogs,
@@ -55,35 +54,14 @@ const MyDogs: React.FC = () => {
     console.log('[MyDogs Page] Filtered dogs updated:', filteredDogs?.length || 0);
   }, [filteredDogs]);
 
-  // Check if the current state indicates authentication is required
-  const authRequired = !isLoggedIn && isAuthReady && !loading;
-
   return (
     <PageLayout 
       title="My Dogs" 
       description="Manage your breeding dogs"
       className="bg-warmbeige-50"
     >
-      {/* Authentication required message */}
-      {authRequired && (
-        <Alert className="mb-4 bg-blue-50 border-blue-200">
-          <LogIn className="h-4 w-4 mr-2 text-blue-600" />
-          <AlertDescription className="flex items-center justify-between w-full">
-            <span>
-              Please log in to view and manage your dogs
-            </span>
-            <Button 
-              asChild
-              className="ml-2 bg-blue-600 hover:bg-blue-700"
-            >
-              <Link to="/login">Log In</Link>
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-      
       {/* Error message */}
-      {error && showError && !authRequired && (
+      {error && showError && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4 mr-2" />
           <AlertDescription className="flex items-center justify-between w-full">
@@ -158,9 +136,9 @@ const MyDogs: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="bg-white">
-              {!authRequired && <DogList dogsList={filteredDogs} />}
+              <DogList dogsList={filteredDogs} />
               
-              {!authRequired && filteredDogs.length === 0 && !loading && (
+              {filteredDogs.length === 0 && !loading && (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground">No dogs found.</p>
                   <Button 
@@ -171,19 +149,6 @@ const MyDogs: React.FC = () => {
                   >
                     <PlusCircle className="h-4 w-4 mr-2" />
                     Add Your First Dog
-                  </Button>
-                </div>
-              )}
-              
-              {authRequired && (
-                <div className="text-center py-12">
-                  <LogIn className="h-10 w-10 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Authentication Required</h3>
-                  <p className="text-muted-foreground mb-4">
-                    You need to be logged in to view and manage your dogs
-                  </p>
-                  <Button asChild>
-                    <Link to="/login">Go to Login</Link>
                   </Button>
                 </div>
               )}
