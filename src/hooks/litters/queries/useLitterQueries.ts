@@ -19,6 +19,9 @@ interface RawLitterRow {
   created_at?: string;
 }
 
+// Type alias for array of raw litter rows
+type RawLitters = RawLitterRow[];
+
 /**
  * Maps a raw database row to the Litter domain model
  */
@@ -40,7 +43,7 @@ function mapRawRowToLitter(row: RawLitterRow): Litter {
 /**
  * Fetch active litters directly from Supabase
  */
-async function fetchActiveLittersFromDb(userId: string): Promise<RawLitterRow[]> {
+async function fetchActiveLittersFromDb(userId: string): Promise<RawLitters> {
   if (!userId) return [];
   
   const { data, error } = await supabase
@@ -51,13 +54,13 @@ async function fetchActiveLittersFromDb(userId: string): Promise<RawLitterRow[]>
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return (data || []) as RawLitterRow[];
+  return (data || []) as RawLitters;
 }
 
 /**
  * Fetch archived litters directly from Supabase
  */
-async function fetchArchivedLittersFromDb(userId: string): Promise<RawLitterRow[]> {
+async function fetchArchivedLittersFromDb(userId: string): Promise<RawLitters> {
   if (!userId) return [];
   
   const { data, error } = await supabase
@@ -68,7 +71,7 @@ async function fetchArchivedLittersFromDb(userId: string): Promise<RawLitterRow[
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return (data || []) as RawLitterRow[];
+  return (data || []) as RawLitters;
 }
 
 export function useLitterQueries() {
@@ -81,10 +84,11 @@ export function useLitterQueries() {
     
     try {
       // Direct fetch without retry wrapper
-      const rawLitters = await fetchActiveLittersFromDb(userId);
+      const rawLitters: RawLitters = await fetchActiveLittersFromDb(userId);
       
-      // Map after fetching is complete
-      return rawLitters.map(mapRawRowToLitter);
+      // Map after fetching is complete with explicit typing
+      const mappedLitters: Litter[] = rawLitters.map(mapRawRowToLitter);
+      return mappedLitters;
     } catch (error) {
       console.error("Error fetching active litters:", error);
       return [];
@@ -97,10 +101,11 @@ export function useLitterQueries() {
     
     try {
       // Direct fetch without retry wrapper
-      const rawLitters = await fetchArchivedLittersFromDb(userId);
+      const rawLitters: RawLitters = await fetchArchivedLittersFromDb(userId);
       
-      // Map after fetching is complete
-      return rawLitters.map(mapRawRowToLitter);
+      // Map after fetching is complete with explicit typing
+      const mappedLitters: Litter[] = rawLitters.map(mapRawRowToLitter);
+      return mappedLitters;
     } catch (error) {
       console.error("Error fetching archived litters:", error);
       return [];
