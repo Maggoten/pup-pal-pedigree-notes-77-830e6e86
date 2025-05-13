@@ -1,93 +1,73 @@
 
 import React from 'react';
-import { format } from 'date-fns';
-import { CalendarEvent } from '@/types/calendar';
-import { X, Edit, Trash2, BellRing, Calendar } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { CalendarEvent } from './types';
 import { Button } from '@/components/ui/button';
+import { X, Edit, Trash2 } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface MobileEventCardProps {
   event: CalendarEvent;
   colorClass: string;
   onClose: () => void;
+  onEdit: () => void;
   onDelete?: () => void;
-  onEdit?: () => void;
 }
 
 const MobileEventCard: React.FC<MobileEventCardProps> = ({
   event,
   colorClass,
   onClose,
+  onEdit,
   onDelete,
-  onEdit
 }) => {
-  // Check if this is a reminder event
-  const isReminder = event.id.startsWith('reminder-');
-  
+  // Extract just the background class from colorClass string
+  const bgClass = colorClass.split(' ').find(cls => cls.startsWith('bg-')) || '';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-xs rounded-lg bg-white shadow-lg overflow-hidden">
-        <div className={cn("p-3 flex justify-between items-center", colorClass)}>
-          <div className="flex items-center">
-            {isReminder ? (
-              <BellRing className="h-4 w-4 mr-2" />
-            ) : (
-              <Calendar className="h-4 w-4 mr-2" />
-            )}
-            <h3 className="font-medium text-sm">
-              {isReminder ? "Reminder" : "Event"}
-            </h3>
-          </div>
-          <button onClick={onClose} className="text-current opacity-80 hover:opacity-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
+      <div className="bg-warmbeige-50 rounded-xl shadow-lg max-w-md w-full max-h-[80vh] overflow-auto">
+        <div className={`p-3 flex justify-between items-center ${bgClass}`}>
+          <h3 className="font-medium">{event.title}</h3>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={onClose}>
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
         
-        <div className="p-4">
-          <h2 className="text-lg font-semibold mb-2">{event.title}</h2>
-          
-          <div className="text-sm text-gray-500 mb-3">
-            {format(new Date(event.date), 'EEEE, MMMM d, yyyy')}
-            {event.time && <span> • {event.time}</span>}
+        <div className="p-4 space-y-3">
+          <div>
+            <div className="text-sm font-medium text-darkgray-600">Date</div>
+            <div>{format(event.date, 'PPPP')}</div>
           </div>
           
-          {event.notes && (
-            <div className="mb-4">
-              <p className="text-sm">{event.notes}</p>
+          {event.time && (
+            <div>
+              <div className="text-sm font-medium text-darkgray-600">Time</div>
+              <div>{event.time}</div>
             </div>
           )}
           
           {event.dogName && (
-            <div className="text-xs text-gray-500 mb-3">
-              Related to: {event.dogName}
+            <div>
+              <div className="text-sm font-medium text-darkgray-600">Dog</div>
+              <div>{event.dogName}</div>
             </div>
           )}
           
-          <div className="flex justify-end space-x-2 mt-3">
-            <Button variant="outline" size="sm" onClick={onClose}>
-              Close
+          {event.notes && (
+            <div>
+              <div className="text-sm font-medium text-darkgray-600">Notes</div>
+              <div className="whitespace-pre-line">{event.notes}</div>
+            </div>
+          )}
+          
+          <div className="flex justify-end space-x-2 pt-2">
+            <Button variant="outline" size="sm" className="flex items-center" onClick={onEdit}>
+              <Edit className="mr-1 h-3.5 w-3.5" />
+              Edit
             </Button>
-            
-            {!isReminder && onEdit && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="flex items-center"
-                onClick={onEdit}
-              >
-                <Edit className="h-3.5 w-3.5 mr-1" />
-                Edit
-              </Button>
-            )}
-            
-            {!isReminder && onDelete && (
-              <Button 
-                variant="destructive" 
-                size="sm" 
-                className="flex items-center"
-                onClick={onDelete}
-              >
-                <Trash2 className="h-3.5 w-3.5 mr-1" />
+            {onDelete && (
+              <Button variant="destructive" size="sm" className="flex items-center" onClick={onDelete}>
+                <Trash2 className="mr-1 h-3.5 w-3.5" />
                 Delete
               </Button>
             )}

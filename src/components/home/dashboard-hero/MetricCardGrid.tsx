@@ -1,64 +1,33 @@
 
 import React from 'react';
 import MetricCard from './MetricCard';
-import { Dog, Heart, Users, PawPrint } from 'lucide-react';
 
-export interface MetricCardGridProps {
-  dogsCount: number;
-  activePregnancies: number;
-  plannedLitters: number;
-  activeLitters: number;
+interface MetricCardData {
+  title: string;
+  count: number;
+  icon: 'calendar' | 'heart' | 'pawprint' | 'dog';
+  highlight: string | null;
+  action: () => void;
+  color?: string;
+  loading?: boolean;
 }
 
-const MetricCardGrid: React.FC<MetricCardGridProps> = ({
-  dogsCount,
-  activePregnancies,
-  plannedLitters,
-  activeLitters
-}) => {
-  // Define the metrics to display
-  const metrics = [
-    {
-      title: 'Dogs',
-      value: dogsCount,
-      icon: 'dog' as const,
-      description: 'Registered dogs',
-      color: 'bg-blue-100 text-blue-700'
-    },
-    {
-      title: 'Pregnancies',
-      value: activePregnancies,
-      icon: 'heart' as const,
-      description: 'Active pregnancies',
-      color: 'bg-pink-100 text-pink-700'
-    },
-    {
-      title: 'Planned',
-      value: plannedLitters,
-      icon: 'calendar' as const,
-      description: 'Planned litters',
-      color: 'bg-purple-100 text-purple-700'
-    },
-    {
-      title: 'Litters',
-      value: activeLitters,
-      icon: 'pawprint' as const,
-      description: 'Active litters',
-      color: 'bg-amber-100 text-amber-700'
-    }
-  ];
+interface MetricCardGridProps {
+  metricCards: MetricCardData[];
+}
 
+const MetricCardGrid: React.FC<MetricCardGridProps> = ({ metricCards }) => {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {metrics.map((metric, index) => (
-        <MetricCard
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {metricCards.map((card, index) => (
+        <MetricCard 
           key={index}
-          title={metric.title}
-          count={metric.value}
-          icon={metric.icon}
-          highlight={metric.description}
-          action={() => {}}
-          color={metric.color}
+          title={card.title}
+          count={card.count}
+          icon={card.icon}
+          highlight={card.highlight}
+          action={card.action}
+          loading={card.loading}
         />
       ))}
     </div>

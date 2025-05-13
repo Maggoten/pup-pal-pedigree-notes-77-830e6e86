@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
@@ -61,7 +60,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     deleteEvent: dashboardData.deleteEvent,
     editEvent: dashboardData.handleEditEvent,
     isLoading: dashboardData.calendarLoading,
-    hasError: dashboardData.calendarError
+    hasError: dashboardData.calendarError // This now receives a boolean value
   };
   
   const remindersProps = {
@@ -71,10 +70,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     handleMarkComplete: dashboardData.handleMarkComplete
   };
   
-  // Counter metrics for the dashboard
-  const dogsCount = 0; // This would ideally come from the dogs context/state
-  const activeLittersCount = 0; // This would come from litters data
-  
   return (
     <PageLayout 
       title="" 
@@ -83,10 +78,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       <div className="space-y-6">
         <DashboardHero 
           username={username}
-          dogsCount={dogsCount}
-          activePregnancies={activePregnancies.length}
-          plannedLitters={dashboardData.plannedLittersData?.length || 0}
-          activeLitters={activeLittersCount}
+          user={user}
+          reminders={dashboardData.remindersSummary}
+          plannedLitters={dashboardData.plannedLittersData}
+          activePregnancies={activePregnancies}
+          recentLitters={dashboardData.recentLittersData}
+          isLoadingPregnancies={isLoadingPregnancies}
         />
         
         <DashboardContent

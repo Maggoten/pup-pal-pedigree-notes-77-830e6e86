@@ -51,8 +51,6 @@ export async function fetchCalendarEvents(): Promise<CalendarEvent[]> {
       id: event.id,
       title: event.title,
       date: new Date(event.date),
-      startDate: new Date(event.date), // Add required startDate field
-      endDate: new Date(event.date),   // Add required endDate field
       type: event.type,
       dogId: event.dog_id || undefined,
       dogName: event.dog_name || undefined,
@@ -123,8 +121,6 @@ export async function addEventToSupabase(
       id: result.id,
       title: result.title,
       date: new Date(result.date),
-      startDate: new Date(result.date), // Add required startDate field
-      endDate: new Date(result.date),   // Add required endDate field
       type: result.type,
       dogId: result.dog_id || undefined,
       dogName: result.dog_name || undefined,
@@ -194,8 +190,6 @@ export async function updateEventInSupabase(
       id: result.id,
       title: result.title,
       date: new Date(result.date),
-      startDate: new Date(result.date), // Add required startDate field
-      endDate: new Date(result.date),   // Add required endDate field
       type: result.type,
       dogId: result.dog_id || undefined,
       dogName: result.dog_name || undefined,
