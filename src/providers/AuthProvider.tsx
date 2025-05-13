@@ -1,3 +1,4 @@
+
 import { useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { User } from '@/types/auth';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
@@ -223,6 +224,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Set up auth state listener and check for existing session
   useEffect(() => {
+    console.log('[AuthProvider] init listener — isAuthReady:', isAuthReady, 'isLoggedIn:', isLoggedIn);
     let isSubscribed = true;
     
     const initAuth = async () => {
@@ -231,6 +233,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const authStateResponse = supabase.auth.onAuthStateChange(
           (event, currentSession) => {
             console.log(`[Auth Debug] Auth state change event: ${event}`);
+            console.log('[AuthProvider] onAuthStateChange', { event, sessionExists: !!currentSession });
             
             if (!isSubscribed) return;
             
@@ -303,7 +306,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (cleanup) cleanup();
       });
     };
-  }, [getUserProfile, processAuthChange]);
+  }, [getUserProfile, processAuthChange, isAuthReady, isLoggedIn]);
   
   /**
    * Enhanced logout function that properly resets all application state

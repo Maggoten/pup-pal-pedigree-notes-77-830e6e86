@@ -17,7 +17,12 @@ export const useMyDogs = ({ genderFilter, isAuthReady, isLoggedIn }: UseMyDogsOp
   console.log('[useMyDogs Debug] Hook initialized with:', { genderFilter, isAuthReady, isLoggedIn });
   
   const { dogs, activeDog, loading, error, fetchDogs } = useDogs();
-  console.log('[useMyDogs Debug] Dogs context accessed:', { dogsCount: dogs?.length, loading, hasError: !!error });
+  console.log('[useMyDogs Debug] Dogs context accessed:', { 
+    dogsCount: dogs?.length, 
+    loading, 
+    hasError: !!error,
+    errorMessage: error || 'none'
+  });
   
   const [showAddDogDialog, setShowAddDogDialog] = useState(false);
   const [pageReady, setPageReady] = useState(false);
@@ -32,6 +37,8 @@ export const useMyDogs = ({ genderFilter, isAuthReady, isLoggedIn }: UseMyDogsOp
         setPageReady(true);
       }, 500); // 500ms delay for stability
       return () => clearTimeout(timer);
+    } else {
+      console.log('[useMyDogs Debug] Auth not ready or user not logged in, page not ready', { isAuthReady, isLoggedIn });
     }
   }, [isAuthReady, isLoggedIn]);
   
@@ -55,6 +62,7 @@ export const useMyDogs = ({ genderFilter, isAuthReady, isLoggedIn }: UseMyDogsOp
   // Add timeout before showing errors to allow recovery
   useEffect(() => {
     if (error) {
+      console.log('[useMyDogs Debug] Error detected:', error);
       const timer = setTimeout(() => {
         setShowError(true);
       }, 2000); // Only show errors after 2 seconds of failure
@@ -91,6 +99,8 @@ export const useMyDogs = ({ genderFilter, isAuthReady, isLoggedIn }: UseMyDogsOp
                          errorMessage.includes('Network error') ||
                          errorMessage.includes('timeout');
 
+  console.log('[useMyDogs Debug] Final loading state:', loading || !pageReady || !isAuthReady);
+                         
   return {
     filteredDogs,
     loading: loading || !pageReady || !isAuthReady,

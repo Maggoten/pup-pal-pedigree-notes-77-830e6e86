@@ -134,6 +134,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     
     if (!authLoading && isLoggedIn && (user?.id || supabaseUser?.id) && !dogLoadingAttempted) {
       console.log('[DogsProvider Debug] Attempting initial dogs fetch');
+      console.log('[DogsProvider] calling fetchDogs, ownerId:', user?.id || supabaseUser?.id);
       setDogLoadingAttempted(true);
       fetchDogs().catch(err => {
         console.error('[DogsProvider Debug] Initial dogs fetch failed:', err);
@@ -158,6 +159,13 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     removeDog
   };
 
+  console.log('[DogsProvider Debug] providing context value', {
+    dogsCount: dogs?.length || 0,
+    loading: isLoading,
+    error: value.error,
+    hasActiveDog: !!activeDog
+  });
+  
   console.log('[DogsProvider Debug] Rendering provider with dogs:', dogs?.length || 0);
   
   return (

@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dogs';
 import { enrichDog, DbDog } from '@/utils/dogUtils';
@@ -65,7 +66,10 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
   
   // Verify session first before making data requests
   try {
+    console.log('[Dogs Debug] Verifying session before fetch');
     const isSessionValid = await verifySession({ skipThrow: true });
+    console.log('[Dogs Debug] Session verification result:', isSessionValid);
+    
     if (!isSessionValid) {
       console.warn('[Dogs Debug] No valid session before fetching dogs, returning empty array');
       // Return empty array as we'll let the auth system recover the session
@@ -76,6 +80,7 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
     const response = await fetchWithRetry<PostgrestResponse<DbDog>>(
       // Fetch function with specific fields instead of select('*')
       async () => {
+        console.log('[Dogs Debug] Executing Supabase query for dogs with owner_id:', userId);
         return await supabase
           .from('dogs')
           .select('id, name, breed, gender, birthdate, color, image_url, heatHistory, heatInterval, owner_id, created_at')
@@ -110,6 +115,13 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
         }
       }
     );
+
+    console.log('[Dogs Debug] Supabase response', { 
+      hasData: !!response.data, 
+      dataLength: response.data?.length || 0, 
+      hasError: !!response.error,
+      errorMessage: response.error ? response.error.message : 'none'
+    });
 
     if (response.error) {
       // Check if error is auth-related

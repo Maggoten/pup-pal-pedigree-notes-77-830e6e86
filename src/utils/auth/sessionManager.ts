@@ -14,11 +14,17 @@ interface VerifySessionOptions {
 export async function verifySession(options: VerifySessionOptions = {}): Promise<boolean> {
   try {
     const { skipThrow = false } = options;
+    console.log('[SessionManager] verifySession called with skipThrow:', skipThrow);
     
     const { data, error } = await supabase.auth.getSession();
+    console.log('[SessionManager] getSession result:', { 
+      hasSession: !!data?.session, 
+      hasError: !!error,
+      errorMessage: error ? error.message : 'none'
+    });
     
     if (error) {
-      console.error("Session verification error:", error.message);
+      console.error("[SessionManager] Session verification error:", error.message);
       if (!skipThrow) {
         throw new Error(`Authentication required: ${error.message}`);
       }
@@ -26,16 +32,18 @@ export async function verifySession(options: VerifySessionOptions = {}): Promise
     }
     
     if (!data?.session) {
-      console.warn("No active session found");
+      console.warn("[SessionManager] No active session found");
       if (!skipThrow) {
         throw new Error("Authentication required: No active session");
       }
       return false;
     }
     
+    console.log('[SessionManager] Valid session found, expires at:', 
+      new Date(data.session.expires_at! * 1000).toISOString());
     return true;
   } catch (err) {
-    console.error("Session verification failed:", err);
+    console.error("[SessionManager] Session verification failed:", err);
     if (!options.skipThrow) {
       throw err;
     }
@@ -49,21 +57,24 @@ export async function verifySession(options: VerifySessionOptions = {}): Promise
  */
 export async function refreshSessionFromToken(refreshToken: string) {
   try {
+    console.log('[SessionManager] Attempting to refresh session using refresh token');
     const { data, error } = await supabase.auth.refreshSession({ refresh_token: refreshToken });
     
     if (error) {
-      console.error("Failed to refresh session:", error.message);
+      console.error("[SessionManager] Failed to refresh session:", error.message);
       throw error;
     }
     
     if (!data?.session) {
-      console.error("No session received after refresh");
+      console.error("[SessionManager] No session received after refresh");
       throw new Error("Invalid refresh token");
     }
     
+    console.log('[SessionManager] Session successfully refreshed, expires at:', 
+      new Date(data.session.expires_at! * 1000).toISOString());
     return data.session;
   } catch (err) {
-    console.error("Session refresh failed:", err);
+    console.error("[SessionManager] Session refresh failed:", err);
     throw err;
   }
 }
@@ -73,21 +84,24 @@ export async function refreshSessionFromToken(refreshToken: string) {
  */
 export async function refreshCurrentSession() {
   try {
+    console.log('[SessionManager] Attempting to refresh current session');
     const { data, error } = await supabase.auth.refreshSession();
     
     if (error) {
-      console.error("Failed to refresh current session:", error.message);
+      console.error("[SessionManager] Failed to refresh current session:", error.message);
       throw error;
     }
     
     if (!data?.session) {
-      console.error("No session received after refreshing current session");
+      console.error("[SessionManager] No session received after refreshing current session");
       throw new Error("No active session to refresh");
     }
     
+    console.log('[SessionManager] Current session successfully refreshed, expires at:', 
+      new Date(data.session.expires_at! * 1000).toISOString());
     return data.session;
   } catch (err) {
-    console.error("Current session refresh failed:", err);
+    console.error("[SessionManager] Current session refresh failed:", err);
     throw err;
   }
 }
@@ -97,10 +111,11 @@ export async function refreshCurrentSession() {
  */
 export async function refreshSession(): Promise<boolean> {
   try {
+    console.log('[SessionManager] refreshSession called');
     await refreshCurrentSession();
     return true;
   } catch (err) {
-    console.error("Failed to refresh session:", err);
+    console.error("[SessionManager] Failed to refresh session:", err);
     return false;
   }
 }
