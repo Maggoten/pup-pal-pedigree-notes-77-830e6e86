@@ -6,16 +6,14 @@ import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AddEventFormValues } from './calendar/types';
 import CalendarContent from './calendar/CalendarContent';
-import { useReminders } from '@/hooks/useReminders';
-import { remindersToCalendarEvents } from '@/utils/reminderToCalendarMapper'; 
 
 // Define props interface for calendar events data
 interface CalendarEventsData {
   getEventsForDate: (date: Date) => any[];
   getEventColor: (type: string) => string;
-  addEvent: (data: AddEventFormValues) => Promise<boolean> | boolean;  // Updated to support Promise
+  addEvent: (data: AddEventFormValues) => Promise<boolean> | boolean;
   deleteEvent: (eventId: string) => void;
-  editEvent: (eventId: string, data: AddEventFormValues) => Promise<boolean> | boolean;  // Updated to support Promise
+  editEvent: (eventId: string, data: AddEventFormValues) => Promise<boolean> | boolean;
   isLoading: boolean;
   hasError: boolean;
 }
@@ -36,23 +34,15 @@ const CalendarSkeleton = () => (
 const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) => {
   const { dogs } = useDogs();
   
-  // Use the reminders hook to access reminders
-  const { reminders, isLoading: remindersLoading } = useReminders();
-  
-  // Convert reminders to calendar events for integrated display
-  const reminderEvents = React.useMemo(() => {
-    return remindersToCalendarEvents(reminders);
-  }, [reminders]);
-  
   // If no events data is provided, we need to fetch it - for backward compatibility
   // We'll use the provided eventsData directly from props if available
   const { 
-    getEventsForDate: propsGetEventsForDate, 
+    getEventsForDate, 
     getEventColor, 
     addEvent, 
     deleteEvent,
     editEvent,
-    isLoading: propsIsLoading,
+    isLoading,
     hasError
   } = eventsData || { 
     getEventsForDate: () => [], 
@@ -64,40 +54,27 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
     hasError: false 
   };
   
-  // Enhance the getEventsForDate function to include reminders
-  const getEventsForDate = React.useCallback((date: Date) => {
-    // Get regular events
-    const regularEvents = propsGetEventsForDate(date);
-    
-    // Get reminder events for this date
-    const dateReminders = reminderEvents.filter(event => {
-      if (!event.date) return false;
-      const eventDate = new Date(event.date);
-      return (
-        eventDate.getDate() === date.getDate() &&
-        eventDate.getMonth() === date.getMonth() &&
-        eventDate.getFullYear() === date.getFullYear()
-      );
-    });
-    
-    // Combine both types of events
-    return [...regularEvents, ...dateReminders];
-  }, [propsGetEventsForDate, reminderEvents]);
-  
-  // Combined loading state
-  const isLoading = propsIsLoading || remindersLoading;
-  
   // Create wrapper functions to handle the async nature of the original functions
   const handleAddEvent = (data: AddEventFormValues) => {
     const result = addEvent(data);
-    // Always return true synchronously for UI feedback
-    return true;
+    // Handle both synchronous boolean returns and Promises
+    if (result instanceof Promise) {
+      result.catch(err => {
+        console.error("Error adding event:", err);
+      });
+    }
+    return true; // Always return true synchronously for UI feedback
   };
   
   const handleEditEvent = (eventId: string, data: AddEventFormValues) => {
     const result = editEvent(eventId, data);
-    // Always return true synchronously for UI feedback
-    return true;
+    // Handle both synchronous boolean returns and Promises
+    if (result instanceof Promise) {
+      result.catch(err => {
+        console.error("Error editing event:", err);
+      });
+    }
+    return true; // Always return true synchronously for UI feedback
   };
   
   return (

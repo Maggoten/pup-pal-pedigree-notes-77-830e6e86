@@ -1,16 +1,18 @@
+
 import React from 'react';
 import MetricCard from './MetricCard';
 
-export interface MetricCardData {
+interface MetricCardData {
   title: string;
   count: number;
-  icon: 'calendar' | 'heart' | 'pawprint' | 'dog' | 'bell';
+  icon: 'calendar' | 'heart' | 'pawprint' | 'dog';
   highlight: string | null;
   action: () => void;
+  color?: string;
   loading?: boolean;
 }
 
-export interface MetricCardGridProps {
+interface MetricCardGridProps {
   metricCards: MetricCardData[];
 }
 
@@ -36,7 +38,7 @@ const MetricCardGrid: React.FC<MetricCardGridProps | LegacyMetricCardGridProps> 
           <MetricCard 
             key={index}
             title={card.title}
-            count={card.count}
+            count={card.count ?? 0}
             icon={card.icon}
             highlight={card.highlight}
             action={card.action}

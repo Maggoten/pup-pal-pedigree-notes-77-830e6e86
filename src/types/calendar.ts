@@ -5,7 +5,7 @@ export interface CalendarEvent {
   date: string | Date;         // Keep for backward compatibility
   startDate: string | Date;    // Primary date field for event start
   endDate: string | Date;      // Primary date field for event end
-  type: string;                // Changed from optional to required
+  type?: string;
   dogId?: string;
   dogName?: string;
   notes?: string;

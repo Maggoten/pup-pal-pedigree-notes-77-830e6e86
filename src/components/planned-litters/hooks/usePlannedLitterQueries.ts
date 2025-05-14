@@ -58,13 +58,24 @@ export const usePlannedLitterQueries = () => {
     // Skip if no user
     if (!user) {
       console.log('Skipping planned litters load - no user');
-      setIsLoading(false);
       return;
     }
 
     if (loadAttempted && !isRefresh) {
       // Already tried loading once, don't spam attempts unless it's a refresh
       return;
+    }
+    
+    // Verify session is valid first
+    try {
+      const isSessionValid = await verifySession({ skipThrow: true });
+      if (!isSessionValid) {
+        console.warn('No valid session for loading planned litters');
+        setIsLoading(false);
+        return;
+      }
+    } catch (error) {
+      console.error('Session verification failed:', error);
     }
     
     try {
@@ -145,7 +156,6 @@ export const usePlannedLitterQueries = () => {
       const timer = setTimeout(() => {
         console.log('Automatically retrying planned litters load after timeout');
         setLoadAttempted(false); // Reset the flag to allow another attempt
-        loadLitters();
       }, 3000);
       
       return () => clearTimeout(timer);

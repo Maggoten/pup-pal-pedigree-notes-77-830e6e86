@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
@@ -9,7 +8,6 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 import { getDisplayUsername } from '@/utils/userDisplayUtils';
 import { getActivePregnancies } from '@/services/PregnancyService';
 import { toast } from '@/components/ui/use-toast';
-import { useReminders } from '@/hooks/useReminders';
 
 interface DashboardLayoutProps {
   user: User | null;
@@ -26,14 +24,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   
   // Use the custom hook to get all dashboard data and functions
   const dashboardData = useDashboardData();
-  
-  // Use our new reminders hook
-  const { 
-    reminders,
-    isLoading: remindersLoading,
-    hasError: remindersError,
-    handleMarkComplete
-  } = useReminders();
   
   // Fetch active pregnancies if not provided
   useEffect(() => {
@@ -74,19 +64,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   };
   
   const remindersProps = {
-    reminders,
-    isLoading: remindersLoading,
-    hasError: remindersError,
-    handleMarkComplete
+    reminders: dashboardData.reminders,
+    isLoading: dashboardData.remindersLoading,
+    hasError: dashboardData.remindersError,
+    handleMarkComplete: dashboardData.handleMarkComplete
   };
-  
-  // Calculate reminders summary for the hero section
-  const remindersSummary = React.useMemo(() => {
-    return {
-      count: reminders.length,
-      highPriority: reminders.filter(r => r.priority === 'high' && !r.isCompleted).length
-    };
-  }, [reminders]);
   
   return (
     <PageLayout 
@@ -97,7 +79,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <DashboardHero 
           username={username}
           user={user}
-          reminders={remindersSummary}
+          reminders={dashboardData.remindersSummary}
           plannedLitters={dashboardData.plannedLittersData}
           activePregnancies={activePregnancies}
           recentLitters={dashboardData.recentLittersData}
@@ -105,7 +87,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         />
         
         <DashboardContent
-          isDataReady={!remindersLoading && !dashboardData.calendarLoading}
+          isDataReady={dashboardData.isDataReady}
           calendarProps={calendarProps}
           remindersProps={remindersProps}
         />

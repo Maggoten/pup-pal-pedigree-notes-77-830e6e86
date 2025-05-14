@@ -17,7 +17,7 @@ export const reminderToCalendarEvent = (reminder: Reminder): CalendarEvent => {
     date: dueDate, // For backward compatibility
     startDate: dueDate, // Required field
     endDate: dueDate, // Required field
-    type: reminder.type || 'reminder', // Ensure type is always set
+    type: reminder.type || 'reminder',
     dogId: reminder.relatedId,
     notes: reminder.description,
     isReminderEvent: true  // Flag to identify this as a reminder-sourced event
