@@ -1,11 +1,12 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { StorageError } from '@supabase/storage-js';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 import { 
   BUCKET_NAME, 
-  STORAGE_ERRORS,
+  STORAGE_ERROR_CODES as STORAGE_ERRORS,
   getStorageTimeout,
+  isStorageError,
+  getSafeErrorMessage
 } from '../config';
 import { getPlatformInfo } from '../mobileUpload';
 import { checkBucketExists } from '../core/bucket';

@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { BUCKET_NAME, STORAGE_ERRORS } from '../config'; 
+import { BUCKET_NAME, STORAGE_ERROR_CODES as STORAGE_ERRORS } from '../config'; 
 import { fetchWithRetry } from '@/utils/fetchUtils';
 import { getPlatformInfo } from '../mobileUpload';
 import { checkBucketExists } from '../core/bucket';

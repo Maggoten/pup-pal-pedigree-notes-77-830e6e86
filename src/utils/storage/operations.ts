@@ -4,7 +4,7 @@ import { StorageError } from '@supabase/storage-js';
 import { fetchWithRetry, shouldRetryRequest, getDeviceAwareTimeout, isMobileDevice } from '@/utils/fetchUtils';
 import { 
   BUCKET_NAME, 
-  STORAGE_ERRORS,
+  STORAGE_ERROR_CODES as STORAGE_ERRORS,
   isSafari,
   getStorageTimeout,
   isStorageError,

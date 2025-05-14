@@ -1,7 +1,6 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { STORAGE_ERRORS } from '../config';
 import { getPlatformInfo } from '../mobileUpload';
+import { STORAGE_ERROR_CODES as STORAGE_ERRORS } from '../config';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 
 /**

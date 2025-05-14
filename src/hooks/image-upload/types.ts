@@ -1,6 +1,6 @@
 
 import { StorageError } from '@supabase/storage-js';
-import { ApiErrorResponse } from '@/utils/storage/config';
+import { StorageErrorDetails, ApiErrorResponse } from '@/utils/storage/config';
 
 export interface UseImageUploadProps {
   user_id: string | undefined;

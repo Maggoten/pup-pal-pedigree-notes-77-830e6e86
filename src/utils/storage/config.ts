@@ -1,3 +1,4 @@
+
 export const BUCKET_NAME = process.env.NEXT_PUBLIC_SUPABASE_BUCKET_NAME || 'public';
 
 // Image processing constants
@@ -27,6 +28,9 @@ export const STORAGE_ERROR_CODES = {
   GET_URL_FAILED: 'Failed to get public URL for file'
 };
 
+// Alias for backward compatibility
+export const STORAGE_ERRORS = STORAGE_ERROR_CODES;
+
 // Type definitions for storage errors
 export interface StorageErrorDetails {
   message: string;
@@ -36,6 +40,13 @@ export interface StorageErrorDetails {
 
 export interface SupabaseStorageError {
   error: string | StorageErrorDetails;
+}
+
+export interface ApiErrorResponse {
+  error: string;
+  status: number;
+  statusCode?: number;
+  message?: string;
 }
 
 // Type guards for error identification
@@ -52,6 +63,13 @@ export const isSupabaseStorageError = (obj: unknown): obj is SupabaseStorageErro
          'error' in obj &&
          (typeof (obj as any).error === 'string' || 
           typeof (obj as any).error === 'object');
+};
+
+export const isApiErrorResponse = (obj: unknown): obj is ApiErrorResponse => {
+  return typeof obj === 'object' &&
+         obj !== null &&
+         'error' in obj &&
+         'status' in obj;
 };
 
 // Helper function to safely get error message from any error type
@@ -78,4 +96,21 @@ export const getSafeErrorMessage = (error: unknown): string => {
   }
   
   return 'Unexpected error occurred';
+};
+
+// Browser detection functions
+export const isSafari = (): boolean => {
+  if (typeof navigator === 'undefined') return false;
+  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+};
+
+// Get dynamic timeout based on platform
+export const getStorageTimeout = (): number => {
+  if (isSafari()) {
+    return 60000; // 60s for Safari
+  } else if (typeof navigator !== 'undefined' && /mobile/i.test(navigator.userAgent)) {
+    return 45000; // 45s for mobile
+  } else {
+    return 30000; // 30s for desktop
+  }
 };
