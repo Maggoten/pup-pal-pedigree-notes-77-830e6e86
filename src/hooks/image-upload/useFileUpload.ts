@@ -1,3 +1,4 @@
+
 import { toast } from '@/components/ui/use-toast';
 import { 
   BUCKET_NAME, 
@@ -9,8 +10,7 @@ import {
   uploadToStorage, 
   getPublicUrl,
   processImageForUpload,
-  isValidPublicUrl,
-  createBucketIfNotExists
+  isValidPublicUrl
 } from '@/utils/storage';
 import { validateImageFile } from '@/utils/imageValidation';
 import { useImageSessionCheck } from './useImageSessionCheck';
@@ -32,8 +32,7 @@ export const useFileUpload = (
       platform,
       fileSize: file.size,
       fileType: file.type || 'unknown',
-      authReady: isAuthReady,
-      bucket: BUCKET_NAME
+      authReady: isAuthReady
     });
     
     if (!user_id) {
@@ -75,28 +74,10 @@ export const useFileUpload = (
         }
       }
       
-      // Verify bucket exists and create if needed
-      try {
-        const bucketExists = await checkBucketExists();
-        
-        if (!bucketExists) {
-          console.log(`Bucket '${BUCKET_NAME}' not found, attempting to create it...`);
-          const created = await createBucketIfNotExists();
-          
-          if (!created) {
-            throw new Error(`Storage bucket "${BUCKET_NAME}" could not be created or accessed`);
-          } else {
-            console.log(`Successfully created bucket '${BUCKET_NAME}' for upload`);
-          }
-        }
-      } catch (bucketError) {
-        console.error('Bucket verification failed:', bucketError);
-        
-        if (!platform.mobile && !platform.safari) {
-          throw bucketError;
-        } else {
-          console.log('On mobile/Safari - attempting upload despite bucket verification failure');
-        }
+      // Verify bucket exists before proceeding
+      const bucketExists = await checkBucketExists();
+      if (!bucketExists) {
+        throw new Error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
       }
       
       // Create a unique filename with better platform identification
@@ -197,16 +178,17 @@ export const useFileUpload = (
         ? error.message 
         : getSafeErrorMessage(error);
       
-      // Include bucket name in error message for better diagnostics
-      let friendlyMessage = `${errorMessage} (Bucket: ${BUCKET_NAME})`;
-      
       // Platform-specific error messages
+      let friendlyMessage = errorMessage;
+      
       if (platform.iOS) {
-        friendlyMessage = `iOS upload issue with bucket '${BUCKET_NAME}'. Try using WiFi instead of cellular data.`;
+        friendlyMessage = "iOS upload issue. Try using WiFi instead of cellular data, or try again later.";
       } else if (platform.safari) {
-        friendlyMessage = `Safari upload issue with bucket '${BUCKET_NAME}'. Try reloading or using Chrome.`;
+        friendlyMessage = "Safari upload issue. Try reloading the page and trying again, or use Chrome.";
       } else if (platform.mobile) {
-        friendlyMessage = `Mobile upload failed to bucket '${BUCKET_NAME}'. Try using WiFi or reloading.`;
+        friendlyMessage = "Mobile upload failed. Try using WiFi or reloading the page.";
+      } else if (typeof errorMessage === 'string' && errorMessage.includes("storage")) {
+        friendlyMessage = "Could not upload image. Please try logging out and back in, then try again.";
       }
       
       toast({
