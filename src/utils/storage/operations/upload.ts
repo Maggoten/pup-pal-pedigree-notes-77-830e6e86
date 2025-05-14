@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { StorageError } from '@supabase/storage-js';
 import { fetchWithRetry } from '@/utils/fetchUtils';
@@ -10,7 +9,7 @@ import {
   getSafeErrorMessage
 } from '../config';
 import { getPlatformInfo } from '../mobileUpload';
-import { checkBucketExists } from '../core/bucket';
+import { checkBucketExists, createBucketIfNotExists } from '../core/bucket';
 import { verifySession } from '../core/session';
 import { hasError, safeGetErrorProperty, createStorageError, formatStorageError } from '../core/errors';
 
@@ -65,10 +64,15 @@ export const uploadToStorage = async (
         platform: platform
       });
       
+      // Check for bucket and attempt to create it if missing
       const bucketExists = await checkBucketExists();
       if (!bucketExists) {
-        console.error(`Upload failed: Bucket '${BUCKET_NAME}' not found or not accessible`);
-        throw new Error(STORAGE_ERRORS.BUCKET_NOT_FOUND(BUCKET_NAME));
+        console.log(`Bucket '${BUCKET_NAME}' not found, attempting to create it...`);
+        const created = await createBucketIfNotExists();
+        if (!created) {
+          console.error(`Upload failed: Could not create bucket '${BUCKET_NAME}'`);
+          throw new Error(STORAGE_ERRORS.BUCKET_NOT_FOUND(BUCKET_NAME));
+        }
       }
     } catch (error) {
       // For mobile, proceed even if pre-checks fail
