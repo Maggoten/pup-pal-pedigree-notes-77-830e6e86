@@ -4,8 +4,29 @@ import WelcomeHeader from './WelcomeHeader';
 import MetricCardGrid from './MetricCardGrid';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { CalendarEvent } from '@/types/calendar';
+import { User } from '@/types/auth';
+import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 
-const DashboardHero: React.FC = () => {
+// Updated interface to include all the props being passed from DashboardLayout
+interface DashboardHeroProps {
+  username?: string;
+  user?: User | null;
+  reminders?: { count: number; highPriority: number; };
+  plannedLitters?: { count: number; nextDate: Date | null; };
+  activePregnancies?: ActivePregnancy[];
+  recentLitters?: { count: number; latest: Date | null; };
+  isLoadingPregnancies?: boolean;
+}
+
+const DashboardHero: React.FC<DashboardHeroProps> = ({
+  username,
+  user,
+  reminders: remindersProp,
+  plannedLitters: plannedLittersProp,
+  activePregnancies,
+  recentLitters: recentLittersProp,
+  isLoadingPregnancies
+}) => {
   const {
     reminders,
     remindersLoading,
@@ -18,13 +39,19 @@ const DashboardHero: React.FC = () => {
     isDataReady
   } = useDashboardData();
   
+  // Use props if provided, otherwise use data from the hook
+  const finalRemindersSummary = remindersProp || remindersSummary;
+  const finalPlannedLittersData = plannedLittersProp || plannedLittersData;
+  const finalRecentLittersData = recentLittersProp || recentLittersData;
+  const finalIsLoading = isLoadingPregnancies !== undefined ? isLoadingPregnancies : !isDataReady;
+  
   // Derive metrics for the hero section
   const metrics = React.useMemo(() => [
     {
       icon: 'bell',
       label: 'Active Reminders',
-      value: remindersSummary.count.toString(),
-      highlightColor: remindersSummary.highPriority > 0 ? 'orange' : undefined,
+      value: finalRemindersSummary.count.toString(),
+      highlightColor: finalRemindersSummary.highPriority > 0 ? 'orange' : undefined,
       trend: null,
       loading: remindersLoading
     },
@@ -39,10 +66,10 @@ const DashboardHero: React.FC = () => {
     {
       icon: 'pawprint',
       label: 'Planned Litters',
-      value: plannedLittersData.count.toString(),
+      value: finalPlannedLittersData.count.toString(),
       highlightColor: undefined,
       trend: null,
-      loading: !isDataReady
+      loading: finalIsLoading
     },
     {
       icon: 'heart',
@@ -50,22 +77,29 @@ const DashboardHero: React.FC = () => {
       value: upcomingHeats.length.toString(),
       highlightColor: undefined, 
       trend: null,
-      loading: !isDataReady
+      loading: finalIsLoading
     }
   ], [
-    remindersSummary, 
+    finalRemindersSummary, 
     calendarEvents, 
-    plannedLittersData, 
+    finalPlannedLittersData, 
     upcomingHeats, 
     remindersLoading, 
     calendarLoading, 
-    isDataReady
+    finalIsLoading
   ]);
   
   return (
     <section className="w-full bg-gradient-to-b from-greige-50 via-greige-100 to-white rounded-xl shadow-sm mb-12 px-6 py-8">
-      <WelcomeHeader />
-      <MetricCardGrid metrics={metrics} />
+      <WelcomeHeader username={username} user={user} />
+      <MetricCardGrid metricCards={metrics.map(m => ({
+        title: m.label,
+        count: parseInt(m.value) || 0,
+        icon: m.icon as any,
+        highlight: m.highlightColor || null,
+        action: () => {},
+        loading: m.loading
+      }))} />
     </section>
   );
 };

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
 import { useBreedingReminders } from '@/hooks/reminders';
@@ -51,24 +50,26 @@ export function useDashboardData() {
     // Convert reminders to calendar events
     const reminderEvents = remindersToCalendarEvents(reminders);
     
-    // Ensure all date fields are Date objects
+    // Ensure all date fields are Date objects and type is always set
     const normalizedReminderEvents = reminderEvents.map(event => ({
       ...event,
       date: event.date instanceof Date ? event.date : new Date(event.date),
       startDate: event.startDate instanceof Date ? event.startDate : new Date(event.startDate),
-      endDate: event.endDate instanceof Date ? event.endDate : new Date(event.endDate)
+      endDate: event.endDate instanceof Date ? event.endDate : new Date(event.endDate),
+      type: event.type || 'reminder' // Ensure type is always set
     }));
     
     // Update calendar events with reminder events
     setCalendarEvents(prevEvents => {
       // Filter out any existing reminder events
       const regularEvents = prevEvents.filter(e => !e.isReminderEvent);
-      // Ensure all regular events have proper Date objects too
+      // Ensure all regular events have proper Date objects and type is set
       const normalizedRegularEvents = regularEvents.map(event => ({
         ...event,
         date: event.date instanceof Date ? event.date : new Date(event.date),
         startDate: event.startDate instanceof Date ? event.startDate : new Date(event.startDate),
-        endDate: event.endDate instanceof Date ? event.endDate : new Date(event.endDate)
+        endDate: event.endDate instanceof Date ? event.endDate : new Date(event.endDate),
+        type: event.type || 'event' // Ensure type is always set
       }));
       
       return [...normalizedRegularEvents, ...normalizedReminderEvents];
