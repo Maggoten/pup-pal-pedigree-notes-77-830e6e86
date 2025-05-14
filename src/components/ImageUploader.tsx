@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { UploadIcon, XIcon, Loader2 } from 'lucide-react';
@@ -8,7 +7,7 @@ import ImagePreviewDisplay from './image-upload/ImagePreviewDisplay';
 import { toast } from '@/components/ui/use-toast';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { uploadStateManager, setUploadPending } from '@/components/AuthGuard';
-import { createBucketIfNotExists } from '@/utils/storage/core/bucket';
+import { createBucketIfNotExists } from '@/utils/storage';
 
 interface ImageUploaderProps {
   currentImage?: string;

@@ -4,13 +4,14 @@ export interface Reminder {
   title: string;
   description: string;
   dueDate: string | Date;
-  priority: string;
+  priority: 'high' | 'medium' | 'low';
   type: string;
   relatedId?: string | null;
   isCompleted: boolean;
   isDeleted?: boolean;
   createdAt?: string | Date;
   updatedAt?: string | Date;
+  icon?: React.ReactNode;
 }
 
 export interface RemindersSummary {
@@ -23,7 +24,7 @@ export interface ReminderFormValues {
   title: string;
   description: string;
   dueDate: Date;
-  priority: string;
+  priority: 'high' | 'medium' | 'low';
   type: string;
   relatedId?: string;
 }
@@ -33,4 +34,21 @@ export interface RecentMating {
   maleName: string;
   femaleName: string;
   date: Date;
+}
+
+export interface CustomReminderInput {
+  title: string;
+  description: string;
+  dueDate: Date;
+  priority: 'high' | 'medium' | 'low';
+  type?: string;
+  relatedId?: string;
+}
+
+export interface UpcomingHeat {
+  id: string; 
+  dogId: string;
+  dogName: string;
+  expectedDate: Date;
+  daysUntil: number;
 }

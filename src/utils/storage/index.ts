@@ -22,7 +22,8 @@ export {
 // Export from bucket operations
 export {
   checkBucketExists,
-  createBucketIfNotExists
+  createBucketIfNotExists,
+  uploadFileAndGetUrl
 } from './core/bucket';
 
 // Export from session operations

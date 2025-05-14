@@ -18,21 +18,38 @@ export const useBreedingRemindersProvider = () => {
       setIsLoading(true);
       setHasError(false);
       
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.user) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session?.user) {
         throw new Error("No valid session");
       }
+      
+      const userId = sessionData.session.user.id;
       
       const { data, error } = await supabase
         .from('reminders')
         .select('*')
-        .eq('user_id', session.user.id)
+        .eq('user_id', userId)
         .eq('is_deleted', false)
         .order('due_date', { ascending: true });
       
       if (error) throw error;
       
-      setReminders(data || []);
+      // Transform the data to match the Reminder interface
+      const transformedReminders: Reminder[] = (data || []).map(item => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        dueDate: item.due_date,
+        priority: item.priority as 'high' | 'medium' | 'low',
+        type: item.type,
+        relatedId: item.related_id,
+        isCompleted: item.is_completed,
+        isDeleted: item.is_deleted,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at
+      }));
+      
+      setReminders(transformedReminders);
     } catch (error) {
       console.error('Error fetching reminders:', error);
       setHasError(true);
@@ -59,7 +76,7 @@ export const useBreedingRemindersProvider = () => {
       setReminders(prev => 
         prev.map(reminder => 
           reminder.id === id 
-            ? { ...reminder, is_completed: true } 
+            ? { ...reminder, isCompleted: true } 
             : reminder
         )
       );
@@ -80,11 +97,11 @@ export const useBreedingRemindersProvider = () => {
 
   // Format reminders summary for the dashboard
   const remindersSummary = useMemo(() => {
-    const incomplete = reminders.filter(r => !r.is_completed).length;
+    const incomplete = reminders.filter(r => !r.isCompleted).length;
     const upcoming = reminders.filter(r => 
-      !r.is_completed && 
-      new Date(r.due_date) > new Date() && 
-      new Date(r.due_date) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      !r.isCompleted && 
+      new Date(r.dueDate) > new Date() && 
+      new Date(r.dueDate) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     ).length;
     
     return {

@@ -1,23 +1,22 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
+import { formatDate } from '@/utils/dateUtils';
 
 const UserWelcomeBanner: React.FC = () => {
   const { user } = useAuth();
-  const firstName = user?.firstName || user?.metadata?.firstName || '';
-
+  const firstName = user?.firstName || user?.email?.split('@')[0] || 'Breeder';
+  const today = new Date();
+  
   return (
-    <Card className="bg-gradient-to-r from-warmbeige-100 to-warmbeige-50">
-      <CardContent className="p-6">
-        <h1 className="text-2xl font-bold">
-          {firstName ? `Welcome back, ${firstName}!` : 'Welcome to your Dashboard!'}
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Here's what's happening with your kennel today
-        </p>
-      </CardContent>
-    </Card>
+    <div className="flex flex-col space-y-1 mb-2">
+      <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+        Welcome back, {firstName}
+      </h1>
+      <p className="text-muted-foreground">
+        Today is {formatDate(today, { month: 'long', day: 'numeric', year: 'numeric' })}
+      </p>
+    </div>
   );
 };
 

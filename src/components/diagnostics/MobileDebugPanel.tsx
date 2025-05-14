@@ -6,6 +6,7 @@ import { useBreedingStats } from '@/hooks/useBreedingStats';
 import { useCalendarContext } from '@/context/CalendarContext';
 import { useReminders } from '@/context/RemindersContext'; 
 import { Separator } from '@/components/ui/separator';
+import { Loader2 } from 'lucide-react';
 
 const MobileDebugPanel: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -15,13 +16,15 @@ const MobileDebugPanel: React.FC = () => {
     addEvent, 
     updateEvent, 
     deleteEvent, 
-    getEventsForDay,
-    isLoading: eventsLoading 
+    getEventsForDay
   } = useCalendarContext();
+  
+  const calendarLoading = false; // Default to false since isLoading doesn't exist in the context
   
   const { 
     reminders, 
     isLoading: remindersLoading, 
+    hasError,
     handleMarkComplete,
     remindersSummary
   } = useReminders();
@@ -39,7 +42,7 @@ const MobileDebugPanel: React.FC = () => {
     }
   };
 
-  // Function to manually refresh reminders data - stub since it doesn't exist in context
+  // Function to manually refresh reminders data
   const refreshReminderData = () => {
     console.log("Refreshing reminder data...");
     // If the reminders context has a refresh function, call it
@@ -93,7 +96,7 @@ const MobileDebugPanel: React.FC = () => {
           <Separator />
           <div>
             <h5 className="text-xs font-bold">Calendar Events</h5>
-            <p className="text-xs">Is Loading: {String(eventsLoading)}</p>
+            <p className="text-xs">Is Loading: {String(calendarLoading)}</p>
             {events && (
               <pre className="text-xs">{JSON.stringify(events, null, 2)}</pre>
             )}

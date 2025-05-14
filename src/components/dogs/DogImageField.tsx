@@ -7,7 +7,9 @@ import { DogFormValues } from './DogFormFields';
 import { useUpdateDog } from '@/hooks/dogs/mutations/useUpdateDog';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
-import { createBucketIfNotExists } from '@/utils/storage/core/bucket';
+
+// Import this from the utils/storage module rather than from core/bucket directly
+import { createBucketIfNotExists } from '@/utils/storage';
 
 interface DogImageFieldProps {
   form: UseFormReturn<DogFormValues>;

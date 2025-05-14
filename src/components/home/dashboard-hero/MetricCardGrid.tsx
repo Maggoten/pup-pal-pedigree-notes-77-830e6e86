@@ -1,34 +1,21 @@
 
 import React from 'react';
-import MetricCard from './MetricCard';
+import MetricCard, { MetricCardProps } from './MetricCard';
 
-export interface MetricCardProps {
-  icon: "calendar" | "heart" | "pawprint" | "dog" | "bell";
-  label: string;
-  value: string | number | React.ReactNode;
-  highlightColor?: "green" | "blue" | "purple" | "rose" | "orange" | string;
-  trend?: string | React.ReactNode;
-  loading?: boolean;
-}
-
-interface MetricCardGridProps {
+export interface MetricCardGridProps {
   metricCards: MetricCardProps[];
 }
 
 const MetricCardGrid: React.FC<MetricCardGridProps> = ({ metricCards }) => {
-  if (!metricCards) {
-    return <div>No metrics available</div>;
-  }
-  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {metricCards.map((card, index) => (
         <MetricCard
           key={index}
-          icon={card.icon as "calendar" | "heart" | "pawprint" | "dog" | "bell"}
+          icon={card.icon}
           label={card.label}
-          value={card.value.toString()}
-          highlightColor={card.highlightColor as "green" | "blue" | "purple" | "rose" | "orange"}
+          value={card.value} 
+          highlightColor={card.highlightColor}
           trend={card.trend}
           loading={card.loading}
         />

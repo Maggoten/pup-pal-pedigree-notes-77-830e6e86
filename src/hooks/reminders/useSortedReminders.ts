@@ -1,51 +1,64 @@
 
 import { useMemo } from 'react';
 import { Reminder } from '@/types/reminders';
-import { isBefore, isToday } from 'date-fns';
 
-export const useSortedReminders = (reminders: Reminder[]) => {
-  // Sort reminders by priority (high first), completion status, and due date
-  const sortedReminders = useMemo(() => {
-    return [...reminders].sort((a, b) => {
-      // First sort by completion status
-      if (a.isCompleted && !b.isCompleted) return 1;
-      if (!a.isCompleted && b.isCompleted) return -1;
+// Sorting options for reminders
+type SortOption = 'date-asc' | 'date-desc' | 'priority' | 'status';
+
+export const useSortedReminders = (
+  reminders: Reminder[],
+  sortBy: SortOption = 'date-asc',
+  filterCompleted: boolean = false
+) => {
+  return useMemo(() => {
+    if (!reminders || reminders.length === 0) {
+      return [];
+    }
+
+    // First apply filter if needed
+    let filtered = reminders;
+    if (filterCompleted) {
+      filtered = reminders.filter(reminder => !reminder.isCompleted);
+    }
+
+    // Then apply sorting
+    return [...filtered].sort((a, b) => {
+      // Convert dates for comparison
+      const dateA = a.dueDate instanceof Date ? a.dueDate : new Date(a.dueDate);
+      const dateB = b.dueDate instanceof Date ? b.dueDate : new Date(b.dueDate);
       
-      // For non-completed reminders, sort by priority first
-      if (!a.isCompleted && !b.isCompleted) {
-        // Then sort by priority
-        const priorityOrder = { high: 0, medium: 1, low: 2 };
-        const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+      switch (sortBy) {
+        case 'date-asc':
+          return dateA.getTime() - dateB.getTime();
         
-        if (priorityDiff !== 0) return priorityDiff;
+        case 'date-desc':
+          return dateB.getTime() - dateA.getTime();
         
-        // Then by date (past/today dates first, then future dates)
-        const aIsToday = isToday(a.dueDate);
-        const bIsToday = isToday(b.dueDate);
-        const aIsPast = isBefore(a.dueDate, new Date()) && !aIsToday;
-        const bIsPast = isBefore(b.dueDate, new Date()) && !bIsToday;
+        case 'priority': {
+          // Priority order: high (0), medium (1), low (2)
+          const priorityOrder = { high: 0, medium: 1, low: 2 };
+          const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+          
+          // If same priority, sort by date ascending
+          if (priorityDiff === 0) {
+            return dateA.getTime() - dateB.getTime();
+          }
+          return priorityDiff;
+        }
         
-        // Past dates first
-        if (aIsPast && !bIsPast) return -1;
-        if (!aIsPast && bIsPast) return 1;
+        case 'status': {
+          // Completed items go to the bottom
+          if (a.isCompleted !== b.isCompleted) {
+            return a.isCompleted ? 1 : -1;
+          }
+          
+          // If both have same completion status, sort by date
+          return dateA.getTime() - dateB.getTime();
+        }
         
-        // Then today's dates
-        if (aIsToday && !bIsToday) return -1;
-        if (!aIsToday && bIsToday) return 1;
-        
-        // Then sort by date
-        return a.dueDate.getTime() - b.dueDate.getTime();
+        default:
+          return 0;
       }
-      
-      // For completed reminders, sort by most recently completed (assuming dueDate is completion date)
-      if (a.isCompleted && b.isCompleted) {
-        return b.dueDate.getTime() - a.dueDate.getTime(); 
-      }
-      
-      // The above clauses should cover all cases, this is just a fallback
-      return 0;
     });
-  }, [reminders]);
-
-  return sortedReminders;
+  }, [reminders, sortBy, filterCompleted]);
 };

@@ -49,7 +49,10 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
         gender: 'male', // Default value, will be overwritten by the update
         imageUrl: url,
         weightLog: [],
-        heightLog: []
+        heightLog: [],
+        color: '',
+        markings: '',
+        status: 'Available'
       });
       
       console.log('Image URL saved to database for puppy:', puppyId);

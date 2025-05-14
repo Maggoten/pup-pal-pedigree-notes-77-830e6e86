@@ -22,7 +22,8 @@ export const usePlannedLitterQueries = () => {
   const males = dogs.filter(dog => dog.gender === 'male');
   const females = dogs.filter(dog => dog.gender === 'female');
   
-  const { recentMatings, setRecentMatings } = useRecentMatings(plannedLitters);
+  // Create recentMatings object that includes the hook functions
+  const recentMatingsData = useRecentMatings(plannedLitters);
   
   // Function to handle visibility change for reloading
   useEffect(() => {
@@ -156,7 +157,7 @@ export const usePlannedLitterQueries = () => {
   return {
     plannedLitters,
     upcomingHeats,
-    recentMatings,
+    recentMatings: recentMatingsData.recentMatings,
     males,
     females,
     isLoading,
@@ -169,5 +170,8 @@ export const usePlannedLitterQueries = () => {
         }
       });
     },
+    // Include the setter from useRecentMatings
+    setExtendedRecentPeriod: recentMatingsData.setExtendedRecentPeriod,
+    extendedRecentPeriod: recentMatingsData.extendedRecentPeriod
   };
 };

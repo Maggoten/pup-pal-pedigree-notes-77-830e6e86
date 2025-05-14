@@ -1,58 +1,57 @@
 
-import { useMemo } from 'react';
-import { PlannedLitter, MatingDate } from '@/types/breeding';
-import { format, isToday, parseISO, isBefore, subDays } from 'date-fns';
+import { useMemo, useState } from 'react';
+import { PlannedLitter } from '@/types/breeding';
+import { format, isToday, isWithinDays } from 'date-fns';
 
-// Helper function to convert a MatingDate to a standard Date object
-const getMatingDateAsDate = (matingDate: Date | MatingDate | string): Date => {
-  if (typeof matingDate === 'string') {
-    return parseISO(matingDate);
-  } else if (matingDate instanceof Date) {
-    return matingDate;
-  } else {
-    // Convert MatingDate object to Date
-    const dateValue = matingDate.matingDate;
-    return typeof dateValue === 'string' ? parseISO(dateValue) : dateValue;
-  }
-};
+interface MatingData {
+  id: string;
+  femaleName: string;
+  maleName: string;
+  matingDate: Date;
+  formattedDate: string;
+  isToday: boolean;
+}
 
-export const useRecentMatings = (plannedLitters: PlannedLitter[], days = 14) => {
+export const useRecentMatings = (plannedLitters: PlannedLitter[]) => {
+  const [extendedRecentPeriod, setExtendedRecentPeriod] = useState(false);
+  
   const recentMatings = useMemo(() => {
-    if (!plannedLitters || plannedLitters.length === 0) return [];
-
-    const result: Array<{
-      id: string;
-      femaleName: string;
-      maleName: string;
-      matingDate: Date;
-      formattedDate: string;
-      isToday: boolean;
-    }> = [];
-
-    const cutoffDate = subDays(new Date(), days);
-
+    if (!plannedLitters || plannedLitters.length === 0) {
+      return [] as MatingData[];
+    }
+    
+    const daysToConsiderRecent = extendedRecentPeriod ? 14 : 7;
+    
+    const recentData: MatingData[] = [];
+    
     plannedLitters.forEach(litter => {
       if (litter.matingDates && litter.matingDates.length > 0) {
-        litter.matingDates.forEach(matingDate => {
-          const dateObj = getMatingDateAsDate(matingDate);
+        litter.matingDates.forEach(mating => {
+          const matingDate = new Date(mating.matingDate);
           
-          if (isBefore(cutoffDate, dateObj) || isToday(dateObj)) {
-            result.push({
-              id: typeof matingDate === 'object' && 'id' in matingDate ? matingDate.id : `${litter.id}-${dateObj.getTime()}`,
+          if (isWithinDays(matingDate, new Date(), daysToConsiderRecent)) {
+            recentData.push({
+              id: mating.id || `mating-${litter.id}-${recentData.length}`,
               femaleName: litter.femaleName,
-              maleName: litter.externalMale ? litter.externalMaleName || 'External' : litter.maleName,
-              matingDate: dateObj,
-              formattedDate: format(dateObj, 'MMM d, yyyy'),
-              isToday: isToday(dateObj)
+              maleName: litter.externalMale ? litter.externalMaleName || 'External Male' : litter.maleName || 'Unknown Male',
+              matingDate: matingDate,
+              formattedDate: format(matingDate, 'MMM d, yyyy'),
+              isToday: isToday(matingDate)
             });
           }
         });
       }
     });
-
-    // Sort by date, most recent first
-    return result.sort((a, b) => b.matingDate.getTime() - a.matingDate.getTime());
-  }, [plannedLitters, days]);
-
-  return recentMatings;
+    
+    // Sort by date with most recent first
+    return recentData.sort((a, b) => 
+      b.matingDate.getTime() - a.matingDate.getTime()
+    );
+  }, [plannedLitters, extendedRecentPeriod]);
+  
+  return { 
+    recentMatings, 
+    setExtendedRecentPeriod,
+    extendedRecentPeriod
+  };
 };

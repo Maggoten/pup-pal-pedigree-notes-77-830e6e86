@@ -3,10 +3,12 @@ import { useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { compressImage } from '@/utils/storage/imageUtils';
 import { toast } from '@/hooks/use-toast';
-import { uploadFileAndGetUrl } from '@/utils/storage/core/bucket';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { STORAGE_ERRORS } from '@/utils/storage/config';
 import { UploadResult } from './types';
+
+// Import this function from the main storage module
+import { uploadFileAndGetUrl } from '@/utils/storage';
 
 // Maximum file size in bytes (5MB)
 const MAX_FILE_SIZE = 5 * 1024 * 1024;

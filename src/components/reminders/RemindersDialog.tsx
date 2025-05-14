@@ -1,12 +1,14 @@
+
 import React, { useState, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { useReminders } from '@/context/RemindersContext';
 import RemindersList from './RemindersList';
 import AddReminderForm from './AddReminderForm';
 import { Reminder, ReminderFormValues } from '@/types/reminders';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface RemindersDialogProps {
   open: boolean;
@@ -115,7 +117,7 @@ const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange })
                 </AlertDescription>
               </Alert>
             ) : (
-              <Tabs>
+              <Tabs defaultValue="upcoming" value={activeTab} onValueChange={setActiveTab}>
                 <TabsList>
                   <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
                   <TabsTrigger value="completed">Completed</TabsTrigger>

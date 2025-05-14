@@ -5,6 +5,7 @@ import UserWelcomeBanner from './UserWelcomeBanner';
 import MetricCardGrid from './MetricCardGrid';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
+import { MetricCardProps } from './MetricCard';
 
 interface DashboardHeroProps {
   username?: string;
@@ -38,7 +39,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   const remindersLoading = false;
   const dogsLoading = false;
 
-  const metricCards = [
+  const metricCards: MetricCardProps[] = [
     {
       icon: "dog",
       label: "Active Dogs",

@@ -1,116 +1,99 @@
 
-import { StorageBucketOptions } from '@supabase/storage-js';
 import { supabase } from '@/integrations/supabase/client';
-
-// Configuration for storage operations
-interface BucketConfig {
-  bucketId: string;
-  defaultUploadFolder?: string;
-}
-
-// Centralized bucket configuration
-export const bucketConfig: BucketConfig = {
-  bucketId: 'breeding-images',
-  defaultUploadFolder: 'uploads'
-};
-
-// Error types for storage operations
-export type StorageError = {
-  message: string;
-  status: number;
-};
-
-export type StorageResponse<T> = {
-  data: T | null;
-  error: StorageError | null;
-};
+import { BUCKET_NAME, STORAGE_ERRORS } from '../config';
+import { v4 as uuidv4 } from 'uuid';
+import { verifyStorageSession } from './session';
+import { processImageForUpload } from '../imageUtils';
 
 /**
- * Creates a storage bucket if it doesn't exist
+ * Checks if the storage bucket exists
  */
-export async function ensureBucketExists(
-  bucketId: string = bucketConfig.bucketId,
-  options?: StorageBucketOptions
-): Promise<StorageResponse<string>> {
+export const checkBucketExists = async (): Promise<boolean> => {
   try {
-    // Check if bucket exists
-    const { data, error } = await supabase.storage.getBucket(bucketId);
+    const { data, error } = await supabase.storage.getBucket(BUCKET_NAME);
     
-    if (error && error.message !== 'Bucket not found') {
-      return { data: null, error: { message: error.message, status: error.status || 500 } };
-    }
-    
-    // If bucket doesn't exist, create it
-    if (!data) {
-      const { data: newBucket, error: createError } = await supabase.storage.createBucket(
-        bucketId,
-        options || {
-          public: false,
-          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif'],
-          fileSizeLimit: 5242880 // 5MB
-        }
-      );
-      
-      if (createError) {
-        return { 
-          data: null, 
-          error: { 
-            message: createError.message, 
-            status: createError.status || 500 
-          }
-        };
-      }
-      
-      return { data: bucketId, error: null };
-    }
-    
-    return { data: bucketId, error: null };
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return { 
-        data: null, 
-        error: { message: error.message, status: 500 } 
-      };
-    }
-    
-    return { 
-      data: null, 
-      error: { message: 'Unknown error ensuring bucket exists', status: 500 } 
-    };
-  }
-}
-
-/**
- * Get a list of files in the bucket
- */
-export async function listFiles(
-  bucketId: string = bucketConfig.bucketId,
-  path?: string
-) {
-  try {
-    const { data, error } = await supabase.storage
-      .from(bucketId)
-      .list(path || bucketConfig.defaultUploadFolder || '');
-      
     if (error) {
-      return { 
-        data: null, 
-        error: { message: error.message, status: error.status || 500 } 
-      };
+      console.error('Error checking bucket:', error);
+      return false;
     }
     
-    return { data, error: null };
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return { 
-        data: null, 
-        error: { message: error.message, status: 500 } 
-      };
-    }
-    
-    return { 
-      data: null, 
-      error: { message: 'Unknown error listing files', status: 500 } 
-    };
+    return !!data;
+  } catch (error) {
+    console.error('Unexpected error in checkBucketExists:', error);
+    return false;
   }
-}
+};
+
+/**
+ * Creates the storage bucket if it doesn't exist
+ */
+export const createBucketIfNotExists = async (): Promise<boolean> => {
+  try {
+    const bucketExists = await checkBucketExists();
+    
+    if (bucketExists) {
+      return true;
+    }
+    
+    // Create new bucket
+    const { data, error } = await supabase.storage.createBucket(BUCKET_NAME, {
+      public: true,
+    });
+    
+    if (error) {
+      console.error('Error creating bucket:', error);
+      return false;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error('Unexpected error in createBucketIfNotExists:', error);
+    return false;
+  }
+};
+
+/**
+ * Uploads a file to storage and returns its URL
+ */
+export const uploadFileAndGetUrl = async (file: File, userId: string): Promise<string> => {
+  try {
+    // Verify session is valid
+    await verifyStorageSession();
+    
+    // Process image for upload (compress it)
+    const processedFile = await processImageForUpload(file);
+    
+    // Create a unique file path with user ID and UUID
+    const filePath = `${userId}/${uuidv4()}-${file.name.replace(/\s+/g, '_')}`;
+    
+    // Upload the file
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(filePath, processedFile, {
+        cacheControl: '3600',
+        upsert: true
+      });
+    
+    if (error) {
+      console.error('Error uploading file:', error);
+      throw new Error(error.message || STORAGE_ERRORS.UPLOAD_FAILED);
+    }
+    
+    // Get the public URL
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filePath);
+    
+    if (!publicUrlData || !publicUrlData.publicUrl) {
+      throw new Error(STORAGE_ERRORS.GET_URL_FAILED);
+    }
+    
+    return publicUrlData.publicUrl;
+  } catch (error: any) {
+    console.error('Error in uploadFileAndGetUrl:', error);
+    // Safely handle potential error objects with different structures
+    const errorMessage = error?.message || (error?.error && error.error.message) || 
+      (typeof error === 'object' ? JSON.stringify(error) : String(error));
+    throw new Error(errorMessage);
+  }
+};

@@ -1,60 +1,86 @@
 
-import React, { createContext, useContext, useState } from 'react';
-import { CalendarEvent } from '@/types/calendar';
-import { AddEventFormValues } from '@/components/calendar/types';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
 
 interface CalendarContextType {
   events: CalendarEvent[];
-  addEvent: (eventData: AddEventFormValues) => void;
-  updateEvent: (eventId: string, updatedEventData: AddEventFormValues) => void;
-  deleteEvent: (eventId: string) => void;
-  getEventsForDay: (day: Date) => CalendarEvent[];
-  refreshEvents?: () => void;
+  getEventsForDay: (date: Date) => CalendarEvent[];
+  addEvent: (event: AddEventFormValues) => Promise<void>;
+  updateEvent: (id: string, event: Partial<AddEventFormValues>) => Promise<void>;
+  deleteEvent: (id: string) => Promise<void>;
+  refreshEvents?: () => Promise<void>;
 }
 
 const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
 
-export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CalendarProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   
-  const addEvent = (eventData: AddEventFormValues) => {
-    // Implement add event
+  // Get events for a specific day
+  const getEventsForDay = (date: Date) => {
+    return events.filter(event => {
+      const eventDate = new Date(event.date);
+      return (
+        eventDate.getDate() === date.getDate() &&
+        eventDate.getMonth() === date.getMonth() &&
+        eventDate.getFullYear() === date.getFullYear()
+      );
+    });
   };
   
-  const updateEvent = (eventId: string, updatedEventData: AddEventFormValues) => {
-    // Implement update event
+  // Add a new event
+  const addEvent = async (eventData: AddEventFormValues) => {
+    const newEvent: CalendarEvent = {
+      id: Math.random().toString(36).substring(2, 9),
+      ...eventData,
+      createdAt: new Date(),
+    };
+    
+    setEvents(prev => [...prev, newEvent]);
   };
   
-  const deleteEvent = (eventId: string) => {
-    // Implement delete event
+  // Update an existing event
+  const updateEvent = async (id: string, eventData: Partial<AddEventFormValues>) => {
+    setEvents(prev => 
+      prev.map(event => 
+        event.id === id ? { ...event, ...eventData } : event
+      )
+    );
   };
   
-  const getEventsForDay = (day: Date): CalendarEvent[] => {
-    return [];
+  // Delete an event
+  const deleteEvent = async (id: string) => {
+    setEvents(prev => prev.filter(event => event.id !== id));
   };
   
-  const refreshEvents = () => {
-    // Implement refresh functionality
+  // Refresh events from backend
+  const refreshEvents = async () => {
+    // For now just a placeholder - would be replaced with actual API call
+    console.log('Refreshing calendar events...');
+  };
+  
+  const contextValue: CalendarContextType = {
+    events,
+    getEventsForDay,
+    addEvent,
+    updateEvent,
+    deleteEvent,
+    refreshEvents,
   };
   
   return (
-    <CalendarContext.Provider value={{ 
-      events, 
-      addEvent, 
-      updateEvent, 
-      deleteEvent, 
-      getEventsForDay,
-      refreshEvents
-    }}>
+    <CalendarContext.Provider value={contextValue}>
       {children}
     </CalendarContext.Provider>
   );
 };
 
-export const useCalendarContext = (): CalendarContextType => {
+export const useCalendarContext = () => {
   const context = useContext(CalendarContext);
-  if (!context) {
+  
+  if (context === undefined) {
     throw new Error('useCalendarContext must be used within a CalendarProvider');
   }
+  
   return context;
 };
