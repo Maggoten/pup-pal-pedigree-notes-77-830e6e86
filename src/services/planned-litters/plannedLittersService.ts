@@ -32,7 +32,7 @@ export const fetchPlannedLitters = async (userId: string): Promise<PlannedLitter
     console.log(`Found ${data?.length} planned litters for user ${userId}`);
     
     // Map the database fields to our frontend PlannedLitter type
-    return (data || []).map(item => ({
+    const plannedLitters = (data || []).map(item => ({
       id: item.id,
       maleId: item.male_id || '',
       femaleId: item.female_id,
@@ -40,11 +40,31 @@ export const fetchPlannedLitters = async (userId: string): Promise<PlannedLitter
       femaleName: item.female_name,
       expectedHeatDate: item.expected_heat_date,
       notes: item.notes,
-      matingDates: [], // This would be populated from a join or separate query
+      matingDates: [], // This will be populated from a separate query
       externalMale: item.external_male || false,
       externalMaleBreed: item.external_male_breed,
       externalMaleRegistration: item.external_male_registration
     }));
+    
+    // Now fetch mating dates for all litters
+    for (const litter of plannedLitters) {
+      // Get mating dates for this litter
+      const { data: matingDates, error: matingError } = await supabase
+        .from('mating_dates')
+        .select('mating_date')
+        .eq('planned_litter_id', litter.id)
+        .order('mating_date', { ascending: true });
+        
+      if (matingError) {
+        console.error(`Error fetching mating dates for litter ${litter.id}:`, matingError);
+      } else if (matingDates && matingDates.length > 0) {
+        // Add the mating dates to the litter
+        litter.matingDates = matingDates.map(md => md.mating_date);
+        console.log(`Found ${matingDates.length} mating dates for litter ${litter.id}`);
+      }
+    }
+    
+    return plannedLitters;
   } catch (error) {
     console.error("Error fetching planned litters:", error);
     return [];
