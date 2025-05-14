@@ -1,61 +1,58 @@
 
 import { StorageError } from '@supabase/storage-js';
+import { getSafeErrorMessage } from '../config';
 
 /**
- * Checks if an object has an error property
+ * Type guard to check if an object has an error property
  */
-export const hasError = <T extends object>(obj: T): obj is T & { error: unknown } => {
+export const hasError = (obj: unknown): obj is { error: unknown } => {
   return obj !== null && 
          typeof obj === 'object' && 
          'error' in obj;
 };
 
 /**
- * Safely gets a property from an error object
+ * Safely get a property from an error object
  */
-export const safeGetErrorProperty = <T>(error: unknown, property: string, defaultValue: T): T => {
-  if (error && typeof error === 'object' && property in error) {
-    return (error as any)[property];
+export const safeGetErrorProperty = <T>(obj: unknown, prop: string, defaultValue: T): T => {
+  if (obj && typeof obj === 'object' && prop in (obj as object)) {
+    return (obj as any)[prop];
   }
   return defaultValue;
 };
 
 /**
- * Creates a properly formatted storage error response
+ * Create a standardized error response object
  */
-export const createStorageError = (message: string): { data: null; error: StorageError } => {
+export const createStorageError = (message: string) => {
   return {
-    data: null,
-    error: new StorageError(message)
+    error: {
+      message,
+      status: 500,
+      statusCode: 'ERROR'
+    }
   };
 };
 
 /**
- * Formats storage errors into user-friendly messages
+ * Format a storage error message for display
  */
 export const formatStorageError = (error: unknown): string => {
-  if (!error) return 'Unknown storage error';
+  // If it's a string, return it directly
+  if (typeof error === 'string') {
+    return error;
+  }
   
-  if (typeof error === 'string') return error;
-  
+  // If it's an Error object, use its message
   if (error instanceof Error) {
     return error.message;
   }
   
-  if (typeof error === 'object') {
-    if ('message' in error) {
-      return String((error as any).message);
-    }
-    if ('error' in error && typeof (error as any).error === 'object') {
-      const errorObj = (error as any).error;
-      if ('message' in errorObj) {
-        return String(errorObj.message);
-      }
-    }
-    if ('error' in error && typeof (error as any).error === 'string') {
-      return String((error as any).error);
-    }
+  // For objects with message property
+  if (error && typeof error === 'object') {
+    return getSafeErrorMessage(error);
   }
   
-  return 'Unexpected storage error occurred';
+  // Default message if we can't extract anything useful
+  return 'An unknown error occurred during storage operation';
 };
