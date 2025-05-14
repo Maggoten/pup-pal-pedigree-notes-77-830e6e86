@@ -1,69 +1,71 @@
 
 import React from 'react';
-import { User } from '@/types/auth';
-import { format } from 'date-fns';
-import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import WelcomeHeader from './WelcomeHeader';
 import MetricCardGrid from './MetricCardGrid';
-import DecorativePawprints from './DecorativePawprints';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { CalendarEvent } from '@/types/calendar';
 
-interface DashboardHeroProps {
-  username?: string;
-  user?: User | null;
-  reminders?: {
-    count: number;
-    highPriority: number;
-  };
-  plannedLitters?: {
-    count: number;
-    nextDate: Date | null;
-  };
-  activePregnancies?: ActivePregnancy[];
-  recentLitters?: {
-    count: number;
-    latest: Date | null;
-  };
-  isLoadingPregnancies?: boolean;
-}
-
-const DashboardHero: React.FC<DashboardHeroProps> = ({
-  username,
-  user,
-  reminders,
-  plannedLitters,
-  activePregnancies,
-  recentLitters,
-  isLoadingPregnancies = false
-}) => {
-  // Use nullish coalescing to provide default values for objects that might be undefined
-  const safeReminders = reminders ?? { count: 0, highPriority: 0 };
-  const safePlannedLitters = plannedLitters ?? { count: 0, nextDate: null };
-  const safeRecentLitters = recentLitters ?? { count: 0, latest: null };
+const DashboardHero: React.FC = () => {
+  const {
+    reminders,
+    remindersLoading,
+    remindersSummary,
+    calendarEvents,
+    calendarLoading,
+    plannedLittersData,
+    recentLittersData,
+    upcomingHeats,
+    isDataReady
+  } = useDashboardData();
+  
+  // Derive metrics for the hero section
+  const metrics = React.useMemo(() => [
+    {
+      icon: 'bell',
+      label: 'Active Reminders',
+      value: remindersSummary.count.toString(),
+      highlightColor: remindersSummary.highPriority > 0 ? 'orange' : undefined,
+      trend: null,
+      loading: remindersLoading
+    },
+    {
+      icon: 'calendar',
+      label: 'Calendar Events',
+      value: calendarEvents.length.toString(),
+      highlightColor: undefined,
+      trend: null,
+      loading: calendarLoading
+    },
+    {
+      icon: 'pawprint',
+      label: 'Planned Litters',
+      value: plannedLittersData.count.toString(),
+      highlightColor: undefined,
+      trend: null,
+      loading: !isDataReady
+    },
+    {
+      icon: 'heart',
+      label: 'Upcoming Heats',
+      value: upcomingHeats.length.toString(),
+      highlightColor: undefined, 
+      trend: null,
+      loading: !isDataReady
+    }
+  ], [
+    remindersSummary, 
+    calendarEvents, 
+    plannedLittersData, 
+    upcomingHeats, 
+    remindersLoading, 
+    calendarLoading, 
+    isDataReady
+  ]);
   
   return (
-    <section className="relative bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 py-8 md:py-10 px-6 rounded-xl border border-warmbeige-200 overflow-hidden shadow-sm">
-      {/* Decorative elements */}
-      <DecorativePawprints />
-      
-      {/* Welcome header */}
-      <WelcomeHeader 
-        username={username || 'Breeder'} 
-        user={user}
-      />
-      
-      {/* Stats grid */}
-      <div className="relative z-10 mt-6">
-        <MetricCardGrid 
-          remindersCount={safeReminders.count}
-          highPriorityCount={safeReminders.highPriority}
-          plannedLittersCount={safePlannedLitters.count}
-          nextHeatDate={safePlannedLitters.nextDate}
-          activePregnanciesCount={activePregnancies?.length || 0}
-          isLoadingPregnancies={isLoadingPregnancies}
-          recentLittersCount={safeRecentLitters.count}
-          recentLitterDate={safeRecentLitters.latest}
-        />
-      </div>
+    <section className="w-full bg-gradient-to-b from-greige-50 via-greige-100 to-white rounded-xl shadow-sm mb-12 px-6 py-8">
+      <WelcomeHeader />
+      <MetricCardGrid metrics={metrics} />
     </section>
   );
 };

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
 import { useBreedingReminders } from '@/hooks/reminders';
@@ -50,11 +51,27 @@ export function useDashboardData() {
     // Convert reminders to calendar events
     const reminderEvents = remindersToCalendarEvents(reminders);
     
+    // Ensure all date fields are Date objects
+    const normalizedReminderEvents = reminderEvents.map(event => ({
+      ...event,
+      date: event.date instanceof Date ? event.date : new Date(event.date),
+      startDate: event.startDate instanceof Date ? event.startDate : new Date(event.startDate),
+      endDate: event.endDate instanceof Date ? event.endDate : new Date(event.endDate)
+    }));
+    
     // Update calendar events with reminder events
     setCalendarEvents(prevEvents => {
       // Filter out any existing reminder events
       const regularEvents = prevEvents.filter(e => !e.isReminderEvent);
-      return [...regularEvents, ...reminderEvents];
+      // Ensure all regular events have proper Date objects too
+      const normalizedRegularEvents = regularEvents.map(event => ({
+        ...event,
+        date: event.date instanceof Date ? event.date : new Date(event.date),
+        startDate: event.startDate instanceof Date ? event.startDate : new Date(event.startDate),
+        endDate: event.endDate instanceof Date ? event.endDate : new Date(event.endDate)
+      }));
+      
+      return [...normalizedRegularEvents, ...normalizedReminderEvents];
     });
     
     setCalendarLoading(false);
@@ -67,7 +84,7 @@ export function useDashboardData() {
     return calendarEvents.filter(event => {
       if (!event.date) return false;
       
-      const eventDate = new Date(event.date);
+      const eventDate = event.date instanceof Date ? event.date : new Date(event.date);
       return (
         eventDate.getDate() === date.getDate() &&
         eventDate.getMonth() === date.getMonth() &&

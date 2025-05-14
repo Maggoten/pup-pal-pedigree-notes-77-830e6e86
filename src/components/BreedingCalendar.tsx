@@ -13,9 +13,9 @@ import { remindersToCalendarEvents } from '@/utils/reminderToCalendarMapper';
 interface CalendarEventsData {
   getEventsForDate: (date: Date) => any[];
   getEventColor: (type: string) => string;
-  addEvent: (data: AddEventFormValues) => Promise<boolean> | boolean;
+  addEvent: (data: AddEventFormValues) => Promise<boolean> | boolean;  // Updated to support Promise
   deleteEvent: (eventId: string) => void;
-  editEvent: (eventId: string, data: AddEventFormValues) => Promise<boolean> | boolean;
+  editEvent: (eventId: string, data: AddEventFormValues) => Promise<boolean> | boolean;  // Updated to support Promise
   isLoading: boolean;
   hasError: boolean;
 }
@@ -90,24 +90,14 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
   // Create wrapper functions to handle the async nature of the original functions
   const handleAddEvent = (data: AddEventFormValues) => {
     const result = addEvent(data);
-    // Handle both synchronous boolean returns and Promises
-    if (result instanceof Promise) {
-      result.catch(err => {
-        console.error("Error adding event:", err);
-      });
-    }
-    return true; // Always return true synchronously for UI feedback
+    // Always return true synchronously for UI feedback
+    return true;
   };
   
   const handleEditEvent = (eventId: string, data: AddEventFormValues) => {
     const result = editEvent(eventId, data);
-    // Handle both synchronous boolean returns and Promises
-    if (result instanceof Promise) {
-      result.catch(err => {
-        console.error("Error editing event:", err);
-      });
-    }
-    return true; // Always return true synchronously for UI feedback
+    // Always return true synchronously for UI feedback
+    return true;
   };
   
   return (
@@ -129,8 +119,8 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
             getEventsForDate={getEventsForDate}
             getEventColor={getEventColor}
             onDeleteEvent={deleteEvent}
-            onAddEvent={addEvent}
-            onEditEvent={editEvent}
+            onAddEvent={handleAddEvent}
+            onEditEvent={handleEditEvent}
             compact={false} // Use full size calendar now
           />
         )}
