@@ -23,11 +23,11 @@ export const usePlannedLitters = () => {
     if (upcomingHeats && upcomingHeats.length > 0) {
       // Sort heats by date, get the closest
       const sortedHeats = [...upcomingHeats].sort(
-        (a, b) => new Date(a.expectedDate).getTime() - new Date(b.expectedDate).getTime()
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
       );
       
       if (sortedHeats[0]) {
-        setNextHeatDate(new Date(sortedHeats[0].expectedDate));
+        setNextHeatDate(new Date(sortedHeats[0].date));
       }
     } else {
       // Check planned litters for expected heat dates

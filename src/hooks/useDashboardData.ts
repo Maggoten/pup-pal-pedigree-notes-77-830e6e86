@@ -37,14 +37,14 @@ export const useDashboardData = () => {
   }, [reminders]);
   
   // Get calendar events data
-  const { 
-    events: calendarEvents, 
-    isLoading: eventsLoading, 
-    error: calendarError,
-    addEvent,
-    deleteEvent,
-    editEvent 
-  } = useCalendarEvents();
+  const calendarEvents = useCalendarEvents();
+  // Add isLoading and error properties to match expected interface
+  const eventsWithStatus = {
+    ...calendarEvents,
+    isLoading: false,
+    error: null,
+    editEvent: calendarEvents.updateEvent // Map updateEvent to editEvent for API compatibility
+  };
   
   // Planned litters data
   const { 
@@ -53,7 +53,7 @@ export const useDashboardData = () => {
     nextHeatDate
   } = usePlannedLitters();
   
-  // Recent litters data - cast the result to include the needed properties
+  // Cast the litter query result to include the needed properties
   const litterQueryData = useLitterQueries() as unknown as LitterQueryData;
   const { 
     recentLittersCount,
@@ -64,7 +64,7 @@ export const useDashboardData = () => {
   
   // Combine calendar events with reminder events
   const combinedEvents = useMemo(() => {
-    const results = [...calendarEvents];
+    const results = [...calendarEvents.events];
     
     // Only add reminder events that don't overlap with existing calendar events
     if (reminderEvents && reminderEvents.length > 0) {
@@ -83,7 +83,7 @@ export const useDashboardData = () => {
     }
     
     return results;
-  }, [calendarEvents, reminderEvents]);
+  }, [calendarEvents.events, reminderEvents]);
   
   // Get events for a specific date
   const getEventsForDate = useCallback((date: Date) => {
@@ -116,14 +116,26 @@ export const useDashboardData = () => {
   }, []);
   
   // Handle add event mutation wrapper
-  const handleAddEvent = useCallback((data: AddEventFormValues) => {
-    return addEvent(data);
-  }, [addEvent]);
+  const handleAddEvent = useCallback((data: AddEventFormValues): Promise<boolean> => {
+    try {
+      calendarEvents.addEvent(data);
+      return Promise.resolve(true);
+    } catch (error) {
+      console.error("Error adding event:", error);
+      return Promise.resolve(false);
+    }
+  }, [calendarEvents.addEvent]);
   
   // Handle edit event mutation wrapper
-  const handleEditEvent = useCallback((eventId: string, data: AddEventFormValues) => {
-    return editEvent(eventId, data);
-  }, [editEvent]);
+  const handleEditEvent = useCallback((eventId: string, data: AddEventFormValues): Promise<boolean> => {
+    try {
+      calendarEvents.updateEvent(eventId, data);
+      return Promise.resolve(true);
+    } catch (error) {
+      console.error("Error editing event:", error);
+      return Promise.resolve(false);
+    }
+  }, [calendarEvents.updateEvent]);
   
   // Format planned litters data for the dashboard
   const plannedLittersData = useMemo(() => {
@@ -143,12 +155,12 @@ export const useDashboardData = () => {
   
   // Determine when data is ready
   useEffect(() => {
-    const dataLoaded = !remindersLoading && !eventsLoading && !plannedLittersLoading && !littersLoading;
+    const dataLoaded = !remindersLoading && !plannedLittersLoading && !littersLoading;
     
     if (dataLoaded) {
       setTimeout(() => setIsDataReady(true), 500);
     }
-  }, [remindersLoading, eventsLoading, plannedLittersLoading, littersLoading]);
+  }, [remindersLoading, plannedLittersLoading, littersLoading]);
   
   return {
     // Data status
@@ -163,12 +175,12 @@ export const useDashboardData = () => {
     
     // Calendar events data and actions  
     events: combinedEvents,
-    calendarLoading: eventsLoading,
-    calendarError: !!calendarError,
+    calendarLoading: eventsWithStatus.isLoading,
+    calendarError: !!eventsWithStatus.error,
     getEventsForDate,
     getEventColor,
     handleAddEvent,
-    deleteEvent,
+    deleteEvent: calendarEvents.deleteEvent,
     handleEditEvent,
     
     // Planned litters data

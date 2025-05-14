@@ -105,7 +105,7 @@ export async function uploadFileAndGetUrl(file: File, userId: string): Promise<s
     // Show toast for user feedback
     toast({
       title: 'Upload Failed',
-      description: hasError(error) ? error.message : 'Failed to upload file',
+      description: hasError(error) && error.message ? error.message : 'Failed to upload file',
       variant: 'destructive'
     });
     

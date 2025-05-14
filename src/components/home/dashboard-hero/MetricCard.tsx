@@ -1,116 +1,71 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { Calendar, Heart, PawPrint, Dog, Bell } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
+import { 
+  Calendar, 
+  Heart, 
+  Bell, 
+  PawPrint, 
+  Dog 
+} from 'lucide-react';
 
-interface MetricCardProps {
+export interface MetricCardProps {
   icon: "calendar" | "heart" | "pawprint" | "dog" | "bell";
   label: string;
   value: string;
-  highlightColor?: "green" | "blue" | "purple" | "rose" | "orange";
-  trend?: string | React.ReactNode;
-  loading?: boolean;
+  highlightColor: string;
+  trend: string;
+  loading: boolean;
 }
 
-const MetricCard: React.FC<MetricCardProps> = ({
-  icon,
-  label,
-  value,
-  highlightColor = "green",
+const MetricCard: React.FC<MetricCardProps> = ({ 
+  icon, 
+  label, 
+  value, 
+  highlightColor, 
   trend,
-  loading = false
+  loading
 }) => {
   const renderIcon = () => {
-    const iconClass = "h-5 w-5";
-    
     switch (icon) {
-      case "calendar":
-        return <Calendar className={iconClass} />;
-      case "heart":
-        return <Heart className={iconClass} />;
-      case "pawprint":
-        return <PawPrint className={iconClass} />;
-      case "dog":
-        return <Dog className={iconClass} />;
-      case "bell":
-        return <Bell className={iconClass} />;
+      case 'calendar':
+        return <Calendar className="h-5 w-5" />;
+      case 'heart':
+        return <Heart className="h-5 w-5" />;
+      case 'bell':
+        return <Bell className="h-5 w-5" />;
+      case 'pawprint':
+        return <PawPrint className="h-5 w-5" />;
+      case 'dog':
+        return <Dog className="h-5 w-5" />;
       default:
-        return <Calendar className={iconClass} />;
+        return <Bell className="h-5 w-5" />;
     }
   };
-  
-  const getColorClasses = () => {
-    switch (highlightColor) {
-      case "green":
-        return {
-          text: "text-emerald-600",
-          bg: "bg-emerald-100",
-          border: "border-emerald-200",
-          iconBg: "bg-emerald-500/10"
-        };
-      case "blue":
-        return {
-          text: "text-blue-600",
-          bg: "bg-blue-50",
-          border: "border-blue-100",
-          iconBg: "bg-blue-500/10"
-        };
-      case "purple":
-        return {
-          text: "text-purple-600",
-          bg: "bg-purple-50",
-          border: "border-purple-100",
-          iconBg: "bg-purple-500/10"
-        };
-      case "rose":
-        return {
-          text: "text-rose-600",
-          bg: "bg-rose-50",
-          border: "border-rose-100",
-          iconBg: "bg-rose-500/10"
-        };
-      case "orange":
-        return {
-          text: "text-orange-600",
-          bg: "bg-orange-50",
-          border: "border-orange-100",
-          iconBg: "bg-orange-500/10"
-        };
-      default:
-        return {
-          text: "text-emerald-600",
-          bg: "bg-emerald-100",
-          border: "border-emerald-200",
-          iconBg: "bg-emerald-500/10"
-        };
-    }
-  };
-  
-  const colors = getColorClasses();
-  
+
   return (
-    <Card className={`${colors.bg} border ${colors.border} shadow-sm hover:shadow-md transition-all p-4 flex`}>
-      <div className="flex-1">
-        <div className="flex items-center gap-2 mb-2">
-          <div className={`${colors.iconBg} p-2 rounded-full ${colors.text}`}>
+    <Card className="border-warmbeige-200 shadow-sm hover:shadow-md transition-all duration-300">
+      <CardContent className="pt-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <p className="text-sm font-medium text-gray-500">{label}</p>
+            <div className="flex items-end mt-2">
+              {loading ? (
+                <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+              ) : (
+                <h3 className={`text-3xl font-bold ${highlightColor}`}>
+                  {value}
+                </h3>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 mt-2">{trend}</p>
+          </div>
+          <div className="bg-warmbeige-100 p-2 rounded-full">
             {renderIcon()}
           </div>
-          <p className="text-sm font-medium text-muted-foreground">{label}</p>
         </div>
-        
-        {loading ? (
-          <>
-            <Skeleton className="h-8 w-16 mb-2 bg-white/50" />
-            <Skeleton className="h-3 w-24 bg-white/50" />
-          </>
-        ) : (
-          <>
-            <p className="text-3xl font-bold mb-1">{value}</p>
-            <p className={`text-xs ${colors.text}`}>{trend}</p>
-          </>
-        )}
-      </div>
+      </CardContent>
     </Card>
   );
 };

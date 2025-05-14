@@ -1,22 +1,22 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { User } from '@/types/auth';
-import UserWelcomeBanner from './UserWelcomeBanner';
-import MetricCardGrid from './MetricCardGrid';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
-import { MetricCardProps } from './MetricCardGrid';
+import MetricCardGrid from './MetricCardGrid';
+import UserWelcomeBanner from './UserWelcomeBanner';
+import DecorativePawprints from './DecorativePawprints';
 
 interface DashboardHeroProps {
   username: string;
   user: User | null;
-  reminders: { count: number; highPriority: number };
+  reminders: { total: number; incomplete: number; upcoming: number };
   plannedLitters: { count: number; nextDate: Date | null };
   activePregnancies: ActivePregnancy[];
   recentLitters: { count: number; recent: number };
   isLoadingPregnancies?: boolean;
 }
 
-const DashboardHero: React.FC<DashboardHeroProps> = ({ 
+const DashboardHero: React.FC<DashboardHeroProps> = ({
   username,
   user,
   reminders,
@@ -25,59 +25,70 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   recentLitters,
   isLoadingPregnancies = false
 }) => {
-  // Debug logging
-  console.log('[DashboardHero] Rendering with data:', { 
-    username,
-    reminders,
-    plannedLitters,
-    activePregnancies: activePregnancies?.length,
-    recentLitters
-  });
-  
-  // Format the metrics for display
-  const metricCards: MetricCardProps[] = [
+  const formattedNextHeatDate = useMemo(() => {
+    if (!plannedLitters.nextDate) return 'None scheduled';
+    
+    return new Date(plannedLitters.nextDate).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  }, [plannedLitters.nextDate]);
+
+  // Format the metrics for the cards
+  const metrics = useMemo(() => [
     {
       icon: "bell",
       label: "Reminders",
-      value: reminders.count.toString(),
-      highlightColor: reminders.highPriority > 0 ? "rose" : "green",
-      trend: reminders.highPriority > 0 ? `${reminders.highPriority} high priority` : "No urgent tasks",
-      loading: false
+      value: `${reminders.incomplete}`,
+      highlightColor: "text-amber-600",
+      trend: `${reminders.upcoming} upcoming`,
+      loading: false,
     },
     {
       icon: "calendar",
       label: "Planned Litters",
-      value: plannedLitters.count.toString(),
-      highlightColor: "green",
-      trend: plannedLitters.nextDate ? `Next heat: ${plannedLitters.nextDate.toLocaleDateString()}` : "No upcoming heats",
-      loading: false
+      value: `${plannedLitters.count}`,
+      highlightColor: "text-rose-600",
+      trend: `Next heat: ${formattedNextHeatDate}`,
+      loading: false,
     },
     {
       icon: "heart",
       label: "Active Pregnancies",
-      value: activePregnancies?.length.toString() || "0",
-      highlightColor: "blue",
-      trend: activePregnancies?.length === 1 ? "1 due soon" : activePregnancies?.length > 1 ? `${activePregnancies.length} active` : "None active",
-      loading: isLoadingPregnancies
+      value: `${isLoadingPregnancies ? '...' : activePregnancies.length}`,
+      highlightColor: "text-emerald-600",
+      trend: isLoadingPregnancies 
+        ? 'Loading...' 
+        : `${activePregnancies.length === 0 ? 'None active' : ''}`,
+      loading: isLoadingPregnancies,
     },
     {
       icon: "pawprint",
       label: "Recent Litters",
-      value: recentLitters.count.toString(),
-      highlightColor: "purple",
-      trend: recentLitters.recent > 0 ? `${recentLitters.recent} this year` : "None this year",
-      loading: false
+      value: `${recentLitters.count}`,
+      highlightColor: "text-blue-600",
+      trend: `${recentLitters.recent} this year`,
+      loading: false,
     }
-  ];
+  ], [
+    reminders.incomplete, 
+    reminders.upcoming,
+    plannedLitters.count,
+    formattedNextHeatDate,
+    isLoadingPregnancies,
+    activePregnancies.length,
+    recentLitters.count,
+    recentLitters.recent
+  ]);
 
   return (
-    <section className="space-y-6">
-      <UserWelcomeBanner 
-        username={username}
-        user={user}
-      />
-      
-      <MetricCardGrid metricCards={metricCards} />
+    <section className="relative overflow-hidden">
+      <DecorativePawprints className="absolute right-0 top-0 w-48 h-48 text-warmbeige-200/50 -z-10" />
+      <div className="pb-6">
+        <UserWelcomeBanner username={username} user={user} />
+        <MetricCardGrid metrics={metrics} />
+      </div>
     </section>
   );
 };
