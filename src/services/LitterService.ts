@@ -674,145 +674,179 @@ class LitterService {
       
       console.log("Successfully updated puppy in Supabase");
 
-      // First, synchronize the birth weight record if it exists
-      const birthDate = updatedPuppy.birthDateTime ? 
-        new Date(updatedPuppy.birthDateTime).toISOString().split('T')[0] : 
-        null;
+      // Process weight logs with proper error handling
+      if (updatedPuppy.weightLog && updatedPuppy.weightLog.length > 0) {
+        console.log("Processing", updatedPuppy.weightLog.length, "weight logs");
         
-      if (birthDate && currentBirthWeight) {
-        console.log("Synchronizing birth weight record");
-        
-        // Check if a birth weight entry already exists
-        const { data: existingBirthWeightLog } = await supabase
-          .from('puppy_weight_logs')
-          .select('*')
-          .eq('puppy_id', updatedPuppy.id)
-          .eq('date', birthDate)
-          .maybeSingle();
+        // First, synchronize the birth weight record if it exists
+        const birthDate = updatedPuppy.birthDateTime ? 
+          new Date(updatedPuppy.birthDateTime).toISOString().split('T')[0] : 
+          null;
           
-        if (existingBirthWeightLog) {
-          // Update existing birth weight log if it exists
-          console.log("Updating existing birth weight log:", existingBirthWeightLog.id);
-          await supabase
-            .from('puppy_weight_logs')
-            .update({ weight: currentBirthWeight })
-            .eq('id', existingBirthWeightLog.id);
-        } else {
-          // Create a new birth weight log if it doesn't exist
-          console.log("Creating new birth weight log entry");
-          await supabase
-            .from('puppy_weight_logs')
-            .insert({
-              puppy_id: updatedPuppy.id,
-              date: birthDate,
-              weight: currentBirthWeight
-            });
+        if (birthDate && currentBirthWeight) {
+          console.log("Synchronizing birth weight record");
+          
+          try {
+            // Check if a birth weight entry already exists
+            const { data: existingBirthWeightLog } = await supabase
+              .from('puppy_weight_logs')
+              .select('*')
+              .eq('puppy_id', updatedPuppy.id)
+              .eq('date', birthDate)
+              .maybeSingle();
+              
+            if (existingBirthWeightLog) {
+              // Update existing birth weight log if it exists
+              console.log("Updating existing birth weight log:", existingBirthWeightLog.id);
+              await supabase
+                .from('puppy_weight_logs')
+                .update({ weight: currentBirthWeight })
+                .eq('id', existingBirthWeightLog.id);
+            } else {
+              // Create a new birth weight log if it doesn't exist
+              console.log("Creating new birth weight log entry");
+              await supabase
+                .from('puppy_weight_logs')
+                .insert({
+                  puppy_id: updatedPuppy.id,
+                  date: birthDate,
+                  weight: currentBirthWeight
+                });
+            }
+          } catch (birthWeightError) {
+            console.error("Error handling birth weight:", birthWeightError);
+            // Continue with other operations even if this fails
+          }
+        }
+
+        // Process each weight log individually with error handling
+        for (const weightLog of updatedPuppy.weightLog) {
+          try {
+            // Format the date for comparison (strip time component)
+            const logDate = new Date(weightLog.date).toISOString().split('T')[0];
+            
+            // Skip if this is the birth date (already handled above)
+            if (birthDate && logDate === birthDate) {
+              console.log("Skipping birth date weight log as it's already handled");
+              continue;
+            }
+            
+            console.log("Processing weight log for date:", logDate, "with weight:", weightLog.weight);
+            
+            // Check if this log already exists
+            const { data: existingLog } = await supabase
+              .from('puppy_weight_logs')
+              .select('*')
+              .eq('puppy_id', updatedPuppy.id)
+              .eq('date', logDate)
+              .maybeSingle();
+              
+            if (existingLog) {
+              // Update existing log
+              console.log("Updating existing weight log:", existingLog.id);
+              const { error: updateError } = await supabase
+                .from('puppy_weight_logs')
+                .update({ weight: weightLog.weight })
+                .eq('id', existingLog.id);
+                
+              if (updateError) {
+                console.error("Error updating weight log:", updateError);
+              }
+            } else {
+              // Insert new log
+              console.log("Inserting new weight log");
+              const { error: insertError } = await supabase
+                .from('puppy_weight_logs')
+                .insert({
+                  puppy_id: updatedPuppy.id,
+                  date: logDate,
+                  weight: weightLog.weight
+                });
+                
+              if (insertError) {
+                console.error("Error inserting weight log:", insertError);
+              }
+            }
+          } catch (weightLogError) {
+            console.error("Error processing weight log:", weightLogError);
+            // Continue with other weight logs even if one fails
+          }
         }
       }
 
-      // Handle all other weight logs
-      console.log("Processing weight logs:", updatedPuppy.weightLog.length);
-      for (const weightLog of updatedPuppy.weightLog) {
-        // Format the date for comparison (strip time component)
-        const logDate = new Date(weightLog.date).toISOString().split('T')[0];
-        
-        // Skip if this is the birth date (already handled above)
-        if (birthDate && logDate === birthDate) {
-          console.log("Skipping birth date weight log as it's already handled");
-          continue;
-        }
-        
-        console.log("Processing weight log for date:", logDate);
-        
-        // Check if this log already exists
-        const { data: existingLog } = await supabase
-          .from('puppy_weight_logs')
-          .select('*')
-          .eq('puppy_id', updatedPuppy.id)
-          .eq('date', logDate)
-          .maybeSingle();
-          
-        if (existingLog) {
-          // Update existing log
-          console.log("Updating existing weight log:", existingLog.id);
-          await supabase
-            .from('puppy_weight_logs')
-            .update({ weight: weightLog.weight })
-            .eq('id', existingLog.id);
-        } else {
-          // Insert new log
-          console.log("Inserting new weight log");
-          await supabase
-            .from('puppy_weight_logs')
-            .insert({
-              puppy_id: updatedPuppy.id,
-              date: logDate,
-              weight: weightLog.weight
-            });
+      // Process height logs similarly with error handling
+      if (updatedPuppy.heightLog && updatedPuppy.heightLog.length > 0) {
+        console.log("Processing height logs");
+        for (const heightLog of updatedPuppy.heightLog) {
+          try {
+            // Format the date for comparison (strip time component)
+            const logDate = new Date(heightLog.date).toISOString().split('T')[0];
+            
+            // Check if this log already exists
+            const { data: existingLog } = await supabase
+              .from('puppy_height_logs')
+              .select('*')
+              .eq('puppy_id', updatedPuppy.id)
+              .eq('date', logDate)
+              .maybeSingle();
+              
+            if (existingLog) {
+              // Update existing log
+              await supabase
+                .from('puppy_height_logs')
+                .update({ height: heightLog.height })
+                .eq('id', existingLog.id);
+            } else {
+              // Insert new log
+              await supabase
+                .from('puppy_height_logs')
+                .insert({
+                  puppy_id: updatedPuppy.id,
+                  date: logDate,
+                  height: heightLog.height
+                });
+            }
+          } catch (heightLogError) {
+            console.error("Error processing height log:", heightLogError);
+            // Continue with other height logs even if one fails
+          }
         }
       }
 
-      // Handle height logs
-      console.log("Processing height logs");
-      for (const heightLog of updatedPuppy.heightLog) {
-        // Format the date for comparison (strip time component)
-        const logDate = new Date(heightLog.date).toISOString().split('T')[0];
-        
-        // Check if this log already exists
-        const { data: existingLog } = await supabase
-          .from('puppy_height_logs')
-          .select('*')
-          .eq('puppy_id', updatedPuppy.id)
-          .eq('date', logDate)
-          .maybeSingle();
-          
-        if (existingLog) {
-          // Update existing log
-          await supabase
-            .from('puppy_height_logs')
-            .update({ height: heightLog.height })
-            .eq('id', existingLog.id);
-        } else {
-          // Insert new log
-          await supabase
-            .from('puppy_height_logs')
-            .insert({
-              puppy_id: updatedPuppy.id,
-              date: logDate,
-              height: heightLog.height
-            });
-        }
-      }
-      
-      // Process and save notes
+      // Process and save notes with error handling
       if (updatedPuppy.notes && updatedPuppy.notes.length > 0) {
         console.log("Processing notes:", updatedPuppy.notes.length);
         
-        // Get existing notes to avoid duplication
-        const { data: existingNotes } = await supabase
-          .from('puppy_notes')
-          .select('*')
-          .eq('puppy_id', updatedPuppy.id);
-          
-        const existingNoteDates = existingNotes 
-          ? existingNotes.map(note => new Date(note.date).toISOString()) 
-          : [];
-          
-        // Process each note
-        for (const note of updatedPuppy.notes) {
-          const noteDate = new Date(note.date).toISOString();
-          
-          // Check if this note already exists by date (simple approach)
-          if (!existingNoteDates.includes(noteDate)) {
-            console.log("Adding new note from date:", noteDate);
-            await supabase
-              .from('puppy_notes')
-              .insert({
-                puppy_id: updatedPuppy.id,
-                date: noteDate,
-                content: note.content
-              });
+        try {
+          // Get existing notes to avoid duplication
+          const { data: existingNotes } = await supabase
+            .from('puppy_notes')
+            .select('*')
+            .eq('puppy_id', updatedPuppy.id);
+            
+          const existingNoteDates = existingNotes 
+            ? existingNotes.map(note => new Date(note.date).toISOString()) 
+            : [];
+            
+          // Process each note
+          for (const note of updatedPuppy.notes) {
+            const noteDate = new Date(note.date).toISOString();
+            
+            // Check if this note already exists by date (simple approach)
+            if (!existingNoteDates.includes(noteDate)) {
+              console.log("Adding new note from date:", noteDate);
+              await supabase
+                .from('puppy_notes')
+                .insert({
+                  puppy_id: updatedPuppy.id,
+                  date: noteDate,
+                  content: note.content
+                });
+            }
           }
+        } catch (notesError) {
+          console.error("Error processing notes:", notesError);
+          // Continue even if notes processing fails
         }
       }
 

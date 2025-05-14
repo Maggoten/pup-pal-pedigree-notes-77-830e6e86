@@ -55,10 +55,13 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       weight: weightValue 
     };
     
+    // Ensure weightLog exists before adding to it
+    const existingWeightLog = localPuppy.weightLog || [];
+    
     const updatedPuppy = {
       ...localPuppy,
       weightLog: [
-        ...localPuppy.weightLog,
+        ...existingWeightLog,
         newWeightRecord
       ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
       // Update the currentWeight to this new weight value
@@ -89,15 +92,19 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     const [hours, minutes] = selectedTime.split(':').map(Number);
     measurementDate.setHours(hours, minutes);
 
+    const heightValue = parseFloat(height);
     const newHeightRecord = { 
       date: measurementDate.toISOString(), 
-      height: parseFloat(height) 
+      height: heightValue 
     };
+    
+    // Ensure heightLog exists before adding to it
+    const existingHeightLog = localPuppy.heightLog || [];
     
     const updatedPuppy = {
       ...localPuppy,
       heightLog: [
-        ...localPuppy.heightLog,
+        ...existingHeightLog,
         newHeightRecord
       ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     };
@@ -108,7 +115,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     
     toast({
       title: "Height Recorded",
-      description: `${puppy.name}'s height has been recorded successfully.`
+      description: `${puppy.name}'s height has been recorded.`
     });
   }, [height, selectedDate, selectedTime, localPuppy, puppy.name, onUpdate]);
 
@@ -126,20 +133,20 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     const [hours, minutes] = selectedTime.split(':').map(Number);
     noteDate.setHours(hours, minutes);
 
-    // Make sure the puppy has a notes array, or create one
-    const currentNotes = localPuppy.notes || [];
-
     const newNote = { 
       date: noteDate.toISOString(), 
-      content: note 
+      content: note.trim() 
     };
-
+    
+    // Ensure notes array exists
+    const existingNotes = localPuppy.notes || [];
+    
     const updatedPuppy = {
       ...localPuppy,
       notes: [
-        ...currentNotes,
+        ...existingNotes,
         newNote
-      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Newest first
     };
 
     setLocalPuppy(updatedPuppy);
@@ -148,76 +155,69 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     
     toast({
       title: "Note Added",
-      description: `Note for ${puppy.name} has been added successfully.`
+      description: `Note added for ${puppy.name}.`
     });
   }, [note, selectedDate, selectedTime, localPuppy, puppy.name, onUpdate]);
 
   return (
-    <DialogContent className="sm:max-w-[500px]">
+    <DialogContent className="sm:max-w-[600px]" onInteractOutside={onClose}>
       <DialogHeader>
-        <DialogTitle>{puppy.name} - Growth Measurements</DialogTitle>
+        <DialogTitle>Record Measurements for {puppy.name}</DialogTitle>
         <DialogDescription>
-          Record weight, height, and notes for this puppy.
+          Add weight, height, or notes for tracking puppy development.
         </DialogDescription>
       </DialogHeader>
 
-      <div className="space-y-4 mt-2">
-        <DateTimeSelector
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          selectedTime={selectedTime}
-          setSelectedTime={setSelectedTime}
-        />
+      <DateTimeSelector 
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        selectedTime={selectedTime}
+        setSelectedTime={setSelectedTime}
+      />
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="weight">Weight</TabsTrigger>
-            <TabsTrigger value="height">Height</TabsTrigger>
-            <TabsTrigger value="notes">Notes</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="weight" className="space-y-4 mt-4">
-            <PuppyWeightTab
-              puppy={localPuppy}
-              weight={weight}
-              setWeight={setWeight}
-              selectedDate={selectedDate}
-              selectedTime={selectedTime}
-              onAddWeight={handleAddWeight}
-            />
-          </TabsContent>
-          
-          <TabsContent value="height" className="space-y-4 mt-4">
-            <PuppyHeightTab
-              puppy={localPuppy}
-              height={height}
-              setHeight={setHeight}
-              selectedDate={selectedDate}
-              selectedTime={selectedTime}
-              onAddHeight={handleAddHeight}
-            />
-          </TabsContent>
-          
-          <TabsContent value="notes" className="space-y-4 mt-4">
-            <PuppyNotesTab
-              puppy={localPuppy}
-              note={note}
-              setNote={setNote}
-              selectedDate={selectedDate}
-              selectedTime={selectedTime}
-              onAddNote={handleAddNote}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
+        <TabsList className="grid grid-cols-3">
+          <TabsTrigger value="weight">Weight</TabsTrigger>
+          <TabsTrigger value="height">Height</TabsTrigger>
+          <TabsTrigger value="notes">Notes</TabsTrigger>
+        </TabsList>
+        <TabsContent value="weight">
+          <PuppyWeightTab
+            puppy={localPuppy}
+            weight={weight}
+            setWeight={setWeight}
+            selectedDate={selectedDate}
+            selectedTime={selectedTime}
+            onAddWeight={handleAddWeight}
+          />
+        </TabsContent>
+        <TabsContent value="height">
+          <PuppyHeightTab
+            puppy={localPuppy}
+            height={height}
+            setHeight={setHeight}
+            selectedDate={selectedDate}
+            selectedTime={selectedTime}
+            onAddHeight={handleAddHeight}
+          />
+        </TabsContent>
+        <TabsContent value="notes">
+          <PuppyNotesTab
+            puppy={localPuppy}
+            note={note}
+            setNote={setNote}
+            selectedDate={selectedDate}
+            selectedTime={selectedTime}
+            onAddNote={handleAddNote}
+          />
+        </TabsContent>
+      </Tabs>
 
-      <DialogFooter className="mt-6">
-        <Button type="button" variant="outline" onClick={onClose}>
-          Close
-        </Button>
+      <DialogFooter className="mt-4 gap-2">
+        <Button variant="outline" onClick={onClose}>Close</Button>
       </DialogFooter>
     </DialogContent>
   );
 };
 
-export default React.memo(PuppyMeasurementsDialog);
+export default PuppyMeasurementsDialog;
