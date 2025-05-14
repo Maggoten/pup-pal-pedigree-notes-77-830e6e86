@@ -1,36 +1,46 @@
 
-import { supabase, Profile } from '@/integrations/supabase/client';
-import { User } from '@/types/auth';
-import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { LoginData, User } from '@/types/auth';
+import { AuthApiError, PostgrestError } from '@supabase/supabase-js';
 
-// Handle login functionality
-export const loginUser = async (email: string, password: string): Promise<User | null> => {
+export const loginUser = async (
+  loginData: LoginData
+): Promise<{ user: User | null; error: null | AuthApiError | PostgrestError }> => {
   const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
+    email: loginData.email,
+    password: loginData.password,
   });
-  
-  if (error || !data.user) {
-    console.error("Login error:", error);
-    return null;
+
+  if (error) {
+    console.error('Login error:', error.message);
+    return { user: null, error };
   }
-  
-  // Get user profile from database
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id, email, first_name, last_name, address')
+
+  if (!data.user) {
+    return { user: null, error: null };
+  }
+
+  // Get the user metadata from the user
+  const { data: userData, error: userError } = await supabase
+    .from('users')
+    .select('*')
     .eq('id', data.user.id)
     .single();
-  
-  if (profile) {
-    return {
-      id: data.user.id,
-      email: data.user.email || '',
-      firstName: profile.first_name,
-      lastName: profile.last_name,
-      address: profile.address
-    };
+
+  if (userError) {
+    console.error('Error fetching user data:', userError.message);
   }
-  
-  return null;
+
+  // Construct the User object from both auth data and database data
+  const user: User = {
+    id: data.user.id,
+    email: data.user.email || '',
+    firstName: userData?.first_name || '',
+    lastName: userData?.last_name || '',
+    // Note: These properties exist in database but not in our User type
+    // address: userData?.address || '',
+    // phone: userData?.phone || '',
+  };
+
+  return { user, error: null };
 };

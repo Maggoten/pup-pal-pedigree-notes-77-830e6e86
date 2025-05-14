@@ -1,66 +1,73 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { User, RegisterData } from '@/types/auth';
-import { toast } from '@/hooks/use-toast';
+import { RegisterData, User } from '@/types/auth';
+import { AuthApiError, PostgrestError } from '@supabase/supabase-js';
 
-// Handle registration functionality
-export const registerUser = async (userData: RegisterData): Promise<User | null> => {
+export const registerUser = async (
+  registerData: RegisterData
+): Promise<{ user: User | null; error: null | AuthApiError | PostgrestError }> => {
   try {
-    // Register the user with Supabase auth
+    // Step 1: Register the user with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
-      email: userData.email,
-      password: userData.password,
+      email: registerData.email,
+      password: registerData.password,
       options: {
         data: {
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          // Since address was removed from RegisterData, use empty string
-          address: ''
-        }
-      }
+          first_name: registerData.firstName,
+          last_name: registerData.lastName,
+        },
+      },
     });
-    
+
     if (error) {
-      console.error("Registration error:", error);
-      
-      // Handle specific error cases
-      if (error.message.includes('already registered')) {
-        toast({
-          title: "Email already in use",
-          description: "This email address is already registered. Please try to log in instead.",
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Registration failed",
-          description: error.message,
-          variant: "destructive"
-        });
-      }
-      
-      return null;
+      console.error('Registration error:', error.message);
+      return { user: null, error };
     }
-    
+
     if (!data.user) {
-      console.error("Registration error: No user returned from Supabase");
-      return null;
+      return { user: null, error: null };
     }
-    
-    // The profile is created automatically via database trigger
-    return {
+
+    // Step 2: Create a record in the users table
+    const { error: profileError } = await supabase
+      .from('users')
+      .insert([
+        {
+          id: data.user.id,
+          email: registerData.email,
+          first_name: registerData.firstName,
+          last_name: registerData.lastName,
+          // Note: These properties exist in database but not in our User type
+          // address: registerData.address,
+          // phone: registerData.phone,
+          // kennel_name: registerData.kennel_name,
+        },
+      ]);
+
+    if (profileError) {
+      console.error('Error creating user profile:', profileError.message);
+      return { user: null, error: profileError };
+    }
+
+    // Step 3: Construct the User object
+    const user: User = {
       id: data.user.id,
-      email: userData.email,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      address: '' // Use empty string since address field was removed
+      email: data.user.email || '',
+      firstName: registerData.firstName,
+      lastName: registerData.lastName,
+      // Note: These properties exist in database but not in our User type
+      // address: registerData.address || '',
+      // phone: registerData.phone || '',
     };
+
+    return { user, error: null };
   } catch (error) {
-    console.error("Registration error:", error);
-    toast({
-      title: "Registration failed",
-      description: "An unexpected error occurred. Please try again.",
-      variant: "destructive"
-    });
-    return null;
+    console.error('Unexpected error during registration:', error);
+    return { 
+      user: null, 
+      error: { 
+        message: 'Unexpected error during registration' 
+      } as AuthApiError 
+    };
   }
 };

@@ -1,156 +1,101 @@
 
-import React, { useState, memo } from 'react';
-import { format, isBefore, addDays } from 'date-fns';
-import { Check, X, Trash2 } from 'lucide-react';
+import React from 'react';
+import { format } from 'date-fns';
+import { Check, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface ReminderItemProps {
   id: string;
   title: string;
   description: string;
-  icon: React.ReactNode;
-  priority: 'high' | 'medium' | 'low';
   dueDate: Date;
+  priority: 'high' | 'medium' | 'low';
   type: string;
-  relatedId?: string;
-  isCompleted?: boolean;
+  relatedId?: string | null;
+  icon?: React.ReactNode;
   onComplete: (id: string) => void;
   onDelete?: (id: string) => void;
-  compact?: boolean;
+  compact?: boolean; // Added compact prop
 }
 
-// Use memo to prevent unnecessary re-renders
-const ReminderItem: React.FC<ReminderItemProps> = memo(({
+const ReminderItem: React.FC<ReminderItemProps> = ({
   id,
   title,
   description,
-  icon,
-  priority,
   dueDate,
-  isCompleted = false,
+  priority,
+  icon,
   onComplete,
   onDelete,
-  compact = false
+  compact = false // Default to standard view
 }) => {
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  // Determine if overdue (due date is before now and not completed)
-  const isOverdue = !isCompleted && isBefore(new Date(dueDate), new Date());
-  
-  // Determine if due soon (due in next 2 days and not completed)
-  const isDueSoon = !isCompleted && 
-    !isOverdue && 
-    isBefore(new Date(dueDate), addDays(new Date(), 2));
-  
-  // Handle completion toggle
-  const handleComplete = () => {
-    onComplete(id);
-  };
-  
-  // Handle delete with confirmation state
-  const handleDelete = () => {
-    if (isDeleting) {
-      onDelete?.(id);
-    } else {
-      setIsDeleting(true);
-      // Reset delete state after 3 seconds if not confirmed
-      setTimeout(() => {
-        setIsDeleting(false);
-      }, 3000);
+  const getPriorityStyles = () => {
+    switch (priority) {
+      case 'high':
+        return 'bg-red-50 border-red-200 text-red-800';
+      case 'medium':
+        return 'bg-amber-50 border-amber-200 text-amber-800';
+      case 'low':
+        return 'bg-blue-50 border-blue-200 text-blue-800';
+      default:
+        return 'bg-gray-50 border-gray-200 text-gray-800';
     }
   };
-  
-  // Format date based on compact view
-  const formattedDate = format(new Date(dueDate), compact ? 'MMM d' : 'MMM d, yyyy');
-  
+
   return (
-    <div
-      className={cn(
-        "p-3 transition-colors relative",
-        isCompleted ? "bg-primary/5" : "hover:bg-primary/5",
-        compact ? "py-2" : "py-3"
-      )}
-    >
-      <div className="flex items-start gap-3">
-        {/* Priority indicator and toggle */}
-        <div className="mt-1 flex-shrink-0">
-          <button
-            onClick={handleComplete}
-            className={cn(
-              "h-5 w-5 rounded-full border flex-shrink-0 flex items-center justify-center transition-colors",
-              isCompleted ? "bg-green-500 border-green-600" : "border-greige-300 hover:border-primary/70",
-              priority === 'high' && !isCompleted ? "border-rose-400" : "",
-              priority === 'medium' && !isCompleted ? "border-amber-400" : "",
-              priority === 'low' && !isCompleted ? "border-green-400" : ""
-            )}
-          >
-            {isCompleted && <Check className="h-3 w-3 text-white" />}
-          </button>
-        </div>
+    <div className={cn(
+      "flex items-start gap-3 p-3 bg-white border rounded-md shadow-sm transition-all hover:shadow-md relative overflow-hidden",
+      getPriorityStyles(),
+      compact ? "py-2" : ""
+    )}>
+      <div className="mt-1 shrink-0">
+        {icon}
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <h4 className={cn("font-medium text-gray-900 mb-1", compact ? "text-sm" : "")}>
+          {title}
+        </h4>
         
-        {/* Content */}
-        <div className="flex-grow min-w-0">
-          <div className="flex items-center gap-2">
-            {/* Icon */}
-            <div className="flex-shrink-0 mr-1">
-              {icon}
-            </div>
-            
-            {/* Title */}
-            <div
-              className={cn(
-                "flex-grow text-sm font-medium truncate",
-                isCompleted ? "text-muted-foreground line-through" : "",
-                isOverdue ? "text-rose-700" : ""
-              )}
-            >
-              {title}
-            </div>
-          </div>
-          
-          {/* Description - hidden in compact view */}
-          {!compact && (
-            <div
-              className={cn(
-                "mt-1 text-xs text-muted-foreground",
-                isCompleted ? "line-through" : ""
-              )}
-            >
-              {description}
-            </div>
-          )}
-          
-          {/* Due date */}
-          <div
-            className={cn(
-              "text-xs mt-0.5 flex items-center",
-              isCompleted ? "text-muted-foreground line-through" : "text-muted-foreground",
-              isOverdue ? "text-rose-600 font-medium" : "",
-              isDueSoon ? "text-amber-600 font-medium" : ""
-            )}
-          >
-            {isOverdue ? "Overdue: " : isDueSoon ? "Due soon: " : "Due: "}
-            {formattedDate}
-          </div>
-        </div>
+        {!compact && (
+          <p className="text-sm text-gray-600 mb-2">
+            {description}
+          </p>
+        )}
         
-        {/* Delete button (only shown if onDelete is provided and not in compact view) */}
-        {onDelete && !compact && (
-          <button
-            onClick={handleDelete}
-            className={cn(
-              "h-6 w-6 flex items-center justify-center rounded-full",
-              isDeleting ? "bg-red-500 text-white" : "text-gray-400 hover:text-red-500"
-            )}
+        <div className="text-xs text-gray-500">
+          Due: {format(dueDate, 'MMM d, yyyy')}
+        </div>
+      </div>
+      
+      <div className={cn("flex gap-2", compact ? "ml-auto" : "")}>
+        <Button
+          variant="ghost"
+          size={compact ? "sm" : "default"}
+          className="h-8 w-8 p-0 rounded-full bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700"
+          onClick={() => onComplete(id)}
+          title="Mark as complete"
+        >
+          <Check className="h-4 w-4" />
+          <span className="sr-only">Complete</span>
+        </Button>
+        
+        {onDelete && (
+          <Button
+            variant="ghost"
+            size={compact ? "sm" : "default"}
+            className="h-8 w-8 p-0 rounded-full bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700"
+            onClick={() => onDelete(id)}
+            title="Delete reminder"
           >
-            {isDeleting ? <X className="h-3 w-3" /> : <Trash2 className="h-3 w-3" />}
-          </button>
+            <Trash2 className="h-4 w-4" />
+            <span className="sr-only">Delete</span>
+          </Button>
         )}
       </div>
     </div>
   );
-});
-
-ReminderItem.displayName = 'ReminderItem';
+};
 
 export default ReminderItem;

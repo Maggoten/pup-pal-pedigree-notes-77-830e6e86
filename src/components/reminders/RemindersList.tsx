@@ -9,20 +9,22 @@ interface RemindersListProps {
   reminders: Reminder[];
   onComplete: (id: string) => void;
   onDelete?: (id: string) => void;
-  showDelete?: boolean;  // Added this property
+  showDelete?: boolean;
   className?: string;
+  compact?: boolean; // Added compact prop for condensed view
 }
 
 const RemindersList: React.FC<RemindersListProps> = ({ 
   reminders, 
   onComplete, 
   onDelete,
-  showDelete = false,  // Default to false
-  className 
+  showDelete = false,
+  className,
+  compact = false // Default to standard view
 }) => {
   if (!reminders || reminders.length === 0) {
     return (
-      <div className="py-8 text-center">
+      <div className={`py-${compact ? '4' : '8'} text-center`}>
         <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
           <CalendarDays className="h-6 w-6 text-gray-400" />
         </div>
@@ -42,7 +44,7 @@ const RemindersList: React.FC<RemindersListProps> = ({
   };
 
   return (
-    <div className={`space-y-3 ${className}`}>
+    <div className={`space-y-${compact ? '2' : '3'} ${className || ''}`}>
       {reminders.map((reminder) => (
         <ReminderItem
           key={reminder.id}
@@ -56,6 +58,7 @@ const RemindersList: React.FC<RemindersListProps> = ({
           relatedId={reminder.relatedId}
           onComplete={onComplete}
           onDelete={showDelete ? onDelete : undefined}
+          compact={compact}
         />
       ))}
     </div>

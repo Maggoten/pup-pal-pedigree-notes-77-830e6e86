@@ -5,7 +5,7 @@ import { formatDate } from '@/utils/dateUtils';
 
 const UserWelcomeBanner: React.FC = () => {
   const { user } = useAuth();
-  const firstName = user?.firstName || user?.email?.split('@')[0] || 'Breeder';
+  const firstName = user?.firstName || (user?.email ? user.email.split('@')[0] : 'Breeder');
   const today = new Date();
   
   return (

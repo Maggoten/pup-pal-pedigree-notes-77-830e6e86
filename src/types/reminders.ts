@@ -49,13 +49,13 @@ export interface UpcomingHeat {
   id: string; 
   dogId: string;
   dogName: string;
-  date: Date;             // Added this property
+  date: Date;
   expectedDate: Date;
   daysUntil: number;
-  heatIndex: number;      // Added this property
+  heatIndex: number;
 }
 
-// Creating a MatingData interface to match what's being used
+// Creating a MatingData interface
 export interface MatingData {
   id: string;
   femaleName: string;
@@ -63,5 +63,15 @@ export interface MatingData {
   matingDate: Date;
   formattedDate: string;
   isToday: boolean;
-  litterId: string;      // Added this property
+  litterId: string;
 }
+
+// Helper function to create a valid Reminder object
+export const createReminder = (
+  data: Omit<Reminder, 'isCompleted'> & { isCompleted?: boolean }
+): Reminder => {
+  return {
+    ...data,
+    isCompleted: data.isCompleted ?? false // Default to false if not provided
+  };
+};
