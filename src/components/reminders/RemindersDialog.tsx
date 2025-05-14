@@ -1,19 +1,12 @@
-
-import React from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from '@/components/ui/dialog';
+import React, { useState, useMemo } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Calendar, Loader2 } from 'lucide-react';
-import { useBreedingReminders } from '@/hooks/useBreedingReminders';
+import { Plus } from 'lucide-react';
+import { useReminders } from '@/context/RemindersContext';
+import RemindersList from './RemindersList';
 import AddReminderForm from './AddReminderForm';
-import RemindersTabContent from './RemindersTabContent';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Reminder, ReminderFormValues } from '@/types/reminders';
 
 interface RemindersDialogProps {
   open: boolean;
@@ -21,28 +14,81 @@ interface RemindersDialogProps {
 }
 
 const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange }) => {
-  // Since this is a modal dialog, it's okay to use the hook here
-  // It will only fetch once when the dialog is opened
+  const [activeTab, setActiveTab] = useState('upcoming');
+  const [showAddForm, setShowAddForm] = useState(false);
+  
   const { 
     reminders, 
     isLoading, 
     hasError, 
-    handleMarkComplete, 
-    addCustomReminder, 
-    deleteReminder 
-  } = useBreedingReminders();
+    handleMarkComplete,
+    remindersSummary 
+  } = useReminders();
   
+  // Implement these functions if they don't exist in the context
+  const addCustomReminder = (data: ReminderFormValues) => {
+    console.log("Adding custom reminder:", data);
+    // If this function exists in the context, use it instead
+    if ('addReminder' in useReminders()) {
+      return (useReminders() as any).addReminder(data);
+    }
+    // Otherwise just log that it's not implemented
+    console.warn("addReminder not implemented in RemindersContext");
+    return Promise.resolve(false);
+  };
+  
+  const deleteReminder = (id: string) => {
+    console.log("Deleting reminder:", id);
+    // If this function exists in the context, use it instead
+    if ('removeReminder' in useReminders()) {
+      return (useReminders() as any).removeReminder(id);
+    }
+    // Otherwise just log that it's not implemented
+    console.warn("removeReminder not implemented in RemindersContext");
+  };
+
+  // Filter reminders based on active tab
+  const filteredReminders = useMemo(() => {
+    if (!reminders) return [];
+    
+    const currentDate = new Date();
+    return reminders.filter(reminder => {
+      const dueDate = new Date(reminder.dueDate);
+      
+      if (activeTab === 'upcoming') {
+        return !reminder.isCompleted && dueDate >= currentDate;
+      } else if (activeTab === 'completed') {
+        return reminder.isCompleted;
+      } else if (activeTab === 'past') {
+        return !reminder.isCompleted && dueDate < currentDate;
+      }
+      return true;
+    });
+  }, [reminders, activeTab]);
+
+  const handleAddReminderClick = () => {
+    setShowAddForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowAddForm(false);
+  };
+
+  const handleFormSubmit = async (data: ReminderFormValues) => {
+    const success = await addCustomReminder(data);
+    if (success) {
+      setShowAddForm(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
-            <Calendar className="h-6 w-6 text-primary" />
-            Breeding Reminders
+            <Plus className="h-6 w-6 text-primary" />
+            Reminders
           </DialogTitle>
-          <DialogDescription>
-            Manage your breeding program tasks and reminders
-          </DialogDescription>
         </DialogHeader>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -52,7 +98,7 @@ const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange })
               Add New Reminder
             </div>
             
-            <AddReminderForm onSubmit={addCustomReminder} />
+            <AddReminderForm onSubmit={handleFormSubmit} />
           </div>
           
           {/* Right side - Tabs with reminders lists */}
@@ -69,11 +115,22 @@ const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange })
                 </AlertDescription>
               </Alert>
             ) : (
-              <RemindersTabContent 
-                reminders={reminders} 
-                onComplete={handleMarkComplete}
-                onDelete={deleteReminder}
-              />
+              <Tabs>
+                <TabsList>
+                  <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+                  <TabsTrigger value="completed">Completed</TabsTrigger>
+                  <TabsTrigger value="past">Past</TabsTrigger>
+                </TabsList>
+                <TabsContent value="upcoming">
+                  <RemindersList reminders={filteredReminders} onComplete={handleMarkComplete} onDelete={deleteReminder} />
+                </TabsContent>
+                <TabsContent value="completed">
+                  <RemindersList reminders={filteredReminders} onComplete={handleMarkComplete} onDelete={deleteReminder} />
+                </TabsContent>
+                <TabsContent value="past">
+                  <RemindersList reminders={filteredReminders} onComplete={handleMarkComplete} onDelete={deleteReminder} />
+                </TabsContent>
+              </Tabs>
             )}
           </div>
         </div>

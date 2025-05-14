@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { parseISO, isBefore } from 'date-fns';
-import { PlannedLitter } from '@/types/breeding';
+import { PlannedLitter, MatingDate } from '@/types/breeding';
 import { RecentMating } from '@/types/reminders';
 
 export const useRecentMatings = (plannedLitters: PlannedLitter[]) => {
@@ -12,8 +12,16 @@ export const useRecentMatings = (plannedLitters: PlannedLitter[]) => {
     
     plannedLitters.forEach(litter => {
       if (litter.matingDates && litter.matingDates.length > 0) {
-        litter.matingDates.forEach(dateStr => {
-          const matingDate = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
+        litter.matingDates.forEach(matingDateObj => {
+          // Extract the date string or convert to string if it's a Date object
+          const dateValue = typeof matingDateObj === 'string' ? 
+            matingDateObj : 
+            typeof matingDateObj.matingDate === 'string' ? 
+              matingDateObj.matingDate : 
+              matingDateObj.matingDate.toISOString();
+          
+          const matingDate = parseISO(dateValue);
+          
           if (isBefore(matingDate, new Date())) {
             matings.push({
               litterId: litter.id,

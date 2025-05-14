@@ -1,199 +1,69 @@
+import React from 'react';
+import { Card } from '@/components/ui/card';
+import { Calendar, PlusCircle } from 'lucide-react';
+import { format, isToday, parseISO } from 'date-fns';
+import { PlannedLitter, MatingDate } from '@/types/breeding';
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Trash2, ClipboardCheck, PenLine } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
-import { parseISO } from 'date-fns';
-import { PlannedLitter } from '@/types/breeding';
-import PlannedLitterDetailsDialog from './PlannedLitterDetailsDialog';
-import PreBreedingChecklist from './PreBreedingChecklist';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+// Helper function to format a date from MatingDate object or string
+const formatMatingDate = (date: Date | MatingDate | string): string => {
+  if (typeof date === 'string') {
+    return format(parseISO(date), 'MMM d, yyyy');
+  } else if (date instanceof Date) {
+    return format(date, 'MMM d, yyyy');
+  } else {
+    // Handle MatingDate object
+    return format(parseISO(date.matingDate as string), 'MMM d, yyyy');
+  }
+};
+
+// Helper function to check if a date is today
+const checkIsToday = (date: Date | MatingDate | string): boolean => {
+  if (typeof date === 'string') {
+    return isToday(parseISO(date));
+  } else if (date instanceof Date) {
+    return isToday(date);
+  } else {
+    // Handle MatingDate object
+    return isToday(parseISO(date.matingDate as string));
+  }
+};
 
 interface PlannedLitterCardProps {
-  litter: PlannedLitter;
-  onAddMatingDate: (litterId: string, date: Date) => void;
-  onEditMatingDate?: (litterId: string, dateIndex: number, newDate: Date) => void;
-  onDeleteMatingDate?: (litterId: string, dateIndex: number) => void;
-  onDeleteLitter: (litterId: string) => void;
-  calendarOpen: boolean;
-  onCalendarOpenChange: (open: boolean) => void;
+  plannedLitter: PlannedLitter;
+  onSelect: () => void;
 }
 
-const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
-  litter,
-  onAddMatingDate,
-  onEditMatingDate,
-  onDeleteMatingDate,
-  onDeleteLitter,
-  calendarOpen,
-  onCalendarOpenChange
-}) => {
-  const [showChecklist, setShowChecklist] = useState(false);
-  const [editingDateIndex, setEditingDateIndex] = useState<number | null>(null);
-  
-  const handleEditMatingDate = (date: Date | undefined) => {
-    if (date && editingDateIndex !== null && onEditMatingDate) {
-      onEditMatingDate(litter.id, editingDateIndex, date);
-      setEditingDateIndex(null);
-    }
-  };
-
-  // Format mating dates for display
-  const formattedMatingDates = litter.matingDates && litter.matingDates.length > 0 
-    ? litter.matingDates.map(dateStr => typeof dateStr === 'string' ? new Date(dateStr) : dateStr)
-    : [];
+const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({ plannedLitter, onSelect }) => {
+  const hasMatingDates = plannedLitter.matingDates && plannedLitter.matingDates.length > 0;
 
   return (
-    <Card className="flex flex-col h-full">
-      <CardHeader className="relative">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="absolute right-2 top-2" 
-          onClick={() => onDeleteLitter(litter.id)}
-        >
-          <Trash2 className="h-4 w-4 text-red-500" />
-        </Button>
-        <CardTitle>{litter.maleName} × {litter.femaleName}</CardTitle>
-        <CardDescription className="flex items-center gap-1">
-          <Calendar className="h-4 w-4" />
-          Expected heat: {new Date(litter.expectedHeatDate).toLocaleDateString()}
-        </CardDescription>
-        {litter.externalMale && (
-          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-            External Sire
-          </span>
-        )}
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <p className="text-sm">{litter.notes}</p>
-        
-        {formattedMatingDates.length > 0 && (
-          <div className="mt-4">
-            <h4 className="text-sm font-medium">Mating Dates:</h4>
-            <ul className="mt-1 space-y-1">
-              {formattedMatingDates.map((date, index) => (
-                <li key={index} className="flex items-center justify-between py-1 text-sm">
-                  {editingDateIndex === index ? (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          {date.toLocaleDateString()}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <CalendarComponent
-                          mode="single"
-                          selected={date}
-                          onSelect={handleEditMatingDate}
-                          initialFocus
-                          className="p-3 pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  ) : (
-                    <span>{date.toLocaleDateString()}</span>
-                  )}
-                  
-                  <div className="flex space-x-1">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-7 w-7"
-                            onClick={() => setEditingDateIndex(index)}
-                          >
-                            <PenLine className="h-3.5 w-3.5" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Edit date</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-7 w-7 text-destructive"
-                            onClick={() => onDeleteMatingDate && onDeleteMatingDate(litter.id, index)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Delete date</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                </li>
+    <Card onClick={onSelect} className="cursor-pointer">
+      <div className="flex items-center justify-between space-x-4 p-4">
+        <div className="space-y-1">
+          <h3 className="text-sm font-semibold">{plannedLitter.femaleName}'s litter</h3>
+          <p className="text-xs text-muted-foreground">
+            Sire: {plannedLitter.maleName || (plannedLitter.externalMaleName ? `External - ${plannedLitter.externalMaleName}` : 'Unknown')}
+          </p>
+          {hasMatingDates ? (
+            <div className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4" />
+              {plannedLitter.matingDates.slice(0, 3).map((matingDate, index) => (
+                <span
+                  key={index}
+                  className={`text-xs ${checkIsToday(matingDate) ? 'font-medium text-blue-500' : ''}`}
+                >
+                  {formatMatingDate(matingDate)}
+                  {index < plannedLitter.matingDates.length - 1 && ', '}
+                </span>
               ))}
-            </ul>
-          </div>
-        )}
-      </CardContent>
-      <CardFooter className="flex flex-col gap-2 mt-auto pt-4">
-        <div className="grid grid-cols-1 gap-2 w-full">
-          <Popover open={calendarOpen} onOpenChange={onCalendarOpenChange}>
-            <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                className="w-full"
-              >
-                <Calendar className="mr-2 h-4 w-4" />
-                Add Mating Date
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent
-                mode="single"
-                onSelect={(date) => date && onAddMatingDate(litter.id, date)}
-                initialFocus
-                className="p-3 pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
-          
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={() => setShowChecklist(true)}
-          >
-            <ClipboardCheck className="mr-2 h-4 w-4" />
-            Breeding Checklist
-          </Button>
-          
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="w-full">
-                View Details
-              </Button>
-            </DialogTrigger>
-            <PlannedLitterDetailsDialog 
-              litter={litter} 
-              onAddMatingDate={onAddMatingDate}
-              onEditMatingDate={onEditMatingDate}
-              onDeleteMatingDate={onDeleteMatingDate}
-            />
-          </Dialog>
+              {plannedLitter.matingDates.length > 3 && <span className="text-xs">, ...</span>}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">No mating dates added</p>
+          )}
         </div>
-      </CardFooter>
-
-      {/* Breeding Checklist Dialog */}
-      <Dialog open={showChecklist} onOpenChange={setShowChecklist}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-          <PreBreedingChecklist litter={litter} />
-        </DialogContent>
-      </Dialog>
+        <PlusCircle className="h-5 w-5 text-muted-foreground" />
+      </div>
     </Card>
   );
 };

@@ -1,23 +1,31 @@
 
-import React from 'react';
-
 export interface Reminder {
   id: string;
   title: string;
   description: string;
-  dueDate: Date;
-  priority: 'high' | 'medium' | 'low';
-  type: 'pregnancy' | 'litter' | 'breeding' | 'health' | 'heat' | 'vaccination' | 'birthday' | 'other';
-  icon?: React.ReactNode;
-  relatedId?: string;
-  isCompleted?: boolean;
+  dueDate: string | Date;
+  priority: string;
+  type: string;
+  relatedId?: string | null;
+  isCompleted: boolean;
+  isDeleted?: boolean;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
-export interface UpcomingHeat {
-  dogId: string;
-  dogName: string;
-  date: Date;
-  heatIndex: number; // Add the index of the heat record in the dog's heatHistory array
+export interface RemindersSummary {
+  total: number;
+  incomplete: number;
+  upcoming: number;
+}
+
+export interface ReminderFormValues {
+  title: string;
+  description: string;
+  dueDate: Date;
+  priority: string;
+  type: string;
+  relatedId?: string;
 }
 
 export interface RecentMating {
@@ -25,11 +33,4 @@ export interface RecentMating {
   maleName: string;
   femaleName: string;
   date: Date;
-}
-
-export interface CustomReminderInput {
-  title: string;
-  description: string;
-  dueDate: Date;
-  priority: 'high' | 'medium' | 'low';
 }

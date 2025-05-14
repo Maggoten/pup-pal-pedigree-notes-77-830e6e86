@@ -1,95 +1,70 @@
 
-import React, { useMemo } from 'react';
-import { User } from '@/types/auth';
-import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
-import MetricCardGrid from './MetricCardGrid';
+import React from 'react';
+import { differenceInDays } from 'date-fns';
+import { Card, CardContent } from '@/components/ui/card';
 import UserWelcomeBanner from './UserWelcomeBanner';
-import DecorativePawprints from './DecorativePawprints';
+import MetricCardGrid, { MetricCardProps } from './MetricCardGrid';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
-interface DashboardHeroProps {
-  username: string;
-  user: User | null;
-  reminders: { total: number; incomplete: number; upcoming: number };
-  plannedLitters: { count: number; nextDate: Date | null };
-  activePregnancies: ActivePregnancy[];
-  recentLitters: { count: number; recent: number };
-  isLoadingPregnancies?: boolean;
-}
+const DashboardHero: React.FC = () => {
+  const { 
+    dogCount, 
+    recentLittersCount,
+    littersThisYear,
+    upcomingRemindersCount,
+    nearbyAppointmentsCount,
+    littersLoading,
+    appointmentsLoading,
+    remindersLoading,
+    dogsLoading
+  } = useDashboardData();
 
-const DashboardHero: React.FC<DashboardHeroProps> = ({
-  username,
-  user,
-  reminders,
-  plannedLitters,
-  activePregnancies,
-  recentLitters,
-  isLoadingPregnancies = false
-}) => {
-  const formattedNextHeatDate = useMemo(() => {
-    if (!plannedLitters.nextDate) return 'None scheduled';
-    
-    return new Date(plannedLitters.nextDate).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  }, [plannedLitters.nextDate]);
-
-  // Format the metrics for the cards
-  const metricCards = useMemo(() => [
+  const metricCards: MetricCardProps[] = [
     {
-      icon: "bell" as const,
+      icon: "dog",
+      label: "Active Dogs",
+      value: dogCount.toString(),
+      highlightColor: "blue",
+      trend: "All time",
+      loading: dogsLoading
+    },
+    {
+      icon: "heart",
+      label: "Active Litters",
+      value: recentLittersCount.toString(),
+      highlightColor: "green",
+      trend: `${littersThisYear} this year`,
+      loading: littersLoading
+    },
+    {
+      icon: "bell",
       label: "Reminders",
-      value: `${reminders.incomplete}`,
-      highlightColor: "text-amber-600" as const,
-      trend: `${reminders.upcoming} upcoming`,
-      loading: false,
+      value: upcomingRemindersCount.toString(),
+      highlightColor: "purple",
+      trend: "Due soon",
+      loading: remindersLoading
     },
     {
-      icon: "calendar" as const,
-      label: "Planned Litters",
-      value: `${plannedLitters.count}`,
-      highlightColor: "text-rose-600" as const,
-      trend: `Next heat: ${formattedNextHeatDate}`,
-      loading: false,
-    },
-    {
-      icon: "heart" as const,
-      label: "Active Pregnancies",
-      value: `${isLoadingPregnancies ? '...' : activePregnancies.length}`,
-      highlightColor: "text-emerald-600" as const,
-      trend: isLoadingPregnancies 
-        ? 'Loading...' 
-        : `${activePregnancies.length === 0 ? 'None active' : ''}`,
-      loading: isLoadingPregnancies,
-    },
-    {
-      icon: "pawprint" as const,
-      label: "Recent Litters",
-      value: `${recentLitters.count}`,
-      highlightColor: "text-blue-600" as const,
-      trend: `${recentLitters.recent} this year`,
-      loading: false,
+      icon: "calendar",
+      label: "Appointments",
+      value: nearbyAppointmentsCount.toString(),
+      highlightColor: "rose",
+      trend: "Next 7 days",
+      loading: appointmentsLoading
     }
-  ], [
-    reminders.incomplete, 
-    reminders.upcoming,
-    plannedLitters.count,
-    formattedNextHeatDate,
-    isLoadingPregnancies,
-    activePregnancies.length,
-    recentLitters.count,
-    recentLitters.recent
-  ]);
+  ];
 
   return (
-    <section className="relative overflow-hidden">
-      <DecorativePawprints />
-      <div className="pb-6">
-        <UserWelcomeBanner username={username} user={user} />
-        <MetricCardGrid metricCards={metricCards} />
-      </div>
-    </section>
+    <div className="space-y-4">
+      <UserWelcomeBanner />
+      
+      <Card>
+        <CardContent className="p-6">
+          <MetricCardGrid metricCards={metricCards} />
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
