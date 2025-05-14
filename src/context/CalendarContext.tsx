@@ -61,7 +61,7 @@ export const CalendarProvider: React.FC<{ children: ReactNode }> = ({ children }
           }
           if (eventData.dogId) updated.dogId = eventData.dogId;
           if (eventData.notes !== undefined) updated.notes = eventData.notes;
-          if (eventData.dogName) updated.dogName = eventData.dogName;
+          if (eventData.dogName !== undefined) updated.dogName = eventData.dogName;
           return updated;
         }
         return event;

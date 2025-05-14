@@ -1,4 +1,3 @@
-
 import { format, parse, isValid, parseISO } from 'date-fns';
 
 /**
@@ -21,6 +20,13 @@ export const formatDate = (
     console.error('Error formatting date:', error);
     return '';
   }
+};
+
+/**
+ * Format date as YYYY-MM-DD
+ */
+export const formatDateYYYYMMDD = (date: Date): string => {
+  return format(date, 'yyyy-MM-dd');
 };
 
 /**
@@ -70,4 +76,13 @@ export const parseISODate = (isoString: string | null | undefined): Date | null 
     console.error('Error parsing ISO date:', error);
     return null;
   }
+};
+
+/**
+ * Get noon time on a specific date
+ */
+export const getNoonDate = (date: Date): Date => {
+  const noon = new Date(date);
+  noon.setHours(12, 0, 0, 0);
+  return noon;
 };

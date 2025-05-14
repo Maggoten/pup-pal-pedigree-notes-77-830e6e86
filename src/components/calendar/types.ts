@@ -1,4 +1,3 @@
-
 export interface CalendarEvent {
   id: string;
   title: string;
@@ -16,9 +15,10 @@ export interface CalendarEvent {
 export interface AddEventFormValues {
   title: string;
   date: Date;
-  time?: string;
   dogId?: string;
   notes?: string;
+  type?: string;  // Added this field
+  dogName?: string;  // Added this field
 }
 
 export interface CalendarGridProps {

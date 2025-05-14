@@ -21,11 +21,11 @@ export interface CustomReminderInput {
   description: string;
   dueDate: Date;
   priority: 'high' | 'medium' | 'low';
-  type: string;
+  type: string;  // Ensure this is required
   relatedId?: string;
 }
 
-// Alias for form values
+// Type alias for form values
 export type ReminderFormValues = CustomReminderInput;
 
 export interface MatingData {
@@ -52,7 +52,7 @@ export interface UpcomingHeat {
   id: string;
   dogId: string;
   dogName: string;
-  expectedDate: Date;
+  expectedDate: Date;  // Standardize on expectedDate, not date
   daysUntil: number;
   heatIndex: number;
 }

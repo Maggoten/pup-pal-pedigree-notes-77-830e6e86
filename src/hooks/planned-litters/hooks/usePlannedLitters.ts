@@ -1,66 +1,80 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState } from 'react';
 import { PlannedLitter } from '@/types/breeding';
-import { fetchPlannedLitters } from '@/services/planned-litters';
-import { useUpcomingHeats } from '@/hooks/useUpcomingHeats';
-import { useAuth } from '@/hooks/useAuth';
+import { usePlannedLitterQueries } from './usePlannedLitterQueries';
+import { usePlannedLitterMutations } from './usePlannedLitterMutations';
+import { plannedLittersService } from '@/services/PlannedLitterService';
+import { fetchWithRetry } from '@/utils/fetchUtils';
+import { toast } from '@/hooks/use-toast';
 
 export const usePlannedLitters = () => {
-  const [plannedLitters, setPlannedLitters] = useState<PlannedLitter[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const { user } = useAuth();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { 
+    plannedLitters, 
+    upcomingHeats, 
+    recentMatings, 
+    males, 
+    females, 
+    setPlannedLitters,
+    isLoading: queriesLoading
+  } = usePlannedLitterQueries();
   
-  // Get upcoming heat dates for dogs
-  const { upcomingHeats } = useUpcomingHeats();
-  
-  // Determine the next heat date from either planned litters or upcoming heats
-  const nextHeatDate = useMemo(() => {
-    // First check planned litters
-    const plannedHeatDates = plannedLitters
-      .filter(litter => new Date(litter.expectedHeatDate) > new Date())
-      .map(litter => new Date(litter.expectedHeatDate))
-      .sort((a, b) => a.getTime() - b.getTime());
-    
-    // Then check upcoming heats
-    const upcomingHeatDates = upcomingHeats
-      .map(heat => new Date(heat.date))
-      .sort((a, b) => a.getTime() - b.getTime());
-    
-    // Return the earliest date from either source
-    const allDates = [...plannedHeatDates, ...upcomingHeatDates];
-    return allDates.length > 0 ? allDates.sort((a, b) => a.getTime() - b.getTime())[0] : null;
-  }, [plannedLitters, upcomingHeats]);
-  
-  // Load planned litters
-  useEffect(() => {
-    const loadPlannedLitters = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        if (!user) {
-          setIsLoading(false);
-          return;
+  const refreshLitters = async () => {
+    try {
+      setIsRefreshing(true);
+      console.log("Refreshing planned litters data...");
+      
+      // Use fetchWithRetry for more reliable loading
+      const litters = await fetchWithRetry(
+        () => plannedLittersService.loadPlannedLitters(),
+        {
+          maxRetries: 2,
+          initialDelay: 1500,
+          onRetry: (attempt) => {
+            toast({
+              title: "Retrying connection",
+              description: `Attempt ${attempt}/2: Loading planned litters...`
+            });
+          }
         }
-        
-        const litters = await fetchPlannedLitters();
-        setPlannedLitters(litters);
-      } catch (err) {
-        console.error('Error fetching planned litters:', err);
-        setError(err instanceof Error ? err : new Error('Failed to fetch planned litters'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadPlannedLitters();
-  }, [user]);
-  
+      );
+      
+      // Type assertion to ensure TypeScript knows litters is PlannedLitter[]
+      setPlannedLitters(litters as PlannedLitter[]);
+      console.log("Planned litters refreshed:", (litters as PlannedLitter[]).length);
+      
+      toast({
+        title: "Data refreshed",
+        description: `${(litters as PlannedLitter[]).length} planned litters loaded successfully.`
+      });
+    } catch (error) {
+      console.error('Error refreshing planned litters:', error);
+      toast({
+        title: "Refresh failed",
+        description: "Could not load planned litters. Please try again.",
+        variant: "destructive",
+        action: {
+          label: "Retry",
+          onClick: refreshLitters,
+          className: "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
+        }
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const mutations = usePlannedLitterMutations(refreshLitters);
+
   return {
     plannedLitters,
-    isLoading,
-    error,
-    nextHeatDate
+    upcomingHeats,
+    recentMatings,
+    males,
+    females,
+    isRefreshing,
+    isLoading: queriesLoading,
+    ...mutations,
+    refreshLitters
   };
 };

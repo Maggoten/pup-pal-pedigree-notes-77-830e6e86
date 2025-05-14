@@ -12,6 +12,7 @@ import { generateDogReminders } from './reminders/DogReminderService';
 import { generateLitterReminders } from './reminders/LitterReminderService';
 import { generateGeneralReminders } from './reminders/GeneralReminderService';
 import { isMobileDevice } from '@/utils/fetchUtils';
+import { Litter } from '@/types/breeding';
 
 // Add a new manual trigger function with explicit type
 export const triggerAllReminders: TriggerAllRemindersFunction = async (userId: string): Promise<Reminder[]> => {
@@ -43,9 +44,11 @@ export const triggerAllReminders: TriggerAllRemindersFunction = async (userId: s
     const dogReminders = generateDogReminders(userDogs);
     console.log(`[Manual Reminder Generation] Generated ${dogReminders.length} dog reminders`);
     
+    // Call generateLitterReminders with the correct parameter type
     const litterReminders = await generateLitterReminders(userId);
     console.log(`[Manual Reminder Generation] Generated ${litterReminders.length} litter reminders`);
     
+    // Call generateGeneralReminders without unnecessary parameters
     const generalReminders = generateGeneralReminders(userDogs);
     console.log(`[Manual Reminder Generation] Generated ${generalReminders.length} general reminders`);
     

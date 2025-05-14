@@ -1,50 +1,33 @@
 
 import { User } from '@/types/auth';
+import { supabase } from '@/integrations/supabase/client';
 
-/**
- * Maps user profile data from Supabase to our app's User format
- * Extracts only the fields we need and provides fallbacks
- */
-export const mapUserProfile = (
-  profile: any, 
-  userId: string,
-  userEmail?: string | null
-): User => {
-  if (!profile) {
-    // Fallback user when profile is missing
-    return {
-      id: userId,
-      email: userEmail || '',
-      firstName: '',
-      lastName: '',
-      address: ''
-    };
-  }
-  
-  // Map profile data to our user model
+// Create a simplified user object from Supabase user data
+export const createUserFromSupabaseSession = (sessionUser: any): User => {
+  // Create a minimally viable User object that satisfies the interface
   return {
-    id: userId,
-    email: userEmail || '',
-    firstName: profile.first_name || '',
-    lastName: profile.last_name || '',
-    address: profile.address || ''
+    id: sessionUser.id,
+    email: sessionUser.email,
+    firstName: sessionUser.user_metadata?.firstName,
+    lastName: sessionUser.user_metadata?.lastName,
+    address: sessionUser.user_metadata?.address,
+    app_metadata: sessionUser.app_metadata || {},
+    user_metadata: sessionUser.user_metadata || {},
+    aud: sessionUser.aud || 'authenticated',
+    created_at: sessionUser.created_at || new Date().toISOString()
   };
 };
 
-/**
- * Helper for checking if a session is expired or near expiry
- */
-export const isSessionNearExpiry = (
-  session: { expires_at?: number | null },
-  thresholdMinutes = 5
-): boolean => {
-  if (!session?.expires_at) return true;
+export const getSessionUser = async (): Promise<User | null> => {
+  const { data } = await supabase.auth.getSession();
   
-  // Convert expires_at to milliseconds
-  const expiryTime = session.expires_at * 1000;
-  const now = Date.now();
+  if (!data?.session?.user) {
+    return null;
+  }
   
-  // Check if within threshold minutes of expiry
-  const thresholdMs = thresholdMinutes * 60 * 1000;
-  return now >= expiryTime - thresholdMs;
+  return createUserFromSupabaseSession(data.session.user);
+};
+
+export const clearSession = async (): Promise<void> => {
+  await supabase.auth.signOut();
 };
