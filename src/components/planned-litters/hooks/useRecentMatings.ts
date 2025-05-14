@@ -1,51 +1,34 @@
 
-import { useMemo, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { parseISO, isBefore } from 'date-fns';
 import { PlannedLitter } from '@/types/breeding';
-import { format, isToday } from 'date-fns';
-import { MatingData, RecentMating } from '@/types/reminders';
-import { isWithinDays } from '@/utils/dateUtils';
+import { RecentMating } from '@/types/reminders';
 
 export const useRecentMatings = (plannedLitters: PlannedLitter[]) => {
-  const [extendedRecentPeriod, setExtendedRecentPeriod] = useState(false);
-  
-  const recentMatings = useMemo(() => {
-    if (!plannedLitters || plannedLitters.length === 0) {
-      return [] as MatingData[];
-    }
-    
-    const daysToConsiderRecent = extendedRecentPeriod ? 14 : 7;
-    
-    const recentData: MatingData[] = [];
+  const [recentMatings, setRecentMatings] = useState<RecentMating[]>([]);
+
+  useEffect(() => {
+    const matings: RecentMating[] = [];
     
     plannedLitters.forEach(litter => {
       if (litter.matingDates && litter.matingDates.length > 0) {
-        litter.matingDates.forEach(mating => {
-          const matingDate = new Date(mating.matingDate);
-          
-          if (isWithinDays(matingDate, new Date(), daysToConsiderRecent)) {
-            recentData.push({
-              id: mating.id || `mating-${litter.id}-${recentData.length}`,
+        litter.matingDates.forEach(dateStr => {
+          const matingDate = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
+          if (isBefore(matingDate, new Date())) {
+            matings.push({
               litterId: litter.id,
+              maleName: litter.maleName || 'Unknown',
               femaleName: litter.femaleName,
-              maleName: litter.externalMale ? litter.externalMaleName || 'External Male' : litter.maleName || 'Unknown Male',
-              matingDate: matingDate,
-              formattedDate: format(matingDate, 'MMM d, yyyy'),
-              isToday: isToday(matingDate)
+              date: matingDate
             });
           }
         });
       }
     });
     
-    // Sort by date with most recent first
-    return recentData.sort((a, b) => 
-      b.matingDate.getTime() - a.matingDate.getTime()
-    );
-  }, [plannedLitters, extendedRecentPeriod]);
-  
-  return { 
-    recentMatings, 
-    setExtendedRecentPeriod,
-    extendedRecentPeriod
-  };
+    matings.sort((a, b) => b.date.getTime() - a.date.getTime());
+    setRecentMatings(matings);
+  }, [plannedLitters]);
+
+  return { recentMatings, setRecentMatings };
 };

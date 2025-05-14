@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { UploadIcon, XIcon, Loader2 } from 'lucide-react';
@@ -6,20 +7,17 @@ import { useImageUpload } from '@/hooks/image-upload';
 import ImagePreviewDisplay from './image-upload/ImagePreviewDisplay';
 import { toast } from '@/components/ui/use-toast';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
-import { uploadStateManager, setUploadPending } from '@/components/AuthGuard';
-import { createBucketIfNotExists } from '@/utils/storage';
+import { uploadStateManager } from '@/components/AuthGuard';
 
 interface ImageUploaderProps {
   currentImage?: string;
   onImageChange: (imageUrl: string) => void;
-  onImageSaved?: (imageUrl: string) => Promise<void>;
   className?: string;
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ 
   currentImage,
   onImageChange,
-  onImageSaved,
   className = ''
 }) => {
   const { user, isAuthReady } = useAuth();
@@ -30,49 +28,31 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const isPlaceholder = !currentImage || currentImage === PLACEHOLDER_IMAGE_PATH;
   const platform = getPlatformInfo();
 
-  // Initialize bucket if user is authenticated
-  useEffect(() => {
-    if (user?.id && isAuthReady) {
-      createBucketIfNotExists().catch(err => {
-        console.error("Failed to initialize storage bucket:", err);
-      });
-    }
-  }, [user?.id, isAuthReady]);
-
   // Pass the current user ID to useImageUpload
-  const { isUploading, uploadImage, removeImage, isUploadActive } = useImageUpload({
+  const { isUploading, uploadImage, removeImage } = useImageUpload({
     user_id: user?.id,
     onImageChange: (url: string) => {
       console.log('ImageUploader: Image change callback received URL:', 
                  url.substring(0, 50) + (url.length > 50 ? '...' : ''));
       onImageChange(url);
-    },
-    onImageSaved // Pass through the auto-save callback
+    }
   });
 
-  // Track upload state in the global manager and AuthGuard
+  // Track upload state in the global manager
   useEffect(() => {
     if (isUploading) {
       uploadStateManager.incrementUploads();
-      setUploadPending(true);
     } else {
-      // Add a short delay before marking upload as complete
-      setTimeout(() => {
-        uploadStateManager.decrementUploads();
-        if (!isUploadActive) {
-          setUploadPending(false);
-        }
-      }, 1000);
+      uploadStateManager.decrementUploads();
     }
     
     return () => {
       // Make sure we decrement if component unmounts during upload
       if (isUploading) {
         uploadStateManager.decrementUploads();
-        setUploadPending(false);
       }
     };
-  }, [isUploading, isUploadActive]);
+  }, [isUploading]);
 
   // Log user authentication status when component mounts
   useEffect(() => {
@@ -114,8 +94,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     
     try {
       console.log('ImageUploader: Calling uploadImage function...');
-      // Notify AuthGuard that we're starting an upload
-      setUploadPending(true);
+      // Set a flag to prevent auth redirect during upload
       await uploadImage(file);
       console.log('ImageUploader: Upload function completed');
     } catch (error) {
@@ -147,9 +126,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           variant: "destructive"
         });
       }
-      
-      // Release upload pending state
-      setUploadPending(false);
     }
     
     if (fileInputRef.current) {
@@ -195,27 +171,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     console.log('ImageUploader: Removing image:', 
                 currentImage.substring(0, 50) + (currentImage.length > 50 ? '...' : ''));
     try {
-      // Update the removeImage call to match its signature (it doesn't need user.id)
-      await removeImage();
-      
-      // If we have an onImageSaved callback, call it with empty string to clear the image
-      if (onImageSaved) {
-        try {
-          await onImageSaved('');
-          console.log("Image removed from database");
-          toast({
-            title: "Image Removed",
-            description: "The image has been successfully removed"
-          });
-        } catch (error) {
-          console.error("Failed to remove image from database:", error);
-          toast({
-            title: "Remove Error",
-            description: "Failed to update database after removing image",
-            variant: "destructive"
-          });
-        }
-      }
+      await removeImage(currentImage, user.id);
     } catch (error) {
       console.error('ImageUploader: Image remove error:', error);
       toast({
@@ -228,6 +184,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  // Remove mobile help warning completely by returning null
+  const renderMobileHelp = () => {
+    return null;
   };
 
   return (
@@ -267,6 +228,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           </Button>
         )}
       </div>
+      
+      {renderMobileHelp()}
       
       <input
         type="file"

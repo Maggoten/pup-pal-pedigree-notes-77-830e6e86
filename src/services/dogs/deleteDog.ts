@@ -1,8 +1,9 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { DbDog } from '@/utils/dogUtils';
 import { PostgrestResponse } from '@supabase/supabase-js';
 import { withTimeout, TIMEOUT } from '@/utils/timeoutUtils';
-import { cleanupStorageImage } from '@/utils/storage';
+import { cleanupStorageImage } from '@/utils/storageUtils';
 
 export async function deleteDog(id: string): Promise<boolean> {
   if (!id) {

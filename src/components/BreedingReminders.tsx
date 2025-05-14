@@ -47,13 +47,6 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
     handleMarkComplete = () => {} 
   } = remindersData || {};
   
-  // Debug logging
-  console.log('[BreedingReminders] Rendering with:', {
-    remindersCount: reminders.length,
-    isLoading,
-    hasError
-  });
-  
   // Memoize the priority filtering logic to avoid recalculating on every render
   const displayReminders = React.useMemo(() => {
     // First prioritize active high priority reminders

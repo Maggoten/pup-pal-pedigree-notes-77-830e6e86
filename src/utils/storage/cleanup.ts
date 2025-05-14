@@ -1,68 +1,94 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { fetchWithRetry } from '@/utils/fetchUtils';
 import { BUCKET_NAME } from './config';
-import { deleteStorageObject } from './operations/remove';
-import { isValidPublicUrl } from './operations/validate';
+import { checkBucketExists } from './operations';
 
-/**
- * Interface for image cleanup options
- */
-export interface CleanupImageOptions {
+interface StorageCleanupOptions {
   oldImageUrl: string;
   userId: string;
   excludeDogId?: string;
 }
 
-/**
- * Cleans up a storage image based on its URL
- * @param options String URL or cleanup options object
- */
-export const cleanupStorageImage = async (options: string | CleanupImageOptions): Promise<boolean> => {
-  // Handle both string and object format for backward compatibility
-  const imageUrl = typeof options === 'string' ? options : options.oldImageUrl;
-
-  if (!imageUrl || !isValidPublicUrl(imageUrl)) {
-    console.log('No valid image URL to clean up');
-    return false;
+// Improved cleanup with better error handling
+export const cleanupStorageImage = async ({ oldImageUrl, userId, excludeDogId }: StorageCleanupOptions) => {
+  if (!oldImageUrl || !oldImageUrl.includes(BUCKET_NAME)) {
+    console.log('No valid image URL to cleanup:', oldImageUrl);
+    return;
   }
-  
+
   try {
-    // Extract path from URL - this is a simplified approach
-    const urlObj = new URL(imageUrl);
-    const path = urlObj.pathname.split('/').slice(-2).join('/'); // Get last two segments which should be userId/filename
-    
-    if (!path) {
-      console.warn('Could not extract valid path from image URL:', imageUrl);
-      return false;
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.error('Storage cleanup failed: No active session');
+      return;
     }
     
-    // Delete the object
-    const result = await deleteStorageObject(path);
-    return !result.error;
-  } catch (error) {
-    console.error('Failed to clean up storage image:', error);
-    return false;
-  }
-};
+    // Check if other dogs are using the same image before deleting
+    const { data: dogsUsingImage, error: searchError } = await supabase
+      .from('dogs')
+      .select('id')
+      .eq('image_url', oldImageUrl)
+      .eq('owner_id', userId);
+    
+    // If excludeDogId is provided, filter it out from the results
+    const otherDogsUsingImage = dogsUsingImage ? 
+      dogsUsingImage.filter(dog => dog.id !== excludeDogId) : 
+      [];
 
-/**
- * Cleans up orphaned uploads that are no longer referenced
- */
-export const cleanupOrphanedUploads = async (userId: string): Promise<number> => {
-  // This would typically query the database to find orphaned files
-  // and remove them, but for now we'll just return a placeholder
-  console.log('Cleanup for user', userId, 'would happen here');
-  return 0;
-};
+    if (searchError) {
+      console.error('Error checking for image usage:', searchError);
+      return;
+    }
 
-/**
- * Schedules a cleanup job to run periodically
- */
-export const scheduleCleanup = (intervalMs: number = 24 * 60 * 60 * 1000): () => void => {
-  const timer = setInterval(() => {
-    console.log('Scheduled cleanup would run here');
-  }, intervalMs);
+    if (otherDogsUsingImage && otherDogsUsingImage.length > 0) {
+      console.log('Image is still in use by other dogs, skipping deletion', otherDogsUsingImage);
+      return;
+    }
+
+    // Check if bucket exists and is accessible
+    const bucketExists = await checkBucketExists();
+    if (!bucketExists) {
+      console.error(`Storage bucket "${BUCKET_NAME}" does not exist or is not accessible`);
+      console.log('Skipping image deletion due to bucket access issues');
+      return; // Just return without throwing, let the dog deletion complete
+    }
+    
+    console.log(`Bucket "${BUCKET_NAME}" exists and is accessible, proceeding with deletion`);
+
+    // Extract the storage path from the URL
+    const urlParts = oldImageUrl.split('/');
+    const bucketIndex = urlParts.findIndex(part => part === BUCKET_NAME);
+    
+    if (bucketIndex === -1) {
+      console.error('Could not find bucket name in URL:', oldImageUrl);
+      return;
+    }
+    
+    const storagePath = urlParts
+      .slice(bucketIndex + 1)
+      .join('/');
+    
+    console.log('Deleting unused image:', storagePath);
+    
+    await fetchWithRetry(
+      () => supabase.storage
+        .from(BUCKET_NAME)
+        .remove([storagePath]),
+      { maxRetries: 1, initialDelay: 1000 }
+    );
   
-  // Return a function to cancel the scheduled cleanup
-  return () => clearInterval(timer);
+    console.log('Successfully deleted unused image');
+  } catch (error) {
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : "An unexpected error occurred while cleaning up storage";
+
+    console.error('Cleanup error:', {
+      error,
+      message: errorMessage
+    });
+    
+    // Don't throw, just log the error and allow the dog deletion to complete
+  }
 };

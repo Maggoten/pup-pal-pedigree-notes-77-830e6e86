@@ -1,3 +1,4 @@
+
 import { isSafari } from './config';
 import { MAX_FILE_SIZE } from '@/utils/imageValidation';
 import { toast } from '@/components/ui/use-toast';
@@ -104,15 +105,14 @@ export const safeCanvasToBlob = async (
   });
 };
 
-// Process image with fallbacks for mobile/Safari - Updated to accept maxSizeMB parameter
-export async function safeImageCompression(file: File, maxSizeMB: number = 1): Promise<File> {
+// Process image with fallbacks for mobile/Safari
+export async function safeImageCompression(file: File): Promise<File> {
   const platform = getPlatformInfo();
   const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
   console.log(`Processing image on ${platform.device}`, {
     platform,
     fileSize: `${fileSizeMB}MB (${file.size} bytes)`,
-    fileType: file.type || 'unknown',
-    maxSizeMB: maxSizeMB // Log the target max size
+    fileType: file.type || 'unknown'
   });
   
   // Skip compression for already small files and problematic formats on mobile
@@ -130,7 +130,7 @@ export async function safeImageCompression(file: File, maxSizeMB: number = 1): P
   
   // For Safari or mobile, use a more robust method
   if (platform.mobile || platform.safari) {
-    console.log(`Starting enhanced compression for ${platform.device} browser with target size of ${maxSizeMB}MB`);
+    console.log(`Starting enhanced compression for ${platform.device} browser`);
     return new Promise((resolve) => {
       try {
         const img = new Image();
@@ -138,13 +138,8 @@ export async function safeImageCompression(file: File, maxSizeMB: number = 1): P
           try {
             console.log(`Image loaded successfully: ${img.width}x${img.height}`);
             const canvas = document.createElement('canvas');
-            // Calculate scaled dimensions based on maxSizeMB
-            // For smaller target sizes, reduce dimensions more aggressively
-            const scaleFactor = Math.min(1, maxSizeMB / 2);
-            const maxDim = platform.mobile 
-              ? 1000 * scaleFactor 
-              : 1600 * scaleFactor;
-            
+            // Calculate scaled dimensions (reduced from 1200px to 1000px for mobile)
+            const maxDim = platform.mobile ? 1000 : 1600;
             let { width, height } = img;
             
             if (width > maxDim || height > maxDim) {
@@ -155,7 +150,7 @@ export async function safeImageCompression(file: File, maxSizeMB: number = 1): P
                 width = Math.round((width * maxDim) / height);
                 height = maxDim;
               }
-              console.log(`Image resized to ${width}x${height} (maxSizeMB: ${maxSizeMB})`);
+              console.log(`Image resized to ${width}x${height}`);
             } else {
               console.log(`Image size maintained at ${width}x${height} (below max dimension of ${maxDim}px)`);
             }
@@ -175,11 +170,10 @@ export async function safeImageCompression(file: File, maxSizeMB: number = 1): P
             ctx.drawImage(img, 0, 0, width, height);
             console.log('Image drawn to canvas, converting to blob...');
             
-            // Adjust quality based on target size
-            // Lower quality for smaller target sizes
-            const baseQuality = platform.safari ? 0.75 : 0.7;
-            const compressionQuality = Math.max(0.5, Math.min(0.9, baseQuality * (maxSizeMB)));
-            console.log(`Using compression quality: ${compressionQuality} (target: ${maxSizeMB}MB)`);
+            // Try to get blob with safe fallbacks - Lower quality for better compression
+            // Reduced quality for better performance
+            const compressionQuality = platform.safari ? 0.75 : 0.7;
+            console.log(`Using compression quality: ${compressionQuality}`);
             
             const blob = await safeCanvasToBlob(
               canvas, 

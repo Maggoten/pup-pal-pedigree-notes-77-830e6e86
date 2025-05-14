@@ -2,7 +2,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { litterService } from '@/services/LitterService';
 import { useAuth } from '@/hooks/useAuth';
-import { Litter } from '@/types/breeding';
 
 // Query key factory
 export const archivedLittersQueryKey = ['litters', 'archived'];
@@ -10,7 +9,7 @@ export const archivedLittersQueryKey = ['litters', 'archived'];
 export const useArchivedLittersQuery = () => {
   const { user, isAuthReady } = useAuth();
   
-  return useQuery<Litter[], Error>({
+  return useQuery({
     queryKey: archivedLittersQueryKey,
     queryFn: async () => {
       // Verify auth state before fetching
@@ -22,13 +21,9 @@ export const useArchivedLittersQuery = () => {
       // Add more debug logging
       console.log('Fetching archived litters for user:', user?.id);
       try {
-        // Use litterService's method which returns Litter[]
-        // The typing complexity is handled inside litterService
         const litters = await litterService.getArchivedLitters();
         console.log('Retrieved archived litters:', litters.length);
-        
-        // Use type assertion to break deep inference if needed
-        return litters as Litter[];
+        return litters;
       } catch (error) {
         // Check if error is auth-related
         const errorMsg = error instanceof Error ? error.message : String(error);

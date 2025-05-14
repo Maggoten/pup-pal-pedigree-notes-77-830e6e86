@@ -110,7 +110,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ activePregnancies = [], condens
     },
     {
       title: "Active Pregnancies",
-      value: activePregnancies?.length ?? 0,
+      value: activePregnancies.length,
       description: "Pregnancies in progress",
       icon: <PawPrint className="h-5 w-5 text-rose-600" />,
       linkText: "Track pregnancies",

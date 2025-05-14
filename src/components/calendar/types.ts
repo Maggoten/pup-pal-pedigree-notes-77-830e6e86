@@ -8,19 +8,16 @@ export interface CalendarEvent {
   dogId?: string;
   dogName?: string;
   notes?: string;
-  startDate: Date; // Changed from optional to required
-  endDate: Date;   // Changed from optional to required
-  isReminderEvent?: boolean; // Flag to identify events that originated from reminders
+  startDate?: Date; // Added for new format compatibility
+  endDate?: Date;   // Added for new format compatibility
 }
 
 export interface AddEventFormValues {
   title: string;
   date: Date;
-  time?: string;  // Added this field
+  time?: string;
   dogId?: string;
   notes?: string;
-  type?: string;  // Added this field
-  dogName?: string;  // Added this field
 }
 
 export interface CalendarGridProps {

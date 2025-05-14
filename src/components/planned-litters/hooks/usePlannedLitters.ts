@@ -39,13 +39,13 @@ export const usePlannedLitters = () => {
         }
       );
       
-      // Type assertion to ensure TypeScript knows litters is PlannedLitter[]
-      setPlannedLitters(litters as PlannedLitter[]);
-      console.log("Planned litters refreshed:", (litters as PlannedLitter[]).length);
+      // Directly update the state with the new litters
+      setPlannedLitters(litters);
+      console.log("Planned litters refreshed:", litters);
       
       toast({
         title: "Data refreshed",
-        description: `${(litters as PlannedLitter[]).length} planned litters loaded successfully.`
+        description: `${litters.length} planned litters loaded successfully.`
       });
     } catch (error) {
       console.error('Error refreshing planned litters:', error);

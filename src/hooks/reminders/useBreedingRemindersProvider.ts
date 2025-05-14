@@ -1,121 +1,328 @@
 
-import { useState, useEffect, useMemo } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Reminder } from '@/types/reminders';
-import { toast } from '@/hooks/use-toast';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Reminder, CustomReminderInput } from '@/types/reminders';
+import { useAuth } from '@/hooks/useAuth';
+import { useDogs } from '@/context/DogsContext';
+import { 
+  fetchReminders, 
+  migrateRemindersFromLocalStorage,
+  addReminder,
+  updateReminder,
+  deleteReminder as deleteReminderFromSupabase
+} from '@/services/RemindersService';
+import { generateDogReminders } from '@/services/reminders/DogReminderService';
+import { generateLitterReminders } from '@/services/reminders/LitterReminderService';
+import { generateGeneralReminders } from '@/services/reminders/GeneralReminderService';
+import { 
+  generatePlannedHeatReminders, 
+  generateEnhancedBirthdayReminders, 
+  generateVaccinationReminders,
+  mergeReminders 
+} from '@/services/reminders/AutoRemindersService';
+import { useSortedReminders } from './useSortedReminders';
+import { toast } from '@/components/ui/use-toast';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { plannedLittersService } from '@/services/PlannedLitterService';
 
+// Add device detection
+const isMobileDevice = () => {
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+};
+
+// This is the centralized hook for reminders management across the application
 export const useBreedingRemindersProvider = () => {
-  const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  const { user } = useAuth();
+  const { dogs } = useDogs();
+  const [hasMigrated, setHasMigrated] = useState<boolean>(false);
+  const queryClient = useQueryClient();
+  const deviceType = isMobileDevice() ? 'Mobile' : 'Desktop';
   
-  useEffect(() => {
-    fetchReminders();
-  }, []);
+  console.log(`[Reminders Debug] Hook initialized on ${deviceType}, user ID: ${user?.id || 'none'}, dogs count: ${dogs.length}`);
+  
+  // Handle migration first (happens once per session)
+  const migrateRemindersIfNeeded = useCallback(async () => {
+    if (!hasMigrated && user) {
+      console.log("[Reminders Debug] Starting data migration check...");
+      await migrateRemindersFromLocalStorage();
+      setHasMigrated(true);
+      console.log("[Reminders Debug] Migration completed.");
+    }
+  }, [hasMigrated, user]);
 
-  const fetchReminders = async () => {
-    try {
-      setIsLoading(true);
-      setHasError(false);
-      
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData?.session?.user) {
-        throw new Error("No valid session");
+  // Add a query to get planned litters for automatic reminders
+  const { data: plannedLitters = [] } = useQuery({
+    queryKey: ['planned-litters', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      console.log(`[Reminders Debug] Fetching planned litters for reminders`);
+      try {
+        return await plannedLittersService.loadPlannedLitters();
+      } catch (error) {
+        console.error(`[Reminders Debug] Error loading planned litters:`, error);
+        return [];
+      }
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+  });
+  
+  // Use React Query for data fetching with proper caching
+  const { 
+    data: reminders = [], 
+    isLoading, 
+    error: hasError 
+  } = useQuery({
+    queryKey: ['reminders', user?.id, dogs.length, plannedLitters.length],
+    queryFn: async () => {
+      if (!user) {
+        console.log(`[Reminders Debug] No user available, skipping reminders fetch`);
+        return [];
       }
       
-      const userId = sessionData.session.user.id;
+      console.log(`[Reminders Debug] Fetching reminders for user: ${user.id} on ${deviceType}`);
+      console.log(`[Reminders Debug] Available dogs for reminders: ${dogs.length}`);
+      console.log(`[Reminders Debug] Available planned litters: ${plannedLitters.length}`);
       
-      const { data, error } = await supabase
-        .from('reminders')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('is_deleted', false)
-        .order('due_date', { ascending: true });
+      // Ensure migration happens before fetching
+      await migrateRemindersIfNeeded();
       
-      if (error) throw error;
+      // Fetch custom reminders from Supabase
+      console.log(`[Reminders Debug] Fetching custom reminders from Supabase`);
+      const startTime = performance.now();
+      const supabaseReminders = await fetchReminders();
+      const endTime = performance.now();
       
-      // Transform the data to match the Reminder interface
-      const transformedReminders: Reminder[] = (data || []).map(item => ({
-        id: item.id,
-        title: item.title,
-        description: item.description,
-        dueDate: new Date(item.due_date), // Convert string to Date object
-        priority: item.priority as 'high' | 'medium' | 'low',
-        type: item.type,
-        relatedId: item.related_id,
-        isCompleted: item.is_completed,
-        isDeleted: item.is_deleted,
-        createdAt: item.created_at,
-        updatedAt: item.updated_at
-      }));
+      console.log(`[Reminders Debug] Fetch duration: ${Math.round(endTime - startTime)}ms`);
+      console.log(`[Reminders Debug] Fetched ${supabaseReminders.length} custom reminders`);
       
-      setReminders(transformedReminders);
-    } catch (error) {
-      console.error('Error fetching reminders:', error);
-      setHasError(true);
-      toast({
-        title: "Failed to load reminders",
-        description: "Please try again later",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleMarkComplete = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('reminders')
-        .update({ is_completed: true })
-        .eq('id', id);
+      // Use only dogs belonging to current user
+      const userDogs = dogs.filter(dog => dog.owner_id === user.id);
+      console.log(`[Reminders Debug] Found ${userDogs.length} dogs belonging to user ${user.id}`);
       
-      if (error) throw error;
+      if (userDogs.length === 0 && plannedLitters.length === 0) {
+        console.log(`[Reminders Debug] No user data available, showing only custom reminders`);
+        return supabaseReminders;
+      }
       
-      // Update local state
-      setReminders(prev => 
-        prev.map(reminder => 
-          reminder.id === id 
-            ? { ...reminder, isCompleted: true } 
-            : reminder
-        )
+      try {
+        // Generate all reminders in sequence
+        console.log(`[Reminders Debug] Generating dog reminders`);
+        const dogReminders = generateDogReminders(userDogs);
+        console.log(`[Reminders Debug] Generated ${dogReminders.length} dog reminders`);
+        
+        console.log(`[Reminders Debug] Generating litter reminders`);
+        const litterReminders = await generateLitterReminders(user.id);
+        console.log(`[Reminders Debug] Generated ${litterReminders.length} litter reminders`);
+        
+        console.log(`[Reminders Debug] Generating general reminders`);
+        const generalReminders = generateGeneralReminders(userDogs);
+        console.log(`[Reminders Debug] Generated ${generalReminders.length} general reminders`);
+        
+        // Generate the new automatic reminders
+        console.log(`[Reminders Debug] Generating planned heat reminders`);
+        const plannedHeatReminders = generatePlannedHeatReminders(plannedLitters);
+        console.log(`[Reminders Debug] Generated ${plannedHeatReminders.length} planned heat reminders`);
+        
+        console.log(`[Reminders Debug] Generating enhanced birthday reminders`);
+        const birthdayReminders = generateEnhancedBirthdayReminders(userDogs);
+        console.log(`[Reminders Debug] Generated ${birthdayReminders.length} birthday reminders`);
+        
+        console.log(`[Reminders Debug] Generating vaccination reminders`);
+        const vaccinationReminders = generateVaccinationReminders(userDogs);
+        console.log(`[Reminders Debug] Generated ${vaccinationReminders.length} vaccination reminders`);
+        
+        // Use our mergeReminders function to combine all reminders without duplicates
+        const allReminders = mergeReminders(
+          supabaseReminders,
+          dogReminders,
+          litterReminders,
+          generalReminders,
+          plannedHeatReminders,
+          birthdayReminders,
+          vaccinationReminders
+        );
+        
+        console.log(`[Reminders Debug] Total: ${allReminders.length} reminders loaded`);
+        
+        return allReminders;
+      } catch (error) {
+        console.error(`[Reminders Debug] Error generating reminders:`, error);
+        // Return at least the custom reminders to prevent total failure
+        return supabaseReminders;
+      }
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * (isMobileDevice() ? 1 : 5), // Consider data fresh for 1 min on mobile, 5 min on desktop
+    retry: 2, // Retry twice to handle mobile connection issues
+    refetchOnMount: true,
+    refetchOnWindowFocus: isMobileDevice() ? true : false, // Refetch when regaining focus on mobile
+  });
+  
+  // Get sorted reminders - memoized in the hook
+  const sortedReminders = useSortedReminders(reminders);
+  
+  // Use mutations for state changes with optimistic updates
+  const markCompleteReminderMutation = useMutation({
+    mutationFn: async (id: string) => {
+      console.log(`[Reminders Debug] Marking reminder ${id} as completed`);
+      
+      // Find the current reminder to toggle its state
+      const reminder = reminders.find(r => r.id === id);
+      if (!reminder) {
+        console.error(`[Reminders Debug] Reminder with ID ${id} not found`);
+        return false;
+      }
+      
+      const newCompletedState = !reminder.isCompleted;
+      
+      // Only update custom reminders in database (those with UUIDs)
+      if (id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
+        return await updateReminder(id, newCompletedState);
+      }
+      // For system-generated reminders, we still return success but don't persist to DB
+      return true;
+    },
+    onMutate: async (id) => {
+      // Cancel any outgoing refetches to avoid overwriting our optimistic update
+      await queryClient.cancelQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+      
+      // Find the current reminder to toggle its state
+      const reminder = reminders.find(r => r.id === id);
+      if (!reminder) {
+        return { previousReminders: reminders };
+      }
+      
+      const newCompletedState = !reminder.isCompleted;
+      
+      // Snapshot the previous value
+      const previousReminders = queryClient.getQueryData(['reminders', user?.id, dogs.length]);
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(['reminders', user?.id, dogs.length], (old: Reminder[] = []) => 
+        old.map(r => r.id === id ? {...r, isCompleted: newCompletedState} : r)
       );
       
+      return { previousReminders };
+    },
+    onError: (err, id, context) => {
+      console.error("[Reminders Debug] Error marking reminder complete:", err);
+      // Rollback to the previous state
+      if (context?.previousReminders) {
+        queryClient.setQueryData(['reminders', user?.id, dogs.length], context.previousReminders);
+      }
+    },
+    onSuccess: (result, id) => {
+      // Find the current reminder to get its new state for the message
+      const reminder = reminders.find(r => r.id === id);
+      const newCompletedState = reminder ? !reminder.isCompleted : true;
+      
+      console.log(`[Reminders Debug] Successfully marked reminder ${id} as ${newCompletedState ? 'completed' : 'not completed'}`);
+      
       toast({
-        title: "Reminder completed",
-        description: "The reminder has been marked as complete",
+        title: newCompletedState ? "Reminder Completed" : "Reminder Reopened",
+        description: newCompletedState 
+          ? "This task has been marked as completed."
+          : "This task has been marked as not completed."
       });
-    } catch (error) {
-      console.error('Error marking reminder complete:', error);
+    }
+  });
+  
+  const addCustomReminderMutation = useMutation({
+    mutationFn: async (input: CustomReminderInput) => {
+      if (!user) throw new Error("User authentication required");
+      return await addReminder(input);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Reminder added successfully."
+      });
+      
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+    },
+    onError: (error) => {
+      console.error("Error adding reminder:", error);
       toast({
         title: "Error",
-        description: "Failed to update reminder status",
+        description: "Failed to add reminder. Please try again.",
         variant: "destructive"
       });
     }
+  });
+  
+  const deleteReminderMutation = useMutation({
+    mutationFn: async (id: string) => {
+      // Only delete from database if it's a custom reminder (has UUID format)
+      if (id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
+        return await deleteReminderFromSupabase(id);
+      }
+      return true;
+    },
+    onMutate: async (id) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+      
+      // Snapshot the previous value
+      const previousReminders = queryClient.getQueryData(['reminders', user?.id, dogs.length]);
+      
+      // Optimistically update
+      queryClient.setQueryData(['reminders', user?.id, dogs.length], (old: Reminder[] = []) => 
+        old.filter(r => r.id !== id)
+      );
+      
+      return { previousReminders };
+    },
+    onError: (err, id, context) => {
+      console.error("Error deleting reminder:", err);
+      // Rollback on error
+      if (context?.previousReminders) {
+        queryClient.setQueryData(['reminders', user?.id, dogs.length], context.previousReminders);
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Reminder Deleted",
+        description: "The reminder has been deleted successfully."
+      });
+    }
+  });
+  
+  // Action handler wrappers
+  const handleMarkComplete = (id: string) => {
+    markCompleteReminderMutation.mutate(id);
   };
-
-  // Format reminders summary for the dashboard
-  const remindersSummary = useMemo(() => {
-    const incomplete = reminders.filter(r => !r.isCompleted).length;
-    const upcoming = reminders.filter(r => 
-      !r.isCompleted && 
-      new Date(r.dueDate) > new Date() && 
-      new Date(r.dueDate) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    ).length;
-    
-    return {
-      total: reminders.length,
-      incomplete,
-      upcoming
-    };
-  }, [reminders]);
-
+  
+  const addCustomReminder = async (input: CustomReminderInput) => {
+    try {
+      await addCustomReminderMutation.mutateAsync(input);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  
+  const deleteReminder = async (id: string) => {
+    try {
+      await deleteReminderMutation.mutateAsync(id);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  
+  // Force refetch function for manual refresh
+  const refreshReminderData = () => {
+    queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+  };
+  
   return {
-    reminders,
+    reminders: sortedReminders,
     isLoading,
-    hasError,
+    hasError: !!hasError,
     handleMarkComplete,
-    remindersSummary
+    addCustomReminder,
+    deleteReminder,
+    refreshReminderData
   };
 };

@@ -1,52 +1,59 @@
 
-import { Litter } from '@/types/breeding';
-import { Reminder, createReminder } from '@/types/reminders';
-import { differenceInDays, parseISO, isBefore, addDays, addWeeks } from 'date-fns';
+import { Reminder } from '@/types/reminders';
 import { createPawPrintIcon } from '@/utils/iconUtils';
+import { supabase } from '@/integrations/supabase/client';
+import { differenceInDays, startOfDay } from 'date-fns';
+import { isMobileDevice } from '@/utils/fetchUtils';
 
-export const generateLitterReminders = (litters: Litter[]): Reminder[] => {
+// Generate litter-related reminders for a specific user
+export const generateLitterReminders = async (userId: string): Promise<Reminder[]> => {
+  console.log(`Generating litter reminders for user: ${userId}`);
   const reminders: Reminder[] = [];
-  const today = new Date();
+  const today = startOfDay(new Date());
   
-  // Filter for active litters (not archived)
-  const activeLitters = litters.filter(litter => !litter.archived);
-  
-  activeLitters.forEach(litter => {
-    // Only process litters with a valid date of birth
-    if (!litter.dateOfBirth) return;
-    
-    const litterBirthDate = parseISO(litter.dateOfBirth);
-    
-    // Create reminders for key litter milestones
-    const milestones = [
-      { days: 3, title: 'Dewclaw Removal', description: 'Time to remove dewclaws if necessary', priority: 'high' as const },
-      { days: 7, title: 'First Weigh-In', description: 'Time for the first weight check', priority: 'medium' as const },
-      { days: 14, title: 'Eyes Opening', description: 'Puppies\' eyes should be opening', priority: 'low' as const },
-      { days: 21, title: 'Deworming Due', description: 'First deworming treatment due', priority: 'high' as const },
-      { days: 28, title: 'Weaning Time', description: 'Start introducing solid food', priority: 'medium' as const },
-      { days: 42, title: 'First Vaccinations', description: 'Time for first vaccinations', priority: 'high' as const },
-      { days: 49, title: 'Ready for New Homes', description: 'Puppies can start going to new homes', priority: 'medium' as const },
-    ];
-    
-    milestones.forEach(milestone => {
-      const milestoneDate = addDays(litterBirthDate, milestone.days);
-      const daysUntil = differenceInDays(milestoneDate, today);
+  try {
+    // Fetch active pregnancies from Supabase for the current user with specific fields
+    const { data: pregnancies, error: pregnancyError } = await supabase
+      .from('pregnancies')
+      .select('id, expected_due_date, status, user_id')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .limit(isMobileDevice() ? 5 : 20); // Limit results based on device type
       
-      // Only create reminders for upcoming or recent (within 2 days) milestones
-      if (daysUntil >= -2 && daysUntil <= 7) {
-        reminders.push(createReminder({
-          id: `litter-milestone-${litter.id}-${milestone.days}`,
-          title: `${litter.name}: ${milestone.title}`,
-          description: milestone.description,
-          dueDate: milestoneDate,
-          priority: milestone.priority,
-          type: 'litter-milestone',
-          icon: createPawPrintIcon("amber-500"),
-          relatedId: litter.id
-        }));
-      }
-    });
-  });
-  
-  return reminders;
+    if (pregnancyError) {
+      console.error("Error fetching pregnancies for reminders:", pregnancyError);
+    } else if (pregnancies?.length) {
+      console.log(`Found ${pregnancies.length} active pregnancies for user ${userId}`);
+      
+      // Process each pregnancy
+      pregnancies.forEach(pregnancy => {
+        const dueDate = new Date(pregnancy.expected_due_date);
+        const daysUntilBirth = differenceInDays(dueDate, today);
+        
+        // Add due date reminder starting 14 days before
+        if (daysUntilBirth >= -2 && daysUntilBirth <= 14) {
+          reminders.push({
+            id: `pregnancy-due-${pregnancy.id}`,
+            title: `Pregnancy Due Date ${daysUntilBirth <= 0 ? 'Today/Passed' : 'Approaching'}`,
+            description: daysUntilBirth <= 0 
+              ? `Due date is today or has passed` 
+              : `Due in ${daysUntilBirth} days`,
+            dueDate,
+            priority: 'high',
+            type: 'pregnancy', // Changed from 'other' to 'pregnancy'
+            icon: createPawPrintIcon('rose-500'),
+            relatedId: pregnancy.id
+          });
+          
+          console.log(`Created due date reminder for pregnancy ${pregnancy.id}`);
+        }
+      });
+    }
+    
+    console.log(`Generated ${reminders.length} litter reminders for user ${userId}`);
+    return reminders;
+  } catch (error) {
+    console.error("Error generating litter reminders:", error);
+    return [];
+  }
 };

@@ -114,7 +114,7 @@ class LitterService {
       const puppiesWithDetails = await Promise.all((puppies || []).map(async puppy => {
         console.log("Processing puppy:", puppy.id, puppy.name);
         
-        // Fetch weight logs, height logs, and notes
+        // Fetch weight logs
         const { data: weightLogs, error: weightError } = await supabase
           .from('puppy_weight_logs')
           .select('*')
@@ -123,6 +123,7 @@ class LitterService {
         if (weightError) console.error("Error loading weight logs:", weightError);
         else console.log(`Found ${weightLogs?.length || 0} weight logs for puppy ${puppy.id}`);
         
+        // Fetch height logs
         const { data: heightLogs, error: heightError } = await supabase
           .from('puppy_height_logs')
           .select('*')
@@ -131,6 +132,7 @@ class LitterService {
         if (heightError) console.error("Error loading height logs:", heightError);
         else console.log(`Found ${heightLogs?.length || 0} height logs for puppy ${puppy.id}`);
         
+        // Fetch notes
         const { data: notes, error: notesError } = await supabase
           .from('puppy_notes')
           .select('*')
@@ -167,9 +169,7 @@ class LitterService {
           heightLog: heightLogs ? heightLogs.map(log => ({
             date: log.date,
             height: log.height
-          })) : [],
-          // Map litter_id to litterId for frontend consistency
-          litterId: puppy.litter_id
+          })) : []
         };
       }));
 
@@ -516,11 +516,11 @@ class LitterService {
         name: puppy.name,
         gender: puppyGender,
         color: puppy.color,
-        litter_id: litterId, // Map litterId to litter_id for database
+        litter_id: litterId,
         birth_date_time: puppy.birthDateTime
       });
 
-      // Insert puppy into Supabase with proper field mapping
+      // Insert puppy into Supabase
       const { data, error } = await supabase
         .from('puppies')
         .insert({
@@ -539,7 +539,7 @@ class LitterService {
           breed: puppy.breed || '',
           image_url: puppy.imageUrl || '',
           birth_date_time: puppy.birthDateTime || new Date().toISOString(),
-          litter_id: litterId, // Map litterId to litter_id for database
+          litter_id: litterId,
           // New fields
           registered_name: puppy.registered_name || null,
           registration_number: puppy.registration_number || null,
@@ -639,7 +639,7 @@ class LitterService {
       const isSold = status === 'Sold';
       const isReserved = status === 'Reserved';
       
-      // Update puppy in Supabase with proper field mapping
+      // Update puppy in Supabase
       const { error } = await supabase
         .from('puppies')
         .update({
@@ -665,7 +665,7 @@ class LitterService {
           buyer_phone: updatedPuppy.buyer_phone || null
         })
         .eq('id', updatedPuppy.id)
-        .eq('litter_id', litterId); // Use litterId for the query
+        .eq('litter_id', litterId);
 
       if (error) {
         console.error("Error updating puppy in Supabase:", error);

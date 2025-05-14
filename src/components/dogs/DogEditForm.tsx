@@ -4,7 +4,7 @@ import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Dog } from '@/types/dogs';
+import { Dog } from '@/context/DogsContext';
 import DogFormFields, { dogFormSchema, DogFormValues } from './DogFormFields';
 import DogImageField from './DogImageField';
 import HeatRecordsField from './HeatRecordsField';
@@ -53,7 +53,6 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isLoad
             form={form} 
             handleImageChange={(imageBase64: string) => form.setValue('image', imageBase64)} 
             disabled={isLoading}
-            dogId={dog.id}
           />
           <div className="space-y-6">
             <DogFormFields form={form} disabled={isLoading} />

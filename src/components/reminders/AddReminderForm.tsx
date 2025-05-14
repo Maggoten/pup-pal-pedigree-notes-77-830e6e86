@@ -1,117 +1,109 @@
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { CustomReminderInput } from '@/types/reminders';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import DatePicker from '@/components/common/DatePicker';
+import { toast } from '@/components/ui/use-toast';
+import { CustomReminderInput } from '@/types/reminders';
 
 interface AddReminderFormProps {
-  onSubmit: (data: CustomReminderInput) => void;
+  onSubmit: (values: CustomReminderInput) => void;
 }
 
 const AddReminderForm: React.FC<AddReminderFormProps> = ({ onSubmit }) => {
-  const form = useForm<CustomReminderInput>({
-    defaultValues: {
-      title: '',
-      description: '',
-      dueDate: new Date(),
-      priority: 'medium',
-      type: 'custom'  // Default to 'custom' type
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState<Date>(new Date());
+  const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium');
+  
+  const handleAddReminder = () => {
+    if (!title.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a reminder title",
+        variant: "destructive"
+      });
+      return;
     }
-  });
-
-  const handleSubmit = (data: CustomReminderInput) => {
-    onSubmit(data);
+    
+    onSubmit({
+      title,
+      description,
+      dueDate,
+      priority
+    });
+    
+    // Reset form
+    setTitle('');
+    setDescription('');
+    setDueDate(new Date());
+    setPriority('medium');
+    
+    toast({
+      title: "Reminder Added",
+      description: "Your reminder has been added successfully."
+    });
   };
-
+  
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input placeholder="Reminder title" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <div className="space-y-4 border p-4 rounded-md">
+      <div className="space-y-2">
+        <Label htmlFor="title">Title</Label>
+        <Input 
+          id="title" 
+          value={title} 
+          onChange={(e) => setTitle(e.target.value)} 
+          placeholder="Reminder title" 
         />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Add more details here..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Input 
+          id="description" 
+          value={description} 
+          onChange={(e) => setDescription(e.target.value)} 
+          placeholder="Details about this reminder" 
         />
-
-        <FormField
-          control={form.control}
-          name="dueDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Due Date</FormLabel>
-              <DatePicker 
-                date={field.value} 
-                setDate={(date) => field.onChange(date)}
-              />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="priority"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Priority</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="flex space-x-2"
-                >
-                  <div className="flex items-center space-x-1">
-                    <RadioGroupItem value="low" id="low" />
-                    <Label htmlFor="low" className="text-xs">Low</Label>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <RadioGroupItem value="medium" id="medium" />
-                    <Label htmlFor="medium" className="text-xs">Medium</Label>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <RadioGroupItem value="high" id="high" />
-                    <Label htmlFor="high" className="text-xs">High</Label>
-                  </div>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        {/* Hidden field for type - defaults to "custom" */}
-        <input type="hidden" {...form.register("type")} value="custom" />
-
-        <Button type="submit" className="w-full">Add Reminder</Button>
-      </form>
-    </Form>
+      </div>
+      
+      <div className="space-y-2">
+        <Label>Due Date</Label>
+        <DatePicker date={dueDate} setDate={setDueDate} />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="priority">Priority</Label>
+        <Select 
+          value={priority} 
+          onValueChange={(value) => setPriority(value as 'high' | 'medium' | 'low')}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="high">High</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="low">Low</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <Button 
+        onClick={handleAddReminder} 
+        className="w-full"
+      >
+        Add Reminder
+      </Button>
+    </div>
   );
 };
 

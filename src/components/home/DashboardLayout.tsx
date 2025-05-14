@@ -2,10 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
+import { DogsProvider } from '@/context/DogsContext';
 import PageLayout from '@/components/PageLayout';
 import DashboardHero from './dashboard-hero';
 import DashboardContent from './DashboardContent';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { getDisplayUsername } from '@/utils/userDisplayUtils';
 import { getActivePregnancies } from '@/services/PregnancyService';
 import { toast } from '@/components/ui/use-toast';
 
@@ -49,8 +51,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     fetchActivePregnancies();
   }, [initialActivePregnancies.length]);
   
-  // Get the personalized username for display
-  const username = user?.firstName || (user?.email ? user.email.split('@')[0] : 'Breeder');
+  // Get the personalized username
+  const username = getDisplayUsername(user);
   
   // Prepare props for child components
   const calendarProps = {
@@ -59,8 +61,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     addEvent: dashboardData.handleAddEvent,
     deleteEvent: dashboardData.deleteEvent,
     editEvent: dashboardData.handleEditEvent,
-    isLoading: dashboardData.calendarLoading || false,
-    hasError: dashboardData.calendarError || false
+    isLoading: dashboardData.calendarLoading,
+    hasError: dashboardData.calendarError // This now receives a boolean value
   };
   
   const remindersProps = {
@@ -68,20 +70,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     isLoading: dashboardData.remindersLoading,
     hasError: dashboardData.remindersError,
     handleMarkComplete: dashboardData.handleMarkComplete
-  };
-
-  // Debug logging
-  console.log('[DashboardLayout] Rendering with data:', {
-    reminders: dashboardData.remindersSummary,
-    plannedLitters: dashboardData.plannedLittersData,
-    activePregnanciesCount: activePregnancies?.length || 0,
-    isLoadingPregnancies
-  });
-  
-  // Ensure plannedLittersData.nextDate is handled properly (could be null)
-  const enhancedPlannedLittersData = {
-    count: dashboardData.plannedLittersData.count,
-    nextDate: dashboardData.plannedLittersData.nextDate || new Date() // Provide fallback date if null
   };
   
   return (
@@ -91,10 +79,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     >
       <div className="space-y-6">
         <DashboardHero 
-          user={user}
           username={username}
           reminders={dashboardData.remindersSummary}
-          plannedLitters={enhancedPlannedLittersData}
+          plannedLitters={dashboardData.plannedLittersData}
           activePregnancies={activePregnancies}
           recentLitters={dashboardData.recentLittersData}
           isLoadingPregnancies={isLoadingPregnancies}

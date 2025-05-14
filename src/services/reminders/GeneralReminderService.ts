@@ -1,37 +1,44 @@
 
-import { Reminder, createReminder } from '@/types/reminders';
-import { addDays, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { Dog } from '@/types/dogs';
+import { Reminder } from '@/types/reminders';
 import { createCalendarClockIcon } from '@/utils/iconUtils';
+import { differenceInMonths, parseISO, startOfDay } from 'date-fns';
 
-export const generateGeneralReminders = (): Reminder[] => {
+/**
+ * Generate general breeding-related reminders
+ */
+export const generateGeneralReminders = (dogs: Dog[]): Reminder[] => {
   const reminders: Reminder[] = [];
-  const today = new Date();
+  const today = startOfDay(new Date());
   
-  // Get the first day of the current month
-  const firstDayOfMonth = startOfMonth(today);
-  const lastDayOfMonth = endOfMonth(today);
+  // Female dogs of breeding age without heat records
+  const femaleDogsWithoutHeatRecords = dogs.filter(dog => {
+    if (dog.gender !== 'female') return false;
+    if (!dog.dateOfBirth) return false;
+    
+    const birthDate = parseISO(dog.dateOfBirth);
+    const ageInMonths = differenceInMonths(today, birthDate);
+    
+    // Only consider dogs older than 6 months (potential breeding age)
+    if (ageInMonths < 6) return false;
+    
+    // Check if the dog has heat records
+    return !dog.heatHistory || dog.heatHistory.length === 0;
+  });
   
-  // Create a reminder for kennel maintenance on the 15th of each month
-  const maintenanceReminderDate = new Date(today.getFullYear(), today.getMonth(), 15);
-  
-  // Only add if the 15th is in the future or today
-  if (isWithinInterval(maintenanceReminderDate, { 
-    start: today, 
-    end: addDays(today, 7) // Only show if it's within a week
-  })) {
-    reminders.push(createReminder({
-      id: `general-maintenance-${today.getFullYear()}-${today.getMonth() + 1}`,
-      title: 'Monthly Kennel Maintenance',
-      description: 'Perform routine maintenance checks of kennel facilities',
-      icon: createCalendarClockIcon("blue-500"),
-      dueDate: maintenanceReminderDate,
+  // Add heat tracking reminders
+  femaleDogsWithoutHeatRecords.forEach(dog => {
+    reminders.push({
+      id: `general-heat-tracking-${dog.id}`,
+      title: `Start Heat Tracking for ${dog.name}`,
+      description: `${dog.name} is of breeding age but has no heat records`,
+      icon: createCalendarClockIcon('purple-500'),
+      dueDate: today,
       priority: 'low',
-      type: 'maintenance',
-      relatedId: 'kennel'
-    }));
-  }
-  
-  // Add more general reminder types as needed
+      type: 'breeding', // Changed from 'other' to 'breeding'
+      relatedId: dog.id
+    });
+  });
   
   return reminders;
 };

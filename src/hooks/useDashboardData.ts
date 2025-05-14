@@ -1,222 +1,180 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { isSameDay, parseISO } from 'date-fns';
-import { useBreedingReminders } from '@/hooks/reminders';
-import useCalendarEvents from '@/hooks/useCalendarEvents';
-import { remindersToCalendarEvents } from '@/utils/reminderToCalendarMapper';
-import { CalendarEvent } from '@/types/calendar';
-import { AddEventFormValues } from '@/components/calendar/types';
-import { usePlannedLitters as usePlannedLittersHook } from '@/hooks/planned-litters/hooks/usePlannedLitters';
-import { useLitterQueries } from '@/hooks/useLitterQueries';
-import { useAuth } from '@/hooks/useAuth';
-import { parseISODate } from '@/utils/dateUtils';
 
-interface LitterQueryData {
-  recentLittersCount: number;
-  littersThisYear: number;
-  isLoading: boolean;
-  error: any;
-}
+import { useMemo, useEffect, useState } from 'react';
+import { subDays } from 'date-fns';
+import { useDogs } from '@/context/DogsContext';
+import { useBreedingReminders } from '@/hooks/useBreedingReminders';
+import useSupabaseCalendarEvents from '@/hooks/useSupabaseCalendarEvents';
+import { plannedLittersService } from '@/services/PlannedLitterService';
+import { litterService } from '@/services/LitterService';
+import { getEventColor } from '@/services/CalendarEventService';
 
 export const useDashboardData = () => {
-  const { user } = useAuth();
-  const [isDataReady, setIsDataReady] = useState(false);
+  // State for data tracking
+  const [isDataReady, setIsDataReady] = useState<boolean>(false);
+  const [plannedLittersData, setPlannedLittersData] = useState({ count: 0, nextDate: null as Date | null });
+  const [recentLittersData, setRecentLittersData] = useState({ count: 0, latest: null as Date | null });
+  const [isLoadingPlannedLitters, setIsLoadingPlannedLitters] = useState<boolean>(true);
+  const [isLoadingRecentLitters, setIsLoadingRecentLitters] = useState<boolean>(true);
   
-  // Get reminders data
+  // Centralized data fetching for calendar and reminders
+  const { dogs } = useDogs();
+  
+  // Single instances of these hooks to prevent duplicate fetching
   const { 
     reminders, 
     isLoading: remindersLoading, 
     hasError: remindersError,
     handleMarkComplete,
-    remindersSummary
+    addCustomReminder,
+    deleteReminder
   } = useBreedingReminders();
   
-  // Convert reminders to calendar events format
-  const reminderEvents = useMemo(() => {
-    return remindersToCalendarEvents(reminders);
-  }, [reminders]);
+  // Use the Supabase-based calendar hook
+  const {
+    events,
+    isLoading: calendarLoading,
+    hasError: calendarError,
+    addEvent,
+    updateEvent: editEvent,
+    deleteEvent,
+    getEventsForDay
+  } = useSupabaseCalendarEvents();
   
-  // Get calendar events data
-  const calendarEvents = useCalendarEvents();
-  // Add isLoading and error properties to match expected interface
-  const eventsWithStatus = {
-    ...calendarEvents,
-    isLoading: false,
-    error: null,
-    editEvent: calendarEvents.updateEvent // Map updateEvent to editEvent for API compatibility
-  };
-  
-  // Planned litters data
-  const plannedLittersHook = usePlannedLittersHook();
-  const { 
-    plannedLitters,
-    isLoading: plannedLittersLoading,
-  } = plannedLittersHook;
-  
-  // Extract or compute nextHeatDate from plannedLitters data
-  const nextHeatDate = useMemo(() => {
-    if (!plannedLitters || plannedLitters.length === 0) {
-      return null;
-    }
-    
-    // Find the next planned heat date
-    const sortedLitters = [...plannedLitters].sort(
-      (a, b) => new Date(a.expectedHeatDate).getTime() - new Date(b.expectedHeatDate).getTime()
-    );
-    
-    // Ensure we return a Date object, not a string
-    const nextDate = sortedLitters[0]?.expectedHeatDate || null;
-    return nextDate ? (nextDate instanceof Date ? nextDate : new Date(nextDate)) : null;
-  }, [plannedLitters]);
-  
-  // Get litter data
-  const litterQueryResult = useLitterQueries();
-  let recentLittersCount = 0;
-  let littersThisYear = 0;
-  let littersLoading = true;
-  
-  if (litterQueryResult) {
-    // Check if these properties exist before accessing them
-    if ('recentLitters' in litterQueryResult && Array.isArray(litterQueryResult.recentLitters)) {
-      recentLittersCount = litterQueryResult.recentLitters.length;
-    }
-    if ('thisYearLitters' in litterQueryResult && Array.isArray(litterQueryResult.thisYearLitters)) {
-      littersThisYear = litterQueryResult.thisYearLitters.length;
-    }
-    if ('isLoading' in litterQueryResult) {
-      littersLoading = Boolean(litterQueryResult.isLoading);
-    }
-  }
-  
-  const littersError = null; // No error handling for litters currently
-  
-  // Combine calendar events with reminder events
-  const combinedEvents = useMemo(() => {
-    const results = [...calendarEvents.events];
-    
-    // Only add reminder events that don't overlap with existing calendar events
-    if (reminderEvents && reminderEvents.length > 0) {
-      for (const reminderEvent of reminderEvents) {
-        // Check if this reminder is already in the calendar events
-        const exists = results.some(calEvent => 
-          calEvent.id === reminderEvent.id || 
-          (calEvent.title === reminderEvent.title && 
-          isSameDay(new Date(calEvent.date), new Date(reminderEvent.date)))
+  // Fetch planned litters data
+  useEffect(() => {
+    const fetchPlannedLittersData = async () => {
+      try {
+        setIsLoadingPlannedLitters(true);
+        const plannedLitters = await plannedLittersService.loadPlannedLitters();
+        
+        // Sort planned litters by expected heat date to find the next one
+        const sortedLitters = [...plannedLitters].sort(
+          (a, b) => new Date(a.expectedHeatDate).getTime() - new Date(b.expectedHeatDate).getTime()
         );
         
-        if (!exists) {
-          results.push(reminderEvent);
-        }
+        // Find the next planned litter (with heat date in the future)
+        const nextLitter = sortedLitters.find(
+          litter => new Date(litter.expectedHeatDate).getTime() > Date.now()
+        );
+        
+        setPlannedLittersData({
+          count: plannedLitters.length,
+          nextDate: nextLitter ? new Date(nextLitter.expectedHeatDate) : null
+        });
+      } catch (error) {
+        console.error('Error fetching planned litters:', error);
+        setPlannedLittersData({ count: 0, nextDate: null });
+      } finally {
+        setIsLoadingPlannedLitters(false);
       }
-    }
+    };
     
-    return results;
-  }, [calendarEvents.events, reminderEvents]);
-  
-  // Get events for a specific date
-  const getEventsForDate = useCallback((date: Date) => {
-    return combinedEvents.filter(event => {
-      const eventDate = typeof event.date === 'string' ? parseISO(event.date) : event.date;
-      return isSameDay(eventDate, date);
-    });
-  }, [combinedEvents]);
-  
-  // Get color for event type
-  const getEventColor = useCallback((type: string) => {
-    switch (type) {
-      case 'heat':
-        return 'bg-pink-500';
-      case 'birthday':
-        return 'bg-blue-500';
-      case 'vaccination':
-        return 'bg-green-500';
-      case 'breeding':
-        return 'bg-purple-500';
-      case 'litter':
-        return 'bg-amber-500';
-      case 'pregnancy':
-        return 'bg-rose-500';
-      case 'health':
-        return 'bg-emerald-500';
-      default:
-        return 'bg-gray-500';
-    }
+    fetchPlannedLittersData();
   }, []);
   
-  // Handle add event mutation wrapper
-  const handleAddEvent = useCallback((data: AddEventFormValues): Promise<boolean> => {
-    try {
-      calendarEvents.addEvent(data);
-      return Promise.resolve(true);
-    } catch (error) {
-      console.error("Error adding event:", error);
-      return Promise.resolve(false);
-    }
-  }, [calendarEvents.addEvent]);
-  
-  // Handle edit event mutation wrapper
-  const handleEditEvent = useCallback((eventId: string, data: AddEventFormValues): Promise<boolean> => {
-    try {
-      calendarEvents.updateEvent(eventId, data);
-      return Promise.resolve(true);
-    } catch (error) {
-      console.error("Error editing event:", error);
-      return Promise.resolve(false);
-    }
-  }, [calendarEvents.updateEvent]);
-  
-  // Format planned litters data for the dashboard
-  const plannedLittersData = useMemo(() => {
-    return {
-      count: plannedLitters.length,
-      nextDate: nextHeatDate // This is now guaranteed to be a Date or null
-    };
-  }, [plannedLitters, nextHeatDate]);
-  
-  // Format recent litters data for the dashboard
-  const recentLittersData = useMemo(() => {
-    return {
-      count: recentLittersCount,
-      recent: littersThisYear
-    };
-  }, [recentLittersCount, littersThisYear]);
-  
-  // Determine when data is ready
+  // Fetch recent litters data
   useEffect(() => {
-    const dataLoaded = !remindersLoading && !plannedLittersLoading && !littersLoading;
+    const fetchRecentLittersData = async () => {
+      try {
+        setIsLoadingRecentLitters(true);
+        // Get all litters
+        const activeLitters = await litterService.getActiveLitters();
+        const archivedLitters = await litterService.getArchivedLitters();
+        const allLitters = [...activeLitters, ...archivedLitters];
+        
+        // Consider litters from the last 90 days as "recent"
+        const ninetyDaysAgo = subDays(new Date(), 90);
+        const recentLitters = allLitters.filter(
+          litter => new Date(litter.dateOfBirth) >= ninetyDaysAgo
+        );
+        
+        // Find the most recent litter
+        let latestDate: Date | null = null;
+        if (recentLitters.length > 0) {
+          const sortedLitters = [...recentLitters].sort(
+            (a, b) => new Date(b.dateOfBirth).getTime() - new Date(a.dateOfBirth).getTime()
+          );
+          latestDate = sortedLitters[0] ? new Date(sortedLitters[0].dateOfBirth) : null;
+        }
+        
+        setRecentLittersData({
+          count: recentLitters.length,
+          latest: latestDate
+        });
+      } catch (error) {
+        console.error('Error fetching recent litters:', error);
+        setRecentLittersData({ count: 0, latest: null });
+      } finally {
+        setIsLoadingRecentLitters(false);
+      }
+    };
     
-    if (dataLoaded) {
-      setTimeout(() => setIsDataReady(true), 500);
+    fetchRecentLittersData();
+  }, []);
+  
+  const remindersSummary = useMemo(() => {
+    const highPriorityCount = reminders.filter(r => r.priority === 'high' && !r.isCompleted).length;
+    return {
+      count: reminders.filter(r => !r.isCompleted).length,
+      highPriority: highPriorityCount
+    };
+  }, [reminders]);
+  
+  // Update data ready state based on actual data loading states
+  useEffect(() => {
+    const allDataLoaded = 
+      !remindersLoading && 
+      !calendarLoading && 
+      !isLoadingPlannedLitters && 
+      !isLoadingRecentLitters;
+      
+    if (allDataLoaded) {
+      setIsDataReady(true);
+    } else {
+      setIsDataReady(false);
     }
-  }, [remindersLoading, plannedLittersLoading, littersLoading]);
+  }, [remindersLoading, calendarLoading, isLoadingPlannedLitters, isLoadingRecentLitters]);
+  
+  // Create wrapper functions to adapt to what components expect
+  const getEventsForDate = (date: Date) => {
+    return getEventsForDay(date);
+  };
+
+  // Wrapper functions to adapt async functions to the synchronous interface expected by components
+  const handleAddEvent = (data: any) => {
+    addEvent(data);
+    return true; // Always return true synchronously for UI feedback
+  };
+  
+  const handleEditEvent = (eventId: string, data: any) => {
+    editEvent(eventId, data);
+    return true; // Always return true synchronously for UI feedback
+  };
+  
+  // Check if there's any data to display
+  const hasCalendarData = events && events.length > 0;
+  const hasReminderData = reminders && reminders.length > 0;
   
   return {
-    // Data status
     isDataReady,
-    
-    // Reminders data and actions
+    dogs,
     reminders,
     remindersLoading,
     remindersError,
     handleMarkComplete,
-    remindersSummary,
-    
-    // Calendar events data and actions  
-    events: combinedEvents,
-    calendarLoading: eventsWithStatus.isLoading,
-    calendarError: !!eventsWithStatus.error,
+    addCustomReminder,
+    deleteReminder,
     getEventsForDate,
     getEventColor,
     handleAddEvent,
-    deleteEvent: calendarEvents.deleteEvent,
+    deleteEvent,
     handleEditEvent,
-    
-    // Planned litters data
+    calendarLoading,
+    calendarError,
     plannedLittersData,
-    plannedLittersLoading,
-    
-    // Recent litters data
     recentLittersData,
-    littersLoading,
-    littersError
+    remindersSummary,
+    hasCalendarData,
+    hasReminderData
   };
 };

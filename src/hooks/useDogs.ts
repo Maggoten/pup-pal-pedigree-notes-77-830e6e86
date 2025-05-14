@@ -1,7 +1,8 @@
 
 // This file is kept for backward compatibility
 // It re-exports the new modular hook structure
-import { useDogs as useDogsHook } from '@/context/dogs/DogsContext';
+import { useDogs as useDogsHook } from './dogs';
+export { useDogs };
 
 // Re-export the hook with the same name
-export const useDogs = useDogsHook;
+const useDogs = useDogsHook;

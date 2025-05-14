@@ -1,122 +1,221 @@
 
-import React, { useState } from 'react';
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { useBreedingStats } from '@/hooks/useBreedingStats';
-import { useCalendarContext } from '@/context/CalendarContext';
-import { useReminders } from '@/context/RemindersContext'; 
-import { Separator } from '@/components/ui/separator';
-import { Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useDogs } from '@/context/DogsContext';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useBreedingReminders } from '@/hooks/useBreedingReminders';
+import { X, Database, User, RefreshCw, ChevronDown, ChevronUp, Bug, Calendar } from 'lucide-react';
+import { triggerAllReminders } from '@/services/ReminderService';
+import { useQueryClient } from '@tanstack/react-query';
+import { TriggerAllRemindersFunction } from '@/types/reminderFunctions';
+
+const isMobileDevice = () => {
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+};
+
+// Only show in development mode
+const isDevMode = () => {
+  return process.env.NODE_ENV === 'development';
+};
+
+// Check for common browser compatibility issues
+const checkBrowserCompatibility = () => {
+  const issues = [];
+  
+  // Safer check for module support without passing multiple arguments
+  if (!('noModule' in document.createElement('script'))) {
+    issues.push('ES Modules not fully supported');
+  }
+  
+  // Check for other potential issues
+  if (typeof window.IntersectionObserver === 'undefined') {
+    issues.push('IntersectionObserver not supported');
+  }
+  
+  if (typeof window.ResizeObserver === 'undefined') {
+    issues.push('ResizeObserver not supported');
+  }
+  
+  return issues;
+};
 
 const MobileDebugPanel: React.FC = () => {
-  const [open, setOpen] = useState(false);
-  const { stats, isLoading: statsLoading } = useBreedingStats();
-  const { 
-    events, 
-    addEvent, 
-    updateEvent, 
-    deleteEvent, 
-    getEventsForDay
-  } = useCalendarContext();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const { user, session } = useAuth();
+  const { dogs, loading: dogsLoading, refreshDogs } = useDogs();
+  const { reminders, isLoading: remindersLoading, refreshReminderData } = useBreedingReminders();
+  const [deviceInfo, setDeviceInfo] = useState('');
+  const [networkType, setNetworkType] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [compatibilityIssues, setCompatibilityIssues] = useState<string[]>([]);
+  const queryClient = useQueryClient();
   
-  const calendarLoading = false; // Default to false since isLoading doesn't exist in the context
+  // Only show the panel on mobile devices in development mode
+  useEffect(() => {
+    // Always show in development mode, regardless of device
+    const shouldShowPanel = isDevMode();
+    setIsVisible(shouldShowPanel);
+    
+    if (shouldShowPanel) {
+      setDeviceInfo(navigator.userAgent);
+      setNetworkType((navigator as any).connection?.effectiveType || 'unknown');
+      setCompatibilityIssues(checkBrowserCompatibility());
+      
+      // Log mobile detection
+      console.log(`[MobileDebug] Is mobile device: ${isMobileDevice()}`);
+      console.log(`[MobileDebug] User agent: ${navigator.userAgent}`);
+      console.log(`[MobileDebug] Screen size: ${window.innerWidth}x${window.innerHeight}`);
+      
+      // Listen for network changes
+      const connection = (navigator as any).connection;
+      if (connection) {
+        const updateNetworkInfo = () => {
+          setNetworkType(connection.effectiveType || 'unknown');
+        };
+        connection.addEventListener('change', updateNetworkInfo);
+        return () => connection.removeEventListener('change', updateNetworkInfo);
+      }
+    }
+  }, []);
   
-  const { 
-    reminders, 
-    isLoading: remindersLoading, 
-    hasError,
-    handleMarkComplete,
-    remindersSummary
-  } = useReminders();
-
-  const togglePanel = () => {
-    setOpen(prev => !prev);
-  };
-
-  // Function to refresh each data source
-  const refreshCalendarData = () => {
-    console.log("Refreshing calendar data...");
-    // If the calendar context has a refresh function, call it
-    if ('refreshEvents' in useCalendarContext()) {
-      (useCalendarContext() as any).refreshEvents();
+  const handleRefreshAll = async () => {
+    setRefreshing(true);
+    try {
+      console.log('[MobileDebug] Refreshing all data');
+      
+      // Clear React Query cache
+      await queryClient.invalidateQueries();
+      
+      // Refresh dogs data
+      await refreshDogs();
+      console.log('[MobileDebug] Dogs refreshed');
+      
+      // Give time for dogs to load before refreshing reminders
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Refresh reminders
+      await refreshReminderData();
+      console.log('[MobileDebug] Reminders refreshed');
+      
+      // Manual trigger for reminders if user is available
+      if (user && dogs.length > 0) {
+        // Fix: pass only userId as the first argument since that's what the type expects
+        const manualReminders = await triggerAllReminders(user.id);
+        console.log(`[MobileDebug] Manually generated ${manualReminders.length} reminders`);
+      }
+    } catch (error) {
+      console.error('[MobileDebug] Refresh error:', error);
+    } finally {
+      setRefreshing(false);
     }
   };
-
-  // Function to manually refresh reminders data
-  const refreshReminderData = () => {
-    console.log("Refreshing reminder data...");
-    // If the reminders context has a refresh function, call it
-    if ('refreshReminders' in useReminders()) {
-      (useReminders() as any).refreshReminders();
-    }
-  };
-
-  // Function to refresh breeding stats
-  const refreshBreedingStats = () => {
-    console.log("Refreshing breeding stats...");
-    // If the breeding stats hook has a refresh function, call it
-    if ('refreshStats' in useBreedingStats()) {
-      (useBreedingStats() as any).refreshStats();
-    }
-  };
-
-  if (!open) {
-    return (
-      <Button 
-        className="fixed bottom-4 left-4 z-50 h-10 w-10 rounded-full p-2 text-xs"
-        variant="secondary"
-        onClick={togglePanel}
-      >
-        Debug
-      </Button>
-    );
-  }
-
+  
+  if (!isVisible) return null;
+  
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-secondary text-secondary-foreground border-t border-muted/50">
-      <div className="flex items-center justify-between p-4">
-        <h4 className="text-sm font-bold">Mobile Debug Panel</h4>
-        <Button variant="outline" size="sm" onClick={togglePanel}>
-          Close
+    <div className="fixed bottom-0 left-0 right-0 z-50">
+      {isOpen ? (
+        <Card className="rounded-b-none border-b-0">
+          <CardHeader className="py-2 px-4 flex flex-row items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Bug className="h-4 w-4" />
+              Mobile Debug Panel
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <RefreshCw 
+                className={`h-4 w-4 cursor-pointer ${refreshing ? 'animate-spin' : ''}`} 
+                onClick={() => window.location.reload()}
+              />
+              <ChevronDown 
+                className="h-4 w-4 cursor-pointer" 
+                onClick={() => setIsOpen(false)}
+              />
+              <X 
+                className="h-4 w-4 cursor-pointer" 
+                onClick={() => setIsVisible(false)}
+              />
+            </div>
+          </CardHeader>
+          <CardContent className="py-2 px-4 text-xs space-y-3">
+            <div>
+              <div className="font-bold">Network:</div> 
+              <div className="ml-2">{networkType}</div>
+            </div>
+            
+            {compatibilityIssues.length > 0 && (
+              <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded">
+                <div className="font-bold text-yellow-800 dark:text-yellow-200">Compatibility Issues:</div>
+                <ul className="ml-2 list-disc list-inside">
+                  {compatibilityIssues.map((issue, i) => (
+                    <li key={i} className="text-yellow-700 dark:text-yellow-300">{issue}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            <div>
+              <div className="font-bold flex items-center gap-1">
+                <User className="h-3 w-3" />
+                Authentication:
+              </div>
+              <div className="ml-2">
+                <div>User ID: {user?.id || 'Not logged in'}</div>
+                <div>Session valid: {session ? 'Yes' : 'No'}</div>
+                <div>Token length: {session?.access_token?.length || 0} characters</div>
+              </div>
+            </div>
+            
+            <div>
+              <div className="font-bold flex items-center gap-1">
+                <Database className="h-3 w-3" />
+                Data:
+              </div>
+              <div className="ml-2 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span>Dogs:</span> 
+                  <Badge variant={dogsLoading ? "outline" : "default"}>
+                    {dogsLoading ? 'Loading...' : dogs.length}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>Reminders:</span> 
+                  <Badge variant={remindersLoading ? "outline" : "default"}>
+                    {remindersLoading ? 'Loading...' : reminders.length}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-xs opacity-70 max-h-20 overflow-auto">
+              {deviceInfo}
+            </div>
+          </CardContent>
+          <CardFooter className="py-2 px-4">
+            <Button
+              size="sm"
+              onClick={handleRefreshAll}
+              disabled={refreshing}
+              className="w-full"
+            >
+              {refreshing && <RefreshCw className="h-3 w-3 mr-2 animate-spin" />}
+              {refreshing ? 'Refreshing...' : 'Force Refresh All Data'}
+            </Button>
+          </CardFooter>
+        </Card>
+      ) : (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="bg-muted/60 backdrop-blur-sm w-full rounded-t-none rounded-b-none border-t"
+          onClick={() => setIsOpen(true)}
+        >
+          <ChevronUp className="h-3 w-3 mr-2" />
+          Debug Panel
         </Button>
-      </div>
-      <Separator />
-      <ScrollArea className="max-h-64">
-        <div className="p-4 space-y-4">
-          <div>
-            <h5 className="text-xs font-bold">Breeding Stats</h5>
-            <p className="text-xs">Is Loading: {String(statsLoading)}</p>
-            {stats && (
-              <pre className="text-xs">{JSON.stringify(stats, null, 2)}</pre>
-            )}
-            <Button variant="outline" size="sm" onClick={refreshBreedingStats}>
-              Refresh Stats
-            </Button>
-          </div>
-          <Separator />
-          <div>
-            <h5 className="text-xs font-bold">Calendar Events</h5>
-            <p className="text-xs">Is Loading: {String(calendarLoading)}</p>
-            {events && (
-              <pre className="text-xs">{JSON.stringify(events, null, 2)}</pre>
-            )}
-            <Button variant="outline" size="sm" onClick={refreshCalendarData}>
-              Refresh Calendar
-            </Button>
-          </div>
-          <Separator />
-          <div>
-            <h5 className="text-xs font-bold">Reminders</h5>
-            <p className="text-xs">Is Loading: {String(remindersLoading)}</p>
-            {reminders && (
-              <pre className="text-xs">{JSON.stringify(reminders, null, 2)}</pre>
-            )}
-            <Button variant="outline" size="sm" onClick={refreshReminderData}>
-              Refresh Reminders
-            </Button>
-          </div>
-        </div>
-      </ScrollArea>
+      )}
     </div>
   );
 };

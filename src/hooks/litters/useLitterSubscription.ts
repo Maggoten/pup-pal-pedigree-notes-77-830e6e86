@@ -2,9 +2,9 @@
 import { useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export function useLitterSubscription(loadLittersData?: () => Promise<void>, userId?: string) {
+export function useLitterSubscription(loadLittersData, userId) {
   const setupSubscription = useCallback(() => {
-    if (!userId || !loadLittersData) return () => {};
+    if (!userId) return () => {};
     
     console.log("Setting up litter subscription for user:", userId);
     

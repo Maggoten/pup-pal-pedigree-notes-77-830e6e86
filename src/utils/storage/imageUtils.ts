@@ -3,12 +3,6 @@ import { isMobileDevice } from '@/utils/fetchUtils';
 import { isSafari } from '@/utils/storage/config';
 import { safeImageCompression, directUpload, getPlatformInfo } from './mobileUpload';
 
-// Define StorageError type locally to avoid dependency on @supabase/storage-js
-interface StorageError {
-  message: string;
-  statusCode?: number;
-}
-
 // Improved image prefetch function with better mobile support
 export const prefetchImage = async (url: string): Promise<void> => {
   return new Promise((resolve) => {
@@ -115,73 +109,5 @@ export const createSafariCompatibleFile = (blob: Blob, filename: string, mimeTyp
     file.name = filename;
     file.lastModified = new Date().getTime();
     return file as File;
-  }
-};
-
-// Updated compressImage utility function to accept maxSizeMB parameter
-export const compressImage = async (file: File, maxSizeMB: number = 1): Promise<File> => {
-  try {
-    // Pass both parameters to safeImageCompression
-    return await safeImageCompression(file, maxSizeMB);
-  } catch (error) {
-    console.warn('Image compression failed:', error);
-    return file; // Return original file if compression fails
-  }
-};
-
-// Error handling utilities
-export const formatStorageError = (error: unknown): string => {
-  if (!error) return 'Unknown storage error';
-  
-  if (error instanceof Error) {
-    return error.message;
-  }
-  
-  if (typeof error === 'object' && error !== null) {
-    if ('message' in error && typeof (error as any).message === 'string') {
-      return (error as any).message;
-    }
-    if ('error' in error && typeof (error as any).error === 'string') {
-      return (error as any).error;
-    }
-    if ('error' in error && typeof (error as any).error === 'object' && (error as any).error !== null) {
-      const errorObj = (error as any).error;
-      if ('message' in errorObj && typeof errorObj.message === 'string') {
-        return errorObj.message;
-      }
-    }
-  }
-  
-  return String(error);
-};
-
-export const createStorageError = (message: string) => {
-  return { data: null, error: { message } };
-};
-
-export const hasError = (result: unknown): result is { error: unknown } => {
-  return typeof result === 'object' && 
-         result !== null && 
-         'error' in result && 
-         result.error !== null && 
-         result.error !== undefined;
-};
-
-export const safeGetErrorProperty = <T>(obj: unknown, prop: string, defaultValue: T): T => {
-  if (obj && typeof obj === 'object' && prop in obj) {
-    return (obj as any)[prop];
-  }
-  return defaultValue;
-};
-
-export const getStorageTimeout = (): number => {
-  const platform = getPlatformInfo();
-  // Default timeouts based on platform
-  if (platform.mobile) {
-    return 60000; // 60s for mobile
-  } else if (platform.safari) {
-    return 45000; // 45s for Safari desktop
-  } else {
-    return 30000; // 30s for other browsers
   }
 };

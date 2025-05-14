@@ -1,91 +1,100 @@
 
-interface RetryOptions {
-  maxRetries: number;
-  initialDelay: number;
-  onRetry?: (attempt: number, error?: unknown) => void;
-}
+// Enhanced fetch utilities with better mobile support
 
-/**
- * Utility function to retry a fetch operation with exponential backoff
- * 
- * @param fetchFn The async function to retry
- * @param options Retry options (maxRetries, initialDelay, onRetry callback)
- * @returns The result of the successful fetch
- * @throws The last error encountered after all retries fail
- */
-export async function fetchWithRetry<TInput, TOutput = TInput>(
-  fetchFn: () => Promise<TInput>, 
-  options: RetryOptions
-): Promise<TOutput> {
-  const { maxRetries, initialDelay, onRetry } = options;
-  let lastError: unknown;
+// Check if we're on a mobile device
+export const isMobileDevice = (): boolean => {
+  return /iphone|ipad|ipod|android|blackberry|windows phone/i.test(navigator.userAgent) ||
+    // iPad detection on iOS 13+
+    (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+};
+
+// Get device-aware timeout values
+export const getDeviceAwareTimeout = (baseTimeout: number): number => {
+  if (isMobileDevice()) {
+    // Mobile devices get more generous timeouts due to potential network issues
+    return baseTimeout * 1.5;
+  }
+  return baseTimeout;
+};
+
+type RetryOptions = {
+  maxRetries?: number;
+  initialDelay?: number;
+  useBackoff?: boolean;
+  onRetry?: (attempt: number, error?: any) => void;
+  shouldRetry?: (error: any) => boolean;
+};
+
+// General retry utility for any async operation
+export async function fetchWithRetry<T>(
+  operation: () => Promise<T>,
+  options: RetryOptions = {}
+): Promise<T> {
+  const {
+    maxRetries = 2,
+    initialDelay = 1000,
+    useBackoff = true,
+    onRetry,
+    shouldRetry = () => true
+  } = options;
   
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+  let attempt = 0;
+  let lastError: any;
+  
+  while (attempt <= maxRetries) {
     try {
-      // First attempt (attempt = 0) doesn't count as a retry
-      if (attempt > 0 && onRetry) {
-        onRetry(attempt, lastError);
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      
+      // Check if we should retry this error
+      if (!shouldRetry(error)) {
+        console.log('Not retrying based on error type:', error);
+        break;
       }
       
-      // Add delay before retries (not before the first attempt)
-      if (attempt > 0) {
-        // Exponential backoff with initial delay
-        const delay = initialDelay * Math.pow(2, attempt - 1);
+      if (attempt < maxRetries) {
+        // Calculate delay with exponential backoff if enabled
+        const delay = useBackoff 
+          ? initialDelay * Math.pow(2, attempt)
+          : initialDelay;
+        
+        console.log(`Operation failed, retry ${attempt + 1}/${maxRetries} in ${delay}ms`, error);
+        
+        if (onRetry) {
+          onRetry(attempt + 1, error);
+        }
+        
         await new Promise(resolve => setTimeout(resolve, delay));
       }
       
-      // Attempt the fetch
-      return await fetchFn() as unknown as TOutput;
-    } catch (error) {
-      console.error(`Fetch attempt ${attempt + 1}/${maxRetries + 1} failed:`, error);
-      lastError = error;
-      
-      // If this was the last attempt, throw the error
-      if (attempt === maxRetries) {
-        throw error;
+      attempt++;
+    }
+  }
+  
+  throw lastError;
+}
+
+// Determine if a request error should be retried
+export const shouldRetryRequest = (error: any): boolean => {
+  // Don't retry 4xx errors (client errors)
+  if (error && typeof error === 'object') {
+    // For Supabase errors with status codes
+    if ('statusCode' in error && error.statusCode >= 400 && error.statusCode < 500) {
+      // Don't retry client errors except for 408 (timeout)
+      if (error.statusCode !== 408) {
+        return false;
+      }
+    }
+    
+    // For fetch Response objects
+    if ('status' in error && error.status >= 400 && error.status < 500) {
+      // Don't retry client errors except for 408 (timeout)
+      if (error.status !== 408) {
+        return false;
       }
     }
   }
   
-  // This shouldn't be reached due to the throw in the loop,
-  // but TypeScript needs it for type safety
-  throw lastError;
-}
-
-/**
- * Simple timeout promise that rejects after the specified time
- * 
- * @param ms Timeout duration in milliseconds
- * @param message Optional error message
- */
-export function timeout<T>(ms: number, message = 'Operation timed out'): Promise<T> {
-  return new Promise((_, reject) => {
-    setTimeout(() => reject(new Error(message)), ms);
-  });
-}
-
-/**
- * Wraps a promise with a timeout
- * 
- * @param promise The promise to wrap
- * @param ms Timeout duration in milliseconds
- * @param message Optional error message
- */
-export function withTimeout<T>(
-  promise: Promise<T>, 
-  ms: number, 
-  message = 'Operation timed out'
-): Promise<T> {
-  return Promise.race([
-    promise,
-    timeout<T>(ms, message)
-  ]);
-}
-
-/**
- * Utility to detect if the current device is a mobile device
- * @returns true if the current device is a mobile device
- */
-export function isMobileDevice(): boolean {
-  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-}
+  return true;
+};

@@ -1,6 +1,6 @@
 
 import { Dog } from '@/types/dogs';
-import { Reminder, createReminder } from '@/types/reminders';
+import { Reminder } from '@/types/reminders';
 import { differenceInDays, parseISO, addDays, isSameMonth, isSameDay, addYears, startOfDay, isAfter, isBefore, isToday } from 'date-fns';
 import { createPawPrintIcon, createCalendarClockIcon } from '@/utils/iconUtils';
 
@@ -30,7 +30,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
       
       // Show reminder for upcoming heat 30 days in advance (previously was also 30 days)
       if (isAfter(nextHeatDate, today) && differenceInDays(nextHeatDate, today) <= 30) {
-        reminders.push(createReminder({
+        reminders.push({
           id: `dog-heat-${dog.id}-${nextHeatDate.getTime()}`, // Add timestamp for uniqueness
           title: `${dog.name}'s Heat Approaching`,
           description: `Expected heat cycle in ${differenceInDays(nextHeatDate, today)} days`,
@@ -39,7 +39,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
           priority: 'high',
           type: 'heat', 
           relatedId: dog.id
-        }));
+        });
         console.log(`Created heat reminder for dog ${dog.name}`);
       }
     }
@@ -57,7 +57,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
       if (daysUntilVaccination >= -7 && daysUntilVaccination <= 7) {
         const isOverdue = daysUntilVaccination < 0;
         
-        reminders.push(createReminder({
+        reminders.push({
           id: `dog-vaccine-${dog.id}-${nextVaccination.getFullYear()}`, // Add year for uniqueness
           title: `${dog.name}'s Vaccination ${isOverdue ? 'Overdue' : 'Due'}`,
           description: isOverdue 
@@ -68,7 +68,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
           priority: isOverdue ? 'high' : 'medium',
           type: 'vaccination', 
           relatedId: dog.id
-        }));
+        });
         console.log(`Created vaccination reminder for dog ${dog.name}`);
       }
     } else {
@@ -95,7 +95,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
           ? currentYear - birthdate.getFullYear() 
           : (currentYear + (isBefore(birthdateThisYear, today) ? 1 : 0)) - birthdate.getFullYear();
         
-        reminders.push(createReminder({
+        reminders.push({
           id: `dog-birthday-${dog.id}-${nextBirthday.getFullYear()}`, // Add year for uniqueness 
           title: `${dog.name}'s Birthday`,
           description: daysUntilBirthday === 0 
@@ -108,7 +108,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
           priority: 'low',
           type: 'birthday',
           relatedId: dog.id
-        }));
+        });
         console.log(`Created birthday reminder for dog ${dog.name}`);
       }
     }

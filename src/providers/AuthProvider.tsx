@@ -1,25 +1,19 @@
-
 import { useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { User } from '@/types/auth';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, Profile } from '@/integrations/supabase/client';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import AuthContext from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { fetchWithRetry, isMobileDevice } from '@/utils/fetchUtils';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
-import { verifySession, refreshSession, clearSessionState } from '@/utils/auth/sessionManager';
-import { handleAuthStateChange, resetQueryClient } from '@/utils/reactQueryConfig';
-import { useSessionManager } from '@/hooks/useSessionManager';
-import { handleLogoutState } from '@/utils/auth/logoutManager';
-import { mapUserProfile } from '@/utils/auth/sessionUtils';
+import { verifySession } from '@/utils/storage/core/session';
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  // Core auth state
   const [user, setUser] = useState<User | null>(null);
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -27,118 +21,124 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
-  // Get session management functions
-  const {
-    isActive,
-    setIsActive,
-    lastActiveTime,
-    sessionCheckInterval,
-    isSessionExpiredOrNearExpiry,
-    clearSessionIntervals
-  } = useSessionManager(session, isAuthReady);
+  // Track focus & visibility state
+  const [isActive, setIsActive] = useState(true);
+  const lastActiveTime = useRef(Date.now());
+  const sessionCheckInterval = useRef<NodeJS.Timeout | null>(null);
   
-  const { login, register, logout: baseLogout, getUserProfile } = useAuthActions();
+  const { login, register, logout, getUserProfile } = useAuthActions();
 
-  /**
-   * Fetches user profile and maps it to our app user shape
-   */
-  const fetchAndMapUserProfile = async (
-    userId: string, 
-    userEmail?: string | null
-  ): Promise<User | null> => {
-    if (!userId) return null;
-    
-    try {
-      console.log(`[Auth Debug] Fetching profile for user: ${userId}`);
-      const profile = await getUserProfile(userId);
-      return mapUserProfile(profile, userId, userEmail);
-    } catch (error) {
-      console.error('[Auth Debug] Error fetching profile:', error);
-      return mapUserProfile(null, userId, userEmail);
-    }
-  };
-
-  /**
-   * Shared helper function to process authentication changes
-   */
-  const processAuthChange = useCallback(async (
-    event: string,
-    currentSession: Session | null,
-    options?: { skipProfileFetch?: boolean }
-  ) => {
-    if (!currentSession) {
-      // No session, clear user state
-      setUser(null);
-      setSupabaseUser(null);
-      setSession(null);
-      setIsLoggedIn(false);
-      setIsAuthReady(true);
-      setIsLoading(false);
-      
-      // Trigger React Query cleanup on sign out if needed
-      if (event === 'SIGNED_OUT') {
-        handleAuthStateChange(event);
-      }
-      
-      return;
-    }
-    
-    // Immediately update session state to prevent race conditions
-    setSession(currentSession);
-    setSupabaseUser(currentSession.user);
-    setIsLoggedIn(true);
-    
-    console.log(`[Auth Debug] User ID from session: ${currentSession.user.id}`);
-    console.log(`[Auth Debug] Session expires: ${new Date(currentSession.expires_at! * 1000).toISOString()}`);
-    
-    // Skip profile fetch if requested (useful for certain events)
-    if (options?.skipProfileFetch) {
-      setIsAuthReady(true);
-      setIsLoading(false);
-      return;
-    }
-    
-    try {
-      // Fetch user profile
-      const appUser = await fetchAndMapUserProfile(
-        currentSession.user.id, 
-        currentSession.user.email
-      );
-      
-      if (appUser) {
-        setUser(appUser);
-        console.log(`[Auth Debug] User profile loaded`);
-        
-        // Trigger React Query data prefetching on sign in
-        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-          handleAuthStateChange('SIGNED_IN', currentSession.user.id);
-        } else if (event === 'REFRESHED') {
-          handleAuthStateChange(event, currentSession.user.id);
-        }
-      }
-    } catch (error) {
-      console.error('[Auth Debug] Error processing auth change:', error);
-    } finally {
-      // Ensure auth is ready and loading is complete regardless of profile fetch result
-      setIsAuthReady(true);
-      setIsLoading(false);
-    }
-  }, [fetchAndMapUserProfile]);
-  
   // Log device info immediately
   useEffect(() => {
     const deviceType = isMobileDevice() ? 'Mobile' : 'Desktop';
     const browserType = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome') ? 'Safari' : 
                         navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other';
     console.log(`[Auth Debug] Device type: ${deviceType}, Browser: ${browserType}, User Agent: ${navigator.userAgent}`);
+  }, []);
+  
+  // Helper to check if a session is expired or near expiration
+  const isSessionExpiredOrNearExpiry = useCallback((currentSession: Session | null, options?: { ignoreAuthReady?: boolean }): boolean => {
+    // Do not perform expiry checks until auth is ready, unless explicitly overridden
+    if (!options?.ignoreAuthReady && !isAuthReady) {
+      console.log('[Auth Debug] Skipping expiry check as auth is not ready yet');
+      return false;
+    }
     
-    // Clean up any lingering state from previous sessions
-    clearSessionState();
+    if (!currentSession || !currentSession.expires_at) return true;
     
-    // Return cleanup function
-    return () => {
-      clearSessionState();
-    };
+    // Convert expires_at to milliseconds
+    const expiryTime = currentSession.expires_at * 1000;
+    const now = Date.now();
+    
+    // Check if expired or within 5 minutes of expiry
+    const fiveMinutesMs = 5 * 60 * 1000;
+    const isExpiring = now >= expiryTime - fiveMinutesMs;
+    
+    if (isExpiring) {
+      console.log('[Auth Debug] Session is expired or near expiry', {
+        now: new Date(now).toISOString(),
+        expiry: new Date(expiryTime).toISOString(),
+        timeLeft: (expiryTime - now) / 1000 / 60 + ' minutes'
+      });
+    }
+    
+    return isExpiring;
+  }, [isAuthReady]);
+  
+  // Function to refresh the session with improved mobile handling
+  const refreshSession = useCallback(async () => {
+    const platform = getPlatformInfo();
+    const isMobile = platform.mobile || platform.safari;
+    
+    try {
+      console.log('[Auth Debug] Refreshing session...');
+      
+      // Use verifySession with appropriate options
+      const sessionValid = await verifySession({
+        respectAuthReady: true,
+        authReady: isAuthReady,
+        skipThrow: true
+      });
+      
+      if (sessionValid) {
+        console.log('[Auth Debug] Session verified or refreshed successfully');
+        // Get the updated session to update the React state
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          setSession(data.session);
+          setSupabaseUser(data.session.user);
+          setIsLoggedIn(true);
+        }
+        return true;
+      } else {
+        console.log('[Auth Debug] Session verification failed');
+        return false;
+      }
+    } catch (err) {
+      console.error('[Auth Debug] Error during session refresh:', err);
+      return false;
+    }
+  }, [isAuthReady]);
+
+  // Function to check session status across storage locations
+  const validateSessionAcrossStorages = useCallback(async () => {
+    try {
+      // Check localStorage, sessionStorage and cookies for session fragments
+      let hasLocalStorageSession = false;
+      let hasSessionStorageSession = false;
+      
+      try {
+        // Look for known session keys in localStorage
+        hasLocalStorageSession = !!localStorage.getItem('supabase.auth.token') || 
+                                !!localStorage.getItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+      } catch (e) {
+        console.log('[Auth Debug] Error checking localStorage:', e);
+      }
+      
+      try {
+        // Look for known session keys in sessionStorage
+        hasSessionStorageSession = !!sessionStorage.getItem('supabase.auth.token') || 
+                                   !!sessionStorage.getItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+      } catch (e) {
+        console.log('[Auth Debug] Error checking sessionStorage:', e);
+      }
+      
+      // If session found in any storage but getSession returns no session, 
+      // there might be a storage fragmentation issue
+      const { data } = await supabase.auth.getSession();
+      if ((hasLocalStorageSession || hasSessionStorageSession) && !data.session) {
+        console.log('[Auth Debug] Storage fragmentation detected: session in storage but not in memory');
+        
+        // Try to fix by forcing a recovery refresh
+        const { data: refreshData } = await supabase.auth.refreshSession();
+        return !!refreshData.session;
+      }
+      
+      return !!data.session;
+    } catch (e) {
+      console.error('[Auth Debug] Error during cross-storage validation:', e);
+      return false;
+    }
   }, []);
   
   // Handle window focus/blur events (tab switching)
@@ -158,13 +158,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (isAuthReady && inactiveTime > 30 * 1000) {
           console.log('[Auth Debug] Long inactivity detected, refreshing session...');
           
-          // Refresh session
-          const refreshed = await refreshSession();
+          // First validate session across storage locations (important for Safari)
+          const hasValidSession = await validateSessionAcrossStorages();
           
-          if (refreshed && session && supabaseUser) {
-            // Trigger data refresh upon successful session refresh
-            handleAuthStateChange('REFRESHED', supabaseUser.id);
+          if (!hasValidSession) {
+            console.log('[Auth Debug] No valid session found, attempting refresh...');
           }
+          
+          // Refresh regardless to ensure tokens are up to date
+          await refreshSession();
         }
       } else {
         // Going inactive - record time
@@ -187,7 +189,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       window.removeEventListener('focus', handleVisibilityChange);
       window.removeEventListener('blur', () => {});
     };
-  }, [refreshSession, isAuthReady, session, supabaseUser, setIsActive, lastActiveTime]);
+  }, [refreshSession, validateSessionAcrossStorages, isAuthReady]);
   
   // Periodically check session when app is active
   useEffect(() => {
@@ -220,114 +222,280 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         sessionCheckInterval.current = null;
       }
     };
-  }, [isActive, session, refreshSession, isSessionExpiredOrNearExpiry, isAuthReady, sessionCheckInterval]);
+  }, [isActive, session, refreshSession, isSessionExpiredOrNearExpiry, isAuthReady]);
 
   // Set up auth state listener and check for existing session
   useEffect(() => {
-    console.log('[AuthProvider] init listener — isAuthReady:', isAuthReady, 'isLoggedIn:', isLoggedIn);
     let isSubscribed = true;
     
     const initAuth = async () => {
       try {
-        // First set up the auth state listener - STORE THE SUBSCRIPTION PROPERLY
-        const authStateResponse = supabase.auth.onAuthStateChange(
+        // First set up the auth state listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
           (event, currentSession) => {
             console.log(`[Auth Debug] Auth state change event: ${event}`);
-            console.log('[AuthProvider] onAuthStateChange', { event, sessionExists: !!currentSession });
             
             if (!isSubscribed) return;
             
-            // Handle SIGNED_OUT events immediately to prevent flicker
-            if (event === 'SIGNED_OUT') {
-              processAuthChange(event, null);
-              return;
+            if (event === 'INITIAL_SESSION') {
+              console.log('[Auth Debug] Initial session event received');
             }
             
-            // Process other auth events
-            processAuthChange(event, currentSession);
+            console.log(`[Auth Debug] Session exists: ${!!currentSession}`);
+            if (currentSession) {
+              console.log(`[Auth Debug] User ID from session: ${currentSession.user.id}`);
+              console.log(`[Auth Debug] Session expires: ${new Date(currentSession.expires_at! * 1000).toISOString()}`);
+            }
+            
+            setSession(currentSession);
+            setIsLoggedIn(!!currentSession);
+            
+            if (currentSession?.user) {
+              console.log(`[Auth Debug] User authenticated: ${currentSession.user.id}`);
+              setSupabaseUser(currentSession.user);
+              
+              // Use setTimeout to prevent potential deadlocks - this is critical for mobile
+              setTimeout(async () => {
+                try {
+                  if (!isSubscribed) return;
+                  
+                  console.log(`[Auth Debug] Fetching profile for user: ${currentSession.user.id}`);
+                  // Get user profile from database with retry logic
+                  let retryCount = 0;
+                  let profile = null;
+                  
+                  while (retryCount < 4 && !profile) {
+                    try {
+                      profile = await getUserProfile(currentSession.user.id);
+                      if (profile) {
+                        console.log(`[Auth Debug] Profile retrieved: success`);
+                        break;
+                      }
+                      console.log(`[Auth Debug] Profile fetch attempt ${retryCount + 1} returned null`);
+                    } catch (err) {
+                      console.log(`[Auth Debug] Profile fetch attempt ${retryCount + 1} failed:`, err);
+                      await new Promise(resolve => setTimeout(resolve, 1500));
+                    }
+                    retryCount++;
+                  }
+                  
+                  if (profile) {
+                    setUser({
+                      id: currentSession.user.id,
+                      email: currentSession.user.email || '',
+                      firstName: profile.first_name,
+                      lastName: profile.last_name,
+                      address: profile.address
+                    });
+                    console.log(`[Auth Debug] User object set with profile data`);
+                  } else {
+                    console.error('[Auth Debug] Failed to fetch profile after retries');
+                    // Use a fallback approach - create a minimal user object
+                    setUser({
+                      id: currentSession.user.id,
+                      email: currentSession.user.email || '',
+                      firstName: '',
+                      lastName: '',
+                      address: ''
+                    });
+                    console.log(`[Auth Debug] User object set with fallback data`);
+                  }
+                  // IMPORTANT: Only set auth as ready AFTER setting the user
+                  setIsAuthReady(true);
+                } catch (error) {
+                  console.error('[Auth Debug] Error in auth state change handler:', error);
+                  setIsAuthReady(true); // Mark as ready even on error to prevent hanging
+                }
+              }, 0);
+            } else {
+              if (event === 'SIGNED_OUT') {
+                if (isSubscribed) {
+                  setUser(null);
+                  setSupabaseUser(null);
+                  setIsLoggedIn(false);
+                  console.log(`[Auth Debug] Sign out event processed, state cleared`);
+                  
+                  // Perform thorough storage cleanup
+                  try {
+                    // ... keep existing code (storage cleanup)
+                  } catch (e) {
+                    console.log('[Auth Debug] Error during thorough storage cleanup:', e);
+                  }
+                  
+                  // Explicit mark as auth ready on signout
+                  setIsAuthReady(true);
+                }
+              } else {
+                // If we have no session and it's not a signout event,
+                // mark as not logged in and auth ready
+                setUser(null);
+                setSupabaseUser(null);
+                setIsAuthReady(true);
+                console.log(`[Auth Debug] No user in session, marked auth as ready`);
+              }
+            }
+
+            setIsLoading(false);
           }
         );
-        
-        // Store the subscription for proper cleanup
-        const subscription = authStateResponse.data.subscription;
-        
-        // Check for existing session
+
+        // Check for existing session with enhanced mobile handling
         try {
-          const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+          // Enhanced session check with retry and cross-storage validation
+          const getInitialSession = async () => {
+            const platform = getPlatformInfo();
+            const isMobile = platform.mobile || platform.safari;
+            
+            console.log(`[Auth Debug] Checking initial session on ${platform.device}`);
+            
+            // First check standard session with more retries for mobile
+            const { data: { session: initialSession }, error } = await fetchWithRetry(
+              () => supabase.auth.getSession(),
+              { 
+                maxRetries: isMobile ? 4 : 3, 
+                initialDelay: isMobile ? 1800 : 1500,
+                useBackoff: true
+              }
+            );
+            
+            if (error) {
+              console.log('[Auth Debug] Error getting session:', error);
+              
+              // Try cross-storage validation for Safari
+              if (platform.safari || platform.mobile) {
+                console.log(`[Auth Debug] ${platform.device} detected, trying cross-storage validation`);
+                await validateSessionAcrossStorages();
+                
+                // After validation attempt, try session refresh
+                console.log('[Auth Debug] Attempting session refresh after validation');
+                const refreshResult = await supabase.auth.refreshSession();
+                return refreshResult.data.session;
+              }
+              
+              return null;
+            }
+            
+            return initialSession;
+          };
           
-          if (error) {
-            console.error('[Auth Debug] Error getting initial session:', error);
-            setIsAuthReady(true);
-            setIsLoading(false);
-            return;
-          }
+          const initialSession = await getInitialSession();
           
           console.log(`[Auth Debug] Initial session check: ${initialSession ? 'Session exists' : 'No session'}`);
           
-          // Process the initial session with appropriate event name
-          if (isSubscribed) {
-            await processAuthChange('INITIAL_SESSION', initialSession);
+          if (initialSession?.user && isSubscribed) {
+            console.log(`[Auth Debug] Initial user ID: ${initialSession?.user?.id || 'none'}`);
+            
+            setSession(initialSession);
+            setSupabaseUser(initialSession.user);
+            setIsLoggedIn(true);
+            
+            if (initialSession.access_token) {
+              console.log(`[Auth Debug] Initial auth token length: ${initialSession.access_token.length}`);
+              const expiresAt = initialSession.expires_at;
+              if (expiresAt) {
+                const expiryDate = new Date(expiresAt * 1000);
+                console.log(`[Auth Debug] Token expires at: ${expiryDate.toISOString()}`);
+              }
+            } else {
+              console.warn('[Auth Debug] No access token in session');
+            }
+            
+            // Get user profile from database with retry logic
+            let retryCount = 0;
+            let profile = null;
+            
+            while (retryCount < 4 && !profile) {
+              try {
+                console.log(`[Auth Debug] Initial profile fetch attempt ${retryCount + 1}`);
+                profile = await getUserProfile(initialSession.user.id);
+                if (profile) break;
+              } catch (err) {
+                console.log(`[Auth Debug] Initial profile fetch attempt ${retryCount + 1} failed:`, err);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+              }
+              retryCount++;
+            }
+            
+            if (profile && isSubscribed) {
+              setUser({
+                id: initialSession.user.id,
+                email: initialSession.user.email || '',
+                firstName: profile.first_name,
+                lastName: profile.last_name,
+                address: profile.address
+              });
+            } else if (isSubscribed) {
+              // Create a minimal user object as fallback
+              setUser({
+                id: initialSession.user.id,
+                email: initialSession.user.email || '',
+                firstName: '',
+                lastName: '',
+                address: ''
+              });
+            }
           }
-        } catch (error) {
-          console.error('[Auth Debug] Error checking initial session:', error);
+          
+          // Always mark auth as ready and loading complete even if no session
+          // IMPORTANT: This needs to happen AFTER the profile is loaded and user is set
+          setIsAuthReady(true);
+          setIsLoading(false);
+          
+        } catch (sessionError) {
+          console.error('[Auth Debug] Error checking initial session:', sessionError);
+          // Even on error, mark auth as ready and loading complete to prevent hanging
           setIsAuthReady(true);
           setIsLoading(false);
         }
-        
-        // Return cleanup function
+
         return () => {
-          console.log('[Auth Debug] Unsubscribing from auth state changes');
           subscription.unsubscribe();
+          isSubscribed = false;
         };
-      } catch (error) {
-        console.error('[Auth Debug] Critical error:', error);
+      } catch (err) {
+        console.error('[Auth Debug] Critical error during auth setup:', err);
         setIsAuthReady(true);
         setIsLoading(false);
       }
     };
+
+    initAuth();
     
-    const cleanupPromise = initAuth();
-    
-    // Safety timeout to prevent hanging
+    // Add a safety timeout in case auth never completes
     const safetyTimer = setTimeout(() => {
-      if (isSubscribed && (isLoading || !isAuthReady)) {
+      if (isLoading) {
         console.warn('[Auth Debug] Auth initialization timed out, forcing ready state');
         setIsLoading(false);
         setIsAuthReady(true);
       }
-    }, 5000);
+    }, 8000); // Reduced from 10s to 8s for faster recovery
+    
+    // Safari may need periodic session refreshes to maintain authentication
+    let refreshTimer: NodeJS.Timeout | null = null;
+    if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
+      refreshTimer = setInterval(async () => {
+        // Only run Safari periodic refresh if auth is ready
+        if (isAuthReady) {
+          try {
+            const { data } = await supabase.auth.getSession();
+            if (data.session) {
+              console.log('[Auth Debug] Safari periodic session refresh');
+              await supabase.auth.refreshSession();
+            }
+          } catch (e) {
+            console.error('[Auth Debug] Error in periodic session refresh:', e);
+          }
+        }
+      }, 3 * 60 * 1000); // Every 3 minutes
+    }
     
     return () => {
-      clearTimeout(safetyTimer);
       isSubscribed = false;
-      
-      // Ensure we call the cleanup function returned by initAuth
-      cleanupPromise.then(cleanup => {
-        if (cleanup) cleanup();
-      });
+      clearTimeout(safetyTimer);
+      if (refreshTimer) clearInterval(refreshTimer);
     };
-  }, [getUserProfile, processAuthChange, isAuthReady, isLoggedIn]);
-  
-  /**
-   * Enhanced logout function that properly resets all application state
-   */
-  const wrappedLogout = useCallback(async () => {
-    // Create a state reset function that resets all auth state
-    const resetAuthState = () => {
-      setUser(null);
-      setSupabaseUser(null);
-      setSession(null);
-      setIsLoggedIn(false);
-      setIsLoading(false);
-      setIsAuthReady(true);
-    };
-    
-    // Use the central logout manager
-    await handleLogoutState(baseLogout, resetAuthState, {
-      clearIntervals: clearSessionIntervals
-    });
-  }, [baseLogout, clearSessionIntervals]);
-  
+  }, [getUserProfile, validateSessionAcrossStorages]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -340,13 +508,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isAuthReady,
         login,
         register,
-        logout: wrappedLogout
+        logout
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
-
-// Add explicit export for AuthContext
-export { default as AuthContext } from '@/context/AuthContext';

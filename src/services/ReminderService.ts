@@ -12,7 +12,6 @@ import { generateDogReminders } from './reminders/DogReminderService';
 import { generateLitterReminders } from './reminders/LitterReminderService';
 import { generateGeneralReminders } from './reminders/GeneralReminderService';
 import { isMobileDevice } from '@/utils/fetchUtils';
-import { Litter } from '@/types/breeding';
 
 // Add a new manual trigger function with explicit type
 export const triggerAllReminders: TriggerAllRemindersFunction = async (userId: string): Promise<Reminder[]> => {
@@ -44,37 +43,10 @@ export const triggerAllReminders: TriggerAllRemindersFunction = async (userId: s
     const dogReminders = generateDogReminders(userDogs);
     console.log(`[Manual Reminder Generation] Generated ${dogReminders.length} dog reminders`);
     
-    // Fetch litters for the user to pass to generateLitterReminders
-    const { data: littersData, error: littersError } = await supabase
-      .from('litters')
-      .select('*')
-      .eq('user_id', userId);
-      
-    if (littersError) {
-      console.error('[Manual Reminder Generation] Error fetching litters:', littersError);
-      return [];
-    }
-    
-    // Convert litters data to expected Litter type before passing to generateLitterReminders
-    const processedLitters: Litter[] = (littersData || []).map(litter => ({
-      id: litter.id,
-      user_id: litter.user_id, // Make sure to use user_id, not userId
-      name: litter.name,
-      dateOfBirth: litter.date_of_birth,
-      sireName: litter.sire_name,
-      damName: litter.dam_name,
-      sireId: litter.sire_id,
-      damId: litter.dam_id,
-      puppies: [], // Default empty puppies array
-      archived: litter.archived || false
-    }));
-    
-    // Call generateLitterReminders with the properly converted litters array
-    const litterReminders = generateLitterReminders(processedLitters);
+    const litterReminders = await generateLitterReminders(userId);
     console.log(`[Manual Reminder Generation] Generated ${litterReminders.length} litter reminders`);
     
-    // Call generateGeneralReminders
-    const generalReminders = generateGeneralReminders();
+    const generalReminders = generateGeneralReminders(userDogs);
     console.log(`[Manual Reminder Generation] Generated ${generalReminders.length} general reminders`);
     
     const allReminders = [...dogReminders, ...litterReminders, ...generalReminders];

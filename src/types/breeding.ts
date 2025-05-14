@@ -1,32 +1,20 @@
-
-import { Dog } from './dogs';
-
-// Basic types
-export interface Puppy {
+export interface PlannedLitter {
   id: string;
-  name: string;
-  litterId: string;
-  gender: 'male' | 'female';
-  color: string;
-  breed?: string;
-  birthWeight?: number;
-  birthDateTime?: string;
-  imageUrl?: string;
-  currentWeight?: number;
-  weightLog: PuppyWeightRecord[];
-  heightLog: PuppyHeightRecord[];
-  notes?: PuppyNote[];
-  collar?: string;
-  microchip?: string;
-  status?: 'Available' | 'Reserved' | 'Sold';
-  reserved?: boolean;
-  sold?: boolean;
-  newOwner?: string | null;
-  buyer_name?: string | null;
-  buyer_phone?: string | null;
-  registered_name?: string | null;
-  registration_number?: string | null;
-  markings?: string;
+  maleId: string;
+  femaleId: string;
+  maleName: string;
+  femaleName: string;
+  expectedHeatDate: string;
+  notes?: string;
+  matingDates?: string[];
+  externalMale?: boolean;
+  externalMaleBreed?: string;
+  externalMaleRegistration?: string;
+}
+
+export interface Mating {
+  date: string;
+  notes?: string;
 }
 
 export interface PuppyWeightRecord {
@@ -44,6 +32,34 @@ export interface PuppyNote {
   content: string;
 }
 
+export interface Puppy {
+  id: string;
+  name: string;
+  gender: 'male' | 'female';
+  color: string;
+  markings?: string;
+  birthWeight?: number;
+  currentWeight?: number;
+  sold?: boolean;
+  reserved?: boolean;
+  newOwner?: string;
+  notes?: PuppyNote[];
+  collar?: string;
+  microchip?: string;
+  
+  // New or enhanced fields
+  breed?: string;
+  imageUrl?: string;
+  birthDateTime?: string;
+  weightLog: PuppyWeightRecord[];
+  heightLog: PuppyHeightRecord[];
+  registered_name?: string;
+  registration_number?: string;
+  status?: 'Available' | 'Reserved' | 'Sold';
+  buyer_name?: string;
+  buyer_phone?: string;
+}
+
 export interface Litter {
   id: string;
   name: string;
@@ -54,40 +70,5 @@ export interface Litter {
   damName: string;
   puppies: Puppy[];
   archived?: boolean;
-  user_id: string;
-}
-
-export interface MatingDate {
-  id: string;
-  plannedLitterId: string;
-  matingDate: string | Date;
-  pregnancyId?: string | null;
-  userId: string;
-  createdAt: string | Date;
-  updatedAt: string | Date;
-}
-
-export interface PlannedLitter {
-  id: string;
-  maleId: string | null;
-  femaleId: string;
-  maleName: string;
-  femaleName: string;
-  externalMale: boolean;
-  externalMaleName: string | null;
-  externalMaleBreed: string | null;
-  externalMaleRegistration: string | null;
-  expectedHeatDate: Date | string;
-  notes: string | null;
-  male: Dog | null;
-  female: Dog | null;
-  matingDates: MatingDate[];
-}
-
-export interface BreedingRecord {
-  id: string;
-  dogId: string;
-  partnerId: string;
-  date: Date | string;
-  notes?: string;
+  user_id: string; // Added user_id property to match the database schema
 }

@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { useDogs } from '@/context/dogs/DogsContext';
-import { Dog } from '@/types/dogs';
+import { useDogs, Dog } from '@/context/DogsContext';
 import DogCard from './DogCard';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
@@ -21,28 +20,18 @@ const DogList: React.FC<DogListProps> = ({
     setActiveDog,
     loading
   } = useDogs();
-  
-  console.log('[DogList Debug] Component rendering with:', {
-    receivedDogsList: dogsList?.length || 0,
-    contextDogs: allDogs?.length || 0,
-    loading
-  });
-  
   const [search, setSearch] = useState('');
 
   // Use the provided dogsList or fall back to all dogs from context
-  // Adding null/undefined check with fallback to empty array
-  const dogs = dogsList || allDogs || [];
+  const dogs = dogsList || allDogs;
   const filteredDogs = dogs.filter(dog => {
     // Search filter only (removed gender filter)
     return dog.name.toLowerCase().includes(search.toLowerCase()) || dog.breed.toLowerCase().includes(search.toLowerCase());
   });
   
-  console.log('[DogList Debug] Filtered dogs count:', filteredDogs.length);
-  
   const handleDogClick = (dog: Dog) => {
     setActiveDog(dog);
-    console.log('[DogList Debug] Clicked on dog:', dog.name);
+    console.log('Clicked on dog:', dog.name);
   };
 
   // Enhanced skeleton loaders with fade-in/out transitions
@@ -63,7 +52,6 @@ const DogList: React.FC<DogListProps> = ({
   );
     
   if (loading) {
-    console.log('[DogList Debug] Rendering loading skeleton');
     return (
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row gap-3">

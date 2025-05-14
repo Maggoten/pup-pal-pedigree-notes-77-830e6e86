@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,17 +8,16 @@ import DashboardLayout from '@/components/home/DashboardLayout';
 import { migratePregnancyData } from '@/utils/pregnancyMigration';
 
 const Index = () => {
-  const { user, isAuthReady } = useAuth();
+  const { user } = useAuth();
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  
   useEffect(() => {
     const initialize = async () => {
-      if (!isAuthReady || !user) return;
-
       try {
         setIsLoading(true);
-
+        
+        // Run data migration if needed
         const migrationResult = await migratePregnancyData();
         if (migrationResult.success) {
           toast({
@@ -25,21 +25,21 @@ const Index = () => {
             description: "Your pregnancy data has been successfully migrated to the cloud."
           });
         }
-
+        
         const pregnancies = await getActivePregnancies();
         setActivePregnancies(pregnancies);
       } catch (error) {
-        console.error("Error initializing Index.tsx:", error);
+        console.error("Error initializing:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
+    
     initialize();
-  }, [isAuthReady, user]);
+  }, []);
 
   return (
-    <DashboardLayout
+    <DashboardLayout 
       user={user}
       activePregnancies={activePregnancies}
     />

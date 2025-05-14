@@ -1,11 +1,12 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dogs';
 import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
 import { PostgrestResponse } from '@supabase/supabase-js';
 import { withTimeout, TIMEOUT, isTimeoutError } from '@/utils/timeoutUtils';
-import { cleanupStorageImage } from '@/utils/storage';
+import { cleanupStorageImage } from '@/utils/storageUtils';
 import { dateToISOString } from '@/utils/dateUtils';
-import { syncBirthdayEvents, syncVaccinationEvents, syncHeatCycleEvents } from '@/services/ReminderCalendarSyncService';
+import { ReminderCalendarSyncService } from '@/services/ReminderCalendarSyncService';
 import { isValidPublicUrl } from '@/utils/storage';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 
@@ -166,11 +167,11 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
           console.log('Syncing calendar events after dog update');
           
           if (needsBirthdaySync && updatedDog.dateOfBirth) {
-            await syncBirthdayEvents(updatedDog.id);
+            await ReminderCalendarSyncService.syncBirthdayEvents(updatedDog);
           }
           
           if (needsVaccinationSync && updatedDog.vaccinationDate) {
-            await syncVaccinationEvents(updatedDog.id);
+            await ReminderCalendarSyncService.syncVaccinationEvents(updatedDog);
           }
           
           if (needsHeatSync && updatedDog.gender === 'female') {
@@ -178,7 +179,7 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
             const upcomingHeats = calculateUpcomingHeats([updatedDog]);
             
             for (const heat of upcomingHeats) {
-              await syncHeatCycleEvents(heat);
+              await ReminderCalendarSyncService.syncHeatCycleEvents(heat);
             }
           }
         }

@@ -96,8 +96,6 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
           <div className="w-40 h-40">
             <PuppyImageUploader 
               puppyName={displayName}
-              puppyId={puppy.id}
-              litterId={puppy.litterId}
               currentImage={imageUrl}
               onImageChange={handleImageChange}
               large={true}

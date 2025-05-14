@@ -1,89 +1,85 @@
 
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import UserWelcomeBanner from './UserWelcomeBanner';
+import React, { useState } from 'react';
 import MetricCardGrid from './MetricCardGrid';
-import { User } from '@/types/auth';
+import RemindersDialog from '@/components/reminders/RemindersDialog';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
-import { MetricCardProps } from './MetricCard';
+import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import WelcomeHeader from './WelcomeHeader';
+import DecorativePawprints from './DecorativePawprints';
 
 interface DashboardHeroProps {
-  username?: string;
-  user: User | null;
-  reminders: { total: number; incomplete: number; upcoming: number };
+  username: string;
+  reminders: { count: number; highPriority: number };
   plannedLitters: { count: number; nextDate: Date | null };
   activePregnancies: ActivePregnancy[];
-  recentLitters: { count: number; recent: number };
-  isLoadingPregnancies: boolean;
+  recentLitters: { count: number; latest: Date | null };
+  isLoadingPregnancies?: boolean;
 }
 
 const DashboardHero: React.FC<DashboardHeroProps> = ({ 
-  username,
-  user,
+  username, 
   reminders,
   plannedLitters,
   activePregnancies,
   recentLitters,
-  isLoadingPregnancies
+  isLoadingPregnancies = false
 }) => {
-  // Compute metrics based on the provided data
-  const dogCount = 0; // This would come from a dogs context or hook
-  const recentLittersCount = recentLitters?.count || 0;
-  const littersThisYear = recentLitters?.recent || 0;
-  const upcomingRemindersCount = reminders?.upcoming || 0;
-  const nearbyAppointmentsCount = 0; // This would come from appointments data
+  const navigate = useNavigate();
+  const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
   
-  // Loading states
-  const littersLoading = false;
-  const appointmentsLoading = false;
-  const remindersLoading = false;
-  const dogsLoading = false;
-
-  const metricCards: MetricCardProps[] = [
+  const metricCardsData = [
     {
-      icon: "dog",
-      label: "Active Dogs",
-      value: dogCount.toString(),
-      highlightColor: "blue",
-      trend: "All time",
-      loading: dogsLoading
+      title: "Reminders",
+      count: reminders.count,
+      icon: "calendar" as const,
+      highlight: reminders.highPriority > 0 ? `${reminders.highPriority} high priority` : null,
+      action: () => setRemindersDialogOpen(true),
+      loading: false
     },
     {
-      icon: "heart",
-      label: "Active Litters",
-      value: recentLittersCount.toString(),
-      highlightColor: "green",
-      trend: `${littersThisYear} this year`,
-      loading: littersLoading
+      title: "Planned Litters",
+      count: plannedLitters.count,
+      icon: "heart" as const,
+      highlight: plannedLitters.nextDate ? `Next: ${format(plannedLitters.nextDate, 'MMM d')}` : null,
+      action: () => navigate("/planned-litters"),
+      loading: false
     },
     {
-      icon: "bell",
-      label: "Reminders",
-      value: upcomingRemindersCount.toString(),
-      highlightColor: "purple",
-      trend: "Due soon",
-      loading: remindersLoading
+      title: "Active Pregnancies",
+      count: activePregnancies.length,
+      icon: "pawprint" as const,
+      highlight: activePregnancies.length > 0 ? `${activePregnancies[0].daysLeft} days to due date` : null,
+      action: () => navigate("/pregnancy"),
+      loading: isLoadingPregnancies
     },
     {
-      icon: "calendar",
-      label: "Appointments",
-      value: nearbyAppointmentsCount.toString(),
-      highlightColor: "rose",
-      trend: "Next 7 days",
-      loading: appointmentsLoading
+      title: "Recent Litters",
+      count: recentLitters.count,
+      icon: "dog" as const,
+      highlight: recentLitters.latest ? `Latest: ${format(recentLitters.latest, 'MMM d')}` : null,
+      action: () => navigate("/my-litters"),
+      loading: false
     }
   ];
-
+  
   return (
-    <div className="space-y-4">
-      <UserWelcomeBanner />
+    <>
+      <div className="rounded-lg overflow-hidden border border-greige-300 beige-gradient relative mt-2 animate-fade-in">
+        <WelcomeHeader username={username} />
+        
+        <DecorativePawprints />
+        
+        <div className="p-4 md:p-6 relative z-10">
+          <MetricCardGrid metricCards={metricCardsData} />
+        </div>
+      </div>
       
-      <Card>
-        <CardContent className="p-6">
-          <MetricCardGrid metricCards={metricCards} />
-        </CardContent>
-      </Card>
-    </div>
+      <RemindersDialog 
+        open={remindersDialogOpen}
+        onOpenChange={setRemindersDialogOpen}
+      />
+    </>
   );
 };
 

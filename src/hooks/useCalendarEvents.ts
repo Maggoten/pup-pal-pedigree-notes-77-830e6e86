@@ -26,9 +26,9 @@ const useCalendarEvents = () => {
     const newEvent: CalendarEvent = {
       id: Date.now().toString(), // Generate a unique ID
       title: eventData.title,
-      date: format(eventData.date, 'yyyy-MM-dd'), // Format date as string
-      startDate: format(eventData.date, 'yyyy-MM-dd'), // New field
-      endDate: format(eventData.date, 'yyyy-MM-dd'), // New field
+      date: eventData.date, // For backward compatibility
+      startDate: eventData.date, // New field
+      endDate: eventData.date, // New field
       type: 'custom',
       dogId: eventData.dogId,
       notes: eventData.notes || '',
@@ -48,9 +48,9 @@ const useCalendarEvents = () => {
         return {
           ...event,
           title: updatedEventData.title,
-          date: format(updatedEventData.date, 'yyyy-MM-dd'),
-          startDate: format(updatedEventData.date, 'yyyy-MM-dd'),
-          endDate: format(updatedEventData.date, 'yyyy-MM-dd'),
+          date: updatedEventData.date, // For backward compatibility
+          startDate: updatedEventData.date, // New field
+          endDate: updatedEventData.date, // New field
           dogId: updatedEventData.dogId,
           notes: updatedEventData.notes || '',
         };

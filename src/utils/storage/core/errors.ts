@@ -1,61 +1,63 @@
 
-// Define error constants for storage operations
-export const ERROR_CODES = {
-  NO_SESSION: "No active session found",
-  BUCKET_NOT_FOUND: (bucket: string) => `Storage bucket "${bucket}" not found`,
-  UPLOAD_FAILED: "Failed to upload file",
-  DOWNLOAD_FAILED: "Failed to download file",
-  REMOVE_FAILED: "Failed to delete file",
-  SAFARI_STORAGE_ERROR: "Safari storage error occurred",
-  RETRY_EXCEEDED: "Maximum retry attempts exceeded",
-  UNSUPPORTED_FILE: "Unsupported file type",
-  SIZE_EXCEEDED: "File size exceeds the maximum allowed limit",
-  VALIDATION_FAILED: "File validation failed",
-  BROWSER_ERROR: "Browser does not support file operations",
-  CANVAS_ERROR: "Error processing image in canvas",
-  GET_URL_FAILED: "Failed to get public URL for file"
+import { StorageError } from '@supabase/storage-js';
+import { 
+  StorageErrorDetails, 
+  SupabaseStorageError,
+  isStorageError, 
+  isSupabaseStorageError
+} from '../config';
+
+// Type guards for response objects
+export const hasError = (obj: unknown): obj is { error: unknown } => {
+  return typeof obj === 'object' && 
+         obj !== null && 
+         'error' in obj;
 };
 
-// Format storage errors consistently
-export const formatStorageError = (error: any, code?: string): Error => {
-  const message = typeof error === 'string' ? error : error?.message || 'Unknown storage error';
-  const formattedError = new Error(message);
-  (formattedError as any).code = code || 'STORAGE_ERROR';
-  return formattedError;
-};
-
-// Create a standardized storage error
-export const createStorageError = (code: keyof typeof ERROR_CODES | string, additionalInfo?: string): Error => {
-  let message: string;
-  
-  if (typeof ERROR_CODES[code as keyof typeof ERROR_CODES] === 'function') {
-    message = (ERROR_CODES[code as keyof typeof ERROR_CODES] as any)(additionalInfo);
-  } else if (ERROR_CODES[code as keyof typeof ERROR_CODES]) {
-    message = ERROR_CODES[code as keyof typeof ERROR_CODES] as string;
-    if (additionalInfo) message += `: ${additionalInfo}`;
-  } else {
-    message = code;
-    if (additionalInfo) message += `: ${additionalInfo}`;
+/**
+ * Safely extracts a property from a potentially complex error object
+ * @param error The error object to extract from
+ * @param prop The property name to extract
+ * @param defaultValue Default value if property doesn't exist
+ * @returns The extracted property value or default
+ */
+export const safeGetErrorProperty = <T>(error: unknown, prop: string, defaultValue: T): T => {
+  if (error && typeof error === 'object' && prop in error) {
+    return (error as any)[prop];
   }
-  
-  const error = new Error(message);
-  (error as any).code = code;
-  return error;
+  return defaultValue;
 };
 
-// Check if an object is an error
-export const hasError = (obj: any): boolean => {
-  return obj instanceof Error || (obj && obj.message && obj.stack);
+/**
+ * Formats storage errors into user-friendly messages with enhanced platform-specific handling
+ * @param error The original error object
+ * @param platform Device platform information
+ * @returns A user-friendly error message
+ */
+export const formatStorageError = (error: unknown, fileSize?: number): string => {
+  if (error instanceof Error) {
+    return error.message;
+  } else if (isSupabaseStorageError(error)) {
+    return typeof error.error === 'string' ? error.error : error.error.message;
+  } else if (isStorageError(error)) {
+    return error.message || 'Unknown storage error';
+  } else if (typeof error === 'string') {
+    return error;
+  } else if (error && typeof error === 'object' && 'message' in error) {
+    return String((error as any).message);
+  } else {
+    return 'Unknown error occurred';
+  }
 };
 
-// Safely extract a property from a potential error object
-export const safeGetErrorProperty = (error: any, prop: string): any => {
-  if (!error) return undefined;
-  return error[prop];
+/**
+ * Creates a standardized storage error object
+ * @param message The error message
+ * @returns Storage error object
+ */
+export const createStorageError = (message: string): { error: StorageError } => {
+  return { 
+    error: new StorageError(message) 
+  };
 };
 
-// Handle storage errors consistently
-export const handleStorageError = (error: any, defaultMessage: string): Error => {
-  if (hasError(error)) return error;
-  return formatStorageError(error || defaultMessage);
-};

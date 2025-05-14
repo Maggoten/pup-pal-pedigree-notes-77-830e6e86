@@ -1,20 +1,17 @@
 
-import { useDogsQueries } from './useDogsQueries';
 import { useDogsMutations } from './useDogsMutations';
-import { Dog } from '@/types/dogs';
-import { UseDogs } from './types';
+import { useDogsQueries } from './useDogsQueries';
+import { UseDogs, UseDogsMutations, UseDogsQueries } from './types';
 
-export function useDogsFunctions(): UseDogs {
-  const dogsQueries = useDogsQueries();
-  const dogsMutations = useDogsMutations();
-  
+export const useDogs = (): UseDogs => {
+  const queries = useDogsQueries();
+  const mutations = useDogsMutations();
+
   return {
-    ...dogsQueries,
-    ...dogsMutations,
-    // Explicitly add totalDogs to satisfy the UseDogs interface
-    totalDogs: dogsQueries.dogs?.length || 0
+    ...queries,
+    ...mutations
   };
-}
+};
 
-export { useDogsQueries } from './useDogsQueries';
-export { useDogsMutations } from './useDogsMutations';
+// Export types
+export type { UseDogs, UseDogsMutations, UseDogsQueries } from './types';

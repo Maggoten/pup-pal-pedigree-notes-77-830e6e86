@@ -1,76 +1,69 @@
 
 import React from 'react';
-import { cn } from '@/lib/utils';
-import { LucideIcon, Dog, CalendarDays, Heart, Bell } from 'lucide-react';
+import { Calendar, Heart, Dog, PawPrint } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export type IconType = 'dog' | 'calendar' | 'heart' | 'bell';
-
-export interface MetricCardProps {
-  icon: IconType;
-  label: string;
-  value: string;
-  highlightColor: string;
-  trend: string;
+interface MetricCardProps {
+  title: string;
+  count: number;
+  icon: 'calendar' | 'heart' | 'pawprint' | 'dog';
+  highlight?: string | null;
+  action: () => void;
+  color?: string;
   loading?: boolean;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({
+  title,
+  count,
   icon,
-  label,
-  value,
-  highlightColor,
-  trend,
+  highlight = null,
+  action,
+  color = 'bg-white',
   loading = false
 }) => {
-  const getIcon = () => {
-    switch (icon) {
-      case 'dog':
-        return <Dog className="h-5 w-5" />;
-      case 'calendar':
-        return <CalendarDays className="h-5 w-5" />;
-      case 'heart':
-        return <Heart className="h-5 w-5" />;
-      case 'bell':
-        return <Bell className="h-5 w-5" />;
-      default:
-        return <Dog className="h-5 w-5" />;
-    }
+  // Update the icon styles to match the image design
+  const getIconStyles = () => {
+    // Use warmgreen for all icons as shown in the image
+    return { textColor: 'text-warmgreen-600' };
   };
 
-  const getColorClass = () => {
-    switch (highlightColor) {
-      case 'blue':
-        return 'text-blue-600 bg-blue-100';
-      case 'green':
-        return 'text-green-600 bg-green-100';
-      case 'purple':
-        return 'text-purple-600 bg-purple-100';
-      case 'rose':
-        return 'text-rose-600 bg-rose-100';
-      default:
-        return 'text-blue-600 bg-blue-100';
+  const renderIcon = () => {
+    const { textColor } = getIconStyles();
+    
+    switch (icon) {
+      case 'calendar': return <Calendar className={`h-5 w-5 ${textColor}`} />;
+      case 'heart': return <Heart className={`h-5 w-5 ${textColor}`} />;
+      case 'pawprint': return <PawPrint className={`h-5 w-5 ${textColor}`} />;
+      case 'dog': return <Dog className={`h-5 w-5 ${textColor}`} />;
+      default: return null;
     }
   };
 
   return (
-    <div className="bg-white rounded-lg border p-4 flex flex-col hover:shadow-sm transition-shadow">
-      <div className="flex justify-between items-start mb-4">
-        <div className={cn("p-2 rounded-md", getColorClass())}>
-          {getIcon()}
+    <button 
+      onClick={action}
+      className="rounded-xl p-4 md:p-5 bg-white border border-greige-100 transition-transform hover:scale-[1.02] flex flex-col items-start gap-3 w-full text-left shadow-sm"
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <div className={getIconStyles().textColor}>
+          {renderIcon()}
         </div>
+        <p className="text-sm font-medium text-darkgray-600">{title}</p>
       </div>
-
-      <div className="text-sm text-gray-600 mb-1">{label}</div>
       
-      {loading ? (
-        <Skeleton className="h-8 w-16 mb-1" />
-      ) : (
-        <div className="text-2xl font-bold mb-1">{value}</div>
-      )}
-      
-      <div className="text-xs text-gray-500">{trend}</div>
-    </div>
+      <div className="space-y-0">
+        <h3 className="text-2xl font-semibold text-darkgray-800 mb-0">
+          {loading ? <Skeleton className="h-7 w-16" /> : count}
+        </h3>
+        {highlight && !loading && (
+          <p className="text-xs text-darkgray-400 mt-1">{highlight}</p>
+        )}
+        {highlight && loading && (
+          <Skeleton className="h-4 w-24 mt-1" />
+        )}
+      </div>
+    </button>
   );
 };
 

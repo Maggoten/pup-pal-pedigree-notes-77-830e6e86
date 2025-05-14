@@ -1,99 +1,64 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { BUCKET_NAME, STORAGE_ERRORS } from '../config';
-import { v4 as uuidv4 } from 'uuid';
-import { verifyStorageSession } from './session';
-import { processImageForUpload } from '../imageUtils';
+import { BUCKET_NAME, isStorageError } from '../config';
+import { fetchWithRetry } from '@/utils/fetchUtils';
+import { getPlatformInfo } from '../mobileUpload';
+
+// Safe error property access helper
+const safeGetErrorProperty = <T>(error: unknown, property: string, defaultValue: T): T => {
+  if (error && typeof error === 'object' && property in error) {
+    return (error as any)[property];
+  }
+  return defaultValue;
+};
 
 /**
- * Checks if the storage bucket exists
+ * Check if bucket exists and is accessible with retries
+ * @returns boolean indicating if bucket exists and is accessible
  */
 export const checkBucketExists = async (): Promise<boolean> => {
   try {
-    const { data, error } = await supabase.storage.getBucket(BUCKET_NAME);
-    
-    if (error) {
-      console.error('Error checking bucket:', error);
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      console.error('Storage bucket check failed: No active session', sessionError);
       return false;
     }
-    
-    return !!data;
-  } catch (error) {
-    console.error('Unexpected error in checkBucketExists:', error);
-    return false;
-  }
-};
 
-/**
- * Creates the storage bucket if it doesn't exist
- */
-export const createBucketIfNotExists = async (): Promise<boolean> => {
-  try {
-    const bucketExists = await checkBucketExists();
+    console.log(`Checking if bucket '${BUCKET_NAME}' exists...`);
     
-    if (bucketExists) {
+    const platform = getPlatformInfo();
+    try {
+      // Using our retry utility for more reliable bucket checking
+      const result = await fetchWithRetry(
+        () => supabase.storage.from(BUCKET_NAME).list('', { limit: 1 }),
+        { 
+          maxRetries: platform.safari ? 3 : 2, 
+          initialDelay: platform.safari ? 2000 : 1000,
+          onRetry: (attempt) => {
+            console.log(`Bucket check retry attempt ${attempt} - Safari: ${platform.safari}`);
+          }
+        }
+      );
+      
+      if (result.error) {
+        console.error(`Bucket '${BUCKET_NAME}' check failed:`, result.error);
+        // Log more details about the error for troubleshooting
+        console.error('Error details:', {
+          message: safeGetErrorProperty(result.error, 'message', 'Unknown error'),
+          status: safeGetErrorProperty(result.error, 'status', 'unknown'),
+          details: safeGetErrorProperty(result.error, 'details', 'none')
+        });
+        return false;
+      }
+      
+      console.log(`Bucket '${BUCKET_NAME}' exists and is accessible, can list files:`, result.data);
       return true;
-    }
-    
-    // Create new bucket
-    const { data, error } = await supabase.storage.createBucket(BUCKET_NAME, {
-      public: true,
-    });
-    
-    if (error) {
-      console.error('Error creating bucket:', error);
+    } catch (listError) {
+      console.error(`Error or timeout when listing bucket '${BUCKET_NAME}' contents:`, listError);
       return false;
     }
-    
-    return !!data;
-  } catch (error) {
-    console.error('Unexpected error in createBucketIfNotExists:', error);
+  } catch (err) {
+    console.error(`Error in bucket '${BUCKET_NAME}' verification:`, err);
     return false;
-  }
-};
-
-/**
- * Uploads a file to storage and returns its URL
- */
-export const uploadFileAndGetUrl = async (file: File, userId: string): Promise<string> => {
-  try {
-    // Verify session is valid
-    await verifyStorageSession();
-    
-    // Process image for upload (compress it)
-    const processedFile = await processImageForUpload(file);
-    
-    // Create a unique file path with user ID and UUID
-    const filePath = `${userId}/${uuidv4()}-${file.name.replace(/\s+/g, '_')}`;
-    
-    // Upload the file
-    const { data, error } = await supabase.storage
-      .from(BUCKET_NAME)
-      .upload(filePath, processedFile, {
-        cacheControl: '3600',
-        upsert: true
-      });
-    
-    if (error) {
-      console.error('Error uploading file:', error);
-      throw new Error(error.message || STORAGE_ERRORS.UPLOAD_FAILED);
-    }
-    
-    // Get the public URL
-    const { data: publicUrlData } = supabase.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(filePath);
-    
-    if (!publicUrlData || !publicUrlData.publicUrl) {
-      throw new Error(STORAGE_ERRORS.GET_URL_FAILED);
-    }
-    
-    return publicUrlData.publicUrl;
-  } catch (error: any) {
-    console.error('Error in uploadFileAndGetUrl:', error);
-    // Safely handle potential error objects with different structures
-    const errorMessage = error?.message || (error?.error && error.error.message) || 
-      (typeof error === 'object' ? JSON.stringify(error) : String(error));
-    throw new Error(errorMessage);
   }
 };

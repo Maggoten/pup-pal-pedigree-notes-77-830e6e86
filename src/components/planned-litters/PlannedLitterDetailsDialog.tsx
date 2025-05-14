@@ -1,156 +1,163 @@
 
-import React from 'react';
-import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { format, isToday, parseISO } from 'date-fns';
-import { PlannedLitter, MatingDate } from '@/types/breeding';
-import { Calendar, Dog, Edit, Trash2, CalendarPlus } from 'lucide-react';
-
-// Helper function to format a date from MatingDate object or string
-const formatMatingDate = (date: Date | MatingDate | string): string => {
-  if (typeof date === 'string') {
-    return format(parseISO(date), 'MMM d, yyyy');
-  } else if (date instanceof Date) {
-    return format(date, 'MMM d, yyyy');
-  } else {
-    // Handle MatingDate object
-    const dateStr = typeof date.matingDate === 'string' ? date.matingDate : date.matingDate.toISOString();
-    return format(parseISO(dateStr), 'MMM d, yyyy');
-  }
-};
-
-// Helper function to check if a date is today
-const checkIsToday = (date: Date | MatingDate | string): boolean => {
-  if (typeof date === 'string') {
-    return isToday(parseISO(date));
-  } else if (date instanceof Date) {
-    return isToday(date);
-  } else {
-    // Handle MatingDate object
-    const dateStr = typeof date.matingDate === 'string' ? date.matingDate : date.matingDate.toISOString();
-    return isToday(parseISO(dateStr));
-  }
-};
+import { Calendar, PenLine, Trash2 } from 'lucide-react';
+import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { PlannedLitter } from '@/types/breeding';
+import { parseISO } from 'date-fns';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PlannedLitterDetailsDialogProps {
-  plannedLitter: PlannedLitter;
-  onClose: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  onAddMatingDate?: () => void;
+  litter: PlannedLitter;
+  onAddMatingDate: (litterId: string, date: Date) => void;
+  onDeleteMatingDate?: (litterId: string, dateIndex: number) => void;
+  onEditMatingDate?: (litterId: string, dateIndex: number, newDate: Date) => void;
 }
 
-const PlannedLitterDetailsDialog: React.FC<PlannedLitterDetailsDialogProps> = ({ 
-  plannedLitter,
-  onClose,
-  onEdit,
-  onDelete,
-  onAddMatingDate
+const PlannedLitterDetailsDialog: React.FC<PlannedLitterDetailsDialogProps> = ({
+  litter,
+  onAddMatingDate,
+  onDeleteMatingDate,
+  onEditMatingDate
 }) => {
-  const expectedHeatDate = typeof plannedLitter.expectedHeatDate === 'string' 
-    ? parseISO(plannedLitter.expectedHeatDate) 
-    : plannedLitter.expectedHeatDate;
+  const [editingDateIndex, setEditingDateIndex] = useState<number | null>(null);
   
-  const formattedHeatDate = format(expectedHeatDate, 'MMMM d, yyyy');
-  const isHeatToday = isToday(expectedHeatDate);
-  
+  const handleEditMatingDate = (date: Date | undefined) => {
+    if (date && editingDateIndex !== null && onEditMatingDate) {
+      onEditMatingDate(litter.id, editingDateIndex, date);
+      setEditingDateIndex(null);
+    }
+  };
+
+  // Format mating dates for display
+  const formattedMatingDates = litter.matingDates && litter.matingDates.length > 0 
+    ? litter.matingDates.map(dateStr => typeof dateStr === 'string' ? new Date(dateStr) : dateStr)
+    : [];
+
   return (
-    <DialogContent className="sm:max-w-[550px]">
+    <DialogContent>
       <DialogHeader>
-        <DialogTitle className="text-xl">Planned Litter Details</DialogTitle>
+        <DialogTitle>Litter Details</DialogTitle>
         <DialogDescription>
-          {plannedLitter.femaleName} × {plannedLitter.externalMale ? plannedLitter.externalMaleName : plannedLitter.maleName}
+          {litter.maleName} × {litter.femaleName}
         </DialogDescription>
       </DialogHeader>
       
-      <div className="space-y-4 py-4">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">
-            Expected heat date: <span className="font-medium">{formattedHeatDate}</span>
-            {isHeatToday && <Badge variant="outline" className="ml-2 bg-amber-100">Today</Badge>}
-          </span>
+      <div className="grid gap-4">
+        <div>
+          <h3 className="text-sm font-medium text-muted-foreground">Expected Heat</h3>
+          <p>{new Date(litter.expectedHeatDate).toLocaleDateString()}</p>
         </div>
         
-        <div className="flex items-start gap-2">
-          <Dog className="h-4 w-4 text-muted-foreground mt-0.5" />
-          <div className="text-sm">
-            <div>
-              <span className="text-muted-foreground">Dam:</span> <span className="font-medium">{plannedLitter.femaleName}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Sire:</span> <span className="font-medium">
-                {plannedLitter.externalMale ? plannedLitter.externalMaleName : plannedLitter.maleName}
-                {plannedLitter.externalMale && <Badge variant="outline" className="ml-2 text-xs">External</Badge>}
-              </span>
-            </div>
-            {plannedLitter.externalMale && plannedLitter.externalMaleBreed && (
-              <div className="mt-1">
-                <span className="text-muted-foreground">External sire breed:</span> <span className="font-medium">{plannedLitter.externalMaleBreed}</span>
-              </div>
-            )}
-            {plannedLitter.externalMale && plannedLitter.externalMaleRegistration && (
-              <div>
-                <span className="text-muted-foreground">Registration:</span> <span className="font-medium">{plannedLitter.externalMaleRegistration}</span>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {plannedLitter.notes && (
-          <div className="mt-4 p-3 bg-muted/50 rounded-md">
-            <h4 className="text-sm font-medium mb-1">Notes</h4>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{plannedLitter.notes}</p>
+        {litter.externalMale && litter.externalMaleBreed && (
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground">External Sire Breed</h3>
+            <p>{litter.externalMaleBreed}</p>
           </div>
         )}
         
-        <div className="mt-6">
-          <div className="flex items-center justify-between mb-2">
-            <h4 className="text-sm font-medium">Mating Dates</h4>
-            {onAddMatingDate && (
-              <Button variant="ghost" size="sm" onClick={onAddMatingDate} className="h-8 px-2">
-                <CalendarPlus className="h-4 w-4 mr-1" />
-                Add Date
-              </Button>
-            )}
-          </div>
+        <div>
+          <h3 className="text-sm font-medium text-muted-foreground">Notes</h3>
+          <p>{litter.notes || 'No notes'}</p>
+        </div>
+        
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">Mating Dates</h3>
           
-          {plannedLitter.matingDates && plannedLitter.matingDates.length > 0 ? (
-            <div className="space-y-2">
-              {plannedLitter.matingDates.map((matingDate, index) => (
-                <div key={index} className="flex items-center gap-2 p-2 bg-muted/30 rounded-md">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">
-                    {formatMatingDate(matingDate)}
-                    {checkIsToday(matingDate) && <Badge variant="outline" className="ml-2 bg-amber-100">Today</Badge>}
-                  </span>
-                </div>
+          {formattedMatingDates.length > 0 ? (
+            <ul className="space-y-1">
+              {formattedMatingDates.map((date, index) => (
+                <li key={index} className="flex items-center justify-between py-1">
+                  {editingDateIndex === index ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          {date.toLocaleDateString()}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={date}
+                          onSelect={handleEditMatingDate}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <span>{date.toLocaleDateString()}</span>
+                  )}
+                  
+                  <div className="flex space-x-1">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-7 w-7"
+                            onClick={() => setEditingDateIndex(index)}
+                          >
+                            <PenLine className="h-3.5 w-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit date</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => onDeleteMatingDate && onDeleteMatingDate(litter.id, index)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete date</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </li>
               ))}
-            </div>
+            </ul>
           ) : (
-            <div className="text-sm text-muted-foreground p-2 bg-muted/30 rounded-md">
-              No mating dates recorded yet
-            </div>
+            <p className="text-sm text-muted-foreground">No mating dates recorded</p>
           )}
+          
+          <div className="mt-4">
+            <h4 className="text-sm font-medium">Add Mating Date:</h4>
+            <div className="mt-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    <span>Select Date</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <CalendarComponent
+                    mode="single"
+                    onSelect={(date) => date && onAddMatingDate(litter.id, date)}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
         </div>
       </div>
-      
-      <DialogFooter className="gap-2 sm:gap-0">
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={onEdit} className="gap-1">
-            <Edit className="h-4 w-4" />
-            Edit
-          </Button>
-          <Button variant="outline" size="sm" onClick={onDelete} className="gap-1 text-destructive hover:text-destructive">
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
-        </div>
-        <Button variant="default" onClick={onClose}>
-          Close
-        </Button>
-      </DialogFooter>
     </DialogContent>
   );
 };

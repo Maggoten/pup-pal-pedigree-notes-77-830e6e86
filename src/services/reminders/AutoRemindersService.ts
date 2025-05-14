@@ -1,6 +1,7 @@
+
 import { PlannedLitter } from '@/types/breeding';
 import { Dog } from '@/types/dogs';
-import { Reminder, createReminder } from '@/types/reminders';
+import { Reminder } from '@/types/reminders';
 import { differenceInDays, addYears, isAfter, isBefore, parseISO } from 'date-fns';
 import { createCalendarClockIcon, createPawPrintIcon } from '@/utils/iconUtils';
 
@@ -23,7 +24,7 @@ export const generatePlannedHeatReminders = (plannedLitters: PlannedLitter[]): R
     const heatDate = new Date(litter.expectedHeatDate);
     const daysUntil = differenceInDays(heatDate, today);
     
-    reminders.push(createReminder({
+    reminders.push({
       id: `auto_planned-heat-${litter.femaleId}-${litter.id}`, // Added 'auto_' prefix to avoid collisions
       title: `Upcoming Heat for ${litter.femaleName}`,
       description: `Heat expected in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`,
@@ -32,7 +33,7 @@ export const generatePlannedHeatReminders = (plannedLitters: PlannedLitter[]): R
       type: 'heat',
       icon: createPawPrintIcon("rose-500"),
       relatedId: litter.femaleId
-    }));
+    });
   });
   
   return reminders;
@@ -65,7 +66,7 @@ export const generateEnhancedBirthdayReminders = (dogs: Dog[]): Reminder[] => {
         ? currentYear + 1 - birthdate.getFullYear()
         : currentYear - birthdate.getFullYear();
       
-      reminders.push(createReminder({
+      reminders.push({
         id: `auto_birthday-${dog.id}-${currentYear}`, // Added 'auto_' prefix to avoid collisions
         title: `${dog.name}'s Birthday Coming Up!`,
         description: `${dog.name} will turn ${age} in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`,
@@ -74,7 +75,7 @@ export const generateEnhancedBirthdayReminders = (dogs: Dog[]): Reminder[] => {
         type: 'birthday',
         icon: createPawPrintIcon("blue-500"),
         relatedId: dog.id
-      }));
+      });
     }
   });
   
@@ -100,7 +101,7 @@ export const generateVaccinationReminders = (dogs: Dog[]): Reminder[] => {
     if (daysUntil >= -30 && daysUntil <= 7) {
       const isOverdue = daysUntil < 0;
       
-      reminders.push(createReminder({
+      reminders.push({
         id: `auto_vaccination-${dog.id}`, // Added 'auto_' prefix to avoid collisions
         title: `${dog.name}'s Vaccination ${isOverdue ? 'Overdue' : 'Due Soon'}`,
         description: isOverdue 
@@ -111,7 +112,7 @@ export const generateVaccinationReminders = (dogs: Dog[]): Reminder[] => {
         type: 'vaccination',
         icon: createCalendarClockIcon("amber-500"),
         relatedId: dog.id
-      }));
+      });
     }
   });
   

@@ -7,17 +7,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { UseDogsQueries } from './types';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchWithRetry } from '@/utils/fetchUtils';
-import { verifySession } from '@/utils/auth/sessionManager';
 
 export const useDogsQueries = (): UseDogsQueries => {
   const { user, isLoading: authLoading, isAuthReady } = useAuth();
-  console.log('[useDogsQueries] Auth state:', { 
-    isAuthReady, 
-    authLoading, 
-    hasUser: !!user, 
-    userId: user?.id 
-  });
-  
   const userId = user?.id;
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { toast } = useToast();
@@ -35,41 +27,31 @@ export const useDogsQueries = (): UseDogsQueries => {
     queryKey: ['dogs', userId],
     queryFn: async () => {
       if (!userId) {
-        console.log('[useDogsQueries] No userId provided, returning empty dogs array');
+        console.log('useDogsQueries: No userId provided, returning empty dogs array');
         return [];
       }
       
       // Only proceed if auth is ready and we have a valid session
       if (!isAuthReady) {
-        console.log('[useDogsQueries] Auth not ready yet, delaying fetch');
-        return [];
-      }
-      
-      // Verify the session is valid before fetching
-      console.log('[useDogsQueries] Verifying session before fetching dogs');
-      const sessionValid = await verifySession({ skipThrow: true });
-      console.log('[useDogsQueries] Session verification result:', sessionValid);
-      
-      if (!sessionValid) {
-        console.log('[useDogsQueries] Session verification failed, skipping fetch');
+        console.log('useDogsQueries: Auth not ready yet, delaying fetch');
         return [];
       }
       
       try {
-        console.log('[useDogsQueries] querying Supabase for dogs with ownerId:', userId);
+        console.log('Fetching dogs from service for user:', userId);
         const data = await fetchDogs(userId);
-        console.log(`[useDogsQueries] Retrieved ${data.length} dogs for user ${userId}`);
+        console.log(`Retrieved ${data.length} dogs for user ${userId}`);
         return data;
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-        console.error('[useDogsQueries] Error fetching dogs:', errorMessage);
+        console.error('Error fetching dogs:', errorMessage);
         throw err;
       } finally {
         setIsInitialLoad(false);
       }
     },
     enabled: !!userId && isAuthReady, // Only run query when userId is available AND auth is done loading
-    staleTime: 30 * 1000, // Consider data fresh for 30 seconds
+    staleTime: 60 * 1000, // Consider data fresh for 1 minute
     gcTime: 5 * 60 * 1000, // Keep unused data in cache for 5 minutes
     retry: 2, // Retry failed queries twice
     retryDelay: attempt => Math.min(1000 * Math.pow(2, attempt), 30000), // Exponential backoff
@@ -77,24 +59,19 @@ export const useDogsQueries = (): UseDogsQueries => {
 
   // Add detailed logging about query status
   useEffect(() => {
-    console.log('[useDogsQueries] Dogs query status:', status, 'fetchStatus:', fetchStatus, 'isLoading:', isLoading);
-    console.log('[useDogsQueries] Auth loading:', authLoading, 'Auth ready:', isAuthReady, 'Query is enabled:', !!userId && isAuthReady);
+    console.log('Dogs query status:', status, 'fetchStatus:', fetchStatus, 'isLoading:', isLoading);
+    console.log('Auth loading:', authLoading, 'Auth ready:', isAuthReady, 'Query is enabled:', !!userId && isAuthReady);
   }, [status, fetchStatus, isLoading, userId, authLoading, isAuthReady]);
 
   // Add visibility change listener to handle page resume/wake
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && userId && isAuthReady) {
-        console.log('[useDogsQueries] Page became visible, checking if dogs data needs refresh');
-        // Verify session is valid before refreshing
-        verifySession({ skipThrow: true }).then(isValid => {
-          if (isValid) {
-            // Small delay to allow auth to fully stabilize
-            setTimeout(() => {
-              queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
-            }, 500);
-          }
-        });
+        console.log('Page became visible, checking if dogs data needs refresh');
+        // Small delay to allow auth to fully stabilize
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
+        }, 500);
       }
     };
 
@@ -106,28 +83,21 @@ export const useDogsQueries = (): UseDogsQueries => {
 
   // Improved refresh function with optional skipCache parameter and retry logic
   const refreshDogs = useCallback(async (skipCache = false) => {
-    console.log('[useDogsQueries] refreshDogs called with skipCache:', skipCache);
+    console.log('refreshDogs called with skipCache:', skipCache);
     
     // Only proceed if auth is ready
     if (!isAuthReady) {
-      console.log('[useDogsQueries] Auth not ready yet, will not attempt refresh');
-      return [];
-    }
-    
-    // Verify session is valid before refreshing
-    const sessionValid = await verifySession();
-    if (!sessionValid) {
-      console.log('[useDogsQueries] Session verification failed, will not attempt refresh');
+      console.log('refreshDogs: Auth not ready yet, will not attempt refresh');
       return [];
     }
     
     if (skipCache) {
-      console.log('[useDogsQueries] Invalidating dogs query cache');
+      console.log('Invalidating dogs query cache');
       await queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
     }
     
     try {
-      console.log('[useDogsQueries] Refetching dogs data');
+      console.log('Refetching dogs data');
       
       // Use fetchWithRetry for more reliable data fetching
       const result = await fetchWithRetry(
@@ -146,10 +116,10 @@ export const useDogsQueries = (): UseDogsQueries => {
         }
       );
       
-      console.log('[useDogsQueries] Refetch result:', result.status, 'data length:', result.data?.length || 0);
+      console.log('Refetch result:', result.status, 'data length:', result.data?.length || 0);
       return result.data || [];
     } catch (error) {
-      console.error('[useDogsQueries] Failed to refresh dogs after retries:', error);
+      console.error('Failed to refresh dogs after retries:', error);
       toast({
         title: "Failed to refresh",
         description: "Could not load dog data after multiple attempts. Please try again later.",
@@ -169,22 +139,13 @@ export const useDogsQueries = (): UseDogsQueries => {
     let timeoutId: ReturnType<typeof setTimeout>;
     
     if (userId && isInitialLoad && isAuthReady) {
-      console.log('[useDogsQueries] Initial load - fetching dogs');
-      
-      // Verify session is valid before refreshing
-      verifySession().then(isValid => {
-        if (isValid) {
-          refetch();
-        } else {
-          console.log('[useDogsQueries] Initial load - session invalid, skipping fetch');
-          setIsInitialLoad(false);
-        }
-      });
+      console.log('Initial load - fetching dogs');
+      refetch();
       
       // Set a timeout to stop the initial loading state after 10 seconds
       timeoutId = setTimeout(() => {
         if (isInitialLoad) {
-          console.log('[useDogsQueries] Initial load timeout reached, resetting loading state');
+          console.log('Initial load timeout reached, resetting loading state');
           setIsInitialLoad(false);
           
           // If no data was loaded, show an error toast
@@ -214,12 +175,6 @@ export const useDogsQueries = (): UseDogsQueries => {
     isLoading: isLoading || isInitialLoad || authLoading || !isAuthReady,
     error: error ? (error instanceof Error ? error.message : 'Unknown error') : null,
     fetchDogs: refreshDogs,
-    useDogs: () => ({ 
-      data: dogs, 
-      isLoading: isLoading || isInitialLoad || authLoading || !isAuthReady, 
-      error,
-      totalDogs: dogs?.length || 0  // Ensure we always return totalDogs
-    }),
-    totalDogs: dogs?.length || 0  // Add the totalDogs property here too
+    useDogs: () => ({ data: dogs, isLoading: isLoading || isInitialLoad || authLoading || !isAuthReady, error })
   };
 };

@@ -1,22 +1,32 @@
 
 import React from 'react';
-import MetricCard, { MetricCardProps } from './MetricCard';
+import MetricCard from './MetricCard';
 
-export interface MetricCardGridProps {
-  metricCards: MetricCardProps[];
+interface MetricCardData {
+  title: string;
+  count: number;
+  icon: 'calendar' | 'heart' | 'pawprint' | 'dog';
+  highlight: string | null;
+  action: () => void;
+  color?: string;
+  loading?: boolean;
+}
+
+interface MetricCardGridProps {
+  metricCards: MetricCardData[];
 }
 
 const MetricCardGrid: React.FC<MetricCardGridProps> = ({ metricCards }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {metricCards.map((card, index) => (
-        <MetricCard
+        <MetricCard 
           key={index}
+          title={card.title}
+          count={card.count}
           icon={card.icon}
-          label={card.label}
-          value={card.value} 
-          highlightColor={card.highlightColor}
-          trend={card.trend}
+          highlight={card.highlight}
+          action={card.action}
           loading={card.loading}
         />
       ))}

@@ -1,52 +1,62 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { BUCKET_NAME } from '../config';
-import { createStorageError } from '../core/errors';
+import { BUCKET_NAME, STORAGE_ERRORS } from '../config'; 
+import { fetchWithRetry } from '@/utils/fetchUtils';
+import { getPlatformInfo } from '../mobileUpload';
+import { checkBucketExists } from '../core/bucket';
+import { verifySession } from '../core/session';
+import { hasError } from '../core/errors';
 
 /**
- * Remove an image from storage
+ * Remove file from storage with enhanced retry logic
+ * @param storagePath Path to the file in storage
+ * @returns Result with data or error
  */
-export const removeImage = async (path: string): Promise<{ error: Error | null }> => {
-  return removeFromStorage(path);
-};
-
-/**
- * Remove any object from storage
- */
-export const removeFromStorage = async (path: string): Promise<{ error: Error | null }> => {
-  if (!path) {
-    return { error: new Error('No path provided for storage object removal') };
-  }
-  
+export const removeFromStorage = async (storagePath: string) => {
   try {
-    return await deleteStorageObject(path);
-  } catch (error) {
-    console.error('Error removing from storage:', error);
-    return { error: error instanceof Error ? error : new Error('Unknown error removing from storage') };
-  }
-};
-
-/**
- * Delete a storage object
- */
-export const deleteStorageObject = async (path: string): Promise<{ error: Error | null }> => {
-  if (!path) {
-    return { error: new Error('No path provided for storage object deletion') };
-  }
-  
-  try {
-    const { error } = await supabase.storage
-      .from(BUCKET_NAME)
-      .remove([path]);
+    const platform = getPlatformInfo();
     
-    if (error) {
-      console.error('Supabase storage deletion error:', error);
-      return { error };
+    // Verify session first
+    try {
+      await verifySession();
+      
+      // Verify bucket exists before attempting removal
+      const bucketExists = await checkBucketExists();
+      if (!bucketExists) {
+        console.error(`Remove failed: Bucket '${BUCKET_NAME}' not found or not accessible`);
+        throw new Error(STORAGE_ERRORS.BUCKET_NOT_FOUND(BUCKET_NAME));
+      }
+    } catch (error) {
+      console.error('Pre-remove checks failed:', error);
+      throw error;
     }
     
-    return { error: null };
+    console.log(`[Storage] Attempting to remove ${storagePath} from bucket '${BUCKET_NAME}'`);
+    
+    // Use more retries for mobile/Safari
+    const result = await fetchWithRetry(
+      () => supabase.storage
+        .from(BUCKET_NAME)
+        .remove([storagePath]),
+      { 
+        maxRetries: platform.safari || platform.mobile ? 3 : 2, 
+        initialDelay: platform.safari ? 2000 : 1000,
+        useBackoff: true
+      }
+    );
+    
+    // Safely check for errors
+    if (hasError(result) && result.error) {
+      console.error(`Error removing file from '${BUCKET_NAME}':`, result.error);
+      return {
+        data: null,
+        error: result.error
+      };
+    }
+    
+    return result;
   } catch (error) {
-    console.error('Unhandled error during storage deletion:', error);
-    return { error: error instanceof Error ? error : new Error('Unknown error during storage deletion') };
+    console.error(`Remove from storage error (bucket '${BUCKET_NAME}'):`, error);
+    throw error;
   }
 };

@@ -1,69 +1,46 @@
 
 import { Dog } from '@/types/dogs';
-import { addMonths, differenceInDays, format, isPast } from 'date-fns';
+import { UpcomingHeat } from '@/types/reminders';
+import { addDays, parseISO } from 'date-fns';
 
-// Calculate the expected heat date based on the dog's last heat and heat cycle
-export const calculateExpectedHeatDate = (dog: Dog): Date => {
-  // Access lastHeat from the heatHistory if it exists
-  const lastHeatRecord = dog.heatHistory && Array.isArray(dog.heatHistory) && dog.heatHistory.length > 0
-    ? dog.heatHistory[0]
-    : null;
+/**
+ * Calculate upcoming heats based on dogs' heat histories
+ */
+export const calculateUpcomingHeats = (dogs: Dog[]): UpcomingHeat[] => {
+  const upcomingHeats: UpcomingHeat[] = [];
+  const today = new Date();
+  
+  // Filter for female dogs with heat history
+  const femaleDogs = dogs.filter(dog => 
+    dog.gender === 'female' && 
+    dog.heatHistory && 
+    dog.heatHistory.length > 0
+  );
+  
+  femaleDogs.forEach(dog => {
+    // Sort heat history by date (most recent first)
+    const sortedHeatDates = [...dog.heatHistory].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
     
-  const lastHeatDate = lastHeatRecord?.date;
-  const heatCycle = calculateHeatCycle(dog);
-
-  if (!lastHeatDate || !heatCycle) {
-    return addMonths(new Date(), 6); // Default 6 months if no data
-  }
-
-  const expectedHeatDate = addMonths(new Date(lastHeatDate), heatCycle / 30);
-  return expectedHeatDate;
-};
-
-// Calculate days until the next heat
-export const calculateDaysUntilNextHeat = (dog: Dog): number => {
-  const expectedHeatDate = calculateExpectedHeatDate(dog);
-  return differenceInDays(expectedHeatDate, new Date());
-};
-
-// Calculate heat index (0-100) based on days until next heat
-export const calculateHeatIndex = (dog: Dog): number => {
-  const daysUntilNextHeat = calculateDaysUntilNextHeat(dog);
-  const heatCycle = calculateHeatCycle(dog);
-  const percentageLeft = (daysUntilNextHeat / heatCycle) * 100;
-  return Math.max(0, Math.min(100, percentageLeft)); // Ensure value is between 0 and 100
-};
-
-// Calculate upcoming heats for all dogs
-export const calculateUpcomingHeats = (dogs: Dog[]) => {
-  return dogs.map(dog => {
-    const expectedDate = calculateExpectedHeatDate(dog);
-    const daysUntil = differenceInDays(expectedDate, new Date());
-    const heatIndex = calculateHeatIndex(dog);
-
-    return {
-      id: dog.id,
-      dogId: dog.id,
-      dogName: dog.name,
-      expectedDate: expectedDate,
-      daysUntil: daysUntil,
-      heatIndex: heatIndex
-    };
-  }).filter(heat => heat.daysUntil >= 0 && heat.daysUntil <= 90); // Only show heats within the next 90 days
-};
-
-// If dog.heatCycle is being used but doesn't exist on the Dog type, we need to access heatInterval instead
-export function calculateHeatCycle(dog: any): number {
-  // Check for heatInterval field first
-  if (dog.heatInterval) {
-    return dog.heatInterval;
-  }
+    if (sortedHeatDates.length > 0) {
+      const lastHeatDate = parseISO(sortedHeatDates[0].date);
+      // Use dog's heat interval or default to 180 days (6 months)
+      const intervalDays = dog.heatInterval || 180;
+      const nextHeatDate = addDays(lastHeatDate, intervalDays);
+      
+      // Only include if the next heat date is in the future
+      if (nextHeatDate > today) {
+        upcomingHeats.push({
+          dogId: dog.id,
+          dogName: dog.name,
+          date: nextHeatDate,
+          heatIndex: dog.heatHistory.findIndex(h => h.date === sortedHeatDates[0].date) // Store the index for deletion
+        });
+      }
+    }
+  });
   
-  // Fall back to heatCycle if it exists (for backward compatibility)
-  if (dog.heatCycle) {
-    return dog.heatCycle;
-  }
-  
-  // Default heat cycle is 6 months
-  return 6 * 30; // 6 months in days
-}
+  // Sort by date (closest first)
+  return upcomingHeats.sort((a, b) => a.date.getTime() - b.date.getTime());
+};

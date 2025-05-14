@@ -21,7 +21,6 @@ export interface UsePlannedLitterMutations {
   handleEditMatingDate: (litterId: string, dateIndex: number, newDate: Date) => Promise<void>;
   handleDeleteMatingDate: (litterId: string, dateIndex: number) => Promise<void>;
   handleDeleteLitter: (litterId: string) => Promise<void>;
-  sessionChecked?: boolean;
 }
 
 export type UsePlannedLitters = UsePlannedLitterQueries & UsePlannedLitterMutations & {

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Camera, X, Loader2 } from 'lucide-react';
+import { Camera, X, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
@@ -9,14 +9,16 @@ import { toast } from '@/components/ui/use-toast';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 import { BUCKET_NAME } from '@/utils/storage/config';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
-import { useUpdatePuppyMutation } from '@/hooks/puppies/queries/useUpdatePuppyMutation';
-// Import the props interface from our types file instead of redefining it
-import { PuppyImageUploaderProps } from '@/hooks/image-upload/types';
+
+interface PuppyImageUploaderProps {
+  puppyName: string;
+  currentImage?: string;
+  onImageChange: (url: string) => void;
+  large?: boolean;
+}
 
 const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
   puppyName,
-  puppyId,
-  litterId,
   currentImage,
   onImageChange,
   large = false
@@ -25,42 +27,11 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
   const [imageUrl, setImageUrl] = useState<string>(currentImage || '');
   const [error, setError] = useState<string>('');
   const { safari: isSafariBrowser, device: platformDevice } = getPlatformInfo();
-  
-  // Get the update mutation to save images directly to database
-  const updatePuppyMutation = litterId ? useUpdatePuppyMutation(litterId) : null;
 
   // Update local state when prop changes
   useEffect(() => {
     setImageUrl(currentImage || '');
   }, [currentImage]);
-
-  const saveImageToDatabase = useCallback(async (url: string) => {
-    if (!puppyId || !litterId || !updatePuppyMutation) {
-      console.error('Cannot save image: missing puppy ID, litter ID, or mutation');
-      return;
-    }
-    
-    try {
-      // Pass a complete puppy object with required fields to match the Puppy interface
-      await updatePuppyMutation.mutateAsync({
-        id: puppyId,
-        litterId: litterId,
-        name: puppyName,
-        gender: 'male', // Default value, will be overwritten by the update
-        imageUrl: url,
-        weightLog: [],
-        heightLog: [],
-        color: '',
-        markings: '',
-        status: 'Available'
-      });
-      
-      console.log('Image URL saved to database for puppy:', puppyId);
-    } catch (error) {
-      console.error('Failed to save image URL to database:', error);
-      throw error;
-    }
-  }, [puppyId, litterId, puppyName, updatePuppyMutation]);
 
   const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) {
@@ -134,9 +105,7 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
           { 
             maxRetries: platformInfo.safari ? 3 : 2,
             initialDelay: 2000,
-            onRetry: (attempt) => {
-              console.log(`PuppyImageUploader: Retry attempt ${attempt}`);
-            }
+            useBackoff: true
           }
         );
       };
@@ -173,14 +142,8 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
         
         console.log('PuppyImageUploader: Setting image URL:', finalUrl);
         
-        // Update local state
         setImageUrl(finalUrl);
-        
-        // Update UI via callback
         onImageChange(finalUrl);
-        
-        // Save to database
-        await saveImageToDatabase(finalUrl);
         
         toast({
           title: "Success",
@@ -206,31 +169,12 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
     } finally {
       setIsUploading(false);
     }
-  }, [onImageChange, saveImageToDatabase]);
+  }, [onImageChange]);
 
-  const handleRemoveImage = useCallback(async () => {
-    // If we have an image URL, try to remove it from database
-    if (imageUrl) {
-      try {
-        // Clear the image in the database
-        await saveImageToDatabase('');
-        
-        // Clear the UI
-        setImageUrl('');
-        onImageChange('');
-      } catch (error) {
-        console.error('Error removing image from database:', error);
-        toast({
-          title: "Error",
-          description: "Failed to remove image. Please try again.",
-          variant: "destructive"
-        });
-      }
-    } else {
-      setImageUrl('');
-      onImageChange('');
-    }
-  }, [imageUrl, onImageChange, saveImageToDatabase]);
+  const handleRemoveImage = useCallback(() => {
+    setImageUrl('');
+    onImageChange('');
+  }, [onImageChange]);
 
   const initials = puppyName
     ? puppyName.substring(0, 2).toUpperCase()
@@ -267,10 +211,10 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
           variant="secondary"
           size="sm"
           className="h-8 w-8 rounded-full p-0 shadow-md"
-          onClick={() => document.getElementById(`puppy-image-upload-${puppyId || 'new'}`)?.click()}
+          onClick={() => document.getElementById('puppy-image-upload')?.click()}
           disabled={isUploading}
         >
-          {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+          <Camera className="h-4 w-4" />
           <span className="sr-only">Upload image</span>
         </Button>
 
@@ -281,7 +225,6 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
             size="sm"
             className="h-8 w-8 rounded-full p-0 shadow-md"
             onClick={handleRemoveImage}
-            disabled={isUploading}
           >
             <X className="h-4 w-4" />
             <span className="sr-only">Remove image</span>
@@ -291,7 +234,7 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
 
       <input
         type="file"
-        id={`puppy-image-upload-${puppyId || 'new'}`}
+        id="puppy-image-upload"
         onChange={handleFileChange}
         accept="image/*"
         className="hidden"

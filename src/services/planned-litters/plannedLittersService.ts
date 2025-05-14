@@ -1,317 +1,92 @@
 
-// Only updating the object mapping function since the property names don't match the data structure
 import { supabase } from '@/integrations/supabase/client';
 import { PlannedLitter } from '@/types/breeding';
-import { PlannedLitterFormValues, plannedLitterFormSchema } from './types';
-import { toast } from '@/hooks/use-toast';
+import { PlannedLitterFormValues } from './types';
+import { matingDatesService } from './matingDatesService';
 
-// Helper function to convert database rows to PlannedLitter objects
-const mapDbRowToPlannedLitter = (row: any, matingDates: any[] = []): PlannedLitter => {
-  return {
-    id: row.id,
-    maleId: row.male_id || null,
-    femaleId: row.female_id,
-    maleName: row.male_name || (row.external_male ? row.external_male_name : ''),
-    femaleName: row.female_name,
-    externalMale: !!row.external_male,
-    externalMaleName: row.external_male_name || null,
-    externalMaleBreed: row.external_male_breed || null,
-    externalMaleRegistration: row.external_male_registration || null,
-    expectedHeatDate: row.expected_heat_date,
-    notes: row.notes || null,
-    male: row.male || null,
-    female: row.female || null,
-    matingDates: matingDates.map(date => ({
-      id: date.id,
-      plannedLitterId: date.planned_litter_id,
-      matingDate: date.mating_date,
-      pregnancyId: date.pregnancy_id,
-      userId: date.user_id,
-      createdAt: date.created_at,
-      updatedAt: date.updated_at
-    }))
-  };
-};
-
-// Helper for checking session validity
-const checkSession = async () => {
-  try {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) throw error;
-    if (!session) {
-      console.error("No valid session found");
-      return null;
-    }
-    return session.user.id;
-  } catch (error) {
-    console.error("Error checking session:", error);
-    return null;
-  }
-};
-
-export const plannedLittersService = {
-  /**
-   * Load all planned litters for the current user
-   */
-  loadPlannedLitters: async (): Promise<PlannedLitter[]> => {
-    console.log("[PlannedLittersService] Loading planned litters");
-    
-    const userId = await checkSession();
-    if (!userId) {
-      console.error("[PlannedLittersService] No valid user session");
+class PlannedLittersService {
+  async loadPlannedLitters(): Promise<PlannedLitter[]> {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.error('No active session found');
       return [];
     }
 
-    try {
-      console.log(`[PlannedLittersService] Fetching planned litters for user ${userId}`);
-      
-      // First, get all planned litters
-      const { data: plannedLittersData, error } = await supabase
-        .from('planned_litters')
-        .select(`
-          *,
-          male:male_id(id, name, breed, image_url),
-          female:female_id(id, name, breed, image_url)
-        `)
-        .eq('user_id', userId);
-      
-      if (error) {
-        console.error('[PlannedLittersService] Error fetching planned litters:', error);
-        throw error;
-      }
-      
-      // Then, for each planned litter, get its mating dates
-      const plannedLittersWithMatingDates = await Promise.all((plannedLittersData || []).map(async (litter) => {
-        const { data: matingDates, error: matingError } = await supabase
-          .from('mating_dates')
-          .select('*')
-          .eq('planned_litter_id', litter.id)
-          .order('mating_date', { ascending: false });
-        
-        if (matingError) {
-          console.error(`[PlannedLittersService] Error fetching mating dates for litter ${litter.id}:`, matingError);
-          return mapDbRowToPlannedLitter(litter, []);
-        }
-        
-        return mapDbRowToPlannedLitter(litter, matingDates || []);
-      }));
-      
-      console.log(`[PlannedLittersService] Loaded ${plannedLittersWithMatingDates.length} planned litters with mating dates`);
-      return plannedLittersWithMatingDates;
-    } catch (error) {
-      console.error('[PlannedLittersService] Error in loadPlannedLitters:', error);
-      throw error;
-    }
-  },
-  
-  /**
-   * Create a new planned litter
-   */
-  createPlannedLitter: async (data: PlannedLitterFormValues): Promise<PlannedLitter | null> => {
-    console.log("[PlannedLittersService] Creating new planned litter:", data);
-    
-    const userId = await checkSession();
-    if (!userId) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to create planned litters",
-        variant: "destructive"
-      });
-      throw new Error("No valid session");
+    const { data: litters, error } = await supabase
+      .from('planned_litters')
+      .select(`
+        *,
+        mating_dates(*)
+      `)
+      .eq('user_id', sessionData.session.user.id);
+
+    if (error) {
+      console.error('Error loading planned litters:', error);
+      return [];
     }
 
-    try {
-      // Validate the form data
-      const validatedData = plannedLitterFormSchema.parse(data);
-      
-      // Format the date for Supabase (it expects a string, not a Date object)
-      const expectedHeatDate = validatedData.expectedHeatDate instanceof Date 
-        ? validatedData.expectedHeatDate.toISOString() 
-        : validatedData.expectedHeatDate;
-      
-      // Create a new planned litter entry
-      const { data: newLitter, error } = await supabase
-        .from('planned_litters')
-        .insert({
-          user_id: userId,
-          male_id: validatedData.externalMale ? null : validatedData.maleId,
-          female_id: validatedData.femaleId,
-          female_name: validatedData.femaleName,
-          male_name: validatedData.externalMale ? null : validatedData.maleName,
-          external_male: validatedData.externalMale,
-          external_male_name: validatedData.externalMale ? validatedData.externalMaleName : null,
-          external_male_breed: validatedData.externalMale ? validatedData.externalMaleBreed : null,
-          external_male_registration: validatedData.externalMale ? validatedData.externalMaleRegistration : null,
-          expected_heat_date: expectedHeatDate,
-          notes: validatedData.notes || null
-        })
-        .select(`
-          *,
-          male:male_id(id, name, breed, image_url),
-          female:female_id(id, name, breed, image_url)
-        `)
-        .single();
-      
-      if (error) {
-        console.error('[PlannedLittersService] Error creating planned litter:', error);
-        throw error;
-      }
-      
-      console.log('[PlannedLittersService] Created new planned litter:', newLitter);
-      
-      // Convert the database row to a proper PlannedLitter object
-      return mapDbRowToPlannedLitter(newLitter, []);
-    } catch (error) {
-      console.error('[PlannedLittersService] Error in createPlannedLitter:', error);
-      throw error;
-    }
-  },
-  
-  /**
-   * Add a mating date to a planned litter
-   */
-  addMatingDate: async (plannedLitterId: string, date: Date): Promise<void> => {
-    console.log(`[PlannedLittersService] Adding mating date ${date.toISOString()} to litter ${plannedLitterId}`);
-    
-    const userId = await checkSession();
-    if (!userId) throw new Error("No valid session");
-
-    try {
-      // Get the planned litter info
-      const { data: litter, error: litterError } = await supabase
-        .from('planned_litters')
-        .select('*')
-        .eq('id', plannedLitterId)
-        .eq('user_id', userId)
-        .single();
-      
-      if (litterError) {
-        console.error('[PlannedLittersService] Error fetching planned litter:', litterError);
-        throw litterError;
-      }
-      
-      if (!litter) {
-        throw new Error("Planned litter not found or not owned by current user");
-      }
-      
-      // Format the date for Supabase (it expects a string, not a Date object)
-      const matingDate = date instanceof Date ? date.toISOString() : date;
-      
-      // Add the mating date
-      const { error: matingError } = await supabase
-        .from('mating_dates')
-        .insert({
-          planned_litter_id: plannedLitterId,
-          mating_date: matingDate,
-          user_id: userId
-        });
-      
-      if (matingError) {
-        console.error('[PlannedLittersService] Error adding mating date:', matingError);
-        throw matingError;
-      }
-    } catch (error) {
-      console.error('[PlannedLittersService] Error in addMatingDate:', error);
-      throw error;
-    }
-  },
-  
-  /**
-   * Edit a mating date in a planned litter
-   */
-  editMatingDate: async (plannedLitterId: string, dateIndex: number, newDate: Date): Promise<void> => {
-    console.log(`[PlannedLittersService] Editing mating date at index ${dateIndex} for litter ${plannedLitterId}`);
-    
-    const userId = await checkSession();
-    if (!userId) throw new Error("No valid session");
-
-    try {
-      // Get all mating dates for this litter
-      const { data: matingDates, error: fetchError } = await supabase
-        .from('mating_dates')
-        .select('*')
-        .eq('planned_litter_id', plannedLitterId)
-        .eq('user_id', userId)
-        .order('mating_date', { ascending: false });
-      
-      if (fetchError) {
-        console.error('[PlannedLittersService] Error fetching mating dates:', fetchError);
-        throw fetchError;
-      }
-      
-      if (!matingDates || matingDates.length === 0 || !matingDates[dateIndex]) {
-        throw new Error("Mating date not found");
-      }
-      
-      // Format the date for Supabase (it expects a string, not a Date object)
-      const formattedDate = newDate instanceof Date ? newDate.toISOString() : newDate;
-      
-      // Update the mating date
-      const matingDateId = matingDates[dateIndex].id;
-      const { error: updateError } = await supabase
-        .from('mating_dates')
-        .update({ mating_date: formattedDate })
-        .eq('id', matingDateId)
-        .eq('user_id', userId);
-      
-      if (updateError) {
-        console.error('[PlannedLittersService] Error updating mating date:', updateError);
-        throw updateError;
-      }
-      
-      // TBD: Update pregnancy due date if exists
-    } catch (error) {
-      console.error('[PlannedLittersService] Error in editMatingDate:', error);
-      throw error;
-    }
-  },
-  
-  /**
-   * Delete a mating date from a planned litter
-   */
-  deleteMatingDate: async (plannedLitterId: string, dateIndex: number): Promise<void> => {
-    console.log(`[PlannedLittersService] Deleting mating date at index ${dateIndex} for litter ${plannedLitterId}`);
-    
-    const userId = await checkSession();
-    if (!userId) throw new Error("No valid session");
-
-    try {
-      // Get all mating dates for this litter
-      const { data: matingDates, error: fetchError } = await supabase
-        .from('mating_dates')
-        .select('*')
-        .eq('planned_litter_id', plannedLitterId)
-        .eq('user_id', userId)
-        .order('mating_date', { ascending: false });
-      
-      if (fetchError) {
-        console.error('[PlannedLittersService] Error fetching mating dates:', fetchError);
-        throw fetchError;
-      }
-      
-      if (!matingDates || matingDates.length === 0 || !matingDates[dateIndex]) {
-        throw new Error("Mating date not found");
-      }
-      
-      // Delete the mating date
-      const matingDateId = matingDates[dateIndex].id;
-      const { error: deleteError } = await supabase
-        .from('mating_dates')
-        .delete()
-        .eq('id', matingDateId)
-        .eq('user_id', userId);
-      
-      if (deleteError) {
-        console.error('[PlannedLittersService] Error deleting mating date:', deleteError);
-        throw deleteError;
-      }
-      
-      // TBD: Delete pregnancy if exists
-    } catch (error) {
-      console.error('[PlannedLittersService] Error in deleteMatingDate:', error);
-      throw error;
-    }
+    return litters.map(litter => ({
+      id: litter.id,
+      maleId: litter.male_id || '',
+      femaleId: litter.female_id,
+      maleName: litter.male_name || '',
+      femaleName: litter.female_name,
+      expectedHeatDate: litter.expected_heat_date,
+      notes: litter.notes,
+      matingDates: litter.mating_dates?.map(date => date.mating_date) || [],
+      externalMale: litter.external_male || false,
+      externalMaleBreed: litter.external_male_breed || '',
+      externalMaleRegistration: litter.external_male_registration || ''
+    }));
   }
-};
 
-export const fetchPlannedLitters = plannedLittersService.loadPlannedLitters;
+  async createPlannedLitter(formValues: PlannedLitterFormValues): Promise<PlannedLitter | null> {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      throw new Error('No active session');
+    }
+
+    const { data: litter, error } = await supabase
+      .from('planned_litters')
+      .insert({
+        male_id: formValues.externalMale ? null : formValues.maleId,
+        female_id: formValues.femaleId,
+        male_name: formValues.externalMale ? formValues.externalMaleName : formValues.maleName,
+        female_name: formValues.femaleName,
+        expected_heat_date: formValues.expectedHeatDate.toISOString(),
+        notes: formValues.notes,
+        external_male: formValues.externalMale,
+        external_male_breed: formValues.externalMaleBreed,
+        external_male_registration: formValues.externalMaleRegistration,
+        user_id: sessionData.session.user.id
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating planned litter:', error);
+      return null;
+    }
+
+    return {
+      id: litter.id,
+      maleId: litter.male_id || '',
+      femaleId: litter.female_id,
+      maleName: litter.male_name || '',
+      femaleName: litter.female_name,
+      expectedHeatDate: litter.expected_heat_date,
+      notes: litter.notes,
+      matingDates: [],
+      externalMale: litter.external_male || false,
+      externalMaleBreed: litter.external_male_breed || '',
+      externalMaleRegistration: litter.external_male_registration || ''
+    };
+  }
+
+  // Re-export mating dates methods for backward compatibility
+  addMatingDate = matingDatesService.addMatingDate;
+  deleteMatingDate = matingDatesService.deleteMatingDate;
+  editMatingDate = matingDatesService.editMatingDate;
+}
+
+export const plannedLittersService = new PlannedLittersService();

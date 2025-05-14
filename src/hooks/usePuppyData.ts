@@ -26,8 +26,6 @@ export const usePuppyData = () => {
           color: 'Golden',
           birthWeight: 0.45,
           birthDateTime: '2025-04-15T08:30:00',
-          litterId: '1', // Added litterId to match Puppy interface
-          imageUrl: '', // Added required imageUrl
           weightLog: [
             { date: '2025-04-15', weight: 0.45 },
             { date: '2025-04-16', weight: 0.48 },
@@ -42,8 +40,6 @@ export const usePuppyData = () => {
           color: 'Light Golden',
           birthWeight: 0.42,
           birthDateTime: '2025-04-15T09:15:00',
-          litterId: '1', // Added litterId to match Puppy interface
-          imageUrl: '', // Added required imageUrl
           weightLog: [
             { date: '2025-04-15', weight: 0.42 },
             { date: '2025-04-16', weight: 0.46 },
