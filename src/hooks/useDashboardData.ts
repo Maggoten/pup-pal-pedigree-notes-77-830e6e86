@@ -1,3 +1,4 @@
+
 import { useMemo, useEffect, useState } from 'react';
 import { subDays } from 'date-fns';
 import { useDogs } from '@/context/DogsContext';
@@ -6,8 +7,6 @@ import useSupabaseCalendarEvents from '@/hooks/useSupabaseCalendarEvents';
 import { plannedLittersService } from '@/services/PlannedLitterService';
 import { litterService } from '@/services/LitterService';
 import { getEventColor } from '@/services/CalendarEventService';
-import { remindersToCalendarEvents } from '@/utils/reminderToCalendarMapper';
-import { CalendarEvent } from '@/types/calendar';
 
 export const useDashboardData = () => {
   // State for data tracking
@@ -40,20 +39,6 @@ export const useDashboardData = () => {
     deleteEvent,
     getEventsForDay
   } = useSupabaseCalendarEvents();
-
-  // Convert reminders to calendar events and memoize the result
-  const reminderEvents = useMemo(() => {
-    // Only include non-completed reminders in the calendar
-    const activeReminders = reminders.filter(r => !r.isCompleted);
-    return remindersToCalendarEvents(activeReminders);
-  }, [reminders]);
-
-  // Combine both sets of events - ensuring consistent types
-  const combinedEvents = useMemo(() => {
-    const calendarEvents = events || [];
-    // Use type assertion to ensure consistent types
-    return [...calendarEvents, ...reminderEvents] as CalendarEvent[];
-  }, [events, reminderEvents]);
   
   // Fetch planned litters data
   useEffect(() => {
@@ -150,45 +135,9 @@ export const useDashboardData = () => {
     }
   }, [remindersLoading, calendarLoading, isLoadingPlannedLitters, isLoadingRecentLitters]);
   
-  // Create an enhanced getEventsForDate function that includes both calendar events and reminders
-  const getEventsForDate = (date: Date): CalendarEvent[] => {
-    // First get regular calendar events
-    const regularEvents = getEventsForDay(date);
-    
-    // Then get reminder events for this date
-    const reminderEventsForDate = reminderEvents.filter(event => {
-      const eventDate = new Date(event.date);
-      return (
-        eventDate.getDate() === date.getDate() && 
-        eventDate.getMonth() === date.getMonth() && 
-        eventDate.getFullYear() === date.getFullYear()
-      );
-    });
-    
-    // Return combined events for this date, with explicit type annotation
-    return [...regularEvents, ...reminderEventsForDate] as CalendarEvent[];
-  };
-
-  // Enhanced getEventColor function that handles reminder types
-  const getEnhancedEventColor = (type: string): string => {
-    // Add special handling for reminder-specific types
-    switch(type) {
-      case 'heat':
-        return 'bg-rose-200 text-rose-800 border-rose-300';
-      case 'pregnancy':
-        return 'bg-purple-200 text-purple-800 border-purple-300';
-      case 'birthday':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'vaccination':
-        return 'bg-amber-100 text-amber-800 border-amber-200';
-      case 'breeding':
-        return 'bg-violet-100 text-violet-800 border-violet-200';
-      case 'reminder':
-        return 'bg-warmbeige-200 text-darkgray-700 border-warmbeige-300';
-      default:
-        // Use the default event color service for other types
-        return getEventColor(type);
-    }
+  // Create wrapper functions to adapt to what components expect
+  const getEventsForDate = (date: Date) => {
+    return getEventsForDay(date);
   };
 
   // Wrapper functions to adapt async functions to the synchronous interface expected by components
@@ -203,7 +152,7 @@ export const useDashboardData = () => {
   };
   
   // Check if there's any data to display
-  const hasCalendarData = combinedEvents.length > 0;
+  const hasCalendarData = events && events.length > 0;
   const hasReminderData = reminders && reminders.length > 0;
   
   return {
@@ -216,7 +165,7 @@ export const useDashboardData = () => {
     addCustomReminder,
     deleteReminder,
     getEventsForDate,
-    getEventColor: getEnhancedEventColor, // Use our enhanced color function
+    getEventColor,
     handleAddEvent,
     deleteEvent,
     handleEditEvent,
@@ -226,7 +175,6 @@ export const useDashboardData = () => {
     recentLittersData,
     remindersSummary,
     hasCalendarData,
-    hasReminderData,
-    combinedEvents // Export the combined events
+    hasReminderData
   };
 };

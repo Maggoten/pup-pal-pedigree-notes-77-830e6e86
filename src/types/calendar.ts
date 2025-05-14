@@ -11,5 +11,4 @@ export interface CalendarEvent {
   notes?: string;
   time?: string;
   description?: string;
-  isReminderEvent?: boolean;   // Flag to identify events that originated from reminders
 }

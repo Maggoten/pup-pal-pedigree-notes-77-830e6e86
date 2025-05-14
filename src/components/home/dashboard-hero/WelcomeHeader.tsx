@@ -34,15 +34,15 @@ const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ username, user }) => {
   }, [user, username]);
 
   return (
-    <div className="px-4 pb-4 border-b border-warmbeige-200">
-      <h2 className="text-2xl md:text-3xl font-playfair text-darkgray-800">
+    <div className="px-6 pt-4 pb-1 border-b border-warmbeige-200">
+      <h2 className="text-2xl font-playfair text-primary">
         {loading ? (
-          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-8 w-40" />
         ) : (
           <>Welcome back, {displayName}!</>
         )}
       </h2>
-      <p className="text-sm font-sourcesans text-darkgray-600 mt-1">
+      <p className="text-sm font-sourcesans text-muted-foreground">
         Here's an overview of your breeding program
       </p>
     </div>
