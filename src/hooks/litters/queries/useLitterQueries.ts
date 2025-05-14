@@ -12,12 +12,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { littersQueryKey } from './useAddLitterMutation';
 import { toast } from '@/hooks/use-toast';
 import { fetchWithRetry } from '@/utils/fetchUtils';
+import { isMobileDevice } from '@/utils/fetchUtils';
 
 // This is the main hook that combines all the other hooks
 export const useLitterQueries = () => {
   const activeLittersQuery = useActiveLittersQuery();
   const archivedLittersQuery = useArchivedLittersQuery();
   const queryClient = useQueryClient();
+  const isMobile = isMobileDevice();
   
   const addLitterMutation = useAddLitterMutation();
   const updateLitterMutation = useUpdateLitterMutation();
@@ -31,18 +33,32 @@ export const useLitterQueries = () => {
     return activeLittersQuery.isSuccess && archivedLittersQuery.isSuccess;
   }, [activeLittersQuery.isSuccess, archivedLittersQuery.isSuccess]);
   
-  // Force refresh all litter data
+  // Force refresh all litter data with mobile-specific options
   const refreshLitters = useCallback(async () => {
     try {
       console.log('Manually refreshing all litters data');
       
+      // Show toast only on mobile since mobile users expect more visual feedback
+      if (isMobile) {
+        toast({
+          title: "Refreshing data...",
+          description: "Loading your latest litter information",
+          duration: 2000,
+        });
+      }
+      
       // Invalidate the queries first
       await queryClient.invalidateQueries({ queryKey: littersQueryKey });
       
-      // Then refetch with retry logic
+      // Then refetch with retry logic - more retries on mobile
+      const maxRetries = isMobile ? 3 : 2;
+      
       const [activeResult, archivedResult] = await Promise.all([
-        fetchWithRetry(() => activeLittersQuery.refetch(), { maxRetries: 2 }),
-        fetchWithRetry(() => archivedLittersQuery.refetch(), { maxRetries: 2 })
+        fetchWithRetry(() => activeLittersQuery.refetch(), { 
+          maxRetries,
+          initialDelay: isMobile ? 1000 : 1500 // Shorter initial delay on mobile for better UX
+        }),
+        fetchWithRetry(() => archivedLittersQuery.refetch(), { maxRetries })
       ]);
       
       console.log('Litters refresh completed', {
@@ -74,7 +90,7 @@ export const useLitterQueries = () => {
         archived: archivedLittersQuery.data || []
       };
     }
-  }, [queryClient, activeLittersQuery, archivedLittersQuery]);
+  }, [queryClient, activeLittersQuery, archivedLittersQuery, isMobile]);
 
   // Export an object with all the queries and mutations
   return {

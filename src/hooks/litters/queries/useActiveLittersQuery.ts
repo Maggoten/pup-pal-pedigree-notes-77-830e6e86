@@ -2,12 +2,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { litterService } from '@/services/LitterService';
 import { useAuth } from '@/hooks/useAuth';
+import { isMobileDevice } from '@/utils/fetchUtils';
 
 // Query key factory
 export const activeLittersQueryKey = ['litters', 'active'];
 
 export const useActiveLittersQuery = () => {
   const { user, isAuthReady } = useAuth();
+  const isMobile = isMobileDevice();
   
   return useQuery({
     queryKey: activeLittersQueryKey,
@@ -40,8 +42,10 @@ export const useActiveLittersQuery = () => {
       }
     },
     enabled: !!user?.id && isAuthReady,
-    staleTime: 1000 * 60, // 1 minute
-    retry: 2, // Retry failed queries up to 2 times
+    staleTime: isMobile ? 1000 * 30 : 1000 * 60, // 30 seconds on mobile, 1 minute on desktop
+    retry: isMobile ? 3 : 2, // More retries on mobile
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000), // Exponential backoff
+    // This ensures we refetch when the component mounts, important for mobile navigation
+    refetchOnMount: true,
   });
 };

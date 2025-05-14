@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigationType } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -19,22 +19,38 @@ import { getFirstActivePregnancy } from "./services/PregnancyService";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Pregnancy from "./pages/Pregnancy";
 import MobileDebugPanel from "./components/diagnostics/MobileDebugPanel";
-import { isMobileDevice } from "./utils/fetchUtils";
+import { isMobileDevice, isAppForeground } from "./utils/fetchUtils";
+import { queryClient, refreshOnVisibilityChange } from "./utils/reactQueryConfig";
 
-// Configure React Query with error handling
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: isMobileDevice() ? 3 : 2, // Increase retry count for mobile networks
-      // Use meta for error handling in newer versions of React Query
-      meta: {
-        onError: (error: Error) => {
-          console.error('[React Query Error]:', error);
-        }
+// RouteChangeTracker to detect navigation changes and refresh data
+const RouteChangeTracker = () => {
+  const location = useLocation();
+  const navigationType = useNavigationType();
+  
+  useEffect(() => {
+    // Only force refresh on POP (back/forward navigation) on mobile
+    const isMobile = isMobileDevice();
+    if (isMobile && navigationType === 'POP') {
+      console.log(`[Navigation] Back navigation to ${location.pathname}, refreshing data`);
+      
+      // Invalidate key queries based on the current route
+      if (location.pathname.includes('/my-litters')) {
+        queryClient.invalidateQueries({ queryKey: ['litters'] });
+      } else if (location.pathname.includes('/my-dogs')) {
+        queryClient.invalidateQueries({ queryKey: ['dogs'] });
+      } else if (location.pathname.includes('/pregnancy')) {
+        queryClient.invalidateQueries({ queryKey: ['pregnancies'] });
+      } else if (location.pathname.includes('/planned-litters')) {
+        queryClient.invalidateQueries({ queryKey: ['planned_litters'] });
       }
     }
-  }
-});
+    
+    // For all navigation types, log route change
+    console.log(`[Navigation] Route changed to ${location.pathname} (${navigationType})`);
+  }, [location, navigationType]);
+  
+  return null;
+};
 
 const App = () => {
   const [firstPregnancyId, setFirstPregnancyId] = useState<string | null>(null);
@@ -64,10 +80,16 @@ const App = () => {
     
     // Add listener for window focus to detect app returning to foreground
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (isAppForeground()) {
         console.log(`[App Debug] App returned to foreground on ${deviceType}`);
-        // Trigger fetch if needed when returning to app
-        queryClient.invalidateQueries();
+        
+        // Selectively refresh data based on common query keys
+        refreshOnVisibilityChange([
+          ['litters'],
+          ['dogs'],
+          ['pregnancies'],
+          ['planned_litters']
+        ]);
       }
     };
     
@@ -76,12 +98,21 @@ const App = () => {
     // Monitor for network connectivity changes (important on mobile)
     window.addEventListener('online', () => {
       console.log('[App Debug] Network connection restored');
-      queryClient.invalidateQueries();
+      // More aggressive cache invalidation when coming back online on mobile
+      if (isMobileDevice()) {
+        queryClient.invalidateQueries();
+      }
     });
     
     window.addEventListener('offline', () => {
       console.log('[App Debug] Network connection lost');
     });
+    
+    // Mobile-specific initialization
+    if (isMobileDevice()) {
+      // Add additional mobile-specific init code here
+      console.log('[App Debug] Mobile-specific initialization complete');
+    }
     
     // Cleanup event listeners
     return () => {
@@ -101,6 +132,7 @@ const App = () => {
             <BrowserRouter>
               <AuthGuard>
                 <DogsProvider>
+                  <RouteChangeTracker />
                   <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/" element={<Index />} />

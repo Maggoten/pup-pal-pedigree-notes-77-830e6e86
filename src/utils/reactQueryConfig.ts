@@ -1,23 +1,27 @@
 
 import { QueryClient } from '@tanstack/react-query';
+import { isMobileDevice } from './fetchUtils';
 
-// Configure the query client with optimizations to prevent unnecessary renders
+const isMobile = isMobileDevice();
+
+// Configure the query client with optimizations for mobile vs desktop
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 1000 * 60 * 5, // 5 minutes - increase stale time to reduce fetches
+      retry: isMobile ? 3 : 1, // More retries on mobile
+      staleTime: isMobile ? 1000 * 60 : 1000 * 60 * 5, // Shorter stale time on mobile (1 min vs 5 min)
       gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
       // Modern error handling approach
       throwOnError: false,
-      refetchOnMount: 'always'
+      refetchOnMount: true, // Always refetch on mounting a component
+      refetchOnReconnect: true
     },
     mutations: {
       // Modern error handling approach
       throwOnError: false,
       // Add retry for mutations
-      retry: 1
+      retry: isMobile ? 2 : 1
     }
   }
 });
@@ -37,19 +41,42 @@ export const resetQueryClient = () => {
   queryClient.clear();
 };
 
-// Helper function to prefetch commonly used data
+// Helper function to prefetch commonly used data with mobile optimizations
 export const prefetchCommonData = async (userId: string) => {
   if (!userId) return;
   
   try {
-    // Prefetch active litters
+    console.log(`[Query Client] Prefetching common data for user: ${userId}`);
+    
+    // Prefetch active litters with shorter stale time for mobile
     await queryClient.prefetchQuery({
       queryKey: ['litters', 'active'],
-      queryFn: () => fetch('/api/litters/active').then(res => res.json())
+      queryFn: () => fetch('/api/litters/active').then(res => res.json()),
+      staleTime: isMobile ? 1000 * 30 : 1000 * 60 * 5 // 30 seconds for mobile
     });
     
-    // You can add more prefetch operations here for other commonly accessed data
+    // Prefetch dogs for mobile users (important for several screens)
+    if (isMobile) {
+      await queryClient.prefetchQuery({
+        queryKey: ['dogs'],
+        queryFn: () => fetch('/api/dogs').then(res => res.json()),
+        staleTime: 1000 * 30 // 30 seconds stale time for mobile
+      });
+    }
+    
+    console.log('[Query Client] Prefetching complete');
   } catch (error) {
-    console.error('Error prefetching data:', error);
+    console.error('[Query Client] Error prefetching data:', error);
+  }
+};
+
+// Special function to force refresh data when a page becomes visible
+// This is especially important for mobile where app may be backgrounded
+export const refreshOnVisibilityChange = (queryKeys: string[][]) => {
+  if (document.visibilityState === 'visible') {
+    console.log('[Query Client] Page became visible, refreshing data');
+    queryKeys.forEach(key => {
+      queryClient.invalidateQueries({ queryKey: key });
+    });
   }
 };

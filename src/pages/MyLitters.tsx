@@ -4,11 +4,12 @@ import { LitterFilterProvider } from '@/components/litters/LitterFilterProvider'
 import { Skeleton } from '@/components/ui/skeleton';
 import MyLittersContent from '@/components/litters/MyLittersContent';
 import PageLayout from '@/components/PageLayout';
-import { PawPrint, AlertCircle, Loader2 } from 'lucide-react';
+import { PawPrint, AlertCircle, Loader2, RefreshCcw } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import useLitterQueries from '@/hooks/litters/queries/useLitterQueries';
+import { isMobileDevice } from '@/utils/fetchUtils';
 
 const MyLittersLoading = () => (
   <div className="space-y-4 p-4">
@@ -26,6 +27,8 @@ const MyLitters: React.FC = () => {
   const { isError, error, refreshLitters } = useLitterQueries();
   const [showError, setShowError] = useState(false);
   const [retryAttempt, setRetryAttempt] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const isMobile = isMobileDevice();
   
   // Effect to simulate the content loading (replacing Suspense behavior)
   useEffect(() => {
@@ -77,6 +80,16 @@ const MyLitters: React.FC = () => {
     }, backoffTime);
   };
   
+  // Force refresh function
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshLitters();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+  
   // Handle error state display
   const errorMessage = error instanceof Error ? error.message : 'Failed to load litters';
   const isNetworkError = errorMessage.includes('Failed to fetch') || 
@@ -108,6 +121,31 @@ const MyLitters: React.FC = () => {
             </Button>
           </AlertDescription>
         </Alert>
+      )}
+      
+      {/* Mobile-specific refresh button */}
+      {isMobile && (
+        <div className="flex justify-end mb-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleManualRefresh}
+            disabled={isRefreshing || contentLoading || !isAuthReady}
+            className="flex items-center gap-2"
+          >
+            {isRefreshing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Refreshing...</span>
+              </>
+            ) : (
+              <>
+                <RefreshCcw className="h-4 w-4" />
+                <span>Refresh</span>
+              </>
+            )}
+          </Button>
+        </div>
       )}
       
       <LitterFilterProvider>

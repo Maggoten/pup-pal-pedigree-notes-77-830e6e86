@@ -1,129 +1,76 @@
 
 /**
- * Utility to retry a fetch operation with exponential backoff
- * 
- * @param fetchFn The function to execute that returns a Promise
- * @param options Configuration options for the retry behavior
- * @returns The result of the fetchFn if successful
+ * Utility to retry fetch requests with customizable retry options
  */
-export async function fetchWithRetry<T>(
+export const fetchWithRetry = async <T>(
   fetchFn: () => Promise<T>,
   options: {
     maxRetries?: number;
     initialDelay?: number;
-    backoffFactor?: number;
-    onRetry?: (attempt: number, error?: any) => void;
-    useBackoff?: boolean;
-    shouldRetry?: (error: any) => boolean;
+    onRetry?: (attempt: number) => void;
   } = {}
-): Promise<T> {
-  const {
-    maxRetries = 3,
-    initialDelay = 500,
-    backoffFactor = 1.5,
-    onRetry = () => {},
-    useBackoff = true,
-    shouldRetry = () => true
-  } = options;
-
-  let lastError: any;
+): Promise<T> => {
+  const { maxRetries = 3, initialDelay = 500, onRetry } = options;
   
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
+  let lastError: Error;
+  let attempt = 0;
+  
+  while (attempt <= maxRetries) {
     try {
       return await fetchFn();
     } catch (error) {
-      console.error(`Fetch attempt ${attempt + 1}/${maxRetries} failed:`, error);
-      lastError = error;
+      lastError = error as Error;
+      attempt++;
       
-      if (attempt < maxRetries - 1) {
-        // Calculate backoff delay with exponential increase if useBackoff is true
-        const delay = useBackoff 
-          ? initialDelay * Math.pow(backoffFactor, attempt)
-          : initialDelay;
-
-        // Check if we should retry this specific error
-        if (!shouldRetry(error)) {
-          console.log(`Not retrying after error: ${error}`);
-          break;
+      if (attempt <= maxRetries) {
+        // Calculate backoff delay - exponential with jitter
+        const delay = initialDelay * Math.pow(1.5, attempt - 1) * (0.9 + Math.random() * 0.2);
+        
+        console.error(`Fetch failed (attempt ${attempt}/${maxRetries}), retrying in ${Math.round(delay)}ms`, error);
+        
+        if (onRetry) {
+          onRetry(attempt);
         }
         
-        console.log(`Retrying in ${delay}ms...`);
-        
-        // Notify about retry
-        onRetry(attempt + 1, error);
-        
-        // Wait before retrying
+        // Wait before next attempt
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
   }
   
-  // If we get here, all retries failed
-  throw lastError;
-}
+  throw lastError!;
+};
 
 /**
- * Detect if the current device is mobile
- * @returns boolean indicating if the current device is mobile
+ * Detect if the current device is a mobile device
  */
 export const isMobileDevice = (): boolean => {
-  if (typeof navigator === 'undefined') {
-    return false;
-  }
+  // Check if window exists (for SSR)
+  if (typeof window === 'undefined') return false;
   
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-    (window.innerWidth <= 768);
+  // Classic mobile detection regex 
+  const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+  
+  // 1. Check user agent
+  const isMobileUserAgent = mobileRegex.test(navigator.userAgent);
+  
+  // 2. Check screen size (typical mobile widths)
+  const isSmallScreen = window.innerWidth < 768;
+  
+  // 3. Check for touch capability
+  const hasTouch = 'ontouchstart' in window || 
+    navigator.maxTouchPoints > 0 || 
+    // @ts-ignore - Some browsers use msMaxTouchPoints
+    navigator.msMaxTouchPoints > 0;
+  
+  // For this app, we primarily care about small screen + touch capability
+  // or explicit mobile user agent
+  return (isSmallScreen && hasTouch) || isMobileUserAgent;
 };
 
 /**
- * Get a timeout value that's appropriate for the current device
- * @param defaultTimeout The default timeout in milliseconds
- * @param mobileTimeout The timeout for mobile devices in milliseconds
- * @returns Appropriate timeout value
+ * Check if the app is currently in the foreground
  */
-export const getDeviceAwareTimeout = (defaultTimeout = 30000, mobileTimeout = 45000): number => {
-  return isMobileDevice() ? mobileTimeout : defaultTimeout;
+export const isAppForeground = (): boolean => {
+  return document.visibilityState === 'visible';
 };
-
-/**
- * Check if a request should be retried based on the error
- * @param error The error that occurred
- * @returns boolean indicating if the request should be retried
- */
-export const shouldRetryRequest = (error: any): boolean => {
-  // Network errors should be retried
-  if (error instanceof TypeError && error.message.includes('network')) {
-    return true;
-  }
-  
-  // Retry on timeout errors
-  if (error.message && error.message.includes('timeout')) {
-    return true;
-  }
-  
-  // Retry on certain status codes
-  if (error.status) {
-    // Retry on server errors and some specific client errors
-    return error.status >= 500 || [408, 429].includes(error.status);
-  }
-  
-  // Default to retry
-  return true;
-};
-
-/**
- * Check if an error is a timeout error
- * @param error The error to check
- * @returns boolean indicating if the error is a timeout
- */
-export const isTimeoutError = (error: any): boolean => {
-  return error instanceof Error && 
-    (error.name === 'TimeoutError' || 
-     error.message.toLowerCase().includes('timeout') ||
-     error.message.toLowerCase().includes('timed out'));
-};
-
-/**
- * Default timeout value in milliseconds
- */
-export const TIMEOUT = 30000;
