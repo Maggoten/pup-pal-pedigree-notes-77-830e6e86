@@ -22,6 +22,6 @@ export default defineConfig(({ mode }) => ({
   },
   define: {
     // Provide fallback values for environment variables
-    'import.meta.env.VITE_SUPABASE_BUCKET_NAME': JSON.stringify('public'),
+    'import.meta.env.VITE_SUPABASE_BUCKET_NAME': JSON.stringify('dog-photos'),
   },
 }));

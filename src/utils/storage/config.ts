@@ -1,5 +1,5 @@
 
-export const BUCKET_NAME = import.meta.env.VITE_SUPABASE_BUCKET_NAME || 'public';
+export const BUCKET_NAME = import.meta.env.VITE_SUPABASE_BUCKET_NAME || 'dog-photos';
 
 // Image processing constants
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
