@@ -44,12 +44,23 @@ export const triggerAllReminders: TriggerAllRemindersFunction = async (userId: s
     const dogReminders = generateDogReminders(userDogs);
     console.log(`[Manual Reminder Generation] Generated ${dogReminders.length} dog reminders`);
     
-    // Call generateLitterReminders with the correct parameter type
-    const litterReminders = await generateLitterReminders(userId);
+    // Fetch litters for the user to pass to generateLitterReminders
+    const { data: littersData, error: littersError } = await supabase
+      .from('litters')
+      .select('*')
+      .eq('user_id', userId);
+      
+    if (littersError) {
+      console.error('[Manual Reminder Generation] Error fetching litters:', littersError);
+      return [];
+    }
+    
+    // Call generateLitterReminders with the actual litters array
+    const litterReminders = await generateLitterReminders(littersData || []);
     console.log(`[Manual Reminder Generation] Generated ${litterReminders.length} litter reminders`);
     
-    // Call generateGeneralReminders without unnecessary parameters
-    const generalReminders = generateGeneralReminders(userDogs);
+    // Call generateGeneralReminders
+    const generalReminders = generateGeneralReminders();
     console.log(`[Manual Reminder Generation] Generated ${generalReminders.length} general reminders`);
     
     const allReminders = [...dogReminders, ...litterReminders, ...generalReminders];

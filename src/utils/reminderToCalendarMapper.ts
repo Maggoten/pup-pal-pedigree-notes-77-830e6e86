@@ -1,6 +1,7 @@
 
 import { Reminder } from '@/types/reminders';
 import { CalendarEvent } from '@/types/calendar';
+import { format } from 'date-fns';
 
 /**
  * Converts a Reminder object to a CalendarEvent object for display in the calendar
@@ -9,13 +10,16 @@ import { CalendarEvent } from '@/types/calendar';
  */
 export const reminderToCalendarEvent = (reminder: Reminder): CalendarEvent => {
   const dueDate = reminder.dueDate;
+  const formattedDate = dueDate instanceof Date 
+    ? format(dueDate, 'yyyy-MM-dd')
+    : dueDate;
   
   return {
     id: `reminder-${reminder.id}`, // Prefix with 'reminder-' to distinguish from regular calendar events
     title: reminder.title,
-    date: dueDate, // For backward compatibility
-    startDate: dueDate, // Required field
-    endDate: dueDate, // Required field
+    date: formattedDate, // For backward compatibility
+    startDate: formattedDate, // Required field
+    endDate: formattedDate, // Required field
     type: reminder.type || 'other', // Ensure type is never undefined
     dogId: reminder.relatedId,
     notes: reminder.description,

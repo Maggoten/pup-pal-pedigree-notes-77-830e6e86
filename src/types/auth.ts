@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -8,4 +9,12 @@ export interface User {
   user_metadata: Record<string, any>;
   aud: string;
   created_at: string;
+}
+
+export interface RegisterData {
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+  address?: string;
 }

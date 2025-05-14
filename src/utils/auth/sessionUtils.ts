@@ -1,33 +1,49 @@
 
 import { User } from '@/types/auth';
-import { supabase } from '@/integrations/supabase/client';
 
-// Create a simplified user object from Supabase user data
-export const createUserFromSupabaseSession = (sessionUser: any): User => {
-  // Create a minimally viable User object that satisfies the interface
+// Create a user object from a profile and user ID
+export const createUserFromSupabase = (profile: any, userId: string, userEmail?: string | null): User => {
   return {
-    id: sessionUser.id,
-    email: sessionUser.email,
-    firstName: sessionUser.user_metadata?.firstName,
-    lastName: sessionUser.user_metadata?.lastName,
-    address: sessionUser.user_metadata?.address,
-    app_metadata: sessionUser.app_metadata || {},
-    user_metadata: sessionUser.user_metadata || {},
-    aud: sessionUser.aud || 'authenticated',
-    created_at: sessionUser.created_at || new Date().toISOString()
+    id: userId,
+    email: userEmail || profile?.email || '',
+    firstName: profile?.firstName || profile?.first_name || '',
+    lastName: profile?.lastName || profile?.last_name || '',
+    address: profile?.address || '',
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString()
   };
 };
 
-export const getSessionUser = async (): Promise<User | null> => {
-  const { data } = await supabase.auth.getSession();
-  
-  if (!data?.session?.user) {
-    return null;
-  }
-  
-  return createUserFromSupabaseSession(data.session.user);
+// Map a Supabase user to our app's user format
+export const createUserFromSupabaseSession = (supabaseUser: any): User => {
+  return {
+    id: supabaseUser.id,
+    email: supabaseUser.email || '',
+    firstName: supabaseUser.user_metadata?.firstName || supabaseUser.user_metadata?.first_name || '',
+    lastName: supabaseUser.user_metadata?.lastName || supabaseUser.user_metadata?.last_name || '',
+    address: supabaseUser.user_metadata?.address || '',
+    app_metadata: supabaseUser.app_metadata || {},
+    user_metadata: supabaseUser.user_metadata || {},
+    aud: supabaseUser.aud || 'authenticated',
+    created_at: supabaseUser.created_at || new Date().toISOString()
+  };
 };
 
-export const clearSession = async (): Promise<void> => {
-  await supabase.auth.signOut();
+// Map a profile and user to our app user format
+export const mapUserProfile = (profile: any, userId: string, userEmail?: string | null): User => {
+  const user: User = {
+    id: userId,
+    email: userEmail || profile?.email || '',
+    firstName: profile?.firstName || profile?.first_name || '',
+    lastName: profile?.lastName || profile?.last_name || '',
+    address: profile?.address || '',
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString()
+  };
+
+  return user;
 };

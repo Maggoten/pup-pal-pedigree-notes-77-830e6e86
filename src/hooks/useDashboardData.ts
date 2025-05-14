@@ -6,7 +6,7 @@ import useCalendarEvents from '@/hooks/useCalendarEvents';
 import { remindersToCalendarEvents } from '@/utils/reminderToCalendarMapper';
 import { CalendarEvent } from '@/types/calendar';
 import { AddEventFormValues } from '@/components/calendar/types';
-import { usePlannedLitters } from '@/hooks/planned-litters/hooks/usePlannedLitters';
+import { usePlannedLitters as usePlannedLittersHook } from '@/hooks/planned-litters/hooks/usePlannedLitters';
 import { useLitterQueries } from '@/hooks/useLitterQueries';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -46,11 +46,25 @@ export const useDashboardData = () => {
   };
   
   // Planned litters data
+  const plannedLittersHook = usePlannedLittersHook();
   const { 
     plannedLitters,
     isLoading: plannedLittersLoading,
-    nextHeatDate
-  } = usePlannedLitters();
+  } = plannedLittersHook;
+  
+  // Extract or compute nextHeatDate from plannedLitters data
+  const nextHeatDate = useMemo(() => {
+    if (!plannedLitters || plannedLitters.length === 0) {
+      return null;
+    }
+    
+    // Find the next planned heat date
+    const sortedLitters = [...plannedLitters].sort(
+      (a, b) => new Date(a.expectedHeatDate).getTime() - new Date(b.expectedHeatDate).getTime()
+    );
+    
+    return sortedLitters[0]?.expectedHeatDate || null;
+  }, [plannedLitters]);
   
   // Get litter data
   const litterQueryResult = useLitterQueries();

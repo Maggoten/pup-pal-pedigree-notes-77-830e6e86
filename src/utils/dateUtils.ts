@@ -26,7 +26,7 @@ export const formatDate = (
  * Format date as YYYY-MM-DD
  */
 export const formatDateYYYYMMDD = (date: Date): string => {
-  return format(date, 'yyyy-MM-dd');
+  return date.toISOString().split('T')[0];
 };
 
 /**
@@ -79,10 +79,10 @@ export const parseISODate = (isoString: string | null | undefined): Date | null 
 };
 
 /**
- * Get noon time on a specific date
+ * Get noon datetime for a specific date (useful for consistent date handling)
  */
 export const getNoonDate = (date: Date): Date => {
-  const noon = new Date(date);
-  noon.setHours(12, 0, 0, 0);
-  return noon;
+  const result = new Date(date);
+  result.setHours(12, 0, 0, 0);
+  return result;
 };

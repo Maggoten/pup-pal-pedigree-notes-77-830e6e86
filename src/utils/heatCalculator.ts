@@ -1,9 +1,15 @@
+
 import { Dog } from '@/types/dogs';
 import { addMonths, differenceInDays, format, isPast } from 'date-fns';
 
 // Calculate the expected heat date based on the dog's last heat and heat cycle
 export const calculateExpectedHeatDate = (dog: Dog): Date => {
-  const lastHeatDate = dog.lastHeat;
+  // Access lastHeat from the heatHistory if it exists
+  const lastHeatRecord = dog.heatHistory && Array.isArray(dog.heatHistory) && dog.heatHistory.length > 0
+    ? dog.heatHistory[0]
+    : null;
+    
+  const lastHeatDate = lastHeatRecord?.date;
   const heatCycle = calculateHeatCycle(dog);
 
   if (!lastHeatDate || !heatCycle) {
