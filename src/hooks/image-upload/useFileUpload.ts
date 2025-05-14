@@ -1,10 +1,11 @@
 
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { compressImage } from '@/utils/storage/imageUtils';
 import { toast } from '@/hooks/use-toast';
+import { uploadFileAndGetUrl } from '@/utils/storage/core/bucket';
+import { getPlatformInfo } from '@/utils/storage/mobileUpload';
+import { STORAGE_ERRORS } from '@/utils/storage/config';
 import { UploadResult } from './types';
 
 // Maximum file size in bytes (5MB)
@@ -52,11 +53,15 @@ export const useFileUpload = (
       // Compress the image for better upload/display performance
       const compressedFile = await compressImage(file);
       
-      // Upload file to Supabase Storage
-      const { publicUrl, error } = await uploadToStorage(compressedFile, user_id);
+      // Log platform info for debugging
+      const platform = getPlatformInfo();
+      console.log(`[useFileUpload] Uploading from: ${platform.device}, Browser: ${platform.browser}`);
       
-      if (error || !publicUrl) {
-        throw new Error(error?.message || 'Failed to upload image');
+      // Upload file to storage and get public URL
+      const publicUrl = await uploadFileAndGetUrl(compressedFile, user_id);
+      
+      if (!publicUrl) {
+        throw new Error(STORAGE_ERRORS.UPLOAD_FAILED);
       }
       
       // Update the UI with the new image
@@ -96,55 +101,6 @@ export const useFileUpload = (
       return false;
     } finally {
       uploadInProgressRef.current = false;
-    }
-  };
-  
-  /**
-   * Handle the actual upload to Supabase Storage
-   */
-  const uploadToStorage = async (file: File, userId: string): Promise<{ publicUrl?: string; error?: Error }> => {
-    // Get device/platform information for error handling
-    const platform = getPlatformInfo();
-    console.log(`Uploading from: ${platform.mobile ? 'Mobile' : 'Desktop'}, Browser: ${platform.safari ? 'Safari' : 'Other'}`);
-    
-    try {
-      // Create a unique file path
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const filePath = `${userId}/${fileName}`;
-      
-      // Upload to the user's folder in storage
-      const { data, error } = await supabase.storage
-        .from('images')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        }) as UploadResult;
-      
-      if (error) {
-        console.error('Storage upload error:', error);
-        
-        // Special handling for mobile Safari
-        if (platform.mobile && platform.safari) {
-          toast({
-            title: 'Mobile upload issue',
-            description: 'Safari on iOS may have limited storage access. Try a different browser.',
-            variant: 'destructive',
-          });
-        }
-        
-        return { error: new Error(error.message || 'Upload failed') };
-      }
-      
-      // Get the public URL for the uploaded image
-      const { data: { publicUrl } } = supabase.storage
-        .from('images')
-        .getPublicUrl(data?.path || '');
-      
-      return { publicUrl };
-    } catch (error: any) {
-      console.error('Unexpected upload error:', error);
-      return { error: new Error('Unexpected error during upload') };
     }
   };
   

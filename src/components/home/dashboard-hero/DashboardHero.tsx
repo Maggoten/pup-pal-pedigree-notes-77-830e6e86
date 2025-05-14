@@ -1,32 +1,21 @@
 
 import React from 'react';
 import { User } from '@/types/auth';
-import { format } from 'date-fns';
-import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
-import WelcomeHeader from './WelcomeHeader';
+import UserWelcomeBanner from './UserWelcomeBanner';
 import MetricCardGrid from './MetricCardGrid';
-import DecorativePawprints from './DecorativePawprints';
+import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 
 interface DashboardHeroProps {
-  username?: string;
-  user?: User | null;
-  reminders?: {
-    count: number;
-    highPriority: number;
-  };
-  plannedLitters?: {
-    count: number;
-    nextDate: Date | null;
-  };
-  activePregnancies?: ActivePregnancy[];
-  recentLitters?: {
-    count: number;
-    latest: Date | null;
-  };
+  username: string;
+  user: User | null;
+  reminders: { count: number; highPriority: number };
+  plannedLitters: { count: number; nextDate: Date | null };
+  activePregnancies: ActivePregnancy[];
+  recentLitters: { count: number; recent: number };
   isLoadingPregnancies?: boolean;
 }
 
-const DashboardHero: React.FC<DashboardHeroProps> = ({
+const DashboardHero: React.FC<DashboardHeroProps> = ({ 
   username,
   user,
   reminders,
@@ -35,35 +24,59 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   recentLitters,
   isLoadingPregnancies = false
 }) => {
-  // Use nullish coalescing to provide default values for objects that might be undefined
-  const safeReminders = reminders ?? { count: 0, highPriority: 0 };
-  const safePlannedLitters = plannedLitters ?? { count: 0, nextDate: null };
-  const safeRecentLitters = recentLitters ?? { count: 0, latest: null };
+  // Debug logging
+  console.log('[DashboardHero] Rendering with data:', { 
+    username,
+    reminders,
+    plannedLitters,
+    activePregnancies: activePregnancies?.length,
+    recentLitters
+  });
   
+  // Format the metrics for display
+  const metricCards = [
+    {
+      icon: "bell",
+      label: "Reminders",
+      value: reminders.count.toString(),
+      highlightColor: reminders.highPriority > 0 ? "rose" : "green",
+      trend: reminders.highPriority > 0 ? `${reminders.highPriority} high priority` : "No urgent tasks",
+      loading: false
+    },
+    {
+      icon: "calendar",
+      label: "Planned Litters",
+      value: plannedLitters.count.toString(),
+      highlightColor: "green",
+      trend: plannedLitters.nextDate ? `Next heat: ${plannedLitters.nextDate.toLocaleDateString()}` : "No upcoming heats",
+      loading: false
+    },
+    {
+      icon: "heart",
+      label: "Active Pregnancies",
+      value: activePregnancies?.length.toString() || "0",
+      highlightColor: "blue",
+      trend: activePregnancies?.length === 1 ? "1 due soon" : activePregnancies?.length > 1 ? `${activePregnancies.length} active` : "None active",
+      loading: isLoadingPregnancies
+    },
+    {
+      icon: "pawprint",
+      label: "Recent Litters",
+      value: recentLitters.count.toString(),
+      highlightColor: "purple",
+      trend: recentLitters.recent > 0 ? `${recentLitters.recent} this year` : "None this year",
+      loading: false
+    }
+  ];
+
   return (
-    <section className="relative bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 py-8 md:py-10 px-6 rounded-xl border border-warmbeige-200 overflow-hidden shadow-sm">
-      {/* Decorative elements */}
-      <DecorativePawprints />
-      
-      {/* Welcome header */}
-      <WelcomeHeader 
-        username={username || 'Breeder'} 
+    <section className="space-y-6">
+      <UserWelcomeBanner 
+        username={username}
         user={user}
       />
       
-      {/* Stats grid */}
-      <div className="relative z-10 mt-6">
-        <MetricCardGrid 
-          remindersCount={safeReminders.count}
-          highPriorityCount={safeReminders.highPriority}
-          plannedLittersCount={safePlannedLitters.count}
-          nextHeatDate={safePlannedLitters.nextDate}
-          activePregnanciesCount={activePregnancies?.length || 0}
-          isLoadingPregnancies={isLoadingPregnancies}
-          recentLittersCount={safeRecentLitters.count}
-          recentLitterDate={safeRecentLitters.latest}
-        />
-      </div>
+      <MetricCardGrid metricCards={metricCards} />
     </section>
   );
 };

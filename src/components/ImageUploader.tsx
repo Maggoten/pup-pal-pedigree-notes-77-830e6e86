@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { UploadIcon, XIcon, Loader2 } from 'lucide-react';
@@ -7,6 +8,7 @@ import ImagePreviewDisplay from './image-upload/ImagePreviewDisplay';
 import { toast } from '@/components/ui/use-toast';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { uploadStateManager, setUploadPending } from '@/components/AuthGuard';
+import { createBucketIfNotExists } from '@/utils/storage/core/bucket';
 
 interface ImageUploaderProps {
   currentImage?: string;
@@ -28,6 +30,15 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const PLACEHOLDER_IMAGE_PATH = '/placeholder.svg';
   const isPlaceholder = !currentImage || currentImage === PLACEHOLDER_IMAGE_PATH;
   const platform = getPlatformInfo();
+
+  // Initialize bucket if user is authenticated
+  useEffect(() => {
+    if (user?.id && isAuthReady) {
+      createBucketIfNotExists().catch(err => {
+        console.error("Failed to initialize storage bucket:", err);
+      });
+    }
+  }, [user?.id, isAuthReady]);
 
   // Pass the current user ID to useImageUpload
   const { isUploading, uploadImage, removeImage, isUploadActive } = useImageUpload({
@@ -193,8 +204,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         try {
           await onImageSaved('');
           console.log("Image removed from database");
+          toast({
+            title: "Image Removed",
+            description: "The image has been successfully removed"
+          });
         } catch (error) {
           console.error("Failed to remove image from database:", error);
+          toast({
+            title: "Remove Error",
+            description: "Failed to update database after removing image",
+            variant: "destructive"
+          });
         }
       }
     } catch (error) {
@@ -209,11 +229,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  };
-
-  // Remove mobile help warning completely by returning null
-  const renderMobileHelp = () => {
-    return null;
   };
 
   return (
@@ -253,8 +268,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           </Button>
         )}
       </div>
-      
-      {renderMobileHelp()}
       
       <input
         type="file"

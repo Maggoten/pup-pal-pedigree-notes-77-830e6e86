@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
@@ -5,7 +6,6 @@ import PageLayout from '@/components/PageLayout';
 import DashboardHero from './dashboard-hero';
 import DashboardContent from './DashboardContent';
 import { useDashboardData } from '@/hooks/useDashboardData';
-import { getDisplayUsername } from '@/utils/userDisplayUtils';
 import { getActivePregnancies } from '@/services/PregnancyService';
 import { toast } from '@/components/ui/use-toast';
 
@@ -49,7 +49,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     fetchActivePregnancies();
   }, [initialActivePregnancies.length]);
   
-  // Get the personalized username for initial display while we fetch from Supabase
+  // Get the personalized username for display
   const username = user?.firstName || (user?.email ? user.email.split('@')[0] : 'Breeder');
   
   // Prepare props for child components
@@ -60,7 +60,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     deleteEvent: dashboardData.deleteEvent,
     editEvent: dashboardData.handleEditEvent,
     isLoading: dashboardData.calendarLoading,
-    hasError: dashboardData.calendarError // This now receives a boolean value
+    hasError: dashboardData.calendarError 
   };
   
   const remindersProps = {
@@ -69,6 +69,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     hasError: dashboardData.remindersError,
     handleMarkComplete: dashboardData.handleMarkComplete
   };
+
+  // Debug logging
+  console.log('[DashboardLayout] Rendering with data:', {
+    reminders: dashboardData.remindersSummary,
+    plannedLitters: dashboardData.plannedLittersData,
+    activePregnanciesCount: activePregnancies?.length || 0,
+    isLoadingPregnancies
+  });
   
   return (
     <PageLayout 

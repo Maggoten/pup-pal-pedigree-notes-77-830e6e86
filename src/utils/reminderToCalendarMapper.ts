@@ -1,7 +1,6 @@
 
 import { Reminder } from '@/types/reminders';
 import { CalendarEvent } from '@/types/calendar';
-import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Converts a Reminder object to a CalendarEvent object for display in the calendar
@@ -17,7 +16,7 @@ export const reminderToCalendarEvent = (reminder: Reminder): CalendarEvent => {
     date: dueDate, // For backward compatibility
     startDate: dueDate, // Required field
     endDate: dueDate, // Required field
-    type: reminder.type || 'reminder',
+    type: reminder.type || 'other', // Ensure type is never undefined
     dogId: reminder.relatedId,
     notes: reminder.description,
     isReminderEvent: true  // Flag to identify this as a reminder-sourced event

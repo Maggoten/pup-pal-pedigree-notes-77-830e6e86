@@ -1,232 +1,174 @@
-import { useMemo, useEffect, useState } from 'react';
-import { subDays } from 'date-fns';
-import { useDogs } from '@/context/DogsContext';
+
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { isSameDay, parseISO } from 'date-fns';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
-import useSupabaseCalendarEvents from '@/hooks/useSupabaseCalendarEvents';
-import { plannedLittersService } from '@/services/PlannedLitterService';
-import { litterService } from '@/services/LitterService';
-import { getEventColor } from '@/services/CalendarEventService';
+import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { remindersToCalendarEvents } from '@/utils/reminderToCalendarMapper';
 import { CalendarEvent } from '@/types/calendar';
+import { AddEventFormValues } from '@/components/calendar/types';
+import { usePlannedLitters } from '@/hooks/planned-litters/hooks/usePlannedLitters';
+import { useLitterQueries } from '@/hooks/useLitterQueries';
+import { useAuth } from '@/hooks/useAuth';
 
 export const useDashboardData = () => {
-  // State for data tracking
-  const [isDataReady, setIsDataReady] = useState<boolean>(false);
-  const [plannedLittersData, setPlannedLittersData] = useState({ count: 0, nextDate: null as Date | null });
-  const [recentLittersData, setRecentLittersData] = useState({ count: 0, latest: null as Date | null });
-  const [isLoadingPlannedLitters, setIsLoadingPlannedLitters] = useState<boolean>(true);
-  const [isLoadingRecentLitters, setIsLoadingRecentLitters] = useState<boolean>(true);
+  const { user } = useAuth();
+  const [isDataReady, setIsDataReady] = useState(false);
   
-  // Centralized data fetching for calendar and reminders
-  const { dogs } = useDogs();
-  
-  // Single instances of these hooks to prevent duplicate fetching
+  // Get reminders data
   const { 
     reminders, 
     isLoading: remindersLoading, 
     hasError: remindersError,
     handleMarkComplete,
-    addCustomReminder,
-    deleteReminder
+    remindersSummary
   } = useBreedingReminders();
   
-  // Use the Supabase-based calendar hook
-  const {
-    events,
-    isLoading: calendarLoading,
-    hasError: calendarError,
-    addEvent,
-    updateEvent: editEvent,
-    deleteEvent,
-    getEventsForDay
-  } = useSupabaseCalendarEvents();
-
-  // Convert reminders to calendar events and memoize the result
+  // Convert reminders to calendar events format
   const reminderEvents = useMemo(() => {
-    // Only include non-completed reminders in the calendar
-    const activeReminders = reminders.filter(r => !r.isCompleted);
-    return remindersToCalendarEvents(activeReminders);
+    return remindersToCalendarEvents(reminders);
   }, [reminders]);
-
-  // Combine both sets of events - ensuring consistent types
+  
+  // Get calendar events data
+  const { 
+    events: calendarEvents, 
+    isLoading: eventsLoading, 
+    error: calendarError,
+    addEvent,
+    deleteEvent,
+    editEvent 
+  } = useCalendarEvents();
+  
+  // Planned litters data
+  const { 
+    plannedLitters,
+    isLoading: plannedLittersLoading,
+    nextHeatDate
+  } = usePlannedLitters();
+  
+  // Recent litters data
+  const { 
+    recentLittersCount,
+    littersThisYear,
+    isLoading: littersLoading,
+    error: littersError
+  } = useLitterQueries();
+  
+  // Combine calendar events with reminder events
   const combinedEvents = useMemo(() => {
-    const calendarEvents = events || [];
-    // Use type assertion to ensure consistent types
-    return [...calendarEvents, ...reminderEvents] as CalendarEvent[];
-  }, [events, reminderEvents]);
-  
-  // Fetch planned litters data
-  useEffect(() => {
-    const fetchPlannedLittersData = async () => {
-      try {
-        setIsLoadingPlannedLitters(true);
-        const plannedLitters = await plannedLittersService.loadPlannedLitters();
-        
-        // Sort planned litters by expected heat date to find the next one
-        const sortedLitters = [...plannedLitters].sort(
-          (a, b) => new Date(a.expectedHeatDate).getTime() - new Date(b.expectedHeatDate).getTime()
-        );
-        
-        // Find the next planned litter (with heat date in the future)
-        const nextLitter = sortedLitters.find(
-          litter => new Date(litter.expectedHeatDate).getTime() > Date.now()
-        );
-        
-        setPlannedLittersData({
-          count: plannedLitters.length,
-          nextDate: nextLitter ? new Date(nextLitter.expectedHeatDate) : null
-        });
-      } catch (error) {
-        console.error('Error fetching planned litters:', error);
-        setPlannedLittersData({ count: 0, nextDate: null });
-      } finally {
-        setIsLoadingPlannedLitters(false);
-      }
-    };
+    const results = [...calendarEvents];
     
-    fetchPlannedLittersData();
-  }, []);
-  
-  // Fetch recent litters data
-  useEffect(() => {
-    const fetchRecentLittersData = async () => {
-      try {
-        setIsLoadingRecentLitters(true);
-        // Get all litters
-        const activeLitters = await litterService.getActiveLitters();
-        const archivedLitters = await litterService.getArchivedLitters();
-        const allLitters = [...activeLitters, ...archivedLitters];
-        
-        // Consider litters from the last 90 days as "recent"
-        const ninetyDaysAgo = subDays(new Date(), 90);
-        const recentLitters = allLitters.filter(
-          litter => new Date(litter.dateOfBirth) >= ninetyDaysAgo
+    // Only add reminder events that don't overlap with existing calendar events
+    if (reminderEvents && reminderEvents.length > 0) {
+      for (const reminderEvent of reminderEvents) {
+        // Check if this reminder is already in the calendar events
+        const exists = results.some(calEvent => 
+          calEvent.id === reminderEvent.id || 
+          (calEvent.title === reminderEvent.title && 
+          isSameDay(new Date(calEvent.date), new Date(reminderEvent.date)))
         );
         
-        // Find the most recent litter
-        let latestDate: Date | null = null;
-        if (recentLitters.length > 0) {
-          const sortedLitters = [...recentLitters].sort(
-            (a, b) => new Date(b.dateOfBirth).getTime() - new Date(a.dateOfBirth).getTime()
-          );
-          latestDate = sortedLitters[0] ? new Date(sortedLitters[0].dateOfBirth) : null;
+        if (!exists) {
+          results.push(reminderEvent);
         }
-        
-        setRecentLittersData({
-          count: recentLitters.length,
-          latest: latestDate
-        });
-      } catch (error) {
-        console.error('Error fetching recent litters:', error);
-        setRecentLittersData({ count: 0, latest: null });
-      } finally {
-        setIsLoadingRecentLitters(false);
       }
-    };
+    }
     
-    fetchRecentLittersData();
+    return results;
+  }, [calendarEvents, reminderEvents]);
+  
+  // Get events for a specific date
+  const getEventsForDate = useCallback((date: Date) => {
+    return combinedEvents.filter(event => {
+      const eventDate = event.date instanceof Date ? event.date : parseISO(event.date as string);
+      return isSameDay(eventDate, date);
+    });
+  }, [combinedEvents]);
+  
+  // Get color for event type
+  const getEventColor = useCallback((type: string) => {
+    switch (type) {
+      case 'heat':
+        return 'bg-pink-500';
+      case 'birthday':
+        return 'bg-blue-500';
+      case 'vaccination':
+        return 'bg-green-500';
+      case 'breeding':
+        return 'bg-purple-500';
+      case 'litter':
+        return 'bg-amber-500';
+      case 'pregnancy':
+        return 'bg-rose-500';
+      case 'health':
+        return 'bg-emerald-500';
+      default:
+        return 'bg-gray-500';
+    }
   }, []);
   
-  const remindersSummary = useMemo(() => {
-    const highPriorityCount = reminders.filter(r => r.priority === 'high' && !r.isCompleted).length;
+  // Handle add event mutation wrapper
+  const handleAddEvent = useCallback((data: AddEventFormValues) => {
+    return addEvent(data);
+  }, [addEvent]);
+  
+  // Handle edit event mutation wrapper
+  const handleEditEvent = useCallback((eventId: string, data: AddEventFormValues) => {
+    return editEvent(eventId, data);
+  }, [editEvent]);
+  
+  // Format planned litters data for the dashboard
+  const plannedLittersData = useMemo(() => {
     return {
-      count: reminders.filter(r => !r.isCompleted).length,
-      highPriority: highPriorityCount
+      count: plannedLitters.length,
+      nextDate: nextHeatDate
     };
-  }, [reminders]);
+  }, [plannedLitters, nextHeatDate]);
   
-  // Update data ready state based on actual data loading states
+  // Format recent litters data for the dashboard
+  const recentLittersData = useMemo(() => {
+    return {
+      count: recentLittersCount,
+      recent: littersThisYear
+    };
+  }, [recentLittersCount, littersThisYear]);
+  
+  // Determine when data is ready
   useEffect(() => {
-    const allDataLoaded = 
-      !remindersLoading && 
-      !calendarLoading && 
-      !isLoadingPlannedLitters && 
-      !isLoadingRecentLitters;
-      
-    if (allDataLoaded) {
-      setIsDataReady(true);
-    } else {
-      setIsDataReady(false);
-    }
-  }, [remindersLoading, calendarLoading, isLoadingPlannedLitters, isLoadingRecentLitters]);
-  
-  // Create an enhanced getEventsForDate function that includes both calendar events and reminders
-  const getEventsForDate = (date: Date): CalendarEvent[] => {
-    // First get regular calendar events
-    const regularEvents = getEventsForDay(date);
+    const dataLoaded = !remindersLoading && !eventsLoading && !plannedLittersLoading && !littersLoading;
     
-    // Then get reminder events for this date
-    const reminderEventsForDate = reminderEvents.filter(event => {
-      const eventDate = new Date(event.date);
-      return (
-        eventDate.getDate() === date.getDate() && 
-        eventDate.getMonth() === date.getMonth() && 
-        eventDate.getFullYear() === date.getFullYear()
-      );
-    });
-    
-    // Return combined events for this date, with explicit type annotation
-    return [...regularEvents, ...reminderEventsForDate] as CalendarEvent[];
-  };
-
-  // Enhanced getEventColor function that handles reminder types
-  const getEnhancedEventColor = (type: string): string => {
-    // Add special handling for reminder-specific types
-    switch(type) {
-      case 'heat':
-        return 'bg-rose-200 text-rose-800 border-rose-300';
-      case 'pregnancy':
-        return 'bg-purple-200 text-purple-800 border-purple-300';
-      case 'birthday':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'vaccination':
-        return 'bg-amber-100 text-amber-800 border-amber-200';
-      case 'breeding':
-        return 'bg-violet-100 text-violet-800 border-violet-200';
-      case 'reminder':
-        return 'bg-warmbeige-200 text-darkgray-700 border-warmbeige-300';
-      default:
-        // Use the default event color service for other types
-        return getEventColor(type);
+    if (dataLoaded) {
+      setTimeout(() => setIsDataReady(true), 500);
     }
-  };
-
-  // Wrapper functions to adapt async functions to the synchronous interface expected by components
-  const handleAddEvent = (data: any) => {
-    addEvent(data);
-    return true; // Always return true synchronously for UI feedback
-  };
-  
-  const handleEditEvent = (eventId: string, data: any) => {
-    editEvent(eventId, data);
-    return true; // Always return true synchronously for UI feedback
-  };
-  
-  // Check if there's any data to display
-  const hasCalendarData = combinedEvents.length > 0;
-  const hasReminderData = reminders && reminders.length > 0;
+  }, [remindersLoading, eventsLoading, plannedLittersLoading, littersLoading]);
   
   return {
+    // Data status
     isDataReady,
-    dogs,
+    
+    // Reminders data and actions
     reminders,
     remindersLoading,
     remindersError,
     handleMarkComplete,
-    addCustomReminder,
-    deleteReminder,
+    remindersSummary,
+    
+    // Calendar events data and actions  
+    events: combinedEvents,
+    calendarLoading: eventsLoading,
+    calendarError: !!calendarError,
     getEventsForDate,
-    getEventColor: getEnhancedEventColor, // Use our enhanced color function
+    getEventColor,
     handleAddEvent,
     deleteEvent,
     handleEditEvent,
-    calendarLoading,
-    calendarError,
+    
+    // Planned litters data
     plannedLittersData,
+    plannedLittersLoading,
+    
+    // Recent litters data
     recentLittersData,
-    remindersSummary,
-    hasCalendarData,
-    hasReminderData,
-    combinedEvents // Export the combined events
+    littersLoading,
+    littersError
   };
 };
