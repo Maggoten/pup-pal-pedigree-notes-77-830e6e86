@@ -5,6 +5,21 @@ import { useQueryClient } from '@tanstack/react-query';
 import { littersQueryKey } from './queries/useAddLitterMutation';
 import { toast } from '@/hooks/use-toast';
 
+// Define TypeScript interfaces for the payload types
+interface PuppyPayload {
+  new?: {
+    litter_id?: string;
+    name?: string;
+    [key: string]: any;
+  };
+  old?: {
+    litter_id?: string;
+    name?: string;
+    [key: string]: any;
+  };
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+}
+
 export function useLitterSubscription(loadLittersData, userId) {
   const queryClient = useQueryClient();
   
@@ -71,9 +86,10 @@ export function useLitterSubscription(loadLittersData, userId) {
           schema: 'public',
           table: 'puppies'
         },
-        (payload) => {
+        (payload: PuppyPayload) => {
           console.log('Puppy change detected:', payload);
           
+          // Safely extract litter_id from the payload
           const litterId = payload.new?.litter_id || payload.old?.litter_id;
           if (!litterId) return;
           
@@ -84,7 +100,7 @@ export function useLitterSubscription(loadLittersData, userId) {
             
             toast({
               title: "Puppy Added",
-              description: `${payload.new.name} has been added to the litter.`,
+              description: `${payload.new?.name || 'A new puppy'} has been added to the litter.`,
               duration: 3000,
             });
           } else if (payload.eventType === 'UPDATE') {
