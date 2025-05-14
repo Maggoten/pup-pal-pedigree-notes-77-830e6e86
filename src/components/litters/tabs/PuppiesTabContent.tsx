@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Puppy } from '@/types/breeding';
 import PuppyList from '../PuppyList';
@@ -39,6 +38,14 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   const [addPuppyDialogOpen, setAddPuppyDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [activePuppy, setActivePuppy] = useState<Puppy | null>(null);
+  const [localPuppies, setLocalPuppies] = useState<Puppy[]>([]);
+  
+  // Keep local state in sync with props
+  useEffect(() => {
+    if (puppies && puppies.length > 0) {
+      setLocalPuppies(puppies);
+    }
+  }, [puppies]);
   
   useEffect(() => {
     console.log("PuppiesTabContent rendered with puppies:", puppies);
@@ -62,21 +69,39 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   };
   
   const getNextPuppyNumber = () => {
-    return puppies.length + 1;
+    return localPuppies.length + 1;
   };
   
   const handleDeletePuppy = (puppyId: string) => {
     onDeletePuppy(puppyId);
     setDetailsDialogOpen(false);
+    
+    // Update local state immediately for responsive UI
+    setLocalPuppies(prev => prev.filter(p => p.id !== puppyId));
   };
   
   const handleAddPuppy = async (puppy: Puppy) => {
     console.log("PuppiesTabContent - Adding puppy:", puppy);
-    await onAddPuppy(puppy);
-    setAddPuppyDialogOpen(false);
+    
+    // Update local state immediately for responsive UI
+    setLocalPuppies(prev => [...prev, puppy]);
+    
+    try {
+      await onAddPuppy(puppy);
+      setAddPuppyDialogOpen(false);
+    } catch (error) {
+      console.error("Error adding puppy:", error);
+      // Revert local state on error
+      setLocalPuppies(puppies);
+    }
   };
   
   const updatePuppyNames = (updatedPuppy: Puppy) => {
+    // Update local state immediately for responsive UI
+    setLocalPuppies(prev => 
+      prev.map(p => p.id === updatedPuppy.id ? updatedPuppy : p)
+    );
+    
     onUpdatePuppy(updatedPuppy);
   };
   
@@ -87,7 +112,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
           <div className="flex items-center gap-2">
             <PawPrint className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg font-semibold">
-              Puppies {puppies && puppies.length > 0 && `(${puppies.length})`}
+              Puppies {localPuppies && localPuppies.length > 0 && `(${localPuppies.length})`}
             </CardTitle>
           </div>
           
@@ -110,9 +135,9 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
       </CardHeader>
       
       <CardContent className="p-4">
-        {puppies && puppies.length > 0 ? (
+        {localPuppies && localPuppies.length > 0 ? (
           <PuppyList 
-            puppies={puppies} 
+            puppies={localPuppies} 
             onUpdatePuppy={updatePuppyNames} 
             onDeletePuppy={handleDeletePuppy}
             onPuppyClick={handlePuppyClick}

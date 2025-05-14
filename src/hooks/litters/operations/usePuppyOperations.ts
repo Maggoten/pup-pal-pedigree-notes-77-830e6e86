@@ -3,11 +3,13 @@ import { litterService } from '@/services/LitterService';
 import { toast } from '@/components/ui/use-toast';
 import { Puppy } from '@/types/breeding';
 import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function usePuppyOperations(
   loadLittersData
 ) {
   const { isAuthReady } = useAuth();
+  const queryClient = useQueryClient();
   
   async function addPuppy(selectedLitterId: string | null, newPuppy: Puppy) {
     if (!selectedLitterId) return;
@@ -23,13 +25,21 @@ export function usePuppyOperations(
     }
     
     try {
-      await litterService.addPuppy(selectedLitterId, newPuppy);
+      const result = await litterService.addPuppy(selectedLitterId, newPuppy);
+      
+      // Update React Query cache immediately
+      const litterQueryKey = ['litters', selectedLitterId];
+      queryClient.invalidateQueries({ queryKey: litterQueryKey });
+      
+      // Also reload the full data
       await loadLittersData();
       
       toast({
         title: "Puppy Added",
         description: `${newPuppy.name} has been added to the litter.`
       });
+      
+      return result;
     } catch (error) {
       console.error('Error adding puppy:', error);
       toast({
@@ -37,6 +47,7 @@ export function usePuppyOperations(
         description: "Failed to add puppy. Please try again.",
         variant: "destructive"
       });
+      throw error;
     }
   }
   
@@ -54,8 +65,16 @@ export function usePuppyOperations(
     }
     
     try {
-      await litterService.updatePuppy(selectedLitterId, updatedPuppy);
+      const result = await litterService.updatePuppy(selectedLitterId, updatedPuppy);
+      
+      // Update React Query cache immediately
+      const litterQueryKey = ['litters', selectedLitterId];
+      queryClient.invalidateQueries({ queryKey: litterQueryKey });
+      
+      // Also reload the full data
       await loadLittersData();
+      
+      return result;
     } catch (error) {
       console.error('Error updating puppy:', error);
       toast({
@@ -63,6 +82,7 @@ export function usePuppyOperations(
         description: "Failed to update puppy. Please try again.",
         variant: "destructive"
       });
+      throw error;
     }
   }
 
@@ -80,8 +100,21 @@ export function usePuppyOperations(
     }
     
     try {
-      await litterService.deletePuppy(selectedLitterId, puppyId);
+      const result = await litterService.deletePuppy(selectedLitterId, puppyId);
+      
+      // Update React Query cache immediately
+      const litterQueryKey = ['litters', selectedLitterId];
+      queryClient.invalidateQueries({ queryKey: litterQueryKey });
+      
+      // Also reload the full data
       await loadLittersData();
+      
+      toast({
+        title: "Puppy Deleted",
+        description: "The puppy has been removed from the litter."
+      });
+      
+      return result;
     } catch (error) {
       console.error('Error deleting puppy:', error);
       toast({
@@ -89,6 +122,7 @@ export function usePuppyOperations(
         description: "Failed to delete puppy. Please try again.",
         variant: "destructive"
       });
+      throw error;
     }
   }
 

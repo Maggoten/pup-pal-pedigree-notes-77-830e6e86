@@ -14,7 +14,7 @@ export function useLitterSubscription(loadLittersData, userId) {
     console.log("Setting up litter subscription for user:", userId);
     
     // Subscribe to changes in the litters table with enhanced configuration
-    const channel = supabase
+    const littersChannel = supabase
       .channel('litters-realtime')
       .on('postgres_changes', 
         { 
@@ -49,7 +49,7 @@ export function useLitterSubscription(loadLittersData, userId) {
         }
       )
       .subscribe((status) => {
-        console.log('Supabase subscription status:', status);
+        console.log('Supabase litters subscription status:', status);
         if (status === 'SUBSCRIBED') {
           console.log('Successfully subscribed to litters table');
         } else if (status === 'CHANNEL_ERROR') {
@@ -57,14 +57,65 @@ export function useLitterSubscription(loadLittersData, userId) {
           // Attempt to reconnect in case of error
           setTimeout(() => {
             console.log('Attempting to reconnect litters subscription');
-            channel.subscribe();
+            littersChannel.subscribe();
+          }, 5000);
+        }
+      });
+    
+    // New subscription for puppies table
+    const puppiesChannel = supabase
+      .channel('puppies-realtime')
+      .on('postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'puppies'
+        },
+        (payload) => {
+          console.log('Puppy change detected:', payload);
+          
+          const litterId = payload.new?.litter_id || payload.old?.litter_id;
+          if (!litterId) return;
+          
+          // Handle different types of changes
+          if (payload.eventType === 'INSERT') {
+            console.log('Puppy added:', payload.new);
+            queryClient.invalidateQueries({ queryKey: ['litters', litterId] });
+            
+            toast({
+              title: "Puppy Added",
+              description: `${payload.new.name} has been added to the litter.`,
+              duration: 3000,
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            console.log('Puppy updated:', payload.new);
+            queryClient.invalidateQueries({ queryKey: ['litters', litterId] });
+          } else if (payload.eventType === 'DELETE') {
+            console.log('Puppy deleted:', payload.old);
+            queryClient.invalidateQueries({ queryKey: ['litters', litterId] });
+          }
+          
+          // Reload the full data set to ensure consistency
+          loadLittersData();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Supabase puppies subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('Successfully subscribed to puppies table');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('Error subscribing to puppies table');
+          setTimeout(() => {
+            console.log('Attempting to reconnect puppies subscription');
+            puppiesChannel.subscribe();
           }, 5000);
         }
       });
       
     return () => {
-      console.log('Cleaning up Supabase litters channel');
-      supabase.removeChannel(channel);
+      console.log('Cleaning up Supabase channels');
+      supabase.removeChannel(littersChannel);
+      supabase.removeChannel(puppiesChannel);
     };
   }, [loadLittersData, userId, queryClient]);
   
