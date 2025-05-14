@@ -17,3 +17,68 @@ export const StorageErrors = {
   GET_URL_FAILED: 'Failed to get file URL. Please try again.',
   CANVAS_ERROR: 'Error processing image. Please try with another image.',
 };
+
+/**
+ * Format a storage error message from different error types
+ */
+export const formatStorageError = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  } else if (typeof error === 'string') {
+    return error;
+  } else if (error && typeof error === 'object' && 'message' in error) {
+    return String((error as { message: string }).message);
+  } else {
+    return 'Unknown storage error occurred';
+  }
+};
+
+/**
+ * Create a standardized storage error object
+ */
+export const createStorageError = (message: string, details?: any): Error => {
+  const error = new Error(message);
+  if (details) {
+    (error as any).details = details;
+  }
+  return error;
+};
+
+/**
+ * Check if an object has error properties
+ */
+export const hasError = (obj: any): boolean => {
+  return obj && (
+    obj instanceof Error ||
+    obj.error ||
+    obj.message ||
+    obj.errorMessage ||
+    obj.statusCode >= 400
+  );
+};
+
+/**
+ * Safely get a property from an error object
+ */
+export const safeGetErrorProperty = <T>(
+  error: unknown,
+  property: string,
+  defaultValue: T
+): T => {
+  if (!error || typeof error !== 'object') {
+    return defaultValue;
+  }
+  
+  return (error as any)[property] || defaultValue;
+};
+
+/**
+ * Handle storage errors with consistent formatting
+ */
+export const handleStorageError = (
+  error: unknown, 
+  defaultMessage: string = 'Storage operation failed'
+): string => {
+  console.error('Storage error:', error);
+  return formatStorageError(error) || defaultMessage;
+};
