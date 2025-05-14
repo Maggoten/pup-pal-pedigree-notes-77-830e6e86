@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { LucideIcon, Dog, CalendarDays, Heart, Bell } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Heart, PawPrint, Dog, Bell } from 'lucide-react';
 
-export type MetricIconType = 'calendar' | 'heart' | 'pawprint' | 'dog' | 'bell';
+export type IconType = 'dog' | 'calendar' | 'heart' | 'bell';
 
 export interface MetricCardProps {
-  icon: MetricIconType;
+  icon: IconType;
   label: string;
   value: string;
   highlightColor: string;
@@ -15,68 +15,62 @@ export interface MetricCardProps {
   loading?: boolean;
 }
 
-const MetricCard: React.FC<MetricCardProps> = ({ 
-  icon, 
-  label, 
-  value, 
+const MetricCard: React.FC<MetricCardProps> = ({
+  icon,
+  label,
+  value,
   highlightColor,
   trend,
   loading = false
 }) => {
-  const getIcon = (iconName: MetricIconType) => {
-    switch (iconName) {
-      case 'calendar':
-        return <Calendar className="h-5 w-5" />;
-      case 'heart':
-        return <Heart className="h-5 w-5" />;
-      case 'pawprint':
-        return <PawPrint className="h-5 w-5" />;
+  const getIcon = () => {
+    switch (icon) {
       case 'dog':
         return <Dog className="h-5 w-5" />;
+      case 'calendar':
+        return <CalendarDays className="h-5 w-5" />;
+      case 'heart':
+        return <Heart className="h-5 w-5" />;
       case 'bell':
         return <Bell className="h-5 w-5" />;
       default:
-        return <PawPrint className="h-5 w-5" />;
+        return <Dog className="h-5 w-5" />;
     }
   };
 
-  const getHighlightColor = (color: string) => {
-    switch (color) {
+  const getColorClass = () => {
+    switch (highlightColor) {
       case 'blue':
-        return 'bg-blue-100 text-blue-500';
+        return 'text-blue-600 bg-blue-100';
       case 'green':
-        return 'bg-green-100 text-green-500';
+        return 'text-green-600 bg-green-100';
       case 'purple':
-        return 'bg-purple-100 text-purple-500';
-      case 'amber':
-        return 'bg-amber-100 text-amber-500';
+        return 'text-purple-600 bg-purple-100';
       case 'rose':
-        return 'bg-rose-100 text-rose-500';
+        return 'text-rose-600 bg-rose-100';
       default:
-        return 'bg-slate-100 text-slate-500';
+        return 'text-blue-600 bg-blue-100';
     }
   };
 
   return (
-    <Card className="border shadow-sm hover:shadow-md transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-center space-x-4">
-          <div className={`p-2 rounded-full ${getHighlightColor(highlightColor)}`}>
-            {getIcon(icon)}
-          </div>
-          
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">{label}</p>
-            {loading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <h3 className="text-2xl font-bold">{value}</h3>
-            )}
-            <p className="text-xs text-muted-foreground mt-1">{trend}</p>
-          </div>
+    <div className="bg-white rounded-lg border p-4 flex flex-col hover:shadow-sm transition-shadow">
+      <div className="flex justify-between items-start mb-4">
+        <div className={cn("p-2 rounded-md", getColorClass())}>
+          {getIcon()}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      <div className="text-sm text-gray-600 mb-1">{label}</div>
+      
+      {loading ? (
+        <Skeleton className="h-8 w-16 mb-1" />
+      ) : (
+        <div className="text-2xl font-bold mb-1">{value}</div>
+      )}
+      
+      <div className="text-xs text-gray-500">{trend}</div>
+    </div>
   );
 };
 

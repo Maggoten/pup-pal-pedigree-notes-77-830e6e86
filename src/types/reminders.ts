@@ -49,6 +49,19 @@ export interface UpcomingHeat {
   id: string; 
   dogId: string;
   dogName: string;
+  date: Date;             // Added this property
   expectedDate: Date;
   daysUntil: number;
+  heatIndex: number;      // Added this property
+}
+
+// Creating a MatingData interface to match what's being used
+export interface MatingData {
+  id: string;
+  femaleName: string;
+  maleName: string;
+  matingDate: Date;
+  formattedDate: string;
+  isToday: boolean;
+  litterId: string;      // Added this property
 }

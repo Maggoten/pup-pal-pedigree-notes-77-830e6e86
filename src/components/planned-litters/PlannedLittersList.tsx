@@ -21,16 +21,6 @@ interface PlannedLittersListProps {
   onDeleteLitter: (litterId: string) => void;
 }
 
-interface PlannedLitterCardProps {
-  plannedLitter: PlannedLitter;
-  onAddMatingDate: (litterId: string, date: Date) => void;
-  onEditMatingDate?: (litterId: string, dateIndex: number, newDate: Date) => void;
-  onDeleteMatingDate?: (litterId: string, dateIndex: number) => void;
-  onDeleteLitter: (litterId: string) => void;
-  calendarOpen: boolean;
-  onCalendarOpenChange: (open: boolean) => void;
-}
-
 const PlannedLittersList: React.FC<PlannedLittersListProps> = ({
   plannedLitters,
   males,

@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, Clock } from 'lucide-react';
 import { format, isWithinInterval, startOfWeek, endOfWeek, addDays } from 'date-fns';
-import { Reminder } from '@/hooks/useBreedingReminders';
+import { Reminder } from '@/types/reminders';
 import ReminderItem from './ReminderItem';
 import { Button } from '@/components/ui/button';
 
@@ -18,9 +18,10 @@ const WeeklyTasks: React.FC<WeeklyTasksProps> = ({ reminders, onComplete }) => {
   const weekEnd = endOfWeek(today, { weekStartsOn: 1 }); // End on Sunday
   
   // Filter reminders for this week
-  const weeklyReminders = reminders.filter(reminder => 
-    isWithinInterval(reminder.dueDate, { start: weekStart, end: weekEnd })
-  );
+  const weeklyReminders = reminders.filter(reminder => {
+    const reminderDate = new Date(reminder.dueDate);
+    return isWithinInterval(reminderDate, { start: weekStart, end: weekEnd });
+  });
   
   // Generate the weekday labels
   const weekDays = Array.from({ length: 7 }, (_, i) => {
@@ -69,9 +70,9 @@ const WeeklyTasks: React.FC<WeeklyTasksProps> = ({ reminders, onComplete }) => {
                 id={reminder.id}
                 title={reminder.title}
                 description={reminder.description}
-                icon={reminder.icon}
+                icon={reminder.icon || <Clock className="h-5 w-5" />}
                 priority={reminder.priority}
-                dueDate={reminder.dueDate}
+                dueDate={new Date(reminder.dueDate)}
                 type={reminder.type}
                 relatedId={reminder.relatedId}
                 onComplete={onComplete}

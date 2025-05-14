@@ -9,12 +9,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 import { toast } from '@/hooks/use-toast';
 import { verifySession } from '@/utils/auth/sessionManager';
+import { MatingData, RecentMating, UpcomingHeat } from '@/types/reminders';
 
 export const usePlannedLitterQueries = () => {
   const { dogs } = useDogs();
   const { user, isAuthReady } = useAuth();
   const [plannedLitters, setPlannedLitters] = useState<PlannedLitter[]>([]);
-  const [upcomingHeats, setUpcomingHeats] = useState(calculateUpcomingHeats([]));
+  const [upcomingHeats, setUpcomingHeats] = useState<UpcomingHeat[]>(calculateUpcomingHeats([]));
   const [isLoading, setIsLoading] = useState(true);
   const [loadAttempted, setLoadAttempted] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -23,7 +24,15 @@ export const usePlannedLitterQueries = () => {
   const males = dogs.filter(dog => dog.gender === 'male');
   const females = dogs.filter(dog => dog.gender === 'female');
   
-  const { recentMatings, setRecentMatings } = useRecentMatings(plannedLitters);
+  const recentMatingsData = useRecentMatings(plannedLitters);
+  
+  // Convert MatingData[] to RecentMating[]
+  const recentMatings: RecentMating[] = recentMatingsData.recentMatings.map(mating => ({
+    litterId: mating.litterId,
+    maleName: mating.maleName,
+    femaleName: mating.femaleName,
+    date: mating.matingDate
+  }));
   
   // Function to handle visibility change for reloading
   useEffect(() => {
@@ -171,5 +180,8 @@ export const usePlannedLitterQueries = () => {
     isLoading,
     setPlannedLitters,
     refreshLitters: () => loadLitters(true),
+    // Include the setter from useRecentMatings
+    setExtendedRecentPeriod: recentMatingsData.setExtendedRecentPeriod,
+    extendedRecentPeriod: recentMatingsData.extendedRecentPeriod
   };
 };

@@ -1,16 +1,9 @@
 
 import { useMemo, useState } from 'react';
 import { PlannedLitter } from '@/types/breeding';
-import { format, isToday, isWithinDays } from 'date-fns';
-
-interface MatingData {
-  id: string;
-  femaleName: string;
-  maleName: string;
-  matingDate: Date;
-  formattedDate: string;
-  isToday: boolean;
-}
+import { format, isToday } from 'date-fns';
+import { MatingData, RecentMating } from '@/types/reminders';
+import { isWithinDays } from '@/utils/dateUtils';
 
 export const useRecentMatings = (plannedLitters: PlannedLitter[]) => {
   const [extendedRecentPeriod, setExtendedRecentPeriod] = useState(false);
@@ -32,6 +25,7 @@ export const useRecentMatings = (plannedLitters: PlannedLitter[]) => {
           if (isWithinDays(matingDate, new Date(), daysToConsiderRecent)) {
             recentData.push({
               id: mating.id || `mating-${litter.id}-${recentData.length}`,
+              litterId: litter.id,
               femaleName: litter.femaleName,
               maleName: litter.externalMale ? litter.externalMaleName || 'External Male' : litter.maleName || 'Unknown Male',
               matingDate: matingDate,

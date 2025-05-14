@@ -4,6 +4,7 @@ import PlannedLittersList from '@/components/planned-litters/PlannedLittersList'
 import MatingSection from '@/components/planned-litters/mating/MatingSection';
 import { usePlannedLitters } from '../hooks/usePlannedLitters';
 import { HeatService } from '@/services/HeatService';
+import { RecentMating } from '@/types/reminders'; 
 
 const PlannedLittersContent: React.FC = () => {
   const {
@@ -35,6 +36,9 @@ const PlannedLittersContent: React.FC = () => {
     refreshLitters();
   };
 
+  // Convert recentMatings to RecentMating type if needed
+  const typedRecentMatings: RecentMating[] = recentMatings;
+
   return (
     <>
       {/* Planned Litters Section */}
@@ -52,7 +56,7 @@ const PlannedLittersContent: React.FC = () => {
       {/* Mating Section */}
       <MatingSection 
         upcomingHeats={upcomingHeats}
-        recentMatings={recentMatings}
+        recentMatings={typedRecentMatings}
         onHeatDeleted={handleHeatDeleted}
       />
     </>
