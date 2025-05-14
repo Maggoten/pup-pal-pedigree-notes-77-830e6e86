@@ -55,8 +55,24 @@ export const triggerAllReminders: TriggerAllRemindersFunction = async (userId: s
       return [];
     }
     
-    // Call generateLitterReminders with the actual litters array
-    const litterReminders = await generateLitterReminders(littersData || []);
+    // Convert litters data to expected Litter type before passing to generateLitterReminders
+    const processedLitters: Litter[] = (littersData || []).map(litter => ({
+      id: litter.id,
+      userId: litter.user_id,
+      name: litter.name,
+      dateOfBirth: new Date(litter.date_of_birth),
+      sireName: litter.sire_name,
+      damName: litter.dam_name,
+      sireId: litter.sire_id,
+      damId: litter.dam_id,
+      puppies: [], // Default empty puppies array
+      archived: litter.archived || false,
+      createdAt: litter.created_at,
+      updatedAt: litter.updated_at
+    }));
+    
+    // Call generateLitterReminders with the properly converted litters array
+    const litterReminders = await generateLitterReminders(processedLitters);
     console.log(`[Manual Reminder Generation] Generated ${litterReminders.length} litter reminders`);
     
     // Call generateGeneralReminders

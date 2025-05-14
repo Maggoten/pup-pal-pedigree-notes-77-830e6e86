@@ -78,6 +78,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     isLoadingPregnancies
   });
   
+  // Ensure plannedLittersData.nextDate is handled properly (could be null)
+  const enhancedPlannedLittersData = {
+    count: dashboardData.plannedLittersData.count,
+    nextDate: dashboardData.plannedLittersData.nextDate || new Date() // Provide fallback date if null
+  };
+  
   return (
     <PageLayout 
       title="" 
@@ -88,7 +94,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           user={user}
           username={username}
           reminders={dashboardData.remindersSummary}
-          plannedLitters={dashboardData.plannedLittersData}
+          plannedLitters={enhancedPlannedLittersData}
           activePregnancies={activePregnancies}
           recentLitters={dashboardData.recentLittersData}
           isLoadingPregnancies={isLoadingPregnancies}

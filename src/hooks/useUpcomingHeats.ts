@@ -4,7 +4,7 @@ import { UpcomingHeat } from '@/types/reminders';
 import { calculateUpcomingHeats } from '@/utils/heatCalculator';
 import { useDogs } from '@/context/DogsContext';
 import { Dog } from '@/types/dogs';
-import { ReminderCalendarSyncService } from '@/services/ReminderCalendarSyncService';
+import { syncHeatCycleEvents } from '@/services/ReminderCalendarSyncService';
 
 export const useUpcomingHeats = () => {
   const { dogs } = useDogs();
@@ -22,7 +22,7 @@ export const useUpcomingHeats = () => {
     const syncHeatEvents = async () => {
       try {
         for (const heat of heats) {
-          await ReminderCalendarSyncService.syncHeatCycleEvents(heat);
+          await syncHeatCycleEvents(heat);
         }
       } catch (error) {
         console.error('Error syncing heat calendar events:', error);
@@ -41,7 +41,7 @@ export const useUpcomingHeats = () => {
     const syncHeatEvents = async () => {
       try {
         for (const heat of heats) {
-          await ReminderCalendarSyncService.syncHeatCycleEvents(heat);
+          await syncHeatCycleEvents(heat);
         }
       } catch (error) {
         console.error('Error syncing heat calendar events on refresh:', error);

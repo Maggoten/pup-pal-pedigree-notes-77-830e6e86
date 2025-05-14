@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { isSameDay, parseISO } from 'date-fns';
 import { useBreedingReminders } from '@/hooks/reminders';
@@ -9,6 +8,7 @@ import { AddEventFormValues } from '@/components/calendar/types';
 import { usePlannedLitters as usePlannedLittersHook } from '@/hooks/planned-litters/hooks/usePlannedLitters';
 import { useLitterQueries } from '@/hooks/useLitterQueries';
 import { useAuth } from '@/hooks/useAuth';
+import { parseISODate } from '@/utils/dateUtils';
 
 interface LitterQueryData {
   recentLittersCount: number;
@@ -63,7 +63,9 @@ export const useDashboardData = () => {
       (a, b) => new Date(a.expectedHeatDate).getTime() - new Date(b.expectedHeatDate).getTime()
     );
     
-    return sortedLitters[0]?.expectedHeatDate || null;
+    // Ensure we return a Date object, not a string
+    const nextDate = sortedLitters[0]?.expectedHeatDate || null;
+    return nextDate ? (nextDate instanceof Date ? nextDate : new Date(nextDate)) : null;
   }, [plannedLitters]);
   
   // Get litter data
@@ -166,7 +168,7 @@ export const useDashboardData = () => {
   const plannedLittersData = useMemo(() => {
     return {
       count: plannedLitters.length,
-      nextDate: nextHeatDate
+      nextDate: nextHeatDate // This is now guaranteed to be a Date or null
     };
   }, [plannedLitters, nextHeatDate]);
   

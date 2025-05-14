@@ -5,7 +5,7 @@ import { enrichDog, sanitizeDogForDb, DbDog } from '@/utils/dogUtils';
 import { PostgrestResponse, PostgrestSingleResponse } from '@supabase/supabase-js';
 import { withTimeout, TIMEOUT } from '@/utils/timeoutUtils';
 import { dateToISOString } from '@/utils/dateUtils';
-import { ReminderCalendarSyncService } from '@/services/ReminderCalendarSyncService';
+import { syncBirthdayEvents, syncVaccinationEvents, syncHeatCycleEvents } from '@/services/ReminderCalendarSyncService';
 
 export async function addDog(
   dog: Omit<Dog, 'id' | 'created_at' | 'updated_at'>, 
@@ -92,11 +92,11 @@ export async function addDog(
     try {
       // Sync birthday and vaccination events
       if (addedDog.dateOfBirth) {
-        await ReminderCalendarSyncService.syncBirthdayEvents(addedDog);
+        await syncBirthdayEvents(addedDog.id);
       }
       
       if (addedDog.vaccinationDate) {
-        await ReminderCalendarSyncService.syncVaccinationEvents(addedDog);
+        await syncVaccinationEvents(addedDog.id);
       }
       
       // For female dogs with heat history, sync heat events
@@ -105,7 +105,7 @@ export async function addDog(
         const upcomingHeats = calculateUpcomingHeats([addedDog]);
         
         for (const heat of upcomingHeats) {
-          await ReminderCalendarSyncService.syncHeatCycleEvents(heat);
+          await syncHeatCycleEvents(heat);
         }
       }
     } catch (syncError) {

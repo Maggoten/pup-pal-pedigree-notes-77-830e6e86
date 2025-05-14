@@ -1,4 +1,3 @@
-
 export interface CalendarEvent {
   id: string;
   title: string;
@@ -13,6 +12,7 @@ export interface CalendarEvent {
   user_id?: string;
   created_at?: string;
   updated_at?: string;
+  isReminderEvent?: boolean; // Add this property
 }
 
 export interface CalendarFilter {
