@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { StorageError } from '@supabase/storage-js';
 import { fetchWithRetry } from '@/utils/fetchUtils';
@@ -135,7 +136,6 @@ export const uploadToStorage = async (
       { 
         maxRetries,
         initialDelay,
-        useBackoff: true,
         shouldRetry: (error) => {
           console.log('Evaluating if upload error should trigger retry:', error);
           
@@ -159,8 +159,8 @@ export const uploadToStorage = async (
           console.log('Will retry upload');
           return true;
         },
-        onRetry: (attempt, error) => {
-          console.log(`Retrying upload to '${BUCKET_NAME}', attempt ${attempt}, error:`, error);
+        onRetry: (attempt) => {
+          console.log(`Retrying upload to '${BUCKET_NAME}', attempt ${attempt}`);
           if (onProgress) onProgress(-1); // Signal retry to UI
         }
       }

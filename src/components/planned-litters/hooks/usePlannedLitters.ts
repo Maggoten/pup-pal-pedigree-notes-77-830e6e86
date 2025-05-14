@@ -27,34 +27,40 @@ export const usePlannedLitters = () => {
   
   // Set up realtime subscription for planned_litters
   useEffect(() => {
-    const { data: sessionData } = supabase.auth.getSession();
-    if (!sessionData.session?.user?.id) return;
-    
-    const userId = sessionData.session.user.id;
-    
-    // Subscribe to changes in the planned_litters table
-    const plannedLittersChannel = supabase
-      .channel('planned_litters-realtime')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'planned_litters',
-          filter: `user_id=eq.${userId}`
-        },
-        (payload) => {
-          console.log('Planned litter change detected:', payload);
+    // Fixed: using async IIFE to handle the Promise properly
+    (async () => {
+      try {
+        const sessionResult = await supabase.auth.getSession();
+        const userId = sessionResult.data.session?.user?.id;
+        if (!userId) return;
+        
+        // Subscribe to changes in the planned_litters table
+        const plannedLittersChannel = supabase
+          .channel('planned_litters-realtime')
+          .on('postgres_changes', 
+            { 
+              event: '*', 
+              schema: 'public', 
+              table: 'planned_litters',
+              filter: `user_id=eq.${userId}`
+            },
+            (payload) => {
+              console.log('Planned litter change detected:', payload);
+              
+              // Invalidate queries and refresh data
+              queryClient.invalidateQueries({ queryKey: ['planned_litters'] });
+              refreshLitters();
+            }
+          )
+          .subscribe();
           
-          // Invalidate queries and refresh data
-          queryClient.invalidateQueries({ queryKey: ['planned_litters'] });
-          refreshLitters();
-        }
-      )
-      .subscribe();
-      
-    return () => {
-      supabase.removeChannel(plannedLittersChannel);
-    };
+        return () => {
+          supabase.removeChannel(plannedLittersChannel);
+        };
+      } catch (error) {
+        console.error("Error setting up planned litters subscription:", error);
+      }
+    })();
   }, [queryClient]);
   
   const refreshLitters = async () => {

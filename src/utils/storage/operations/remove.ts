@@ -40,8 +40,7 @@ export const removeFromStorage = async (storagePath: string) => {
         .remove([storagePath]),
       { 
         maxRetries: platform.safari || platform.mobile ? 3 : 2, 
-        initialDelay: platform.safari ? 2000 : 1000,
-        useBackoff: true
+        initialDelay: platform.safari ? 2000 : 1000
       }
     );
     

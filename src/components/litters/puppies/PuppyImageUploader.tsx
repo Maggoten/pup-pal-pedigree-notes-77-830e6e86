@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Camera, X, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -105,7 +106,7 @@ const PuppyImageUploader: React.FC<PuppyImageUploaderProps> = ({
           { 
             maxRetries: platformInfo.safari ? 3 : 2,
             initialDelay: 2000,
-            useBackoff: true
+            // Don't use useBackoff here since it's not in the fetchWithRetry options
           }
         );
       };

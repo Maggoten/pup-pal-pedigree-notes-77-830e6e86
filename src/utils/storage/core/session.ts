@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { getPlatformInfo } from '../mobileUpload';
 import { STORAGE_ERROR_CODES as STORAGE_ERRORS } from '../config';
@@ -57,8 +58,7 @@ export const verifySession = async (options?: {
       { 
         maxRetries: maxRetries,
         // Increased initial delay for mobile
-        initialDelay: isMobile ? 2200 : 1000,
-        useBackoff: true
+        initialDelay: isMobile ? 2200 : 1000
       }
     );
     
@@ -84,8 +84,7 @@ export const verifySession = async (options?: {
           // Increased retries for mobile
           maxRetries: isMobile ? 5 : 2,
           // Increased initial delay for mobile
-          initialDelay: isMobile ? 2200 : 1000,
-          useBackoff: true
+          initialDelay: isMobile ? 2200 : 1000
         }
       );
       

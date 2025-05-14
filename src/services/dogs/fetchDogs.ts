@@ -54,20 +54,9 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
       {
         maxRetries: MAX_RETRIES,
         initialDelay: RETRY_DELAY,
-        useBackoff: true,
-        onRetry: (attempt, error) => {
-          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-          console.log(`[Dogs Debug] Retry #${attempt} after error: ${errorMsg}`);
-          
-          // Check if error is auth-related
-          const isAuthError = AUTH_ERROR_CODES.some(code => 
-            errorMsg.toLowerCase().includes(code.toLowerCase()));
-          
-          if (isAuthError) {
-            console.log('[Dogs Debug] Auth-related error detected, allowing auth system to recover');
-            // Don't show toast for auth errors, let auth system handle it
-            return;
-          }
+        onRetry: (attempt) => {
+          const errorMsg = `Fetch attempt ${attempt} failed`;
+          console.log(`[Dogs Debug] Retry #${attempt}/${MAX_RETRIES}: ${errorMsg}`);
           
           // Show toast only on first retry to avoid spamming
           if (attempt === 1) {
