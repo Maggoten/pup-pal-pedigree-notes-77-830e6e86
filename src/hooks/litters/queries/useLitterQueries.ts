@@ -57,7 +57,6 @@ export const useLitterQueries = () => {
     } catch (error) {
       console.error('Failed to refresh litters:', error);
       
-      // Replace JSX with a function to render the retry action
       toast({
         title: "Refresh failed",
         description: "Could not reload litters data. Please try again.",
@@ -98,7 +97,7 @@ export const useLitterQueries = () => {
     
     getAvailableYears,
     isDataReady,
-    refreshLitters // New function to manually refresh data
+    refreshLitters
   };
 };
 

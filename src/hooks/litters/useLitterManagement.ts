@@ -7,10 +7,13 @@ import { useLitterLoading } from './useLitterLoading';
 import { useLitterOperations } from './useLitterOperations';
 import { useLitterUtils } from './useLitterUtils';
 import { useLitterSubscription } from './useLitterSubscription';
+import { useQueryClient } from '@tanstack/react-query';
+import { littersQueryKey } from './queries/useAddLitterMutation';
 
 export function useLitterManagement() {
   // Add useAuth to get the current user
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   
   // Use the separated state hook
   const {
@@ -80,6 +83,22 @@ export function useLitterManagement() {
   
   // Use subscription hook
   const { setupSubscription } = useLitterSubscription(loadLittersData, user?.id);
+  
+  // Enhanced refresh function that first invalidates React Query and then does a manual load
+  const refreshLitters = useCallback(async () => {
+    try {
+      console.log("Manually refreshing all litters");
+      
+      // First invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: littersQueryKey });
+      
+      // Then do a manual refresh
+      const result = await loadLittersData();
+      return result;
+    } catch (error) {
+      console.error("Error refreshing litters:", error);
+    }
+  }, [queryClient, loadLittersData]);
   
   // Initial data load
   useEffect(() => {
@@ -169,7 +188,8 @@ export function useLitterManagement() {
     handleArchiveLitter: archiveLitter,
     handleSelectLitter,
     getAvailableYears,
-    refreshPlannedLitters
+    refreshPlannedLitters,
+    refreshLitters
   };
 }
 

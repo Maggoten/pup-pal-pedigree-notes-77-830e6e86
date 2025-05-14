@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLitterManagement } from '@/hooks/litters/useLitterManagement';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
@@ -13,12 +13,16 @@ import LitterFilterHeader from './filters/LitterFilterHeader';
 import SelectedLitterSection from './SelectedLitterSection';
 import { ViewType } from './LitterFilterProvider';
 import { Separator } from '@/components/ui/separator';
+import { useQueryClient } from '@tanstack/react-query';
+import { littersQueryKey } from '@/hooks/litters/queries/useAddLitterMutation';
 
 const MyLittersContent: React.FC = () => {
   // Track view mode locally
   const [view, setView] = useState<ViewType>('grid');
   // Update the type of categoryTab to match what LitterFilterHeader expects
   const [categoryTab, setCategoryTab] = useState<'active' | 'archived'>('active');
+  const queryClient = useQueryClient();
+  
   const {
     activeLitters,
     archivedLitters,
@@ -38,7 +42,8 @@ const MyLittersContent: React.FC = () => {
     handleArchiveLitter,
     getAvailableYears,
     plannedLitters,
-    refreshPlannedLitters
+    refreshPlannedLitters,
+    refreshLitters
   } = useLitterManagement();
 
   // Use litter filtering - explicitly pass the active or archived litters based on tab
@@ -58,6 +63,24 @@ const MyLittersContent: React.FC = () => {
   const handleArchive = (litter: Litter) => {
     handleArchiveLitter(litter.id, !litter.archived);
   };
+
+  // Enhanced add litter handler to ensure UI updates
+  const handleAddLitterWithRefresh = useCallback(async (litter: Litter) => {
+    try {
+      await handleAddLitter(litter);
+      
+      // Ensure queries are invalidated after adding a litter
+      queryClient.invalidateQueries({ queryKey: littersQueryKey });
+      
+      // Force a manual refresh to update the UI
+      setTimeout(() => {
+        refreshLitters();
+      }, 500);
+      
+    } catch (error) {
+      console.error("Error in handleAddLitterWithRefresh:", error);
+    }
+  }, [handleAddLitter, queryClient, refreshLitters]);
 
   // When dialog opens, refresh planned litters to ensure we have the latest data
   useEffect(() => {
@@ -79,6 +102,16 @@ const MyLittersContent: React.FC = () => {
     setSearchQuery('');
     setSelectedYear(null);
   };
+
+  // Initial data load and periodic refresh
+  useEffect(() => {
+    // Set up interval for periodic UI refresh
+    const refreshInterval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: littersQueryKey });
+    }, 30000); // Refresh every 30 seconds
+    
+    return () => clearInterval(refreshInterval);
+  }, [queryClient]);
 
   console.log("Rendering MyLittersContent with planned litters:", plannedLitters?.length || 0);
 
@@ -221,7 +254,7 @@ const MyLittersContent: React.FC = () => {
       <AddLitterDialog 
         open={showAddLitterDialog} 
         onOpenChange={setShowAddLitterDialog} 
-        onAddLitter={handleAddLitter} 
+        onAddLitter={handleAddLitterWithRefresh} 
         plannedLitters={plannedLitters || []} 
       />
     </div>

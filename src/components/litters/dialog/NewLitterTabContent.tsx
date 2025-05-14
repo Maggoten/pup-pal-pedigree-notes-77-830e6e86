@@ -10,6 +10,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useForm, FormProvider } from 'react-hook-form';
 import { litterService } from '@/services/LitterService';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { littersQueryKey } from '@/hooks/litters/queries/useAddLitterMutation';
 
 interface NewLitterTabContentProps {
   onClose: () => void;
@@ -31,6 +33,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
   const { dogs } = useDogs();
   const { toast } = useToast();
   const { user, isAuthReady } = useAuth();
+  const queryClient = useQueryClient();
   
   // Set up React Hook Form with typed form values
   const methods = useForm<LitterFormValues>({
@@ -177,6 +180,9 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       }
       
       console.log("Litter successfully created:", result);
+      
+      // Invalidate React Query cache to force refresh
+      queryClient.invalidateQueries({ queryKey: littersQueryKey });
       
       // Call the onLitterAdded callback with the new litter
       onLitterAdded(newLitter);
