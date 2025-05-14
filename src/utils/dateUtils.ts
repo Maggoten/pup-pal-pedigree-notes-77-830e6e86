@@ -1,34 +1,57 @@
 
-/**
- * Formats a date according to the specified options
- */
-export const formatDate = (date: Date, options?: Intl.DateTimeFormatOptions): string => {
-  return new Date(date).toLocaleDateString(undefined, options);
-};
+import { format, parse, isValid, parseISO } from 'date-fns';
 
 /**
- * Checks if a date is within a specified number of days from the reference date
+ * Format a date using date-fns format
  */
-export const isWithinDays = (date: Date, referenceDate: Date, days: number): boolean => {
-  const diffTime = Math.abs(referenceDate.getTime() - date.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays <= days;
-};
-
-/**
- * Converts a Date object to an ISO string without time information (YYYY-MM-DD)
- * This helps avoid timezone issues when storing dates
- */
-export const dateToISOString = (date: Date): string => {
+export const formatDate = (
+  date: Date | string | number | null | undefined,
+  options: Intl.DateTimeFormatOptions = { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  }
+): string => {
   if (!date) return '';
   
   try {
-    // Extract year, month, and day components and format as YYYY-MM-DD
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // +1 because months are 0-indexed
-    const day = String(date.getDate()).padStart(2, '0');
-    
-    return `${year}-${month}-${day}`;
+    const dateObj = date instanceof Date ? date : new Date(date);
+    return new Intl.DateTimeFormat('en-US', options).format(dateObj);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return '';
+  }
+};
+
+/**
+ * Determine if a date falls within a certain number of days from a base date
+ */
+export const isWithinDays = (date: Date, baseDate: Date, days: number): boolean => {
+  const targetDate = new Date(baseDate);
+  targetDate.setDate(baseDate.getDate() + days);
+  
+  return date >= baseDate && date <= targetDate;
+};
+
+/**
+ * Safely parse string to date
+ */
+export const parseDate = (dateString: string, formatString: string = 'yyyy-MM-dd'): Date | null => {
+  try {
+    const parsedDate = parse(dateString, formatString, new Date());
+    return isValid(parsedDate) ? parsedDate : null;
+  } catch (error) {
+    return null;
+  }
+};
+
+/**
+ * Convert a Date object to ISO string format
+ */
+export const dateToISOString = (date: Date | null | undefined): string => {
+  if (!date) return '';
+  try {
+    return date instanceof Date ? date.toISOString() : new Date(date).toISOString();
   } catch (error) {
     console.error('Error converting date to ISO string:', error);
     return '';
@@ -36,56 +59,15 @@ export const dateToISOString = (date: Date): string => {
 };
 
 /**
- * Parses an ISO date string (YYYY-MM-DD) to a Date object
- * Sets the time to noon to avoid timezone-related date shifts
+ * Parse an ISO string to a Date object
  */
-export const parseISODate = (dateString: string): Date | null => {
-  if (!dateString) return null;
-  
+export const parseISODate = (isoString: string | null | undefined): Date | null => {
+  if (!isoString) return null;
   try {
-    // Create a new date and set the time to noon to avoid timezone shifts
-    const date = new Date(dateString);
-    date.setHours(12, 0, 0, 0);
-    return date;
+    const date = parseISO(isoString);
+    return isValid(date) ? date : null;
   } catch (error) {
-    console.error('Error parsing ISO date string:', error);
+    console.error('Error parsing ISO date:', error);
     return null;
   }
-};
-
-/**
- * Formats a date as a string with the format YYYY-MM-DD
- */
-export const formatDateYYYYMMDD = (date: Date): string => {
-  if (!date) return '';
-  
-  try {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    
-    return `${year}-${month}-${day}`;
-  } catch (error) {
-    console.error('Error formatting date as YYYY-MM-DD:', error);
-    return '';
-  }
-};
-
-/**
- * Checks if a date is today
- */
-export const isToday = (date: Date): boolean => {
-  const today = new Date();
-  return date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear();
-};
-
-/**
- * Gets the current date at noon to avoid timezone issues
- */
-export const getNoonDate = (): Date => {
-  const date = new Date();
-  date.setHours(12, 0, 0, 0);
-  return date;
 };

@@ -52,21 +52,26 @@ export const useDashboardData = () => {
     nextHeatDate
   } = usePlannedLitters();
   
-  // Cast the litter query result to include the needed properties
+  // Get litter data
   const litterQueryResult = useLitterQueries();
-  const litterQueryData: LitterQueryData = {
-    recentLittersCount: litterQueryResult?.recentLitters?.length || 0,
-    littersThisYear: litterQueryResult?.thisYearLitters?.length || 0,
-    isLoading: litterQueryResult?.isLoading || false,
-    error: null
-  };
+  let recentLittersCount = 0;
+  let littersThisYear = 0;
+  let littersLoading = true;
   
-  const { 
-    recentLittersCount,
-    littersThisYear,
-    isLoading: littersLoading,
-    error: littersError
-  } = litterQueryData;
+  if (litterQueryResult) {
+    // Check if these properties exist before accessing them
+    if ('recentLitters' in litterQueryResult && Array.isArray(litterQueryResult.recentLitters)) {
+      recentLittersCount = litterQueryResult.recentLitters.length;
+    }
+    if ('thisYearLitters' in litterQueryResult && Array.isArray(litterQueryResult.thisYearLitters)) {
+      littersThisYear = litterQueryResult.thisYearLitters.length;
+    }
+    if ('isLoading' in litterQueryResult) {
+      littersLoading = Boolean(litterQueryResult.isLoading);
+    }
+  }
+  
+  const littersError = null; // No error handling for litters currently
   
   // Combine calendar events with reminder events
   const combinedEvents = useMemo(() => {
@@ -94,7 +99,7 @@ export const useDashboardData = () => {
   // Get events for a specific date
   const getEventsForDate = useCallback((date: Date) => {
     return combinedEvents.filter(event => {
-      const eventDate = event.date instanceof Date ? event.date : parseISO(event.date as string);
+      const eventDate = typeof event.date === 'string' ? parseISO(event.date) : event.date;
       return isSameDay(eventDate, date);
     });
   }, [combinedEvents]);

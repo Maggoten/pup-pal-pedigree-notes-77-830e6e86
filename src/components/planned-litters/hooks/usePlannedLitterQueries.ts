@@ -28,10 +28,13 @@ export const usePlannedLitterQueries = () => {
   
   // Convert MatingData[] to RecentMating[]
   const recentMatings: RecentMating[] = recentMatingsData.recentMatings.map(mating => ({
+    id: mating.id,
     litterId: mating.litterId,
     maleName: mating.maleName,
     femaleName: mating.femaleName,
-    date: mating.matingDate
+    date: mating.matingDate,
+    formattedDate: mating.formattedDate,
+    isToday: mating.isToday
   }));
   
   // Function to handle visibility change for reloading

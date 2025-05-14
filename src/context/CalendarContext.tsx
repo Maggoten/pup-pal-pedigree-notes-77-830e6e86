@@ -1,6 +1,8 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
+import { CalendarEvent } from '@/types/calendar';
+import { AddEventFormValues } from '@/components/calendar/types';
+import { format } from 'date-fns';
 
 interface CalendarContextType {
   events: CalendarEvent[];
@@ -32,8 +34,14 @@ export const CalendarProvider: React.FC<{ children: ReactNode }> = ({ children }
   const addEvent = async (eventData: AddEventFormValues) => {
     const newEvent: CalendarEvent = {
       id: Math.random().toString(36).substring(2, 9),
-      ...eventData,
-      createdAt: new Date(),
+      title: eventData.title,
+      date: format(eventData.date, 'yyyy-MM-dd'),
+      startDate: format(eventData.date, 'yyyy-MM-dd'),
+      endDate: format(eventData.date, 'yyyy-MM-dd'),
+      type: eventData.type || 'custom',
+      dogId: eventData.dogId,
+      notes: eventData.notes || '',
+      dogName: eventData.dogName
     };
     
     setEvents(prev => [...prev, newEvent]);
@@ -42,9 +50,22 @@ export const CalendarProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Update an existing event
   const updateEvent = async (id: string, eventData: Partial<AddEventFormValues>) => {
     setEvents(prev => 
-      prev.map(event => 
-        event.id === id ? { ...event, ...eventData } : event
-      )
+      prev.map(event => {
+        if (event.id === id) {
+          const updated: CalendarEvent = { ...event };
+          if (eventData.title) updated.title = eventData.title;
+          if (eventData.date) {
+            updated.date = format(eventData.date, 'yyyy-MM-dd');
+            updated.startDate = format(eventData.date, 'yyyy-MM-dd');
+            updated.endDate = format(eventData.date, 'yyyy-MM-dd');
+          }
+          if (eventData.dogId) updated.dogId = eventData.dogId;
+          if (eventData.notes !== undefined) updated.notes = eventData.notes;
+          if (eventData.dogName) updated.dogName = eventData.dogName;
+          return updated;
+        }
+        return event;
+      })
     );
   };
   

@@ -9,11 +9,13 @@ import { Calendar } from 'lucide-react';
 interface UpcomingHeatCardProps {
   heat: UpcomingHeat;
   onDelete?: (id: string) => void;
+  onHeatDeleted?: () => void; // Adding this prop to match usage in MatingSection
 }
 
 const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ 
   heat,
-  onDelete 
+  onDelete,
+  onHeatDeleted 
 }) => {
   const getWeekText = (daysUntil: number) => {
     if (daysUntil <= 7) return 'This week';

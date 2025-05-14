@@ -11,6 +11,9 @@ export interface Reminder {
   type: string;
   relatedId?: string;
   icon?: ReactElement;
+  isDeleted?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CustomReminderInput {
@@ -21,6 +24,9 @@ export interface CustomReminderInput {
   type: string;
   relatedId?: string;
 }
+
+// Alias for form values
+export type ReminderFormValues = CustomReminderInput;
 
 export interface MatingData {
   id: string;

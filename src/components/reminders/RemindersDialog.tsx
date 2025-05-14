@@ -7,7 +7,7 @@ import { Plus, Loader2 } from 'lucide-react';
 import { useReminders } from '@/context/RemindersContext';
 import RemindersList from './RemindersList';
 import AddReminderForm from './AddReminderForm';
-import { Reminder, ReminderFormValues } from '@/types/reminders';
+import { Reminder, CustomReminderInput } from '@/types/reminders';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface RemindersDialogProps {
@@ -28,7 +28,7 @@ const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange })
   } = useReminders();
   
   // Implement these functions if they don't exist in the context
-  const addCustomReminder = (data: ReminderFormValues) => {
+  const addCustomReminder = (data: CustomReminderInput) => {
     console.log("Adding custom reminder:", data);
     // If this function exists in the context, use it instead
     if ('addReminder' in useReminders()) {
@@ -76,7 +76,7 @@ const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange })
     setShowAddForm(false);
   };
 
-  const handleFormSubmit = async (data: ReminderFormValues) => {
+  const handleFormSubmit = async (data: CustomReminderInput) => {
     const success = await addCustomReminder(data);
     if (success) {
       setShowAddForm(false);

@@ -22,7 +22,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
-import { isWithinDays } from '@/utils/dateUtils';
+import { isWithinInterval } from 'date-fns';
+
+// Custom utility function to replace date-fns isWithinDays
+const isWithinDays = (date: Date, baseDate: Date, days: number): boolean => {
+  const start = baseDate;
+  const end = addDays(baseDate, days);
+  return isWithinInterval(date, { start, end });
+};
 
 export interface PlannedLitterCardProps {
   plannedLitter: PlannedLitter;

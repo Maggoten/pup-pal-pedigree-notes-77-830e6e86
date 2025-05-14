@@ -39,7 +39,7 @@ export const useBreedingRemindersProvider = () => {
         id: item.id,
         title: item.title,
         description: item.description,
-        dueDate: item.due_date,
+        dueDate: new Date(item.due_date), // Convert string to Date object
         priority: item.priority as 'high' | 'medium' | 'low',
         type: item.type,
         relatedId: item.related_id,

@@ -3,6 +3,8 @@ export interface CalendarEvent {
   id: string;
   title: string;
   date: string; // ISO date format 'YYYY-MM-DD'
+  startDate?: string; // ISO date format
+  endDate?: string; // ISO date format
   time?: string; // time string e.g., '08:00'
   type: string; // e.g., 'heat', 'birthday', 'vet', etc.
   notes?: string;
