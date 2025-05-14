@@ -8,3 +8,6 @@
  */
 
 export * from '@/utils/storage';
+
+// Re-export cleanup specifically since it's imported directly from storageUtils
+export { cleanupStorageImage } from '@/utils/storage/cleanup';

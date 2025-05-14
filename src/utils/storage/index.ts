@@ -2,7 +2,8 @@
 // Re-exports from storage modules
 export * from './config';
 export * from './operations';
-export * from './operations/index';
+// Remove this line to fix the ambiguous exports
+// export * from './operations/index';
 export * from './imageUtils';
 
 // Export mime type constants
@@ -14,3 +15,6 @@ export const EXTENDED_MIME_TYPES = {
   // For Safari and iOS which sometimes return generic types
   GENERIC: ['image/image', 'application/octet-stream', 'image']
 };
+
+// Explicitly re-export cleanup for direct imports
+export { cleanupStorageImage } from './cleanup';
