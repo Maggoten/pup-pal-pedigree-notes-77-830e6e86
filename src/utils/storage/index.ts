@@ -6,6 +6,8 @@ export { uploadToStorage } from './operations/upload';
 export { removeFromStorage } from './operations/remove';
 export { getPublicUrl, retrieveFromStorage, isValidPublicUrl } from './operations/retrieve';
 export * from './imageUtils';
+// Export core utilities
+export * from './core';
 
 // Export mime type constants
 export const EXTENDED_MIME_TYPES = {
