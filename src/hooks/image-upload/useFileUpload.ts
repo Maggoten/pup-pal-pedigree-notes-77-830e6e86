@@ -55,7 +55,7 @@ export const useFileUpload = (
       
       // Log platform info for debugging
       const platform = getPlatformInfo();
-      console.log(`[useFileUpload] Uploading from: ${platform.device}, Browser: ${platform.browser}`);
+      console.log(`[useFileUpload] Uploading from: ${platform.device}, Browser: ${platform.userAgent}`);
       
       // Upload file to storage and get public URL
       const publicUrl = await uploadFileAndGetUrl(compressedFile, user_id);

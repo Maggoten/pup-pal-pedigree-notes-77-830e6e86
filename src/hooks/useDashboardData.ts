@@ -2,13 +2,21 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { isSameDay, parseISO } from 'date-fns';
 import { useBreedingReminders } from '@/hooks/useBreedingReminders';
-import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import useCalendarEvents from '@/hooks/useCalendarEvents';
 import { remindersToCalendarEvents } from '@/utils/reminderToCalendarMapper';
 import { CalendarEvent } from '@/types/calendar';
 import { AddEventFormValues } from '@/components/calendar/types';
 import { usePlannedLitters } from '@/hooks/planned-litters/hooks/usePlannedLitters';
 import { useLitterQueries } from '@/hooks/useLitterQueries';
 import { useAuth } from '@/hooks/useAuth';
+
+// Interface for litter queries result with proper properties
+interface LitterQueryData {
+  recentLittersCount: number;
+  littersThisYear: number;
+  isLoading: boolean;
+  error: any;
+}
 
 export const useDashboardData = () => {
   const { user } = useAuth();
@@ -45,13 +53,14 @@ export const useDashboardData = () => {
     nextHeatDate
   } = usePlannedLitters();
   
-  // Recent litters data
+  // Recent litters data - cast the result to include the needed properties
+  const litterQueryData = useLitterQueries() as unknown as LitterQueryData;
   const { 
     recentLittersCount,
     littersThisYear,
     isLoading: littersLoading,
     error: littersError
-  } = useLitterQueries();
+  } = litterQueryData;
   
   // Combine calendar events with reminder events
   const combinedEvents = useMemo(() => {

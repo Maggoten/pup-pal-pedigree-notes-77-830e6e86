@@ -4,6 +4,26 @@ import { PlannedLitter } from '@/types/breeding';
 import { PlannedLitterFormValues, plannedLitterFormSchema } from './types';
 import { toast } from '@/hooks/use-toast';
 
+// Helper function to convert database rows to PlannedLitter objects
+const mapDbRowToPlannedLitter = (row: any, matingDates: any[] = []): PlannedLitter => {
+  return {
+    id: row.id,
+    maleId: row.male_id || null,
+    femaleId: row.female_id,
+    maleName: row.male_name || (row.external_male ? row.external_male_name : ''),
+    femaleName: row.female_name,
+    externalMale: !!row.external_male,
+    externalMaleName: row.external_male_name || null,
+    externalMaleBreed: row.external_male_breed || null,
+    externalMaleRegistration: row.external_male_registration || null,
+    expectedHeatDate: row.expected_heat_date,
+    notes: row.notes || null,
+    male: row.male || null,
+    female: row.female || null,
+    matingDates: matingDates
+  };
+};
+
 // Helper for checking session validity
 const checkSession = async () => {
   try {
@@ -52,7 +72,7 @@ export const plannedLittersService = {
       }
       
       // Then, for each planned litter, get its mating dates
-      const plannedLittersWithMatingDates = await Promise.all(plannedLittersData.map(async (litter) => {
+      const plannedLittersWithMatingDates = await Promise.all((plannedLittersData || []).map(async (litter) => {
         const { data: matingDates, error: matingError } = await supabase
           .from('mating_dates')
           .select('*')
@@ -61,16 +81,10 @@ export const plannedLittersService = {
         
         if (matingError) {
           console.error(`[PlannedLittersService] Error fetching mating dates for litter ${litter.id}:`, matingError);
-          return {
-            ...litter,
-            matingDates: []
-          };
+          return mapDbRowToPlannedLitter(litter, []);
         }
         
-        return {
-          ...litter,
-          matingDates: matingDates || []
-        };
+        return mapDbRowToPlannedLitter(litter, matingDates || []);
       }));
       
       console.log(`[PlannedLittersService] Loaded ${plannedLittersWithMatingDates.length} planned litters with mating dates`);
@@ -101,6 +115,11 @@ export const plannedLittersService = {
       // Validate the form data
       const validatedData = plannedLitterFormSchema.parse(data);
       
+      // Format the date for Supabase (it expects a string, not a Date object)
+      const expectedHeatDate = validatedData.expectedHeatDate instanceof Date 
+        ? validatedData.expectedHeatDate.toISOString() 
+        : validatedData.expectedHeatDate;
+      
       // Create a new planned litter entry
       const { data: newLitter, error } = await supabase
         .from('planned_litters')
@@ -114,7 +133,7 @@ export const plannedLittersService = {
           external_male_name: validatedData.externalMale ? validatedData.externalMaleName : null,
           external_male_breed: validatedData.externalMale ? validatedData.externalMaleBreed : null,
           external_male_registration: validatedData.externalMale ? validatedData.externalMaleRegistration : null,
-          expected_heat_date: validatedData.expectedHeatDate,
+          expected_heat_date: expectedHeatDate,
           notes: validatedData.notes || null
         })
         .select(`
@@ -130,10 +149,9 @@ export const plannedLittersService = {
       }
       
       console.log('[PlannedLittersService] Created new planned litter:', newLitter);
-      return { 
-        ...newLitter, 
-        matingDates: [] 
-      };
+      
+      // Convert the database row to a proper PlannedLitter object
+      return mapDbRowToPlannedLitter(newLitter, []);
     } catch (error) {
       console.error('[PlannedLittersService] Error in createPlannedLitter:', error);
       throw error;
@@ -167,12 +185,15 @@ export const plannedLittersService = {
         throw new Error("Planned litter not found or not owned by current user");
       }
       
+      // Format the date for Supabase (it expects a string, not a Date object)
+      const matingDate = date instanceof Date ? date.toISOString() : date;
+      
       // Add the mating date
       const { error: matingError } = await supabase
         .from('mating_dates')
         .insert({
           planned_litter_id: plannedLitterId,
-          mating_date: date,
+          mating_date: matingDate,
           user_id: userId
         });
       
@@ -215,11 +236,14 @@ export const plannedLittersService = {
         throw new Error("Mating date not found");
       }
       
+      // Format the date for Supabase (it expects a string, not a Date object)
+      const formattedDate = newDate instanceof Date ? newDate.toISOString() : newDate;
+      
       // Update the mating date
       const matingDateId = matingDates[dateIndex].id;
       const { error: updateError } = await supabase
         .from('mating_dates')
-        .update({ mating_date: newDate })
+        .update({ mating_date: formattedDate })
         .eq('id', matingDateId)
         .eq('user_id', userId);
       

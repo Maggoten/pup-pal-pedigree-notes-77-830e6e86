@@ -4,6 +4,7 @@ import { User } from '@/types/auth';
 import UserWelcomeBanner from './UserWelcomeBanner';
 import MetricCardGrid from './MetricCardGrid';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
+import { MetricCardProps } from './MetricCardGrid';
 
 interface DashboardHeroProps {
   username: string;
@@ -34,7 +35,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   });
   
   // Format the metrics for display
-  const metricCards = [
+  const metricCards: MetricCardProps[] = [
     {
       icon: "bell",
       label: "Reminders",
