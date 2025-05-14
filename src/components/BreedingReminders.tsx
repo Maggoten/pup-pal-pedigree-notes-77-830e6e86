@@ -103,7 +103,7 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
           
           <CardTitle className="flex items-center gap-2 text-primary">
             <BellRing className="h-5 w-5" />
-            Breeding Reminders
+            Reminders
           </CardTitle>
           <CardDescription>
             {hasReminders 
