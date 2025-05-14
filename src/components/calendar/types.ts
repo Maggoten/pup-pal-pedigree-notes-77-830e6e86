@@ -10,6 +10,7 @@ export interface CalendarEvent {
   notes?: string;
   startDate?: Date; // Added for new format compatibility
   endDate?: Date;   // Added for new format compatibility
+  isReminderEvent?: boolean; // Flag to identify events that originated from reminders
 }
 
 export interface AddEventFormValues {
