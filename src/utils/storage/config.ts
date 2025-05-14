@@ -14,7 +14,8 @@ export const STORAGE_ERRORS = {
   INVALID_FILE_TYPE: 'Invalid file type. Please upload an image file.',
   COMPRESSION_ERROR: 'Failed to compress image. Trying direct upload.',
   MOBILE_UPLOAD_ERROR: 'Mobile upload issue. Try using a smaller image (under 2MB).',
-  CANVAS_ERROR: 'Browser could not process this image. Try a different image format.'
+  CANVAS_ERROR: 'Browser could not process this image. Try a different image format.',
+  GET_URL_FAILED: 'Failed to get public URL for file'
 };
 
 // Enhanced error interfaces
