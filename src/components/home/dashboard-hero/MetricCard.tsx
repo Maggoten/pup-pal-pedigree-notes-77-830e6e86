@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { Calendar, Heart, Dog, PawPrint } from 'lucide-react';
+import { Calendar, Heart, Dog, PawPrint, Bell } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface MetricCardProps {
   title: string;
   count: number;
-  icon: 'calendar' | 'heart' | 'pawprint' | 'dog';
+  icon: 'calendar' | 'heart' | 'pawprint' | 'dog' | 'bell';
   highlight?: string | null;
   action: () => void;
   color?: string;
@@ -35,6 +35,8 @@ const MetricCard: React.FC<MetricCardProps> = ({
         return <PawPrint className={`h-5 w-5 ${iconColor}`} />;
       case 'dog':
         return <Dog className={`h-5 w-5 ${iconColor}`} />;
+      case 'bell':
+        return <Bell className={`h-5 w-5 ${iconColor}`} />;
       default:
         return null;
     }
