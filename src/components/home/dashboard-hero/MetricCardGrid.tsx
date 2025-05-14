@@ -6,7 +6,7 @@ export interface MetricCardProps {
   icon: "calendar" | "heart" | "pawprint" | "dog" | "bell";
   label: string;
   value: string;
-  highlightColor?: "green" | "blue" | "purple" | "rose" | "orange";
+  highlightColor?: "green" | "blue" | "purple" | "rose" | "orange" | string;
   trend?: string | React.ReactNode;
   loading?: boolean;
 }
@@ -21,10 +21,10 @@ const MetricCardGrid: React.FC<MetricCardGridProps> = ({ metricCards }) => {
       {metricCards.map((card, index) => (
         <MetricCard
           key={index}
-          icon={card.icon}
+          icon={card.icon as "calendar" | "heart" | "pawprint" | "dog" | "bell"}
           label={card.label}
-          value={card.value}
-          highlightColor={card.highlightColor}
+          value={String(card.value)}
+          highlightColor={card.highlightColor as "green" | "blue" | "purple" | "rose" | "orange"}
           trend={card.trend}
           loading={card.loading}
         />

@@ -1,4 +1,5 @@
 
+// Only updating the object mapping function since the property names don't match the data structure
 import { supabase } from '@/integrations/supabase/client';
 import { PlannedLitter } from '@/types/breeding';
 import { PlannedLitterFormValues, plannedLitterFormSchema } from './types';
@@ -20,7 +21,15 @@ const mapDbRowToPlannedLitter = (row: any, matingDates: any[] = []): PlannedLitt
     notes: row.notes || null,
     male: row.male || null,
     female: row.female || null,
-    matingDates: matingDates
+    matingDates: matingDates.map(date => ({
+      id: date.id,
+      plannedLitterId: date.planned_litter_id,
+      matingDate: date.mating_date,
+      pregnancyId: date.pregnancy_id,
+      userId: date.user_id,
+      createdAt: date.created_at,
+      updatedAt: date.updated_at
+    }))
   };
 };
 
@@ -201,8 +210,6 @@ export const plannedLittersService = {
         console.error('[PlannedLittersService] Error adding mating date:', matingError);
         throw matingError;
       }
-      
-      // TBD: Create pregnancy record in a different function
     } catch (error) {
       console.error('[PlannedLittersService] Error in addMatingDate:', error);
       throw error;

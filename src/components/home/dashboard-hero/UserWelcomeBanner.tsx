@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { User } from '@/types/auth';
-import { Card, CardContent } from '@/components/ui/card';
 
 interface UserWelcomeBannerProps {
   username: string;
@@ -9,32 +8,25 @@ interface UserWelcomeBannerProps {
 }
 
 const UserWelcomeBanner: React.FC<UserWelcomeBannerProps> = ({ username, user }) => {
-  const greeting = getTimeBasedGreeting();
-  
   return (
-    <Card className="mb-6 border-warmbeige-200 bg-gradient-to-r from-warmbeige-50 to-warmbeige-100">
-      <CardContent className="p-6">
-        <div className="flex items-center space-x-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-warmbeige-900">
-              {greeting}, {username}!
-            </h1>
-            <p className="text-warmbeige-700 mt-1">
-              Welcome to your breeding journey dashboard
-            </p>
-          </div>
+    <div className="flex items-center justify-between mb-6 p-4 rounded-lg bg-warmbeige-50 border border-warmbeige-100">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Welcome, {username}!
+        </h1>
+        <p className="text-gray-600">
+          Here's your breeding management overview
+        </p>
+      </div>
+      {user?.firstName && (
+        <div className="hidden md:flex items-center gap-2">
+          <span className="w-10 h-10 rounded-full bg-warmbeige-200 text-warmbeige-700 flex items-center justify-center text-lg font-bold">
+            {user.firstName.charAt(0)}
+          </span>
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 };
-
-function getTimeBasedGreeting(): string {
-  const hour = new Date().getHours();
-  
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
-}
 
 export default UserWelcomeBanner;

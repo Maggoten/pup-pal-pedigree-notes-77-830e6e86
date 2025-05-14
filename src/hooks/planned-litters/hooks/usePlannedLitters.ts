@@ -1,59 +1,66 @@
 
-import { useState, useEffect } from 'react';
-import { usePlannedLitterQueries } from '@/hooks/planned-litters/hooks/usePlannedLitterQueries';
+import { useState, useEffect, useMemo } from 'react';
 import { PlannedLitter } from '@/types/breeding';
+import { fetchPlannedLitters } from '@/services/planned-litters';
+import { useUpcomingHeats } from '@/hooks/useUpcomingHeats';
 import { useAuth } from '@/hooks/useAuth';
 
-/**
- * Hook for managing planned litters data
- */
 export const usePlannedLitters = () => {
+  const [plannedLitters, setPlannedLitters] = useState<PlannedLitter[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
-  const { 
-    plannedLitters, 
-    upcomingHeats, 
-    isLoading, 
-    refreshLitters 
-  } = usePlannedLitterQueries();
-
-  const [nextHeatDate, setNextHeatDate] = useState<Date | null>(null);
   
-  // Find the next upcoming heat date
-  useEffect(() => {
-    if (upcomingHeats && upcomingHeats.length > 0) {
-      // Sort heats by date, get the closest
-      const sortedHeats = [...upcomingHeats].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
-      
-      if (sortedHeats[0]) {
-        setNextHeatDate(new Date(sortedHeats[0].date));
-      }
-    } else {
-      // Check planned litters for expected heat dates
-      const littersWithHeatDates = plannedLitters.filter(
-        litter => litter.expectedHeatDate
-      );
-      
-      if (littersWithHeatDates.length > 0) {
-        // Sort by date and get earliest
-        const sortedLitters = [...littersWithHeatDates].sort(
-          (a, b) => new Date(a.expectedHeatDate).getTime() - new Date(b.expectedHeatDate).getTime()
-        );
-        
-        if (sortedLitters[0]) {
-          setNextHeatDate(new Date(sortedLitters[0].expectedHeatDate));
-        }
-      } else {
-        setNextHeatDate(null);
-      }
-    }
+  // Get upcoming heat dates for dogs
+  const { upcomingHeats } = useUpcomingHeats();
+  
+  // Determine the next heat date from either planned litters or upcoming heats
+  const nextHeatDate = useMemo(() => {
+    // First check planned litters
+    const plannedHeatDates = plannedLitters
+      .filter(litter => new Date(litter.expectedHeatDate) > new Date())
+      .map(litter => new Date(litter.expectedHeatDate))
+      .sort((a, b) => a.getTime() - b.getTime());
+    
+    // Then check upcoming heats
+    const upcomingHeatDates = upcomingHeats
+      .map(heat => new Date(heat.date))
+      .sort((a, b) => a.getTime() - b.getTime());
+    
+    // Return the earliest date from either source
+    const allDates = [...plannedHeatDates, ...upcomingHeatDates];
+    return allDates.length > 0 ? allDates.sort((a, b) => a.getTime() - b.getTime())[0] : null;
   }, [plannedLitters, upcomingHeats]);
-
+  
+  // Load planned litters
+  useEffect(() => {
+    const loadPlannedLitters = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        if (!user) {
+          setIsLoading(false);
+          return;
+        }
+        
+        const litters = await fetchPlannedLitters();
+        setPlannedLitters(litters);
+      } catch (err) {
+        console.error('Error fetching planned litters:', err);
+        setError(err instanceof Error ? err : new Error('Failed to fetch planned litters'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadPlannedLitters();
+  }, [user]);
+  
   return {
     plannedLitters,
     isLoading,
-    refreshLitters,
+    error,
     nextHeatDate
   };
 };

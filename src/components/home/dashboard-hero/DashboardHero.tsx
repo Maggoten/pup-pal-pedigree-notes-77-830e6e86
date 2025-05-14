@@ -36,38 +36,38 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   }, [plannedLitters.nextDate]);
 
   // Format the metrics for the cards
-  const metrics = useMemo(() => [
+  const metricCards = useMemo(() => [
     {
-      icon: "bell",
+      icon: "bell" as const,
       label: "Reminders",
       value: `${reminders.incomplete}`,
-      highlightColor: "text-amber-600",
+      highlightColor: "text-amber-600" as const,
       trend: `${reminders.upcoming} upcoming`,
       loading: false,
     },
     {
-      icon: "calendar",
+      icon: "calendar" as const,
       label: "Planned Litters",
       value: `${plannedLitters.count}`,
-      highlightColor: "text-rose-600",
+      highlightColor: "text-rose-600" as const,
       trend: `Next heat: ${formattedNextHeatDate}`,
       loading: false,
     },
     {
-      icon: "heart",
+      icon: "heart" as const,
       label: "Active Pregnancies",
       value: `${isLoadingPregnancies ? '...' : activePregnancies.length}`,
-      highlightColor: "text-emerald-600",
+      highlightColor: "text-emerald-600" as const,
       trend: isLoadingPregnancies 
         ? 'Loading...' 
         : `${activePregnancies.length === 0 ? 'None active' : ''}`,
       loading: isLoadingPregnancies,
     },
     {
-      icon: "pawprint",
+      icon: "pawprint" as const,
       label: "Recent Litters",
       value: `${recentLitters.count}`,
-      highlightColor: "text-blue-600",
+      highlightColor: "text-blue-600" as const,
       trend: `${recentLitters.recent} this year`,
       loading: false,
     }
@@ -84,10 +84,10 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
 
   return (
     <section className="relative overflow-hidden">
-      <DecorativePawprints className="absolute right-0 top-0 w-48 h-48 text-warmbeige-200/50 -z-10" />
+      <DecorativePawprints />
       <div className="pb-6">
         <UserWelcomeBanner username={username} user={user} />
-        <MetricCardGrid metrics={metrics} />
+        <MetricCardGrid metricCards={metricCards} />
       </div>
     </section>
   );

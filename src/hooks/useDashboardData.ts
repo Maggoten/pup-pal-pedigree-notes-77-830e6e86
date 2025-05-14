@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { isSameDay, parseISO } from 'date-fns';
-import { useBreedingReminders } from '@/hooks/useBreedingReminders';
+import { useBreedingReminders } from '@/hooks/reminders';
 import useCalendarEvents from '@/hooks/useCalendarEvents';
 import { remindersToCalendarEvents } from '@/utils/reminderToCalendarMapper';
 import { CalendarEvent } from '@/types/calendar';
@@ -10,7 +10,6 @@ import { usePlannedLitters } from '@/hooks/planned-litters/hooks/usePlannedLitte
 import { useLitterQueries } from '@/hooks/useLitterQueries';
 import { useAuth } from '@/hooks/useAuth';
 
-// Interface for litter queries result with proper properties
 interface LitterQueryData {
   recentLittersCount: number;
   littersThisYear: number;
@@ -54,7 +53,14 @@ export const useDashboardData = () => {
   } = usePlannedLitters();
   
   // Cast the litter query result to include the needed properties
-  const litterQueryData = useLitterQueries() as unknown as LitterQueryData;
+  const litterQueryResult = useLitterQueries();
+  const litterQueryData: LitterQueryData = {
+    recentLittersCount: litterQueryResult?.recentLitters?.length || 0,
+    littersThisYear: litterQueryResult?.thisYearLitters?.length || 0,
+    isLoading: litterQueryResult?.isLoading || false,
+    error: null
+  };
+  
   const { 
     recentLittersCount,
     littersThisYear,
