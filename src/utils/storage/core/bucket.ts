@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { BUCKET_NAME, isStorageError } from '../config';
+import { BUCKET_NAME, isStorageError, STORAGE_ERROR_CODES } from '../config';
 import { fetchWithRetry } from '@/utils/fetchUtils';
 import { getPlatformInfo } from '../mobileUpload';
 

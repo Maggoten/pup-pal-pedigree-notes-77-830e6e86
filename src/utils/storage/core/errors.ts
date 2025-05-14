@@ -60,4 +60,3 @@ export const createStorageError = (message: string): { error: StorageError } => 
     error: new StorageError(message) 
   };
 };
-

@@ -1,130 +1,81 @@
+export const BUCKET_NAME = process.env.NEXT_PUBLIC_SUPABASE_BUCKET_NAME || 'public';
 
-// Core configuration for storage operations
-export const BUCKET_NAME = 'dog-photos';
+// Image processing constants
+export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+export const MAX_WIDTH = 1024;
+export const MAX_HEIGHT = 1024;
+export const COMPRESSION_QUALITY = 0.7;
 
-// Common error messages
-export const STORAGE_ERRORS = {
-  NO_SESSION: 'No active session. User authentication is required.',
-  BUCKET_NOT_FOUND: (bucket: string) => `Storage bucket "${bucket}" does not exist or is not accessible`,
-  UPLOAD_FAILED: 'Upload failed',
-  DOWNLOAD_FAILED: 'Download failed',
-  REMOVE_FAILED: 'Failed to remove file',
-  SAFARI_STORAGE_ERROR: 'Safari storage access error, trying alternative method',
+// Mobile upload settings
+export const MOBILE_MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB for mobile
+export const MOBILE_COMPRESSION_QUALITY = 0.6;
+
+// Storage error constants
+export const STORAGE_ERROR_CODES = {
+  NO_SESSION: 'No active authentication session found',
+  BUCKET_NOT_FOUND: (bucket: string) => `Storage bucket "${bucket}" not found or inaccessible`,
+  UPLOAD_FAILED: 'Failed to upload file to storage',
+  DOWNLOAD_FAILED: 'Failed to download file from storage',
+  REMOVE_FAILED: 'Failed to remove file from storage',
+  SAFARI_STORAGE_ERROR: 'Safari browser storage issue detected',
   RETRY_EXCEEDED: 'Maximum retry attempts exceeded',
-  FILE_TOO_LARGE: (size: number) => `File size (${(size/1024/1024).toFixed(1)}MB) exceeds the maximum allowed`,
-  INVALID_FILE_TYPE: 'Invalid file type. Please upload an image file.',
-  COMPRESSION_ERROR: 'Failed to compress image. Trying direct upload.',
-  MOBILE_UPLOAD_ERROR: 'Mobile upload issue. Try using a smaller image (under 2MB).',
-  CANVAS_ERROR: 'Browser could not process this image. Try a different image format.'
+  PROCESS_IMAGE_FAILED: 'Failed to process image for upload',
+  FILE_TOO_LARGE: 'File exceeds maximum allowed size',
+  INVALID_FILE_TYPE: 'File type not supported',
+  CANVAS_ERROR: 'Error processing image in canvas',
+  GET_URL_FAILED: 'Failed to get public URL for file'
 };
 
-// Enhanced error interfaces
+// Type definitions for storage errors
 export interface StorageErrorDetails {
-  message?: string;
-  status?: number;
+  message: string;
   statusCode?: number;
   details?: string;
 }
 
 export interface SupabaseStorageError {
-  error: string | Error;
-  status?: number;
-  details?: string;
+  error: string | StorageErrorDetails;
 }
 
-export interface ApiErrorResponse {
-  error: string | Error | unknown;
-  status?: number;
-  statusCode?: number;
-  message?: string;
-  details?: string;
-}
-
-// Type guard for checking if an object is a storage error
-export function isStorageError(error: unknown): error is StorageErrorDetails {
-  return typeof error === 'object' && 
-         error !== null && 
-         ('message' in error || 'status' in error || 'details' in error);
-}
-
-// Type guard for checking if an object is a Supabase storage error
-export function isSupabaseStorageError(error: unknown): error is SupabaseStorageError {
-  return typeof error === 'object' && 
-         error !== null && 
-         'error' in error;
-}
-
-// Type guard for API error responses
-export function isApiErrorResponse(error: unknown): error is ApiErrorResponse {
-  return typeof error === 'object' && 
-         error !== null && 
-         'error' in error;
-}
-
-// Enhanced Safari detection
-export const isSafari = (): boolean => {
-  const userAgent = navigator.userAgent.toLowerCase();
-  return (
-    (userAgent.includes('safari') && !userAgent.includes('chrome') && !userAgent.includes('android')) ||
-    // iPad on iOS 13+ detection
-    (userAgent.includes('macintosh') && navigator.maxTouchPoints > 1 && !userAgent.includes('chrome'))
-  );
+// Type guards for error identification
+export const isStorageError = (obj: unknown): obj is { message: string } => {
+  return typeof obj === 'object' &&
+         obj !== null &&
+         'message' in obj &&
+         typeof (obj as any).message === 'string';
 };
 
-// Mobile-aware timeouts
-export const getStorageTimeout = (): number => {
-  const userAgent = navigator.userAgent.toLowerCase();
-  const isMobile = /iphone|ipad|ipod|android/i.test(userAgent);
-  
-  if (isSafari() && isMobile) {
-    return 60000; // 60 seconds for mobile Safari
-  } else if (isSafari()) {
-    return 45000; // 45 seconds for desktop Safari
-  } else if (isMobile) {
-    return 50000; // 50 seconds for other mobile browsers
-  } else {
-    return 30000; // 30 seconds for desktop browsers
-  }
+export const isSupabaseStorageError = (obj: unknown): obj is SupabaseStorageError => {
+  return typeof obj === 'object' &&
+         obj !== null &&
+         'error' in obj &&
+         (typeof (obj as any).error === 'string' || 
+          typeof (obj as any).error === 'object');
 };
 
-// Extended MIME types Safari might use
-export const EXTENDED_MIME_TYPES = {
-  JPEG: ['image/jpeg', 'image/jpg'],
-  PNG: ['image/png'],
-  WEBP: ['image/webp'],
-  HEIC: ['image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence'],
-  // Safari sometimes uses these generic types
-  GENERIC: [
-    'application/octet-stream', 
-    'image', 
-    'image/generic', 
-    'binary/octet-stream',
-    ''  // Empty string is sometimes returned by Safari
-  ],
-};
-
-// Get supported image extensions
-export const SUPPORTED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
-
-// Check if a file is an image based on extension
-export const isImageByExtension = (fileName: string): boolean => {
-  const extension = fileName.split('.').pop()?.toLowerCase() || '';
-  return SUPPORTED_IMAGE_EXTENSIONS.includes(extension);
-};
-
-// Safe error extraction utility
+// Helper function to safely get error message from any error type
 export const getSafeErrorMessage = (error: unknown): string => {
+  if (!error) return 'Unknown error';
+  
+  if (typeof error === 'string') return error;
+  
+  if (isSupabaseStorageError(error)) {
+    if (typeof error.error === 'string') return error.error;
+    return error.error.message || 'Storage error occurred';
+  }
+  
+  if (isStorageError(error)) {
+    return error.message;
+  }
+  
   if (error instanceof Error) {
     return error.message;
-  } else if (isSupabaseStorageError(error)) {
-    return typeof error.error === 'string' ? error.error : error.error.message;
-  } else if (isStorageError(error)) {
-    return error.message || 'Unknown storage error';
-  } else if (typeof error === 'string') {
-    return error;
-  } else if (error && typeof error === 'object' && 'message' in error) {
-    return String((error as any).message);
-  } else {
-    return 'Unknown error occurred';
   }
+  
+  if (typeof error === 'object' && 'message' in error) {
+    return String((error as any).message);
+  }
+  
+  return 'Unexpected error occurred';
 };
