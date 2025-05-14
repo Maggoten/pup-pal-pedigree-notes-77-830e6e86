@@ -1,9 +1,10 @@
 
 // Re-exports from storage modules
 export * from './config';
-export * from './operations';
-// Remove this line to fix the ambiguous exports
-// export * from './operations/index';
+// Export operations directly from their source files to avoid ambiguity
+export { uploadToStorage } from './operations/upload';
+export { removeFromStorage } from './operations/remove';
+export { getPublicUrl, retrieveFromStorage, isValidPublicUrl } from './operations/retrieve';
 export * from './imageUtils';
 
 // Export mime type constants
