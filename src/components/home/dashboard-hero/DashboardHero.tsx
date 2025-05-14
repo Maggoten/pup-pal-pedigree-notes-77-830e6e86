@@ -41,7 +41,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   const safeRecentLitters = recentLitters ?? { count: 0, latest: null };
   
   return (
-    <section className="relative bg-gradient-to-br from-primary/5 to-primary/10 py-6 md:py-12 px-4 rounded-xl border border-primary/10 overflow-hidden">
+    <section className="relative bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 py-8 md:py-10 px-6 rounded-xl border border-warmbeige-200 overflow-hidden shadow-sm">
       {/* Decorative elements */}
       <DecorativePawprints />
       
@@ -52,7 +52,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
       />
       
       {/* Stats grid */}
-      <div className="relative z-10">
+      <div className="relative z-10 mt-6">
         <MetricCardGrid 
           remindersCount={safeReminders.count}
           highPriorityCount={safeReminders.highPriority}

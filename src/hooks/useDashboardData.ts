@@ -1,4 +1,3 @@
-
 import { useMemo, useEffect, useState } from 'react';
 import { subDays } from 'date-fns';
 import { useDogs } from '@/context/DogsContext';
@@ -49,10 +48,11 @@ export const useDashboardData = () => {
     return remindersToCalendarEvents(activeReminders);
   }, [reminders]);
 
-  // Combine both sets of events
+  // Combine both sets of events - ensuring consistent types
   const combinedEvents = useMemo(() => {
     const calendarEvents = events || [];
-    return [...calendarEvents, ...reminderEvents];
+    // Use type assertion to ensure consistent types
+    return [...calendarEvents, ...reminderEvents] as CalendarEvent[];
   }, [events, reminderEvents]);
   
   // Fetch planned litters data
@@ -165,8 +165,8 @@ export const useDashboardData = () => {
       );
     });
     
-    // Return combined events for this date
-    return [...regularEvents, ...reminderEventsForDate];
+    // Return combined events for this date, with explicit type annotation
+    return [...regularEvents, ...reminderEventsForDate] as CalendarEvent[];
   };
 
   // Enhanced getEventColor function that handles reminder types
