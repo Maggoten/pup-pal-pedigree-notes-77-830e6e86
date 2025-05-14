@@ -9,9 +9,9 @@ import {
   checkBucketExists, 
   uploadToStorage, 
   getPublicUrl,
-  processImageForUpload,
-  isValidPublicUrl
+  processImageForUpload
 } from '@/utils/storage';
+import { isValidPublicUrl } from '@/utils/storage/operations/retrieve';
 import { validateImageFile } from '@/utils/imageValidation';
 import { useImageSessionCheck } from './useImageSessionCheck';
 import { UploadResult, hasErrorProperty, safeGetErrorProperty } from './types';

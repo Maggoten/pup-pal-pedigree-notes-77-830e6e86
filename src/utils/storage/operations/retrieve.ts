@@ -56,3 +56,18 @@ export const isValidPublicUrl = (url: string | undefined | null): boolean => {
               
   return isValidFormat;
 };
+
+/**
+ * Retrieve contents from storage
+ * @param filePath The path to the file in storage
+ * @returns The file data or error
+ */
+export const retrieveFromStorage = async (filePath: string) => {
+  if (!filePath) {
+    console.error('[Storage] Cannot retrieve: filePath is empty');
+    return { data: null, error: new Error('Empty filePath provided') };
+  }
+  
+  console.log('[Storage] Retrieving file:', filePath);
+  return await supabase.storage.from(BUCKET_NAME).download(filePath);
+};

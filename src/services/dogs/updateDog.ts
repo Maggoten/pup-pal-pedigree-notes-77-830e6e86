@@ -7,7 +7,7 @@ import { withTimeout, TIMEOUT, isTimeoutError } from '@/utils/timeoutUtils';
 import { cleanupStorageImage } from '@/utils/storage/cleanup';
 import { dateToISOString } from '@/utils/dateUtils';
 import { ReminderCalendarSyncService } from '@/services/ReminderCalendarSyncService';
-import { isValidPublicUrl } from '@/utils/storage';
+import { isValidPublicUrl } from '@/utils/storage/operations/retrieve';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 
 export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog | null> {
