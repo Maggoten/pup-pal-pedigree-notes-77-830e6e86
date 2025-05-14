@@ -1,16 +1,28 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, Pencil, PlusCircle, Trash, X } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlannedLitter } from '@/types/breeding';
-import { format, addDays, isWithinDays } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { PopoverClose } from '@radix-ui/react-popover';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarPrimitive } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
+import { isWithinDays } from '@/utils/dateUtils';
 
 export interface PlannedLitterCardProps {
   plannedLitter: PlannedLitter;
@@ -41,7 +53,7 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
   return (
     <Card className="relative overflow-hidden bg-white border-amber-100 hover:shadow-md transition-shadow">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">{plannedLitter.name}</CardTitle>
+        <CardTitle className="text-lg font-semibold">{plannedLitter.femaleName}'s Litter</CardTitle>
       </CardHeader>
       <CardContent className="py-4">
         <div className="grid grid-cols-2 gap-2">

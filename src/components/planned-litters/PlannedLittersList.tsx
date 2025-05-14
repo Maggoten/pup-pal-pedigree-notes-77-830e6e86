@@ -57,16 +57,16 @@ const PlannedLittersList: React.FC<PlannedLittersListProps> = ({
 
       {plannedLitters.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-         {(plannedLitters ?? []).map(litter => (
+         {(plannedLitters ?? []).map(plannedLitter => (
             <PlannedLitterCard 
-              key={litter.id}
-              plannedLitter={litter}
+              key={plannedLitter.id}
+              plannedLitter={plannedLitter}
               onAddMatingDate={onAddMatingDate}
               onEditMatingDate={onEditMatingDate}
               onDeleteMatingDate={onDeleteMatingDate}
               onDeleteLitter={onDeleteLitter}
-              calendarOpen={calendarOpen[litter.id] || false}
-              onCalendarOpenChange={(open) => setCalendarOpen({...calendarOpen, [litter.id]: open})}
+              calendarOpen={calendarOpen[plannedLitter.id] || false}
+              onCalendarOpenChange={(open) => setCalendarOpen({...calendarOpen, [plannedLitter.id]: open})}
             />
           ))}
         </div>

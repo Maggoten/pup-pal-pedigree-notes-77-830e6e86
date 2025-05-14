@@ -1,39 +1,16 @@
 
+import { ReactElement } from 'react';
+
 export interface Reminder {
   id: string;
   title: string;
   description: string;
-  dueDate: string | Date;
-  priority: 'high' | 'medium' | 'low';
-  type: string;
-  relatedId?: string | null;
-  isCompleted: boolean;
-  isDeleted?: boolean;
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
-  icon?: React.ReactNode;
-}
-
-export interface RemindersSummary {
-  total: number;
-  incomplete: number;
-  upcoming: number;
-}
-
-export interface ReminderFormValues {
-  title: string;
-  description: string;
   dueDate: Date;
+  isCompleted: boolean;
   priority: 'high' | 'medium' | 'low';
   type: string;
   relatedId?: string;
-}
-
-export interface RecentMating {
-  litterId: string;
-  maleName: string;
-  femaleName: string;
-  date: Date;
+  icon?: ReactElement;
 }
 
 export interface CustomReminderInput {
@@ -41,37 +18,42 @@ export interface CustomReminderInput {
   description: string;
   dueDate: Date;
   priority: 'high' | 'medium' | 'low';
-  type?: string;
+  type: string;
   relatedId?: string;
 }
 
-export interface UpcomingHeat {
-  id: string; 
-  dogId: string;
-  dogName: string;
-  date: Date;
-  expectedDate: Date;
-  daysUntil: number;
-  heatIndex: number;
-}
-
-// Creating a MatingData interface
 export interface MatingData {
   id: string;
+  litterId: string;
   femaleName: string;
   maleName: string;
   matingDate: Date;
   formattedDate: string;
   isToday: boolean;
-  litterId: string;
 }
 
-// Helper function to create a valid Reminder object
-export const createReminder = (
-  data: Omit<Reminder, 'isCompleted'> & { isCompleted?: boolean }
-): Reminder => {
+export interface RecentMating {
+  id: string;
+  litterId: string;
+  femaleName: string;
+  maleName: string;
+  date: Date;
+  formattedDate?: string;
+  isToday?: boolean;
+}
+
+export interface UpcomingHeat {
+  id: string;
+  dogId: string;
+  dogName: string;
+  expectedDate: Date;
+  daysUntil: number;
+  heatIndex: number;
+}
+
+export const createReminder = (data: Omit<Reminder, 'isCompleted'>): Reminder => {
   return {
     ...data,
-    isCompleted: data.isCompleted ?? false // Default to false if not provided
+    isCompleted: false
   };
 };
