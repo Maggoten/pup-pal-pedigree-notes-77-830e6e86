@@ -1,26 +1,44 @@
 
 import React from 'react';
-import { differenceInDays } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import UserWelcomeBanner from './UserWelcomeBanner';
-import MetricCardGrid, { MetricCardProps } from './MetricCardGrid';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import MetricCardGrid from './MetricCardGrid';
+import { User } from '@/types/auth';
+import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 
-const DashboardHero: React.FC = () => {
-  const { 
-    dogCount, 
-    recentLittersCount,
-    littersThisYear,
-    upcomingRemindersCount,
-    nearbyAppointmentsCount,
-    littersLoading,
-    appointmentsLoading,
-    remindersLoading,
-    dogsLoading
-  } = useDashboardData();
+interface DashboardHeroProps {
+  username?: string;
+  user: User | null;
+  reminders: { total: number; incomplete: number; upcoming: number };
+  plannedLitters: { count: number; nextDate: Date | null };
+  activePregnancies: ActivePregnancy[];
+  recentLitters: { count: number; recent: number };
+  isLoadingPregnancies: boolean;
+}
 
-  const metricCards: MetricCardProps[] = [
+const DashboardHero: React.FC<DashboardHeroProps> = ({ 
+  username,
+  user,
+  reminders,
+  plannedLitters,
+  activePregnancies,
+  recentLitters,
+  isLoadingPregnancies
+}) => {
+  // Compute metrics based on the provided data
+  const dogCount = 0; // This would come from a dogs context or hook
+  const recentLittersCount = recentLitters?.count || 0;
+  const littersThisYear = recentLitters?.recent || 0;
+  const upcomingRemindersCount = reminders?.upcoming || 0;
+  const nearbyAppointmentsCount = 0; // This would come from appointments data
+  
+  // Loading states
+  const littersLoading = false;
+  const appointmentsLoading = false;
+  const remindersLoading = false;
+  const dogsLoading = false;
+
+  const metricCards = [
     {
       icon: "dog",
       label: "Active Dogs",

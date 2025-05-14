@@ -1,114 +1,116 @@
 
+import { StorageBucketOptions } from '@supabase/storage-js';
 import { supabase } from '@/integrations/supabase/client';
-import { BUCKET_NAME, STORAGE_ERRORS } from '@/utils/storage/config';
-import { formatStorageError, hasError } from './errors';
-import { toast } from '@/hooks/use-toast';
 
-// Constants
-const DOG_PHOTOS_BUCKET = 'images';
+// Configuration for storage operations
+interface BucketConfig {
+  bucketId: string;
+  defaultUploadFolder?: string;
+}
+
+// Centralized bucket configuration
+export const bucketConfig: BucketConfig = {
+  bucketId: 'breeding-images',
+  defaultUploadFolder: 'uploads'
+};
+
+// Error types for storage operations
+export type StorageError = {
+  message: string;
+  status: number;
+};
+
+export type StorageResponse<T> = {
+  data: T | null;
+  error: StorageError | null;
+};
 
 /**
- * Checks if the storage bucket exists
+ * Creates a storage bucket if it doesn't exist
  */
-export async function checkBucketExists(): Promise<boolean> {
+export async function ensureBucketExists(
+  bucketId: string = bucketConfig.bucketId,
+  options?: StorageBucketOptions
+): Promise<StorageResponse<string>> {
   try {
-    const { data, error } = await supabase.storage.getBucket(DOG_PHOTOS_BUCKET);
+    // Check if bucket exists
+    const { data, error } = await supabase.storage.getBucket(bucketId);
     
-    if (error) {
-      console.error(`[Storage] Bucket check error:`, error);
-      return false;
+    if (error && error.message !== 'Bucket not found') {
+      return { data: null, error: { message: error.message, status: error.status || 500 } };
     }
     
-    return !!data;
-  } catch (error) {
-    console.error(`[Storage] Error checking bucket existence:`, error);
-    return false;
+    // If bucket doesn't exist, create it
+    if (!data) {
+      const { data: newBucket, error: createError } = await supabase.storage.createBucket(
+        bucketId,
+        options || {
+          public: false,
+          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif'],
+          fileSizeLimit: 5242880 // 5MB
+        }
+      );
+      
+      if (createError) {
+        return { 
+          data: null, 
+          error: { 
+            message: createError.message, 
+            status: createError.status || 500 
+          }
+        };
+      }
+      
+      return { data: bucketId, error: null };
+    }
+    
+    return { data: bucketId, error: null };
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return { 
+        data: null, 
+        error: { message: error.message, status: 500 } 
+      };
+    }
+    
+    return { 
+      data: null, 
+      error: { message: 'Unknown error ensuring bucket exists', status: 500 } 
+    };
   }
 }
 
 /**
- * Creates the storage bucket if it doesn't exist
+ * Get a list of files in the bucket
  */
-export async function createBucketIfNotExists(): Promise<boolean> {
+export async function listFiles(
+  bucketId: string = bucketConfig.bucketId,
+  path?: string
+) {
   try {
-    const exists = await checkBucketExists();
-    
-    if (exists) {
-      console.log(`[Storage] Bucket ${DOG_PHOTOS_BUCKET} already exists`);
-      return true;
-    }
-    
-    console.log(`[Storage] Creating bucket ${DOG_PHOTOS_BUCKET}`);
-    
-    const { data, error } = await supabase.storage.createBucket(DOG_PHOTOS_BUCKET, {
-      public: true,
-      fileSizeLimit: 5242880 // 5MB
-    });
-    
+    const { data, error } = await supabase.storage
+      .from(bucketId)
+      .list(path || bucketConfig.defaultUploadFolder || '');
+      
     if (error) {
-      console.error(`[Storage] Failed to create bucket:`, error);
-      return false;
+      return { 
+        data: null, 
+        error: { message: error.message, status: error.status || 500 } 
+      };
     }
     
-    console.log(`[Storage] Successfully created bucket ${DOG_PHOTOS_BUCKET}`);
-    return true;
-  } catch (error) {
-    console.error(`[Storage] Error creating bucket:`, error);
-    return false;
-  }
-}
-
-/**
- * Upload a file to storage and return its public URL
- */
-export async function uploadFileAndGetUrl(file: File, userId: string): Promise<string | null> {
-  try {
-    if (!userId) {
-      throw new Error('User ID is required for file upload');
+    return { data, error: null };
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return { 
+        data: null, 
+        error: { message: error.message, status: 500 } 
+      };
     }
     
-    // Create a unique file path
-    const fileExt = file.name.split('.').pop() || 'jpg';
-    const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-    const filePath = `${userId}/${fileName}`;
-    
-    // Ensure bucket exists
-    const bucketExists = await createBucketIfNotExists();
-    if (!bucketExists) {
-      throw new Error(STORAGE_ERRORS.BUCKET_NOT_FOUND(DOG_PHOTOS_BUCKET));
-    }
-    
-    console.log(`[Storage] Uploading ${file.name} (${file.size} bytes) to ${DOG_PHOTOS_BUCKET}/${filePath}`);
-    
-    // Upload file
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from(DOG_PHOTOS_BUCKET)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
-    
-    if (uploadError) {
-      throw formatStorageError(uploadError);
-    }
-    
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from(DOG_PHOTOS_BUCKET)
-      .getPublicUrl(uploadData?.path || filePath);
-    
-    console.log(`[Storage] File uploaded successfully. Path: ${uploadData?.path}`);
-    return urlData.publicUrl;
-  } catch (error) {
-    console.error('[Storage] File upload error:', error);
-    
-    // Show toast for user feedback
-    toast({
-      title: "Upload Failed",
-      description: hasError(error) && error.message ? error.message : 'Failed to upload file',
-      variant: "destructive"
-    });
-    
-    return null;
+    return { 
+      data: null, 
+      error: { message: 'Unknown error listing files', status: 500 } 
+    };
   }
 }

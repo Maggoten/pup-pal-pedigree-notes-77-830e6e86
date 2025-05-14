@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,8 @@ const formatMatingDate = (date: Date | MatingDate | string): string => {
     return format(date, 'MMM d, yyyy');
   } else {
     // Handle MatingDate object
-    return format(parseISO(date.matingDate as string), 'MMM d, yyyy');
+    const dateStr = typeof date.matingDate === 'string' ? date.matingDate : date.matingDate.toISOString();
+    return format(parseISO(dateStr), 'MMM d, yyyy');
   }
 };
 
@@ -26,7 +28,8 @@ const checkIsToday = (date: Date | MatingDate | string): boolean => {
     return isToday(date);
   } else {
     // Handle MatingDate object
-    return isToday(parseISO(date.matingDate as string));
+    const dateStr = typeof date.matingDate === 'string' ? date.matingDate : date.matingDate.toISOString();
+    return isToday(parseISO(dateStr));
   }
 };
 

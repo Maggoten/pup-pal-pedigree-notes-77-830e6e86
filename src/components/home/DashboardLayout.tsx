@@ -59,8 +59,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     addEvent: dashboardData.handleAddEvent,
     deleteEvent: dashboardData.deleteEvent,
     editEvent: dashboardData.handleEditEvent,
-    isLoading: dashboardData.calendarLoading,
-    hasError: dashboardData.calendarError 
+    isLoading: dashboardData.calendarLoading || false,
+    hasError: dashboardData.calendarError || false
   };
   
   const remindersProps = {
@@ -85,8 +85,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     >
       <div className="space-y-6">
         <DashboardHero 
-          username={username}
           user={user}
+          username={username}
           reminders={dashboardData.remindersSummary}
           plannedLitters={dashboardData.plannedLittersData}
           activePregnancies={activePregnancies}

@@ -15,8 +15,8 @@ export interface MetricCardProps {
   label: string;
   value: string;
   highlightColor: string;
-  trend: string;
-  loading: boolean;
+  trend?: string | React.ReactNode;
+  loading?: boolean;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({ 

@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 
 const UserWelcomeBanner: React.FC = () => {
   const { user } = useAuth();
-  const firstName = user?.userMetadata?.firstName || user?.first_name || '';
+  const firstName = user?.firstName || user?.metadata?.firstName || '';
 
   return (
     <Card className="bg-gradient-to-r from-warmbeige-100 to-warmbeige-50">

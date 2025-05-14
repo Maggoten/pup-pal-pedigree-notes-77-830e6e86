@@ -27,7 +27,7 @@ const MetricCardGrid: React.FC<MetricCardGridProps> = ({ metricCards }) => {
           key={index}
           icon={card.icon as "calendar" | "heart" | "pawprint" | "dog" | "bell"}
           label={card.label}
-          value={String(card.value)}
+          value={card.value.toString()}
           highlightColor={card.highlightColor as "green" | "blue" | "purple" | "rose" | "orange"}
           trend={card.trend}
           loading={card.loading}

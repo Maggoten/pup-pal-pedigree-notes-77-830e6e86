@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -85,7 +86,7 @@ const MobileDebugPanel: React.FC = () => {
             {stats && (
               <pre className="text-xs">{JSON.stringify(stats, null, 2)}</pre>
             )}
-            <Button variant="outline" size="xs" onClick={refreshBreedingStats}>
+            <Button variant="outline" size="sm" onClick={refreshBreedingStats}>
               Refresh Stats
             </Button>
           </div>
@@ -96,7 +97,7 @@ const MobileDebugPanel: React.FC = () => {
             {events && (
               <pre className="text-xs">{JSON.stringify(events, null, 2)}</pre>
             )}
-            <Button variant="outline" size="xs" onClick={refreshCalendarData}>
+            <Button variant="outline" size="sm" onClick={refreshCalendarData}>
               Refresh Calendar
             </Button>
           </div>
@@ -107,7 +108,7 @@ const MobileDebugPanel: React.FC = () => {
             {reminders && (
               <pre className="text-xs">{JSON.stringify(reminders, null, 2)}</pre>
             )}
-            <Button variant="outline" size="xs" onClick={refreshReminderData}>
+            <Button variant="outline" size="sm" onClick={refreshReminderData}>
               Refresh Reminders
             </Button>
           </div>
