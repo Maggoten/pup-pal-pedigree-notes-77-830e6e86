@@ -1,19 +1,26 @@
 
 import React from 'react';
 import { PawPrint } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface DecorativePawprintsProps {
   className?: string;
 }
 
-const DecorativePawprints: React.FC<DecorativePawprintsProps> = ({ className }) => {
+const DecorativePawprints: React.FC<DecorativePawprintsProps> = ({ className = "" }) => {
   return (
     <div className={className}>
-      {/* Decorative elements */}
-      <PawPrint className="h-40 w-40 text-primary transform rotate-12" />
-      <div className="absolute bottom-0 left-0 opacity-10">
-        <PawPrint className="h-28 w-28 text-primary transform -rotate-12" />
+      {/* Pattern of pawprints */}
+      <div className="flex flex-wrap gap-10">
+        <PawPrint className="h-12 w-12 text-warmgreen-700/30 transform rotate-12" />
+        <PawPrint className="h-10 w-10 text-warmgreen-700/20 transform -rotate-45" />
+        <PawPrint className="h-14 w-14 text-warmgreen-700/20 transform rotate-90" />
+        <PawPrint className="h-8 w-8 text-warmgreen-700/30 transform -rotate-12" />
+        <PawPrint className="h-12 w-12 text-warmgreen-700/20 transform rotate-45" />
+        
+        <PawPrint className="h-10 w-10 text-warmgreen-700/10 transform -rotate-12" />
+        <PawPrint className="h-16 w-16 text-warmgreen-700/20 transform rotate-135" />
+        <PawPrint className="h-9 w-9 text-warmgreen-700/20 transform -rotate-90" />
+        <PawPrint className="h-11 w-11 text-warmgreen-700/30 transform rotate-23" />
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 import React from 'react';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
-import { Loader2 } from 'lucide-react';
+import { Loader2, PawPrint } from 'lucide-react';
 import MetricCardGrid from './MetricCardGrid';
 import WelcomeHeader from './WelcomeHeader';
 import DecorativePawprints from './DecorativePawprints';
@@ -25,7 +25,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   isLoadingPregnancies = false,
 }) => {
   return (
-    <div className="relative rounded-lg bg-warmbeige-100/50 overflow-hidden">
+    <div className="relative rounded-lg bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 shadow-md overflow-hidden border border-warmbeige-200">
       <div className="px-6 py-12 sm:px-10">
         <WelcomeHeader username={username} />
         
@@ -44,6 +44,15 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
             />
           )}
         </div>
+      </div>
+      
+      {/* Decorative elements similar to the pregnancy page */}
+      <div className="absolute top-0 right-0 opacity-10 pointer-events-none">
+        <PawPrint className="w-32 h-32 text-warmgreen-700 transform rotate-12" />
+      </div>
+      
+      <div className="absolute bottom-0 left-0 opacity-10 pointer-events-none">
+        <PawPrint className="w-20 h-20 text-warmgreen-700 transform -rotate-12" />
       </div>
       
       <DecorativePawprints className="absolute top-0 right-0 z-0 opacity-10" />

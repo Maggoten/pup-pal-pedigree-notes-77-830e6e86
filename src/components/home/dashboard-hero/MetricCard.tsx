@@ -1,69 +1,30 @@
 
-import React from 'react';
-import { Calendar, Heart, Dog, PawPrint } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import React, { ReactNode } from 'react';
 
 interface MetricCardProps {
+  icon: ReactNode;
   title: string;
   count: number;
-  icon: 'calendar' | 'heart' | 'pawprint' | 'dog';
-  highlight?: string | null;
-  action: () => void;
-  color?: string;
-  loading?: boolean;
+  description: string;
+  className?: string;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({
+  icon,
   title,
   count,
-  icon,
-  highlight = null,
-  action,
-  color = 'bg-white',
-  loading = false
+  description,
+  className = "",
 }) => {
-  // Update the icon styles to match the image design
-  const getIconStyles = () => {
-    // Use warmgreen for all icons as shown in the image
-    return { textColor: 'text-warmgreen-600' };
-  };
-
-  const renderIcon = () => {
-    const { textColor } = getIconStyles();
-    
-    switch (icon) {
-      case 'calendar': return <Calendar className={`h-5 w-5 ${textColor}`} />;
-      case 'heart': return <Heart className={`h-5 w-5 ${textColor}`} />;
-      case 'pawprint': return <PawPrint className={`h-5 w-5 ${textColor}`} />;
-      case 'dog': return <Dog className={`h-5 w-5 ${textColor}`} />;
-      default: return null;
-    }
-  };
-
   return (
-    <button 
-      onClick={action}
-      className="rounded-xl p-4 md:p-5 bg-white border border-greige-100 transition-transform hover:scale-[1.02] flex flex-col items-start gap-3 w-full text-left shadow-sm"
-    >
-      <div className="flex items-center gap-2 mb-2">
-        <div className={getIconStyles().textColor}>
-          {renderIcon()}
-        </div>
-        <p className="text-sm font-medium text-darkgray-600">{title}</p>
+    <div className={`p-4 rounded-lg flex flex-col items-center transform transition-transform hover:scale-105 ${className}`}>
+      <div className="bg-warmbeige-100 p-3 rounded-full mb-3">
+        {icon}
       </div>
-      
-      <div className="space-y-0">
-        <h3 className="text-2xl font-semibold text-darkgray-800 mb-0">
-          {loading ? <Skeleton className="h-7 w-16" /> : count}
-        </h3>
-        {highlight && !loading && (
-          <p className="text-xs text-darkgray-400 mt-1">{highlight}</p>
-        )}
-        {highlight && loading && (
-          <Skeleton className="h-4 w-24 mt-1" />
-        )}
-      </div>
-    </button>
+      <h3 className="font-medium text-lg">{title}</h3>
+      <span className="text-2xl font-bold text-warmgreen-600 mt-1">{count}</span>
+      <p className="text-xs text-muted-foreground mt-1 text-center">{description}</p>
+    </div>
   );
 };
 
