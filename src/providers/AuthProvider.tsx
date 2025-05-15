@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -55,35 +56,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     const getInitialSession = async () => {
       setIsLoading(true);
       try {
+        // Get the initial session - critical to break out of "checking authentication" state
         const { data: { session } } = await supabase.auth.getSession();
 
         setUser(session?.user || null);
         setSession(session || null);
         setIsLoggedIn(!!session);
+        
+        // Always set isAuthReady to true even if no session
+        setIsAuthReady(true);
       } catch (error) {
         console.error("Failed to get initial session:", error);
-      } finally {
+        // Important: still mark auth as ready even if there's an error
         setIsAuthReady(true);
+      } finally {
         setIsLoading(false);
       }
     };
 
+    // Start the auth initialization process
     getInitialSession();
 
-    // Subscribe to auth state changes
+    // Subscribe to auth state changes separately from initial session check
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log(`Auth event: ${event}`);
         setUser(session?.user || null);
         setSession(session || null);
         setIsLoggedIn(!!session);
+        
+        // Ensure auth is marked as ready on any auth event
+        if (!isAuthReady) setIsAuthReady(true);
       }
     );
 
+    // Add a fail-safe timeout to ensure auth state isn't stuck in loading
+    const failsafeTimer = setTimeout(() => {
+      if (!isAuthReady) {
+        console.warn("Auth initialization timeout reached - forcing auth ready state");
+        setIsAuthReady(true);
+        setIsLoading(false);
+      }
+    }, 5000); // 5 second timeout as fallback
+
     return () => {
       subscription?.unsubscribe();
+      clearTimeout(failsafeTimer);
     };
-  }, []);
+  }, [isAuthReady]);
 
   const signIn = async (email: string) => {
     setIsLoading(true);
