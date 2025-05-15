@@ -1,7 +1,7 @@
 
 import React from 'react';
 import MetricCard from './MetricCard';
-import { Calendar, Check, Dog, Stethoscope } from 'lucide-react';
+import { Calendar, Check, Heart, PawPrint } from 'lucide-react';
 
 interface MetricCardGridProps {
   reminderCount: number;
@@ -35,14 +35,14 @@ const MetricCardGrid: React.FC<MetricCardGridProps> = ({
       <MetricCard 
         title="Active Pregnancies" 
         value={activePregnanciesCount} 
-        icon={<Stethoscope className="h-4 w-4" />} 
+        icon={<Heart className="h-4 w-4" />} 
         linkTo="/pregnancy"
       />
       
       <MetricCard 
         title="Recent Litters" 
         value={recentLittersCount} 
-        icon={<Dog className="h-4 w-4" />} 
+        icon={<PawPrint className="h-4 w-4" />} 
         linkTo="/my-litters"
       />
     </div>
