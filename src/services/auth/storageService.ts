@@ -2,75 +2,67 @@
 // Storage-related functions for authentication
 
 // Enhanced version to ensure thorough cleanup of all auth-related items
-export const clearAuthStorage = async () => {
-  return new Promise<void>((resolve) => {
+export const clearAuthStorage = () => {
+  try {
+    console.log('[Auth Storage] Beginning storage cleanup process');
+    
+    // Clear user data
+    localStorage.removeItem('user');
+    localStorage.removeItem('isLoggedIn');
+    
+    // Clear all Supabase-related storage items
+    localStorage.removeItem('supabase.auth.token');
+    localStorage.removeItem('supabase.auth.refreshToken');
+    localStorage.removeItem('supabase.auth.user');
+    localStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+    
+    // Also try removing from sessionStorage as fallback for some browsers
     try {
-      console.log('[Auth Storage] Beginning storage cleanup process');
-      
-      // Clear user data
-      localStorage.removeItem('user');
-      localStorage.removeItem('isLoggedIn');
-      
-      // Clear all Supabase-related storage items
-      localStorage.removeItem('supabase.auth.token');
-      localStorage.removeItem('supabase.auth.refreshToken');
-      localStorage.removeItem('supabase.auth.user');
-      localStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
-      
-      // Also try removing from sessionStorage as fallback for some browsers
-      try {
-        sessionStorage.removeItem('supabase.auth.token');
-        sessionStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
-      } catch (e) {
-        console.warn('[Auth Storage] Session storage cleanup failed:', e);
-      }
-      
-      // Clear any session/local storage items that contain these keys
-      const itemsToRemove = [];
-      
-      // Identify items to remove
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (
-          key.includes('supabase') || 
-          key.includes('auth') || 
-          key.includes('sb-') ||
-          key.includes('token')
-        )) {
-          itemsToRemove.push(key);
-        }
-      }
-      
-      // Remove items separately to avoid index shifting issues
-      itemsToRemove.forEach(key => {
-        console.log(`[Auth Storage] Removing storage item: ${key}`);
-        localStorage.removeItem(key);
-      });
-      
-      // Also clear cookies that might be related to authentication
-      document.cookie.split(';').forEach(cookie => {
-        const [name] = cookie.trim().split('=');
-        if (name && (
-          name.includes('supabase') || 
-          name.includes('auth') || 
-          name.includes('sb-')
-        )) {
-          console.log(`[Auth Storage] Clearing cookie: ${name}`);
-          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
-        }
-      });
-      
-      console.log('[Auth Storage] All auth-related storage items cleared');
-      
-      // Short delay to ensure storage operations complete
-      setTimeout(() => {
-        resolve();
-      }, 50);
+      sessionStorage.removeItem('supabase.auth.token');
+      sessionStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
     } catch (e) {
-      console.error('[Auth Storage] Error during storage cleanup:', e);
-      resolve(); // Resolve anyway to prevent hanging
+      console.warn('[Auth Storage] Session storage cleanup failed:', e);
     }
-  });
+    
+    // Clear any session/local storage items that contain these keys
+    const itemsToRemove = [];
+    
+    // Identify items to remove
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (
+        key.includes('supabase') || 
+        key.includes('auth') || 
+        key.includes('sb-') ||
+        key.includes('token')
+      )) {
+        itemsToRemove.push(key);
+      }
+    }
+    
+    // Remove items separately to avoid index shifting issues
+    itemsToRemove.forEach(key => {
+      console.log(`[Auth Storage] Removing storage item: ${key}`);
+      localStorage.removeItem(key);
+    });
+    
+    // Also clear cookies that might be related to authentication
+    document.cookie.split(';').forEach(cookie => {
+      const [name] = cookie.trim().split('=');
+      if (name && (
+        name.includes('supabase') || 
+        name.includes('auth') || 
+        name.includes('sb-')
+      )) {
+        console.log(`[Auth Storage] Clearing cookie: ${name}`);
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
+      }
+    });
+    
+    console.log('[Auth Storage] All auth-related storage items cleared');
+  } catch (e) {
+    console.error('[Auth Storage] Error during storage cleanup:', e);
+  }
 };
 
 // Get user data from local storage - not needed with Supabase but kept for compatibility

@@ -2,14 +2,14 @@
 import { supabase } from '@/integrations/supabase/client';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { verifySession } from '@/utils/storage/core/session';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/context/AuthContext';
 
 /**
  * Hook for handling Supabase authentication session validation and refresh
  * with enhanced mobile support
  */
 export const useImageSessionCheck = () => {
-  const { isAuthReady, session, authTransitioning } = useAuth();
+  const { isAuthReady, session } = useAuth();
 
   /**
    * Validates the current authentication session and attempts to refresh if needed
@@ -17,12 +17,6 @@ export const useImageSessionCheck = () => {
    * @returns Promise resolving to true if session is valid, false otherwise
    */
   const validateSession = async (): Promise<boolean> => {
-    // Don't validate during auth transitions to prevent loops
-    if (authTransitioning) {
-      console.log('[ImageSessionCheck] Auth in transition, skipping validation');
-      return true; // Allow operations to proceed during transitions
-    }
-    
     const platform = getPlatformInfo();
     const isMobile = platform.mobile || platform.safari;
     

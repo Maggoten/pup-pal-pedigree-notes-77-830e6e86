@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar, Heart } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/context/AuthContext';
 import {
   Drawer,
   DrawerContent,
@@ -29,9 +29,7 @@ export const Navbar: React.FC = () => {
   
   const handleLogout = async () => {
     try {
-      console.log("Navbar: Starting logout process");
       await logout();
-      console.log("Navbar: Logout completed");
       // The navigation will be handled by AuthGuard component
       // when the auth state changes, preventing the need for navigate() here
     } catch (error) {
