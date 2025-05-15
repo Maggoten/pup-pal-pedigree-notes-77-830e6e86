@@ -1,6 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
@@ -29,7 +30,7 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn, supabaseUser, isAuthReady, isLoading } = useAuth();
+  const { isLoggedIn, user, isAuthReady, isLoading } = useAuth();
   const { toast } = useToast();
   const [showingToast, setShowingToast] = useState(false);
   const [delayComplete, setDelayComplete] = useState(false);
@@ -123,7 +124,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       (isAuthReady || authTimeout) && 
       !isLoggedIn && 
       !isLoginPage && 
-      !supabaseUser && 
+      !user && 
       delayComplete && 
       !showingToast &&
       !hasActiveUploads;
@@ -145,7 +146,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   }, [
     isLoggedIn, 
     isLoginPage, 
-    supabaseUser, 
+    user, 
     toast, 
     isAuthReady, 
     delayComplete, 

@@ -1,11 +1,12 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { verifySession } from '@/utils/storage';
-import { RegisterData } from '@/types/auth';
+import { RegisterData, User } from '@/types/auth';
 
-// Define User type directly since we're not importing from auth-helpers-react
-type User = {
+// Define SupabaseUser type for internal use
+type SupabaseUser = {
   id: string;
   app_metadata: {
     provider?: string;
@@ -21,15 +22,15 @@ type User = {
 
 interface AuthContextType {
   user: User | null;
-  supabaseUser: User | null; // Added to match expected interface
+  supabaseUser: SupabaseUser | null; 
   session: Session | null;
   isAuthReady: boolean;
   isLoading: boolean;
   isLoggedIn: boolean;
   signIn: (email: string) => Promise<void>;
-  login: (email: string, password: string) => Promise<boolean>; // Added for password-based login
-  logout: () => Promise<void>; // Added to match expected interface
-  register: (userData: RegisterData) => Promise<boolean>; // Added to match expected interface
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  register: (userData: RegisterData) => Promise<boolean>;
   signOut: () => Promise<void>;
 }
 
@@ -51,10 +52,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   children 
 }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Helper function to map Supabase user to our User type
+  const mapSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
+    if (!supabaseUser) return null;
+    
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || '',
+      firstName: supabaseUser.user_metadata?.firstName || '',
+      lastName: supabaseUser.user_metadata?.lastName || ''
+    };
+  };
 
   useEffect(() => {
     const getInitialSession = async () => {
@@ -63,7 +77,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         // Get the initial session - critical to break out of "checking authentication" state
         const { data: { session } } = await supabase.auth.getSession();
 
-        setUser(session?.user || null);
+        setSupabaseUser(session?.user || null);
+        setUser(mapSupabaseUser(session?.user || null));
         setSession(session || null);
         setIsLoggedIn(!!session);
         
@@ -85,7 +100,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log(`Auth event: ${event}`);
-        setUser(session?.user || null);
+        setSupabaseUser(session?.user || null);
+        setUser(mapSupabaseUser(session?.user || null));
         setSession(session || null);
         setIsLoggedIn(!!session);
         
@@ -215,16 +231,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   const value: AuthContextType = {
     user,
-    supabaseUser: user, // Map user to supabaseUser to match expected interface
+    supabaseUser,
     session,
     isAuthReady,
     isLoading,
     isLoggedIn,
     signIn,
-    login,    // Add password-based login
-    logout,   // Add logout alias
-    register, // Add registration method
-    signOut,  // Keep original signOut method
+    login,
+    logout,
+    register,
+    signOut,
   };
 
   return (
