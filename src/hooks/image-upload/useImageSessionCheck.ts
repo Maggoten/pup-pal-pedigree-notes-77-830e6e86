@@ -9,7 +9,7 @@ import { useAuth } from '@/providers/AuthProvider';
  * with enhanced mobile support
  */
 export const useImageSessionCheck = () => {
-  const { isAuthReady, session } = useAuth();
+  const { isAuthReady, session, authTransitioning } = useAuth();
 
   /**
    * Validates the current authentication session and attempts to refresh if needed
@@ -17,6 +17,12 @@ export const useImageSessionCheck = () => {
    * @returns Promise resolving to true if session is valid, false otherwise
    */
   const validateSession = async (): Promise<boolean> => {
+    // Don't validate during auth transitions to prevent loops
+    if (authTransitioning) {
+      console.log('[ImageSessionCheck] Auth in transition, skipping validation');
+      return true; // Allow operations to proceed during transitions
+    }
+    
     const platform = getPlatformInfo();
     const isMobile = platform.mobile || platform.safari;
     

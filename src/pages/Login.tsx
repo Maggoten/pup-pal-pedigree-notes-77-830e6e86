@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/providers/AuthProvider';
@@ -10,20 +11,35 @@ import { RegisterData } from '@/types/auth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login, register, isLoading: authLoading } = useAuth();
+  const { login, register, isLoading: authLoading, authTransitioning } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Prevent duplicate login attempts
+  useEffect(() => {
+    if (authTransitioning && isProcessing) {
+      console.log('Login page: Auth transition in progress, waiting...');
+    }
+  }, [authTransitioning, isProcessing]);
 
   const handleLogin = async (values: LoginFormValues) => {
+    if (isProcessing || authTransitioning) {
+      console.log('Login already in progress, skipping duplicate attempt');
+      return;
+    }
+    
     setIsLoading(true);
+    setIsProcessing(true);
+    
     try {
       console.log('Login page: Attempting login for:', values.email);
       const success = await login(values.email, values.password);
       
       if (success) {
-        console.log('Login page: Login successful, redirecting');
-        navigate('/');
+        console.log('Login page: Login successful, redirect will happen via AuthGuard');
+        // Navigation handled by AuthGuard
       } else {
         console.log('Login page: Login failed');
         toast({
@@ -41,6 +57,10 @@ const Login: React.FC = () => {
       });
     } finally {
       setIsLoading(false);
+      // Wait a moment before allowing another attempt
+      setTimeout(() => {
+        setIsProcessing(false);
+      }, 500);
     }
   };
 
@@ -56,7 +76,13 @@ const Login: React.FC = () => {
   };
 
   const handleFreeRegistration = async (values: RegistrationFormValues) => {
+    if (isProcessing || authTransitioning) {
+      console.log('Registration already in progress, skipping duplicate attempt');
+      return;
+    }
+    
     setIsLoading(true);
+    setIsProcessing(true);
     
     try {
       const registerData: RegisterData = {
@@ -71,11 +97,7 @@ const Login: React.FC = () => {
       
       if (success) {
         console.log('Login page: Registration successful');
-        
-        // Navigate but only if email confirmation is not required
-        if (document.cookie.includes('supabase-auth-token')) {
-          navigate('/');
-        }
+        // Navigation will be handled by AuthGuard
       } else {
         console.log('Login page: Registration failed');
       }
@@ -83,11 +105,20 @@ const Login: React.FC = () => {
       console.error("Login page: Registration error:", error);
     } finally {
       setIsLoading(false);
+      setTimeout(() => {
+        setIsProcessing(false);
+      }, 500);
     }
   };
 
   const handlePayment = async () => {
+    if (isProcessing || authTransitioning) {
+      console.log('Payment process already in progress, skipping duplicate attempt');
+      return;
+    }
+    
     setIsLoading(true);
+    setIsProcessing(true);
     
     if (registrationData) {
       try {
@@ -103,14 +134,7 @@ const Login: React.FC = () => {
         
         if (success) {
           console.log('Login page: Registration successful');
-          
-          // Navigate but only if email confirmation is not required
-          if (document.cookie.includes('supabase-auth-token')) {
-            navigate('/');
-          } else {
-            // Stay on login page so user can log in after confirming email
-            setShowPayment(false);
-          }
+          // Navigation handled by AuthGuard
         } else {
           console.log('Login page: Registration failed');
           setShowPayment(false);
@@ -120,11 +144,14 @@ const Login: React.FC = () => {
         setShowPayment(false);
       } finally {
         setIsLoading(false);
+        setTimeout(() => {
+          setIsProcessing(false);
+        }, 500);
       }
     }
   };
 
-  const effectiveLoading = isLoading || authLoading;
+  const effectiveLoading = isLoading || authLoading || authTransitioning;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-warmbeige-50/70 p-4">

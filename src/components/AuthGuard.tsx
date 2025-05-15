@@ -24,13 +24,19 @@ export const uploadStateManager = {
   hasActiveUploads: () => activeUploadsCount > 0
 };
 
+// Track recent auth state changes to prevent redirect loops
+let lastAuthStateChange = 0;
+let lastRedirectTime = 0;
+const REDIRECT_COOLDOWN = 500; // 500ms cooldown between redirects
+const AUTH_STATE_DEBOUNCE = 300; // 300ms debounce for auth state changes
+
 interface AuthGuardProps {
   children: React.ReactNode;
 }
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn, user, isAuthReady, isLoading } = useAuth();
+  const { isLoggedIn, user, isAuthReady, isLoading, authTransitioning } = useAuth();
   const { toast } = useToast();
   const [showingToast, setShowingToast] = useState(false);
   const [delayComplete, setDelayComplete] = useState(false);
@@ -50,12 +56,15 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // Maximum time to wait for auth before assuming there's a problem
   const [authTimeout, setAuthTimeout] = useState(false);
 
+  // Has a redirect recently occurred?
+  const [recentRedirect, setRecentRedirect] = useState(false);
+
   // Track login state changes to detect logouts
   useEffect(() => {
     if (previouslyLoggedIn && !isLoggedIn && isAuthReady) {
       console.log('[AuthGuard] Detected logout, user was logged in but now is not');
-      // User was logged in but isn't anymore - they've logged out
-      // The redirect will happen automatically below
+      // Update timestamp to prevent immediate redirect
+      lastAuthStateChange = Date.now();
     }
     
     setPreviouslyLoggedIn(isLoggedIn);
@@ -122,6 +131,16 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     return () => clearTimeout(timer);
   }, [isAuthReady]);
   
+  // Implement redirect cooldown to prevent loops
+  useEffect(() => {
+    if (recentRedirect) {
+      const timer = setTimeout(() => {
+        setRecentRedirect(false);
+      }, REDIRECT_COOLDOWN);
+      return () => clearTimeout(timer);
+    }
+  }, [recentRedirect]);
+  
   // Show toast for authentication issues
   useEffect(() => {
     // Only show authentication toast when:
@@ -132,6 +151,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     // 5. Delay has completed (prevents flash)
     // 6. No toast is currently showing
     // 7. No active uploads are in progress
+    // 8. Not in auth transition state
     const shouldShowToast = 
       (isAuthReady || authTimeout) && 
       !isLoggedIn && 
@@ -139,7 +159,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       !user && 
       delayComplete && 
       !showingToast &&
-      !hasActiveUploads;
+      !hasActiveUploads &&
+      !authTransitioning;
     
     if (shouldShowToast) {
       console.log('[AuthGuard] Showing auth required toast');
@@ -164,7 +185,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     delayComplete, 
     showingToast,
     hasActiveUploads,
-    authTimeout
+    authTimeout,
+    authTransitioning
   ]);
 
   // Allow bypassing auth check after timeout to prevent infinite loading
@@ -194,29 +216,71 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     isMobile, 
     isOffline,
     authCheckFailed,
-    pathname: location.pathname
+    authTransitioning,
+    pathname: location.pathname,
+    timeSinceLastAuthChange: Date.now() - lastAuthStateChange,
+    timeSinceLastRedirect: Date.now() - lastRedirectTime
   });
 
-  // Only redirect if:
+  // Prevent redirect loops by checking for recent redirects or auth state changes
+  const canRedirect = () => {
+    const now = Date.now();
+    const timeSinceLastAuth = now - lastAuthStateChange;
+    const timeSinceLastRedirect = now - lastRedirectTime;
+    
+    // Don't redirect if we're in a transition state
+    if (authTransitioning) {
+      console.log('[AuthGuard] Skipping redirect during auth transition');
+      return false;
+    }
+    
+    // Don't redirect if we recently redirected
+    if (timeSinceLastRedirect < REDIRECT_COOLDOWN) {
+      console.log('[AuthGuard] Skipping redirect - too soon after last redirect');
+      return false;
+    }
+    
+    // Don't redirect if auth state recently changed
+    if (timeSinceLastAuth < AUTH_STATE_DEBOUNCE) {
+      console.log('[AuthGuard] Skipping redirect - too soon after auth state change');
+      return false;
+    }
+    
+    return true;
+  };
+
+  // Only redirect to login if:
   // 1. Auth is ready
   // 2. User is not logged in 
   // 3. Not on login page
   // 4. No active uploads are in progress
   // 5. Not offline on mobile
+  // 6. Not in a redirect cooldown period
   const shouldRedirectToLogin = (isAuthReady || authCheckFailed) && 
                               !isLoggedIn && 
                               !isLoginPage && 
                               !hasActiveUploads &&
-                              !(isMobile && isOffline);
+                              !(isMobile && isOffline) &&
+                              canRedirect();
   
   if (shouldRedirectToLogin) {
     console.log('[AuthGuard] Redirecting to login page from:', location.pathname);
+    lastRedirectTime = Date.now();
+    setRecentRedirect(true);
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Only redirect if auth is ready and user is logged in and on login page
-  if (isAuthReady && isLoggedIn && isLoginPage) {
+  const shouldRedirectFromLogin = isAuthReady && 
+                                isLoggedIn && 
+                                isLoginPage &&
+                                canRedirect() &&
+                                !authTransitioning;
+                                
+  if (shouldRedirectFromLogin) {
     console.log('[AuthGuard] User already logged in, redirecting from login page');
+    lastRedirectTime = Date.now();
+    setRecentRedirect(true);
     return <Navigate to="/" replace />;
   }
 
