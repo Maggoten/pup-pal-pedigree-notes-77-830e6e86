@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
-import { fetchCalendarEvents, addEventToSupabase, updateEventInSupabase, deleteEventFromSupabase } from '@/services/CalendarEventService';
+import { CalendarEvent } from '@/types/calendar';
+import { AddEventFormValues } from '@/components/calendar/types';
+import { getCalendarEvents, addEventToSupabase, updateEventInSupabase, deleteEventFromSupabase } from '@/services/CalendarEventService';
 import { useDogs } from '@/context/DogsContext';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
@@ -29,7 +30,7 @@ const useSupabaseCalendarEvents = () => {
     setIsLoading(true);
     try {
       console.log('[Calendar] Fetching calendar events from Supabase');
-      const fetchedEvents = await fetchCalendarEvents();
+      const fetchedEvents = await getCalendarEvents();
       console.log(`[Calendar] Fetched ${fetchedEvents.length} events from Supabase`);
       
       // Convert date strings to Date objects and ensure compatibility
@@ -64,7 +65,7 @@ const useSupabaseCalendarEvents = () => {
   }, [fetchEvents]);
 
   // Add a new event
-  const addEvent = async (eventData: AddEventFormValues) => {
+  const addEvent = async (eventData: AddEventFormValues): Promise<boolean> => {
     try {
       console.log('[Calendar] Adding new event:', eventData);
       const newEvent = await addEventToSupabase(eventData, dogs);
@@ -93,7 +94,7 @@ const useSupabaseCalendarEvents = () => {
   };
 
   // Update an existing event
-  const updateEvent = async (eventId: string, eventData: AddEventFormValues) => {
+  const updateEvent = async (eventId: string, eventData: AddEventFormValues): Promise<boolean> => {
     try {
       console.log('[Calendar] Updating event:', eventId, eventData);
       const updatedEvent = await updateEventInSupabase(eventId, eventData, dogs);
@@ -127,7 +128,7 @@ const useSupabaseCalendarEvents = () => {
   };
 
   // Delete an event
-  const deleteEvent = async (eventId: string) => {
+  const deleteEvent = async (eventId: string): Promise<boolean> => {
     try {
       console.log('[Calendar] Deleting event:', eventId);
       const success = await deleteEventFromSupabase(eventId);

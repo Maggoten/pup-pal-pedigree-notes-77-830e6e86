@@ -1,16 +1,10 @@
 
-import React from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog';
-import PersonalSettings from './PersonalSettings';
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AccountSettings from './AccountSettings';
+import PersonalSettings from './PersonalSettings';
 import SharingSettings from './SharingSettings';
-import { useSettings } from '@/hooks/useSettings';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -18,44 +12,32 @@ interface SettingsDialogProps {
 }
 
 const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onOpenChange }) => {
-  const { settings, isLoading } = useSettings();
-
+  const [activeTab, setActiveTab] = useState('personal');
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Settings</DialogTitle>
+          <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
-        
-        {isLoading ? (
-          <div className="flex items-center justify-center p-6">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-          </div>
-        ) : settings ? (
-          <Tabs defaultValue="personal" className="w-full">
-            <TabsList className="grid grid-cols-3 mb-6">
+        <div className="pt-2 pb-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="personal">Personal</TabsTrigger>
-              <TabsTrigger value="account">Account</TabsTrigger>
               <TabsTrigger value="sharing">Sharing</TabsTrigger>
+              <TabsTrigger value="account">Account</TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="personal" className="space-y-4">
-              <PersonalSettings settings={settings} />
+            <TabsContent value="personal" className="py-6">
+              <PersonalSettings />
             </TabsContent>
-            
-            <TabsContent value="account" className="space-y-4">
-              <AccountSettings settings={settings} />
+            <TabsContent value="sharing" className="py-6">
+              <SharingSettings />
             </TabsContent>
-            
-            <TabsContent value="sharing" className="space-y-4">
-              <SharingSettings settings={settings} />
+            <TabsContent value="account" className="py-6">
+              <AccountSettings />
             </TabsContent>
           </Tabs>
-        ) : (
-          <div className="p-6 text-center text-muted-foreground">
-            Settings could not be loaded. Please try again later.
-          </div>
-        )}
+        </div>
       </DialogContent>
     </Dialog>
   );

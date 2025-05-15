@@ -27,11 +27,24 @@ export interface BreedingReminder {
   dogName?: string;
 }
 
+export interface Reminder {
+  id: string;
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+  dueDate: Date;
+  type: string;
+  relatedId?: string;
+  isCompleted?: boolean;
+  icon?: React.ReactNode;
+}
+
 export interface CustomReminderInput {
   title: string;
   description: string;
-  date: Date;
-  priority: 'low' | 'medium' | 'high';
-  type: string;
+  priority: 'high' | 'medium' | 'low';
+  type?: string;
   relatedId?: string;
+  due_date?: Date; // For API compatibility
+  dueDate?: Date; // For UI component compatibility
 }

@@ -8,7 +8,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIU
 
 const isMobile = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-// Initialize fetcher options with support for timeout
+// Initialize fetcher options for mobile optimization
 const fetchOptions: RequestInit = isMobile 
   ? { 
       // Mobile-specific options to reduce data usage
@@ -18,8 +18,13 @@ const fetchOptions: RequestInit = isMobile
     }
   : {};
 
+// Extended RequestInit type with timeout
+interface ExtendedRequestInit extends RequestInit {
+  timeout?: number;
+}
+
 // Create base fetch function with timeout capability
-const timeoutFetch: typeof fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+const timeoutFetch = (input: RequestInfo | URL, init?: ExtendedRequestInit): Promise<Response> => {
   // Default timeout is 30 seconds, but can be overridden
   const timeout = init?.timeout || 30000;
   
@@ -59,7 +64,7 @@ const globalFetchOverride = (url: RequestInfo | URL, init?: RequestInit): Promis
   return timeoutFetch(url, {
     ...init,
     timeout: 12000, // 12 seconds timeout
-  });
+  } as ExtendedRequestInit);
 };
 
 // Configure the client with optimized settings for mobile or desktop
@@ -77,9 +82,6 @@ const clientOptions = {
     params: {
       eventsPerSecond: isMobile ? 1 : 5
     }
-  },
-  db: {
-    schema: 'public'
   }
 };
 

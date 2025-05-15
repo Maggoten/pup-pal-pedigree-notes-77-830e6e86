@@ -1,29 +1,35 @@
 
 import { PostgrestFilterBuilder } from "@supabase/supabase-js";
 
-// Helper to safely cast parameters for Supabase queries
-export const castParam = <T>(param: T): T => {
-  return param as T;
-};
-
-// Helper to handle Supabase errors
-export const handleSupabaseError = (error: any, defaultMessage: string = "An error occurred"): string => {
-  if (error && typeof error === 'object' && 'message' in error) {
-    return error.message as string;
+/**
+ * Type-safe wrapper for filter operations in Supabase
+ * This helps prevent TypeScript errors when using string filters
+ */
+export const safeFilter = <T, K extends string = string>(
+  query: PostgrestFilterBuilder<T>,
+  column: K,
+  value: string | string[] | number | number[] | boolean | null
+) => {
+  // Handle array values
+  if (Array.isArray(value)) {
+    return query.in(column as any, value as any);
   }
-  return defaultMessage;
-};
-
-// Type-safe way to check if a result is a Supabase error
-export const isSupabaseError = (result: any): boolean => {
-  return result && typeof result === 'object' && 'error' in result && result.error === true;
-};
-
-// Type-safe wrapper for Supabase filter operations
-export function safeFilter<T, U>(
-  query: PostgrestFilterBuilder<T, U>,
-  column: string,
-  value: any
-): PostgrestFilterBuilder<T, U> {
+  // Handle single values
   return query.eq(column as any, value as any);
-}
+};
+
+/**
+ * Utility for determining if an error is a Supabase error
+ */
+export const isSupabaseError = (error: any): boolean => {
+  return error && typeof error === 'object' && 
+    'code' in error && 'message' in error && 
+    (error.details !== undefined || error.hint !== undefined);
+};
+
+/**
+ * Type guard to check if a response is an error
+ */
+export const isError = (data: any): boolean => {
+  return data && typeof data === 'object' && 'error' in data && data.error === true;
+};
