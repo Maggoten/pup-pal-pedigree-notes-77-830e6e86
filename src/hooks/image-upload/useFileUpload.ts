@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { uploadToStorage } from '@/utils/storage';
 import { getPublicUrl } from '@/utils/storage';
-import { processImageFile } from '@/utils/storage/imageUtils';
+import { processImageForUpload } from '@/utils/storage/imageUtils';
 import { v4 as uuidv4 } from 'uuid';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 
@@ -25,7 +25,7 @@ export const useFileUpload = (
     
     try {
       // Process image before upload (resize, compress)
-      const processedFile = await processImageFile(file);
+      const processedFile = await processImageForUpload(file);
       if (!processedFile) {
         console.error('Failed to process image file');
         return false;
@@ -49,23 +49,23 @@ export const useFileUpload = (
       // Upload the processed file
       const uploadResult = await uploadToStorage(filePath, processedFile);
       
-      if (uploadResult.error) {
+      if (uploadResult && uploadResult.error) {
         console.error('Error uploading file:', uploadResult.error);
-        setUploadError(uploadResult.error.message);
+        setUploadError(uploadResult.error.message || 'Upload failed');
         return false;
       }
       
-      if (!uploadResult.data) {
+      if (!uploadResult || !uploadResult.data) {
         console.error('Upload completed but no data returned');
         return false;
       }
       
       // Get the public URL for the uploaded file
-      const { data: urlData } = getPublicUrl(filePath);
+      const urlResult = getPublicUrl(filePath);
       
-      if (urlData && urlData.publicUrl) {
-        console.log('File uploaded successfully, URL:', urlData.publicUrl);
-        onImageChange(urlData.publicUrl);
+      if (urlResult && urlResult.data && urlResult.data.publicUrl) {
+        console.log('File uploaded successfully, URL:', urlResult.data.publicUrl);
+        onImageChange(urlResult.data.publicUrl);
         setUploadError(null);
         return true;
       } else {
