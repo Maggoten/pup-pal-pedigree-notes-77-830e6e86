@@ -1,5 +1,5 @@
 
-import { StorageError } from "@supabase/storage-js";
+import { StorageError } from '@supabase/storage-js';
 
 /**
  * Type guard for response objects that have an error property
@@ -42,6 +42,17 @@ export const formatStorageError = (error: unknown): string => {
     if ('message' in error && typeof (error as any).message === 'string') {
       return (error as any).message;
     }
+    
+    // Check for specific Supabase error patterns
+    if ('error' in error && typeof (error as any).error === 'object' && 
+        'message' in (error as any).error) {
+      return (error as any).error.message;
+    }
+    
+    if ('error' in error && typeof (error as any).error === 'string') {
+      return (error as any).error;
+    }
+    
     return JSON.stringify(error);
   }
   return 'Unknown error occurred';

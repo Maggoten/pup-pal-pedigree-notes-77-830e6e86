@@ -1,51 +1,48 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { BUCKET_NAME } from '../config';
+import { fetchWithRetry } from '@/utils/fetchUtils';
 
 /**
- * Checks if the storage bucket exists and is accessible
+ * Check if the storage bucket exists and is accessible
+ * @returns Promise resolving to true if bucket exists and is accessible
  */
 export const checkBucketExists = async (): Promise<boolean> => {
   try {
-    const { data, error } = await supabase.storage.getBucket(BUCKET_NAME);
+    console.log(`Checking if bucket '${BUCKET_NAME}' exists and is accessible...`);
     
-    if (error) {
-      console.error(`Storage bucket check failed for ${BUCKET_NAME}:`, error);
-      return false;
-    }
-    
-    return !!data;
-  } catch (error) {
-    console.error(`Error checking bucket ${BUCKET_NAME}:`, error);
-    return false;
-  }
-};
-
-/**
- * Creates a storage bucket if it doesn't already exist
- */
-export const createBucketIfNotExists = async (): Promise<boolean> => {
-  try {
-    // First check if the bucket already exists
-    const bucketExists = await checkBucketExists();
-    
-    if (bucketExists) {
+    try {
+      // Using our retry utility for more reliable bucket checking
+      const result = await fetchWithRetry(
+        () => supabase.storage.from(BUCKET_NAME).list('', { limit: 1 }),
+        { 
+          maxRetries: 2, 
+          initialDelay: 1000,
+          onRetry: (attempt) => {
+            console.log(`Bucket check retry attempt ${attempt}`);
+          }
+        }
+      );
+      
+      if (result.error) {
+        console.error(`Bucket '${BUCKET_NAME}' check failed:`, result.error);
+        // Log more details about the error for troubleshooting
+        console.error('Error details:', {
+          message: result.error.message || 'Unknown error',
+          status: result.error.status || 'unknown',
+          details: result.error.details || 'none'
+        });
+        return false;
+      }
+      
+      console.log(`Bucket '${BUCKET_NAME}' exists and is accessible, can list files:`, result.data);
       return true;
-    }
-    
-    // Create the bucket if it doesn't exist
-    const { error } = await supabase.storage.createBucket(BUCKET_NAME, {
-      public: true
-    });
-    
-    if (error) {
-      console.error(`Failed to create bucket ${BUCKET_NAME}:`, error);
+    } catch (listError) {
+      console.error(`Error or timeout when listing bucket '${BUCKET_NAME}' contents:`, listError);
       return false;
     }
-    
-    return true;
-  } catch (error) {
-    console.error(`Error creating bucket ${BUCKET_NAME}:`, error);
+  } catch (err) {
+    console.error(`Error in bucket '${BUCKET_NAME}' verification:`, err);
     return false;
   }
 };

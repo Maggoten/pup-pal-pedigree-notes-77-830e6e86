@@ -1,13 +1,14 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { UploadIcon, XIcon, Loader2 } from 'lucide-react';
+import { UploadIcon, XIcon, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useImageUpload } from '@/hooks/image-upload';
 import ImagePreviewDisplay from './image-upload/ImagePreviewDisplay';
 import { toast } from '@/components/ui/use-toast';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { uploadStateManager } from '@/components/AuthGuard';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface ImageUploaderProps {
   currentImage?: string;
@@ -23,13 +24,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const { user, isAuthReady } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isInitialRender, setIsInitialRender] = useState(true);
+  const [visibleError, setVisibleError] = useState<string | null>(null);
   
   const PLACEHOLDER_IMAGE_PATH = '/placeholder.svg';
   const isPlaceholder = !currentImage || currentImage === PLACEHOLDER_IMAGE_PATH;
   const platform = getPlatformInfo();
 
   // Pass the current user ID to useImageUpload
-  const { isUploading, uploadImage, removeImage } = useImageUpload({
+  const { isUploading, uploadImage, removeImage, lastError, uploadRetryCount } = useImageUpload({
     user_id: user?.id,
     onImageChange: (url: string) => {
       console.log('ImageUploader: Image change callback received URL:', 
@@ -37,6 +39,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       onImageChange(url);
     }
   });
+
+  // Show errors in the UI
+  useEffect(() => {
+    if (lastError) {
+      setVisibleError(lastError);
+      console.error('Image upload error:', lastError);
+    } else {
+      setVisibleError(null);
+    }
+  }, [lastError]);
 
   // Track upload state in the global manager
   useEffect(() => {
@@ -94,11 +106,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     
     try {
       console.log('ImageUploader: Calling uploadImage function...');
+      setVisibleError(null); // Clear any previous errors
       // Set a flag to prevent auth redirect during upload
       await uploadImage(file);
       console.log('ImageUploader: Upload function completed');
     } catch (error) {
-      console.error('ImageUploader: Image upload error:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('ImageUploader: Image upload error caught:', errorMessage);
+      setVisibleError(errorMessage);
       
       // Show more specific error messages based on platform
       if (platform.ios) {
@@ -122,7 +137,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       } else {
         toast({
           title: "Upload Failed",
-          description: "There was a problem uploading your image. Please try again.",
+          description: errorMessage || "There was a problem uploading your image. Please try again.",
           variant: "destructive"
         });
       }
@@ -171,9 +186,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     console.log('ImageUploader: Removing image:', 
                 currentImage.substring(0, 50) + (currentImage.length > 50 ? '...' : ''));
     try {
+      setVisibleError(null); // Clear any previous errors
       await removeImage(currentImage, user.id);
     } catch (error) {
-      console.error('ImageUploader: Image remove error:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('ImageUploader: Image remove error:', errorMessage);
+      setVisibleError(errorMessage);
       toast({
         title: "Remove Failed",
         description: "Failed to remove image. Please try again.",
@@ -186,14 +204,18 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
-  // Remove mobile help warning completely by returning null
-  const renderMobileHelp = () => {
-    return null;
-  };
-
   return (
     <div className={className}>
       <ImagePreviewDisplay imageUrl={currentImage} />
+      
+      {visibleError && (
+        <Alert variant="destructive" className="mt-2 mb-2 py-2 text-sm">
+          <AlertCircle className="h-4 w-4 mr-2" />
+          <AlertDescription className="text-xs">
+            {visibleError}
+          </AlertDescription>
+        </Alert>
+      )}
       
       <div className="mt-2 flex gap-2">
         <Button 
@@ -229,7 +251,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         )}
       </div>
       
-      {renderMobileHelp()}
+      {uploadRetryCount > 0 && (
+        <p className="text-xs text-muted-foreground mt-1">
+          Retrying upload... ({uploadRetryCount})
+        </p>
+      )}
       
       <input
         type="file"

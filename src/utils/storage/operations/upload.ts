@@ -57,27 +57,36 @@ export const uploadToStorage = async (
   const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
   
   try {
-    // Verify session and bucket exist
-    try {
-      // For mobile, skip session validation errors
-      await verifySession({
-        skipThrow: platform.mobile || platform.safari
-        // Remove the platform property as it's not in the VerifySessionOptions type
+    // First verify auth session
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+    // Make the session verification error more visible for debugging
+    if (sessionError) {
+      console.error('Session error before upload:', sessionError);
+      throw new Error(`Authentication error: ${sessionError.message || 'No active session'}`);
+    }
+    
+    if (!sessionData.session) {
+      console.error('Upload failed: No active session');
+      throw new Error(STORAGE_ERRORS.NO_SESSION);
+    } else {
+      console.log('Using active session for upload:', {
+        userId: sessionData.session.user.id,
+        expiresAt: sessionData.session.expires_at
       });
-      
+    }
+    
+    // Verify bucket exists before attempting upload
+    try {
       const bucketExists = await checkBucketExists();
       if (!bucketExists) {
         console.error(`Upload failed: Bucket '${BUCKET_NAME}' not found or not accessible`);
         throw new Error(STORAGE_ERRORS.BUCKET_NOT_FOUND(BUCKET_NAME));
       }
-    } catch (error) {
-      // For mobile, proceed even if pre-checks fail
-      if (platform.mobile || platform.safari) {
-        console.log('Pre-upload checks failed on mobile, but proceeding with upload anyway:', error);
-      } else {
-        console.error('Pre-upload checks failed:', error);
-        throw error;
-      }
+    } catch (bucketError) {
+      console.error('Error checking bucket:', bucketError);
+      // Convert to a readable error message
+      throw new Error(`Storage bucket error: ${bucketError instanceof Error ? bucketError.message : 'Could not access storage bucket'}`);
     }
     
     // Log attempt for debugging
@@ -100,38 +109,25 @@ export const uploadToStorage = async (
       async () => {
         console.log(`Making upload request for file: ${fileName} (${fileSizeMB}MB)`);
         
-        // Special handling for Safari and mobile devices
-        if (platform.mobile || platform.safari) {
-          console.log('Using mobile-optimized upload approach');
+        // Custom timeout for mobile uploads
+        const uploadPromise = supabase.storage
+          .from(BUCKET_NAME)
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: true
+          });
           
-          // Use a custom timeout for mobile uploads
-          const uploadPromise = supabase.storage
-            .from(BUCKET_NAME)
-            .upload(fileName, file, {
-              cacheControl: '3600',
-              upsert: true
-            });
-            
-          // Race against a timeout - Increased timeout for mobile
-          // Get from config but ensure it's at least 60 seconds on mobile
-          const configTimeout = getStorageTimeout();
-          const timeout = platform.mobile ? Math.max(configTimeout, 60000) : configTimeout;
-          console.log(`Setting timeout for upload: ${timeout}ms`);
-          
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error(`Upload timeout after ${timeout}ms`)), timeout)
-          );
-          
-          return Promise.race([uploadPromise, timeoutPromise]);
-        } else {
-          // Standard upload for desktop browsers
-          return supabase.storage
-            .from(BUCKET_NAME)
-            .upload(fileName, file, {
-              cacheControl: '3600',
-              upsert: true
-            });
-        }
+        // Race against a timeout - Increased timeout for mobile
+        // Get from config but ensure it's at least 60 seconds on mobile
+        const configTimeout = getStorageTimeout();
+        const timeout = platform.mobile ? Math.max(configTimeout, 60000) : configTimeout;
+        console.log(`Setting timeout for upload: ${timeout}ms`);
+        
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error(`Upload timeout after ${timeout}ms`)), timeout)
+        );
+        
+        return Promise.race([uploadPromise, timeoutPromise]);
       },
       { 
         maxRetries,
@@ -155,6 +151,12 @@ export const uploadToStorage = async (
               console.log('Will not retry 400 Invalid Request error');
               return false;
             }
+            // Don't retry permission errors
+            if (('message' in error && typeof (error as any).message === 'string' && 
+                ((error as any).message.includes('permission') || (error as any).message.includes('not authorized')))) {
+              console.log('Will not retry permission-related error');
+              return false;
+            }
           }
           console.log('Will retry upload');
           return true;
@@ -170,12 +172,21 @@ export const uploadToStorage = async (
     logUploadDetails(fileName, file, result, startTime);
     
     if (hasError(result) && result.error) {
+      // Detailed error logging
       console.error(`Upload error to bucket '${BUCKET_NAME}':`, result.error);
+      console.error('Error details:', {
+        message: safeGetErrorProperty(result.error, 'message', 'Unknown error'),
+        statusCode: safeGetErrorProperty(result.error, 'statusCode', 'unknown'),
+        status: safeGetErrorProperty(result.error, 'status', 'unknown'),
+        error: safeGetErrorProperty(result.error, 'error', 'unknown')
+      });
       
       // Enhanced error reporting
       let errorMessage = formatStorageError(result.error);
       if (platform.safari && errorMessage.includes('timeout')) {
         errorMessage = 'Upload timed out. Please try a smaller file or switch browsers.';
+      } else if (errorMessage.includes('not authorized')) {
+        errorMessage = 'You are not authorized to upload to this storage bucket. Please check permissions.';
       }
       
       return createStorageError(errorMessage);
@@ -186,8 +197,17 @@ export const uploadToStorage = async (
   } catch (error) {
     console.error(`Upload error to bucket '${BUCKET_NAME}':`, error);
     
-    // Enhanced error reporting for mobile/Safari
+    // More descriptive error messages
     let errorMessage = formatStorageError(error);
+    if (typeof error === 'object' && error !== null) {
+      if ('code' in error && (error as any).code === 'PGRST301') {
+        errorMessage = 'Storage permissions denied. Please check bucket policies.';
+      } else if ('code' in error && (error as any).code === '42501') { 
+        errorMessage = 'Database permissions error. You may not have the right access level.';
+      }
+    }
+    
+    // Platform-specific error messages
     if (platform.mobile || platform.safari) {
       if (errorMessage.includes('timeout')) {
         errorMessage = `${platform.device} upload timed out. Try a smaller file (under 2MB).`;

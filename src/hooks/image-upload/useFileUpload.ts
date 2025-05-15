@@ -21,6 +21,13 @@ export const useFileUpload = (
   const performUpload = async (file: File): Promise<boolean> => {
     if (!file) {
       console.error('No file provided for upload');
+      setUploadError('No file provided for upload');
+      return false;
+    }
+    
+    if (!userId) {
+      console.error('No user ID provided for upload');
+      setUploadError('User authentication required');
       return false;
     }
     
@@ -29,6 +36,7 @@ export const useFileUpload = (
       const processedFile = await processImageForUpload(file);
       if (!processedFile) {
         console.error('Failed to process image file');
+        setUploadError('Failed to process image file');
         return false;
       }
       
@@ -51,13 +59,15 @@ export const useFileUpload = (
       const uploadResult = await uploadToStorage(filePath, processedFile) as UploadResult;
       
       if (uploadResult && uploadResult.error) {
+        const errorMessage = uploadResult.error.message || 'Unknown upload error';
         console.error('Error uploading file:', uploadResult.error);
-        setUploadError(uploadResult.error.message || 'Upload failed');
+        setUploadError(errorMessage);
         return false;
       }
       
       if (!uploadResult || !uploadResult.data) {
         console.error('Upload completed but no data returned');
+        setUploadError('Upload completed but no data returned');
         return false;
       }
       
@@ -70,12 +80,15 @@ export const useFileUpload = (
         setUploadError(null);
         return true;
       } else {
-        console.error('Failed to get public URL for uploaded file');
+        const errorMsg = 'Failed to get public URL for uploaded file';
+        console.error(errorMsg);
+        setUploadError(errorMsg);
         return false;
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown upload error';
       console.error('Error in file upload process:', error);
-      setUploadError(error instanceof Error ? error.message : 'Unknown upload error');
+      setUploadError(errorMessage);
       return false;
     }
   };
