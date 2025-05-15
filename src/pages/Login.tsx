@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthTabs } from '@/components/auth/AuthTabs';
-import { BreedingJourneyLogo } from '@/components/ui/logo';
+import AuthTabs from '@/components/auth/AuthTabs'; // Fixed import
+import { BreedingJourneyLogo } from '@/components/BreedingJourneyLogo'; // Corrected import
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ const Login: React.FC = () => {
             <BreedingJourneyLogo />
           </div>
           
-          <AuthTabs />
+          <AuthTabs onLoginSuccess={handleLoginSuccess} />
           
         </div>
       </div>

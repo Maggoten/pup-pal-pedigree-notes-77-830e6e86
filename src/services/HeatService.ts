@@ -1,50 +1,62 @@
 
-import { Dog } from '@/types/dogs';
 import { supabase } from '@/integrations/supabase/client';
-import { safeFilter } from '@/utils/supabaseTypeUtils';
+import { addDays } from 'date-fns';
+import { Dog } from '@/types/dogs';
+import { toast } from '@/components/ui/use-toast';
 
 export class HeatService {
-  /**
-   * Adds a heat date to a dog's heatHistory
-   * @param dogId The ID of the dog
-   * @param date The date of the heat
-   */
-  static async addHeatDate(dogId: string, date: Date): Promise<boolean> {
+  static async recordHeatDate(dogId: string, date: Date): Promise<boolean> {
     try {
-      // Get current heat history
-      const { data: dog, error } = await safeFilter(
-        supabase.from('dogs').select('heatHistory'),
-        'id',
-        dogId
-      ).single();
+      // Get the dog's current data
+      const { data: dog, error: fetchError } = await supabase
+        .from('dogs')
+        .select('*')
+        .eq('id', dogId)
+        .single();
+        
+      if (fetchError) {
+        console.error('Error fetching dog for heat record:', fetchError);
+        return false;
+      }
       
-      if (error) throw error;
-      
-      // Create new heat history entry
+      // Create the new heat entry
       const newHeatEntry = {
         date: date.toISOString(),
         recorded: new Date().toISOString()
       };
       
-      // Update dog with new heat history
-      let heatHistory = [];
+      // Get the current heat history or initialize empty array
+      let heatHistory = dog.heatHistory || [];
       
-      // Check if heatHistory exists and is an array
-      if (dog && dog.heatHistory && Array.isArray(dog.heatHistory)) {
-        heatHistory = [...dog.heatHistory];
+      // Ensure it's an array we can work with
+      if (typeof heatHistory === 'string') {
+        try {
+          heatHistory = JSON.parse(heatHistory);
+        } catch (e) {
+          heatHistory = [];
+        }
       }
       
-      // Add new entry (spread operator doesn't work correctly with JSON arrays in Supabase)
+      // If it's still not an array, initialize it
+      if (!Array.isArray(heatHistory)) {
+        heatHistory = [];
+      }
+      
+      // Add the new entry
       heatHistory.push(newHeatEntry);
       
-      // Update dog with new heat history
-      const { error: updateError } = await safeFilter(
-        supabase.from('dogs').update({ heatHistory }),
-        'id',
-        dogId
-      );
-      
-      if (updateError) throw updateError;
+      // Update the dog with the new heat history
+      const { error: updateError } = await supabase
+        .from('dogs')
+        .update({
+          heatHistory: heatHistory
+        })
+        .eq('id', dogId);
+        
+      if (updateError) {
+        console.error('Error updating dog heat history:', updateError);
+        return false;
+      }
       
       return true;
     } catch (error) {
@@ -53,40 +65,114 @@ export class HeatService {
     }
   }
   
-  /**
-   * Gets the heat history for a dog
-   * @param dogId The ID of the dog
-   */
-  static async getHeatHistory(dogId: string): Promise<any[]> {
+  static async deleteHeatDate(dogId: string, date: string): Promise<boolean> {
     try {
-      const { data: dog, error } = await safeFilter(
-        supabase.from('dogs').select('heatHistory'),
-        'id',
-        dogId
-      ).single();
-      
-      if (error) throw error;
-      
-      if (dog && dog.heatHistory && Array.isArray(dog.heatHistory)) {
-        return dog.heatHistory;
+      // Get the dog's current data
+      const { data: dog, error: fetchError } = await supabase
+        .from('dogs')
+        .select('*')
+        .eq('id', dogId)
+        .single();
+        
+      if (fetchError) {
+        console.error('Error fetching dog for heat deletion:', fetchError);
+        return false;
       }
       
-      return [];
+      // Get the current heat history
+      let heatHistory = dog.heatHistory || [];
+      
+      // Ensure it's an array
+      if (typeof heatHistory === 'string') {
+        try {
+          heatHistory = JSON.parse(heatHistory);
+        } catch (e) {
+          heatHistory = [];
+        }
+      }
+      
+      // If it's still not an array, there's nothing to delete
+      if (!Array.isArray(heatHistory)) {
+        return false;
+      }
+      
+      // Filter out the entry with the matching date
+      const filteredHistory = heatHistory.filter(entry => entry.date !== date);
+      
+      // Update the dog with the filtered heat history
+      const { error: updateError } = await supabase
+        .from('dogs')
+        .update({
+          heatHistory: filteredHistory
+        })
+        .eq('id', dogId);
+        
+      if (updateError) {
+        console.error('Error updating dog heat history after deletion:', updateError);
+        return false;
+      }
+      
+      return true;
     } catch (error) {
-      console.error('Error getting heat history:', error);
-      return [];
+      console.error('Error deleting heat date:', error);
+      return false;
     }
   }
-  
-  /**
-   * Cleans up old heat entries (more than 30 days old)
-   */
-  static async cleanupOldHeatEntries(): Promise<boolean> {
+
+  // Add the missing method that was referenced in PlannedLittersContent.tsx
+  static async deleteOldHeatEntries(): Promise<boolean> {
     try {
-      // Call the Supabase function to clean up old heat entries
-      const { error } = await supabase.rpc('delete_old_heat_entries');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
       
-      if (error) throw error;
+      // Get all dogs for the current user
+      const { data: dogs, error } = await supabase
+        .from('dogs')
+        .select('*')
+        .eq('owner_id', user.id);
+        
+      if (error) {
+        console.error('Error fetching dogs for heat cleanup:', error);
+        return false;
+      }
+      
+      // Get cutoff date (e.g., 1 year ago)
+      const cutoffDate = addDays(new Date(), -365).toISOString();
+      
+      // Process each dog
+      const updates = dogs.map(dog => {
+        if (!dog.heatHistory || !Array.isArray(dog.heatHistory)) {
+          return null; // Skip dogs without heat history
+        }
+        
+        // Filter heat entries newer than cutoff date
+        const filteredHistory = dog.heatHistory.filter(
+          entry => entry.date > cutoffDate
+        );
+        
+        // Only update if there's a change
+        if (filteredHistory.length < dog.heatHistory.length) {
+          return supabase
+            .from('dogs')
+            .update({
+              heatHistory: filteredHistory
+            })
+            .eq('id', dog.id);
+        }
+        
+        return null;
+      });
+      
+      // Execute all updates that need to be performed
+      const validUpdates = updates.filter(update => update !== null);
+      if (validUpdates.length > 0) {
+        await Promise.all(validUpdates);
+        
+        toast({
+          title: "Heat Records Cleaned",
+          description: `Removed old heat records older than one year.`,
+        });
+      }
       
       return true;
     } catch (error) {

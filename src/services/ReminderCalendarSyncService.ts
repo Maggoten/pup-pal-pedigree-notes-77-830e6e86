@@ -16,7 +16,7 @@ interface CalendarEvent {
   dog_id?: string;
   dog_name?: string;
   notes?: string;
-  user_id?: string;
+  user_id: string; // Make this required to match Supabase expectations
 }
 
 /**
@@ -175,7 +175,7 @@ export class ReminderCalendarSyncService {
    * @param heat The upcoming heat data with additional properties
    * @returns boolean indicating success
    */
-  static async syncHeatCycleEvents(heat: UpcomingHeat & { dogId?: string; dogName?: string; date?: Date }): Promise<boolean> {
+  static async syncHeatCycleEvents(heat: UpcomingHeat): Promise<boolean> {
     try {
       // Make sure dog exists and has expected dates
       if (!heat.dog || !heat.expectedDate) {
@@ -194,8 +194,8 @@ export class ReminderCalendarSyncService {
       }
       
       // Create the main heat cycle event
-      const dogId = heat.dogId || dog.id;
-      const dogName = heat.dogName || dog.name;
+      const dogId = dog.id;
+      const dogName = dog.name;
       const preHeatDate = expectedDate;
       
       const preHeatEvent: CalendarEvent = {

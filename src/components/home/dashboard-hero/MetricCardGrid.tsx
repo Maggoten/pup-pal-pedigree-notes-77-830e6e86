@@ -1,12 +1,6 @@
 
 import React from 'react';
-import { 
-  Bell,
-  Calendar,
-  PawPrint, 
-  StethoscopeIcon 
-} from 'lucide-react';
-import MetricCard from './MetricCard';
+import MetricCard, { IconType } from './MetricCard';
 
 export interface MetricCardGridProps {
   reminderCount: number;
