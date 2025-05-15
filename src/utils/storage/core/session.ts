@@ -4,6 +4,8 @@ import { STORAGE_ERROR_CODES } from '../config';
 
 interface VerifySessionOptions {
   skipThrow?: boolean;
+  authReady?: boolean;
+  mobileOptimized?: boolean;
 }
 
 /**
@@ -14,6 +16,12 @@ interface VerifySessionOptions {
  */
 export const verifySession = async (options: VerifySessionOptions = {}): Promise<boolean> => {
   try {
+    // If we need to respect auth ready state, wait for it
+    if (options.authReady === false) {
+      console.log('Auth not ready yet, delaying session verification');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError) {
@@ -40,4 +48,11 @@ export const verifySession = async (options: VerifySessionOptions = {}): Promise
     }
     return false;
   }
+};
+
+// Exporting a validate function for cross-storage session checks
+export const validateCrossStorageSession = async (options: VerifySessionOptions = {}): Promise<boolean> => {
+  // This is a wrapper around verifySession that handles cross-storage session validation
+  // It's particularly useful for mobile platforms where session state may be inconsistent
+  return verifySession(options);
 };

@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { BUCKET_NAME } from '../config';
 import { fetchWithRetry } from '@/utils/fetchUtils';
+import { safeGetErrorProperty } from './errors';
 
 /**
  * Check if the storage bucket exists and is accessible
@@ -26,11 +27,11 @@ export const checkBucketExists = async (): Promise<boolean> => {
       
       if (result.error) {
         console.error(`Bucket '${BUCKET_NAME}' check failed:`, result.error);
-        // Log more details about the error for troubleshooting
+        // Log more details about the error for troubleshooting using safeGetErrorProperty
         console.error('Error details:', {
-          message: result.error.message || 'Unknown error',
-          status: result.error.status || 'unknown',
-          details: result.error.details || 'none'
+          message: safeGetErrorProperty(result.error, 'message', 'Unknown error'),
+          status: safeGetErrorProperty(result.error, 'status', 'unknown'),
+          details: safeGetErrorProperty(result.error, 'details', 'none')
         });
         return false;
       }

@@ -44,7 +44,6 @@ export const useImageSessionCheck = () => {
     // Use the enhanced verifySession function with auth ready state and mobile awareness
     try {
       return verifySession({
-        respectAuthReady: true,
         authReady: isAuthReady,
         // Always skip throwing errors on mobile
         skipThrow: isMobile,
