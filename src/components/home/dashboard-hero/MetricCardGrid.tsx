@@ -1,7 +1,7 @@
 
 import React from 'react';
 import MetricCard from './MetricCard';
-import { Bell, Calendar, Heart, PawPrint, Dog } from 'lucide-react';
+import { Calendar, Check, Dog, Stethoscope } from 'lucide-react';
 
 interface MetricCardGridProps {
   reminderCount: number;
@@ -17,37 +17,33 @@ const MetricCardGrid: React.FC<MetricCardGridProps> = ({
   recentLittersCount,
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       <MetricCard 
-        icon={<Bell className="h-7 w-7 text-warmgreen-700" />}
         title="Reminders" 
-        count={reminderCount}
-        description="Active tasks & reminders" 
-        className="bg-white border border-warmbeige-200 hover:shadow-md transition-all"
+        value={reminderCount} 
+        icon={<Check className="h-4 w-4" />} 
+        linkTo="/reminders"
       />
       
       <MetricCard 
-        icon={<Calendar className="h-7 w-7 text-warmgreen-700" />}
         title="Planned Litters" 
-        count={plannedLittersCount}
-        description="Upcoming breedings" 
-        className="bg-white border border-warmbeige-200 hover:shadow-md transition-all"
+        value={plannedLittersCount} 
+        icon={<Calendar className="h-4 w-4" />} 
+        linkTo="/planned-litters"
       />
       
       <MetricCard 
-        icon={<Heart className="h-7 w-7 text-warmgreen-700" />}
         title="Active Pregnancies" 
-        count={activePregnanciesCount}
-        description="Currently pregnant dogs" 
-        className="bg-white border border-warmbeige-200 hover:shadow-md transition-all"
+        value={activePregnanciesCount} 
+        icon={<Stethoscope className="h-4 w-4" />} 
+        linkTo="/pregnancy"
       />
       
       <MetricCard 
-        icon={<PawPrint className="h-7 w-7 text-warmgreen-700" />}
         title="Recent Litters" 
-        count={recentLittersCount}
-        description="Litters in the last 3 months" 
-        className="bg-white border border-warmbeige-200 hover:shadow-md transition-all"
+        value={recentLittersCount} 
+        icon={<Dog className="h-4 w-4" />} 
+        linkTo="/my-litters"
       />
     </div>
   );

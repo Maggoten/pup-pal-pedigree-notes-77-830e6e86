@@ -6,22 +6,13 @@ interface DecorativePawprintsProps {
   className?: string;
 }
 
-const DecorativePawprints: React.FC<DecorativePawprintsProps> = ({ className = "" }) => {
+const DecorativePawprints: React.FC<DecorativePawprintsProps> = ({ className }) => {
   return (
     <div className={className}>
-      {/* Pattern of pawprints */}
-      <div className="flex flex-wrap gap-10">
-        <PawPrint className="h-12 w-12 text-warmgreen-700/30 transform rotate-12" />
-        <PawPrint className="h-10 w-10 text-warmgreen-700/20 transform -rotate-45" />
-        <PawPrint className="h-14 w-14 text-warmgreen-700/20 transform rotate-90" />
-        <PawPrint className="h-8 w-8 text-warmgreen-700/30 transform -rotate-12" />
-        <PawPrint className="h-12 w-12 text-warmgreen-700/20 transform rotate-45" />
-        
-        <PawPrint className="h-10 w-10 text-warmgreen-700/10 transform -rotate-12" />
-        <PawPrint className="h-16 w-16 text-warmgreen-700/20 transform rotate-135" />
-        <PawPrint className="h-9 w-9 text-warmgreen-700/20 transform -rotate-90" />
-        <PawPrint className="h-11 w-11 text-warmgreen-700/30 transform rotate-23" />
-      </div>
+      {/* Reduced size of decorative pawprints */}
+      <PawPrint className="h-16 w-16 text-warmgreen-700 transform rotate-45 absolute top-4 right-16" />
+      <PawPrint className="h-12 w-12 text-warmgreen-700 transform -rotate-12 absolute top-12 right-4" />
+      <PawPrint className="h-10 w-10 text-warmgreen-700 transform rotate-20 absolute top-20 right-24" />
     </div>
   );
 };

@@ -1,31 +1,35 @@
 
-import React, { ReactNode } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 interface MetricCardProps {
-  icon: ReactNode;
   title: string;
-  count: number;
-  description: string;
-  className?: string;
+  value: number;
+  icon: React.ReactNode;
+  linkTo?: string;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({
-  icon,
   title,
-  count,
-  description,
-  className = "",
+  value,
+  icon,
+  linkTo,
 }) => {
-  return (
-    <div className={`p-4 rounded-lg flex flex-col items-center transform transition-transform hover:scale-105 ${className}`}>
-      <div className="bg-warmbeige-100 p-3 rounded-full mb-3">
+  const content = (
+    <div className="bg-white/70 hover:bg-white/90 transition-colors rounded-lg p-3 flex flex-col items-center shadow-sm">
+      <div className="rounded-full bg-warmbeige-100 p-2 mb-1">
         {icon}
       </div>
-      <h3 className="font-medium text-lg">{title}</h3>
-      <span className="text-2xl font-bold text-warmgreen-600 mt-1">{count}</span>
-      <p className="text-xs text-muted-foreground mt-1 text-center">{description}</p>
+      <span className="text-lg font-semibold text-warmgreen-700">{value}</span>
+      <span className="text-xs text-warmgreen-600">{title}</span>
     </div>
   );
+
+  if (linkTo) {
+    return <Link to={linkTo}>{content}</Link>;
+  }
+
+  return content;
 };
 
 export default MetricCard;
