@@ -1,6 +1,8 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { validateCrossStorageSession } from '@/utils/storage/core/session';
 import { Dog } from '@/types/dogs';
+import { enrichDog } from '@/utils/dogUtils';
 
 export const fetchDogs = async (): Promise<Dog[]> => {
   try {
@@ -21,7 +23,11 @@ export const fetchDogs = async (): Promise<Dog[]> => {
       throw new Error(error.message);
     }
 
-    return data || [];
+    // Process the dogs data using enrichDog to ensure it matches the Dog type
+    const enrichedDogs = Array.isArray(data) ? data.map(dog => enrichDog(dog)) : [];
+    console.log(`Enriched ${enrichedDogs.length} dogs with required fields`);
+    
+    return enrichedDogs;
   } catch (error) {
     console.error('Error in fetchDogs:', error);
     throw error;

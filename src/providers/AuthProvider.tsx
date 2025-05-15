@@ -1,8 +1,22 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/auth-helpers-react';
 import { verifySession } from '@/utils/storage';
+
+// Define User type directly since we're not importing from auth-helpers-react
+type User = {
+  id: string;
+  app_metadata: {
+    provider?: string;
+    [key: string]: any;
+  };
+  user_metadata: {
+    [key: string]: any;
+  };
+  aud: string;
+  created_at: string;
+  [key: string]: any;
+};
 
 interface AuthContextType {
   user: User | null;

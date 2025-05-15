@@ -46,7 +46,8 @@ export const useDogsQueries = (): UseDogsQueries => {
       
       try {
         console.log('Fetching dogs from service for user:', userId);
-        const data = await fetchDogs(userId);
+        // Remove the userId parameter as it's not expected in the fetchDogs function
+        const data = await fetchDogs();
         console.log(`Retrieved ${data.length} dogs for user ${userId}`);
         return data;
       } catch (err) {
