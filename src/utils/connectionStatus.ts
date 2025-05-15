@@ -85,7 +85,7 @@ export const startConnectionPing = (interval = 30000) => {
       
       clearTimeout(timeoutId);
       useConnectionStore.getState().setOnline(response.ok);
-    } catch (error) {
+    } catch (error: any) {
       // If fetch fails, we're probably offline
       if (error.name !== 'AbortError') {
         useConnectionStore.getState().setOnline(false);
@@ -119,5 +119,5 @@ export const useConnection = () => {
 // Initialize network monitoring
 export const initNetworkMonitoring = () => {
   setupConnectionListeners();
-  startConnectionPing();
+  return startConnectionPing();
 };
