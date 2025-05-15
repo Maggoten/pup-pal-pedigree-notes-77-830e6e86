@@ -5,6 +5,7 @@ import { getPublicUrl } from '@/utils/storage';
 import { processImageForUpload } from '@/utils/storage/imageUtils';
 import { v4 as uuidv4 } from 'uuid';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
+import { UploadResult } from './types';
 
 /**
  * Custom hook for handling file uploads to storage
@@ -47,7 +48,7 @@ export const useFileUpload = (
       console.log(`Upload initiated from ${platform.device} device`);
       
       // Upload the processed file
-      const uploadResult = await uploadToStorage(filePath, processedFile);
+      const uploadResult = await uploadToStorage(filePath, processedFile) as UploadResult;
       
       if (uploadResult && uploadResult.error) {
         console.error('Error uploading file:', uploadResult.error);
@@ -61,7 +62,7 @@ export const useFileUpload = (
       }
       
       // Get the public URL for the uploaded file
-      const urlResult = getPublicUrl(filePath);
+      const urlResult = getPublicUrl(filePath) as { data?: { publicUrl: string } };
       
       if (urlResult && urlResult.data && urlResult.data.publicUrl) {
         console.log('File uploaded successfully, URL:', urlResult.data.publicUrl);

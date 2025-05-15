@@ -9,7 +9,10 @@ export interface UseImageUploadProps {
 
 export interface UploadResult {
   data?: { path: string };
-  error?: unknown;
+  error?: {
+    message: string;
+    [key: string]: any;
+  };
 }
 
 export interface ImageUploadState {
