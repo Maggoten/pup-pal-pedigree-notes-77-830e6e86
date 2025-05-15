@@ -1,9 +1,10 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { verifySession } from '@/utils/storage';
 import { RegisterData, User } from '@/types/auth';
+import { clearAuthStorage } from '@/services/auth/storageService';
+import { toast } from '@/components/ui/use-toast';
 
 // Define SupabaseUser type for internal use
 type SupabaseUser = {
@@ -70,10 +71,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     };
   };
 
+  // Helper to reset all auth state
+  const resetAuthState = () => {
+    console.log("[AuthProvider] Resetting auth state");
+    setUser(null);
+    setSupabaseUser(null);
+    setSession(null);
+    setIsLoggedIn(false);
+    // Keep isAuthReady true to avoid loading state
+  };
+
   useEffect(() => {
     const getInitialSession = async () => {
       setIsLoading(true);
       try {
+        console.log("[AuthProvider] Getting initial session");
         // Get the initial session - critical to break out of "checking authentication" state
         const { data: { session } } = await supabase.auth.getSession();
 
@@ -84,6 +96,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         
         // Always set isAuthReady to true even if no session
         setIsAuthReady(true);
+        console.log("[AuthProvider] Auth initialized, session exists:", !!session);
       } catch (error) {
         console.error("Failed to get initial session:", error);
         // Important: still mark auth as ready even if there's an error
@@ -99,11 +112,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     // Subscribe to auth state changes separately from initial session check
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log(`Auth event: ${event}`);
-        setSupabaseUser(session?.user || null);
-        setUser(mapSupabaseUser(session?.user || null));
-        setSession(session || null);
-        setIsLoggedIn(!!session);
+        console.log(`[AuthProvider] Auth event: ${event}`);
+        
+        if (event === 'SIGNED_OUT') {
+          console.log('[AuthProvider] User signed out, resetting state');
+          resetAuthState();
+          // Consider calling clearAuthStorage() here - moved to signOut method
+        } else {
+          setSupabaseUser(session?.user || null);
+          setUser(mapSupabaseUser(session?.user || null));
+          setSession(session || null);
+          setIsLoggedIn(!!session);
+        }
         
         // Ensure auth is marked as ready on any auth event
         if (!isAuthReady) setIsAuthReady(true);
@@ -191,19 +211,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  // Logout method to match expected interface
+  // Enhanced logout method to match expected interface
   const logout = async (): Promise<void> => {
     return signOut();
   };
 
+  // Enhanced signOut method with better state cleanup
   const signOut = async () => {
+    console.log('[AuthProvider] Beginning signOut process');
     setIsLoading(true);
     try {
+      // First, reset our internal state
+      resetAuthState();
+      
+      // Clear all auth-related storage items
+      await clearAuthStorage();
+      
+      // Finally, tell Supabase to sign out
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      if (error) {
+        console.error('[AuthProvider] Supabase signOut error:', error);
+        toast({
+          title: "Sign out issue",
+          description: "There was a problem signing out. Please try again.",
+          variant: "destructive"
+        });
+        throw error;
+      }
+      
+      console.log('[AuthProvider] Supabase signOut completed successfully');
     } catch (error: any) {
-      alert(error.error_description || error.message);
+      console.error('[AuthProvider] Error during signOut:', error);
     } finally {
+      // Ensure we're not in loading state regardless of the outcome
       setIsLoading(false);
     }
   };

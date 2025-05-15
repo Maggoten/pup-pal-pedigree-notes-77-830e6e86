@@ -36,6 +36,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const [delayComplete, setDelayComplete] = useState(false);
   const platform = getPlatformInfo();
   const isMobile = platform.mobile || platform.safari;
+  const [previouslyLoggedIn, setPreviouslyLoggedIn] = useState(false);
 
   // Check if user is on the login page
   const isLoginPage = location.pathname === '/login';
@@ -48,6 +49,17 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   
   // Maximum time to wait for auth before assuming there's a problem
   const [authTimeout, setAuthTimeout] = useState(false);
+
+  // Track login state changes to detect logouts
+  useEffect(() => {
+    if (previouslyLoggedIn && !isLoggedIn && isAuthReady) {
+      console.log('[AuthGuard] Detected logout, user was logged in but now is not');
+      // User was logged in but isn't anymore - they've logged out
+      // The redirect will happen automatically below
+    }
+    
+    setPreviouslyLoggedIn(isLoggedIn);
+  }, [isLoggedIn, isAuthReady, previouslyLoggedIn]);
   
   // Check for active uploads every 500ms
   useEffect(() => {
@@ -172,6 +184,18 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       </div>
     );
   }
+
+  // Log state variables for debugging
+  console.log('[AuthGuard] State:', { 
+    isAuthReady, 
+    isLoggedIn, 
+    isLoginPage, 
+    hasActiveUploads, 
+    isMobile, 
+    isOffline,
+    authCheckFailed,
+    pathname: location.pathname
+  });
 
   // Only redirect if:
   // 1. Auth is ready
