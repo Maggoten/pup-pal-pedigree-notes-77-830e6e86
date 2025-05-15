@@ -6,14 +6,15 @@ import { PostgrestResponse } from '@supabase/supabase-js';
 import { withTimeout, TIMEOUT, isTimeoutError } from '@/utils/timeoutUtils';
 import { fetchWithRetry, isMobileDevice } from '@/utils/fetchUtils';
 import { toast } from '@/hooks/use-toast';
+import { validateCrossStorageSession } from '@/utils/storage/core/session';
 
-// Constants for timeouts and retries
-const MOBILE_TIMEOUT = 15000; // 15 seconds for mobile devices
-const MAX_RETRIES = 3; // Increased from 2
-const RETRY_DELAY = 1500; // Increased from 2000 for faster initial retry
+// Constants for timeouts and retries - Increased values for mobile
+const MOBILE_TIMEOUT = 20000; // 20 seconds for mobile devices (increased from 15s)
+const MAX_RETRIES = 4; // Increased from 3
+const RETRY_DELAY = 1200; // Slightly reduced for faster initial retry
 const MOBILE_PAGE_SIZE = 5; // Smaller page size for mobile devices
 const DESKTOP_PAGE_SIZE = 20; // Larger page size for desktop devices
-const AUTH_ERROR_CODES = ['401', 'JWT', 'auth', 'unauthorized', 'token'];
+const AUTH_ERROR_CODES = ['401', 'JWT', 'auth', 'unauthorized', 'token', 'expired'];
 
 export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
   if (!userId) {
@@ -31,14 +32,41 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
   console.log(`[Dogs Debug] Using timeout: ${effectiveTimeout}ms with ${MAX_RETRIES} retries`);
   
   try {
+    // First, verify session is valid when on mobile before attempting fetches
+    if (isMobileDevice()) {
+      const isSessionValid = await validateCrossStorageSession();
+      if (!isSessionValid) {
+        console.warn('[Dogs Debug] Session validation failed on mobile, might need to reauthenticate');
+        // Return empty array instead of showing error immediately
+        // This gives the system a chance to recover the session first
+        return [];
+      }
+    }
+    
     // Get current session before making data request
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
       console.warn('[Dogs Debug] No active session found before fetching dogs');
       
-      // Return empty array instead of showing error immediately
-      // This allows the auth system to recover the session first
-      return [];
+      if (isMobileDevice()) {
+        // On mobile, try one more session refresh attempt with extended timeout
+        console.log('[Dogs Debug] Attempting emergency session refresh on mobile');
+        try {
+          const { data: refreshData } = await supabase.auth.refreshSession();
+          if (!refreshData.session) {
+            console.warn('[Dogs Debug] Mobile emergency refresh failed');
+            return [];
+          }
+          console.log('[Dogs Debug] Mobile emergency refresh succeeded, proceeding with fetch');
+        } catch (refreshErr) {
+          console.error('[Dogs Debug] Mobile emergency refresh error:', refreshErr);
+          return [];
+        }
+      } else {
+        // Return empty array instead of showing error immediately
+        // This allows the auth system to recover the session first
+        return [];
+      }
     }
     
     // Use our retry wrapper for the fetch operation with pagination and specific columns
@@ -50,10 +78,11 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
         .eq('owner_id', userId)
         .order('created_at', { ascending: false })
         .range(start, end) as unknown as Promise<PostgrestResponse<DbDog>>,
-      // Retry options
+      // Retry options - more retries for mobile
       {
-        maxRetries: MAX_RETRIES,
+        maxRetries: isMobileDevice() ? MAX_RETRIES + 1 : MAX_RETRIES,
         initialDelay: RETRY_DELAY,
+        useBackoff: true, // Enable exponential backoff
         onRetry: (attempt) => {
           const errorMsg = `Fetch attempt ${attempt} failed`;
           console.log(`[Dogs Debug] Retry #${attempt}/${MAX_RETRIES}: ${errorMsg}`);
@@ -62,7 +91,9 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
           if (attempt === 1) {
             toast({
               title: "Retrying connection",
-              description: "Slow network detected. Retrying..."
+              description: isMobileDevice() 
+                ? "Mobile connection is slow. Retrying..."
+                : "Slow network detected. Retrying..."
             });
           }
         }
@@ -71,12 +102,23 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
 
     if (response.error) {
       // Check if error is auth-related
-      const errorMsg = response.error.message;
+      const errorMsg = response.error.message.toLowerCase();
       const isAuthError = AUTH_ERROR_CODES.some(code => 
-        errorMsg.toLowerCase().includes(code.toLowerCase()));
+        errorMsg.includes(code.toLowerCase()));
       
       if (isAuthError) {
         console.warn('[Dogs Debug] Auth error from Supabase:', errorMsg);
+        
+        // For mobile auth errors, try an additional session refresh
+        if (isMobileDevice()) {
+          console.log('[Dogs Debug] Trying mobile session recovery after auth error');
+          try {
+            await supabase.auth.refreshSession();
+          } catch (refreshErr) {
+            console.warn('[Dogs Debug] Mobile refresh after auth error failed:', refreshErr);
+          }
+        }
+        
         // For auth errors, just return empty array and let auth system handle recovery
         return [];
       }
@@ -124,6 +166,11 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
       errorMessage = error.message;
     }
     
+    // More detailed mobile-specific error message
+    if (isMobileDevice()) {
+      errorMessage = `Mobile data fetch error: ${errorMessage}. Try refreshing the page.`;
+    }
+    
     // Show toast with retry option if not auth-related
     if (!isAuthError) {
       toast({
@@ -142,23 +189,33 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
   }
 }
 
-// Add a new function to fetch total count for pagination
+// Add a new function to fetch total count for pagination with better mobile error handling
 export async function fetchDogsCount(userId: string): Promise<number> {
   if (!userId) {
     return 0;
   }
   
+  const retryOptions = {
+    maxRetries: isMobileDevice() ? 3 : 2,
+    initialDelay: 1000,
+    useBackoff: true
+  };
+  
   try {
-    const { count, error } = await supabase
-      .from('dogs')
-      .select('id', { count: 'exact', head: true })
-      .eq('owner_id', userId);
+    // Use retry wrapper for mobile reliability
+    const response = await fetchWithRetry(
+      () => supabase
+        .from('dogs')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_id', userId),
+      retryOptions
+    );
     
-    if (error) {
-      throw error;
+    if (response.error) {
+      throw response.error;
     }
     
-    return count || 0;
+    return response.count || 0;
   } catch (error) {
     console.error('[Dogs Debug] Failed to fetch dog count:', error);
     return 0;

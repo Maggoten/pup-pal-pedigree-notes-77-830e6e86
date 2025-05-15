@@ -1,85 +1,53 @@
 
-import React, { useState } from 'react';
-import MetricCardGrid from './MetricCardGrid';
-import RemindersDialog from '@/components/reminders/RemindersDialog';
+import React from 'react';
+import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
-import { format } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
-import WelcomeHeader from './WelcomeHeader';
-import DecorativePawprints from './DecorativePawprints';
+import { Loader2 } from 'lucide-react';
+import { MetricCardGrid } from './MetricCardGrid';
+import { WelcomeHeader } from './WelcomeHeader';
+import { DecorativePawprints } from './DecorativePawprints';
 
 interface DashboardHeroProps {
   username: string;
-  reminders: { count: number; highPriority: number };
-  plannedLitters: { count: number; nextDate: Date | null };
-  activePregnancies: ActivePregnancy[];
-  recentLitters: { count: number; latest: Date | null };
+  reminders?: number;
+  plannedLitters?: number;
+  activePregnancies?: ActivePregnancy[];
+  recentLitters?: number;
   isLoadingPregnancies?: boolean;
 }
 
-const DashboardHero: React.FC<DashboardHeroProps> = ({ 
-  username, 
-  reminders,
-  plannedLitters,
-  activePregnancies,
-  recentLitters,
-  isLoadingPregnancies = false
+const DashboardHero: React.FC<DashboardHeroProps> = ({
+  username,
+  reminders = 0,
+  plannedLitters = 0,
+  activePregnancies = [],
+  recentLitters = 0,
+  isLoadingPregnancies = false,
 }) => {
-  const navigate = useNavigate();
-  const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
-  
-  const metricCardsData = [
-    {
-      title: "Reminders",
-      count: reminders.count,
-      icon: "calendar" as const,
-      highlight: reminders.highPriority > 0 ? `${reminders.highPriority} high priority` : null,
-      action: () => setRemindersDialogOpen(true),
-      loading: false
-    },
-    {
-      title: "Planned Litters",
-      count: plannedLitters.count,
-      icon: "heart" as const,
-      highlight: plannedLitters.nextDate ? `Next: ${format(plannedLitters.nextDate, 'MMM d')}` : null,
-      action: () => navigate("/planned-litters"),
-      loading: false
-    },
-    {
-      title: "Active Pregnancies",
-      count: activePregnancies.length,
-      icon: "pawprint" as const,
-      highlight: activePregnancies.length > 0 ? `${activePregnancies[0].daysLeft} days to due date` : null,
-      action: () => navigate("/pregnancy"),
-      loading: isLoadingPregnancies
-    },
-    {
-      title: "Recent Litters",
-      count: recentLitters.count,
-      icon: "dog" as const,
-      highlight: recentLitters.latest ? `Latest: ${format(recentLitters.latest, 'MMM d')}` : null,
-      action: () => navigate("/my-litters"),
-      loading: false
-    }
-  ];
-  
   return (
-    <>
-      <div className="rounded-lg overflow-hidden border border-greige-300 beige-gradient relative mt-2 animate-fade-in">
+    <div className="relative rounded-lg bg-warmbeige-100/50 overflow-hidden">
+      <div className="px-6 py-12 sm:px-10">
         <WelcomeHeader username={username} />
         
-        <DecorativePawprints />
-        
-        <div className="p-4 md:p-6 relative z-10">
-          <MetricCardGrid metricCards={metricCardsData} />
+        <div className="mt-8 relative z-10">
+          {isLoadingPregnancies ? (
+            <div className="flex items-center justify-center py-6">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2 text-muted-foreground">Loading statistics...</span>
+            </div>
+          ) : (
+            <MetricCardGrid 
+              reminderCount={reminders} 
+              plannedLittersCount={plannedLitters} 
+              activePregnanciesCount={activePregnancies.length} 
+              recentLittersCount={recentLitters} 
+            />
+          )}
         </div>
       </div>
       
-      <RemindersDialog 
-        open={remindersDialogOpen}
-        onOpenChange={setRemindersDialogOpen}
-      />
-    </>
+      <DecorativePawprints className="absolute top-0 right-0 z-0 opacity-10" />
+    </div>
   );
 };
 

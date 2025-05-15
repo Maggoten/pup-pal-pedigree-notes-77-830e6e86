@@ -1,140 +1,98 @@
-// Import isSafari from config
-import { isSafari } from './config';
 
-// Direct upload for HEIC/HEIF files on iOS
-export const directUpload = async (file: File): Promise<File> => {
-  console.log('Directly uploading HEIC/HEIF file');
-  return file;
-};
+/**
+ * Utility functions for mobile upload detection and handling
+ */
 
-// Get platform information
-export const getPlatformInfo = () => {
-  if (typeof navigator === 'undefined') {
+interface PlatformInfo {
+  mobile: boolean;
+  safari: boolean;
+  ios: boolean;
+  android: boolean;
+  device: string;
+}
+
+/**
+ * Detects platform information to provide optimized experiences
+ */
+export const getPlatformInfo = (): PlatformInfo => {
+  // Default values for server-side rendering
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
     return {
-      iOS: false,
-      android: false,
-      safari: false,
       mobile: false,
-      device: 'server'
+      safari: false,
+      ios: false,
+      android: false,
+      device: 'unknown'
     };
   }
 
-  const userAgent = navigator.userAgent.toLowerCase();
-  const iOS = /iphone|ipad|ipod/.test(userAgent);
-  const android = /android/.test(userAgent);
-  const safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  const mobile = /mobile/i.test(userAgent);
-
-  let device = 'desktop';
-  if (iOS) device = 'iOS';
-  else if (android) device = 'android';
-  else if (mobile) device = 'mobile';
-
+  const ua = navigator.userAgent;
+  
+  // Check for mobile devices
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  
+  // Check for Safari (but not Chrome on iOS which also includes Safari in UA)
+  const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua);
+  
+  // Check for iOS devices
+  const isIOS = /iPhone|iPad|iPod/.test(ua);
+  
+  // Check for Android devices
+  const isAndroid = /Android/.test(ua);
+  
+  // Determine device type string
+  let deviceType = 'desktop';
+  if (isIOS) deviceType = 'iOS';
+  else if (isAndroid) deviceType = 'Android';
+  else if (isMobile) deviceType = 'mobile';
+  
   return {
-    iOS,
-    android,
-    safari,
-    mobile,
-    device
+    mobile: isMobile,
+    safari: isSafari,
+    ios: isIOS,
+    android: isAndroid,
+    device: deviceType
   };
 };
 
-// Compress image while preserving EXIF data
-export const safeImageCompression = async (file: File): Promise<File> => {
-  const platform = getPlatformInfo();
-  const MAX_WIDTH = 1024;
-  const MAX_HEIGHT = 1024;
-  const COMPRESSION_QUALITY = 0.7; // Default compression quality
-
-  // Mobile-specific settings
-  const MOBILE_MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
-  const MOBILE_COMPRESSION_QUALITY = 0.6; // More aggressive compression
-
-  const shouldCompress = (file: File) => {
-    if (platform.mobile) {
-      return file.size > (MOBILE_MAX_FILE_SIZE / 2); // Compress if larger than 1MB on mobile
-    }
-    return file.size > (MOBILE_MAX_FILE_SIZE); // Compress if larger than 2MB on desktop
-  };
-
-  if (!shouldCompress(file)) {
-    console.log('Skipping compression: File size is within acceptable limits');
-    return file;
+/**
+ * Check if the current session is likely to have storage access issues
+ * (Safari private mode, some mobile browsers, etc.)
+ */
+export const hasStorageAccessIssues = (): boolean => {
+  try {
+    // Test localStorage
+    localStorage.setItem('storage_test', 'test');
+    localStorage.removeItem('storage_test');
+    
+    // If we can access localStorage, usually sessionStorage works too
+    return false;
+  } catch (e) {
+    console.warn('Storage access issue detected:', e);
+    return true;
   }
+};
 
-  console.log('Starting image compression');
+/**
+ * Gets the maximum recommended file size for upload based on platform
+ */
+export const getMaxRecommendedFileSize = (): number => {
+  const { mobile, safari, ios } = getPlatformInfo();
+  
+  // Smaller file size limits for mobile and Safari due to common memory constraints
+  if (mobile) return 3 * 1024 * 1024; // 3MB for mobile
+  if (safari || ios) return 5 * 1024 * 1024; // 5MB for Safari/iOS
+  return 10 * 1024 * 1024; // 10MB default
+};
 
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      const img = new Image();
-
-      img.onload = () => {
-        let width = img.width;
-        let height = img.height;
-
-        // Calculate new dimensions while maintaining aspect ratio
-        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-          if (width > height) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          } else {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-
-        if (!ctx) {
-          console.warn('Canvas context not available, skipping compression');
-          resolve(file);
-          return;
-        }
-
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Determine compression quality based on platform
-        const quality = platform.mobile ? MOBILE_COMPRESSION_QUALITY : COMPRESSION_QUALITY;
-
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const compressedFile = new File([blob], file.name, {
-                type: file.type,
-                lastModified: Date.now(),
-              });
-              console.log(`Image compression successful: original size ${file.size} bytes, compressed size ${compressedFile.size} bytes`);
-              resolve(compressedFile);
-            } else {
-              console.warn('Canvas toBlob failed, skipping compression');
-              resolve(file);
-            }
-          },
-          file.type,
-          quality
-        );
-      };
-
-      img.onerror = (error) => {
-        console.error('Error loading image:', error);
-        reject(error);
-      };
-
-      if (event.target && event.target.result) {
-        img.src = event.target.result as string;
-      }
-    };
-
-    reader.onerror = (error) => {
-      console.error('Error reading file:', error);
-      reject(error);
-    };
-
-    reader.readAsDataURL(file);
-  });
+/**
+ * Gets an appropriate upload timeout based on platform
+ */
+export const getUploadTimeout = (): number => {
+  const { mobile, safari } = getPlatformInfo();
+  
+  // Longer timeouts for mobile and Safari
+  if (mobile) return 60000; // 60s for mobile
+  if (safari) return 45000; // 45s for Safari
+  return 30000; // 30s default
 };
