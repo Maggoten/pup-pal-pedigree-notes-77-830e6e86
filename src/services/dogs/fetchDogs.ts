@@ -69,15 +69,22 @@ export async function fetchDogs(userId: string, page = 1): Promise<Dog[]> {
       }
     }
     
+    // Define the type explicitly for the return value
+    type DogsQueryResponse = PostgrestResponse<DbDog>;
+    
     // Use our retry wrapper for the fetch operation with pagination and specific columns
-    const response = await fetchWithRetry<PostgrestResponse<DbDog>>(
+    const response = await fetchWithRetry<DogsQueryResponse>(
       // Fetch function with specific fields instead of select('*')
-      () => supabase
-        .from('dogs')
-        .select('id, name, breed, gender, birthdate, color, image_url, heatHistory, heatInterval, owner_id, created_at')
-        .eq('owner_id', userId)
-        .order('created_at', { ascending: false })
-        .range(start, end) as unknown as Promise<PostgrestResponse<DbDog>>,
+      async () => {
+        const result = await supabase
+          .from('dogs')
+          .select('id, name, breed, gender, birthdate, color, image_url, heatHistory, heatInterval, owner_id, created_at')
+          .eq('owner_id', userId)
+          .order('created_at', { ascending: false })
+          .range(start, end);
+        
+        return result as DogsQueryResponse;
+      },
       // Retry options - more retries for mobile
       {
         maxRetries: isMobileDevice() ? MAX_RETRIES + 1 : MAX_RETRIES,
@@ -202,12 +209,22 @@ export async function fetchDogsCount(userId: string): Promise<number> {
   };
   
   try {
+    // Correctly type the response
+    interface CountResponse {
+      count: number | null;
+      error: any | null;
+    }
+    
     // Use retry wrapper for mobile reliability
-    const response = await fetchWithRetry(
-      () => supabase
-        .from('dogs')
-        .select('id', { count: 'exact', head: true })
-        .eq('owner_id', userId),
+    const response = await fetchWithRetry<CountResponse>(
+      async () => {
+        const result = await supabase
+          .from('dogs')
+          .select('id', { count: 'exact', head: true })
+          .eq('owner_id', userId);
+        
+        return result as unknown as CountResponse;
+      },
       retryOptions
     );
     

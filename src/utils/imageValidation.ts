@@ -21,7 +21,7 @@ export const getMaxFileSize = () => {
   const platform = getPlatformInfo();
   
   // For iOS devices, be more permissive
-  if (platform.iOS) {
+  if (platform.ios) {
     return 8 * 1024 * 1024; // 8MB for iOS - increased from 6MB
   }
   // For Safari or any mobile device
@@ -64,7 +64,7 @@ const isImageFile = (file: File): boolean => {
   });
   
   // For mobile Safari, be very permissive
-  if (platform.iOS && platform.safari) {
+  if (platform.ios && platform.safari) {
     console.log('Using very permissive iOS Safari image type validation');
     return hasValidExtension || hasValidMimeType || isGenericImageType || fileExtension.length > 0;
   }
@@ -118,7 +118,7 @@ export const validateImageFile = (file: File): boolean => {
   // For mobile, be extremely permissive about file sizes
   if (platform.mobile) {
     // Skip buffer multiplier entirely on mobile - new approach!
-    const shouldSkipSizeCheck = platform.iOS && file.size < 5 * 1024 * 1024;
+    const shouldSkipSizeCheck = platform.ios && file.size < 5 * 1024 * 1024;
     
     // Skip size check completely for small iOS files
     if (shouldSkipSizeCheck) {
@@ -128,7 +128,7 @@ export const validateImageFile = (file: File): boolean => {
   }
   
   // Reduced buffer multipliers
-  const bufferMultiplier = platform.iOS ? 1.05 : 
+  const bufferMultiplier = platform.ios ? 1.05 : 
                            platform.safari ? 1.03 : 1.01;
   
   // For small files on mobile (under 2MB), skip buffer multiplier completely
@@ -154,7 +154,7 @@ export const validateImageFile = (file: File): boolean => {
     // Platform-specific error message
     let sizeMessage = `Your image is ${fileSizeMB}MB but the maximum allowed size is ${(maxSize / 1024 / 1024).toFixed(1)}MB.`;
     
-    if (platform.iOS) {
+    if (platform.ios) {
       sizeMessage += ' On iOS devices, try using a smaller image or the Photos app to reduce size.';
     } else if (platform.mobile) {
       sizeMessage += ' On mobile, try using a smaller image or a photo resizer app.';

@@ -7,7 +7,7 @@ import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 export const getUploadTimeout = () => {
   const platform = getPlatformInfo();
   
-  if (platform.iOS) {
+  if (platform.ios) {
     return 70000; // 70s for iOS
   } else if (platform.safari) {
     return 60000; // 60s for Safari
@@ -40,7 +40,7 @@ export const useUploadTimeout = (onTimeout: () => void) => {
       // Platform-specific timeout message
       let timeoutMessage = "The upload took too long.";
       
-      if (platform.iOS) {
+      if (platform.ios) {
         timeoutMessage = "The upload timed out on iOS. Try a smaller image (under 2MB) or use a different device.";
       } else if (platform.safari) {
         timeoutMessage = "The upload timed out in Safari. Try a smaller image (under 2MB) or switch to Chrome.";

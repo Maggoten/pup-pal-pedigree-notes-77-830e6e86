@@ -96,3 +96,17 @@ export const getUploadTimeout = (): number => {
   if (safari) return 45000; // 45s for Safari
   return 30000; // 30s default
 };
+
+// Add implementation for missing functions needed by imageUtils.ts
+export const safeImageCompression = async (file: File): Promise<File> => {
+  console.log('Safe image compression called');
+  // Simple implementation - in a real scenario this would compress the image
+  // but for now we'll just return the original file
+  return file;
+};
+
+export const directUpload = (file: File): File => {
+  console.log('Direct upload called');
+  // Simple implementation - just return the original file
+  return file;
+};

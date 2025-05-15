@@ -47,8 +47,8 @@ export const useImageSessionCheck = () => {
         respectAuthReady: true,
         authReady: isAuthReady,
         // Always skip throwing errors on mobile
-        skipThrow: isMobile,
-        platform: platform
+        skipThrow: isMobile
+        // Remove the platform property as it's not in the VerifySessionOptions type
       });
     } catch (error) {
       console.error('[ImageSessionCheck] Session validation error:', error);

@@ -61,8 +61,8 @@ export const uploadToStorage = async (
     try {
       // For mobile, skip session validation errors
       await verifySession({
-        skipThrow: platform.mobile || platform.safari,
-        platform: platform
+        skipThrow: platform.mobile || platform.safari
+        // Remove the platform property as it's not in the VerifySessionOptions type
       });
       
       const bucketExists = await checkBucketExists();

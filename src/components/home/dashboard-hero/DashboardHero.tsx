@@ -3,9 +3,9 @@ import React from 'react';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Loader2 } from 'lucide-react';
-import { MetricCardGrid } from './MetricCardGrid';
-import { WelcomeHeader } from './WelcomeHeader';
-import { DecorativePawprints } from './DecorativePawprints';
+import MetricCardGrid from './MetricCardGrid';
+import WelcomeHeader from './WelcomeHeader';
+import DecorativePawprints from './DecorativePawprints';
 
 interface DashboardHeroProps {
   username: string;

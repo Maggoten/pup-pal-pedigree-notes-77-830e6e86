@@ -101,7 +101,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       console.error('ImageUploader: Image upload error:', error);
       
       // Show more specific error messages based on platform
-      if (platform.iOS) {
+      if (platform.ios) {
         toast({
           title: "iOS Upload Issue",
           description: "There was a problem uploading your image. Try using a smaller image or a different device.",

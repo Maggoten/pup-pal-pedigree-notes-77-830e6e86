@@ -86,9 +86,9 @@ export const useFileUpload = (
       let fileName = '';
       
       // More specific platform identification in filename
-      if (platform.iOS && platform.safari) {
+      if (platform.ios && platform.safari) {
         fileName = `${user_id}/${timestamp}_ios_safari.${fileExt}`;
-      } else if (platform.iOS) {
+      } else if (platform.ios) {
         fileName = `${user_id}/${timestamp}_ios.${fileExt}`;
       } else if (platform.safari) {
         fileName = `${user_id}/${timestamp}_safari.${fileExt}`;
@@ -181,7 +181,7 @@ export const useFileUpload = (
       // Platform-specific error messages
       let friendlyMessage = errorMessage;
       
-      if (platform.iOS) {
+      if (platform.ios) {
         friendlyMessage = "iOS upload issue. Try using WiFi instead of cellular data, or try again later.";
       } else if (platform.safari) {
         friendlyMessage = "Safari upload issue. Try reloading the page and trying again, or use Chrome.";

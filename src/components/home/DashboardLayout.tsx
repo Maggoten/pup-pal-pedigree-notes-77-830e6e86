@@ -54,6 +54,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   // Get the personalized username
   const username = getDisplayUsername(user);
   
+  // Extract count values from dashboard data for DashboardHero
+  const reminderCount = dashboardData.remindersSummary?.count || 0;
+  const plannedLittersCount = dashboardData.plannedLittersData?.count || 0;
+  const recentLittersCount = dashboardData.recentLittersData?.count || 0;
+  
   // Prepare props for child components
   const calendarProps = {
     getEventsForDate: dashboardData.getEventsForDate,
@@ -80,10 +85,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       <div className="space-y-6">
         <DashboardHero 
           username={username}
-          reminders={dashboardData.remindersSummary}
-          plannedLitters={dashboardData.plannedLittersData}
+          reminders={reminderCount}
+          plannedLitters={plannedLittersCount}
           activePregnancies={activePregnancies}
-          recentLitters={dashboardData.recentLittersData}
+          recentLitters={recentLittersCount}
           isLoadingPregnancies={isLoadingPregnancies}
         />
         
