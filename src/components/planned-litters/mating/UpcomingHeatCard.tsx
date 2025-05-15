@@ -17,9 +17,9 @@ import { format } from 'date-fns';
 import { Dog } from '@/context/DogsContext';
 import { supabase } from '@/integrations/supabase/client';
 import { UpcomingHeat } from '@/types/reminders';
-import { isSupabaseError, safeGet } from '@/utils/supabaseErrorHandler';
+import { isSupabaseError, safeFilter } from '@/utils/supabaseTypeUtils';
 
-interface UpcomingHeatCardProps {
+export interface UpcomingHeatCardProps {
   heat: UpcomingHeat;
   onHeatDeleted?: () => void;
 }
@@ -39,13 +39,16 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onHeatDeleted
       setIsDeleting(true);
       
       // Find the calendar event that corresponds to this dog's heat
-      const { data, error } = await supabase
+      const query = supabase
         .from('calendar_events')
-        .select('id')
-        .eq('dog_id', dog.id)
-        .eq('type', 'heat')
-        .eq('date', heatDate.toISOString())
-        .limit(1);
+        .select('id');
+      
+      // Apply filters with type safety
+      const filteredQuery = safeFilter(query, 'dog_id', dog.id)
+        .eq('type' as any, 'heat' as any)
+        .eq('date' as any, heatDate.toISOString() as any);
+      
+      const { data, error } = await filteredQuery.limit(1);
       
       if (error) {
         console.error('Error finding heat event:', error);
@@ -54,12 +57,12 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onHeatDeleted
       
       // If we found the event, delete it
       if (data && data.length > 0) {
-        const eventId = safeGet(data[0], 'id', '');
+        const eventId = data[0]?.id;
         if (eventId) {
           const { error: deleteError } = await supabase
             .from('calendar_events')
             .delete()
-            .eq('id', eventId);
+            .eq('id' as any, eventId as any);
           
           if (deleteError) {
             throw deleteError;

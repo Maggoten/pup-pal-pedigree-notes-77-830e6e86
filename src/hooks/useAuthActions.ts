@@ -5,6 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { User } from '@/types/auth';
 import { AuthError } from '@supabase/supabase-js';
 import { isSupabaseError, safeGet } from '@/utils/supabaseErrorHandler';
+import { safeFilter } from '@/utils/supabaseTypeUtils';
+import { convertToProfileData } from '@/utils/supabaseProfileUtils';
 
 interface LoginCredentials {
   email: string;
@@ -62,29 +64,18 @@ export const useAuthActions = () => {
       }
       
       // Get profile data from our profiles table if available
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userData.id)
-        .single();
+      const { data: profileData, error: profileError } = await safeFilter(
+        supabase.from('profiles').select('*'),
+        'id',
+        userData.id
+      ).single();
       
       // Set default profile if there's an error
       let profile = PROFILE_DEFAULTS;
       
       // If we have profile data and no error, use it
       if (profileData && !profileError) {
-        profile = {
-          id: safeGet(profileData, 'id', ''),
-          email: safeGet(profileData, 'email', userData.email || ''),
-          first_name: safeGet(profileData, 'first_name', ''),
-          last_name: safeGet(profileData, 'last_name', ''),
-          address: safeGet(profileData, 'address', ''),
-          kennel_name: safeGet(profileData, 'kennel_name', ''),
-          phone: safeGet(profileData, 'phone', ''),
-          subscription_status: safeGet(profileData, 'subscription_status', 'active'),
-          created_at: safeGet(profileData, 'created_at', ''),
-          updated_at: safeGet(profileData, 'updated_at', '')
-        };
+        profile = convertToProfileData(profileData) || PROFILE_DEFAULTS;
       }
       
       // Return our User type with the data we have
@@ -94,7 +85,7 @@ export const useAuthActions = () => {
         firstName: userData.user_metadata?.firstName || profile.first_name || '',
         lastName: userData.user_metadata?.lastName || profile.last_name || '',
         address: userData.user_metadata?.address || profile.address || '',
-        profile
+        profile: profile
       };
     } catch (error) {
       console.error('Error transforming user data:', error);
@@ -168,14 +159,18 @@ export const useAuthActions = () => {
         throw new Error('No user data returned from registration');
       }
       
-      // Create initial profile data (this should also be handled by a trigger on Supabase)
-      await supabase.from('profiles').upsert({
-        id: userData.id,
+      // Create initial profile data (as any to bypass type checking)
+      const insertData = {
         email,
         first_name: firstName,
         last_name: lastName,
         address: address || '',
-      });
+      };
+      
+      await supabase.from('profiles').upsert({
+        ...insertData,
+        id: userData.id
+      } as any);
       
       const user = await transformUserData(userData);
       
@@ -222,32 +217,20 @@ export const useAuthActions = () => {
    */
   const fetchUserProfile = useCallback(async (userId: string): Promise<ProfileData> => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId as any)
-        .single();
+      const { data, error } = await safeFilter(
+        supabase.from('profiles').select('*'),
+        'id',
+        userId
+      ).single();
       
       if (error) throw error;
       
-      // Handle the case where we get data but something is wrong
-      if (!data || typeof data !== 'object') {
+      const profile = convertToProfileData(data);
+      if (!profile) {
         throw new Error('Invalid profile data returned');
       }
       
-      // Map profile data to our ProfileData type safely
-      return {
-        id: safeGet(data, 'id', ''),
-        email: safeGet(data, 'email', ''),
-        first_name: safeGet(data, 'first_name', ''),
-        last_name: safeGet(data, 'last_name', ''),
-        address: safeGet(data, 'address', ''),
-        kennel_name: safeGet(data, 'kennel_name', ''),
-        phone: safeGet(data, 'phone', ''),
-        subscription_status: safeGet(data, 'subscription_status', 'active'),
-        created_at: safeGet(data, 'created_at', ''),
-        updated_at: safeGet(data, 'updated_at', '')
-      };
+      return profile;
     } catch (error) {
       console.error('Error fetching user profile:', error);
       return PROFILE_DEFAULTS;

@@ -1,57 +1,42 @@
 
-import { isSupabaseError, safeGet } from './supabaseErrorHandler';
-import { ProfileData, SharedUser } from '@/types/settings';
+import { ProfileData, SharedUser } from "@/types/settings";
+import { isSupabaseError } from "./supabaseTypeUtils";
 
-/**
- * Convert Supabase profile data to the app's ProfileData type
- */
-export function convertToProfileData(profileData: any): ProfileData | null {
-  if (isSupabaseError(profileData)) {
+// Convert database profile to ProfileData
+export const convertToProfileData = (rawProfile: any): ProfileData | null => {
+  if (!rawProfile || isSupabaseError(rawProfile)) {
     return null;
   }
-  
-  return {
-    id: safeGet(profileData, 'id', ''),
-    email: safeGet(profileData, 'email', ''),
-    first_name: safeGet(profileData, 'first_name', ''),
-    last_name: safeGet(profileData, 'last_name', ''),
-    address: safeGet(profileData, 'address', ''),
-    kennel_name: safeGet(profileData, 'kennel_name', ''),
-    phone: safeGet(profileData, 'phone', ''),
-    created_at: safeGet(profileData, 'created_at', ''),
-    updated_at: safeGet(profileData, 'updated_at', ''),
-    subscription_status: safeGet(profileData, 'subscription_status', 'free')
-  };
-}
 
-/**
- * Convert Supabase shared user data to the app's SharedUser type
- */
-export function convertToSharedUser(userData: any): SharedUser | null {
-  if (isSupabaseError(userData)) {
-    return null;
-  }
-  
   return {
-    id: safeGet(userData, 'id', ''),
-    shared_with_id: safeGet(userData, 'shared_with_id', ''),
-    role: safeGet(userData, 'role', 'viewer'),
-    status: safeGet(userData, 'status', 'pending'),
-    created_at: safeGet(userData, 'created_at', ''),
-    updated_at: safeGet(userData, 'updated_at', ''),
-    owner_id: safeGet(userData, 'owner_id', '')
+    id: rawProfile.id || '',
+    email: rawProfile.email || '',
+    first_name: rawProfile.first_name || '',
+    last_name: rawProfile.last_name || '',
+    address: rawProfile.address || '',
+    kennel_name: rawProfile.kennel_name || '',
+    phone: rawProfile.phone || '',
+    subscription_status: rawProfile.subscription_status || 'active',
+    created_at: rawProfile.created_at || '',
+    updated_at: rawProfile.updated_at || ''
   };
-}
+};
 
-/**
- * Process an array of shared users from Supabase and filter out any invalid entries
- */
-export function processSharedUsers(sharedUsers: any[]): SharedUser[] {
-  if (!Array.isArray(sharedUsers)) {
+// Process shared users and handle potential errors
+export const processSharedUsers = (rawUsers: any[]): SharedUser[] => {
+  if (!Array.isArray(rawUsers)) {
     return [];
   }
-  
-  return sharedUsers
-    .map(convertToSharedUser)
-    .filter((user): user is SharedUser => user !== null);
-}
+
+  return rawUsers
+    .filter(user => !isSupabaseError(user) && user && user.id)
+    .map(user => ({
+      id: user.id || '',
+      shared_with_id: user.shared_with_id || '',
+      role: user.role || 'viewer',
+      status: user.status || 'pending',
+      created_at: user.created_at || '',
+      updated_at: user.updated_at || '',
+      owner_id: user.owner_id || ''
+    }));
+};

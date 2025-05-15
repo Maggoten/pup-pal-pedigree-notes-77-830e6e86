@@ -1,42 +1,37 @@
 
-// Import existing types
-import { Dog } from '@/context/DogsContext';
+import { Dog } from "@/context/DogsContext";
 
 export interface UpcomingHeat {
   dog: Dog;
   heatDate: Date;
-  dogId: string;  // Used for storing or referencing the heat
 }
 
 export interface RecentMating {
   id: string;
-  litterId: string;  // Added this field
+  litterId: string;
   damId: string;
   damName: string;
   sireId?: string;
-  sireName: string;
-  maleName: string;  // Added this field
-  femaleName: string;  // Added this field
+  sireName?: string;
+  maleName: string;
+  femaleName: string;
   date: Date;
-  notes?: string;
 }
 
-export interface Reminder {
+export interface BreedingReminder {
   id: string;
   title: string;
-  description: string;
-  dueDate: Date;
-  priority: 'low' | 'medium' | 'high';
-  type: 'general' | 'dog' | 'litter' | 'breeding';
-  isCompleted: boolean;
-  icon?: string;  // Added icon property as optional
-  relatedId?: string;  // Id of related entity (dog, litter, etc)
+  date: Date;
+  type: string;
+  dogId?: string;
+  dogName?: string;
 }
 
-// Add CustomReminderInput type for the AddReminderForm
 export interface CustomReminderInput {
   title: string;
   description: string;
-  dueDate: Date;
+  date: Date;
   priority: 'low' | 'medium' | 'high';
+  type: string;
+  relatedId?: string;
 }

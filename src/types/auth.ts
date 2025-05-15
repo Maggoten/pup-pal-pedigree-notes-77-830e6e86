@@ -1,30 +1,34 @@
 
-import { User as SupabaseUser, Session } from '@supabase/supabase-js';
-import { Profile } from '@/integrations/supabase/client';
+import { ProfileData } from "./settings";
 
 export interface User {
   id: string;
   email: string;
-  firstName?: string;
-  lastName?: string;
-  address?: string;
-}
-
-export interface RegisterData {
-  email: string;
-  password: string;
   firstName: string;
   lastName: string;
+  address?: string;
+  profile?: ProfileData;
 }
 
 export interface AuthContextType {
   user: User | null;
-  supabaseUser: SupabaseUser | null;
-  session: Session | null;
-  isLoggedIn: boolean;
   isLoading: boolean;
-  isAuthReady: boolean; // Add this to the interface
-  login: (email: string, password: string) => Promise<boolean>;
+  isAuthReady: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
-  register: (userData: RegisterData) => Promise<boolean>;
+  register: (values: RegisterFormValues) => Promise<{ success: boolean; error?: string }>;
+}
+
+export interface RegisterFormValues {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  address?: string;
+}
+
+export interface LoginFormValues {
+  email: string;
+  password: string;
 }
