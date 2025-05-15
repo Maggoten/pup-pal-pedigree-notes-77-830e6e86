@@ -31,8 +31,8 @@ const RemindersList: React.FC<RemindersListProps> = memo(({
   }
 
   // Split reminders into active and completed
-  const activeReminders = reminders.filter(r => !(r.is_completed || r.isCompleted));
-  const completedReminders = reminders.filter(r => (r.is_completed || r.isCompleted));
+  const activeReminders = reminders.filter(r => !r.isCompleted);
+  const completedReminders = reminders.filter(r => r.isCompleted);
   
   // If in compact mode, prioritize showing active reminders
   const displayReminders = compact 
@@ -52,10 +52,8 @@ const RemindersList: React.FC<RemindersListProps> = memo(({
             priority={reminder.priority}
             dueDate={reminder.dueDate}
             type={reminder.type}
-            relatedId={reminder.related_id}
-            related_id={reminder.related_id}
+            relatedId={reminder.relatedId}
             isCompleted={reminder.isCompleted}
-            is_completed={reminder.is_completed}
             onComplete={onComplete}
             onDelete={showDelete && onDelete ? onDelete : undefined}
             compact={compact}

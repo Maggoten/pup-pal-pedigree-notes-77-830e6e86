@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { PlannedLitter } from '@/types/breeding';
 import { usePlannedLitterQueries } from './usePlannedLitterQueries';
 import { usePlannedLitterMutations } from './usePlannedLitterMutations';
@@ -9,15 +9,11 @@ import { toast } from '@/hooks/use-toast';
 import { isMobileDevice } from '@/utils/fetchUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
-import { useConnectionStore } from '@/utils/connectionStatus';
 
 export const usePlannedLitters = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const isMobile = isMobileDevice();
   const queryClient = useQueryClient();
-  const { isOnline } = useConnectionStore();
-  // Track if we've subscribed to avoid duplicate subscriptions
-  const hasSubscribed = useRef(false);
   
   const { 
     plannedLitters, 
@@ -31,20 +27,12 @@ export const usePlannedLitters = () => {
   
   // Set up realtime subscription for planned_litters
   useEffect(() => {
-    // Fixed: prevent multiple subscriptions
-    if (hasSubscribed.current) {
-      console.log('Already subscribed to planned_litters channel, skipping');
-      return;
-    }
-    
     // Fixed: using async IIFE to handle the Promise properly
     (async () => {
       try {
         const sessionResult = await supabase.auth.getSession();
         const userId = sessionResult.data.session?.user?.id;
         if (!userId) return;
-        
-        console.log('Setting up planned_litters subscription for user:', userId);
         
         // Subscribe to changes in the planned_litters table
         const plannedLittersChannel = supabase
@@ -64,33 +52,18 @@ export const usePlannedLitters = () => {
               refreshLitters();
             }
           )
-          .subscribe((status) => {
-            console.log('Planned litters subscription status:', status);
-            hasSubscribed.current = true;
-          });
+          .subscribe();
           
         return () => {
-          console.log('Removing planned_litters channel subscription');
           supabase.removeChannel(plannedLittersChannel);
-          hasSubscribed.current = false;
         };
       } catch (error) {
         console.error("Error setting up planned litters subscription:", error);
       }
     })();
-  }, [queryClient]); // Keep the dependency array minimal
+  }, [queryClient]);
   
   const refreshLitters = async () => {
-    // Skip refresh if offline
-    if (!isOnline) {
-      toast({
-        title: "Offline Mode",
-        description: "Connect to network to update data",
-        duration: 3000,
-      });
-      return;
-    }
-    
     try {
       setIsRefreshing(true);
       console.log("Refreshing planned litters data...");
@@ -151,7 +124,7 @@ export const usePlannedLitters = () => {
     if (!isMobile) return;
     
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && isOnline) {
+      if (document.visibilityState === 'visible') {
         console.log('Document became visible, refreshing planned litters on mobile');
         refreshLitters();
       }
@@ -161,7 +134,7 @@ export const usePlannedLitters = () => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isMobile, isOnline]);
+  }, [isMobile]);
 
   return {
     plannedLitters,
@@ -171,7 +144,6 @@ export const usePlannedLitters = () => {
     females,
     isRefreshing,
     isLoading: queriesLoading,
-    isOffline: !isOnline,
     ...mutations,
     refreshLitters
   };

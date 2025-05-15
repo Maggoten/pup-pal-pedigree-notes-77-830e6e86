@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
+import { DogsProvider } from '@/context/DogsContext';
 import PageLayout from '@/components/PageLayout';
 import DashboardHero from './dashboard-hero';
 import DashboardContent from './DashboardContent';
@@ -66,7 +67,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     deleteEvent: dashboardData.deleteEvent,
     editEvent: dashboardData.handleEditEvent,
     isLoading: dashboardData.calendarLoading,
-    hasError: dashboardData.calendarError
+    hasError: dashboardData.calendarError // This now receives a boolean value
   };
   
   const remindersProps = {

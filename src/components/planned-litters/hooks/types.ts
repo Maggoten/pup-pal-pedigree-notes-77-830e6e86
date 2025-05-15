@@ -1,8 +1,20 @@
 
-import { Dog } from '@/types/dogs';
-import { PlannedLitterFormValues } from '@/services/planned-litters/types';
+import { PlannedLitter } from '@/types/breeding';
+import { UpcomingHeat } from '@/types/reminders';
+import { RecentMating } from '../types';
+import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
+import { Dog } from '@/context/DogsContext';
 
-// Define UsePlannedLitterMutations interface
+export interface UsePlannedLitterQueries {
+  plannedLitters: PlannedLitter[];
+  upcomingHeats: UpcomingHeat[];
+  recentMatings: RecentMating[];
+  males: Dog[];
+  females: Dog[];
+  isLoading: boolean;
+  setPlannedLitters: React.Dispatch<React.SetStateAction<PlannedLitter[]>>;
+}
+
 export interface UsePlannedLitterMutations {
   handleAddPlannedLitter: (values: PlannedLitterFormValues) => Promise<void>;
   handleAddMatingDate: (litterId: string, date: Date) => Promise<void>;
@@ -11,21 +23,6 @@ export interface UsePlannedLitterMutations {
   handleDeleteLitter: (litterId: string) => Promise<void>;
 }
 
-// Define RecentMating type
-export interface RecentMating {
-  id: string;
-  litterId: string;
-  damId: string;
-  damName: string;
-  sireId?: string;
-  sireName?: string;
-  maleName: string;
-  femaleName: string;
-  date: Date;
-}
-
-export interface PlannedLitterHookState {
-  dogs: Dog[];
-  isLoading: boolean;
-  error: Error | null;
-}
+export type UsePlannedLitters = UsePlannedLitterQueries & UsePlannedLitterMutations & {
+  isRefreshing: boolean;
+};

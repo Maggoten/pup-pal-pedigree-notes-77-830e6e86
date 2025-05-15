@@ -1,6 +1,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Reminder, CustomReminderInput } from '@/types/reminders';
+import { v4 as uuidv4 } from 'uuid';
+import { loadCustomReminders, loadCompletedReminders, loadDeletedReminders } from '@/utils/reminderStorage';
 import { createCalendarClockIcon } from '@/utils/iconUtils';
 import { toast } from '@/components/ui/use-toast';
 
@@ -39,10 +41,7 @@ export const fetchReminders = async (): Promise<Reminder[]> => {
       description: reminder.description,
       dueDate: new Date(reminder.due_date),
       priority: reminder.priority as 'high' | 'medium' | 'low',
-      type: reminder.type as string,
-      related_id: reminder.related_id,
-      is_completed: reminder.is_completed,
-      // For backward compatibility
+      type: reminder.type as any,
       relatedId: reminder.related_id,
       isCompleted: reminder.is_completed,
       // Generate the icon based on priority

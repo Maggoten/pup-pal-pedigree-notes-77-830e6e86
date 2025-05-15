@@ -11,7 +11,7 @@ export interface AuthContextType {
   loading: boolean;
   isLoading: boolean;
   isLoggedIn: boolean;
-  isAuthReady: boolean;
+  isAuthReady: boolean; // Explicitly defined and exported
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: any) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -25,7 +25,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   isLoading: true,
   isLoggedIn: false,
-  isAuthReady: false,
+  isAuthReady: false, // Add default value
   login: async () => false,
   register: async () => false,
   logout: async () => {}

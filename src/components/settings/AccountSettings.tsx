@@ -1,125 +1,430 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { UserSettings } from '@/types/settings';
+import { format } from 'date-fns';
+import { UserCheck, CreditCard, Shield, Star, AlertCircle, Loader2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Input } from '@/components/ui/input';
+import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useSettings } from '@/hooks/useSettings';
 
 interface AccountSettingsProps {
-  settings: UserSettings | null;
+  settings: UserSettings;
 }
 
 const AccountSettings: React.FC<AccountSettingsProps> = ({ settings }) => {
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [password, setPassword] = useState('');
-  
-  // Get necessary functions and state from useSettings hook
+  const { user, logout } = useAuth();
   const { deleteAccount, cancelSubscription, isCancellingSubscription, isDeletingAccount } = useSettings();
+  const [cancelSubscriptionDialogOpen, setCancelSubscriptionDialogOpen] = useState(false);
+  const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [confirmText, setConfirmText] = useState('');
+  const [deleteInProgress, setDeleteInProgress] = useState(false);
   
-  // Handle account deletion
-  const handleDeleteAccount = async () => {
-    if (!password.trim()) return;
-    
-    const success = await deleteAccount(password);
-    if (success) {
-      // Redirect to login or show success message
-      // This will happen automatically if the hook is set up correctly
-    }
-    
-    // Reset form regardless of outcome
-    setPassword('');
-    setShowDeleteConfirm(false);
+  // Function to handle subscription upgrade
+  const handleUpgradeSubscription = () => {
+    // In a real app, this would redirect to a payment page or open a payment modal
+    alert('This would open a payment form in a real application.');
   };
   
-  if (!settings) {
-    return <div className="text-center p-4">Loading account settings...</div>;
-  }
+  // Function to handle subscription cancellation
+  const handleCancelSubscription = async () => {
+    try {
+      await cancelSubscription();
+      setCancelSubscriptionDialogOpen(false);
+      toast({
+        title: "Subscription cancelled",
+        description: "Your subscription has been cancelled successfully. You'll still have access until the end of the billing period.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error cancelling subscription",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Function to handle account deletion with improved UX
+  const handleDeleteAccount = async () => {
+    if (deleteInProgress) return;
+    
+    setDeleteInProgress(true);
+    try {
+      toast({
+        title: "Account deletion initiated",
+        description: "We're processing your request to delete your account...",
+      });
+      
+      // Call the deleteAccount function and properly await the Promise
+      const success = await deleteAccount(confirmPassword);
+      
+      if (success) {
+        toast({
+          title: "Account deleted",
+          description: "Your account has been deleted successfully. You will be logged out now.",
+        });
+        setDeleteAccountDialogOpen(false);
+        
+        // Log the user out after account deletion
+        setTimeout(() => {
+          logout();
+        }, 1500);
+      } else {
+        throw new Error("Failed to delete account. Please check your password and try again.");
+      }
+    } catch (error) {
+      console.error("Account deletion error:", error);
+      toast({
+        title: "Error deleting account",
+        description: error instanceof Error ? error.message : "An error occurred during the account deletion process.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteInProgress(false);
+    }
+  };
+  
+  // Function to format subscription end date
+  const formatSubscriptionDate = (date?: Date) => {
+    if (!date) return 'N/A';
+    try {
+      return format(new Date(date), 'MMMM d, yyyy');
+    } catch (e) {
+      return 'Invalid date';
+    }
+  };
+  
+  // Get subscription badge and color
+  const getSubscriptionBadge = () => {
+    switch (settings.subscriptionTier) {
+      case 'premium':
+        return <Badge className="bg-warmgreen-500">Premium</Badge>;
+      case 'professional':
+        return <Badge className="bg-warmgreen-700">Professional</Badge>;
+      default:
+        return <Badge variant="outline">Free</Badge>;
+    }
+  };
+  
+  // Get subscription features based on tier
+  const getSubscriptionFeatures = () => {
+    const features = {
+      free: [
+        'Up to 5 dogs',
+        'Basic breeding records',
+        'Limited calendar events'
+      ],
+      premium: [
+        'Unlimited dogs',
+        'Advanced breeding analysis',
+        'Full calendar functionality',
+        'Email notifications'
+      ],
+      professional: [
+        'Everything in Premium',
+        'Multi-user access',
+        'Priority support',
+        'Advanced reporting',
+        'Data export'
+      ]
+    };
+    
+    return features[settings.subscriptionTier || 'free'] || features.free;
+  };
   
   return (
     <div className="space-y-6">
-      {/* Subscription Information */}
-      <div>
-        <h3 className="text-lg font-medium">Subscription</h3>
-        <div className="mt-4 p-4 border rounded-md">
-          <div className="flex items-center justify-between">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
             <div>
-              <p>Current Plan: <span className="font-medium capitalize">{settings.subscriptionTier}</span></p>
-              <p className="text-sm text-muted-foreground">
-                Renews on {settings.subscriptionEndsAt.toLocaleDateString()}
+              <CardTitle>Subscription</CardTitle>
+              <CardDescription>
+                Manage your subscription and billing
+              </CardDescription>
+            </div>
+            {getSubscriptionBadge()}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-2">
+            <div className="text-sm font-medium">Current Plan</div>
+            <div className="flex items-center gap-2">
+              {settings.subscriptionTier === 'free' ? (
+                <Shield className="h-5 w-5 text-muted-foreground" />
+              ) : settings.subscriptionTier === 'premium' ? (
+                <Star className="h-5 w-5 text-warmgreen-500" />
+              ) : (
+                <CreditCard className="h-5 w-5 text-warmgreen-700" />
+              )}
+              <span className="font-semibold capitalize">
+                {settings.subscriptionTier || 'Free'} Plan
+              </span>
+            </div>
+            
+            {settings.subscriptionTier !== 'free' && settings.subscriptionEndsAt && (
+              <div className="text-sm text-muted-foreground">
+                Renews on {formatSubscriptionDate(settings.subscriptionEndsAt)}
+              </div>
+            )}
+          </div>
+          
+          <div>
+            <h4 className="text-sm font-medium mb-2">Features included:</h4>
+            <ul className="space-y-1">
+              {getSubscriptionFeatures().map((feature, i) => (
+                <li key={i} className="text-sm flex gap-2 items-center">
+                  <span className="text-warmgreen-600">✓</span> {feature}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-wrap gap-2 border-t pt-4">
+          {settings.subscriptionTier === 'free' ? (
+            <Button onClick={handleUpgradeSubscription}>Upgrade Subscription</Button>
+          ) : (
+            <>
+              <Button variant="outline">Manage Billing</Button>
+              <Button 
+                variant="outline" 
+                className="text-rustbrown-600 border-rustbrown-600 hover:bg-rustbrown-50" 
+                onClick={() => setCancelSubscriptionDialogOpen(true)}
+                disabled={isCancellingSubscription}
+              >
+                {isCancellingSubscription ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Cancel Subscription"
+                )}
+              </Button>
+            </>
+          )}
+        </CardFooter>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Security</CardTitle>
+          <CardDescription>
+            Manage your account security settings
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-start gap-3">
+            <UserCheck className="h-5 w-5 text-warmgreen-600 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-medium">Account Status</h4>
+              <p className="text-sm text-muted-foreground mt-1">
+                Your account is active and verified
               </p>
             </div>
-            <Button 
-              variant="outline" 
-              onClick={() => cancelSubscription()}
-              disabled={isCancellingSubscription || settings.subscriptionTier === 'free'}
-            >
-              {isCancellingSubscription ? 'Processing...' : 'Cancel Subscription'}
-            </Button>
           </div>
-        </div>
-      </div>
+          
+          <div className="flex items-start gap-3">
+            <Shield className="h-5 w-5 text-warmgreen-600 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-medium">Password</h4>
+              <p className="text-sm text-muted-foreground mt-1">
+                It's a good idea to use a strong password that you don't use elsewhere.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-end border-t pt-4">
+          <Button variant="outline">Change Password</Button>
+        </CardFooter>
+      </Card>
       
-      {/* Danger Zone - Delete Account */}
-      <div>
-        <h3 className="text-lg font-medium text-red-500">Danger Zone</h3>
-        <div className="mt-4 p-4 border border-red-200 rounded-md bg-red-50">
-          {showDeleteConfirm ? (
-            <div className="space-y-4">
-              <Alert variant="destructive">
-                <AlertDescription>
-                  This action cannot be undone. All your data will be permanently deleted.
-                </AlertDescription>
-              </Alert>
-              
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Enter your password to confirm</Label>
-                <Input 
-                  id="confirm-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Your password"
-                />
-              </div>
-              
-              <div className="flex gap-2">
-                <Button 
-                  variant="destructive" 
-                  onClick={handleDeleteAccount}
-                  disabled={!password.trim() || isDeletingAccount}
-                >
-                  {isDeletingAccount ? 'Deleting...' : 'Confirm Delete'}
-                </Button>
+      {/* Danger Zone Card */}
+      <Card className="border-red-200">
+        <CardHeader className="border-b border-red-200">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-red-500" />
+            <CardTitle className="text-red-500">Danger Zone</CardTitle>
+          </div>
+          <CardDescription>
+            Actions in this zone can't be undone
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <div className="rounded-md border border-red-200 p-4 bg-red-50">
+            <div className="flex flex-col gap-2">
+              <h4 className="text-sm font-medium">Delete Your Account</h4>
+              <p className="text-sm text-muted-foreground">
+                Deleting your account will permanently remove all your data including dogs, litters, breeding records, and settings. 
+                This action cannot be undone and you will not be able to recover any information.
+              </p>
+              <div className="mt-2">
                 <Button 
                   variant="outline" 
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setPassword('');
-                  }}
+                  className="text-red-600 border-red-600 hover:bg-red-50"
+                  onClick={() => setDeleteAccountDialogOpen(true)}
+                  disabled={deleteInProgress || isDeletingAccount}
                 >
-                  Cancel
+                  {deleteInProgress || isDeletingAccount ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Delete Account"
+                  )}
                 </Button>
               </div>
             </div>
-          ) : (
-            <div className="flex items-center justify-between">
-              <p>Delete your account and all associated data</p>
-              <Button 
-                variant="destructive" 
-                onClick={() => setShowDeleteConfirm(true)}
-              >
-                Delete Account
-              </Button>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Cancel Subscription Dialog */}
+      <AlertDialog open={cancelSubscriptionDialogOpen} onOpenChange={setCancelSubscriptionDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Subscription</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel your {settings.subscriptionTier} subscription? 
+              You'll still have access until {formatSubscriptionDate(settings.subscriptionEndsAt)}, 
+              after which you'll be downgraded to the free plan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-2">
+            <p className="text-sm text-muted-foreground mb-4">
+              Type "cancel" to confirm:
+            </p>
+            <Input 
+              value={confirmText} 
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder="cancel"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isCancellingSubscription}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (confirmText.toLowerCase() === 'cancel') {
+                  handleCancelSubscription();
+                } else {
+                  toast({
+                    title: "Confirmation failed",
+                    description: 'Please type "cancel" to confirm',
+                    variant: "destructive",
+                  });
+                }
+              }}
+              className="bg-rustbrown-600 hover:bg-rustbrown-700"
+              disabled={isCancellingSubscription || confirmText.toLowerCase() !== 'cancel'}
+            >
+              {isCancellingSubscription ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Cancel Subscription"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      {/* Delete Account Dialog with improved UX */}
+      <AlertDialog open={deleteAccountDialogOpen} onOpenChange={(open) => {
+        if (!deleteInProgress && !isDeletingAccount) {
+          setDeleteAccountDialogOpen(open);
+          if (!open) {
+            setConfirmPassword('');
+            setConfirmText('');
+          }
+        }
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-600">Delete Your Account</AlertDialogTitle>
+            <AlertDialogDescription>
+              <p className="mb-2">This action cannot be undone. This will permanently delete your account and all associated data including:</p>
+              <ul className="list-disc pl-5 space-y-1 mb-2">
+                <li>All your dogs and their records</li>
+                <li>Breeding history and litter information</li>
+                <li>Calendar events and reminders</li>
+                <li>Personal settings and preferences</li>
+              </ul>
+              <p>Once deleted, you will need to register again if you wish to use the application in the future.</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-2 space-y-4">
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">
+                Enter your password to confirm:
+              </p>
+              <Input 
+                type="password" 
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Your password"
+              />
             </div>
-          )}
-        </div>
-      </div>
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">
+                Type "DELETE MY ACCOUNT" to confirm:
+              </p>
+              <Input 
+                value={confirmText} 
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder="DELETE MY ACCOUNT"
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteInProgress || isDeletingAccount}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (confirmPassword.length > 0 && confirmText === 'DELETE MY ACCOUNT') {
+                  handleDeleteAccount();
+                } else {
+                  toast({
+                    title: "Confirmation failed",
+                    description: 'Please enter your password and type "DELETE MY ACCOUNT" to confirm',
+                    variant: "destructive",
+                  });
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={deleteInProgress || isDeletingAccount || confirmPassword.length === 0 || confirmText !== 'DELETE MY ACCOUNT'}
+            >
+              {deleteInProgress || isDeletingAccount ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Delete Account"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
-
-// Import at the top of the file
-import { useSettings } from '@/hooks/useSettings';
 
 export default AccountSettings;

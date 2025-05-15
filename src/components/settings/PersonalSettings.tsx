@@ -1,128 +1,197 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel,
+  FormMessage
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useSettings } from '@/hooks/useSettings';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { UserSettings } from '@/types/settings';
+import { useSettings } from '@/hooks/useSettings';
+
+const personalFormSchema = z.object({
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  kennelName: z.string().min(1, 'Kennel name is required'),
+  address: z.string().optional(),
+  website: z.string().url('Invalid website URL').optional().or(z.literal('')),
+  phone: z.string().optional(),
+});
+
+type PersonalFormValues = z.infer<typeof personalFormSchema>;
 
 interface PersonalSettingsProps {
-  settings: UserSettings | null;
+  settings: UserSettings;
 }
 
 const PersonalSettings: React.FC<PersonalSettingsProps> = ({ settings }) => {
-  const [firstName, setFirstName] = useState(settings?.profile.first_name || '');
-  const [lastName, setLastName] = useState(settings?.profile.last_name || '');
-  const [kennelName, setKennelName] = useState(settings?.profile.kennel_name || '');
-  const [address, setAddress] = useState(settings?.profile.address || '');
-  const [phone, setPhone] = useState(settings?.profile.phone || '');
-  
-  // Get functions from useSettings hook
   const { updatePersonalInfo, updateKennelInfo, isUpdatingPersonal, isUpdatingKennel } = useSettings();
   
-  // Handle personal info update
-  const handleUpdatePersonalInfo = async () => {
-    await updatePersonalInfo({
-      firstName,
-      lastName
-    });
+  const defaultValues: PersonalFormValues = {
+    firstName: settings.profile.first_name || '',
+    lastName: settings.profile.last_name || '',
+    kennelName: settings.profile.kennel_name || '',
+    address: settings.profile.address || '',
+    website: '', // This would need to be added to the profile model
+    phone: settings.profile.phone || '',
   };
   
-  // Handle kennel info update
-  const handleUpdateKennelInfo = async () => {
-    await updateKennelInfo({
-      kennelName,
-      address,
-      phone
+  const form = useForm<PersonalFormValues>({
+    resolver: zodResolver(personalFormSchema),
+    defaultValues,
+  });
+  
+  const onSubmit = (data: PersonalFormValues) => {
+    // Update personal info
+    updatePersonalInfo({
+      firstName: data.firstName,
+      lastName: data.lastName,
+    });
+    
+    // Update kennel info
+    updateKennelInfo({
+      kennelName: data.kennelName,
+      address: data.address,
+      website: data.website,
+      phone: data.phone,
     });
   };
-  
-  if (!settings) {
-    return <div className="text-center p-4">Loading personal settings...</div>;
-  }
   
   return (
-    <div className="space-y-6">
-      {/* Personal Information */}
-      <div>
-        <h3 className="text-lg font-medium">Personal Information</h3>
-        <div className="mt-4 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input 
-                id="firstName" 
-                value={firstName} 
-                onChange={(e) => setFirstName(e.target.value)} 
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Personal Information</CardTitle>
+            <CardDescription>
+              Update your personal information and contact details
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="First name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Last name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input 
-                id="lastName" 
-                value={lastName} 
-                onChange={(e) => setLastName(e.target.value)} 
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Kennel Information</CardTitle>
+            <CardDescription>
+              Set your kennel name and other business details
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="kennelName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kennel Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Kennel name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Address" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="website"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Website</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Phone number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
-          
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" value={settings.profile.email} disabled />
-            <p className="text-xs text-muted-foreground mt-1">
-              Your email cannot be changed
-            </p>
-          </div>
-          
+          </CardContent>
+        </Card>
+        
+        <div className="flex justify-end">
           <Button 
-            onClick={handleUpdatePersonalInfo} 
-            disabled={isUpdatingPersonal}
+            type="submit" 
+            disabled={isUpdatingPersonal || isUpdatingKennel}
+            className="min-w-[120px]"
           >
-            {isUpdatingPersonal ? 'Saving...' : 'Save Personal Info'}
+            {(isUpdatingPersonal || isUpdatingKennel) ? (
+              <span className="flex items-center gap-2">
+                <span className="animate-spin h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
+                Saving...
+              </span>
+            ) : 'Save Changes'}
           </Button>
         </div>
-      </div>
-      
-      {/* Kennel Information */}
-      <div>
-        <h3 className="text-lg font-medium">Kennel Information</h3>
-        <div className="mt-4 space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="kennelName">Kennel Name</Label>
-            <Input 
-              id="kennelName" 
-              value={kennelName} 
-              onChange={(e) => setKennelName(e.target.value)} 
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
-            <Input 
-              id="address" 
-              value={address} 
-              onChange={(e) => setAddress(e.target.value)} 
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input 
-              id="phone" 
-              value={phone} 
-              onChange={(e) => setPhone(e.target.value)} 
-            />
-          </div>
-          
-          <Button 
-            onClick={handleUpdateKennelInfo} 
-            disabled={isUpdatingKennel}
-          >
-            {isUpdatingKennel ? 'Saving...' : 'Save Kennel Info'}
-          </Button>
-        </div>
-      </div>
-    </div>
+      </form>
+    </Form>
   );
 };
 

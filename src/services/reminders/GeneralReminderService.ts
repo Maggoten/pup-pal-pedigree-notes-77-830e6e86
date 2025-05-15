@@ -1,6 +1,7 @@
 
 import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
+import { createCalendarClockIcon } from '@/utils/iconUtils';
 import { differenceInMonths, parseISO, startOfDay } from 'date-fns';
 
 /**
@@ -31,7 +32,7 @@ export const generateGeneralReminders = (dogs: Dog[]): Reminder[] => {
       id: `general-heat-tracking-${dog.id}`,
       title: `Start Heat Tracking for ${dog.name}`,
       description: `${dog.name} is of breeding age but has no heat records`,
-      icon: 'purple-500', // Use string instead of React component
+      icon: createCalendarClockIcon('purple-500'),
       dueDate: today,
       priority: 'low',
       type: 'breeding', // Changed from 'other' to 'breeding'

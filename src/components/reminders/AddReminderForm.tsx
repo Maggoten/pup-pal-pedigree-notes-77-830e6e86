@@ -37,9 +37,8 @@ const AddReminderForm: React.FC<AddReminderFormProps> = ({ onSubmit }) => {
     onSubmit({
       title,
       description,
-      priority,
-      dueDate, // For UI components
-      due_date: dueDate // For API compatibility
+      dueDate,
+      priority
     });
     
     // Reset form

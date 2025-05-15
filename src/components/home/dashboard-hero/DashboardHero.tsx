@@ -1,39 +1,52 @@
 
 import React from 'react';
-import WelcomeHeader from './WelcomeHeader';
-import MetricCardGrid from './MetricCardGrid';
-import DecorativePawprints from './DecorativePawprints';
+import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
+import { Loader2 } from 'lucide-react';
+import MetricCardGrid from './MetricCardGrid';
+import WelcomeHeader from './WelcomeHeader';
+import DecorativePawprints from './DecorativePawprints';
 
-export interface DashboardHeroProps {
-  username?: string;
-  reminders: number;
-  plannedLitters: number;
-  activePregnancies: ActivePregnancy[];
-  recentLitters: number;
+interface DashboardHeroProps {
+  username: string;
+  reminders?: number;
+  plannedLitters?: number;
+  activePregnancies?: ActivePregnancy[];
+  recentLitters?: number;
   isLoadingPregnancies?: boolean;
 }
 
 const DashboardHero: React.FC<DashboardHeroProps> = ({
-  username = "there",
+  username,
   reminders = 0,
   plannedLitters = 0,
   activePregnancies = [],
   recentLitters = 0,
-  isLoadingPregnancies = false
+  isLoadingPregnancies = false,
 }) => {
   return (
-    <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-indigo-50 to-pink-50 p-6 shadow-sm dark:from-indigo-950/30 dark:to-pink-950/30">
-      <DecorativePawprints />
-      <div className="relative z-10">
+    <div className="relative rounded-lg bg-warmbeige-100/50 overflow-hidden">
+      <div className="px-6 py-12 sm:px-10">
         <WelcomeHeader username={username} />
-        <MetricCardGrid 
-          reminderCount={reminders}
-          plannedLittersCount={plannedLitters}
-          activePregnanciesCount={activePregnancies.length}
-          recentLittersCount={recentLitters}
-        />
+        
+        <div className="mt-8 relative z-10">
+          {isLoadingPregnancies ? (
+            <div className="flex items-center justify-center py-6">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2 text-muted-foreground">Loading statistics...</span>
+            </div>
+          ) : (
+            <MetricCardGrid 
+              reminderCount={reminders} 
+              plannedLittersCount={plannedLitters} 
+              activePregnanciesCount={activePregnancies.length} 
+              recentLittersCount={recentLitters} 
+            />
+          )}
+        </div>
       </div>
+      
+      <DecorativePawprints className="absolute top-0 right-0 z-0 opacity-10" />
     </div>
   );
 };

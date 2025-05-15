@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { UpcomingHeat, RecentMating } from '@/types/reminders';
+import { UpcomingHeat } from '@/types/reminders';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import UpcomingHeatCard from './UpcomingHeatCard';
+import { RecentMating } from '@/types/reminders';
 import RecentMatingsCard from './RecentMatingsCard';
 import MatingTipsCard from './MatingTipsCard';
 
@@ -23,11 +24,7 @@ const MatingSection: React.FC<MatingSectionProps> = ({ upcomingHeats, recentMati
           {upcomingHeats.length > 0 ? (
             <div className="grid gap-3">
               {upcomingHeats.map((heat, index) => (
-                <UpcomingHeatCard 
-                  key={`${heat.dog.id}-${index}`}
-                  heat={heat}
-                  onHeatDeleted={onHeatDeleted}
-                />
+                <UpcomingHeatCard key={`${heat.dogId}-${index}`} heat={heat} onHeatDeleted={onHeatDeleted} />
               ))}
             </div>
           ) : (

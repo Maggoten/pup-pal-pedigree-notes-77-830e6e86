@@ -138,12 +138,10 @@ export const usePlannedLitterMutations = (
     
     try {
       console.log("Deleting litter:", litterId);
-      
-      // Use a more careful approach with proper type handling
       const { error } = await supabase
         .from('planned_litters')
         .delete()
-        .eq('id', litterId as any);
+        .eq('id', litterId);
         
       if (error) throw error;
       

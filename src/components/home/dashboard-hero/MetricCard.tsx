@@ -1,86 +1,69 @@
 
 import React from 'react';
-import { 
-  Bell,
-  Calendar,
-  PawPrint, 
-  Heart as HeartIcon
-} from 'lucide-react';
+import { Calendar, Heart, Dog, PawPrint } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export type IconType = "bell" | "calendar" | "heart" | "pawprint" | "dog";
-
-export interface MetricCardProps {
+interface MetricCardProps {
   title: string;
-  value: string;
-  description: string;
-  icon: IconType;
-  trend: "up" | "down" | "neutral";
+  count: number;
+  icon: 'calendar' | 'heart' | 'pawprint' | 'dog';
+  highlight?: string | null;
+  action: () => void;
+  color?: string;
+  loading?: boolean;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({
   title,
-  value,
-  description,
+  count,
   icon,
-  trend
+  highlight = null,
+  action,
+  color = 'bg-white',
+  loading = false
 }) => {
+  // Update the icon styles to match the image design
+  const getIconStyles = () => {
+    // Use warmgreen for all icons as shown in the image
+    return { textColor: 'text-warmgreen-600' };
+  };
+
   const renderIcon = () => {
+    const { textColor } = getIconStyles();
+    
     switch (icon) {
-      case "bell":
-        return <Bell className="h-6 w-6 text-indigo-500" />;
-      case "calendar":
-        return <Calendar className="h-6 w-6 text-blue-500" />;
-      case "heart":
-        return <HeartIcon className="h-6 w-6 text-rose-500" />;
-      case "pawprint":
-        return <PawPrint className="h-6 w-6 text-amber-500" />;
-      case "dog":
-        return <PawPrint className="h-6 w-6 text-green-500" />;
-      default:
-        return <Bell className="h-6 w-6 text-gray-500" />;
+      case 'calendar': return <Calendar className={`h-5 w-5 ${textColor}`} />;
+      case 'heart': return <Heart className={`h-5 w-5 ${textColor}`} />;
+      case 'pawprint': return <PawPrint className={`h-5 w-5 ${textColor}`} />;
+      case 'dog': return <Dog className={`h-5 w-5 ${textColor}`} />;
+      default: return null;
     }
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5">
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</h3>
-          <p className="text-2xl font-bold mt-1">{value}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{description}</p>
-        </div>
-        <div className="rounded-full p-2 bg-indigo-50 dark:bg-indigo-900/30">
+    <button 
+      onClick={action}
+      className="rounded-xl p-4 md:p-5 bg-white border border-greige-100 transition-transform hover:scale-[1.02] flex flex-col items-start gap-3 w-full text-left shadow-sm"
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <div className={getIconStyles().textColor}>
           {renderIcon()}
         </div>
+        <p className="text-sm font-medium text-darkgray-600">{title}</p>
       </div>
       
-      <div className="mt-3 flex items-center text-xs">
-        {trend === "up" && (
-          <span className="text-green-500 flex items-center">
-            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-            </svg>
-            Increasing
-          </span>
+      <div className="space-y-0">
+        <h3 className="text-2xl font-semibold text-darkgray-800 mb-0">
+          {loading ? <Skeleton className="h-7 w-16" /> : count}
+        </h3>
+        {highlight && !loading && (
+          <p className="text-xs text-darkgray-400 mt-1">{highlight}</p>
         )}
-        {trend === "down" && (
-          <span className="text-red-500 flex items-center">
-            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-            Decreasing
-          </span>
-        )}
-        {trend === "neutral" && (
-          <span className="text-gray-500 flex items-center">
-            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14" />
-            </svg>
-            Stable
-          </span>
+        {highlight && loading && (
+          <Skeleton className="h-4 w-24 mt-1" />
         )}
       </div>
-    </div>
+    </button>
   );
 };
 
