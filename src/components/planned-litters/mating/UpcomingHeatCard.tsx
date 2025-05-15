@@ -16,16 +16,19 @@ import {
 import { format } from 'date-fns';
 import { Dog } from '@/context/DogsContext';
 import { supabase } from '@/integrations/supabase/client';
+import { UpcomingHeat } from '@/types/reminders';
+import { isSupabaseError } from '@/utils/supabaseErrorHandler';
 
 interface UpcomingHeatCardProps {
-  dog: Dog;
-  heatDate: Date;
-  onDeleted: () => void;
+  heat: UpcomingHeat;
+  onHeatDeleted?: () => void;
 }
 
-const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ dog, heatDate, onDeleted }) => {
+const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onHeatDeleted }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  const { dog, heatDate } = heat;
   
   // Format the heat date for display
   const formattedDate = format(heatDate, 'MMM dd, yyyy');
@@ -62,7 +65,9 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ dog, heatDate, onDe
       }
       
       // Call the onDeleted callback
-      onDeleted();
+      if (onHeatDeleted) {
+        onHeatDeleted();
+      }
       setShowConfirm(false);
     } catch (error) {
       console.error('Error deleting heat event:', error);

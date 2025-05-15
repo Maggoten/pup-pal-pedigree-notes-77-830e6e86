@@ -1,221 +1,286 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { 
-  getUserSettings, 
-  updateKennelInfo, 
-  updatePersonalInfo,
-  addSharedUser,
-  removeSharedUser,
-  cancelSubscription
-} from '@/services/settingsService';
-import { deleteUserAccount } from '@/services/authService';
-import { KennelInfo, UserSettings, SharedUser } from '@/types/settings';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
+import { UserSettings, SharedUser, ProfileData } from '@/types/settings';
 import { toast } from '@/components/ui/use-toast';
+import { isSupabaseError, safeGet, safeCast, safeArray } from '@/utils/supabaseErrorHandler';
+
+interface SettingsContextType {
+  settings: UserSettings;
+  isLoading: boolean;
+  error: Error | null;
+  refreshSettings: () => Promise<void>;
+  updateProfile: (profileData: Partial<ProfileData>) => Promise<void>;
+  addSharedUser: (email: string, role: string) => Promise<void>;
+  removeSharedUser: (userId: string) => Promise<void>;
+  isAddingSharedUser: boolean;
+  isRemovingSharedUser: boolean;
+}
+
+const DEFAULT_SETTINGS: UserSettings = {
+  profile: {
+    id: '',
+    email: '',
+    first_name: '',
+    last_name: '',
+    address: '',
+    kennel_name: '',
+    phone: '',
+    subscription_status: 'active',
+    created_at: '',
+    updated_at: ''
+  },
+  sharedUsers: []
+};
+
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+
+export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [isAddingSharedUser, setIsAddingSharedUser] = useState(false);
+  const [isRemovingSharedUser, setIsRemovingSharedUser] = useState(false);
+  const { user, session } = useAuth();
+  
+  const loadSharedUsers = async (userId: string) => {
+    try {
+      const { data: sharedUsersData, error: sharedUsersError } = await supabase
+        .from('shared_users')
+        .select('*')
+        .eq('owner_id', userId);
+      
+      if (sharedUsersError) throw new Error(sharedUsersError.message);
+      
+      // Safe access to prevent type issues
+      const safeSharedUsers = safeArray(sharedUsersData).map(userData => ({
+        id: safeGet(userData, 'id', ''),
+        shared_with_id: safeGet(userData, 'shared_with_id', ''),
+        role: safeGet(userData, 'role', 'viewer'),
+        status: safeGet(userData, 'status', 'pending'),
+        created_at: safeGet(userData, 'created_at', ''),
+        updated_at: safeGet(userData, 'updated_at', ''),
+        owner_id: safeGet(userData, 'owner_id', ''),
+      }));
+      
+      return safeSharedUsers;
+    } catch (err) {
+      console.error('Error loading shared users:', err);
+      return [];
+    }
+  };
+
+  const refreshSettings = async () => {
+    if (!user?.id) {
+      setSettings(DEFAULT_SETTINGS);
+      setIsLoading(false);
+      return;
+    }
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Get profile data
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      if (profileError) throw new Error(profileError.message);
+      
+      // Safe profile handling
+      const safeProfile: ProfileData = {
+        id: safeGet(profileData, 'id', ''),
+        email: safeGet(profileData, 'email', ''),
+        first_name: safeGet(profileData, 'first_name', ''),
+        last_name: safeGet(profileData, 'last_name', ''),
+        address: safeGet(profileData, 'address', ''),
+        kennel_name: safeGet(profileData, 'kennel_name', ''),
+        phone: safeGet(profileData, 'phone', ''),
+        subscription_status: safeGet(profileData, 'subscription_status', 'active'),
+        created_at: safeGet(profileData, 'created_at', ''),
+        updated_at: safeGet(profileData, 'updated_at', '')
+      };
+      
+      // Get shared users
+      const sharedUsers = await loadSharedUsers(user.id);
+      
+      setSettings({
+        profile: safeProfile,
+        sharedUsers
+      });
+    } catch (err) {
+      console.error('Error fetching settings:', err);
+      setError(err instanceof Error ? err : new Error('Failed to load settings'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const updateProfile = async (profileData: Partial<ProfileData>) => {
+    if (!user?.id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(profileData)
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      await refreshSettings();
+      
+      toast({
+        title: 'Profile Updated',
+        description: 'Your profile settings have been updated.'
+      });
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      toast({
+        title: 'Update Failed',
+        description: 'Failed to update profile settings.',
+        variant: 'destructive'
+      });
+    }
+  };
+  
+  const addSharedUser = async (email: string, role: string) => {
+    if (!user?.id) return;
+    
+    setIsAddingSharedUser(true);
+    
+    try {
+      // First check if user exists by email
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .single();
+      
+      if (userError) {
+        if (userError.code === 'PGRST116') {
+          throw new Error(`User with email ${email} not found.`);
+        }
+        throw userError;
+      }
+      
+      const sharedWithId = safeGet(userData, 'id', '');
+      if (!sharedWithId) {
+        throw new Error('Could not find user with that email');
+      }
+      
+      // Check if user is already shared
+      const { data: existingShares, error: sharesError } = await supabase
+        .from('shared_users')
+        .select('*')
+        .eq('owner_id', user.id)
+        .eq('shared_with_id', sharedWithId);
+      
+      if (sharesError) throw sharesError;
+      
+      if (safeArray(existingShares).length > 0) {
+        throw new Error(`You've already shared access with ${email}`);
+      }
+      
+      // Add shared user
+      const { error: insertError } = await supabase
+        .from('shared_users')
+        .insert({
+          owner_id: user.id,
+          shared_with_id: sharedWithId,
+          role,
+          status: 'pending'
+        });
+      
+      if (insertError) throw insertError;
+      
+      // Reload shared users
+      await refreshSettings();
+      
+      toast({
+        title: 'Invitation Sent',
+        description: `Shared access with ${email} successfully.`
+      });
+      
+    } catch (err) {
+      console.error('Error adding shared user:', err);
+      toast({
+        title: 'Invitation Failed',
+        description: err instanceof Error ? err.message : 'Failed to share access.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsAddingSharedUser(false);
+    }
+  };
+  
+  const removeSharedUser = async (userId: string) => {
+    if (!user?.id) return;
+    
+    setIsRemovingSharedUser(true);
+    
+    try {
+      const { error } = await supabase
+        .from('shared_users')
+        .delete()
+        .eq('owner_id', user.id)
+        .eq('shared_with_id', userId);
+      
+      if (error) throw error;
+      
+      // Reload shared users
+      await refreshSettings();
+      
+      toast({
+        title: 'User Removed',
+        description: 'User access has been removed successfully.'
+      });
+      
+    } catch (err) {
+      console.error('Error removing shared user:', err);
+      toast({
+        title: 'Failed to Remove',
+        description: 'An error occurred while removing user access.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsRemovingSharedUser(false);
+    }
+  };
+  
+  // Load settings when user changes
+  useEffect(() => {
+    if (user?.id) {
+      refreshSettings();
+    }
+  }, [user?.id]);
+  
+  return (
+    <SettingsContext.Provider
+      value={{
+        settings,
+        isLoading,
+        error,
+        refreshSettings,
+        updateProfile,
+        addSharedUser,
+        removeSharedUser,
+        isAddingSharedUser,
+        isRemovingSharedUser
+      }}
+    >
+      {children}
+    </SettingsContext.Provider>
+  );
+};
 
 export const useSettings = () => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  
-  // Fetch user settings
-  const { 
-    data: settings, 
-    isLoading, 
-    error 
-  } = useQuery({
-    queryKey: ['settings', user?.email],
-    queryFn: async () => {
-      if (!user?.email) return null;
-      
-      const data = await getUserSettings(user);
-      
-      // Initialize with empty or default values if data is missing
-      const profileData = data?.profile || {
-        id: '',
-        email: '',
-        first_name: null,
-        last_name: null,
-        kennel_name: null,
-        address: null,
-        phone: null,
-        created_at: null,
-        updated_at: null,
-        subscription_status: 'free'
-      };
-      
-      // Safely process shared users
-      const sharedUsers = Array.isArray(data?.sharedUsers) 
-        ? data.sharedUsers.map(user => {
-            // Ensure each user has valid required properties
-            return {
-              id: user?.id || '',
-              shared_with_id: user?.shared_with_id || '',
-              role: (['admin', 'editor', 'viewer'].includes(user?.role) 
-                ? user.role as 'admin' | 'editor' | 'viewer' 
-                : 'viewer'),
-              status: (['pending', 'active'].includes(user?.status) 
-                ? user.status as 'pending' | 'active' 
-                : 'pending'),
-              created_at: user?.created_at || '',
-              updated_at: user?.updated_at || '',
-              owner_id: user?.owner_id || ''
-            };
-          })
-        : [];
-      
-      // Safely determine subscription tier
-      const subscriptionTier = 
-        profileData.subscription_status === 'premium' ? 'premium' :
-        profileData.subscription_status === 'professional' ? 'professional' : 'free';
-      
-      // Construct the final settings object
-      const userSettings: UserSettings = {
-        profile: profileData,
-        sharedUsers: sharedUsers,
-        subscriptionTier: subscriptionTier,
-        // Placeholder for subscription end date
-        subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
-      };
-      
-      return userSettings;
-    },
-    enabled: !!user?.email,
-  });
-  
-  // Update kennel info
-  const updateKennelInfoMutation = useMutation({
-    mutationFn: (kennelInfo: KennelInfo) => updateKennelInfo(user, kennelInfo),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings', user?.email] });
-      toast({
-        title: "Kennel information updated",
-        description: "Your kennel information has been updated successfully.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to update kennel information",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Update personal info
-  const updatePersonalInfoMutation = useMutation({
-    mutationFn: (personalInfo: { firstName: string; lastName: string }) => 
-      updatePersonalInfo(user, personalInfo),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings', user?.email] });
-      toast({
-        title: "Personal information updated",
-        description: "Your personal information has been updated successfully.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to update personal information",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    },
-  });
-  
-  // Add shared user
-  const addSharedUserMutation = useMutation({
-    mutationFn: ({ email, role }: { email: string; role: 'admin' | 'editor' | 'viewer' }) => 
-      addSharedUser(user, email, role),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings', user?.email] });
-      toast({
-        title: "User invited",
-        description: "An invitation has been sent to the user.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to invite user",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    },
-  });
-  
-  // Remove shared user
-  const removeSharedUserMutation = useMutation({
-    mutationFn: (sharedUserId: string) => removeSharedUser(user, sharedUserId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings', user?.email] });
-      toast({
-        title: "User removed",
-        description: "The user has been removed from your shared accounts.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to remove user",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Cancel subscription
-  const cancelSubscriptionMutation = useMutation({
-    mutationFn: () => cancelSubscription(user),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings', user?.email] });
-      toast({
-        title: "Subscription cancelled",
-        description: "Your subscription has been cancelled. You'll still have access until the end of your billing period.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to cancel subscription",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Delete account
-  const deleteAccountMutation = useMutation({
-    mutationFn: (password: string) => deleteUserAccount(password),
-    onSuccess: () => {
-      toast({
-        title: "Account deleted",
-        description: "Your account has been deleted. You will be logged out shortly.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to delete account",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    },
-  });
-
-  return {
-    settings,
-    isLoading,
-    error,
-    updateKennelInfo: (kennelInfo: KennelInfo) => updateKennelInfoMutation.mutate(kennelInfo),
-    updatePersonalInfo: (personalInfo: { firstName: string; lastName: string }) => 
-      updatePersonalInfoMutation.mutate(personalInfo),
-    addSharedUser: (email: string, role: 'admin' | 'editor' | 'viewer') => 
-      addSharedUserMutation.mutate({ email, role }),
-    removeSharedUser: (sharedUserId: string) => removeSharedUserMutation.mutate(sharedUserId),
-    cancelSubscription: () => cancelSubscriptionMutation.mutate(),
-    deleteAccount: (password: string): Promise<boolean> => {
-      return deleteAccountMutation.mutateAsync(password);
-    },
-    isUpdatingKennel: updateKennelInfoMutation.isPending,
-    isUpdatingPersonal: updatePersonalInfoMutation.isPending,
-    isAddingSharedUser: addSharedUserMutation.isPending,
-    isRemovingSharedUser: removeSharedUserMutation.isPending,
-    isCancellingSubscription: cancelSubscriptionMutation.isPending,
-    isDeletingAccount: deleteAccountMutation.isPending
-  };
+  const context = useContext(SettingsContext);
+  if (context === undefined) {
+    throw new Error('useSettings must be used within a SettingsProvider');
+  }
+  return context;
 };

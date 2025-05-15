@@ -1,35 +1,30 @@
 
-import React from 'react';
+// Import existing types
+import { Dog } from '@/context/DogsContext';
+
+export interface UpcomingHeat {
+  dog: Dog;
+  heatDate: Date;
+  dogId: string;  // Used for storing or referencing the heat
+}
+
+export interface RecentMating {
+  id: string;
+  damId: string;
+  damName: string;
+  sireId?: string;
+  sireName: string;
+  date: Date;
+  notes?: string;
+}
 
 export interface Reminder {
   id: string;
   title: string;
   description: string;
   dueDate: Date;
-  priority: 'high' | 'medium' | 'low';
-  type: 'pregnancy' | 'litter' | 'breeding' | 'health' | 'heat' | 'vaccination' | 'birthday' | 'other';
-  icon?: React.ReactNode;
-  relatedId?: string;
-  isCompleted?: boolean;
-}
-
-export interface UpcomingHeat {
-  dogId: string;
-  dogName: string;
-  date: Date;
-  heatIndex: number; // Add the index of the heat record in the dog's heatHistory array
-}
-
-export interface RecentMating {
-  litterId: string;
-  maleName: string;
-  femaleName: string;
-  date: Date;
-}
-
-export interface CustomReminderInput {
-  title: string;
-  description: string;
-  dueDate: Date;
-  priority: 'high' | 'medium' | 'low';
+  priority: 'low' | 'medium' | 'high';
+  type: 'general' | 'dog' | 'litter' | 'breeding';
+  isCompleted: boolean;
+  relatedId?: string;  // Id of related entity (dog, litter, etc)
 }

@@ -116,7 +116,7 @@ const MyLitters: React.FC = () => {
     >
       {/* Offline indicator */}
       {isOffline && (
-        <Alert variant="warning" className="mb-4 bg-amber-50 border border-amber-200">
+        <Alert variant="default" className="mb-4 bg-amber-50 border border-amber-200">
           <WifiOff className="h-4 w-4 mr-2 text-amber-500" />
           <AlertDescription className="flex items-center justify-between w-full">
             <span>You're currently offline. {hasCachedData ? 'Using cached data.' : 'Some features may be limited.'}</span>

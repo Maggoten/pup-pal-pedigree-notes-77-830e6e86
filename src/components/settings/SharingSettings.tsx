@@ -44,6 +44,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from '@/integrations/supabase/client';
+import { isSupabaseError, safeGet } from '@/utils/supabaseErrorHandler';
 
 const inviteFormSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -102,8 +103,12 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
           // Add results to our map if we have valid data
           if (data) {
             data.forEach(profile => {
-              if (profile && profile.id && profile.email) {
-                emailMap[profile.id] = profile.email;
+              if (profile) {
+                const id = safeGet(profile, 'id', '');
+                const email = safeGet(profile, 'email', '');
+                if (id && email) {
+                  emailMap[id] = email;
+                }
               }
             });
           }
@@ -308,7 +313,7 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Shared User</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove {sharedUserEmails[userToRemove?.shared_with_id || ''] || userToRemove?.shared_with_id} from your shared users?
+              Are you sure you want to remove {userToRemove && sharedUserEmails[userToRemove.shared_with_id] || userToRemove?.shared_with_id} from your shared users?
               They will no longer have access to your breeding records.
             </AlertDialogDescription>
           </AlertDialogHeader>
