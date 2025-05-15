@@ -45,8 +45,8 @@ export const useArchivedLittersQuery = () => {
     staleTime: isMobile ? 1000 * 60 * 5 : 1000 * 60, // 5 minutes on mobile, 1 minute on desktop
     retry: isMobile ? 3 : 2, // More retries on mobile
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000), // Exponential backoff capped at 30s
-    // On mobile, only fetch this data when needed and it's stale
-    refetchOnMount: isMobile ? 'stale' : true,
+    // On mobile, only fetch this data when needed
+    refetchOnMount: isMobile ? false : true, // No refetch on mount for mobile
     // On mobile, we shouldn't refetch when window gets focus
     refetchOnWindowFocus: isMobile ? false : true,
     // Network mode for better mobile handling

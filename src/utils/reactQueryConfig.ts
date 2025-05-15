@@ -14,7 +14,7 @@ export const queryClient = new QueryClient({
       gcTime: isMobile ? 1000 * 60 * 15 : 1000 * 60 * 30, // 15 min on mobile vs 30 min on desktop
       // Modern error handling approach
       throwOnError: false,
-      refetchOnMount: isMobile ? 'stale' : true, // Only refetch stale data on mobile
+      refetchOnMount: isMobile ? false : true, // No refetch on mount for mobile
       refetchOnReconnect: true,
       // Reduce network pressure on mobile
       networkMode: isMobile ? 'offlineFirst' : 'online'
