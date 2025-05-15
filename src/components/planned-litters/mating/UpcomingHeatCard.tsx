@@ -1,105 +1,117 @@
-import React from 'react';
-import { UpcomingHeat } from '@/types/reminders';
-import { formatDistance, format } from 'date-fns';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { X, CalendarDays } from 'lucide-react';
-import { HeatService } from '@/services/HeatService';
-import { toast } from '@/components/ui/use-toast';
-import { ReminderCalendarSyncService } from '@/services/ReminderCalendarSyncService';
+import { Trash2 } from 'lucide-react';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { format } from 'date-fns';
+import { Dog } from '@/context/DogsContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface UpcomingHeatCardProps {
-  heat: UpcomingHeat;
-  onHeatDeleted?: () => void;
+  dog: Dog;
+  heatDate: Date;
+  onDeleted: () => void;
 }
 
-const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onHeatDeleted }) => {
-  const [isDeleting, setIsDeleting] = React.useState(false);
-
-  const daysAway = formatDistance(heat.date, new Date(), { addSuffix: true });
-  const dateFormatted = format(heat.date, 'MMM d, yyyy');
-
-  const handleDelete = async () => {
+const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ dog, heatDate, onDeleted }) => {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Format the heat date for display
+  const formattedDate = format(heatDate, 'MMM dd, yyyy');
+  
+  // Function to delete the heat event
+  const deleteHeatEvent = async () => {
     try {
       setIsDeleting(true);
       
-      if (await HeatService.deleteHeatEntry(heat.dogId, heat.heatIndex)) {
-        toast({
-          title: "Heat record deleted",
-          description: "The heat record has been removed from the dog's history."
-        });
-        
-        // Also delete any corresponding calendar events
-        try {
-          const heatEventId = `event-heat-${heat.dogId}-${heat.date.getTime()}`;
-          const reminderEventId = `event-heat-reminder-${heat.dogId}-${heat.date.getTime()}`;
-          
-          // Use supabase to delete the events by matching type, dog_id and date
-          const { data: calendarEvents } = await supabase
-            .from('calendar_events')
-            .select('id')
-            .eq('dog_id', heat.dogId)
-            .in('type', ['heat', 'heat-reminder'])
-            .eq('date', heat.date.toISOString());
-            
-          if (calendarEvents && calendarEvents.length > 0) {
-            await supabase
-              .from('calendar_events')
-              .delete()
-              .in('id', calendarEvents.map(event => event.id));
-          }
-        } catch (error) {
-          console.error('Error removing calendar events for deleted heat:', error);
-        }
-        
-        if (onHeatDeleted) {
-          onHeatDeleted();
-        }
-      } else {
-        toast({
-          title: "Error",
-          description: "Could not delete the heat record. Please try again.",
-          variant: "destructive"
-        });
+      // Find the calendar event that corresponds to this dog's heat
+      const { data, error } = await supabase
+        .from('calendar_events')
+        .select('id')
+        .eq('dog_id', dog.id as any)
+        .eq('type', 'heat' as any)
+        .eq('date', heatDate.toISOString() as any)
+        .limit(1);
+      
+      if (error) {
+        console.error('Error finding heat event:', error);
+        throw error;
       }
+      
+      // If we found the event, delete it
+      if (data && data.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('calendar_events')
+          .delete()
+          .eq('id', data[0].id);
+        
+        if (deleteError) {
+          throw deleteError;
+        }
+      }
+      
+      // Call the onDeleted callback
+      onDeleted();
+      setShowConfirm(false);
+    } catch (error) {
+      console.error('Error deleting heat event:', error);
     } finally {
       setIsDeleting(false);
     }
   };
-
+  
   return (
-    <Card className="bg-white border-warmbeige-200 overflow-hidden">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-sm">
-              {heat.dogName}'s Next Heat
-            </h3>
-            <div className="flex items-center gap-1 mt-1">
-              <CalendarDays className="h-3 w-3 text-rose-400" />
-              <p className="text-xs text-muted-foreground">
-                {dateFormatted}
-              </p>
-            </div>
-            <Badge variant="secondary" className="mt-2 bg-rose-50 text-rose-700 hover:bg-rose-100">
-              {daysAway}
-            </Badge>
-          </div>
-          
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="h-6 w-6"
-            title="Delete this heat record"
-          >
-            <X className="h-4 w-4 text-muted-foreground" />
-          </Button>
-        </div>
+    <Card className="relative hover:shadow-md transition-shadow">
+      <CardContent className="pt-6 pb-0">
+        <h3 className="font-medium text-lg">{dog.name}</h3>
+        <p className="text-muted-foreground text-sm">Expected heat: {formattedDate}</p>
+        <p className="text-sm mt-1.5">Breed: {dog.breed || 'Not specified'}</p>
       </CardContent>
+      
+      <CardFooter className="flex justify-end p-4">
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="h-8 w-8 text-destructive hover:bg-destructive/10" 
+          onClick={() => setShowConfirm(true)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </CardFooter>
+      
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Heat Event</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this heat event for {dog.name}? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={deleteHeatEvent}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };

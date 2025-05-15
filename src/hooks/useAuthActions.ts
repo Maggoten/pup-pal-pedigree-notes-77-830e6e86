@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { User, RegisterData } from '@/types/auth';
@@ -205,7 +206,7 @@ export const useAuthActions = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', userId as any)
         .maybeSingle();
       
       if (error) {
@@ -214,7 +215,12 @@ export const useAuthActions = () => {
       }
       
       console.log('[Auth Action] Profile retrieved:', data ? 'success' : 'not found');
-      return data;
+      
+      // Type-safe return with null handling
+      if (!data) return null;
+      
+      // Return the profile data
+      return data as Profile;
     } catch (error) {
       console.error("[Auth Action] Error fetching user profile:", error);
       throw error;

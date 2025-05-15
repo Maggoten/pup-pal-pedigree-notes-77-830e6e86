@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { 
@@ -24,30 +25,56 @@ export const useSettings = () => {
   } = useQuery({
     queryKey: ['settings', user?.email],
     queryFn: async () => {
+      if (!user?.email) return null;
+      
       const data = await getUserSettings(user);
       
-      // Transform the data to match our UserSettings interface
+      // Initialize with empty or default values if data is missing
+      const profileData = data?.profile || {
+        id: '',
+        email: '',
+        first_name: null,
+        last_name: null,
+        kennel_name: null,
+        address: null,
+        phone: null,
+        created_at: null,
+        updated_at: null,
+        subscription_status: 'free'
+      };
+      
+      // Safely process shared users
+      const sharedUsers = Array.isArray(data?.sharedUsers) 
+        ? data.sharedUsers.map(user => {
+            // Ensure each user has valid required properties
+            return {
+              id: user?.id || '',
+              shared_with_id: user?.shared_with_id || '',
+              role: (['admin', 'editor', 'viewer'].includes(user?.role) 
+                ? user.role as 'admin' | 'editor' | 'viewer' 
+                : 'viewer'),
+              status: (['pending', 'active'].includes(user?.status) 
+                ? user.status as 'pending' | 'active' 
+                : 'pending'),
+              created_at: user?.created_at || '',
+              updated_at: user?.updated_at || '',
+              owner_id: user?.owner_id || ''
+            };
+          })
+        : [];
+      
+      // Safely determine subscription tier
+      const subscriptionTier = 
+        profileData.subscription_status === 'premium' ? 'premium' :
+        profileData.subscription_status === 'professional' ? 'professional' : 'free';
+      
+      // Construct the final settings object
       const userSettings: UserSettings = {
-        profile: data.profile,
-        // Map the sharedUsers array to ensure roles are properly typed
-        sharedUsers: data.sharedUsers?.map(user => ({
-          ...user,
-          // Ensure role is one of the allowed types or default to 'viewer'
-          role: (['admin', 'editor', 'viewer'].includes(user.role) 
-            ? user.role as 'admin' | 'editor' | 'viewer' 
-            : 'viewer'),
-          // Ensure status is one of the allowed types or default to 'pending'
-          status: (['pending', 'active'].includes(user.status) 
-            ? user.status as 'pending' | 'active' 
-            : 'pending'),
-        })) || [],
-        
-        // Derive subscription tier from profile.subscription_status
-        subscriptionTier: data.profile.subscription_status === 'premium' ? 'premium' :
-                        data.profile.subscription_status === 'professional' ? 'professional' : 'free',
-        
-        // Placeholder for subscription end date - would come from a real subscription system
-        subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Placeholder: 30 days from now
+        profile: profileData,
+        sharedUsers: sharedUsers,
+        subscriptionTier: subscriptionTier,
+        // Placeholder for subscription end date
+        subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
       };
       
       return userSettings;

@@ -76,26 +76,40 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
     const fetchSharedUserEmails = async () => {
       if (!settings.sharedUsers?.length) return;
       
-      const userIds = settings.sharedUsers.map(user => user.shared_with_id);
-      
       try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, email')
-          .in('id', userIds);
+        // Create an array of user IDs we need to fetch
+        const userIds = settings.sharedUsers.map(user => user.shared_with_id);
+        
+        // Initialize an empty object for our email mapping
+        const emailMap: Record<string, string> = {};
+        
+        // Fetch profiles in batches to avoid potential in() clause limitations
+        const batchSize = 10;
+        for (let i = 0; i < userIds.length; i += batchSize) {
+          const batchIds = userIds.slice(i, i + batchSize);
           
-        if (error) {
-          console.error('Error fetching shared user emails:', error);
-          return;
+          // Use a safer approach with Supabase types
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('id, email')
+            .in('id', batchIds as any);
+            
+          if (error) {
+            console.error('Error fetching shared user emails:', error);
+            continue;
+          }
+          
+          // Add results to our map if we have valid data
+          if (data) {
+            data.forEach(profile => {
+              if (profile && profile.id && profile.email) {
+                emailMap[profile.id] = profile.email;
+              }
+            });
+          }
         }
         
-        if (data) {
-          const emailMap: Record<string, string> = {};
-          data.forEach(profile => {
-            emailMap[profile.id] = profile.email;
-          });
-          setSharedUserEmails(emailMap);
-        }
+        setSharedUserEmails(emailMap);
       } catch (err) {
         console.error('Exception fetching shared user emails:', err);
       }

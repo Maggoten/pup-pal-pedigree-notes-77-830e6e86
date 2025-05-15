@@ -23,7 +23,7 @@ const PageLoader = () => (
 );
 
 const AppRoutes: React.FC = () => {
-  const { isAuthenticated, isAuthReady } = useAuth();
+  const { isLoggedIn, isAuthReady } = useAuth();
 
   // Show loading state while auth is being checked
   if (!isAuthReady) {
@@ -40,27 +40,27 @@ const AppRoutes: React.FC = () => {
         {/* Protected routes - require authentication */}
         <Route 
           path="/my-dogs" 
-          element={isAuthenticated ? <MyDogs /> : <Navigate to="/login" replace />} 
+          element={isLoggedIn ? <MyDogs /> : <Navigate to="/login" replace />} 
         />
         <Route 
           path="/my-litters" 
-          element={isAuthenticated ? <MyLitters /> : <Navigate to="/login" replace />} 
+          element={isLoggedIn ? <MyLitters /> : <Navigate to="/login" replace />} 
         />
         <Route 
           path="/planned-litters" 
-          element={isAuthenticated ? <PlannedLitters /> : <Navigate to="/login" replace />} 
+          element={isLoggedIn ? <PlannedLitters /> : <Navigate to="/login" replace />} 
         />
         <Route 
           path="/pregnancy" 
-          element={isAuthenticated ? <Pregnancy /> : <Navigate to="/login" replace />} 
+          element={isLoggedIn ? <Pregnancy /> : <Navigate to="/login" replace />} 
         />
         <Route 
           path="/pregnancy/:id" 
-          element={isAuthenticated ? <PregnancyDetails /> : <Navigate to="/login" replace />} 
+          element={isLoggedIn ? <PregnancyDetails /> : <Navigate to="/login" replace />} 
         />
         <Route 
           path="/puppies" 
-          element={isAuthenticated ? <Puppies /> : <Navigate to="/login" replace />} 
+          element={isLoggedIn ? <Puppies /> : <Navigate to="/login" replace />} 
         />
         
         {/* 404 route */}
