@@ -35,8 +35,23 @@ export const useDashboardData = () => {
       if (user?.id) {
         try {
           setCalendarLoading(true);
-          const data = await getCalendarEvents(user.id);
-          setEvents(data);
+          const data = await getCalendarEvents();
+          
+          // Convert to CalendarEvent format
+          const formattedEvents: CalendarEvent[] = data.map(event => ({
+            id: event.id,
+            title: event.title,
+            date: new Date(event.date),
+            time: event.time || '',
+            type: event.type || 'general',
+            dogId: event.dogId || '',
+            dogName: event.dogName || '',
+            notes: event.notes || '',
+            startDate: event.date ? new Date(event.date) : undefined,
+            endDate: event.date ? new Date(event.date) : undefined,
+          }));
+          
+          setEvents(formattedEvents);
           setCalendarError(false);
         } catch (error) {
           console.error('Error loading calendar events:', error);
@@ -73,7 +88,7 @@ export const useDashboardData = () => {
         description: 'Annual checkup for Max',
         type: 'health',
         priority: 'high',
-        due_date: new Date(),
+        dueDate: new Date(),
         is_completed: false,
       },
       {
@@ -82,7 +97,7 @@ export const useDashboardData = () => {
         description: 'Luna needs her shots',
         type: 'vaccination',
         priority: 'medium',
-        due_date: new Date(Date.now() + 86400000),
+        dueDate: new Date(Date.now() + 86400000),
         is_completed: false,
       }
     ]);
@@ -96,8 +111,8 @@ export const useDashboardData = () => {
   }, [events]);
   
   // Handler for adding a new event
-  const handleAddEvent = useCallback(async (event: Partial<CalendarEvent>) => {
-    if (!user?.id) return;
+  const handleAddEvent = useCallback(async (eventData: CalendarEvent): Promise<boolean> => {
+    if (!user?.id) return false;
     
     try {
       // Implement proper event adding logic here
@@ -105,6 +120,7 @@ export const useDashboardData = () => {
         title: "Event Added",
         description: "Your event has been successfully added to the calendar.",
       });
+      return true;
     } catch (error) {
       console.error('Error adding event:', error);
       toast({
@@ -112,11 +128,12 @@ export const useDashboardData = () => {
         description: "Failed to add event",
         variant: "destructive",
       });
+      return false;
     }
   }, [user?.id]);
   
   // Handler for deleting an event
-  const deleteEvent = useCallback(async (eventId: string) => {
+  const deleteEvent = useCallback(async (eventId: string): Promise<boolean> => {
     try {
       // Implement proper event deletion logic here
       setEvents(prev => prev.filter(event => event.id !== eventId));
@@ -124,6 +141,7 @@ export const useDashboardData = () => {
         title: "Event Deleted",
         description: "The event has been removed from your calendar.",
       });
+      return true;
     } catch (error) {
       console.error('Error deleting event:', error);
       toast({
@@ -131,11 +149,12 @@ export const useDashboardData = () => {
         description: "Failed to delete event",
         variant: "destructive",
       });
+      return false;
     }
   }, []);
   
   // Handler for editing an event
-  const handleEditEvent = useCallback(async (eventId: string, updatedEvent: Partial<CalendarEvent>) => {
+  const handleEditEvent = useCallback(async (eventId: string, updatedEvent: CalendarEvent): Promise<boolean> => {
     try {
       // Implement proper event editing logic here
       setEvents(prev => prev.map(event => event.id === eventId ? { ...event, ...updatedEvent } : event));
@@ -143,6 +162,7 @@ export const useDashboardData = () => {
         title: "Event Updated",
         description: "Your event has been successfully updated.",
       });
+      return true;
     } catch (error) {
       console.error('Error updating event:', error);
       toast({
@@ -150,11 +170,12 @@ export const useDashboardData = () => {
         description: "Failed to update event",
         variant: "destructive",
       });
+      return false;
     }
   }, []);
   
   // Handler for marking reminders as complete
-  const handleMarkComplete = useCallback(async (reminderId: string) => {
+  const handleMarkComplete = useCallback(async (reminderId: string): Promise<boolean> => {
     try {
       // Implement proper reminder completion logic here
       setReminders(prev => prev.map(reminder => reminder.id === reminderId 
@@ -163,6 +184,7 @@ export const useDashboardData = () => {
         title: "Reminder Completed",
         description: "The reminder has been marked as complete.",
       });
+      return true;
     } catch (error) {
       console.error('Error marking reminder as complete:', error);
       toast({
@@ -170,6 +192,7 @@ export const useDashboardData = () => {
         description: "Failed to update reminder status",
         variant: "destructive",
       });
+      return false;
     }
   }, []);
   

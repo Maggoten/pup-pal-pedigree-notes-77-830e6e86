@@ -5,7 +5,7 @@ interface WelcomeHeaderProps {
   username: string;
 }
 
-const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ username }) => {
+const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ username = "there" }) => {
   return (
     <div className="px-6 pt-4 pb-1 border-b border-warmbeige-200">
       <h2 className="text-2xl font-playfair text-primary">Welcome back, {username}!</h2>

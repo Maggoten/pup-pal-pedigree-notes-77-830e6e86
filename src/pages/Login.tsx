@@ -5,7 +5,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import AuthTabs from '@/components/auth/AuthTabs';
 import BreedingJourneyLogo from '@/components/BreedingJourneyLogo';
-import { RegisterFormValues } from '@/types/auth';
 
 const Login: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('login');
@@ -43,7 +42,6 @@ const Login: React.FC = () => {
             </TabsList>
             
             <AuthTabs 
-              activeTab={activeTab} 
               onLoginSuccess={handleLoginSuccess}
             />
           </Tabs>

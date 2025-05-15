@@ -9,7 +9,6 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 import { getDisplayUsername } from '@/utils/userDisplayUtils';
 import { getActivePregnancies } from '@/services/PregnancyService';
 import { toast } from '@/components/ui/use-toast';
-import { AddEventFormValues } from '@/components/calendar/types';
 
 interface DashboardLayoutProps {
   user: User | null;
@@ -63,11 +62,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const calendarProps = {
     getEventsForDate: dashboardData.getEventsForDate,
     getEventColor: dashboardData.getEventColor,
-    addEvent: (data: AddEventFormValues) => dashboardData.handleAddEvent(data),
-    deleteEvent: (eventId: string) => dashboardData.deleteEvent(eventId),
-    editEvent: (eventId: string, data: AddEventFormValues) => dashboardData.handleEditEvent(eventId, data),
+    addEvent: dashboardData.handleAddEvent,
+    deleteEvent: dashboardData.deleteEvent,
+    editEvent: dashboardData.handleEditEvent,
     isLoading: dashboardData.calendarLoading,
-    hasError: dashboardData.calendarError // This now receives a boolean value
+    hasError: dashboardData.calendarError
   };
   
   const remindersProps = {

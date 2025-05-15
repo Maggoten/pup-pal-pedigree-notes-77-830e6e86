@@ -1,50 +1,33 @@
-
-import { Dog } from "@/context/DogsContext";
-
-export interface UpcomingHeat {
-  dog: Dog;
-  heatDate: Date;
-}
-
-export interface RecentMating {
-  id: string;
-  litterId: string;
-  damId: string;
-  damName: string;
-  sireId?: string;
-  sireName?: string;
-  maleName: string;
-  femaleName: string;
-  date: Date;
-}
-
-export interface BreedingReminder {
-  id: string;
-  title: string;
-  date: Date;
-  type: string;
-  dogId?: string;
-  dogName?: string;
-}
+import { Dog } from './dogs';
 
 export interface Reminder {
   id: string;
   title: string;
   description: string;
+  type: string; 
   priority: 'high' | 'medium' | 'low';
   dueDate: Date;
-  type: string;
-  relatedId?: string;
-  isCompleted?: boolean;
-  icon?: React.ReactNode;
+  is_completed?: boolean;
+  icon?: string;
+  related_id?: string;
 }
 
 export interface CustomReminderInput {
   title: string;
-  description: string;
+  description?: string;
   priority: 'high' | 'medium' | 'low';
+  dueDate: Date;
+  due_date: Date; // For API compatibility
   type?: string;
-  relatedId?: string;
-  due_date?: Date; // For API compatibility
-  dueDate?: Date; // For UI component compatibility
+}
+
+export interface UpcomingHeat {
+  dog: Dog;
+  expectedDate: Date;
+  daysTillHeat: number;
+  id?: string;
+  // Properties needed for ReminderCalendarSyncService
+  dogId?: string;
+  dogName?: string;
+  date?: Date;
 }

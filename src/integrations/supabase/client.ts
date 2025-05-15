@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { Database } from './types';
 
@@ -131,4 +130,53 @@ export const getStorageUrl = () => {
 export const getUserId = async () => {
   const { data } = await supabase.auth.getUser();
   return data?.user?.id;
+};
+
+// Adjusted version without timeout property in RequestInit
+export async function fetchWithRetry<T>(
+  fn: () => Promise<T>,
+  options: {
+    maxRetries?: number;
+    initialDelay?: number;
+    useBackoff?: boolean;
+  } = {}
+): Promise<T> {
+  const { maxRetries = 3, initialDelay = 1000, useBackoff = true } = options;
+  
+  let retries = 0;
+  let delay = initialDelay;
+  
+  while (true) {
+    try {
+      return await fn();
+    } catch (error) {
+      retries++;
+      
+      if (retries > maxRetries) {
+        throw error;
+      }
+      
+      console.log(`Retry ${retries}/${maxRetries} after ${delay}ms`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      
+      if (useBackoff) {
+        delay = delay * 1.5;
+      }
+    }
+  }
+}
+
+// Fix fetch wrapper to not include timeout
+const fetchWithHeaders = (url: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+  // Create a new init object without timeout property
+  const safeInit: RequestInit = { ...init };
+  
+  // Ensure we always have headers initialized
+  if (!safeInit.headers) {
+    safeInit.headers = {};
+  }
+  
+  // Add any custom headers here if needed
+  
+  return fetch(url, safeInit);
 };

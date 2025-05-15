@@ -1,5 +1,5 @@
 import { useState, useEffect, ReactNode, useCallback, useRef } from 'react';
-import { User } from '@/types/auth';
+import { User, LoginCredentials, RegisterCredentials, AuthResponse } from '@/types/auth';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase, Profile } from '@/integrations/supabase/client';
 import { useAuthActions } from '@/hooks/useAuthActions';
@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const lastActiveTime = useRef(Date.now());
   const sessionCheckInterval = useRef<NodeJS.Timeout | null>(null);
   
-  const { login, register, logout, getUserProfile } = useAuthActions();
+  const { login, register, logout, fetchUserProfile } = useAuthActions();
 
   // Log device info immediately
   useEffect(() => {
@@ -266,7 +266,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                   
                   while (retryCount < 4 && !profile) {
                     try {
-                      profile = await getUserProfile(currentSession.user.id);
+                      // Use fetchUserProfile instead of getUserProfile
+                      profile = await fetchUserProfile(currentSession.user.id);
                       if (profile) {
                         console.log(`[Auth Debug] Profile retrieved: success`);
                         break;
@@ -407,7 +408,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             while (retryCount < 4 && !profile) {
               try {
                 console.log(`[Auth Debug] Initial profile fetch attempt ${retryCount + 1}`);
-                profile = await getUserProfile(initialSession.user.id);
+                profile = await fetchUserProfile(initialSession.user.id);
                 if (profile) break;
               } catch (err) {
                 console.log(`[Auth Debug] Initial profile fetch attempt ${retryCount + 1} failed:`, err);
@@ -494,7 +495,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       clearTimeout(safetyTimer);
       if (refreshTimer) clearInterval(refreshTimer);
     };
-  }, [getUserProfile, validateSessionAcrossStorages]);
+  }, [fetchUserProfile, validateSessionAcrossStorages]);
+  
+  // Adapt login, register, and logout to match the expected types in AuthContext
+  const adaptedLogin = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const result = await login({ email, password });
+      return !!result.user;
+    } catch (error) {
+      return false;
+    }
+  };
+  
+  const adaptedRegister = async (userData: any): Promise<boolean> => {
+    try {
+      const result = await register({
+        email: userData.email,
+        password: userData.password,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        address: userData.address
+      });
+      return !!result.user;
+    } catch (error) {
+      return false;
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -506,8 +532,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isLoading,
         isLoggedIn,
         isAuthReady,
-        login,
-        register,
+        login: adaptedLogin,
+        register: adaptedRegister,
         logout
       }}
     >

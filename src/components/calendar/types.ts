@@ -1,30 +1,65 @@
 
+import { Dog } from '@/types/dogs';
+
 export interface CalendarEvent {
   id: string;
   title: string;
   date: Date;
-  time?: string;
-  type: string;
+  startDate?: Date;
+  endDate?: Date;
+  allDay?: boolean;
+  type?: string;
   dogId?: string;
   dogName?: string;
   notes?: string;
-  startDate?: Date; // Added for new format compatibility
-  endDate?: Date;   // Added for new format compatibility
+  time?: string;
+  eventType?: string;
 }
 
 export interface AddEventFormValues {
   title: string;
   date: Date;
-  time?: string;
-  dogId?: string;
+  startDate?: Date;
+  endDate?: Date;
+  allDay?: boolean;
   notes?: string;
+  dogId?: string;
+  time?: string;
+  eventType?: string;
+  color?: string; // Used for UI color selection
 }
 
-export interface CalendarGridProps {
-  weeks: Date[][];
-  getEventsForDate: (date: Date) => CalendarEvent[];
+export interface AddEventDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onAddEvent: (data: AddEventFormValues) => Promise<boolean>;
+  dogs: Dog[];
+}
+
+export interface EditEventDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  event: CalendarEvent | null;
+  onUpdateEvent: (id: string, data: AddEventFormValues) => Promise<boolean>;
+  onDeleteEvent: (id: string) => Promise<boolean>;
+  dogs: Dog[];
+}
+
+export interface EventFormProps {
+  onSubmit: (data: AddEventFormValues) => void;
+  initialValues?: Partial<AddEventFormValues>;
+  submitLabel?: string;
+  dogs: Dog[];
+}
+
+export interface EventCardProps {
+  event: CalendarEvent;
+  onClick?: () => void;
   getEventColor: (type: string) => string;
-  onDeleteEvent: (eventId: string) => void;
-  onEventClick: (event: CalendarEvent) => void;
-  compact?: boolean;
+}
+
+export interface MobileEventCardProps {
+  event: CalendarEvent;
+  onEdit: () => void;
+  getEventColor: (type: string) => string;
 }

@@ -1,447 +1,275 @@
-import { Dog } from '@/types/dogs';
-import { Reminder } from '@/types/reminders';
-import { UpcomingHeat } from '@/types/reminders';
-import { addDays, format, parseISO } from 'date-fns';
+
 import { supabase } from '@/integrations/supabase/client';
-import { CalendarEvent } from '@/types/calendar';
+import { UpcomingHeat, Reminder } from '@/types/reminders';
+import { Dog } from '@/types/dogs';
+import { addDays, format } from 'date-fns';
+import { toast } from '@/components/ui/use-toast';
+import { safeFilter } from '@/utils/supabaseTypeUtils';
+
+// Structure for calendar event
+interface CalendarEvent {
+  id?: string;
+  title: string;
+  date: Date;
+  time?: string;
+  type: string;
+  dog_id?: string;
+  dog_name?: string;
+  notes?: string;
+  user_id?: string;
+}
 
 /**
- * Service to synchronize reminders with calendar events
- * Ensures that when reminders are created, corresponding calendar events are also created
+ * Service for synchronizing reminders with calendar events
  */
 export class ReminderCalendarSyncService {
   /**
-   * Creates calendar events for dog birthday reminders
-   * @param dog The dog for which to create birthday calendar events
-   * @returns A boolean indicating whether the operation was successful
+   * Add or update a calendar event for a reminder
+   * @param reminder The reminder to sync
+   * @returns boolean indicating success
    */
-  static async syncBirthdayEvents(dog: Dog): Promise<boolean> {
+  static async syncReminderEvent(reminder: Reminder): Promise<boolean> {
     try {
-      if (!dog.id || !dog.dateOfBirth || !dog.name) {
-        console.log('Missing required dog data for birthday events:', { 
-          id: dog.id, 
-          name: dog.name, 
-          dateOfBirth: dog.dateOfBirth 
-        });
-        return false;
-      }
-
-      // Get current user ID
-      const { data: authData, error: authError } = await supabase.auth.getUser();
-      
-      if (authError || !authData.user) {
-        console.error('Error getting user for calendar events:', authError);
+      if (!reminder.id) {
+        console.warn('Cannot sync reminder without ID');
         return false;
       }
       
-      const userId = authData.user.id;
-
-      const birthDate = typeof dog.dateOfBirth === 'string' ? 
-        new Date(dog.dateOfBirth) : dog.dateOfBirth;
-
-      // First, check if event already exists
-      const { data: existingEvents } = await supabase
-        .from('calendar_events')
-        .select('id')
-        .eq('type', 'birthday')
-        .eq('dog_id', dog.id);
-
-      // Get current year's birthday (keep month and day, update year)
-      const currentYear = new Date().getFullYear();
-      const birthMonth = birthDate.getMonth();
-      const birthDay = birthDate.getDate();
-      const thisYearBirthday = new Date(currentYear, birthMonth, birthDay);
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('User not authenticated');
+        return false;
+      }
       
-      // If the birthday already passed this year, use next year
-      const targetDate = thisYearBirthday < new Date() ? 
-        new Date(currentYear + 1, birthMonth, birthDay) : 
-        thisYearBirthday;
-
-      const eventData = {
-        title: `${dog.name}'s Birthday`,
-        date: targetDate.toISOString(),
-        type: 'birthday',
-        dog_id: dog.id,
-        dog_name: dog.name,
-        notes: `Birthday celebration for ${dog.name}`,
-        user_id: userId
+      // Check if a calendar event already exists for this reminder
+      const { data: existingEvents } = await safeFilter(
+        supabase.from('calendar_events').select('*'),
+        'notes',
+        `reminder_id:${reminder.id}`
+      );
+      
+      const event: CalendarEvent = {
+        title: reminder.title,
+        date: reminder.dueDate,
+        type: reminder.type || 'reminder',
+        notes: `reminder_id:${reminder.id}\n${reminder.description || ''}`,
+        user_id: user.id
       };
-
-      // If event exists, update it
+      
+      if (reminder.related_id && reminder.related_id.startsWith('dog:')) {
+        const dogId = reminder.related_id.replace('dog:', '');
+        event.dog_id = dogId;
+        
+        // Fetch dog name
+        try {
+          const { data: dog } = await safeFilter(
+            supabase.from('dogs').select('name'),
+            'id',
+            dogId
+          ).single();
+          
+          if (dog) {
+            event.dog_name = dog.name;
+          }
+        } catch (error) {
+          console.warn('Failed to get dog name:', error);
+        }
+      }
+      
+      // If event exists, update it; otherwise create a new one
       if (existingEvents && existingEvents.length > 0) {
-        const { error: updateError } = await supabase
-          .from('calendar_events')
-          .update(eventData)
-          .eq('id', existingEvents[0].id);
-
-        if (updateError) {
-          console.error('Error updating birthday calendar event:', updateError);
-          return false;
-        }
+        const { error } = await safeFilter(
+          supabase.from('calendar_events').update(event),
+          'id',
+          existingEvents[0].id
+        );
+        
+        if (error) throw error;
       } else {
-        // Otherwise create new event
-        const { error: insertError } = await supabase
-          .from('calendar_events')
-          .insert(eventData);
-
-        if (insertError) {
-          console.error('Error creating birthday calendar event:', insertError);
-          return false;
-        }
+        const { error } = await supabase.from('calendar_events').insert(event);
+        if (error) throw error;
       }
-
-      // Create reminder event 7 days before (changed from 14 to 7 as per requirements)
-      const reminderDate = addDays(targetDate, -7);
       
-      const { data: existingReminders } = await supabase
-        .from('calendar_events')
-        .select('id')
-        .eq('type', 'birthday-reminder')
-        .eq('dog_id', dog.id);
-
-      const reminderEventData = {
-        title: `Prepare for ${dog.name}'s Birthday`,
-        date: reminderDate.toISOString(),
-        type: 'birthday-reminder',
-        dog_id: dog.id,
-        dog_name: dog.name,
-        notes: `Reminder to prepare for ${dog.name}'s birthday in 1 week`,
-        user_id: userId
-      };
-
-      if (existingReminders && existingReminders.length > 0) {
-        const { error: updateError } = await supabase
-          .from('calendar_events')
-          .update(reminderEventData)
-          .eq('id', existingReminders[0].id);
-
-        if (updateError) {
-          console.error('Error updating birthday reminder calendar event:', updateError);
-          return false;
-        }
-      } else {
-        const { error: insertError } = await supabase
-          .from('calendar_events')
-          .insert(reminderEventData);
-
-        if (insertError) {
-          console.error('Error creating birthday reminder calendar event:', insertError);
-          return false;
-        }
-      }
-
-      console.log(`Successfully synced birthday events for ${dog.name}`);
       return true;
     } catch (error) {
-      console.error('Unexpected error in syncBirthdayEvents:', error);
+      console.error('Error syncing reminder event:', error);
       return false;
     }
   }
-
+  
   /**
-   * Creates calendar events for dog vaccination reminders
-   * @param dog The dog for which to create vaccination calendar events
-   * @returns A boolean indicating whether the operation was successful
+   * Remove calendar events associated with a reminder
+   * @param reminderId The ID of the reminder
+   * @returns boolean indicating success
    */
-  static async syncVaccinationEvents(dog: Dog): Promise<boolean> {
+  static async removeReminderEvents(reminderId: string): Promise<boolean> {
     try {
-      if (!dog.id || !dog.vaccinationDate || !dog.name) {
-        console.log('Missing required dog data for vaccination events:', { 
-          id: dog.id, 
-          name: dog.name, 
-          vaccinationDate: dog.vaccinationDate 
-        });
-        return false;
-      }
+      if (!reminderId) return false;
       
-      // Get current user ID
-      const { data: authData, error: authError } = await supabase.auth.getUser();
+      // Delete all calendar events for this reminder
+      const { error } = await safeFilter(
+        supabase.from('calendar_events').delete(),
+        'notes',
+        `reminder_id:${reminderId}`
+      );
       
-      if (authError || !authData.user) {
-        console.error('Error getting user for calendar events:', authError);
-        return false;
-      }
+      if (error) throw error;
       
-      const userId = authData.user.id;
-
-      const vaccinationDate = typeof dog.vaccinationDate === 'string' ? 
-        new Date(dog.vaccinationDate) : dog.vaccinationDate;
-
-      // First, check if event already exists for next vaccination
-      const { data: existingEvents } = await supabase
-        .from('calendar_events')
-        .select('id')
-        .eq('type', 'vaccination')
-        .eq('dog_id', dog.id);
-
-      // Calculate next vaccination date (one year from last vaccination)
-      const nextVaccinationDate = new Date(vaccinationDate);
-      nextVaccinationDate.setFullYear(nextVaccinationDate.getFullYear() + 1);
-
-      // If next vaccination date is in the past, add another year
-      if (nextVaccinationDate < new Date()) {
-        nextVaccinationDate.setFullYear(nextVaccinationDate.getFullYear() + 1);
-      }
-
-      const eventData = {
-        title: `${dog.name}'s Vaccination Due`,
-        date: nextVaccinationDate.toISOString(),
-        type: 'vaccination',
-        dog_id: dog.id,
-        dog_name: dog.name,
-        notes: `Annual vaccination due for ${dog.name}`,
-        user_id: userId
-      };
-
-      // If event exists, update it
-      if (existingEvents && existingEvents.length > 0) {
-        const { error: updateError } = await supabase
-          .from('calendar_events')
-          .update(eventData)
-          .eq('id', existingEvents[0].id);
-
-        if (updateError) {
-          console.error('Error updating vaccination calendar event:', updateError);
-          return false;
-        }
-      } else {
-        // Otherwise create new event
-        const { error: insertError } = await supabase
-          .from('calendar_events')
-          .insert(eventData);
-
-        if (insertError) {
-          console.error('Error creating vaccination calendar event:', insertError);
-          return false;
-        }
-      }
-
-      // Create reminder event 7 days before (changed from 14 to 7 as per requirements)
-      const reminderDate = addDays(nextVaccinationDate, -7);
-      
-      const { data: existingReminders } = await supabase
-        .from('calendar_events')
-        .select('id')
-        .eq('type', 'vaccination-reminder')
-        .eq('dog_id', dog.id);
-
-      const reminderEventData = {
-        title: `Vaccination Reminder for ${dog.name}`,
-        date: reminderDate.toISOString(),
-        type: 'vaccination-reminder',
-        dog_id: dog.id,
-        dog_name: dog.name,
-        notes: `Reminder to schedule vaccination for ${dog.name} in 1 week`,
-        user_id: userId
-      };
-
-      if (existingReminders && existingReminders.length > 0) {
-        const { error: updateError } = await supabase
-          .from('calendar_events')
-          .update(reminderEventData)
-          .eq('id', existingReminders[0].id);
-
-        if (updateError) {
-          console.error('Error updating vaccination reminder calendar event:', updateError);
-          return false;
-        }
-      } else {
-        const { error: insertError } = await supabase
-          .from('calendar_events')
-          .insert(reminderEventData);
-
-        if (insertError) {
-          console.error('Error creating vaccination reminder calendar event:', insertError);
-          return false;
-        }
-      }
-
-      console.log(`Successfully synced vaccination events for ${dog.name}`);
       return true;
     } catch (error) {
-      console.error('Unexpected error in syncVaccinationEvents:', error);
+      console.error('Error removing reminder events:', error);
       return false;
     }
   }
-
+  
   /**
-   * Creates calendar events for upcoming heat cycles
-   * @param heat The upcoming heat cycle for which to create calendar events
-   * @returns A boolean indicating whether the operation was successful
+   * Handle a reminder being marked as complete
+   * @param reminderId The ID of the reminder
+   * @param removeEvent Whether to remove the event (default: false)
+   * @returns boolean indicating success
+   */
+  static async handleReminderCompletion(reminderId: string, removeEvent: boolean = false): Promise<boolean> {
+    try {
+      if (removeEvent) {
+        return await this.removeReminderEvents(reminderId);
+      } else {
+        // Get the reminder event
+        const { data: events } = await safeFilter(
+          supabase.from('calendar_events').select('*'),
+          'notes',
+          `reminder_id:${reminderId}`
+        );
+        
+        if (events && events.length > 0) {
+          // Update the event title to indicate completion
+          const { error } = await safeFilter(
+            supabase.from('calendar_events').update({ title: `✓ ${events[0].title}` }),
+            'id',
+            events[0].id
+          );
+          
+          if (error) throw error;
+        }
+        
+        return true;
+      }
+    } catch (error) {
+      console.error('Error handling reminder completion:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * Create heat cycle reminders and events
+   * @param heat The upcoming heat data
+   * @returns boolean indicating success
    */
   static async syncHeatCycleEvents(heat: UpcomingHeat): Promise<boolean> {
     try {
-      if (!heat.dogId || !heat.dogName || !heat.date) {
-        console.log('Missing required heat data for events:', heat);
+      // Make sure dog exists and has expected dates
+      if (!heat.dog || !heat.expectedDate) {
+        console.warn('Cannot sync heat cycle without dog or expected date');
         return false;
       }
       
-      // Get current user ID
-      const { data: authData, error: authError } = await supabase.auth.getUser();
+      const dog = heat.dog;
+      const expectedDate = heat.expectedDate;
       
-      if (authError || !authData.user) {
-        console.error('Error getting user for calendar events:', authError);
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('User not authenticated');
         return false;
       }
       
-      const userId = authData.user.id;
-
-      // First, check if event already exists
+      // Create the main heat cycle event
+      const dogId = dog.id;
+      const dogName = dog.name;
+      const preHeatDate = expectedDate;
+      
+      const preHeatEvent: CalendarEvent = {
+        title: `${dogName} - Starting heat cycle`,
+        date: preHeatDate,
+        type: 'heat',
+        dog_id: dogId,
+        dog_name: dogName,
+        notes: `Heat cycle begins for ${dogName}`,
+        user_id: user.id
+      };
+      
+      // Check if the event already exists
       const { data: existingEvents } = await supabase
         .from('calendar_events')
-        .select('id')
+        .select('*')
+        .eq('dog_id', dogId)
         .eq('type', 'heat')
-        .eq('dog_id', heat.dogId)
-        .eq('date', heat.date.toISOString());
-
-      const eventData = {
-        title: `${heat.dogName}'s Heat Cycle`,
-        date: heat.date.toISOString(),
-        type: 'heat',
-        dog_id: heat.dogId,
-        dog_name: heat.dogName,
-        notes: `Expected heat cycle for ${heat.dogName}`,
-        user_id: userId
-      };
-
-      // If event exists, update it
+        .gte('date', format(addDays(preHeatDate, -7), 'yyyy-MM-dd'))
+        .lte('date', format(addDays(preHeatDate, 7), 'yyyy-MM-dd'));
+      
+      // If event exists, update it; otherwise create a new one
       if (existingEvents && existingEvents.length > 0) {
-        const { error: updateError } = await supabase
-          .from('calendar_events')
-          .update(eventData)
-          .eq('id', existingEvents[0].id);
-
-        if (updateError) {
-          console.error('Error updating heat cycle calendar event:', updateError);
-          return false;
-        }
-      } else {
-        // Otherwise create new event
-        const { error: insertError } = await supabase
-          .from('calendar_events')
-          .insert(eventData);
-
-        if (insertError) {
-          console.error('Error creating heat cycle calendar event:', insertError);
-          return false;
-        }
-      }
-
-      // Create reminder event 30 days before (changed from 14 to 30 as per requirements)
-      const reminderDate = addDays(heat.date, -30);
-
-      const { data: existingReminders } = await supabase
-        .from('calendar_events')
-        .select('id')
-        .eq('type', 'heat-reminder')
-        .eq('dog_id', heat.dogId)
-        .eq('date', reminderDate.toISOString());
-
-      const reminderEventData = {
-        title: `Upcoming Heat for ${heat.dogName}`,
-        date: reminderDate.toISOString(),
-        type: 'heat-reminder',
-        dog_id: heat.dogId,
-        dog_name: heat.dogName,
-        notes: `Reminder about ${heat.dogName}'s upcoming heat cycle in 30 days`,
-        user_id: userId
-      };
-
-      if (existingReminders && existingReminders.length > 0) {
-        const { error: updateError } = await supabase
-          .from('calendar_events')
-          .update(reminderEventData)
-          .eq('id', existingReminders[0].id);
-
-        if (updateError) {
-          console.error('Error updating heat reminder calendar event:', updateError);
-          return false;
-        }
-      } else {
-        const { error: insertError } = await supabase
-          .from('calendar_events')
-          .insert(reminderEventData);
-
-        if (insertError) {
-          console.error('Error creating heat reminder calendar event:', insertError);
-          return false;
-        }
-      }
-
-      console.log(`Successfully synced heat cycle events for ${heat.dogName}`);
-      return true;
-    } catch (error) {
-      console.error('Unexpected error in syncHeatCycleEvents:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Bulk sync all calendar events based on dog data
-   * @param dogs Array of dogs to create calendar events for
-   * @returns A boolean indicating whether the operation was successful
-   */
-  static async bulkSyncCalendarEvents(dogs: Dog[]): Promise<boolean> {
-    try {
-      for (const dog of dogs) {
-        // Only sync if the dog has the necessary data
-        if (dog.dateOfBirth) {
-          await this.syncBirthdayEvents(dog);
-        }
+        const { error } = await safeFilter(
+          supabase.from('calendar_events').update(preHeatEvent),
+          'id',
+          existingEvents[0].id
+        );
         
-        if (dog.vaccinationDate) {
-          await this.syncVaccinationEvents(dog);
-        }
-        
-        // Handle heat cycles for female dogs
-        if (dog.gender === 'female' && dog.heatHistory && dog.heatHistory.length > 0) {
-          const upcomingHeats = await this.getUpcomingHeats([dog]);
-          for (const heat of upcomingHeats) {
-            await this.syncHeatCycleEvents(heat);
-          }
-        }
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('calendar_events').insert(preHeatEvent);
+        if (error) throw error;
       }
       
-      return true;
-    } catch (error) {
-      console.error('Error in bulkSyncCalendarEvents:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Helper function to calculate upcoming heats for dogs
-   * @param dogs Array of dogs to calculate upcoming heats for
-   * @returns Array of upcoming heat objects
-   */
-  private static async getUpcomingHeats(dogs: Dog[]): Promise<UpcomingHeat[]> {
-    // Import the calculateUpcomingHeats function dynamically
-    // to avoid import cycles
-    const { calculateUpcomingHeats } = await import('@/utils/heatCalculator');
-    return calculateUpcomingHeats(dogs);
-  }
-
-  /**
-   * Delete all calendar events related to a dog
-   * @param dogId The ID of the dog for which to delete events
-   * @returns A boolean indicating whether the operation was successful
-   */
-  static async deleteCalendarEventsForDog(dogId: string): Promise<boolean> {
-    try {
-      const { error } = await supabase
+      // Create fertility window event (typically 9-15 days after start)
+      const fertilityStartDate = addDays(preHeatDate, 9);
+      
+      const fertilityEvent: CalendarEvent = {
+        title: `${dogName} - Fertility window begins`,
+        date: fertilityStartDate,
+        type: 'heat',
+        dog_id: dogId,
+        dog_name: dogName,
+        notes: `Fertility window begins for ${dogName}`,
+        user_id: user.id
+      };
+      
+      // Check if the fertility event already exists
+      const { data: existingFertilityEvents } = await supabase
         .from('calendar_events')
-        .delete()
-        .eq('dog_id', dogId);
-
-      if (error) {
-        console.error('Error deleting calendar events for dog:', error);
-        return false;
+        .select('*')
+        .eq('dog_id', dogId)
+        .eq('type', 'heat')
+        .like('title', `%Fertility window%`)
+        .gte('date', format(addDays(fertilityStartDate, -3), 'yyyy-MM-dd'))
+        .lte('date', format(addDays(fertilityStartDate, 3), 'yyyy-MM-dd'));
+      
+      // If event exists, update it; otherwise create a new one
+      if (existingFertilityEvents && existingFertilityEvents.length > 0) {
+        const { error } = await safeFilter(
+          supabase.from('calendar_events').update(fertilityEvent),
+          'id',
+          existingFertilityEvents[0].id
+        );
+        
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('calendar_events').insert(fertilityEvent);
+        if (error) throw error;
       }
-
-      console.log(`Successfully deleted all calendar events for dog ID ${dogId}`);
+      
+      // Success
       return true;
     } catch (error) {
-      console.error('Unexpected error in deleteCalendarEventsForDog:', error);
+      console.error('Error syncing heat cycle events:', error);
+      
+      // Show toast to user
+      toast({
+        title: "Error",
+        description: "Failed to sync heat cycle events to calendar",
+        variant: "destructive"
+      });
+      
       return false;
     }
   }

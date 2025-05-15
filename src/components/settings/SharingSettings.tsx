@@ -1,61 +1,41 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useSettings } from '@/hooks/useSettings';
 import { supabase } from '@/integrations/supabase/client';
-import { safeFilter } from '@/utils/supabaseTypeUtils';
+import { convertSafely } from '@/utils/supabaseTypeUtils';
 
-export const SharingSettings = () => {
-  const { settings } = useSettings();
+const SharingSettings = () => {
+  const { settings, addSharedUser, removeSharedUser, isAddingSharedUser, isRemovingSharedUser } = useSettings();
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('viewer');
   const [sharedUserEmails, setSharedUserEmails] = useState<Record<string, string>>({});
-  const [newUserEmail, setNewUserEmail] = useState('');
-  const [newUserRole, setNewUserRole] = useState('viewer');
-  const { addSharedUser, removeSharedUser, isAddingSharedUser, isRemovingSharedUser } = useSettings();
-
-  // Fetch shared user emails when settings change
+  
+  // Fetch email addresses for shared user IDs when component mounts or settings change
   useEffect(() => {
     const fetchSharedUserEmails = async () => {
       if (!settings?.sharedUsers?.length) return;
       
       try {
-        // Create an array of user IDs we need to fetch
-        const userIds = settings.sharedUsers.map(user => user.shared_with_id);
+        const emails: Record<string, string> = {};
         
-        // Initialize an empty object for our email mapping
-        const emailMap: Record<string, string> = {};
-        
-        // Fetch profiles in batches to avoid potential in() clause limitations
-        const batchSize = 10;
-        for (let i = 0; i < userIds.length; i += batchSize) {
-          const batchIds = userIds.slice(i, i + batchSize);
+        // Fetch emails for each shared user ID
+        for (const sharedUser of settings.sharedUsers) {
+          const { data } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('id', sharedUser.shared_with_id)
+            .single();
           
-          // Use any casting for now to bypass TypeScript errors with Supabase types
-          const { data, error } = await safeFilter(
-            supabase.from('profiles').select('id, email'),
-            'id',
-            batchIds
-          );
-          
-          if (error) {
-            console.error('Error fetching shared user emails:', error);
-            continue;
-          }
-          
-          // Add results to our map if we have valid data
-          if (data) {
-            data.forEach(profile => {
-              if (profile && profile.id && profile.email) {
-                emailMap[profile.id] = profile.email;
-              }
-            });
+          if (data?.email) {
+            emails[sharedUser.shared_with_id] = data.email;
           }
         }
         
-        setSharedUserEmails(emailMap);
-      } catch (err) {
-        console.error('Exception fetching shared user emails:', err);
+        setSharedUserEmails(emails);
+      } catch (error) {
+        console.error('Error fetching shared user emails:', error);
       }
     };
     
@@ -63,92 +43,85 @@ export const SharingSettings = () => {
   }, [settings?.sharedUsers]);
   
   const handleAddUser = async () => {
-    if (!newUserEmail.trim()) return;
-    
-    await addSharedUser(newUserEmail, newUserRole);
-    setNewUserEmail('');
-    setNewUserRole('viewer');
+    if (!email) return;
+    await addSharedUser(email, role);
+    setEmail('');
   };
   
   const handleRemoveUser = async (userId: string) => {
     await removeSharedUser(userId);
   };
-
+  
+  if (!settings) {
+    return <div className="text-center text-muted-foreground">Loading...</div>;
+  }
+  
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium">Share your account</h3>
+        <h3 className="text-lg font-medium">Share Your Account</h3>
         <p className="text-sm text-muted-foreground">
-          Share your breeding data with others (vets, partners, etc)
+          Share your account with family members or staff to help manage your breeding program.
         </p>
       </div>
       
-      <div className="space-y-4">
-        <div className="flex space-x-2">
-          <div className="grid flex-1 gap-2">
-            <Label htmlFor="email">Email address</Label>
+      <div className="grid gap-4">
+        <div className="grid grid-cols-3 gap-2">
+          <div className="col-span-2">
             <Input
-              id="email"
-              placeholder="colleague@example.com"
-              value={newUserEmail}
-              onChange={(e) => setNewUserEmail(e.target.value)}
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="role">Role</Label>
-            <select
-              id="role"
-              className="h-10 px-3 py-2 border rounded-md"
-              value={newUserRole}
-              onChange={(e) => setNewUserRole(e.target.value)}
+          <div>
+            <select 
+              value={role} 
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full border rounded px-3 py-2"
             >
               <option value="viewer">Viewer</option>
               <option value="editor">Editor</option>
+              <option value="admin">Admin</option>
             </select>
           </div>
-          <div className="self-end">
-            <Button 
-              onClick={handleAddUser}
-              disabled={isAddingSharedUser}
-            >
-              {isAddingSharedUser ? 'Adding...' : 'Add'}
-            </Button>
-          </div>
         </div>
+        
+        <Button 
+          onClick={handleAddUser} 
+          disabled={isAddingSharedUser || !email}
+        >
+          {isAddingSharedUser ? 'Adding...' : 'Add User'}
+        </Button>
       </div>
       
-      {settings?.sharedUsers && settings.sharedUsers.length > 0 && (
-        <div className="border rounded-md">
-          <div className="bg-muted p-3 flex items-center text-sm font-medium">
-            <div className="w-1/2">Email</div>
-            <div className="w-1/3">Role</div>
-            <div className="w-1/6"></div>
-          </div>
-          <div className="divide-y">
-            {settings.sharedUsers.map((user) => (
-              <div key={user.shared_with_id} className="p-3 flex items-center text-sm">
-                <div className="w-1/2">
-                  {sharedUserEmails[user.shared_with_id] || 'Loading...'}
+      <div className="space-y-4">
+        <h4 className="text-sm font-medium">Shared With</h4>
+        
+        {settings.sharedUsers?.length === 0 ? (
+          <p className="text-sm text-muted-foreground">You haven't shared your account with anyone yet.</p>
+        ) : (
+          <ul className="space-y-2">
+            {settings.sharedUsers?.map((user) => (
+              <li key={user.id} className="flex items-center justify-between p-2 border rounded">
+                <div>
+                  <span>{sharedUserEmails[user.shared_with_id] || user.shared_with_id}</span>
+                  <span className="text-xs text-muted-foreground ml-2 capitalize">({user.role})</span>
+                  <span className="text-xs bg-yellow-100 text-yellow-800 rounded px-1 ml-2 uppercase">{user.status}</span>
                 </div>
-                <div className="w-1/3 capitalize">
-                  {user.role}
-                </div>
-                <div className="w-1/6 text-right">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="text-destructive hover:text-destructive/80"
-                    onClick={() => handleRemoveUser(user.shared_with_id)}
-                    disabled={isRemovingSharedUser}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleRemoveUser(user.shared_with_id)}
+                  disabled={isRemovingSharedUser}
+                >
+                  Remove
+                </Button>
+              </li>
             ))}
-          </div>
-        </div>
-      )}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,137 +1,146 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { CalendarEvent } from '@/types/calendar';
-import { AddEventFormValues } from '@/components/calendar/types';
-import { Dog } from '@/context/DogsContext';
+import { AddEventFormValues, CalendarEvent } from '@/components/calendar/types';
+import { Dog } from '@/types/dogs';
+import { formatISO } from 'date-fns';
 import { safeFilter } from '@/utils/supabaseTypeUtils';
 
 // Get all calendar events for the current user
-export const getCalendarEvents = async (): Promise<CalendarEvent[]> => {
-  const { data: user } = await supabase.auth.getUser();
-  
-  if (!user?.user?.id) {
-    console.error('No user ID available');
-    return [];
-  }
-  
+export const getCalendarEvents = async (userId?: string): Promise<CalendarEvent[]> => {
   try {
-    const { data, error } = await safeFilter(
-      supabase.from('calendar_events').select('*'),
-      'user_id',
-      user.user.id
-    ).order('date', { ascending: true });
+    let query = supabase.from('calendar_events').select('*');
     
-    if (error) {
-      console.error('Error fetching calendar events:', error);
-      return [];
+    // If userId is provided, filter by that userId
+    if (userId) {
+      query = query.eq('user_id', userId);
     }
     
-    return data.map(event => ({
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    
+    // Convert to our CalendarEvent type
+    return (data || []).map((event) => ({
       id: event.id,
       title: event.title,
-      date: event.date,
-      startDate: event.date,
-      endDate: event.date,
-      type: event.type,
-      dogId: event.dog_id,
-      dogName: event.dog_name,
-      notes: event.notes,
-      time: event.time,
+      date: new Date(event.date),
+      startDate: event.date ? new Date(event.date) : undefined,
+      endDate: event.date ? new Date(event.date) : undefined,
+      time: event.time || '',
+      type: event.type || 'general',
+      dogId: event.dog_id || '',
+      dogName: event.dog_name || '',
+      notes: event.notes || ''
     }));
-  } catch (err) {
-    console.error('Exception fetching calendar events:', err);
+  } catch (error) {
+    console.error('Error fetching calendar events:', error);
     return [];
   }
 };
 
-// Add a new calendar event
-export const addEventToSupabase = async (event: AddEventFormValues, dogs: Dog[]): Promise<CalendarEvent | null> => {
-  const { data: user } = await supabase.auth.getUser();
-  
-  if (!user?.user?.id) {
-    console.error('No user ID available');
-    return null;
-  }
-  
-  const dogName = event.dogId ? dogs.find(d => d.id === event.dogId)?.name || '' : '';
-  
+// Add a new calendar event and return the created event
+export const addEventToSupabase = async (
+  eventData: AddEventFormValues, 
+  dogs: Dog[]
+): Promise<CalendarEvent | null> => {
   try {
-    const eventData = {
-      title: event.title,
-      date: event.date.toISOString(),
-      time: event.time || '',
-      type: event.type || 'general',
-      dog_id: event.dogId || '',
-      dog_name: dogName,
-      notes: event.notes || '',
-      user_id: user.user.id
-    };
+    const { date, time, notes, dogId, title } = eventData;
+    const eventType = eventData.eventType || 'general';
     
-    const { data, error } = await supabase.from('calendar_events').insert(eventData as any).select().single();
-    
-    if (error || !data) {
-      console.error('Error adding calendar event:', error);
-      return null;
+    // Find dog info if a dog is selected
+    let dogName = '';
+    if (dogId) {
+      const selectedDog = dogs.find(dog => dog.id === dogId);
+      dogName = selectedDog ? selectedDog.name : '';
     }
     
+    // Current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+    
+    // Insert event into Supabase
+    const { data, error } = await supabase.from('calendar_events').insert({
+      title,
+      date: formatISO(date),
+      time,
+      type: eventType,
+      dog_id: dogId || null,
+      dog_name: dogName || null,
+      notes: notes || null,
+      user_id: user.id
+    }).select().single();
+    
+    if (error) throw error;
+    
+    // Return the created event in our CalendarEvent format
     return {
       id: data.id,
       title: data.title,
-      date: data.date,
-      startDate: data.date,
-      endDate: data.date,
-      type: data.type,
-      dogId: data.dog_id,
-      dogName: data.dog_name,
-      notes: data.notes,
-      time: data.time
+      date: new Date(data.date),
+      startDate: data.date ? new Date(data.date) : undefined,
+      endDate: data.date ? new Date(data.date) : undefined,
+      time: data.time || '',
+      type: data.type || 'general',
+      dogId: data.dog_id || '',
+      dogName: data.dog_name || '',
+      notes: data.notes || ''
     };
-  } catch (err) {
-    console.error('Exception adding calendar event:', err);
+  } catch (error) {
+    console.error('Error adding calendar event:', error);
     return null;
   }
 };
 
 // Update an existing calendar event
-export const updateEventInSupabase = async (eventId: string, event: AddEventFormValues, dogs: Dog[]): Promise<CalendarEvent | null> => {
-  const dogName = event.dogId ? dogs.find(d => d.id === event.dogId)?.name || '' : '';
-  
+export const updateEventInSupabase = async (
+  eventId: string,
+  eventData: AddEventFormValues,
+  dogs: Dog[]
+): Promise<CalendarEvent | null> => {
   try {
-    const eventData = {
-      title: event.title,
-      date: event.date.toISOString(),
-      time: event.time || '',
-      type: event.type || 'general',
-      dog_id: event.dogId || '',
-      dog_name: dogName,
-      notes: event.notes || '',
-    };
+    const { date, time, notes, dogId, title } = eventData;
+    const eventType = eventData.eventType || 'general';
     
-    const { data, error } = await safeFilter(
-      supabase.from('calendar_events').update(eventData as any),
-      'id',
-      eventId
-    ).select().single();
-    
-    if (error || !data) {
-      console.error('Error updating calendar event:', error);
-      return null;
+    // Find dog info if a dog is selected
+    let dogName = '';
+    if (dogId) {
+      const selectedDog = dogs.find(dog => dog.id === dogId);
+      dogName = selectedDog ? selectedDog.name : '';
     }
     
+    // Update event in Supabase
+    const { data, error } = await supabase
+      .from('calendar_events')
+      .update({
+        title,
+        date: formatISO(date),
+        time,
+        type: eventType,
+        dog_id: dogId || null,
+        dog_name: dogName || null,
+        notes: notes || null
+      })
+      .eq('id', eventId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    // Return the updated event in our CalendarEvent format
     return {
       id: data.id,
       title: data.title,
-      date: data.date,
-      startDate: data.date,
-      endDate: data.date,
-      type: data.type,
-      dogId: data.dog_id,
-      dogName: data.dog_name,
-      notes: data.notes,
-      time: data.time
+      date: new Date(data.date),
+      startDate: data.date ? new Date(data.date) : undefined,
+      endDate: data.date ? new Date(data.date) : undefined,
+      time: data.time || '',
+      type: data.type || 'general',
+      dogId: data.dog_id || '',
+      dogName: data.dog_name || '',
+      notes: data.notes || ''
     };
-  } catch (err) {
-    console.error('Exception updating calendar event:', err);
+  } catch (error) {
+    console.error('Error updating calendar event:', error);
     return null;
   }
 };
@@ -139,37 +148,40 @@ export const updateEventInSupabase = async (eventId: string, event: AddEventForm
 // Delete a calendar event
 export const deleteEventFromSupabase = async (eventId: string): Promise<boolean> => {
   try {
-    const { error } = await safeFilter(
-      supabase.from('calendar_events').delete(),
-      'id',
-      eventId
-    );
+    const { error } = await supabase
+      .from('calendar_events')
+      .delete()
+      .eq('id', eventId);
     
-    if (error) {
-      console.error('Error deleting calendar event:', error);
-      return false;
-    }
+    if (error) throw error;
     
     return true;
-  } catch (err) {
-    console.error('Exception deleting calendar event:', err);
+  } catch (error) {
+    console.error('Error deleting calendar event:', error);
     return false;
   }
 };
 
-// Get the color for an event type
+// Get event color based on event type
 export const getEventColor = (eventType: string): string => {
-  const colorMap: Record<string, string> = {
-    'appointment': 'bg-purple-500',
-    'breeding': 'bg-pink-500',
-    'heat': 'bg-rose-500',
-    'vaccination': 'bg-blue-500',
-    'deworming': 'bg-green-500',
-    'birthday': 'bg-amber-500',
-    'show': 'bg-indigo-500',
-    'reminder': 'bg-sky-500',
-    'health': 'bg-emerald-500'
-  };
-  
-  return colorMap[eventType] || 'bg-gray-500';
+  switch (eventType) {
+    case 'heat':
+      return 'bg-red-500';
+    case 'vaccination':
+      return 'bg-green-500';
+    case 'vet':
+      return 'bg-blue-500';
+    case 'mating':
+      return 'bg-pink-500';
+    case 'birth':
+      return 'bg-purple-500';
+    case 'grooming':
+      return 'bg-yellow-500';
+    case 'training':
+      return 'bg-orange-500';
+    case 'show':
+      return 'bg-indigo-500';
+    default:
+      return 'bg-gray-500';
+  }
 };
