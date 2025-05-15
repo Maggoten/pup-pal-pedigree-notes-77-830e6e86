@@ -16,9 +16,14 @@ export const useRecentMatings = (plannedLitters: PlannedLitter[]) => {
           const matingDate = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
           if (isBefore(matingDate, new Date())) {
             matings.push({
+              id: `${litter.id}-${matingDate.getTime()}`,
               litterId: litter.id,
-              maleName: litter.maleName || 'Unknown',
-              femaleName: litter.femaleName,
+              damId: litter.femaleId,
+              damName: litter.femaleName || 'Unknown',
+              sireId: litter.maleId || undefined,
+              sireName: litter.maleName || 'Unknown Male',
+              maleName: litter.maleName || 'Unknown Male',
+              femaleName: litter.femaleName || 'Unknown Female',
               date: matingDate
             });
           }

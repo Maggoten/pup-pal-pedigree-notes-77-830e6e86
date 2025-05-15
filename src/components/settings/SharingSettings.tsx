@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -89,7 +88,6 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
         for (let i = 0; i < userIds.length; i += batchSize) {
           const batchIds = userIds.slice(i, i + batchSize);
           
-          // Use a safer approach with Supabase types
           const { data, error } = await supabase
             .from('profiles')
             .select('id, email')
