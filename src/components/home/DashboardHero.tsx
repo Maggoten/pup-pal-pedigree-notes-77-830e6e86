@@ -9,8 +9,13 @@ const DashboardHero: React.FC = () => {
     <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-indigo-50 to-pink-50 p-6 shadow-sm dark:from-indigo-950/30 dark:to-pink-950/30">
       <DecorativePawprints />
       <div className="relative z-10">
-        <WelcomeHeader />
-        <MetricCardGrid />
+        <WelcomeHeader username="there" />
+        <MetricCardGrid 
+          reminderCount={0}
+          plannedLittersCount={0}
+          activePregnanciesCount={0}
+          recentLittersCount={0}
+        />
       </div>
     </div>
   );

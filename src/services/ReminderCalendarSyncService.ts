@@ -10,7 +10,7 @@ import { safeFilter } from '@/utils/supabaseTypeUtils';
 interface CalendarEvent {
   id?: string;
   title: string;
-  date: string | Date; // Can be either string or Date - will convert to string when sending to Supabase
+  date: string; // Always use string for Supabase
   time?: string;
   type: string;
   dog_id?: string;
@@ -172,10 +172,10 @@ export class ReminderCalendarSyncService {
   
   /**
    * Create heat cycle reminders and events
-   * @param heat The upcoming heat data
+   * @param heat The upcoming heat data with additional properties
    * @returns boolean indicating success
    */
-  static async syncHeatCycleEvents(heat: UpcomingHeat): Promise<boolean> {
+  static async syncHeatCycleEvents(heat: UpcomingHeat & { dogId?: string; dogName?: string; date?: Date }): Promise<boolean> {
     try {
       // Make sure dog exists and has expected dates
       if (!heat.dog || !heat.expectedDate) {
@@ -194,8 +194,8 @@ export class ReminderCalendarSyncService {
       }
       
       // Create the main heat cycle event
-      const dogId = dog.id;
-      const dogName = dog.name;
+      const dogId = heat.dogId || dog.id;
+      const dogName = heat.dogName || dog.name;
       const preHeatDate = expectedDate;
       
       const preHeatEvent: CalendarEvent = {

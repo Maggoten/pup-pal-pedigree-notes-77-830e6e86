@@ -23,7 +23,7 @@ const PlannedLittersContent: React.FC = () => {
   // Run cleanup of old heat entries when the page loads
   useEffect(() => {
     const cleanup = async () => {
-      await HeatService.deleteOldHeatEntries();
+      await HeatService.cleanupOldHeatEntries();
     };
     
     cleanup();

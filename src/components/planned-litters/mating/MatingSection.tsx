@@ -26,7 +26,8 @@ const MatingSection: React.FC<MatingSectionProps> = ({ upcomingHeats, recentMati
                 <UpcomingHeatCard 
                   key={`${heat.dog.id}-${index}`} 
                   heat={heat} 
-                  onDelete={onHeatDeleted} 
+                  onDelete={onHeatDeleted}
+                  onHeatDeleted={onHeatDeleted}
                 />
               ))}
             </div>

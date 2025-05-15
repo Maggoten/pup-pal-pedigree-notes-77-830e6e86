@@ -27,28 +27,28 @@ const MetricCardGrid: React.FC<MetricCardGridProps> = ({
         title="Reminders"
         value={reminderCount.toString()}
         description="Active tasks"
-        icon={<Bell className="h-5 w-5" />}
+        icon="bell"
         trend="neutral"
       />
       <MetricCard
         title="Planned Litters"
         value={plannedLittersCount.toString()}
         description="Upcoming breedings"
-        icon={<Calendar className="h-5 w-5" />}
+        icon="calendar"
         trend="up"
       />
       <MetricCard
         title="Active Pregnancies"
         value={activePregnanciesCount.toString()}
         description="In progress"
-        icon={<StethoscopeIcon className="h-5 w-5" />}
+        icon="heart"
         trend="neutral"
       />
       <MetricCard
         title="Recent Litters"
         value={recentLittersCount.toString()}
         description="Last 90 days"
-        icon={<PawPrint className="h-5 w-5" />}
+        icon="pawprint"
         trend="up"
       />
     </div>
