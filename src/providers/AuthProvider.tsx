@@ -1,8 +1,8 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { verifySession } from '@/utils/storage';
+import { RegisterData } from '@/types/auth';
 
 // Define User type directly since we're not importing from auth-helpers-react
 type User = {
@@ -21,11 +21,15 @@ type User = {
 
 interface AuthContextType {
   user: User | null;
+  supabaseUser: User | null; // Added to match expected interface
   session: Session | null;
   isAuthReady: boolean;
   isLoading: boolean;
   isLoggedIn: boolean;
   signIn: (email: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>; // Added for password-based login
+  logout: () => Promise<void>; // Added to match expected interface
+  register: (userData: RegisterData) => Promise<boolean>; // Added to match expected interface
   signOut: () => Promise<void>;
 }
 
@@ -105,6 +109,59 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     };
   }, [isAuthReady]);
 
+  // New method for password-based login to match expected interface
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        console.error("Login error:", error.message);
+        return false;
+      }
+      
+      return !!data.session;
+    } catch (error: any) {
+      console.error("Unexpected login error:", error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Implementation for the register method
+  const register = async (userData: RegisterData): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+          }
+        }
+      });
+      
+      if (error) {
+        console.error("Registration error:", error.message);
+        return false;
+      }
+      
+      return !!data.session;
+    } catch (error: any) {
+      console.error("Unexpected registration error:", error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Magic link sign-in (keeping original functionality)
   const signIn = async (email: string) => {
     setIsLoading(true);
     try {
@@ -116,6 +173,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Logout method to match expected interface
+  const logout = async (): Promise<void> => {
+    return signOut();
   };
 
   const signOut = async () => {
@@ -153,12 +215,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   const value: AuthContextType = {
     user,
+    supabaseUser: user, // Map user to supabaseUser to match expected interface
     session,
     isAuthReady,
     isLoading,
     isLoggedIn,
     signIn,
-    signOut,
+    login,    // Add password-based login
+    logout,   // Add logout alias
+    register, // Add registration method
+    signOut,  // Keep original signOut method
   };
 
   return (

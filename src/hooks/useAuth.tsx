@@ -1,4 +1,4 @@
 
-// Re-export the Auth context and provider for backward compatibility
-export { useAuth } from '@/context/AuthContext';
+// Re-export the Auth context and provider from the correct location
+export { useAuth } from '@/providers/AuthProvider';
 export { AuthProvider } from '@/providers/AuthProvider';

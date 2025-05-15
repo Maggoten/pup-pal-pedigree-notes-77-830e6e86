@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/AuthProvider';
 import AuthTabs from '@/components/auth/AuthTabs';
 import PaymentForm from '@/components/auth/PaymentForm';
 import { LoginFormValues } from '@/components/auth/LoginForm';
@@ -27,9 +26,19 @@ const Login: React.FC = () => {
         navigate('/');
       } else {
         console.log('Login page: Login failed');
+        toast({
+          title: "Login failed",
+          description: "Please check your credentials and try again",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Login page: Login error:", error);
+      toast({
+        title: "Login error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
