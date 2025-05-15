@@ -7,7 +7,7 @@ import { DogFormValues } from '../DogFormFields';
 
 interface DogImageFieldProps {
   form: UseFormReturn<DogFormValues>;
-  handleImageChange: (imageBase64: string) => void;
+  handleImageChange: (imageUrl: string) => void;
   disabled?: boolean;
 }
 

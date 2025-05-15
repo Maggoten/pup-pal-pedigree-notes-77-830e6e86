@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import DogFormFields, { dogFormSchema } from './DogFormFields';
+import DogImageField from './image-upload/DogImageField';
 import HeatRecordsField from './HeatRecordsField';
 import { toast } from '@/hooks/use-toast';
 import { useDogs } from '@/context/DogsContext';
@@ -32,6 +33,7 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
 }) => {
   const { addDog, loading } = useDogs();
   const { isAuthReady } = useAuth();
+  const [imageUrl, setImageUrl] = useState<string>('/placeholder.svg');
   
   const form = useForm<z.infer<typeof dogFormSchema>>({
     resolver: zodResolver(dogFormSchema),
@@ -44,9 +46,16 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
       registrationNumber: '',
       notes: '',
       heatHistory: [],
-      heatInterval: undefined
+      heatInterval: undefined,
+      image: imageUrl
     }
   });
+
+  const handleImageChange = (newImageUrl: string) => {
+    console.log('AddDogDialog: Image URL updated:', newImageUrl);
+    setImageUrl(newImageUrl);
+    form.setValue('image', newImageUrl);
+  };
 
   const handleSubmit = async (data: z.infer<typeof dogFormSchema>) => {
     if (loading) return;
@@ -62,6 +71,7 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
     }
     
     try {
+      // Use the current image URL from state to ensure it's the latest
       const result = await addDog({
         name: data.name,
         breed: data.breed,
@@ -70,7 +80,7 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
         color: data.color,
         registrationNumber: data.registrationNumber,
         notes: data.notes || '',
-        image: '/placeholder.svg',
+        image: imageUrl, // Use the image URL from state
         heatHistory: data.heatHistory?.map(heat => ({ 
           date: heat.date.toISOString().split('T')[0] 
         })) || [],
@@ -81,10 +91,20 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
       
       if (result) {
         form.reset();
+        setImageUrl('/placeholder.svg');
         onOpenChange(false);
+        toast({
+          title: "Dog added successfully",
+          description: `${data.name} has been added to your dogs`,
+        });
       }
     } catch (error) {
       console.error('Error adding dog:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add dog. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -100,6 +120,13 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            {/* Add DogImageField at the top */}
+            <DogImageField 
+              form={form} 
+              handleImageChange={handleImageChange} 
+              disabled={loading} 
+            />
+            
             <DogFormFields form={form} />
             
             {form.watch('gender') === 'female' && (
