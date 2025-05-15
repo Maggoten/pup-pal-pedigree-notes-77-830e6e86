@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { format, addDays } from 'date-fns';
+import { format } from 'date-fns';
 import { Calendar } from 'lucide-react';
 import { UpcomingHeat } from '@/types/reminders';
 import { Button } from '@/components/ui/button';
@@ -15,16 +15,22 @@ import { handleSupabaseError } from '@/utils/supabaseProfileUtils';
 interface UpcomingHeatCardProps {
   heat: UpcomingHeat;
   onDelete?: () => void;
+  onHeatDeleted?: () => void;
 }
 
-const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onDelete }) => {
+const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onDelete, onHeatDeleted }) => {
   const navigate = useNavigate();
   
   // Create calculated properties needed by ReminderCalendarSyncService
   const dogId = heat.dog.id;
   const dogName = heat.dog.name;
   const date = heat.expectedDate;
-  const heatWithAdditionalProps = { ...heat, dogId, dogName, date };
+  const heatWithAdditionalProps = { 
+    ...heat, 
+    dogId, 
+    dogName, 
+    date 
+  };
   
   // Function to navigate to dog details
   const handleViewDog = () => {
@@ -49,7 +55,7 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onDelete }) =
         if (user) {
           const heatEvent = {
             title: `${heat.dog.name} - Heat cycle recorded`,
-            date: new Date(),
+            date: new Date().toISOString(), // Convert Date to string for Supabase
             type: 'heat',
             dog_id: heat.dog.id,
             dog_name: heat.dog.name,
@@ -65,6 +71,7 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onDelete }) =
           description: `Heat cycle recorded for ${heat.dog.name}`,
         });
         
+        if (onHeatDeleted) onHeatDeleted();
         if (onDelete) onDelete();
       } else {
         toast({

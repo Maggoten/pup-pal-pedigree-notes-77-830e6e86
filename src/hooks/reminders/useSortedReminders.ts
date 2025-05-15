@@ -8,11 +8,14 @@ export const useSortedReminders = (reminders: Reminder[]) => {
   const sortedReminders = useMemo(() => {
     return [...reminders].sort((a, b) => {
       // First sort by completion status
-      if (a.isCompleted && !b.isCompleted) return 1;
-      if (!a.isCompleted && b.isCompleted) return -1;
+      const aCompleted = a.is_completed || a.isCompleted || false;
+      const bCompleted = b.is_completed || b.isCompleted || false;
+      
+      if (aCompleted && !bCompleted) return 1;
+      if (!aCompleted && bCompleted) return -1;
       
       // For non-completed reminders, sort by priority first
-      if (!a.isCompleted && !b.isCompleted) {
+      if (!aCompleted && !bCompleted) {
         // Then sort by priority
         const priorityOrder = { high: 0, medium: 1, low: 2 };
         const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
@@ -38,7 +41,7 @@ export const useSortedReminders = (reminders: Reminder[]) => {
       }
       
       // For completed reminders, sort by most recently completed (assuming dueDate is completion date)
-      if (a.isCompleted && b.isCompleted) {
+      if (aCompleted && bCompleted) {
         return b.dueDate.getTime() - a.dueDate.getTime(); 
       }
       

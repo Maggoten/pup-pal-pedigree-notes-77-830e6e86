@@ -13,7 +13,9 @@ interface ReminderItemProps {
   dueDate: Date;
   type: string;
   relatedId?: string;
+  related_id?: string;
   isCompleted?: boolean;
+  is_completed?: boolean;
   onComplete: (id: string) => void;
   onDelete?: (id: string) => void;
   compact?: boolean;
@@ -28,17 +30,24 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
   priority,
   dueDate,
   isCompleted = false,
+  is_completed = false,
   onComplete,
   onDelete,
-  compact = false
+  compact = false,
+  relatedId,
+  related_id
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Use either property name that's available
+  const completed = isCompleted || is_completed || false;
+  const relatedIdValue = relatedId || related_id;
 
   // Determine if overdue (due date is before now and not completed)
-  const isOverdue = !isCompleted && isBefore(new Date(dueDate), new Date());
+  const isOverdue = !completed && isBefore(new Date(dueDate), new Date());
   
   // Determine if due soon (due in next 2 days and not completed)
-  const isDueSoon = !isCompleted && 
+  const isDueSoon = !completed && 
     !isOverdue && 
     isBefore(new Date(dueDate), addDays(new Date(), 2));
   
@@ -67,7 +76,7 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
     <div
       className={cn(
         "p-3 transition-colors relative",
-        isCompleted ? "bg-primary/5" : "hover:bg-primary/5",
+        completed ? "bg-primary/5" : "hover:bg-primary/5",
         compact ? "py-2" : "py-3"
       )}
     >
@@ -78,13 +87,13 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
             onClick={handleComplete}
             className={cn(
               "h-5 w-5 rounded-full border flex-shrink-0 flex items-center justify-center transition-colors",
-              isCompleted ? "bg-green-500 border-green-600" : "border-greige-300 hover:border-primary/70",
-              priority === 'high' && !isCompleted ? "border-rose-400" : "",
-              priority === 'medium' && !isCompleted ? "border-amber-400" : "",
-              priority === 'low' && !isCompleted ? "border-green-400" : ""
+              completed ? "bg-green-500 border-green-600" : "border-greige-300 hover:border-primary/70",
+              priority === 'high' && !completed ? "border-rose-400" : "",
+              priority === 'medium' && !completed ? "border-amber-400" : "",
+              priority === 'low' && !completed ? "border-green-400" : ""
             )}
           >
-            {isCompleted && <Check className="h-3 w-3 text-white" />}
+            {completed && <Check className="h-3 w-3 text-white" />}
           </button>
         </div>
         
@@ -100,7 +109,7 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
             <div
               className={cn(
                 "flex-grow text-sm font-medium truncate",
-                isCompleted ? "text-muted-foreground line-through" : "",
+                completed ? "text-muted-foreground line-through" : "",
                 isOverdue ? "text-rose-700" : ""
               )}
             >
@@ -113,7 +122,7 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
             <div
               className={cn(
                 "mt-1 text-xs text-muted-foreground",
-                isCompleted ? "line-through" : ""
+                completed ? "line-through" : ""
               )}
             >
               {description}
@@ -124,7 +133,7 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
           <div
             className={cn(
               "text-xs mt-0.5 flex items-center",
-              isCompleted ? "text-muted-foreground line-through" : "text-muted-foreground",
+              completed ? "text-muted-foreground line-through" : "text-muted-foreground",
               isOverdue ? "text-rose-600 font-medium" : "",
               isDueSoon ? "text-amber-600 font-medium" : ""
             )}

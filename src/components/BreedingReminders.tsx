@@ -51,17 +51,17 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
   const displayReminders = React.useMemo(() => {
     // First prioritize active high priority reminders
     const highPriorityReminders = reminders
-      .filter(r => r.priority === 'high' && !r.isCompleted)
+      .filter(r => r.priority === 'high' && !(r.is_completed || r.isCompleted))
       .slice(0, 3);
     
     // Then medium priority reminders if we need more
     const mediumPriorityReminders = reminders
-      .filter(r => r.priority === 'medium' && !r.isCompleted)
+      .filter(r => r.priority === 'medium' && !(r.is_completed || r.isCompleted))
       .slice(0, 3 - highPriorityReminders.length);
       
     // Finally low priority if needed
     const lowPriorityReminders = reminders
-      .filter(r => r.priority === 'low' && !r.isCompleted)
+      .filter(r => r.priority === 'low' && !(r.is_completed || r.isCompleted))
       .slice(0, 3 - highPriorityReminders.length - mediumPriorityReminders.length);
     
     // Combine all reminders in priority order
@@ -74,7 +74,7 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
     // If no active reminders, show completed ones
     if (result.length === 0 && reminders.length > 0) {
       const completedReminders = reminders
-        .filter(r => r.isCompleted)
+        .filter(r => r.is_completed || r.isCompleted)
         .slice(0, 3);
       
       result.push(...completedReminders);

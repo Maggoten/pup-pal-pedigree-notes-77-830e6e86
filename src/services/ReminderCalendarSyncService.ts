@@ -10,7 +10,7 @@ import { safeFilter } from '@/utils/supabaseTypeUtils';
 interface CalendarEvent {
   id?: string;
   title: string;
-  date: Date;
+  date: string | Date; // Can be either string or Date - will convert to string when sending to Supabase
   time?: string;
   type: string;
   dog_id?: string;
@@ -18,6 +18,16 @@ interface CalendarEvent {
   notes?: string;
   user_id?: string;
 }
+
+/**
+ * Converts a Date object to an ISO string for Supabase
+ */
+const formatDateForSupabase = (date: Date | string): string => {
+  if (date instanceof Date) {
+    return date.toISOString();
+  }
+  return date;
+};
 
 /**
  * Service for synchronizing reminders with calendar events
@@ -51,7 +61,7 @@ export class ReminderCalendarSyncService {
       
       const event: CalendarEvent = {
         title: reminder.title,
-        date: reminder.dueDate,
+        date: formatDateForSupabase(reminder.dueDate),
         type: reminder.type || 'reminder',
         notes: `reminder_id:${reminder.id}\n${reminder.description || ''}`,
         user_id: user.id
@@ -190,7 +200,7 @@ export class ReminderCalendarSyncService {
       
       const preHeatEvent: CalendarEvent = {
         title: `${dogName} - Starting heat cycle`,
-        date: preHeatDate,
+        date: formatDateForSupabase(preHeatDate),
         type: 'heat',
         dog_id: dogId,
         dog_name: dogName,
@@ -226,7 +236,7 @@ export class ReminderCalendarSyncService {
       
       const fertilityEvent: CalendarEvent = {
         title: `${dogName} - Fertility window begins`,
-        date: fertilityStartDate,
+        date: formatDateForSupabase(fertilityStartDate),
         type: 'heat',
         dog_id: dogId,
         dog_name: dogName,

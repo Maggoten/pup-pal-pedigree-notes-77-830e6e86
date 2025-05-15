@@ -1,11 +1,8 @@
 
 import { PlannedLitter } from '@/types/breeding';
-import { UpcomingHeat, RecentMating as RemindersRecentMating } from '@/types/reminders';
+import { UpcomingHeat, RecentMating } from '@/types/reminders';
 import { Dog } from '@/context/DogsContext';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
-
-// Use the same RecentMating type from reminders for consistency
-export type RecentMating = RemindersRecentMating;
 
 export interface PlannedLitterHandlers {
   onAddPlannedLitter: (values: PlannedLitterFormValues) => void;

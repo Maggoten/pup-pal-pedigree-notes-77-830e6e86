@@ -1,9 +1,8 @@
 
 import React from 'react';
-import { UpcomingHeat } from '@/types/reminders';
+import { UpcomingHeat, RecentMating } from '@/types/reminders';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import UpcomingHeatCard from './UpcomingHeatCard';
-import { RecentMating } from '@/types/reminders';
 import RecentMatingsCard from './RecentMatingsCard';
 import MatingTipsCard from './MatingTipsCard';
 
@@ -27,7 +26,7 @@ const MatingSection: React.FC<MatingSectionProps> = ({ upcomingHeats, recentMati
                 <UpcomingHeatCard 
                   key={`${heat.dog.id}-${index}`} 
                   heat={heat} 
-                  onHeatDeleted={onHeatDeleted} 
+                  onDelete={onHeatDeleted} 
                 />
               ))}
             </div>

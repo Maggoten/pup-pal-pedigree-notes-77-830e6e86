@@ -1,64 +1,132 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
+import { UpcomingHeat } from '@/types/reminders';
+import { format, addDays, differenceInDays } from 'date-fns';
 import { Dog } from '@/types/dogs';
 
 export class HeatService {
-  static async addHeatDate(dogId: string, date: Date): Promise<boolean> {
+  /**
+   * Add a heat date to a dog's heat history
+   */
+  static async addHeatDate(dogId: string, heatDate: Date): Promise<boolean> {
     try {
-      // Fetch the dog to get current heat history
+      // Fetch current heat history
       const { data, error } = await supabase
         .from('dogs')
         .select('heatHistory')
         .eq('id', dogId)
         .single();
       
-      if (error || !data) {
-        console.error('Error fetching dog heat history:', error);
-        return false;
+      if (error) throw error;
+      
+      // Prepare updated heat history
+      let heatHistory: any[] = [];
+      if (data && data.heatHistory) {
+        // Check if heatHistory is already an array
+        if (Array.isArray(data.heatHistory)) {
+          heatHistory = [...data.heatHistory];
+        } else {
+          // If it's not an array (perhaps it's a string or other type), initialize a new one
+          heatHistory = [];
+        }
       }
       
-      // Create new heat entry
-      const newEntry = {
-        date: date.toISOString(),
-        recorded: new Date().toISOString()
-      };
+      // Add new heat date
+      heatHistory.push({
+        date: heatDate.toISOString(),
+        notes: "Recorded heat"
+      });
       
-      // Add to existing heat history or create new array
-      const heatHistory = data.heatHistory || [];
-      heatHistory.push(newEntry);
-      
-      // Update the dog with new heat history
+      // Update dog with new heat history
       const { error: updateError } = await supabase
         .from('dogs')
         .update({ heatHistory })
         .eq('id', dogId);
       
-      if (updateError) {
-        console.error('Error updating dog heat history:', updateError);
-        return false;
-      }
+      if (updateError) throw updateError;
+      
+      // Show toast message on success
+      toast({
+        title: "Heat record added",
+        description: `Heat cycle recorded for ${format(heatDate, 'MMM d, yyyy')}`
+      });
       
       return true;
     } catch (error) {
-      console.error('Unexpected error adding heat date:', error);
+      console.error('Error adding heat date:', error);
+      toast({
+        title: "Error adding heat record",
+        description: "Failed to save heat cycle data",
+        variant: "destructive"
+      });
       return false;
     }
   }
   
-  static async deleteOldHeatEntries(): Promise<boolean> {
-    try {
-      // Call the Supabase function to delete old heat entries
-      const { error } = await supabase.rpc('delete_old_heat_entries');
-      
-      if (error) {
-        console.error('Error calling delete_old_heat_entries:', error);
-        return false;
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Unexpected error deleting old heat entries:', error);
-      return false;
+  /**
+   * Calculate the expected next heat date based on previous heats
+   */
+  static calculateNextHeatDate(dog: Dog): Date | null {
+    // Default heat interval in days
+    const defaultInterval = 180; // ~ 6 months
+    
+    // Use configured heat interval if available
+    const intervalDays = dog.heatInterval || defaultInterval;
+    
+    if (!dog.heatHistory || !Array.isArray(dog.heatHistory) || dog.heatHistory.length === 0) {
+      // If no heat history, estimate from birth date or return null
+      return dog.birthdate ? addDays(new Date(dog.birthdate), 270) : null;
     }
+    
+    // Sort heat history by date, most recent first
+    const sortedHeats = [...dog.heatHistory].sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB.getTime() - dateA.getTime();
+    });
+    
+    // Get the most recent heat date
+    const lastHeatDate = new Date(sortedHeats[0].date);
+    
+    // Calculate expected date
+    return addDays(lastHeatDate, intervalDays);
+  }
+  
+  /**
+   * Get a list of upcoming heats for a collection of dogs
+   */
+  static getUpcomingHeats(dogs: Dog[]): UpcomingHeat[] {
+    if (!dogs || dogs.length === 0) return [];
+    
+    // Filter only female dogs
+    const femaleDogs = dogs.filter(dog => dog.gender === 'female');
+    
+    const upcomingHeats: UpcomingHeat[] = [];
+    
+    // Calculate upcoming heat for each female dog
+    femaleDogs.forEach(dog => {
+      const nextHeatDate = this.calculateNextHeatDate(dog);
+      if (!nextHeatDate) return;
+      
+      const today = new Date();
+      const daysTillHeat = differenceInDays(nextHeatDate, today);
+      
+      // Include heats up to 30 days in the past (already started) and 60 days in the future
+      if (daysTillHeat > -30 && daysTillHeat < 60) {
+        upcomingHeats.push({
+          dog,
+          expectedDate: nextHeatDate,
+          daysTillHeat,
+          // Add properties required by ReminderCalendarSyncService
+          dogId: dog.id,
+          dogName: dog.name,
+          date: nextHeatDate
+        });
+      }
+    });
+    
+    // Sort by date, closest first
+    return upcomingHeats.sort((a, b) => a.daysTillHeat - b.daysTillHeat);
   }
 }

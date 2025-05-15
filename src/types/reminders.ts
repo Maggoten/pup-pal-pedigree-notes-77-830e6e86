@@ -1,3 +1,4 @@
+
 import { Dog } from './dogs';
 
 export interface Reminder {
@@ -10,6 +11,9 @@ export interface Reminder {
   is_completed?: boolean;
   icon?: string;
   related_id?: string;
+  // Legacy field names for backwards compatibility with UI components
+  isCompleted?: boolean;
+  relatedId?: string;
 }
 
 export interface CustomReminderInput {
@@ -30,4 +34,16 @@ export interface UpcomingHeat {
   dogId?: string;
   dogName?: string;
   date?: Date;
+}
+
+export interface RecentMating {
+  id: string;
+  litterId: string;
+  damId: string;
+  damName: string;
+  sireId?: string;
+  sireName?: string;
+  maleName: string;
+  femaleName: string;
+  date: Date;
 }
