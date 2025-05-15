@@ -32,15 +32,17 @@ export const calculateUpcomingHeats = (dogs: Dog[]): UpcomingHeat[] => {
       // Only include if the next heat date is in the future
       if (nextHeatDate > today) {
         upcomingHeats.push({
+          dog,
+          expectedDate: nextHeatDate,
+          daysTillHeat: Math.round((nextHeatDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)),
           dogId: dog.id,
           dogName: dog.name,
-          date: nextHeatDate,
-          heatIndex: dog.heatHistory.findIndex(h => h.date === sortedHeatDates[0].date) // Store the index for deletion
+          date: nextHeatDate
         });
       }
     }
   });
   
   // Sort by date (closest first)
-  return upcomingHeats.sort((a, b) => a.date.getTime() - b.date.getTime());
+  return upcomingHeats.sort((a, b) => a.expectedDate.getTime() - b.expectedDate.getTime());
 };

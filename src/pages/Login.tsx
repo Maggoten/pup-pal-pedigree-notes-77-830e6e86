@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import AuthTabs from '@/components/auth/AuthTabs'; // Fixed import
-import { BreedingJourneyLogo } from '@/components/BreedingJourneyLogo'; // Corrected import
+import AuthTabs from '@/components/auth/AuthTabs';
+import BreedingJourneyLogo from '@/components/BreedingJourneyLogo';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -20,7 +20,8 @@ const Login: React.FC = () => {
             <BreedingJourneyLogo />
           </div>
           
-          <AuthTabs onLoginSuccess={handleLoginSuccess} />
+          {/* Remove onLoginSuccess if it's not supported */}
+          <AuthTabs />
           
         </div>
       </div>

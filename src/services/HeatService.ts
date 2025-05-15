@@ -4,6 +4,12 @@ import { addDays } from 'date-fns';
 import { Dog } from '@/types/dogs';
 import { toast } from '@/components/ui/use-toast';
 
+// Define heat entry type for better type safety
+interface HeatEntry {
+  date: string;
+  recorded: string;
+}
+
 export class HeatService {
   static async recordHeatDate(dogId: string, date: Date): Promise<boolean> {
     try {
@@ -26,20 +32,18 @@ export class HeatService {
       };
       
       // Get the current heat history or initialize empty array
-      let heatHistory = dog.heatHistory || [];
+      let heatHistory: HeatEntry[] = [];
       
-      // Ensure it's an array we can work with
-      if (typeof heatHistory === 'string') {
-        try {
-          heatHistory = JSON.parse(heatHistory);
-        } catch (e) {
-          heatHistory = [];
+      if (dog.heatHistory) {
+        if (typeof dog.heatHistory === 'string') {
+          try {
+            heatHistory = JSON.parse(dog.heatHistory);
+          } catch (e) {
+            heatHistory = [];
+          }
+        } else if (Array.isArray(dog.heatHistory)) {
+          heatHistory = dog.heatHistory;
         }
-      }
-      
-      // If it's still not an array, initialize it
-      if (!Array.isArray(heatHistory)) {
-        heatHistory = [];
       }
       
       // Add the new entry
@@ -80,24 +84,22 @@ export class HeatService {
       }
       
       // Get the current heat history
-      let heatHistory = dog.heatHistory || [];
+      let heatHistory: HeatEntry[] = [];
       
-      // Ensure it's an array
-      if (typeof heatHistory === 'string') {
-        try {
-          heatHistory = JSON.parse(heatHistory);
-        } catch (e) {
-          heatHistory = [];
+      if (dog.heatHistory) {
+        if (typeof dog.heatHistory === 'string') {
+          try {
+            heatHistory = JSON.parse(dog.heatHistory);
+          } catch (e) {
+            heatHistory = [];
+          }
+        } else if (Array.isArray(dog.heatHistory)) {
+          heatHistory = dog.heatHistory;
         }
       }
       
-      // If it's still not an array, there's nothing to delete
-      if (!Array.isArray(heatHistory)) {
-        return false;
-      }
-      
       // Filter out the entry with the matching date
-      const filteredHistory = heatHistory.filter(entry => entry.date !== date);
+      const filteredHistory = heatHistory.filter(entry => entry?.date !== date);
       
       // Update the dog with the filtered heat history
       const { error: updateError } = await supabase
@@ -119,8 +121,8 @@ export class HeatService {
     }
   }
 
-  // Add the missing method that was referenced in PlannedLittersContent.tsx
-  static async deleteOldHeatEntries(): Promise<boolean> {
+  // Add the method referenced in PlannedLittersContent.tsx
+  static async cleanupOldHeatEntries(): Promise<boolean> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return false;
@@ -141,17 +143,39 @@ export class HeatService {
       
       // Process each dog
       const updates = dogs.map(dog => {
-        if (!dog.heatHistory || !Array.isArray(dog.heatHistory)) {
+        if (!dog.heatHistory) {
           return null; // Skip dogs without heat history
         }
         
+        let heatHistory: HeatEntry[] = [];
+        
+        // Parse heat history
+        if (typeof dog.heatHistory === 'string') {
+          try {
+            heatHistory = JSON.parse(dog.heatHistory);
+          } catch (e) {
+            return null;
+          }
+        } else if (Array.isArray(dog.heatHistory)) {
+          heatHistory = dog.heatHistory;
+        } else {
+          return null;
+        }
+        
+        if (!Array.isArray(heatHistory) || heatHistory.length === 0) {
+          return null;
+        }
+        
         // Filter heat entries newer than cutoff date
-        const filteredHistory = dog.heatHistory.filter(
-          entry => entry.date > cutoffDate
-        );
+        const filteredHistory = heatHistory.filter(entry => {
+          if (entry && typeof entry === 'object' && 'date' in entry) {
+            return entry.date > cutoffDate;
+          }
+          return false;
+        });
         
         // Only update if there's a change
-        if (filteredHistory.length < dog.heatHistory.length) {
+        if (filteredHistory.length < heatHistory.length) {
           return supabase
             .from('dogs')
             .update({
