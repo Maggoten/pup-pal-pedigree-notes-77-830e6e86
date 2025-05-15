@@ -1,10 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
+import { validateCrossStorageSession, verifySession } from '@/utils/storage/core/session';
 
 // Add a global state to track active uploads across components
 let activeUploadsCount = 0;
@@ -23,6 +23,34 @@ export const uploadStateManager = {
   hasActiveUploads: () => activeUploadsCount > 0
 };
 
+// Keep track of recently visited authenticated pages to support "return to"
+const recentAuthPaths: string[] = [];
+const MAX_RECENT_PATHS = 5;
+
+// Add path to recent list
+export const trackAuthenticatedPath = (path: string) => {
+  if (path === '/login' || path === '/register') return;
+  
+  // Remove if already exists (to move it to the front)
+  const existingIndex = recentAuthPaths.indexOf(path);
+  if (existingIndex > -1) {
+    recentAuthPaths.splice(existingIndex, 1);
+  }
+  
+  // Add to front
+  recentAuthPaths.unshift(path);
+  
+  // Keep list at max size
+  if (recentAuthPaths.length > MAX_RECENT_PATHS) {
+    recentAuthPaths.pop();
+  }
+};
+
+// Get most recent authenticated path
+export const getMostRecentAuthPath = (): string => {
+  return recentAuthPaths[0] || '/';
+};
+
 interface AuthGuardProps {
   children: React.ReactNode;
 }
@@ -35,9 +63,21 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const [delayComplete, setDelayComplete] = useState(false);
   const platform = getPlatformInfo();
   const isMobile = platform.mobile || platform.safari;
+  
+  // Keep track of authentication status post verification
+  const [verifiedAuth, setVerifiedAuth] = useState<boolean | null>(null);
 
   // Check if user is on the login page
   const isLoginPage = location.pathname === '/login';
+  const isRegisterPage = location.pathname === '/register';
+  const isAuthPage = isLoginPage || isRegisterPage;
+  
+  // Track current path for "return to" functionality
+  useEffect(() => {
+    if (isLoggedIn && !isAuthPage) {
+      trackAuthenticatedPath(location.pathname);
+    }
+  }, [isLoggedIn, isAuthPage, location.pathname]);
   
   // Track if there are active uploads to prevent premature redirects
   const [hasActiveUploads, setHasActiveUploads] = useState(false);
@@ -50,6 +90,40 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     
     return () => clearInterval(uploadCheckInterval);
   }, []);
+  
+  // Enhanced session verification for mobile
+  useEffect(() => {
+    // Only run verification when auth is ready
+    if (isAuthReady && !isAuthPage) {
+      // Use a different approach for mobile - more tolerant and uses local cache
+      const verifyAuthStatus = async () => {
+        try {
+          // For mobile, use cross-storage validation for more resilience
+          if (isMobile) {
+            const isValid = await validateCrossStorageSession();
+            setVerifiedAuth(isValid);
+            return;
+          }
+          
+          // For desktop, use standard session verification
+          const isValid = await verifySession({ 
+            respectAuthReady: true, 
+            authReady: isAuthReady,
+            skipThrow: true
+          });
+          setVerifiedAuth(isValid);
+        } catch (e) {
+          console.error('[AuthGuard] Error verifying session:', e);
+          setVerifiedAuth(false);
+        }
+      };
+      
+      verifyAuthStatus();
+    } else if (isAuthPage) {
+      // No verification needed on auth pages
+      setVerifiedAuth(isLoggedIn);
+    }
+  }, [isAuthReady, isLoggedIn, isAuthPage, isMobile]);
 
   // Add a delay before showing authentication errors
   // This helps prevent flash of auth errors during initialization
@@ -70,7 +144,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   useEffect(() => {
     // On mobile, we add extra time before forcing a redirect
     // This helps prevent premature redirects during slow session restoration
-    if (isMobile && !isLoggedIn && !isLoginPage && !hasActiveUploads) {
+    if (isMobile && !isLoggedIn && !isAuthPage && !hasActiveUploads) {
       // Increased timeout from 6000ms to 8000ms
       const timer = setTimeout(() => {
         console.log('[AuthGuard] Mobile auth timeout reached, checking auth state again');
@@ -103,7 +177,31 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       
       return () => clearTimeout(timer);
     }
-  }, [isMobile, isLoggedIn, isLoginPage, isAuthReady, hasActiveUploads]);
+  }, [isMobile, isLoggedIn, isAuthPage, isAuthReady, hasActiveUploads]);
+  
+  // Add a verification check to try to restore sessions on mobile
+  useEffect(() => {
+    // For mobile only - if auth is not ready or user is not logged in
+    // attempt an extra session verification after delay
+    if (isMobile && (!isAuthReady || !isLoggedIn) && !isAuthPage) {
+      const timer = setTimeout(async () => {
+        try {
+          console.log('[AuthGuard] Attempting mobile session restoration');
+          const isSessionValid = await validateCrossStorageSession();
+          
+          if (isSessionValid) {
+            console.log('[AuthGuard] Successfully validated cross-storage session');
+            // Force refresh if possible
+            window.location.reload();
+          }
+        } catch (e) {
+          console.error('[AuthGuard] Error during mobile session restoration:', e);
+        }
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isMobile, isAuthReady, isLoggedIn, isAuthPage]);
   
   useEffect(() => {
     // Only show authentication toast when:
@@ -115,15 +213,17 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     // 6. No toast is currently showing
     // 7. Mobile timeout has been reached (if mobile)
     // 8. No active uploads are in progress
+    // 9. Verified auth status is false (if available)
     const shouldShowToast = 
       isAuthReady && 
       !isLoggedIn && 
-      !isLoginPage && 
+      !isAuthPage && 
       !supabaseUser && 
       delayComplete && 
       !showingToast &&
       (!isMobile || (isMobile && mobileAuthTimeout)) &&
-      !hasActiveUploads;
+      !hasActiveUploads &&
+      (verifiedAuth === false);
     
     if (shouldShowToast) {
       console.log('[AuthGuard] Showing auth required toast, details:', {
@@ -133,6 +233,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         isMobile,
         mobileAuthTimeout,
         hasActiveUploads,
+        verifiedAuth,
         currentPath: location.pathname
       });
       
@@ -154,7 +255,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     }
   }, [
     isLoggedIn, 
-    isLoginPage, 
+    isAuthPage, 
     supabaseUser, 
     toast, 
     isAuthReady, 
@@ -163,7 +264,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     mobileAuthTimeout,
     hasActiveUploads,
     isMobile,
-    location.pathname
+    location.pathname,
+    verifiedAuth
   ]);
 
   // Show loading state while auth is not ready
@@ -186,21 +288,26 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // 3. Not on login page
   // 4. For mobile, wait for the extra timeout
   // 5. No active uploads are in progress
+  // 6. Verified auth status is false (if available)
   const shouldRedirectToLogin = isAuthReady && 
                               !isLoggedIn && 
-                              !isLoginPage && 
+                              !isAuthPage && 
                               (!isMobile || (isMobile && mobileAuthTimeout)) &&
-                              !hasActiveUploads;
+                              !hasActiveUploads &&
+                              (verifiedAuth === false || verifiedAuth === null);
   
   if (shouldRedirectToLogin) {
     console.log('[AuthGuard] Redirecting to login page from:', location.pathname);
+    // Store the current path for returning after login
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Only redirect if auth is ready and user is logged in and on login page
-  if (isAuthReady && isLoggedIn && isLoginPage) {
+  if (isAuthReady && isLoggedIn && isAuthPage) {
     console.log('[AuthGuard] User already logged in, redirecting from login page');
-    return <Navigate to="/" replace />;
+    // Get the path from the location state or use the most recent auth path
+    const returnPath = location.state?.from?.pathname || getMostRecentAuthPath() || '/';
+    return <Navigate to={returnPath} replace />;
   }
 
   return <>{children}</>;
