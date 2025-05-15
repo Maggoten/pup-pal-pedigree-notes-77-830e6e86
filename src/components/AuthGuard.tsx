@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
+import { debounce, isOnline } from '@/utils/fetchUtils';
 
 // Add a global state to track active uploads across components
 let activeUploadsCount = 0;
@@ -42,6 +43,9 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // Track if there are active uploads to prevent premature redirects
   const [hasActiveUploads, setHasActiveUploads] = useState(false);
   
+  // Track network state for mobile
+  const [isOffline, setIsOffline] = useState(!isOnline());
+  
   // Check for active uploads every 500ms
   useEffect(() => {
     const uploadCheckInterval = setInterval(() => {
@@ -50,6 +54,33 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     
     return () => clearInterval(uploadCheckInterval);
   }, []);
+  
+  // Track network state
+  useEffect(() => {
+    if (!isMobile) return; // Only needed for mobile
+    
+    const updateOnlineStatus = () => {
+      const online = isOnline();
+      setIsOffline(!online);
+      
+      // On reconnection, give time for auth to restore
+      if (online && !isLoggedIn) {
+        console.log('[AuthGuard] Network reconnected, waiting for auth state to restore');
+        // Don't redirect immediately on reconnection
+      }
+    };
+    
+    // Debounce to prevent rapid changes
+    const debouncedUpdateStatus = debounce(updateOnlineStatus, 1000);
+    
+    window.addEventListener('online', debouncedUpdateStatus);
+    window.addEventListener('offline', debouncedUpdateStatus);
+    
+    return () => {
+      window.removeEventListener('online', debouncedUpdateStatus);
+      window.removeEventListener('offline', debouncedUpdateStatus);
+    };
+  }, [isMobile, isLoggedIn]);
 
   // Add a delay before showing authentication errors
   // This helps prevent flash of auth errors during initialization
@@ -104,6 +135,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       return () => clearTimeout(timer);
     }
   }, [isMobile, isLoggedIn, isLoginPage, isAuthReady, hasActiveUploads]);
+  
+  // Handle offline state for mobile
+  if (isMobile && isOffline) {
+    console.log('[AuthGuard] Mobile device is offline');
+    // Don't redirect to login if device is offline
+    return <>{children}</>;
+  }
   
   useEffect(() => {
     // Only show authentication toast when:
@@ -163,7 +201,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     mobileAuthTimeout,
     hasActiveUploads,
     isMobile,
-    location.pathname
+    location.pathname,
+    isOffline
   ]);
 
   // Show loading state while auth is not ready
@@ -186,11 +225,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // 3. Not on login page
   // 4. For mobile, wait for the extra timeout
   // 5. No active uploads are in progress
+  // 6. Not offline on mobile
   const shouldRedirectToLogin = isAuthReady && 
                               !isLoggedIn && 
                               !isLoginPage && 
                               (!isMobile || (isMobile && mobileAuthTimeout)) &&
-                              !hasActiveUploads;
+                              !hasActiveUploads &&
+                              !(isMobile && isOffline);
   
   if (shouldRedirectToLogin) {
     console.log('[AuthGuard] Redirecting to login page from:', location.pathname);
