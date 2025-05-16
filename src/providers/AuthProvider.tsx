@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { RegisterData, User, AuthContextType } from '@/types/auth';
 import { clearAuthStorage } from '@/services/auth/storageService';
 import { toast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 /**
  * AuthContext provides authentication state and methods throughout the application
@@ -37,9 +36,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
-  // Navigation for forced redirects
-  const navigate = useNavigate();
 
   /**
    * Maps a Supabase user to our application User type
@@ -194,10 +190,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "You have been successfully logged out."
       });
       
-      // Force navigation to login page after brief delay
-      setTimeout(() => {
-        navigate("/login", { replace: true });
-      }, 100);
+      // Instead of using useNavigate directly, let the AuthGuard handle redirects
+      // AuthGuard will detect the logged out state and redirect appropriately
       
     } catch (error) {
       console.error("Error during logout process:", error);
@@ -206,9 +200,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "There was a problem during logout. You've been logged out but may need to refresh.",
         variant: "destructive"
       });
-      
-      // Force navigation even on error
-      navigate("/login", { replace: true });
     } finally {
       setIsLoading(false);
     }
@@ -290,7 +281,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     register,
     logout,
-    signOut: logout,
+    signOut,
   };
 
   return (

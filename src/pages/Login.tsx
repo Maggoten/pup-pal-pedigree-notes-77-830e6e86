@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/hooks/useAuth'; // Updated import
 import AuthTabs from '@/components/auth/AuthTabs';
 import PaymentForm from '@/components/auth/PaymentForm';
 import { LoginFormValues } from '@/components/auth/LoginForm';

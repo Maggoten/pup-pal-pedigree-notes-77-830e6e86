@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Navigate, useLocation, Link } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, RefreshCw, LogIn } from 'lucide-react';
@@ -31,13 +31,13 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn, user, isAuthReady, isLoading } = useAuth();
+  const navigate = useNavigate();
+  const { isLoggedIn, user, isAuthReady, isLoading, logout } = useAuth();
   const { toast } = useToast();
   const [showingToast, setShowingToast] = useState(false);
   const [delayComplete, setDelayComplete] = useState(false);
   const platform = getPlatformInfo();
   const isMobile = platform.mobile || platform.safari;
-  const [manualRedirect, setManualRedirect] = useState(false);
   
   // Check if user is on the login page
   const isLoginPage = location.pathname === '/login';
@@ -50,6 +50,12 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   
   // Maximum time to wait for auth before assuming there's a problem
   const [authTimeout, setAuthTimeout] = useState(false);
+
+  // Handle manual redirect to login page
+  const handleManualRedirect = () => {
+    console.log('[AuthGuard] Manual redirect to login triggered');
+    navigate('/login', { state: { from: location }, replace: true });
+  };
   
   // Check for active uploads periodically
   useEffect(() => {
@@ -108,7 +114,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             <Button 
               variant="destructive" 
               size="sm" 
-              onClick={() => setManualRedirect(true)}
+              onClick={handleManualRedirect}
             >
               <LogIn className="h-4 w-4 mr-1" />
               Go to Login
@@ -145,7 +151,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
           <Button 
             variant="destructive" 
             size="sm" 
-            onClick={() => setManualRedirect(true)}
+            onClick={handleManualRedirect}
           >
             <LogIn className="h-4 w-4 mr-1" />
             Login
@@ -168,15 +174,6 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     authTimeout
   ]);
 
-  // Force manual redirect if requested
-  if (manualRedirect) {
-    console.log('[AuthGuard] Manual redirect to login triggered');
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  // Allow bypassing auth check after timeout to prevent infinite loading
-  const authCheckFailed = authTimeout && !isAuthReady;
-
   // Show loading state while auth is not ready (with timeout safety)
   if (!isAuthReady && !authTimeout) {
     return (
@@ -192,7 +189,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => setManualRedirect(true)}
+              onClick={handleManualRedirect}
             >
               <LogIn className="h-4 w-4 mr-2" />
               Go to Login Page
@@ -204,7 +201,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   }
 
   // Only redirect if proper conditions are met
-  const shouldRedirectToLogin = (isAuthReady || authCheckFailed) && 
+  const shouldRedirectToLogin = (isAuthReady || authTimeout) && 
                               !isLoggedIn && 
                               !isLoginPage && 
                               !hasActiveUploads &&
@@ -240,7 +237,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
           </ul>
           <div className="flex flex-col gap-2 w-full mt-2">
             <Button 
-              onClick={() => setManualRedirect(true)}
+              onClick={handleManualRedirect}
               className="w-full"
             >
               <LogIn className="h-4 w-4 mr-2" />
