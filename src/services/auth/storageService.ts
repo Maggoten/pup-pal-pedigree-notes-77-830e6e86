@@ -2,7 +2,7 @@
 // Storage-related functions for authentication
 
 // Enhanced version to ensure thorough cleanup of all auth-related items
-export const clearAuthStorage = async () => {
+export const clearAuthStorage = () => {
   try {
     console.log('[Auth Storage] Beginning storage cleanup process');
     
@@ -15,6 +15,14 @@ export const clearAuthStorage = async () => {
     localStorage.removeItem('supabase.auth.refreshToken');
     localStorage.removeItem('supabase.auth.user');
     localStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+    
+    // Also try removing from sessionStorage as fallback for some browsers
+    try {
+      sessionStorage.removeItem('supabase.auth.token');
+      sessionStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+    } catch (e) {
+      console.warn('[Auth Storage] Session storage cleanup failed:', e);
+    }
     
     // Clear any session/local storage items that contain these keys
     const itemsToRemove = [];
@@ -38,14 +46,6 @@ export const clearAuthStorage = async () => {
       localStorage.removeItem(key);
     });
     
-    // Also try sessionStorage
-    try {
-      sessionStorage.removeItem('supabase.auth.token');
-      sessionStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
-    } catch (e) {
-      console.warn('[Auth Storage] Session storage cleanup failed:', e);
-    }
-    
     // Also clear cookies that might be related to authentication
     document.cookie.split(';').forEach(cookie => {
       const [name] = cookie.trim().split('=');
@@ -59,15 +59,9 @@ export const clearAuthStorage = async () => {
       }
     });
     
-    // Explicitly clear the most important items again to be extra sure
-    localStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
-    localStorage.removeItem('supabase.auth.token');
-    
     console.log('[Auth Storage] All auth-related storage items cleared');
-    return true;
   } catch (e) {
     console.error('[Auth Storage] Error during storage cleanup:', e);
-    return false;
   }
 };
 
@@ -86,27 +80,4 @@ export const getLoggedInStateFromStorage = (): boolean => {
 export const saveUserToStorage = (user) => {
   localStorage.setItem('user', JSON.stringify(user));
   localStorage.setItem('isLoggedIn', 'true');
-};
-
-// Verify storage cleanup was complete
-export const verifyAuthStorageClear = (): boolean => {
-  try {
-    // Check for any remaining auth items
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && (
-        key.includes('supabase') || 
-        key.includes('auth') || 
-        key.includes('sb-') ||
-        key.includes('token')
-      )) {
-        console.warn(`[Auth Storage] Found remaining auth item after cleanup: ${key}`);
-        return false;
-      }
-    }
-    return true;
-  } catch (e) {
-    console.error('[Auth Storage] Error verifying storage cleanup:', e);
-    return false;
-  }
 };

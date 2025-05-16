@@ -1,9 +1,9 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { verifySession } from '@/utils/storage';
 import { RegisterData, User } from '@/types/auth';
-import { clearAuthStorage, verifyAuthStorageClear } from '@/services/auth/storageService';
 
 // Define SupabaseUser type for internal use
 type SupabaseUser = {
@@ -27,7 +27,6 @@ interface AuthContextType {
   isAuthReady: boolean;
   isLoading: boolean;
   isLoggedIn: boolean;
-  isAuthTransitioning: boolean; 
   signIn: (email: string) => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -58,9 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAuthTransitioning, setIsAuthTransitioning] = useState(false);
-  const [logoutCompletionState, setLogoutCompletionState] = useState(false);
-  
+
   // Helper function to map Supabase user to our User type
   const mapSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
     if (!supabaseUser) return null;
@@ -80,9 +77,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         // Get the initial session - critical to break out of "checking authentication" state
         const { data: { session } } = await supabase.auth.getSession();
 
-        console.log('[AuthProvider] Initial auth session check:', 
-          session ? 'Session found' : 'No session');
-          
         setSupabaseUser(session?.user || null);
         setUser(mapSupabaseUser(session?.user || null));
         setSession(session || null);
@@ -91,7 +85,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         // Always set isAuthReady to true even if no session
         setIsAuthReady(true);
       } catch (error) {
-        console.error("[AuthProvider] Failed to get initial session:", error);
+        console.error("Failed to get initial session:", error);
         // Important: still mark auth as ready even if there's an error
         setIsAuthReady(true);
       } finally {
@@ -105,9 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     // Subscribe to auth state changes separately from initial session check
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log(`[AuthProvider] Auth event: ${event}`, 
-          session ? 'Session exists' : 'No session');
-          
+        console.log(`Auth event: ${event}`);
         setSupabaseUser(session?.user || null);
         setUser(mapSupabaseUser(session?.user || null));
         setSession(session || null);
@@ -115,22 +107,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         
         // Ensure auth is marked as ready on any auth event
         if (!isAuthReady) setIsAuthReady(true);
-        
-        // NEW: If logout detected, ensure we complete state transition properly
-        if (event === 'SIGNED_OUT') {
-          console.log('[AuthProvider] SIGNED_OUT event detected, ensuring cleanup');
-          // Add small delay to ensure state updates properly
-          setTimeout(() => {
-            setIsAuthTransitioning(false);
-          }, 300);
-        }
       }
     );
 
     // Add a fail-safe timeout to ensure auth state isn't stuck in loading
     const failsafeTimer = setTimeout(() => {
       if (!isAuthReady) {
-        console.warn("[AuthProvider] Auth initialization timeout reached - forcing auth ready state");
+        console.warn("Auth initialization timeout reached - forcing auth ready state");
         setIsAuthReady(true);
         setIsLoading(false);
       }
@@ -152,13 +135,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       });
       
       if (error) {
-        console.error("[AuthProvider] Login error:", error.message);
+        console.error("Login error:", error.message);
         return false;
       }
       
       return !!data.session;
     } catch (error: any) {
-      console.error("[AuthProvider] Unexpected login error:", error);
+      console.error("Unexpected login error:", error);
       return false;
     } finally {
       setIsLoading(false);
@@ -181,13 +164,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       });
       
       if (error) {
-        console.error("[AuthProvider] Registration error:", error.message);
+        console.error("Registration error:", error.message);
         return false;
       }
       
       return !!data.session;
     } catch (error: any) {
-      console.error("[AuthProvider] Unexpected registration error:", error);
+      console.error("Unexpected registration error:", error);
       return false;
     } finally {
       setIsLoading(false);
@@ -208,95 +191,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  // Further enhanced logout method with proper transition handling, verification and extended delays
+  // Logout method to match expected interface
   const logout = async (): Promise<void> => {
-    console.log("[AuthProvider] Starting logout process");
-    
-    // First set transition state to prevent premature redirects
-    setIsAuthTransitioning(true);
-    setLogoutCompletionState(false);
-    
-    // Also set loading state
-    setIsLoading(true);
-    
-    try {
-      // Step 1: Clear all storage to ensure complete cleanup
-      console.log("[AuthProvider] Clearing auth storage");
-      await clearAuthStorage();
-      
-      // Step 2: Reset all local state BEFORE Supabase signOut to avoid race conditions
-      console.log("[AuthProvider] Resetting local auth state");
-      setSupabaseUser(null);
-      setUser(null);
-      setSession(null);
-      setIsLoggedIn(false);
-      
-      // Step 3: Sign out from Supabase
-      console.log("[AuthProvider] Calling Supabase signOut");
-      const { error } = await supabase.auth.signOut({
-        scope: 'global' // Explicitly sign out from all tabs/devices
-      });
-      
-      if (error) {
-        console.error("[AuthProvider] Supabase signOut error:", error);
-        throw error;
-      }
-      
-      // Step 4: Verify sign out was successful with a second check
-      console.log("[AuthProvider] Verifying successful logout");
-      const { data: sessionData } = await supabase.auth.getSession();
-      
-      if (sessionData.session) {
-        console.warn("[AuthProvider] Session still exists after logout attempt");
-      } else {
-        console.log("[AuthProvider] Logout confirmed - no session exists");
-      }
-      
-      // Step 5: NEW - Verify storage cleanup was complete
-      const storageCleanupComplete = verifyAuthStorageClear();
-      console.log("[AuthProvider] Storage cleanup verification:", 
-        storageCleanupComplete ? "Complete" : "Incomplete");
-      
-      // Step 6: Force a second storage cleanup if needed
-      if (!storageCleanupComplete) {
-        console.log("[AuthProvider] Performing secondary storage cleanup");
-        await clearAuthStorage();
-      }
-      
-      console.log("[AuthProvider] Logout completed successfully");
-      setLogoutCompletionState(true);
-    } catch (error) {
-      console.error("[AuthProvider] Error during logout:", error);
-    } finally {
-      // NEW: Increased delay before completing transition to allow state updates to settle
-      // Increased from 800ms to 1000ms
-      console.log("[AuthProvider] Setting final state after 1000ms delay");
-      setTimeout(() => {
-        // Double-check auth state once more before finalizing
-        console.log("[AuthProvider] Final auth state verification");
-        supabase.auth.getSession().then(({ data }) => {
-          if (data.session) {
-            console.warn("[AuthProvider] WARNING: Session still exists after logout!");
-          } else {
-            console.log("[AuthProvider] Final verification confirms no session exists");
-          }
-          
-          // Complete the transition regardless
-          setIsLoading(false);
-          setIsAuthTransitioning(false);
-          console.log("[AuthProvider] Auth transition completed", {
-            user: null,
-            isLoggedIn: false,
-            isAuthTransitioning: false
-          });
-        });
-      }, 1000); // Increased from 800ms to 1000ms
-    }
+    return signOut();
   };
 
-  // Legacy method to maintain compatibility
-  const signOut = async (): Promise<void> => {
-    return logout();
+  const signOut = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error: any) {
+      alert(error.error_description || error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // When using verifySession in this file, update the options to match the new interface
@@ -307,10 +216,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         authReady: isAuthReady
       });
       if (!sessionValid) {
-        console.warn('[AuthProvider] Potentially invalid session detected, but ignoring.');
+        console.warn('Potentially invalid session detected, but ignoring.');
       }
     } catch (error) {
-      console.error('[AuthProvider] Session check error:', error);
+      console.error('Session check error:', error);
     }
   };
 
@@ -319,16 +228,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       checkSession();
     }
   }, [isAuthReady]);
-  
-  // Debug logging effect to track state changes
-  useEffect(() => {
-    console.log('[AuthProvider] Auth state update:', {
-      user: user ? 'exists' : 'null',
-      isLoggedIn,
-      isAuthReady,
-      isAuthTransitioning
-    });
-  }, [user, isLoggedIn, isAuthReady, isAuthTransitioning]);
 
   const value: AuthContextType = {
     user,
@@ -337,7 +236,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     isAuthReady,
     isLoading,
     isLoggedIn,
-    isAuthTransitioning,
     signIn,
     login,
     logout,

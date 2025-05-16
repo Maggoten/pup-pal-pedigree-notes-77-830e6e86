@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
 import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar, Heart } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth'; // Use consistent import path
+import { useAuth } from '@/context/AuthContext';
 import {
   Drawer,
   DrawerContent,
@@ -15,10 +15,8 @@ import SettingsDialog from '@/components/settings/SettingsDialog';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { logout, isAuthTransitioning, isLoggedIn } = useAuth();
+  const { logout } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [logoutInProgress, setLogoutInProgress] = useState(false);
   
   const isActive = (path: string) => {
     // Special case for home path to avoid matching all routes
@@ -31,30 +29,11 @@ export const Navbar: React.FC = () => {
   
   const handleLogout = async () => {
     try {
-      // Add extra local state to prevent multiple clicks
-      if (isAuthTransitioning || logoutInProgress) {
-        console.log("Navbar: Logout already in progress, ignoring request");
-        return;
-      }
-      
-      // Set local logout in progress state
-      setLogoutInProgress(true);
-      
-      console.log("Navbar: Initiating logout");
-      
       await logout();
-      
-      console.log("Navbar: Logout completed");
-      // The logout function now handles navigation directly
+      // The navigation will be handled by AuthGuard component
+      // when the auth state changes, preventing the need for navigate() here
     } catch (error) {
       console.error("Error during logout:", error);
-      // In case of error, try direct navigation to login page
-      navigate('/login');
-    } finally {
-      // Release local lock after a small delay
-      setTimeout(() => {
-        setLogoutInProgress(false);
-      }, 1000);
     }
   };
   
@@ -99,12 +78,9 @@ export const Navbar: React.FC = () => {
                     variant="destructive" 
                     className="justify-start w-full mt-4"
                     onClick={handleLogout}
-                    disabled={isAuthTransitioning || logoutInProgress}
                   >
                     <LogOut className="h-4 w-4 mr-2" />
-                    <span>
-                      {isAuthTransitioning || logoutInProgress ? "Logging out..." : "Logout"}
-                    </span>
+                    <span>Logout</span>
                   </Button>
                 </DrawerClose>
               </nav>
@@ -124,14 +100,8 @@ export const Navbar: React.FC = () => {
         </nav>
         
         <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleLogout} 
-            title="Logout"
-            disabled={isAuthTransitioning || logoutInProgress}
-          >
-            <LogOut className={`h-5 w-5 ${(isAuthTransitioning || logoutInProgress) ? 'text-gray-400 animate-pulse' : ''}`} />
+          <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+            <LogOut className="h-5 w-5" />
           </Button>
           <Button 
             variant="ghost" 

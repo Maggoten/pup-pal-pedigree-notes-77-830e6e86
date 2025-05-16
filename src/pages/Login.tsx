@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/AuthProvider';
 import AuthTabs from '@/components/auth/AuthTabs';
 import PaymentForm from '@/components/auth/PaymentForm';
 import { LoginFormValues } from '@/components/auth/LoginForm';
@@ -10,29 +10,20 @@ import { RegisterData } from '@/types/auth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login, register, isLoading: authLoading, isAuthTransitioning } = useAuth();
+  const { login, register, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
-  const [loginInProgress, setLoginInProgress] = useState(false);
 
   const handleLogin = async (values: LoginFormValues) => {
-    // Prevent login attempts during transitions or when already in progress
-    if (isAuthTransitioning || loginInProgress) {
-      console.log('Login page: Login already in progress, ignoring');
-      return;
-    }
-    
     setIsLoading(true);
-    setLoginInProgress(true);
-    
     try {
       console.log('Login page: Attempting login for:', values.email);
       const success = await login(values.email, values.password);
       
       if (success) {
-        console.log('Login page: Login successful');
-        // AuthGuard will handle navigation once auth state changes
+        console.log('Login page: Login successful, redirecting');
+        navigate('/');
       } else {
         console.log('Login page: Login failed');
         toast({
@@ -50,21 +41,10 @@ const Login: React.FC = () => {
       });
     } finally {
       setIsLoading(false);
-      
-      // Use a timeout to prevent immediately trying to login again
-      setTimeout(() => {
-        setLoginInProgress(false);
-      }, 1000);
     }
   };
 
-  function handleRegistration(values: RegistrationFormValues) {
-    // Prevent registration attempts during transitions
-    if (isAuthTransitioning) {
-      console.log('Login page: Auth in transition, ignoring registration attempt');
-      return;
-    }
-    
+  const handleRegistration = (values: RegistrationFormValues) => {
     setRegistrationData(values);
     // Only show payment screen for premium subscriptions
     if (values.subscriptionType === 'premium') {
@@ -73,15 +53,9 @@ const Login: React.FC = () => {
       // Proceed directly with free registration
       handleFreeRegistration(values);
     }
-  }
+  };
 
-  async function handleFreeRegistration(values: RegistrationFormValues) {
-    // Prevent registration attempts during transitions
-    if (isAuthTransitioning) {
-      console.log('Login page: Auth in transition, ignoring registration attempt');
-      return;
-    }
-    
+  const handleFreeRegistration = async (values: RegistrationFormValues) => {
     setIsLoading(true);
     
     try {
@@ -97,6 +71,11 @@ const Login: React.FC = () => {
       
       if (success) {
         console.log('Login page: Registration successful');
+        
+        // Navigate but only if email confirmation is not required
+        if (document.cookie.includes('supabase-auth-token')) {
+          navigate('/');
+        }
       } else {
         console.log('Login page: Registration failed');
       }
@@ -105,15 +84,9 @@ const Login: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
-  async function handlePayment() {
-    // Prevent payment processing during transitions
-    if (isAuthTransitioning) {
-      console.log('Login page: Auth in transition, ignoring payment attempt');
-      return;
-    }
-    
+  const handlePayment = async () => {
     setIsLoading(true);
     
     if (registrationData) {
@@ -130,7 +103,14 @@ const Login: React.FC = () => {
         
         if (success) {
           console.log('Login page: Registration successful');
-          setShowPayment(false);
+          
+          // Navigate but only if email confirmation is not required
+          if (document.cookie.includes('supabase-auth-token')) {
+            navigate('/');
+          } else {
+            // Stay on login page so user can log in after confirming email
+            setShowPayment(false);
+          }
         } else {
           console.log('Login page: Registration failed');
           setShowPayment(false);
@@ -142,9 +122,9 @@ const Login: React.FC = () => {
         setIsLoading(false);
       }
     }
-  }
+  };
 
-  const effectiveLoading = isLoading || authLoading || isAuthTransitioning;
+  const effectiveLoading = isLoading || authLoading;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-warmbeige-50/70 p-4">

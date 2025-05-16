@@ -1,10 +1,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth'; // Use consistent import path
+import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { getPlatformInfo } from '@/utils/storage/mobileUpload';
+import { debounce, isOnline } from '@/utils/fetchUtils';
 
 // Add a global state to track active uploads across components
 let activeUploadsCount = 0;
@@ -27,118 +28,174 @@ interface AuthGuardProps {
   children: React.ReactNode;
 }
 
-// Maximum time to wait before forcing a redirect
-const FORCE_REDIRECT_TIMEOUT = 2000; // 2 seconds
-
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn, user, isAuthReady, isLoading, isAuthTransitioning } = useAuth();
+  const { isLoggedIn, user, isAuthReady, isLoading } = useAuth();
   const { toast } = useToast();
-  const [redirectTimer, setRedirectTimer] = useState<NodeJS.Timeout | null>(null);
-  
+  const [showingToast, setShowingToast] = useState(false);
+  const [delayComplete, setDelayComplete] = useState(false);
+  const platform = getPlatformInfo();
+  const isMobile = platform.mobile || platform.safari;
+
   // Check if user is on the login page
   const isLoginPage = location.pathname === '/login';
-
-  // Debug logging for the current state
+  
+  // Track if there are active uploads to prevent premature redirects
+  const [hasActiveUploads, setHasActiveUploads] = useState(false);
+  
+  // Track network state for mobile
+  const [isOffline, setIsOffline] = useState(!isOnline());
+  
+  // Maximum time to wait for auth before assuming there's a problem
+  const [authTimeout, setAuthTimeout] = useState(false);
+  
+  // Check for active uploads every 500ms
   useEffect(() => {
-    console.log('[AuthGuard] Current state:', {
-      isLoggedIn,
-      isAuthReady,
-      isLoginPage,
-      isAuthTransitioning,
-      user: user ? 'exists' : 'null',
-      location: location.pathname,
-    });
-  }, [isLoggedIn, isAuthReady, isLoginPage, isAuthTransitioning, user, location.pathname]);
-
-  // Force redirect if we're stuck in a redirect loop
+    const uploadCheckInterval = setInterval(() => {
+      setHasActiveUploads(uploadStateManager.hasActiveUploads());
+    }, 500);
+    
+    return () => clearInterval(uploadCheckInterval);
+  }, []);
+  
+  // Track network state
   useEffect(() => {
-    // Clear any existing timers
-    if (redirectTimer) {
-      clearTimeout(redirectTimer);
-      setRedirectTimer(null);
-    }
+    if (!isMobile) return; // Only needed for mobile
     
-    // If we need to redirect to login
-    if ((isAuthReady && !isLoggedIn && !isLoginPage) || 
-        (!isAuthReady && !isLoginPage)) {
-      // Set up a timer to force redirect
-      const timer = setTimeout(() => {
-        console.log('[AuthGuard] Forcing redirect to login after timeout');
-        setRedirectTimer(null);
-        window.location.href = '/login'; // Use direct window navigation as a last resort
-      }, FORCE_REDIRECT_TIMEOUT);
+    const updateOnlineStatus = () => {
+      const online = isOnline();
+      setIsOffline(!online);
       
-      setRedirectTimer(timer);
-      
-      return () => clearTimeout(timer);
-    }
+      // On reconnection, give time for auth to restore
+      if (online && !isLoggedIn) {
+        console.log('[AuthGuard] Network reconnected, waiting for auth state to restore');
+        // Don't redirect immediately on reconnection
+      }
+    };
     
-    // If we need to redirect to home
-    if (isAuthReady && isLoggedIn && isLoginPage) {
-      // Set up a timer to force redirect
-      const timer = setTimeout(() => {
-        console.log('[AuthGuard] Forcing redirect to home after timeout');
-        setRedirectTimer(null);
-        window.location.href = '/'; // Use direct window navigation as a last resort
-      }, FORCE_REDIRECT_TIMEOUT);
+    // Debounce to prevent rapid changes
+    const debouncedUpdateStatus = debounce(updateOnlineStatus, 1000);
+    
+    window.addEventListener('online', debouncedUpdateStatus);
+    window.addEventListener('offline', debouncedUpdateStatus);
+    
+    return () => {
+      window.removeEventListener('online', debouncedUpdateStatus);
+      window.removeEventListener('offline', debouncedUpdateStatus);
+    };
+  }, [isMobile, isLoggedIn]);
+
+  // Add a delay before showing authentication errors
+  // This helps prevent flash of auth errors during initialization
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDelayComplete(true);
+      console.log('[AuthGuard] Initial delay complete, can show auth errors now');
+    }, 1000); // Reduced from previous values for faster response
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Add a hard timeout for authentication to prevent infinite "checking authentication"
+  useEffect(() => {
+    const timeoutDuration = 8000; // 8 seconds max wait time
+    
+    const timer = setTimeout(() => {
+      if (!isAuthReady) {
+        console.warn('[AuthGuard] Auth readiness timeout reached - forcing timeout state');
+        setAuthTimeout(true);
+      }
+    }, timeoutDuration);
+    
+    return () => clearTimeout(timer);
+  }, [isAuthReady]);
+  
+  // Show toast for authentication issues
+  useEffect(() => {
+    // Only show authentication toast when:
+    // 1. Auth is fully ready OR timeout has been reached
+    // 2. User is not logged in
+    // 3. Not on login page
+    // 4. No user object exists
+    // 5. Delay has completed (prevents flash)
+    // 6. No toast is currently showing
+    // 7. No active uploads are in progress
+    const shouldShowToast = 
+      (isAuthReady || authTimeout) && 
+      !isLoggedIn && 
+      !isLoginPage && 
+      !user && 
+      delayComplete && 
+      !showingToast &&
+      !hasActiveUploads;
+    
+    if (shouldShowToast) {
+      console.log('[AuthGuard] Showing auth required toast');
       
-      setRedirectTimer(timer);
+      setShowingToast(true);
       
-      return () => clearTimeout(timer);
+      toast({
+        title: "Authentication required",
+        description: "Please log in to access this page",
+        variant: "destructive",
+        onOpenChange: (open) => {
+          if (!open) setShowingToast(false);
+        }
+      });
     }
-  }, [isAuthReady, isLoggedIn, isLoginPage, location.pathname]);
+  }, [
+    isLoggedIn, 
+    isLoginPage, 
+    user, 
+    toast, 
+    isAuthReady, 
+    delayComplete, 
+    showingToast,
+    hasActiveUploads,
+    authTimeout
+  ]);
 
-  // If auth is ready and we're not logged in and not on login page
-  if (isAuthReady && !isLoggedIn && !isLoginPage) {
-    console.log('[AuthGuard] Not logged in, redirecting to login');
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+  // Allow bypassing auth check after timeout to prevent infinite loading
+  const authCheckFailed = authTimeout && !isAuthReady;
 
-  // If auth is ready and we're logged in and on login page
-  if (isAuthReady && isLoggedIn && isLoginPage) {
-    console.log('[AuthGuard] Already logged in, redirecting to home');
-    return <Navigate to="/" replace />;
-  }
-
-  // Show loading state while auth is initializing
-  if (!isAuthReady || isAuthTransitioning) {
+  // Show loading state while auth is not ready (with timeout safety)
+  if (!isAuthReady && !authTimeout) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center justify-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">
-            {isAuthTransitioning ? "Processing authentication..." : "Checking authentication..."}
+            Checking authentication...
+            {authTimeout && <span> (Timeout reached)</span>}
           </p>
-          
-          {/* Add emergency redirect button after a short delay */}
-          <div className="mt-4">
-            <p className="text-xs text-muted-foreground mb-2">
-              If you're stuck on this screen, try:
-            </p>
-            <div className="flex gap-2">
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                onClick={() => window.location.href = '/login'}
-              >
-                Go to Login
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => window.location.reload()}
-              >
-                Reload Page
-              </Button>
-            </div>
-          </div>
         </div>
       </div>
     );
   }
 
-  // If we reach here, everything is ready and we can render children
+  // Only redirect if:
+  // 1. Auth is ready
+  // 2. User is not logged in 
+  // 3. Not on login page
+  // 4. No active uploads are in progress
+  // 5. Not offline on mobile
+  const shouldRedirectToLogin = (isAuthReady || authCheckFailed) && 
+                              !isLoggedIn && 
+                              !isLoginPage && 
+                              !hasActiveUploads &&
+                              !(isMobile && isOffline);
+  
+  if (shouldRedirectToLogin) {
+    console.log('[AuthGuard] Redirecting to login page from:', location.pathname);
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Only redirect if auth is ready and user is logged in and on login page
+  if (isAuthReady && isLoggedIn && isLoginPage) {
+    console.log('[AuthGuard] User already logged in, redirecting from login page');
+    return <Navigate to="/" replace />;
+  }
+
   return <>{children}</>;
 };
 

@@ -1,5 +1,4 @@
 
-// This file provides a consistent entry point for authentication across the app
-// Re-exporting everything from the AuthProvider ensures a single source of truth
-
-export { useAuth, AuthProvider } from '@/providers/AuthProvider';
+// Re-export the Auth context and provider from the correct location
+export { useAuth } from '@/providers/AuthProvider';
+export { AuthProvider } from '@/providers/AuthProvider';
