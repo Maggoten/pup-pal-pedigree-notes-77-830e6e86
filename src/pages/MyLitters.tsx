@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { LitterFilterProvider } from '@/components/litters/LitterFilterProvider';
 import { Skeleton } from '@/components/ui/skeleton';
 import MyLittersContent from '@/components/litters/MyLittersContent';
 import PageLayout from '@/components/PageLayout';
 import { PawPrint, AlertCircle, Loader2, RefreshCcw } from 'lucide-react';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/context/AuthContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import useLitterQueries from '@/hooks/litters/queries/useLitterQueries';

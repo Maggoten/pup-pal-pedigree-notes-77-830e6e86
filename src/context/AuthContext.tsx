@@ -4,12 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { User as AppUser } from '@/types/auth';
 
-// DEPRECATION WARNING
-console.warn(
-  '[DEPRECATED] You are importing from @/context/AuthContext which is deprecated. ' +
-  'Please update your imports to use @/providers/AuthProvider or @/hooks/useAuth instead.'
-);
-
 export interface AuthContextType {
   user: AppUser | null;
   supabaseUser: User | null;
@@ -42,11 +36,6 @@ export default AuthContext;
 
 // Custom hook to use the auth context
 export const useAuth = () => {
-  console.warn(
-    '[DEPRECATED] You are using useAuth from @/context/AuthContext which is deprecated. ' +
-    'Please update your imports to use @/providers/AuthProvider or @/hooks/useAuth instead.'
-  );
-  
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
