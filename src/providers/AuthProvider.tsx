@@ -1,9 +1,9 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { verifySession } from '@/utils/storage';
 import { RegisterData, User } from '@/types/auth';
+import { clearAuthStorage } from '@/services/auth/storageService';
 
 // Define SupabaseUser type for internal use
 type SupabaseUser = {
@@ -191,21 +191,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  // Logout method to match expected interface
+  // Enhanced logout method with proper cleanup sequence
   const logout = async (): Promise<void> => {
-    return signOut();
-  };
-
-  const signOut = async () => {
+    console.log("AuthProvider: Starting logout process");
     setIsLoading(true);
+    
     try {
+      // First clear all storage to ensure complete cleanup
+      console.log("AuthProvider: Clearing auth storage");
+      await clearAuthStorage();
+      
+      // Then sign out from Supabase
+      console.log("AuthProvider: Calling Supabase signOut");
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    } catch (error: any) {
-      alert(error.error_description || error.message);
+      
+      if (error) {
+        console.error("AuthProvider: Supabase signOut error:", error);
+        throw error;
+      }
+      
+      // Finally, reset all local state even if Supabase call fails
+      console.log("AuthProvider: Resetting auth state");
+      setSupabaseUser(null);
+      setUser(null);
+      setSession(null);
+      setIsLoggedIn(false);
+      
+      console.log("AuthProvider: Logout completed successfully");
+    } catch (error) {
+      console.error("AuthProvider: Error during logout:", error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Legacy method to maintain compatibility
+  const signOut = async (): Promise<void> => {
+    return logout();
   };
 
   // When using verifySession in this file, update the options to match the new interface

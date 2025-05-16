@@ -60,8 +60,10 @@ export const clearAuthStorage = () => {
     });
     
     console.log('[Auth Storage] All auth-related storage items cleared');
+    return true;
   } catch (e) {
     console.error('[Auth Storage] Error during storage cleanup:', e);
+    return false;
   }
 };
 
