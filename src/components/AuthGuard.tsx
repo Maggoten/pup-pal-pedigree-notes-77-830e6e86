@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
@@ -30,10 +29,11 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn, user, isAuthReady, isLoading } = useAuth();
+  const { isLoggedIn, user, isAuthReady, isLoading, isAuthTransitioning } = useAuth();
   const { toast } = useToast();
   const [showingToast, setShowingToast] = useState(false);
   const [delayComplete, setDelayComplete] = useState(false);
+  const [redirectSafe, setRedirectSafe] = useState(false);
   const platform = getPlatformInfo();
   const isMobile = platform.mobile || platform.safari;
 
@@ -110,16 +110,28 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     return () => clearTimeout(timer);
   }, [isAuthReady]);
   
+  // Add a delay after auth state changes to prevent redirect loops
+  useEffect(() => {
+    // Only set redirect safety after a small delay to allow state to settle
+    if (isAuthReady && !isAuthTransitioning) {
+      const timer = setTimeout(() => {
+        setRedirectSafe(true);
+        console.log('[AuthGuard] Redirect safety enabled, auth state settled');
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    } else {
+      // Reset redirect safety during transitions
+      setRedirectSafe(false);
+    }
+  }, [isAuthReady, isAuthTransitioning, isLoggedIn]);
+  
   // Show toast for authentication issues
   useEffect(() => {
     // Only show authentication toast when:
-    // 1. Auth is fully ready OR timeout has been reached
-    // 2. User is not logged in
-    // 3. Not on login page
-    // 4. No user object exists
-    // 5. Delay has completed (prevents flash)
-    // 6. No toast is currently showing
-    // 7. No active uploads are in progress
+    // All previous conditions plus:
+    // - Not during auth transition
+    // - Redirect is considered safe
     const shouldShowToast = 
       (isAuthReady || authTimeout) && 
       !isLoggedIn && 
@@ -127,7 +139,9 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       !user && 
       delayComplete && 
       !showingToast &&
-      !hasActiveUploads;
+      !hasActiveUploads &&
+      !isAuthTransitioning &&
+      redirectSafe;
     
     if (shouldShowToast) {
       console.log('[AuthGuard] Showing auth required toast');
@@ -152,20 +166,22 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     delayComplete, 
     showingToast,
     hasActiveUploads,
-    authTimeout
+    authTimeout,
+    isAuthTransitioning,
+    redirectSafe
   ]);
 
   // Allow bypassing auth check after timeout to prevent infinite loading
   const authCheckFailed = authTimeout && !isAuthReady;
 
-  // Show loading state while auth is not ready (with timeout safety)
-  if (!isAuthReady && !authTimeout) {
+  // Show loading state while auth is not ready or during transitions
+  if ((!isAuthReady && !authTimeout) || isAuthTransitioning) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center justify-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">
-            Checking authentication...
+            {isAuthTransitioning ? "Processing authentication..." : "Checking authentication..."}
             {authTimeout && <span> (Timeout reached)</span>}
           </p>
         </div>
@@ -179,19 +195,33 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // 3. Not on login page
   // 4. No active uploads are in progress
   // 5. Not offline on mobile
+  // 6. Not during auth transition
+  // 7. Redirect is safe (after delay)
   const shouldRedirectToLogin = (isAuthReady || authCheckFailed) && 
                               !isLoggedIn && 
                               !isLoginPage && 
                               !hasActiveUploads &&
-                              !(isMobile && isOffline);
+                              !(isMobile && isOffline) &&
+                              !isAuthTransitioning &&
+                              redirectSafe;
   
   if (shouldRedirectToLogin) {
     console.log('[AuthGuard] Redirecting to login page from:', location.pathname);
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Only redirect if auth is ready and user is logged in and on login page
-  if (isAuthReady && isLoggedIn && isLoginPage) {
+  // Only redirect if: 
+  // 1. Auth is ready
+  // 2. User is logged in and on login page
+  // 3. Not during auth transition
+  // 4. Redirect is safe (after delay)
+  const shouldRedirectToHome = isAuthReady && 
+                             isLoggedIn && 
+                             isLoginPage &&
+                             !isAuthTransitioning &&
+                             redirectSafe;
+                             
+  if (shouldRedirectToHome) {
     console.log('[AuthGuard] User already logged in, redirecting from login page');
     return <Navigate to="/" replace />;
   }

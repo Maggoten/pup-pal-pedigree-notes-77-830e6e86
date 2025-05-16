@@ -27,6 +27,7 @@ interface AuthContextType {
   isAuthReady: boolean;
   isLoading: boolean;
   isLoggedIn: boolean;
+  isAuthTransitioning: boolean; // New state to track auth transitions
   signIn: (email: string) => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -57,6 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAuthTransitioning, setIsAuthTransitioning] = useState(false); // New transition state
 
   // Helper function to map Supabase user to our User type
   const mapSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
@@ -191,9 +193,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  // Enhanced logout method with proper cleanup sequence
+  // Enhanced logout method with proper transition handling
   const logout = async (): Promise<void> => {
     console.log("AuthProvider: Starting logout process");
+    // Set transitioning state to true to prevent AuthGuard from immediately redirecting
+    setIsAuthTransitioning(true);
     setIsLoading(true);
     
     try {
@@ -221,7 +225,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     } catch (error) {
       console.error("AuthProvider: Error during logout:", error);
     } finally {
-      setIsLoading(false);
+      // Small delay before completing transition to allow state updates to settle
+      setTimeout(() => {
+        setIsLoading(false);
+        setIsAuthTransitioning(false);
+        console.log("AuthProvider: Auth transition completed");
+      }, 300);
     }
   };
 
@@ -258,6 +267,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     isAuthReady,
     isLoading,
     isLoggedIn,
+    isAuthTransitioning,  // Expose the new transition state
     signIn,
     login,
     logout,

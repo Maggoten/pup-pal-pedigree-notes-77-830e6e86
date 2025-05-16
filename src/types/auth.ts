@@ -23,7 +23,8 @@ export interface AuthContextType {
   session: Session | null;
   isLoggedIn: boolean;
   isLoading: boolean;
-  isAuthReady: boolean; // Add this to the interface
+  isAuthReady: boolean;
+  isAuthTransitioning: boolean; // Add this new state to the interface
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   register: (userData: RegisterData) => Promise<boolean>;

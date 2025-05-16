@@ -15,7 +15,7 @@ import SettingsDialog from '@/components/settings/SettingsDialog';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, isAuthTransitioning } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   
   const isActive = (path: string) => {
@@ -29,6 +29,12 @@ export const Navbar: React.FC = () => {
   
   const handleLogout = async () => {
     try {
+      // Prevent multiple logout attempts while one is in progress
+      if (isAuthTransitioning) {
+        console.log("Navbar: Logout already in progress, ignoring request");
+        return;
+      }
+      
       console.log("Navbar: Initiating logout");
       await logout();
       console.log("Navbar: Logout completed");
@@ -80,9 +86,10 @@ export const Navbar: React.FC = () => {
                     variant="destructive" 
                     className="justify-start w-full mt-4"
                     onClick={handleLogout}
+                    disabled={isAuthTransitioning}
                   >
                     <LogOut className="h-4 w-4 mr-2" />
-                    <span>Logout</span>
+                    <span>{isAuthTransitioning ? "Logging out..." : "Logout"}</span>
                   </Button>
                 </DrawerClose>
               </nav>
@@ -102,7 +109,13 @@ export const Navbar: React.FC = () => {
         </nav>
         
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleLogout} 
+            title="Logout"
+            disabled={isAuthTransitioning}
+          >
             <LogOut className="h-5 w-5" />
           </Button>
           <Button 
