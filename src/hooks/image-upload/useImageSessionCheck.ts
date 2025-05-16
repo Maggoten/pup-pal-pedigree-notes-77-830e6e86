@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { verifySession } from '@/utils/storage/core/session';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 /**
  * Hook for handling Supabase authentication session validation and refresh

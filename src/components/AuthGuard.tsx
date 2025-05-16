@@ -1,11 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/providers/AuthProvider';
-import { useToast } from '@/components/ui/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Navigate, useLocation, Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, RefreshCw, LogIn } from 'lucide-react';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { debounce, isOnline } from '@/utils/fetchUtils';
+import { Button } from '@/components/ui/button';
 
 // Add a global state to track active uploads across components
 let activeUploadsCount = 0;
@@ -36,7 +37,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const [delayComplete, setDelayComplete] = useState(false);
   const platform = getPlatformInfo();
   const isMobile = platform.mobile || platform.safari;
-
+  const [manualRedirect, setManualRedirect] = useState(false);
+  
   // Check if user is on the login page
   const isLoginPage = location.pathname === '/login';
   
@@ -49,7 +51,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // Maximum time to wait for auth before assuming there's a problem
   const [authTimeout, setAuthTimeout] = useState(false);
   
-  // Check for active uploads every 500ms
+  // Check for active uploads periodically
   useEffect(() => {
     const uploadCheckInterval = setInterval(() => {
       setHasActiveUploads(uploadStateManager.hasActiveUploads());
@@ -60,20 +62,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   
   // Track network state
   useEffect(() => {
-    if (!isMobile) return; // Only needed for mobile
+    if (!isMobile) return;
     
     const updateOnlineStatus = () => {
       const online = isOnline();
       setIsOffline(!online);
-      
-      // On reconnection, give time for auth to restore
-      if (online && !isLoggedIn) {
-        console.log('[AuthGuard] Network reconnected, waiting for auth state to restore');
-        // Don't redirect immediately on reconnection
-      }
     };
     
-    // Debounce to prevent rapid changes
     const debouncedUpdateStatus = debounce(updateOnlineStatus, 1000);
     
     window.addEventListener('online', debouncedUpdateStatus);
@@ -83,43 +78,51 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       window.removeEventListener('online', debouncedUpdateStatus);
       window.removeEventListener('offline', debouncedUpdateStatus);
     };
-  }, [isMobile, isLoggedIn]);
+  }, [isMobile]);
 
   // Add a delay before showing authentication errors
-  // This helps prevent flash of auth errors during initialization
   useEffect(() => {
     const timer = setTimeout(() => {
       setDelayComplete(true);
       console.log('[AuthGuard] Initial delay complete, can show auth errors now');
-    }, 1000); // Reduced from previous values for faster response
+    }, 800);
     
     return () => clearTimeout(timer);
   }, []);
   
   // Add a hard timeout for authentication to prevent infinite "checking authentication"
   useEffect(() => {
-    const timeoutDuration = 8000; // 8 seconds max wait time
+    const timeoutDuration = 6000; // 6 seconds max wait time
     
     const timer = setTimeout(() => {
       if (!isAuthReady) {
         console.warn('[AuthGuard] Auth readiness timeout reached - forcing timeout state');
         setAuthTimeout(true);
+        
+        // Show timeout toast
+        toast({
+          title: "Authentication issue",
+          description: "Taking too long to verify your login status. You can try logging in again.",
+          variant: "destructive",
+          action: (
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              onClick={() => setManualRedirect(true)}
+            >
+              <LogIn className="h-4 w-4 mr-1" />
+              Go to Login
+            </Button>
+          )
+        });
       }
     }, timeoutDuration);
     
     return () => clearTimeout(timer);
-  }, [isAuthReady]);
+  }, [isAuthReady, toast]);
   
   // Show toast for authentication issues
   useEffect(() => {
-    // Only show authentication toast when:
-    // 1. Auth is fully ready OR timeout has been reached
-    // 2. User is not logged in
-    // 3. Not on login page
-    // 4. No user object exists
-    // 5. Delay has completed (prevents flash)
-    // 6. No toast is currently showing
-    // 7. No active uploads are in progress
     const shouldShowToast = 
       (isAuthReady || authTimeout) && 
       !isLoggedIn && 
@@ -138,6 +141,16 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         title: "Authentication required",
         description: "Please log in to access this page",
         variant: "destructive",
+        action: (
+          <Button 
+            variant="destructive" 
+            size="sm" 
+            onClick={() => setManualRedirect(true)}
+          >
+            <LogIn className="h-4 w-4 mr-1" />
+            Login
+          </Button>
+        ),
         onOpenChange: (open) => {
           if (!open) setShowingToast(false);
         }
@@ -155,6 +168,12 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     authTimeout
   ]);
 
+  // Force manual redirect if requested
+  if (manualRedirect) {
+    console.log('[AuthGuard] Manual redirect to login triggered');
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
   // Allow bypassing auth check after timeout to prevent infinite loading
   const authCheckFailed = authTimeout && !isAuthReady;
 
@@ -166,19 +185,25 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">
             Checking authentication...
-            {authTimeout && <span> (Timeout reached)</span>}
           </p>
+          
+          {/* Manual redirect option after a delay */}
+          <div className="mt-6">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setManualRedirect(true)}
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              Go to Login Page
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Only redirect if:
-  // 1. Auth is ready
-  // 2. User is not logged in 
-  // 3. Not on login page
-  // 4. No active uploads are in progress
-  // 5. Not offline on mobile
+  // Only redirect if proper conditions are met
   const shouldRedirectToLogin = (isAuthReady || authCheckFailed) && 
                               !isLoggedIn && 
                               !isLoginPage && 
@@ -190,10 +215,49 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Only redirect if auth is ready and user is logged in and on login page
+  // Redirect from login page if already logged in
   if (isAuthReady && isLoggedIn && isLoginPage) {
     console.log('[AuthGuard] User already logged in, redirecting from login page');
     return <Navigate to="/" replace />;
+  }
+
+  // If we encounter persistent auth issues, show a recovery UI
+  if (authTimeout && !isLoggedIn && !isLoginPage) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center gap-4 max-w-md text-center p-6 border rounded-lg shadow-md">
+          <div className="bg-yellow-100 p-3 rounded-full">
+            <RefreshCw className="h-6 w-6 text-yellow-600" />
+          </div>
+          <h2 className="text-xl font-semibold">Authentication Issue</h2>
+          <p className="text-sm text-muted-foreground">
+            We're having trouble verifying your login status. This could be due to:
+          </p>
+          <ul className="text-sm text-muted-foreground list-disc text-left space-y-1">
+            <li>Expired session</li>
+            <li>Network connectivity problems</li>
+            <li>Browser storage issues</li>
+          </ul>
+          <div className="flex flex-col gap-2 w-full mt-2">
+            <Button 
+              onClick={() => setManualRedirect(true)}
+              className="w-full"
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              Go to Login Page
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.reload()}
+              className="w-full"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Page
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

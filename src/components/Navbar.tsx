@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
 import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar, Heart } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Drawer,
   DrawerContent,
@@ -12,11 +12,14 @@ import {
   DrawerTitle
 } from '@/components/ui/drawer';
 import SettingsDialog from '@/components/settings/SettingsDialog';
+import { toast } from '@/hooks/use-toast';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { logout } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const isActive = (path: string) => {
     // Special case for home path to avoid matching all routes
@@ -29,11 +32,27 @@ export const Navbar: React.FC = () => {
   
   const handleLogout = async () => {
     try {
+      setIsLoggingOut(true);
+      toast({
+        title: "Logging out...",
+        description: "Please wait while we sign you out"
+      });
+      
       await logout();
-      // The navigation will be handled by AuthGuard component
-      // when the auth state changes, preventing the need for navigate() here
+      
+      // Navigation is now handled directly in the logout function
+      // for more reliable redirects
     } catch (error) {
       console.error("Error during logout:", error);
+      toast({
+        title: "Logout Error",
+        description: "There was a problem logging out. Please try again.",
+        variant: "destructive"
+      });
+      // Force navigation even on error
+      navigate("/login", { replace: true });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
   
@@ -78,9 +97,10 @@ export const Navbar: React.FC = () => {
                     variant="destructive" 
                     className="justify-start w-full mt-4"
                     onClick={handleLogout}
+                    disabled={isLoggingOut}
                   >
                     <LogOut className="h-4 w-4 mr-2" />
-                    <span>Logout</span>
+                    <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
                   </Button>
                 </DrawerClose>
               </nav>
@@ -100,7 +120,13 @@ export const Navbar: React.FC = () => {
         </nav>
         
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleLogout} 
+            title="Logout"
+            disabled={isLoggingOut}
+          >
             <LogOut className="h-5 w-5" />
           </Button>
           <Button 
