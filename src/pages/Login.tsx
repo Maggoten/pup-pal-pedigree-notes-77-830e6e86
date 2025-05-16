@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 import AuthTabs from '@/components/auth/AuthTabs';
 import PaymentForm from '@/components/auth/PaymentForm';
 import { LoginFormValues } from '@/components/auth/LoginForm';
@@ -33,7 +32,7 @@ const Login: React.FC = () => {
       
       if (success) {
         console.log('Login page: Login successful');
-        // Don't navigate here - let AuthGuard handle it when auth state changes
+        // AuthGuard will handle navigation once auth state changes
       } else {
         console.log('Login page: Login failed');
         toast({
@@ -59,7 +58,7 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleRegistration = (values: RegistrationFormValues) => {
+  function handleRegistration(values: RegistrationFormValues) {
     // Prevent registration attempts during transitions
     if (isAuthTransitioning) {
       console.log('Login page: Auth in transition, ignoring registration attempt');
@@ -74,9 +73,9 @@ const Login: React.FC = () => {
       // Proceed directly with free registration
       handleFreeRegistration(values);
     }
-  };
+  }
 
-  const handleFreeRegistration = async (values: RegistrationFormValues) => {
+  async function handleFreeRegistration(values: RegistrationFormValues) {
     // Prevent registration attempts during transitions
     if (isAuthTransitioning) {
       console.log('Login page: Auth in transition, ignoring registration attempt');
@@ -98,8 +97,6 @@ const Login: React.FC = () => {
       
       if (success) {
         console.log('Login page: Registration successful');
-        
-        // Don't navigate - let AuthGuard handle it when auth state changes
       } else {
         console.log('Login page: Registration failed');
       }
@@ -108,9 +105,9 @@ const Login: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
-  const handlePayment = async () => {
+  async function handlePayment() {
     // Prevent payment processing during transitions
     if (isAuthTransitioning) {
       console.log('Login page: Auth in transition, ignoring payment attempt');
@@ -133,8 +130,6 @@ const Login: React.FC = () => {
         
         if (success) {
           console.log('Login page: Registration successful');
-          
-          // Don't navigate - let AuthGuard handle it when auth state changes
           setShowPayment(false);
         } else {
           console.log('Login page: Registration failed');
@@ -147,7 +142,7 @@ const Login: React.FC = () => {
         setIsLoading(false);
       }
     }
-  };
+  }
 
   const effectiveLoading = isLoading || authLoading || isAuthTransitioning;
 

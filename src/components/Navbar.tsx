@@ -31,7 +31,7 @@ export const Navbar: React.FC = () => {
   
   const handleLogout = async () => {
     try {
-      // Add extra local state to prevent multiple clicks in addition to auth state
+      // Add extra local state to prevent multiple clicks
       if (isAuthTransitioning || logoutInProgress) {
         console.log("Navbar: Logout already in progress, ignoring request");
         return;
@@ -40,17 +40,16 @@ export const Navbar: React.FC = () => {
       // Set local logout in progress state
       setLogoutInProgress(true);
       
-      console.log("Navbar: Initiating logout, current auth state:", {
-        isLoggedIn,
-        isAuthTransitioning
-      });
+      console.log("Navbar: Initiating logout");
       
       await logout();
       
       console.log("Navbar: Logout completed");
-      // Don't navigate - let AuthGuard handle it when auth state changes
+      // The logout function now handles navigation directly
     } catch (error) {
       console.error("Error during logout:", error);
+      // In case of error, try direct navigation to login page
+      navigate('/login');
     } finally {
       // Release local lock after a small delay
       setTimeout(() => {

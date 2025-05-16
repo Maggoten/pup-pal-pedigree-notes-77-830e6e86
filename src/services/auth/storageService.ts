@@ -16,14 +16,6 @@ export const clearAuthStorage = async () => {
     localStorage.removeItem('supabase.auth.user');
     localStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
     
-    // Also try removing from sessionStorage as fallback for some browsers
-    try {
-      sessionStorage.removeItem('supabase.auth.token');
-      sessionStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
-    } catch (e) {
-      console.warn('[Auth Storage] Session storage cleanup failed:', e);
-    }
-    
     // Clear any session/local storage items that contain these keys
     const itemsToRemove = [];
     
@@ -46,6 +38,14 @@ export const clearAuthStorage = async () => {
       localStorage.removeItem(key);
     });
     
+    // Also try sessionStorage
+    try {
+      sessionStorage.removeItem('supabase.auth.token');
+      sessionStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+    } catch (e) {
+      console.warn('[Auth Storage] Session storage cleanup failed:', e);
+    }
+    
     // Also clear cookies that might be related to authentication
     document.cookie.split(';').forEach(cookie => {
       const [name] = cookie.trim().split('=');
@@ -59,21 +59,9 @@ export const clearAuthStorage = async () => {
       }
     });
     
-    // NEW: Add additional forced browser cache flush
-    // This creates a small delay which can help ensure storage operations complete
-    try {
-      localStorage.setItem('__auth_flush', Date.now().toString());
-      localStorage.getItem('__auth_flush');
-      localStorage.removeItem('__auth_flush');
-    } catch (e) {
-      console.warn('[Auth Storage] Cache flush operation failed:', e);
-    }
-    
-    // Force browsers to flush storage operations by reading a value
-    localStorage.getItem('test');
-    
-    // NEW: Add a small delay to ensure browser has time to process storage changes
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Explicitly clear the most important items again to be extra sure
+    localStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+    localStorage.removeItem('supabase.auth.token');
     
     console.log('[Auth Storage] All auth-related storage items cleared');
     return true;
@@ -100,7 +88,7 @@ export const saveUserToStorage = (user) => {
   localStorage.setItem('isLoggedIn', 'true');
 };
 
-// NEW: Verify storage cleanup was complete
+// Verify storage cleanup was complete
 export const verifyAuthStorageClear = (): boolean => {
   try {
     // Check for any remaining auth items
