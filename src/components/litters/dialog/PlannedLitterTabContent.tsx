@@ -5,7 +5,7 @@ import { DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Litter, PlannedLitter } from '@/types/breeding';
 import PlannedLitterForm from './PlannedLitterForm';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 interface PlannedLitterTabContentProps {

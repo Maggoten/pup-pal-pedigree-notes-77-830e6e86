@@ -1,19 +1,45 @@
 
-import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
-import { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { RegisterData, User, AuthContextType } from '@/types/auth';
-import { clearAuthStorage } from '@/services/auth/storageService';
-import { toast } from '@/hooks/use-toast';
+import { verifySession } from '@/utils/storage';
+import { RegisterData, User } from '@/types/auth';
 
-/**
- * AuthContext provides authentication state and methods throughout the application
- */
+// Define SupabaseUser type for internal use
+type SupabaseUser = {
+  id: string;
+  app_metadata: {
+    provider?: string;
+    [key: string]: any;
+  };
+  user_metadata: {
+    [key: string]: any;
+  };
+  aud: string;
+  created_at: string;
+  [key: string]: any;
+};
+
+interface AuthContextType {
+  user: User | null;
+  supabaseUser: SupabaseUser | null; 
+  session: Session | null;
+  isAuthReady: boolean;
+  isLoading: boolean;
+  isLoggedIn: boolean;
+  signIn: (email: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  register: (userData: RegisterData) => Promise<boolean>;
+  signOut: () => Promise<void>;
+}
+
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/**
- * Custom hook to use the auth context
- */
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -22,25 +48,18 @@ export const useAuth = (): AuthContextType => {
   return context;
 };
 
-/**
- * AuthProvider component manages authentication state and provides methods
- * for login, logout, and registration
- */
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Basic auth state
+export const AuthProvider: React.FC<AuthProviderProps> = ({ 
+  children 
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-
-  // Auth status flags
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  /**
-   * Maps a Supabase user to our application User type
-   */
-  const mapSupabaseUser = useCallback((supabaseUser: SupabaseUser | null): User | null => {
+  // Helper function to map Supabase user to our User type
+  const mapSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
     if (!supabaseUser) return null;
     
     return {
@@ -49,11 +68,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       firstName: supabaseUser.user_metadata?.firstName || '',
       lastName: supabaseUser.user_metadata?.lastName || ''
     };
-  }, []);
+  };
 
-  /**
-   * Handles login with email and password
-   */
+  useEffect(() => {
+    const getInitialSession = async () => {
+      setIsLoading(true);
+      try {
+        // Get the initial session - critical to break out of "checking authentication" state
+        const { data: { session } } = await supabase.auth.getSession();
+
+        setSupabaseUser(session?.user || null);
+        setUser(mapSupabaseUser(session?.user || null));
+        setSession(session || null);
+        setIsLoggedIn(!!session);
+        
+        // Always set isAuthReady to true even if no session
+        setIsAuthReady(true);
+      } catch (error) {
+        console.error("Failed to get initial session:", error);
+        // Important: still mark auth as ready even if there's an error
+        setIsAuthReady(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Start the auth initialization process
+    getInitialSession();
+
+    // Subscribe to auth state changes separately from initial session check
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log(`Auth event: ${event}`);
+        setSupabaseUser(session?.user || null);
+        setUser(mapSupabaseUser(session?.user || null));
+        setSession(session || null);
+        setIsLoggedIn(!!session);
+        
+        // Ensure auth is marked as ready on any auth event
+        if (!isAuthReady) setIsAuthReady(true);
+      }
+    );
+
+    // Add a fail-safe timeout to ensure auth state isn't stuck in loading
+    const failsafeTimer = setTimeout(() => {
+      if (!isAuthReady) {
+        console.warn("Auth initialization timeout reached - forcing auth ready state");
+        setIsAuthReady(true);
+        setIsLoading(false);
+      }
+    }, 5000); // 5 second timeout as fallback
+
+    return () => {
+      subscription?.unsubscribe();
+      clearTimeout(failsafeTimer);
+    };
+  }, [isAuthReady]);
+
+  // New method for password-based login to match expected interface
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
@@ -64,32 +136,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         console.error("Login error:", error.message);
-        toast({
-          title: "Login failed",
-          description: error.message,
-          variant: "destructive"
-        });
         return false;
       }
       
-      console.log("Login successful, redirecting to home page");
       return !!data.session;
     } catch (error: any) {
       console.error("Unexpected login error:", error);
-      toast({
-        title: "Login failed",
-        description: "An unexpected error occurred",
-        variant: "destructive"
-      });
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  /**
-   * Handles user registration
-   */
+  // Implementation for the register method
   const register = async (userData: RegisterData): Promise<boolean> => {
     setIsLoading(true);
     try {
@@ -106,170 +165,70 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         console.error("Registration error:", error.message);
-        toast({
-          title: "Registration failed",
-          description: error.message,
-          variant: "destructive"
-        });
         return false;
-      }
-      
-      if (!data.session) {
-        toast({
-          title: "Registration successful",
-          description: "Please check your email to confirm your account.",
-        });
       }
       
       return !!data.session;
     } catch (error: any) {
       console.error("Unexpected registration error:", error);
-      toast({
-        title: "Registration failed", 
-        description: "An unexpected error occurred",
-        variant: "destructive"
-      });
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  /**
-   * Magic link sign-in (keeping for backward compatibility)
-   */
-  const signIn = async (email: string): Promise<void> => {
+  // Magic link sign-in (keeping original functionality)
+  const signIn = async (email: string) => {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOtp({ email });
       if (error) throw error;
-      toast({
-        title: "Magic link sent",
-        description: "Check your email for the magic link to sign in."
-      });
+      alert('Check your email for the magic link to sign in.');
     } catch (error: any) {
-      toast({
-        title: "Sign-in failed",
-        description: error.message || "Failed to send magic link",
-        variant: "destructive"
-      });
+      alert(error.error_description || error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  /**
-   * Enhanced logout function with aggressive storage cleanup and forced navigation
-   */
+  // Logout method to match expected interface
   const logout = async (): Promise<void> => {
-    console.log("Logout initiated...");
+    return signOut();
+  };
+
+  const signOut = async () => {
     setIsLoading(true);
-    
     try {
-      // First, call Supabase's signOut method
       const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error("Supabase signOut error:", error);
-        // Continue with cleanup even if Supabase API call fails
-      }
-      
-      // Immediately clear stored user data and auth tokens
-      await clearAuthStorage();
-      
-      // Reset all auth state regardless of API result
-      setSession(null);
-      setSupabaseUser(null);
-      setUser(null);
-      setIsLoggedIn(false);
-      
-      console.log("Logout completed successfully");
-      
-      // Show success message
-      toast({
-        title: "Logged out",
-        description: "You have been successfully logged out."
-      });
-      
-      // Instead of using useNavigate directly, let the AuthGuard handle redirects
-      // AuthGuard will detect the logged out state and redirect appropriately
-      
-    } catch (error) {
-      console.error("Error during logout process:", error);
-      toast({
-        title: "Logout issue",
-        description: "There was a problem during logout. You've been logged out but may need to refresh.",
-        variant: "destructive"
-      });
+      if (error) throw error;
+    } catch (error: any) {
+      alert(error.error_description || error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // For compatibility with existing code
-  const signOut = logout;
-
-  /**
-   * Initialize auth state and set up listeners
-   */
-  useEffect(() => {
-    console.log("AuthProvider: Initializing auth state...");
-    let authTimeout: ReturnType<typeof setTimeout>;
-    
-    const initAuth = async () => {
-      try {
-        // Set up auth state listener first
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-          console.log(`Auth event: ${event}`);
-          setSupabaseUser(session?.user || null);
-          setUser(mapSupabaseUser(session?.user || null));
-          setSession(session);
-          setIsLoggedIn(!!session);
-          
-          // Always ensure auth is ready after any auth event
-          if (!isAuthReady) setIsAuthReady(true);
-        });
-        
-        // Then get initial session
-        const { data: { session } } = await supabase.auth.getSession();
-        setSupabaseUser(session?.user || null);
-        setUser(mapSupabaseUser(session?.user || null));
-        setSession(session);
-        setIsLoggedIn(!!session);
-        
-        // Mark auth as ready
-        setIsAuthReady(true);
-        setIsLoading(false);
-        
-        // Set a timeout to ensure we don't get stuck in a loading state
-        authTimeout = setTimeout(() => {
-          if (!isAuthReady) {
-            console.warn("Auth initialization timeout reached - forcing auth ready state");
-            setIsAuthReady(true);
-            setIsLoading(false);
-          }
-        }, 5000);
-        
-        return () => {
-          subscription?.unsubscribe();
-          clearTimeout(authTimeout);
-        };
-      } catch (error) {
-        console.error("Error initializing auth:", error);
-        setIsAuthReady(true);
-        setIsLoading(false);
-      }
-    };
-    
-    const cleanup = initAuth();
-    return () => {
-      cleanup.then(unsubscribe => {
-        if (typeof unsubscribe === 'function') unsubscribe();
+  // When using verifySession in this file, update the options to match the new interface
+  const checkSession = async () => {
+    try {
+      const sessionValid = await verifySession({ 
+        skipThrow: true,
+        authReady: isAuthReady
       });
-      clearTimeout(authTimeout);
-    };
-  }, [mapSupabaseUser, isAuthReady]);
+      if (!sessionValid) {
+        console.warn('Potentially invalid session detected, but ignoring.');
+      }
+    } catch (error) {
+      console.error('Session check error:', error);
+    }
+  };
 
-  // Provide auth context to children
+  useEffect(() => {
+    if (isAuthReady) {
+      checkSession();
+    }
+  }, [isAuthReady]);
+
   const value: AuthContextType = {
     user,
     supabaseUser,
@@ -277,10 +236,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthReady,
     isLoading,
     isLoggedIn,
-    login,
     signIn,
-    register,
+    login,
     logout,
+    register,
     signOut,
   };
 

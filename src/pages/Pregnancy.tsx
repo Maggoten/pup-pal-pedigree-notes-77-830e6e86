@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { useDogs } from '@/context/DogsContext';
 import { getActivePregnancies, getFirstActivePregnancy } from '@/services/PregnancyService';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 
 import ActivePregnanciesList from '@/components/pregnancy/ActivePregnanciesList';
 import PregnancyDropdownSelector from '@/components/pregnancy/PregnancyDropdownSelector';
