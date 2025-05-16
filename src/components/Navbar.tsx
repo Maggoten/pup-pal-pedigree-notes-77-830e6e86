@@ -15,8 +15,9 @@ import SettingsDialog from '@/components/settings/SettingsDialog';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
-  const { logout, isAuthTransitioning } = useAuth();
+  const { logout, isAuthTransitioning, isLoggedIn } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [logoutInProgress, setLogoutInProgress] = useState(false);
   
   const isActive = (path: string) => {
     // Special case for home path to avoid matching all routes
@@ -29,19 +30,31 @@ export const Navbar: React.FC = () => {
   
   const handleLogout = async () => {
     try {
-      // Prevent multiple logout attempts while one is in progress
-      if (isAuthTransitioning) {
+      // Add extra local state to prevent multiple clicks in addition to auth state
+      if (isAuthTransitioning || logoutInProgress) {
         console.log("Navbar: Logout already in progress, ignoring request");
         return;
       }
       
-      console.log("Navbar: Initiating logout");
+      // Set local logout in progress state
+      setLogoutInProgress(true);
+      
+      console.log("Navbar: Initiating logout, current auth state:", {
+        isLoggedIn,
+        isAuthTransitioning
+      });
+      
       await logout();
+      
       console.log("Navbar: Logout completed");
-      // The navigation will be handled by AuthGuard component
-      // when the auth state changes, preventing the need for navigate() here
+      // Don't navigate - let AuthGuard handle it when auth state changes
     } catch (error) {
       console.error("Error during logout:", error);
+    } finally {
+      // Release local lock after a small delay
+      setTimeout(() => {
+        setLogoutInProgress(false);
+      }, 1000);
     }
   };
   
@@ -86,10 +99,12 @@ export const Navbar: React.FC = () => {
                     variant="destructive" 
                     className="justify-start w-full mt-4"
                     onClick={handleLogout}
-                    disabled={isAuthTransitioning}
+                    disabled={isAuthTransitioning || logoutInProgress}
                   >
                     <LogOut className="h-4 w-4 mr-2" />
-                    <span>{isAuthTransitioning ? "Logging out..." : "Logout"}</span>
+                    <span>
+                      {isAuthTransitioning || logoutInProgress ? "Logging out..." : "Logout"}
+                    </span>
                   </Button>
                 </DrawerClose>
               </nav>
@@ -114,9 +129,9 @@ export const Navbar: React.FC = () => {
             size="icon" 
             onClick={handleLogout} 
             title="Logout"
-            disabled={isAuthTransitioning}
+            disabled={isAuthTransitioning || logoutInProgress}
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className={`h-5 w-5 ${(isAuthTransitioning || logoutInProgress) ? 'text-gray-400 animate-pulse' : ''}`} />
           </Button>
           <Button 
             variant="ghost" 

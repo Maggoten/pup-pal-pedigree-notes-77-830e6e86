@@ -59,6 +59,9 @@ export const clearAuthStorage = () => {
       }
     });
     
+    // Force browsers to flush storage operations by reading a value
+    localStorage.getItem('test');
+    
     console.log('[Auth Storage] All auth-related storage items cleared');
     return true;
   } catch (e) {

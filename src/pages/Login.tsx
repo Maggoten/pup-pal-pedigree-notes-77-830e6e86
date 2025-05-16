@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -10,20 +11,29 @@ import { RegisterData } from '@/types/auth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login, register, isLoading: authLoading } = useAuth();
+  const { login, register, isLoading: authLoading, isAuthTransitioning } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
+  const [loginInProgress, setLoginInProgress] = useState(false);
 
   const handleLogin = async (values: LoginFormValues) => {
+    // Prevent login attempts during transitions or when already in progress
+    if (isAuthTransitioning || loginInProgress) {
+      console.log('Login page: Login already in progress, ignoring');
+      return;
+    }
+    
     setIsLoading(true);
+    setLoginInProgress(true);
+    
     try {
       console.log('Login page: Attempting login for:', values.email);
       const success = await login(values.email, values.password);
       
       if (success) {
-        console.log('Login page: Login successful, redirecting');
-        navigate('/');
+        console.log('Login page: Login successful');
+        // Don't navigate here - let AuthGuard handle it when auth state changes
       } else {
         console.log('Login page: Login failed');
         toast({
@@ -41,10 +51,21 @@ const Login: React.FC = () => {
       });
     } finally {
       setIsLoading(false);
+      
+      // Use a timeout to prevent immediately trying to login again
+      setTimeout(() => {
+        setLoginInProgress(false);
+      }, 1000);
     }
   };
 
   const handleRegistration = (values: RegistrationFormValues) => {
+    // Prevent registration attempts during transitions
+    if (isAuthTransitioning) {
+      console.log('Login page: Auth in transition, ignoring registration attempt');
+      return;
+    }
+    
     setRegistrationData(values);
     // Only show payment screen for premium subscriptions
     if (values.subscriptionType === 'premium') {
@@ -56,6 +77,12 @@ const Login: React.FC = () => {
   };
 
   const handleFreeRegistration = async (values: RegistrationFormValues) => {
+    // Prevent registration attempts during transitions
+    if (isAuthTransitioning) {
+      console.log('Login page: Auth in transition, ignoring registration attempt');
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -72,10 +99,7 @@ const Login: React.FC = () => {
       if (success) {
         console.log('Login page: Registration successful');
         
-        // Navigate but only if email confirmation is not required
-        if (document.cookie.includes('supabase-auth-token')) {
-          navigate('/');
-        }
+        // Don't navigate - let AuthGuard handle it when auth state changes
       } else {
         console.log('Login page: Registration failed');
       }
@@ -87,6 +111,12 @@ const Login: React.FC = () => {
   };
 
   const handlePayment = async () => {
+    // Prevent payment processing during transitions
+    if (isAuthTransitioning) {
+      console.log('Login page: Auth in transition, ignoring payment attempt');
+      return;
+    }
+    
     setIsLoading(true);
     
     if (registrationData) {
@@ -104,13 +134,8 @@ const Login: React.FC = () => {
         if (success) {
           console.log('Login page: Registration successful');
           
-          // Navigate but only if email confirmation is not required
-          if (document.cookie.includes('supabase-auth-token')) {
-            navigate('/');
-          } else {
-            // Stay on login page so user can log in after confirming email
-            setShowPayment(false);
-          }
+          // Don't navigate - let AuthGuard handle it when auth state changes
+          setShowPayment(false);
         } else {
           console.log('Login page: Registration failed');
           setShowPayment(false);
@@ -124,7 +149,7 @@ const Login: React.FC = () => {
     }
   };
 
-  const effectiveLoading = isLoading || authLoading;
+  const effectiveLoading = isLoading || authLoading || isAuthTransitioning;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-warmbeige-50/70 p-4">

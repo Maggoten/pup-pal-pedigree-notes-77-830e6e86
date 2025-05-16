@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
@@ -27,6 +28,10 @@ interface AuthGuardProps {
   children: React.ReactNode;
 }
 
+// Add navigation cooldown tracking
+let lastNavigationTime = 0;
+const NAVIGATION_COOLDOWN = 800; // ms
+
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
   const { isLoggedIn, user, isAuthReady, isLoading, isAuthTransitioning } = useAuth();
@@ -48,6 +53,35 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   
   // Maximum time to wait for auth before assuming there's a problem
   const [authTimeout, setAuthTimeout] = useState(false);
+  
+  // Navigation cooldown to prevent rapid redirects
+  const [navigationAllowed, setNavigationAllowed] = useState(true);
+  
+  // Debug logging for the current state
+  useEffect(() => {
+    console.log('[AuthGuard] Current state:', {
+      isLoggedIn,
+      isAuthReady,
+      isLoginPage,
+      isAuthTransitioning,
+      user: user ? 'exists' : 'null',
+      location: location.pathname,
+      redirectSafe,
+      navigationAllowed
+    });
+  }, [isLoggedIn, isAuthReady, isLoginPage, isAuthTransitioning, user, location.pathname, redirectSafe, navigationAllowed]);
+  
+  // Navigation cooldown to prevent rapid redirects
+  useEffect(() => {
+    if (!navigationAllowed) {
+      const timerId = setTimeout(() => {
+        console.log('[AuthGuard] Navigation cooldown complete, allowing navigation');
+        setNavigationAllowed(true);
+      }, NAVIGATION_COOLDOWN);
+      
+      return () => clearTimeout(timerId);
+    }
+  }, [navigationAllowed]);
   
   // Check for active uploads every 500ms
   useEffect(() => {
@@ -111,27 +145,26 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   }, [isAuthReady]);
   
   // Add a delay after auth state changes to prevent redirect loops
+  // Extended the delay from 300ms to 500ms
   useEffect(() => {
-    // Only set redirect safety after a small delay to allow state to settle
+    // Only set redirect safety after a delay to allow state to settle
     if (isAuthReady && !isAuthTransitioning) {
       const timer = setTimeout(() => {
         setRedirectSafe(true);
         console.log('[AuthGuard] Redirect safety enabled, auth state settled');
-      }, 300);
+      }, 500); // Increased from 300ms to 500ms
       
       return () => clearTimeout(timer);
     } else {
       // Reset redirect safety during transitions
       setRedirectSafe(false);
+      console.log('[AuthGuard] Redirect safety disabled during auth transition');
     }
   }, [isAuthReady, isAuthTransitioning, isLoggedIn]);
   
   // Show toast for authentication issues
   useEffect(() => {
-    // Only show authentication toast when:
-    // All previous conditions plus:
-    // - Not during auth transition
-    // - Redirect is considered safe
+    // Only show authentication toast when all conditions are met
     const shouldShowToast = 
       (isAuthReady || authTimeout) && 
       !isLoggedIn && 
@@ -189,40 +222,37 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     );
   }
 
-  // Only redirect if:
-  // 1. Auth is ready
-  // 2. User is not logged in 
-  // 3. Not on login page
-  // 4. No active uploads are in progress
-  // 5. Not offline on mobile
-  // 6. Not during auth transition
-  // 7. Redirect is safe (after delay)
+  // Only redirect if all conditions are met and navigation is allowed
   const shouldRedirectToLogin = (isAuthReady || authCheckFailed) && 
                               !isLoggedIn && 
                               !isLoginPage && 
                               !hasActiveUploads &&
                               !(isMobile && isOffline) &&
                               !isAuthTransitioning &&
-                              redirectSafe;
+                              redirectSafe && 
+                              navigationAllowed;
   
   if (shouldRedirectToLogin) {
     console.log('[AuthGuard] Redirecting to login page from:', location.pathname);
+    // Set navigation cooldown to prevent rapid redirects
+    setNavigationAllowed(false);
+    lastNavigationTime = Date.now();
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Only redirect if: 
-  // 1. Auth is ready
-  // 2. User is logged in and on login page
-  // 3. Not during auth transition
-  // 4. Redirect is safe (after delay)
+  // Only redirect if all conditions are met
   const shouldRedirectToHome = isAuthReady && 
                              isLoggedIn && 
                              isLoginPage &&
                              !isAuthTransitioning &&
-                             redirectSafe;
+                             redirectSafe && 
+                             navigationAllowed;
                              
   if (shouldRedirectToHome) {
     console.log('[AuthGuard] User already logged in, redirecting from login page');
+    // Set navigation cooldown to prevent rapid redirects
+    setNavigationAllowed(false);
+    lastNavigationTime = Date.now();
     return <Navigate to="/" replace />;
   }
 
