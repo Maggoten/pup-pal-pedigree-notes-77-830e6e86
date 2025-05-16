@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Litter, Puppy } from '@/types/breeding';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export const usePuppyData = () => {
   const { user } = useAuth();

@@ -23,8 +23,10 @@ export interface AuthContextType {
   session: Session | null;
   isLoggedIn: boolean;
   isLoading: boolean;
-  isAuthReady: boolean; // Add this to the interface
+  isAuthReady: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   register: (userData: RegisterData) => Promise<boolean>;
+  signIn: (email: string) => Promise<void>; // Add the signIn method to the interface
+  signOut: () => Promise<void>; // Keep signOut for backward compatibility
 }
