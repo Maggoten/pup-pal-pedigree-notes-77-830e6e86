@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
 import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar, Heart } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth'; // Use consistent import path
 import {
   Drawer,
   DrawerContent,
@@ -15,6 +15,7 @@ import SettingsDialog from '@/components/settings/SettingsDialog';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { logout, isAuthTransitioning, isLoggedIn } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [logoutInProgress, setLogoutInProgress] = useState(false);

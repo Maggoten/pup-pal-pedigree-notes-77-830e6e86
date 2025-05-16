@@ -18,9 +18,11 @@ export interface AuthContextType {
   isLoading: boolean;
   isLoggedIn: boolean;
   isAuthReady: boolean; // Explicitly defined and exported
+  isAuthTransitioning: boolean; // Add to match new interface
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: any) => Promise<boolean>;
   logout: () => Promise<void>;
+  signOut: () => Promise<void>; // Added to match interface
 }
 
 // Create the context with a default value
@@ -31,10 +33,12 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   isLoading: true,
   isLoggedIn: false,
-  isAuthReady: false, // Add default value
+  isAuthReady: false,
+  isAuthTransitioning: false, // Add default value
   login: async () => false,
   register: async () => false,
-  logout: async () => {}
+  logout: async () => {},
+  signOut: async () => {} // Added to match interface
 });
 
 // Export the context for the provider

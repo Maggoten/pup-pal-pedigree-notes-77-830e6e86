@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/hooks/useAuth'; // Use consistent import path
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
@@ -31,6 +31,7 @@ interface AuthGuardProps {
 // Add navigation cooldown tracking
 let lastNavigationTime = 0;
 const NAVIGATION_COOLDOWN = 800; // ms
+const MAX_REDIRECT_WAIT = 3000; // ms - maximum time to wait before forcing redirect
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
@@ -60,6 +61,9 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // NEW: Track if redirect is in progress
   const [redirectInProgress, setRedirectInProgress] = useState(false);
   
+  // NEW: Force redirect after timeout
+  const [forceRedirect, setForceRedirect] = useState(false);
+  
   // Debug logging for the current state
   useEffect(() => {
     console.log('[AuthGuard] Current state:', {
@@ -71,9 +75,11 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       user: user ? 'exists' : 'null',
       location: location.pathname,
       redirectSafe,
-      navigationAllowed
+      navigationAllowed,
+      forceRedirect
     });
-  }, [isLoggedIn, isAuthReady, isLoginPage, isAuthTransitioning, user, location.pathname, redirectSafe, navigationAllowed, redirectInProgress]);
+  }, [isLoggedIn, isAuthReady, isLoginPage, isAuthTransitioning, user, 
+      location.pathname, redirectSafe, navigationAllowed, redirectInProgress, forceRedirect]);
   
   // Navigation cooldown to prevent rapid redirects
   useEffect(() => {
@@ -86,6 +92,22 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       return () => clearTimeout(timerId);
     }
   }, [navigationAllowed]);
+  
+  // NEW: Force redirect after timeout if stuck in redirect process
+  useEffect(() => {
+    if (redirectInProgress && !isLoggedIn && !isLoginPage) {
+      console.log('[AuthGuard] Setting up force redirect timeout');
+      const forceTimer = setTimeout(() => {
+        console.log('[AuthGuard] Force redirect timeout reached, forcing redirect');
+        setForceRedirect(true);
+        // Also clear any potential blockers
+        setNavigationAllowed(true);
+        setRedirectSafe(true);
+      }, MAX_REDIRECT_WAIT);
+      
+      return () => clearTimeout(forceTimer);
+    }
+  }, [redirectInProgress, isLoggedIn, isLoginPage]);
   
   // Check for active uploads every 500ms
   useEffect(() => {
@@ -166,7 +188,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     }
   }, [isAuthReady, isAuthTransitioning, isLoggedIn]);
   
-  // NEW: Enhanced logic for showing authentication toast
+  // Enhanced logic for showing authentication toast
   // Prioritize redirect over toast when not logged in
   useEffect(() => {
     // Only show authentication toast when we can't redirect but need to show error
@@ -215,7 +237,16 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // Allow bypassing auth check after timeout to prevent infinite loading
   const authCheckFailed = authTimeout && !isAuthReady;
 
-  // NEW: Immediately block protected content if not logged in and auth is ready
+  // CRITICAL FIX: Force redirect after timeout even if other conditions aren't met
+  if (forceRedirect && !isLoginPage) {
+    console.log('[AuthGuard] FORCE REDIRECTING to login after timeout');
+    // Reset states to prevent getting stuck again
+    setRedirectInProgress(false);
+    setForceRedirect(false);
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Immediately block protected content if not logged in and auth is ready
   if ((isAuthReady || authCheckFailed) && 
       !isLoggedIn && 
       !isLoginPage && 
@@ -224,11 +255,12 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     // This ensures user can't see protected content while redirect is pending
     
     // Only attempt redirect if navigation is allowed and not already in progress
-    const shouldRedirect = redirectSafe && 
+    const shouldRedirect = (redirectSafe && 
                          navigationAllowed && 
                          !redirectInProgress && 
                          !hasActiveUploads && 
-                         !(isMobile && isOffline);
+                         !(isMobile && isOffline)) || 
+                         forceRedirect; // Also allow redirect on force flag
     
     if (shouldRedirect) {
       console.log('[AuthGuard] Redirecting to login page from:', location.pathname);
@@ -249,6 +281,11 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
           <p className="text-sm text-muted-foreground">
             Redirecting to login page...
           </p>
+          {redirectInProgress && (
+            <p className="text-xs text-muted-foreground">
+              If you're not redirected shortly, <a href="/login" className="text-blue-500 hover:underline">click here</a>
+            </p>
+          )}
         </div>
       </div>
     );
@@ -301,6 +338,9 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">
             Access restricted. Redirecting to login...
+          </p>
+          <p className="text-xs text-muted-foreground">
+            If you're not redirected shortly, <a href="/login" className="text-blue-500 hover:underline">click here</a>
           </p>
         </div>
       </div>

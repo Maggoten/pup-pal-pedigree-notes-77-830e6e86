@@ -2,7 +2,7 @@
 // Storage-related functions for authentication
 
 // Enhanced version to ensure thorough cleanup of all auth-related items
-export const clearAuthStorage = () => {
+export const clearAuthStorage = async () => {
   try {
     console.log('[Auth Storage] Beginning storage cleanup process');
     
@@ -71,6 +71,9 @@ export const clearAuthStorage = () => {
     
     // Force browsers to flush storage operations by reading a value
     localStorage.getItem('test');
+    
+    // NEW: Add a small delay to ensure browser has time to process storage changes
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     console.log('[Auth Storage] All auth-related storage items cleared');
     return true;

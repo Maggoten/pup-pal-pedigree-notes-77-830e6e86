@@ -116,6 +116,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         
         // Ensure auth is marked as ready on any auth event
         if (!isAuthReady) setIsAuthReady(true);
+        
+        // NEW: If logout detected, ensure we complete state transition properly
+        if (event === 'SIGNED_OUT') {
+          console.log('[AuthProvider] SIGNED_OUT event detected, ensuring cleanup');
+          // Add small delay to ensure state updates properly
+          setTimeout(() => {
+            setIsAuthTransitioning(false);
+          }, 300);
+        }
       }
     );
 
@@ -225,7 +234,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       
       // Step 3: Sign out from Supabase
       console.log("[AuthProvider] Calling Supabase signOut");
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut({
+        scope: 'global' // Explicitly sign out from all tabs/devices
+      });
       
       if (error) {
         console.error("[AuthProvider] Supabase signOut error:", error);
@@ -258,9 +269,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     } catch (error) {
       console.error("[AuthProvider] Error during logout:", error);
     } finally {
-      // NEW: Larger delay before completing transition to allow state updates to settle
-      // Increased from 500ms to 800ms
-      console.log("[AuthProvider] Setting final state after 800ms delay");
+      // NEW: Increased delay before completing transition to allow state updates to settle
+      // Increased from 800ms to 1000ms
+      console.log("[AuthProvider] Setting final state after 1000ms delay");
       setTimeout(() => {
         // Double-check auth state once more before finalizing
         console.log("[AuthProvider] Final auth state verification");
@@ -280,7 +291,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             isAuthTransitioning: false
           });
         });
-      }, 800); // Increased from 500ms to 800ms
+      }, 1000); // Increased from 800ms to 1000ms
     }
   };
 
