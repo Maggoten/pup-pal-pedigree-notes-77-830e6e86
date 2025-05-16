@@ -6,7 +6,7 @@ import { useDogs } from '@/context/DogsContext';
 import { useToast } from '@/hooks/use-toast';
 import { Litter } from '@/types/breeding';
 import NewLitterForm from './NewLitterForm';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/providers/AuthProvider';
 import { useForm, FormProvider } from 'react-hook-form';
 import { litterService } from '@/services/LitterService';
 import { supabase } from '@/integrations/supabase/client';
