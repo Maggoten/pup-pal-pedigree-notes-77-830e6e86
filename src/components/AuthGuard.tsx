@@ -57,6 +57,9 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // Navigation cooldown to prevent rapid redirects
   const [navigationAllowed, setNavigationAllowed] = useState(true);
   
+  // NEW: Track if redirect is in progress
+  const [redirectInProgress, setRedirectInProgress] = useState(false);
+  
   // Debug logging for the current state
   useEffect(() => {
     console.log('[AuthGuard] Current state:', {
@@ -64,12 +67,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       isAuthReady,
       isLoginPage,
       isAuthTransitioning,
+      redirectInProgress,
       user: user ? 'exists' : 'null',
       location: location.pathname,
       redirectSafe,
       navigationAllowed
     });
-  }, [isLoggedIn, isAuthReady, isLoginPage, isAuthTransitioning, user, location.pathname, redirectSafe, navigationAllowed]);
+  }, [isLoggedIn, isAuthReady, isLoginPage, isAuthTransitioning, user, location.pathname, redirectSafe, navigationAllowed, redirectInProgress]);
   
   // Navigation cooldown to prevent rapid redirects
   useEffect(() => {
@@ -162,9 +166,10 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     }
   }, [isAuthReady, isAuthTransitioning, isLoggedIn]);
   
-  // Show toast for authentication issues
+  // NEW: Enhanced logic for showing authentication toast
+  // Prioritize redirect over toast when not logged in
   useEffect(() => {
-    // Only show authentication toast when all conditions are met
+    // Only show authentication toast when we can't redirect but need to show error
     const shouldShowToast = 
       (isAuthReady || authTimeout) && 
       !isLoggedIn && 
@@ -174,11 +179,12 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       !showingToast &&
       !hasActiveUploads &&
       !isAuthTransitioning &&
-      redirectSafe;
+      redirectSafe &&
+      !redirectInProgress && // Don't show toast if we're already redirecting
+      !navigationAllowed; // Only show toast if we can't navigate (due to cooldown)
     
     if (shouldShowToast) {
       console.log('[AuthGuard] Showing auth required toast');
-      
       setShowingToast(true);
       
       toast({
@@ -201,13 +207,54 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     hasActiveUploads,
     authTimeout,
     isAuthTransitioning,
-    redirectSafe
+    redirectSafe,
+    navigationAllowed,
+    redirectInProgress
   ]);
 
   // Allow bypassing auth check after timeout to prevent infinite loading
   const authCheckFailed = authTimeout && !isAuthReady;
 
-  // Show loading state while auth is not ready or during transitions
+  // NEW: Immediately block protected content if not logged in and auth is ready
+  if ((isAuthReady || authCheckFailed) && 
+      !isLoggedIn && 
+      !isLoginPage && 
+      !isAuthTransitioning) {
+    // Don't show protected content even during redirects
+    // This ensures user can't see protected content while redirect is pending
+    
+    // Only attempt redirect if navigation is allowed and not already in progress
+    const shouldRedirect = redirectSafe && 
+                         navigationAllowed && 
+                         !redirectInProgress && 
+                         !hasActiveUploads && 
+                         !(isMobile && isOffline);
+    
+    if (shouldRedirect) {
+      console.log('[AuthGuard] Redirecting to login page from:', location.pathname);
+      // Set flags to prevent duplicate redirects
+      setRedirectInProgress(true);
+      setNavigationAllowed(false);
+      lastNavigationTime = Date.now();
+      
+      // Return redirect component
+      return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+    
+    // If we can't redirect yet, show a loading state
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">
+            Redirecting to login page...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state during auth transitions
   if ((!isAuthReady && !authTimeout) || isAuthTransitioning) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -222,38 +269,42 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     );
   }
 
-  // Only redirect if all conditions are met and navigation is allowed
-  const shouldRedirectToLogin = (isAuthReady || authCheckFailed) && 
-                              !isLoggedIn && 
-                              !isLoginPage && 
-                              !hasActiveUploads &&
-                              !(isMobile && isOffline) &&
+  // Redirect from login to home if already logged in
+  // Only redirect if all conditions are met
+  const shouldRedirectToHome = isAuthReady && 
+                              isLoggedIn && 
+                              isLoginPage &&
                               !isAuthTransitioning &&
                               redirectSafe && 
                               navigationAllowed;
-  
-  if (shouldRedirectToLogin) {
-    console.log('[AuthGuard] Redirecting to login page from:', location.pathname);
-    // Set navigation cooldown to prevent rapid redirects
-    setNavigationAllowed(false);
-    lastNavigationTime = Date.now();
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  // Only redirect if all conditions are met
-  const shouldRedirectToHome = isAuthReady && 
-                             isLoggedIn && 
-                             isLoginPage &&
-                             !isAuthTransitioning &&
-                             redirectSafe && 
-                             navigationAllowed;
                              
   if (shouldRedirectToHome) {
     console.log('[AuthGuard] User already logged in, redirecting from login page');
     // Set navigation cooldown to prevent rapid redirects
     setNavigationAllowed(false);
+    setRedirectInProgress(true);
     lastNavigationTime = Date.now();
     return <Navigate to="/" replace />;
+  }
+
+  // Finally, render children only if we should show the protected content
+  // For login page, always show content
+  // For other pages, only show if user is logged in
+  const shouldShowContent = isLoginPage || (isAuthReady && isLoggedIn);
+  
+  if (!shouldShowContent) {
+    console.log('[AuthGuard] Blocking access to protected content');
+    // This should not happen often because we should redirect first
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">
+            Access restricted. Redirecting to login...
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

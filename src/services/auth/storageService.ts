@@ -59,6 +59,16 @@ export const clearAuthStorage = () => {
       }
     });
     
+    // NEW: Add additional forced browser cache flush
+    // This creates a small delay which can help ensure storage operations complete
+    try {
+      localStorage.setItem('__auth_flush', Date.now().toString());
+      localStorage.getItem('__auth_flush');
+      localStorage.removeItem('__auth_flush');
+    } catch (e) {
+      console.warn('[Auth Storage] Cache flush operation failed:', e);
+    }
+    
     // Force browsers to flush storage operations by reading a value
     localStorage.getItem('test');
     
@@ -85,4 +95,27 @@ export const getLoggedInStateFromStorage = (): boolean => {
 export const saveUserToStorage = (user) => {
   localStorage.setItem('user', JSON.stringify(user));
   localStorage.setItem('isLoggedIn', 'true');
+};
+
+// NEW: Verify storage cleanup was complete
+export const verifyAuthStorageClear = (): boolean => {
+  try {
+    // Check for any remaining auth items
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (
+        key.includes('supabase') || 
+        key.includes('auth') || 
+        key.includes('sb-') ||
+        key.includes('token')
+      )) {
+        console.warn(`[Auth Storage] Found remaining auth item after cleanup: ${key}`);
+        return false;
+      }
+    }
+    return true;
+  } catch (e) {
+    console.error('[Auth Storage] Error verifying storage cleanup:', e);
+    return false;
+  }
 };

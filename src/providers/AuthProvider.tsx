@@ -1,9 +1,10 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { verifySession } from '@/utils/storage';
 import { RegisterData, User } from '@/types/auth';
-import { clearAuthStorage } from '@/services/auth/storageService';
+import { clearAuthStorage, verifyAuthStorageClear } from '@/services/auth/storageService';
 
 // Define SupabaseUser type for internal use
 type SupabaseUser = {
@@ -199,7 +200,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  // Enhanced logout method with proper transition handling and verification
+  // Further enhanced logout method with proper transition handling, verification and extended delays
   const logout = async (): Promise<void> => {
     console.log("[AuthProvider] Starting logout process");
     
@@ -241,22 +242,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         console.log("[AuthProvider] Logout confirmed - no session exists");
       }
       
+      // Step 5: NEW - Verify storage cleanup was complete
+      const storageCleanupComplete = verifyAuthStorageClear();
+      console.log("[AuthProvider] Storage cleanup verification:", 
+        storageCleanupComplete ? "Complete" : "Incomplete");
+      
+      // Step 6: Force a second storage cleanup if needed
+      if (!storageCleanupComplete) {
+        console.log("[AuthProvider] Performing secondary storage cleanup");
+        await clearAuthStorage();
+      }
+      
       console.log("[AuthProvider] Logout completed successfully");
       setLogoutCompletionState(true);
     } catch (error) {
       console.error("[AuthProvider] Error during logout:", error);
     } finally {
-      // Larger delay before completing transition to allow state updates to settle
-      console.log("[AuthProvider] Setting final state after 500ms delay");
+      // NEW: Larger delay before completing transition to allow state updates to settle
+      // Increased from 500ms to 800ms
+      console.log("[AuthProvider] Setting final state after 800ms delay");
       setTimeout(() => {
-        setIsLoading(false);
-        setIsAuthTransitioning(false);
-        console.log("[AuthProvider] Auth transition completed", {
-          user: null,
-          isLoggedIn: false,
-          isAuthTransitioning: false
+        // Double-check auth state once more before finalizing
+        console.log("[AuthProvider] Final auth state verification");
+        supabase.auth.getSession().then(({ data }) => {
+          if (data.session) {
+            console.warn("[AuthProvider] WARNING: Session still exists after logout!");
+          } else {
+            console.log("[AuthProvider] Final verification confirms no session exists");
+          }
+          
+          // Complete the transition regardless
+          setIsLoading(false);
+          setIsAuthTransitioning(false);
+          console.log("[AuthProvider] Auth transition completed", {
+            user: null,
+            isLoggedIn: false,
+            isAuthTransitioning: false
+          });
         });
-      }, 500);
+      }, 800); // Increased from 500ms to 800ms
     }
   };
 
