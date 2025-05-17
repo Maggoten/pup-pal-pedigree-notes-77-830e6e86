@@ -9,7 +9,7 @@ import { useDogs } from '@/context/DogsContext';
 import { getActivePregnancies, getFirstActivePregnancy } from '@/services/PregnancyService';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/providers/AuthProvider';
 
 import ActivePregnanciesList from '@/components/pregnancy/ActivePregnanciesList';
 import PregnancyDropdownSelector from '@/components/pregnancy/PregnancyDropdownSelector';
