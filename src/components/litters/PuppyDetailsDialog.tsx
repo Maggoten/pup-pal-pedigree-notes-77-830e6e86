@@ -34,10 +34,22 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   useEffect(() => {
     setDisplayName(puppy.name);
   }, [puppy.name]);
+
+  // Update image URL when puppy prop changes  
+  useEffect(() => {
+    setImageUrl(puppy.imageUrl || '');
+  }, [puppy.imageUrl]);
   
   const handleImageChange = useCallback((newImageUrl: string) => {
     setImageUrl(newImageUrl);
-  }, []);
+    
+    // Update the puppy with the new image URL immediately
+    const updatedPuppy = {
+      ...puppy,
+      imageUrl: newImageUrl
+    };
+    onUpdatePuppy(updatedPuppy);
+  }, [puppy, onUpdatePuppy]);
   
   const handleSubmit = useCallback((updatedPuppyData: Puppy) => {
     // Clone the puppy data to avoid reference issues
@@ -73,8 +85,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
 
     onUpdatePuppy(updatedPuppy);
     setNewNote('');
-    if (onClose) onClose(); // Close dialog after adding a note
-  }, [newNote, puppy, onUpdatePuppy, onClose]);
+  }, [newNote, puppy, onUpdatePuppy]);
 
   // Add a handler for the close button
   const handleClose = useCallback(() => {

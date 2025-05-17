@@ -9,6 +9,7 @@ import DatePicker from '@/components/common/DatePicker';
 import BreedDropdown from '@/components/dogs/breed-selector/BreedDropdown';
 import { Puppy } from '@/types/breeding';
 import PuppyGenderSelector from './puppies/PuppyGenderSelector';
+import PuppyImageUploader from './puppies/PuppyImageUploader';
 
 interface AddPuppyDialogProps {
   onClose: () => void;
@@ -34,6 +35,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
   const [dateOfBirth, setDateOfBirth] = useState<Date>(defaultDob);
   const [breed, setBreed] = useState<string>(damBreed);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [imageUrl, setImageUrl] = useState<string>('');
   
   useEffect(() => {
     setName(`Puppy ${puppyNumber}`);
@@ -49,6 +51,10 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
 
   const handleGenderChange = (value: 'male' | 'female') => {
     setGender(value);
+  };
+
+  const handleImageChange = (url: string) => {
+    setImageUrl(url);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,7 +89,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
         breed: breed || damBreed || '', // Use breed if selected, fallback to dam breed, or empty string
         birthWeight: weightValue,
         birthDateTime: birthDateTime.toISOString(),
-        imageUrl: '',
+        imageUrl: imageUrl, // Add the image URL
         weightLog: initialWeightLog,
         heightLog: [],
         notes: []
@@ -119,6 +125,15 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-4 mt-4">
+          <div className="flex justify-center mb-4">
+            <PuppyImageUploader
+              puppyName={name}
+              currentImage={imageUrl}
+              onImageChange={handleImageChange}
+              large={true}
+            />
+          </div>
+          
           <div>
             <Label htmlFor="name">Name</Label>
             <Input 
