@@ -25,15 +25,13 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
   onAddWeight
 }) => {
   // Add more detailed console logs to better understand what's happening
-  console.log(`Rendering PuppyWeightTab for ${puppy.name} (${puppy.id})`);
-  console.log(`Weight log entries count: ${puppy.weightLog?.length || 0}`);
+  console.log(`Rendering PuppyWeightTab for ${puppy.name} (${puppy.id})`, {
+    puppyId: puppy.id,
+    weightLogLength: puppy.weightLog?.length || 0,
+    weightLog: puppy.weightLog || []
+  });
   
-  // Log the first and last weight entries if available
-  if (puppy.weightLog && puppy.weightLog.length > 0) {
-    console.log(`First weight entry: ${JSON.stringify(puppy.weightLog[0])}`);
-    console.log(`Last weight entry: ${JSON.stringify(puppy.weightLog[puppy.weightLog.length - 1])}`);
-  }
-  
+  // Ensure we're using the correct weight log entries for this specific puppy
   const weightLogEntries = puppy.weightLog || [];
   
   return (

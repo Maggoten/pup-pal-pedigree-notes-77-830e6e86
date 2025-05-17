@@ -1,5 +1,4 @@
-
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -32,9 +31,10 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     format(new Date(), 'HH:mm')
   );
   
-  // Create a deep clone of the puppy data to work with
+  // Create a deep clone of the puppy data on component mount
+  // This isolates the data for this specific puppy instance
   const [localPuppy, setLocalPuppy] = useState<Puppy>(() => {
-    // Ensure we create proper deep copies of all arrays
+    // Create proper deep copies of all arrays to avoid reference issues
     return {
       ...puppy,
       weightLog: puppy.weightLog ? JSON.parse(JSON.stringify(puppy.weightLog)) : [],
@@ -42,6 +42,21 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       notes: puppy.notes ? JSON.parse(JSON.stringify(puppy.notes)) : []
     };
   });
+  
+  // Update local puppy state when the prop changes (e.g., after a successful update)
+  useEffect(() => {
+    console.log(`PuppyMeasurementsDialog received new puppy prop: ${puppy.name} (${puppy.id})`, {
+      weightLogLength: puppy.weightLog?.length || 0,
+      weightLog: puppy.weightLog || []
+    });
+    
+    setLocalPuppy({
+      ...puppy,
+      weightLog: puppy.weightLog ? JSON.parse(JSON.stringify(puppy.weightLog)) : [],
+      heightLog: puppy.heightLog ? JSON.parse(JSON.stringify(puppy.heightLog)) : [],
+      notes: puppy.notes ? JSON.parse(JSON.stringify(puppy.notes)) : []
+    });
+  }, [puppy.id, puppy.weightLog, puppy.heightLog, puppy.notes]);
 
   // Debug the currently loaded puppy data
   console.log(`PuppyMeasurementsDialog for ${puppy.name} (${puppy.id})`, {
@@ -87,7 +102,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       currentWeight: weightValue
     };
 
-    console.log(`After adding weight record:`, {
+    console.log(`After adding weight record for ${updatedPuppy.name}:`, {
       puppyId: updatedPuppy.id,
       weightLogLength: updatedPuppy.weightLog.length,
       updatedWeightLog: updatedPuppy.weightLog

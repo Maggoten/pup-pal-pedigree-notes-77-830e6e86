@@ -25,7 +25,7 @@ export const usePuppyQueries = (litterId: string) => {
       
       if (puppy.weightLog && puppy.weightLog.length > 0) {
         console.log(`Latest weight: ${puppy.weightLog[puppy.weightLog.length - 1].weight} kg`);
-        console.log(`Weight log details: ${JSON.stringify(puppy.weightLog)}`);
+        console.log(`All weight logs: ${JSON.stringify(puppy.weightLog)}`);
       }
       
       // Create a deep clone of the puppy data to avoid reference issues
@@ -40,7 +40,8 @@ export const usePuppyQueries = (litterId: string) => {
     },
     onSuccess: (updatedLitters: Litter[]) => {
       console.log("Puppy update successful, invalidating queries");
-      // Update the cache for the specific litter
+      // Force refetch all litter data to ensure we have the most up-to-date information
+      queryClient.invalidateQueries({queryKey: ['litter']});
       queryClient.invalidateQueries({queryKey: ['litter', litterId]});
       // Also invalidate the overall litters list
       queryClient.invalidateQueries({queryKey: ['litters']});
@@ -97,7 +98,8 @@ export const usePuppyQueries = (litterId: string) => {
         notes: puppy.notes ? JSON.parse(JSON.stringify(puppy.notes)) : []
       };
       
-      console.log(`Sending update for puppy with ${puppyToUpdate.weightLog.length} weight records`);
+      console.log(`Sending update for puppy with ${puppyToUpdate.weightLog?.length || 0} weight records`);
+      console.log(`Weight records for ${puppyToUpdate.name}: ${JSON.stringify(puppyToUpdate.weightLog || [])}`);
       
       await updatePuppyMutation.mutateAsync(puppyToUpdate);
     } finally {

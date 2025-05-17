@@ -14,19 +14,23 @@ const PuppiesTable: React.FC<PuppiesTableProps> = ({ puppies }) => {
       console.log(`Calculating display weight for puppy ${puppy.name} (${puppy.id})`, {
         currentWeight: puppy.currentWeight,
         weightLogLength: puppy.weightLog?.length || 0,
-        weightLog: puppy.weightLog || []
+        weightLog: (puppy.weightLog || []).map(w => ({ date: w.date, weight: w.weight }))
       });
       
-      // Use the currentWeight value from Supabase if available
+      // Use the currentWeight value if available
       let displayWeight = 'Not recorded';
       
       if (puppy.currentWeight) {
         displayWeight = `${puppy.currentWeight} kg`;
       } else if (puppy.weightLog && puppy.weightLog.length > 0) {
         // Get the last recorded weight from the weight log
+        // Sort by date to ensure we get the most recent
         const lastWeight = [...puppy.weightLog]
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+        
         displayWeight = `${lastWeight.weight} kg`;
+        
+        console.log(`Using last weight log entry for ${puppy.name}: ${lastWeight.weight} kg from ${lastWeight.date}`);
       }
             
       return {
