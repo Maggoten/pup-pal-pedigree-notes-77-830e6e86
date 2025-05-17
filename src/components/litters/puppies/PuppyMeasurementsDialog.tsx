@@ -31,9 +31,10 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     format(new Date(), 'HH:mm')
   );
   
-  // Create a deep clone of the puppy data on component mount
+  // Create a deep clone of the puppy data on component mount and when puppy changes
   // This isolates the data for this specific puppy instance
   const [localPuppy, setLocalPuppy] = useState<Puppy>(() => {
+    console.log(`PuppyMeasurementsDialog: Initializing local puppy for ${puppy.name} (${puppy.id})`);
     // Create proper deep copies of all arrays to avoid reference issues
     return {
       ...puppy,
@@ -45,25 +46,25 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
   
   // Update local puppy state when the prop changes (e.g., after a successful update)
   useEffect(() => {
-    console.log(`PuppyMeasurementsDialog received new puppy prop: ${puppy.name} (${puppy.id})`, {
+    console.log(`PuppyMeasurementsDialog: Puppy prop changed for ${puppy.name} (${puppy.id})`, {
       weightLogLength: puppy.weightLog?.length || 0,
-      weightLog: puppy.weightLog || []
+      currentWeight: puppy.currentWeight,
+      puppyId: puppy.id
     });
     
+    // Always create a fresh deep copy when the puppy prop changes
     setLocalPuppy({
       ...puppy,
       weightLog: puppy.weightLog ? JSON.parse(JSON.stringify(puppy.weightLog)) : [],
       heightLog: puppy.heightLog ? JSON.parse(JSON.stringify(puppy.heightLog)) : [],
       notes: puppy.notes ? JSON.parse(JSON.stringify(puppy.notes)) : []
     });
-  }, [puppy.id, puppy.weightLog, puppy.heightLog, puppy.notes]);
-
-  // Debug the currently loaded puppy data
-  console.log(`PuppyMeasurementsDialog for ${puppy.name} (${puppy.id})`, {
-    initialWeightLogLength: puppy.weightLog?.length || 0,
-    localPuppyWeightLogLength: localPuppy.weightLog?.length || 0,
-    localPuppyWeightLog: localPuppy.weightLog || []
-  });
+    
+    // Reset form states when puppy changes
+    setWeight('');
+    setHeight('');
+    setNote('');
+  }, [puppy.id, puppy.weightLog, puppy.heightLog, puppy.notes, puppy.currentWeight, puppy.name]);
 
   // Memoize event handlers to prevent recreating on each render
   const handleAddWeight = useCallback(() => {
@@ -91,7 +92,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       currentWeightLogLength: localPuppy.weightLog?.length || 0
     });
     
-    // Create a completely new puppy object with the updated weight log
+    // Create a completely new puppy object with the updated weight log and currentWeight
     const updatedPuppy = {
       ...localPuppy,
       weightLog: [
@@ -105,7 +106,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     console.log(`After adding weight record for ${updatedPuppy.name}:`, {
       puppyId: updatedPuppy.id,
       weightLogLength: updatedPuppy.weightLog.length,
-      updatedWeightLog: updatedPuppy.weightLog
+      currentWeight: updatedPuppy.currentWeight
     });
 
     setLocalPuppy(updatedPuppy);

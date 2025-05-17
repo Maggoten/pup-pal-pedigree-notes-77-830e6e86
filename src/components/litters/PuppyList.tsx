@@ -1,4 +1,3 @@
-
 import React, { useMemo, useCallback, memo } from 'react';
 import { Edit, Trash2, BarChart2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -284,7 +283,13 @@ const PuppyList: React.FC<PuppyListProps> = ({
   const getLatestMeasurement = useCallback((puppy: Puppy, type: 'weight' | 'height') => {
     // For weight, prioritize the currentWeight field from Supabase
     if (type === 'weight') {
+      console.log(`PuppyList: Getting weight for ${puppy.name} (${puppy.id})`, {
+        currentWeight: puppy.currentWeight,
+        hasWeightLog: Boolean(puppy.weightLog?.length)
+      });
+      
       if (puppy.currentWeight) {
+        console.log(`PuppyList: Using currentWeight for ${puppy.name}: ${puppy.currentWeight} kg`);
         return `${puppy.currentWeight} kg`;
       }
     }
@@ -296,14 +301,20 @@ const PuppyList: React.FC<PuppyListProps> = ({
     const sortedLog = [...log].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const latestEntry = sortedLog[0];
 
-    // Use the type guard functions to properly handle the types
-    if (type === 'weight' && isWeightRecord(latestEntry)) {
-      return `${latestEntry.weight} kg`;
-    } else if (type === 'height' && isHeightRecord(latestEntry)) {
-      return `${latestEntry.height} cm`;
-    } else {
-      return 'Invalid record';
+    if (type === 'weight' && latestEntry) {
+      // Use the type guard functions to properly handle the types
+      if (isWeightRecord(latestEntry)) {
+        console.log(`PuppyList: Using last weight log entry for ${puppy.name}: ${latestEntry.weight} kg from ${latestEntry.date}`);
+        return `${latestEntry.weight} kg`;
+      }
+    } else if (type === 'height' && latestEntry) {
+      // Use the type guard functions to properly handle the types
+      if (isHeightRecord(latestEntry)) {
+        return `${latestEntry.height} cm`;
+      }
     }
+    
+    return 'Invalid record';
   }, []);
   
   if (isMobile) {

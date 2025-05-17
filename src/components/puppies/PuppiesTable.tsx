@@ -11,10 +11,10 @@ const PuppiesTable: React.FC<PuppiesTableProps> = ({ puppies }) => {
   // Use memoization to prevent unnecessary recalculations
   const puppiesWithDisplayWeight = useMemo(() => {
     return puppies.map(puppy => {
-      console.log(`Calculating display weight for puppy ${puppy.name} (${puppy.id})`, {
+      console.log(`PuppiesTable: Calculating display weight for puppy ${puppy.name} (${puppy.id})`, {
         currentWeight: puppy.currentWeight,
         weightLogLength: puppy.weightLog?.length || 0,
-        weightLog: (puppy.weightLog || []).map(w => ({ date: w.date, weight: w.weight }))
+        puppyId: puppy.id
       });
       
       // Use the currentWeight value if available
@@ -22,17 +22,21 @@ const PuppiesTable: React.FC<PuppiesTableProps> = ({ puppies }) => {
       
       if (puppy.currentWeight) {
         displayWeight = `${puppy.currentWeight} kg`;
+        console.log(`PuppiesTable: Using currentWeight for ${puppy.name}: ${puppy.currentWeight} kg`);
       } else if (puppy.weightLog && puppy.weightLog.length > 0) {
         // Get the last recorded weight from the weight log
         // Sort by date to ensure we get the most recent
-        const lastWeight = [...puppy.weightLog]
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+        const sortedWeightLog = [...puppy.weightLog]
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         
-        displayWeight = `${lastWeight.weight} kg`;
-        
-        console.log(`Using last weight log entry for ${puppy.name}: ${lastWeight.weight} kg from ${lastWeight.date}`);
+        if (sortedWeightLog.length > 0) {
+          const lastWeight = sortedWeightLog[0];
+          displayWeight = `${lastWeight.weight} kg`;
+          
+          console.log(`PuppiesTable: Using last weight log entry for ${puppy.name}: ${lastWeight.weight} kg from ${lastWeight.date}`);
+        }
       }
-            
+      
       return {
         ...puppy,
         displayWeight

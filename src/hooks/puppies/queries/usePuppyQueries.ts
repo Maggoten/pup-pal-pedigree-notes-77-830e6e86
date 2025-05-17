@@ -20,11 +20,15 @@ export const usePuppyQueries = (litterId: string) => {
   const updatePuppyMutation = useMutation({
     mutationFn: (puppy: Puppy) => {
       // Log the puppy object being updated for debugging
-      console.log(`Updating puppy ${puppy.name} (${puppy.id}):`);
+      console.log(`usePuppyQueries: Updating puppy ${puppy.name} (${puppy.id}):`);
       console.log(`Weight log entries: ${puppy.weightLog?.length || 0}`);
+      console.log(`Current weight: ${puppy.currentWeight}`);
       
       if (puppy.weightLog && puppy.weightLog.length > 0) {
-        console.log(`Latest weight: ${puppy.weightLog[puppy.weightLog.length - 1].weight} kg`);
+        const latestWeight = [...puppy.weightLog]
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+        
+        console.log(`Latest weight log entry: ${latestWeight.weight} kg from ${latestWeight.date}`);
         console.log(`All weight logs: ${JSON.stringify(puppy.weightLog)}`);
       }
       
@@ -50,6 +54,9 @@ export const usePuppyQueries = (litterId: string) => {
         title: "Puppy Updated",
         description: "The puppy has been updated successfully",
       });
+      
+      // Force a refetch of the litter data to ensure we have the latest data
+      queryClient.refetchQueries({queryKey: ['litter', litterId]});
     },
     onError: (error) => {
       console.error("Error updating puppy:", error);
@@ -89,6 +96,7 @@ export const usePuppyQueries = (litterId: string) => {
     try {
       // Ensure we're sending a clean copy of the puppy object
       console.log(`Preparing to update puppy ${puppy.name} (${puppy.id})`);
+      console.log(`Current weight value: ${puppy.currentWeight}`);
       
       // Create a deep clone to avoid any reference issues
       const puppyToUpdate = {
@@ -100,6 +108,17 @@ export const usePuppyQueries = (litterId: string) => {
       
       console.log(`Sending update for puppy with ${puppyToUpdate.weightLog?.length || 0} weight records`);
       console.log(`Weight records for ${puppyToUpdate.name}: ${JSON.stringify(puppyToUpdate.weightLog || [])}`);
+      
+      // Update the currentWeight field based on the latest weight log entry if not already set
+      if (puppyToUpdate.weightLog && puppyToUpdate.weightLog.length > 0 && !puppyToUpdate.currentWeight) {
+        const sortedWeightLog = [...puppyToUpdate.weightLog]
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        
+        if (sortedWeightLog.length > 0) {
+          puppyToUpdate.currentWeight = sortedWeightLog[0].weight;
+          console.log(`Automatically setting currentWeight to latest log value: ${puppyToUpdate.currentWeight}`);
+        }
+      }
       
       await updatePuppyMutation.mutateAsync(puppyToUpdate);
     } finally {

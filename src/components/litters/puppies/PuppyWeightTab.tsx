@@ -25,14 +25,20 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
   onAddWeight
 }) => {
   // Add more detailed console logs to better understand what's happening
-  console.log(`Rendering PuppyWeightTab for ${puppy.name} (${puppy.id})`, {
+  console.log(`PuppyWeightTab: Rendering for ${puppy.name} (${puppy.id})`, {
     puppyId: puppy.id,
-    weightLogLength: puppy.weightLog?.length || 0,
-    weightLog: puppy.weightLog || []
+    currentWeight: puppy.currentWeight,
+    weightLogLength: puppy.weightLog?.length || 0
   });
   
   // Ensure we're using the correct weight log entries for this specific puppy
-  const weightLogEntries = puppy.weightLog || [];
+  // Make a safe copy of weight logs to avoid reference issues
+  const weightLogEntries = puppy.weightLog ? [...puppy.weightLog] : [];
+  
+  // Log the actual entries we're showing
+  console.log(`PuppyWeightTab: Weight log entries for ${puppy.name} (${puppy.id})`, 
+    weightLogEntries.map(entry => ({ date: entry.date, weight: entry.weight }))
+  );
   
   return (
     <div className="space-y-4">
@@ -64,12 +70,14 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {[...weightLogEntries].reverse().map((log, index) => (
-                  <TableRow key={`${puppy.id}-weight-${index}`}>
-                    <TableCell>{format(new Date(log.date), "PPP p")}</TableCell>
-                    <TableCell>{log.weight}</TableCell>
-                  </TableRow>
-                ))}
+                {weightLogEntries
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map((log, index) => (
+                    <TableRow key={`${puppy.id}-weight-${index}-${log.date}`}>
+                      <TableCell>{format(new Date(log.date), "PPP p")}</TableCell>
+                      <TableCell>{log.weight}</TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </div>
