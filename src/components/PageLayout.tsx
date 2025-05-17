@@ -1,5 +1,5 @@
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import WelcomeHeader from '@/components/WelcomeHeader';
 
@@ -18,6 +18,24 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   children,
   className = ""
 }) => {
+  // Add useEffect to force scrollability on mount
+  useEffect(() => {
+    // Reset scroll position to top
+    window.scrollTo(0, 0);
+    
+    // Force scrollability on HTML and body elements
+    document.documentElement.style.overflowY = 'auto';
+    document.body.style.overflowY = 'auto';
+    
+    // Special handling for iOS Safari
+    document.documentElement.style.height = 'auto';
+    document.documentElement.style.WebkitOverflowScrolling = 'touch';
+    
+    // Prevent any potential scroll locks
+    document.body.style.position = 'relative';
+    document.body.style.minHeight = '100%';
+  }, []);
+
   return (
     <div className={`min-h-screen flex flex-col bg-background overflow-y-auto ${className}`}>
       <Navbar />
