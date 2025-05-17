@@ -29,7 +29,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
     
     // Special handling for iOS Safari
     document.documentElement.style.height = 'auto';
-    document.documentElement.style.WebkitOverflowScrolling = 'touch';
+    // Use type assertion for vendor-prefixed CSS property
+    (document.documentElement.style as any)['-webkit-overflow-scrolling'] = 'touch';
     
     // Prevent any potential scroll locks
     document.body.style.position = 'relative';
