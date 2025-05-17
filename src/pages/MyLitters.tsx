@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LitterFilterProvider } from '@/components/litters/LitterFilterProvider';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -101,7 +100,7 @@ const MyLitters: React.FC = () => {
       title="My Litters" 
       description="Manage your litter records and puppies" 
       icon={<PawPrint className="h-6 w-6" />}
-      className="bg-warmbeige-50/50"
+      className="bg-warmbeige-50/50 overflow-y-auto"
     >
       {isError && showError && (
         <Alert variant="destructive" className="mb-4">

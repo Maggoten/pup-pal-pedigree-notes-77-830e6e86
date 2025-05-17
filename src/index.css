@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
 
 @tailwind base;
@@ -93,9 +92,25 @@
     @apply border-border;
   }
 
+  html, body {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Improve iOS scrolling */
+    overscroll-behavior-y: none; /* Prevent overscroll effects */
+  }
+  
   body {
     @apply bg-background text-foreground;
     font-family: 'Source Sans Pro', sans-serif;
+    position: relative; /* Ensure position context for children */
+    min-height: 100%;
+  }
+  
+  #root {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
   }
   
   h1, h2, h3, h4, h5, h6 {

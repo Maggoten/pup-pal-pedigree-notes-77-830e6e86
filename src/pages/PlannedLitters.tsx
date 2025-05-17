@@ -8,7 +8,7 @@ const PlannedLitters: React.FC = () => {
     <PageLayout 
       title="Planned Litters & Mating" 
       description="Plan your future litters, track heat cycles, and manage breeding activities"
-      className="bg-warmbeige-50/50"
+      className="bg-warmbeige-50/50 overflow-y-auto"
     >
       <PlannedLittersContent />
     </PageLayout>

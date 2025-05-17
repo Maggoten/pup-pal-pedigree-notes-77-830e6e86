@@ -98,6 +98,7 @@ const Pregnancy: React.FC = () => {
       title="Pregnancy" 
       description="Track your pregnant bitches and fetal development"
       icon={<Heart className="h-6 w-6" />}
+      className="overflow-y-auto"
     >
       {hasError && (
         <Alert variant="destructive" className="mb-6">
@@ -115,7 +116,7 @@ const Pregnancy: React.FC = () => {
           <span className="ml-2 text-lg">Loading pregnancy details...</span>
         </div>
       ) : (
-        <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm">
+        <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm overflow-y-visible">
           <ActivePregnanciesList 
             pregnancies={activePregnancies} 
             onAddPregnancy={handleAddPregnancyClick}

@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/hooks/useAuth';
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
@@ -93,7 +92,7 @@ const MyDogsContent: React.FC = () => {
     <PageLayout 
       title="My Dogs" 
       description="Manage your breeding dogs"
-      className="bg-warmbeige-50"
+      className="bg-warmbeige-50 overflow-y-auto"
     >
       {error && showError && (
         <Alert variant="destructive" className="mb-4">
@@ -156,7 +155,7 @@ const MyDogsContent: React.FC = () => {
             </Button>
           </div>
           
-          <Card className="bg-white border border-warmbeige-100 shadow-sm">
+          <Card className="bg-white border border-warmbeige-100 shadow-sm overflow-y-auto">
             <CardHeader className="bg-warmbeige-50/50 border-b border-warmbeige-100">
               <CardTitle>
                 {genderFilter === 'all' ? 'All Dogs' : 

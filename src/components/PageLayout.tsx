@@ -8,7 +8,7 @@ interface PageLayoutProps {
   description?: string;
   icon?: ReactNode;
   children: ReactNode;
-  className?: string; // Added className prop
+  className?: string;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
@@ -16,14 +16,14 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   description, 
   icon, 
   children,
-  className = "" // Default to empty string
+  className = ""
 }) => {
   return (
-    <div className={`min-h-screen flex flex-col bg-background ${className}`}>
+    <div className={`min-h-screen flex flex-col bg-background overflow-y-auto ${className}`}>
       <Navbar />
       <WelcomeHeader />
       
-      <main className="flex-1 container py-4 space-y-4">
+      <main className="flex-1 container py-4 space-y-4 overflow-y-auto">
         {(title || description) && (
           <div className="flex flex-col items-start justify-between gap-2">
             <div className="flex items-center gap-3">
