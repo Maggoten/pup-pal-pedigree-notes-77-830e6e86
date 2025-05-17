@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { litterService } from '@/services/LitterService';
@@ -20,8 +19,12 @@ export const usePuppyQueries = (litterId: string) => {
   const updatePuppyMutation = useMutation({
     mutationFn: (puppy: Puppy) => {
       // Log the puppy object being updated for debugging
-      console.log(`Updating puppy ${puppy.name} (${puppy.id}) with weightLog:`, 
-        puppy.weightLog ? puppy.weightLog.length : 'undefined');
+      console.log(`Updating puppy ${puppy.name} (${puppy.id}):`);
+      console.log(`Weight log entries: ${puppy.weightLog?.length || 0}`);
+      
+      if (puppy.weightLog && puppy.weightLog.length > 0) {
+        console.log(`Latest weight: ${puppy.weightLog[puppy.weightLog.length - 1].weight} kg`);
+      }
       
       return litterService.updatePuppy(litterId, puppy);
     },
@@ -73,7 +76,20 @@ export const usePuppyQueries = (litterId: string) => {
   const updatePuppy = async (puppy: Puppy) => {
     setIsLoading(true);
     try {
-      await updatePuppyMutation.mutateAsync(puppy);
+      // Ensure we're sending a clean copy of the puppy object
+      console.log(`Preparing to update puppy ${puppy.name} (${puppy.id})`);
+      
+      // Create a clean copy to avoid any reference issues
+      const puppyToUpdate = {
+        ...puppy,
+        weightLog: puppy.weightLog ? [...puppy.weightLog] : [],
+        heightLog: puppy.heightLog ? [...puppy.heightLog] : [],
+        notes: puppy.notes ? [...puppy.notes] : []
+      };
+      
+      console.log(`Sending update for puppy with ${puppyToUpdate.weightLog.length} weight records`);
+      
+      await updatePuppyMutation.mutateAsync(puppyToUpdate);
     } finally {
       setIsLoading(false);
     }

@@ -24,8 +24,13 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
   selectedTime,
   onAddWeight
 }) => {
-  // Add a console log to help debug the weight log data
-  console.log(`Rendering PuppyWeightTab for ${puppy.name} with ${puppy.weightLog?.length || 0} weight logs`, puppy.weightLog);
+  // Add more detailed console logs to better understand what's happening
+  console.log(`Rendering PuppyWeightTab for ${puppy.name} (${puppy.id})`);
+  console.log(`Weight log entries: ${puppy.weightLog?.length || 0}`);
+  if (puppy.weightLog && puppy.weightLog.length > 0) {
+    console.log(`First weight entry: ${JSON.stringify(puppy.weightLog[0])}`);
+    console.log(`Last weight entry: ${JSON.stringify(puppy.weightLog[puppy.weightLog.length - 1])}`);
+  }
   
   return (
     <div className="space-y-4">
@@ -58,7 +63,7 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
               </TableHeader>
               <TableBody>
                 {puppy.weightLog.slice().reverse().map((log, index) => (
-                  <TableRow key={index}>
+                  <TableRow key={`${puppy.id}-weight-${index}`}>
                     <TableCell>{format(new Date(log.date), "PPP p")}</TableCell>
                     <TableCell>{log.weight}</TableCell>
                   </TableRow>

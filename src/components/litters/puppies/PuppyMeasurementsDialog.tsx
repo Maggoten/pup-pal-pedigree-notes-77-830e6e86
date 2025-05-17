@@ -31,13 +31,13 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
   const [selectedTime, setSelectedTime] = useState<string>(
     format(new Date(), 'HH:mm')
   );
-  // Local state to track updated puppy data
-  const [localPuppy, setLocalPuppy] = useState<Puppy>(puppy);
+  // Create a local copy of the puppy data to work with
+  const [localPuppy, setLocalPuppy] = useState<Puppy>({...puppy});
 
   // Debug the currently loaded puppy data
   console.log(`PuppyMeasurementsDialog for ${puppy.name} (${puppy.id})`, {
-    initialWeightLog: puppy.weightLog,
-    currentLocalWeight: localPuppy.weightLog
+    initialWeightLog: puppy.weightLog ? [...puppy.weightLog] : [],
+    localPuppyWeightLog: localPuppy.weightLog ? [...localPuppy.weightLog] : []
   });
 
   // Memoize event handlers to prevent recreating on each render
@@ -64,25 +64,25 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     // Ensure weightLog exists before adding to it
     const existingWeightLog = localPuppy.weightLog || [];
     
-    // Log what we're adding to help with debugging
     console.log(`Adding weight record for ${localPuppy.name} (${localPuppy.id})`, {
       newRecord: newWeightRecord,
-      existingLogs: existingWeightLog.length
+      currentLogLength: existingWeightLog.length
     });
+    
+    const updatedWeightLog = [...existingWeightLog, newWeightRecord]
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
     const updatedPuppy = {
       ...localPuppy,
-      weightLog: [
-        ...existingWeightLog,
-        newWeightRecord
-      ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+      weightLog: updatedWeightLog,
       // Update the currentWeight to this new weight value
       currentWeight: weightValue
     };
 
-    // Log the updated puppy for debugging
-    console.log(`Updated puppy object for ${updatedPuppy.name}`, {
-      weightLogCount: updatedPuppy.weightLog.length
+    console.log(`After adding weight record:`, {
+      puppyId: updatedPuppy.id,
+      weightLogLength: updatedPuppy.weightLog.length,
+      weightLog: updatedPuppy.weightLog
     });
 
     setLocalPuppy(updatedPuppy);
