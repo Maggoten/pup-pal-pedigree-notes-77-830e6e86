@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
@@ -51,6 +52,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
   const handleNewLitterSubmit = async (values: LitterFormValues) => {
     try {
       console.log("Form submission started with values:", values);
+      console.log("Date of birth:", values.dateOfBirth);
       
       // First check if auth is ready
       if (!isAuthReady) {

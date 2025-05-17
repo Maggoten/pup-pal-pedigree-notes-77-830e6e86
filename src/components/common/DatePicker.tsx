@@ -55,7 +55,6 @@ const DatePicker: React.FC<DatePickerProps> = React.memo(({
             selected={date}
             onSelect={handleDateSelect}
             initialFocus
-            className="p-3 pointer-events-auto"
           />
         </PopoverContent>
       </Popover>

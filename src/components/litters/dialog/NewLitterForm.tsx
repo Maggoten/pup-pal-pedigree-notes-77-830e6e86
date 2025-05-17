@@ -43,6 +43,7 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({ dogs }) => {
   
   // Handle date change
   const handleDateChange = (date: Date) => {
+    console.log("Date change in NewLitterForm:", date);
     setValue("dateOfBirth", date);
   };
 
