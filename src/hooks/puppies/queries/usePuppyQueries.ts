@@ -1,61 +1,100 @@
 
-import { useCallback } from 'react';
-import { Puppy } from '@/types/breeding';
-import { useAddPuppyMutation } from './useAddPuppyMutation';
-import { useUpdatePuppyMutation } from './useUpdatePuppyMutation';
-import { useDeletePuppyMutation } from './useDeletePuppyMutation';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { litterService } from '@/services/LitterService';
+import { Puppy, Litter } from '@/types/breeding';
 import { toast } from '@/components/ui/use-toast';
 
 export const usePuppyQueries = (litterId: string) => {
-  // Use the separated mutation hooks
-  const addPuppyMutation = useAddPuppyMutation(litterId);
-  const updatePuppyMutation = useUpdatePuppyMutation(litterId);
-  const deletePuppyMutation = useDeletePuppyMutation(litterId);
+  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Helper function for adding a puppy with proper error handling
-  const addPuppy = useCallback(async (puppy: Puppy) => {
-    try {
-      await addPuppyMutation.mutateAsync(puppy);
+  // Get litter data with puppies
+  const { data: litter, error, isPending } = useQuery({
+    queryKey: ['litter', litterId],
+    queryFn: () => litterService.getLitterDetails(litterId),
+    enabled: !!litterId,
+  });
+
+  // Mutation to update a puppy
+  const updatePuppyMutation = useMutation({
+    mutationFn: (puppy: Puppy) => {
+      // Log the puppy object being updated for debugging
+      console.log(`Updating puppy ${puppy.name} (${puppy.id}) with weightLog:`, 
+        puppy.weightLog ? puppy.weightLog.length : 'undefined');
+      
+      return litterService.updatePuppy(litterId, puppy);
+    },
+    onSuccess: (updatedLitters: Litter[]) => {
+      console.log("Puppy update successful, invalidating queries");
+      // Update the cache for the specific litter
+      queryClient.invalidateQueries({queryKey: ['litter', litterId]});
+      // Also invalidate the overall litters list
+      queryClient.invalidateQueries({queryKey: ['litters']});
+      
       toast({
-        title: "Puppy Added",
-        description: `${puppy.name} has been added to the litter.`
+        title: "Puppy Updated",
+        description: "The puppy has been updated successfully",
       });
-      return true;
-    } catch (error) {
-      console.error('Error adding puppy:', error);
-      return false;
+    },
+    onError: (error) => {
+      console.error("Error updating puppy:", error);
+      toast({
+        title: "Update Failed",
+        description: `Error updating puppy: ${error}`,
+        variant: "destructive",
+      });
     }
-  }, [addPuppyMutation]);
+  });
 
-  // Helper function for updating a puppy with proper error handling
-  const updatePuppy = useCallback(async (puppy: Puppy) => {
+  // Mutation to delete a puppy
+  const deletePuppyMutation = useMutation({
+    mutationFn: (puppyId: string) => litterService.deletePuppy(litterId, puppyId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['litter', litterId]});
+      queryClient.invalidateQueries({queryKey: ['litters']});
+      
+      toast({
+        title: "Puppy Deleted",
+        description: "The puppy has been deleted successfully",
+      });
+    },
+    onError: (error) => {
+      console.error("Error deleting puppy:", error);
+      toast({
+        title: "Delete Failed",
+        description: `Error deleting puppy: ${error}`,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Function to update a puppy
+  const updatePuppy = async (puppy: Puppy) => {
+    setIsLoading(true);
     try {
       await updatePuppyMutation.mutateAsync(puppy);
-      return true;
-    } catch (error) {
-      console.error('Error updating puppy:', error);
-      return false;
+    } finally {
+      setIsLoading(false);
     }
-  }, [updatePuppyMutation]);
+  };
 
-  // Helper function for deleting a puppy with proper error handling
-  const deletePuppy = useCallback(async (puppyId: string) => {
+  // Function to delete a puppy
+  const deletePuppy = async (puppyId: string) => {
+    setIsLoading(true);
     try {
       await deletePuppyMutation.mutateAsync(puppyId);
-      return true;
-    } catch (error) {
-      console.error('Error deleting puppy:', error);
-      return false;
+    } finally {
+      setIsLoading(false);
     }
-  }, [deletePuppyMutation]);
+  };
 
   return {
-    addPuppy,
+    litter,
+    error,
+    isLoading: isPending || isLoading,
     updatePuppy,
-    deletePuppy,
-    isAdding: addPuppyMutation.isPending,
-    isUpdating: updatePuppyMutation.isPending,
-    isDeleting: deletePuppyMutation.isPending
+    deletePuppy
   };
 };
 

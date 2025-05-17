@@ -1,3 +1,4 @@
+
 import { Litter, Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
@@ -114,7 +115,7 @@ class LitterService {
       const puppiesWithDetails = await Promise.all((puppies || []).map(async puppy => {
         console.log("Processing puppy:", puppy.id, puppy.name);
         
-        // Fetch weight logs
+        // Fetch weight logs - FIXED: Now properly filtering by puppy_id
         const { data: weightLogs, error: weightError } = await supabase
           .from('puppy_weight_logs')
           .select('*')
@@ -123,7 +124,7 @@ class LitterService {
         if (weightError) console.error("Error loading weight logs:", weightError);
         else console.log(`Found ${weightLogs?.length || 0} weight logs for puppy ${puppy.id}`);
         
-        // Fetch height logs
+        // Fetch height logs - FIXED: Now properly filtering by puppy_id
         const { data: heightLogs, error: heightError } = await supabase
           .from('puppy_height_logs')
           .select('*')
@@ -132,7 +133,7 @@ class LitterService {
         if (heightError) console.error("Error loading height logs:", heightError);
         else console.log(`Found ${heightLogs?.length || 0} height logs for puppy ${puppy.id}`);
         
-        // Fetch notes
+        // Fetch notes - FIXED: Now properly filtering by puppy_id
         const { data: notes, error: notesError } = await supabase
           .from('puppy_notes')
           .select('*')

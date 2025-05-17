@@ -24,6 +24,9 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
   selectedTime,
   onAddWeight
 }) => {
+  // Add a console log to help debug the weight log data
+  console.log(`Rendering PuppyWeightTab for ${puppy.name} with ${puppy.weightLog?.length || 0} weight logs`, puppy.weightLog);
+  
   return (
     <div className="space-y-4">
       <div className="grid gap-1.5">
@@ -44,7 +47,7 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
       
       <div className="mt-4">
         <h3 className="text-sm font-medium mb-2">Recent Weight Records</h3>
-        {puppy.weightLog.length > 0 ? (
+        {puppy.weightLog && puppy.weightLog.length > 0 ? (
           <div className="max-h-40 overflow-y-auto border rounded-md">
             <Table>
               <TableHeader>

@@ -34,6 +34,12 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
   // Local state to track updated puppy data
   const [localPuppy, setLocalPuppy] = useState<Puppy>(puppy);
 
+  // Debug the currently loaded puppy data
+  console.log(`PuppyMeasurementsDialog for ${puppy.name} (${puppy.id})`, {
+    initialWeightLog: puppy.weightLog,
+    currentLocalWeight: localPuppy.weightLog
+  });
+
   // Memoize event handlers to prevent recreating on each render
   const handleAddWeight = useCallback(() => {
     if (!weight || isNaN(parseFloat(weight))) {
@@ -58,6 +64,12 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     // Ensure weightLog exists before adding to it
     const existingWeightLog = localPuppy.weightLog || [];
     
+    // Log what we're adding to help with debugging
+    console.log(`Adding weight record for ${localPuppy.name} (${localPuppy.id})`, {
+      newRecord: newWeightRecord,
+      existingLogs: existingWeightLog.length
+    });
+    
     const updatedPuppy = {
       ...localPuppy,
       weightLog: [
@@ -67,6 +79,11 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       // Update the currentWeight to this new weight value
       currentWeight: weightValue
     };
+
+    // Log the updated puppy for debugging
+    console.log(`Updated puppy object for ${updatedPuppy.name}`, {
+      weightLogCount: updatedPuppy.weightLog.length
+    });
 
     setLocalPuppy(updatedPuppy);
     onUpdate(updatedPuppy);
