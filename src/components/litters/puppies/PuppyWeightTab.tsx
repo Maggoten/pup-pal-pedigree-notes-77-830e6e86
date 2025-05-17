@@ -26,11 +26,15 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
 }) => {
   // Add more detailed console logs to better understand what's happening
   console.log(`Rendering PuppyWeightTab for ${puppy.name} (${puppy.id})`);
-  console.log(`Weight log entries: ${puppy.weightLog?.length || 0}`);
+  console.log(`Weight log entries count: ${puppy.weightLog?.length || 0}`);
+  
+  // Log the first and last weight entries if available
   if (puppy.weightLog && puppy.weightLog.length > 0) {
     console.log(`First weight entry: ${JSON.stringify(puppy.weightLog[0])}`);
     console.log(`Last weight entry: ${JSON.stringify(puppy.weightLog[puppy.weightLog.length - 1])}`);
   }
+  
+  const weightLogEntries = puppy.weightLog || [];
   
   return (
     <div className="space-y-4">
@@ -52,7 +56,7 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
       
       <div className="mt-4">
         <h3 className="text-sm font-medium mb-2">Recent Weight Records</h3>
-        {puppy.weightLog && puppy.weightLog.length > 0 ? (
+        {weightLogEntries.length > 0 ? (
           <div className="max-h-40 overflow-y-auto border rounded-md">
             <Table>
               <TableHeader>
@@ -62,7 +66,7 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {puppy.weightLog.slice().reverse().map((log, index) => (
+                {[...weightLogEntries].reverse().map((log, index) => (
                   <TableRow key={`${puppy.id}-weight-${index}`}>
                     <TableCell>{format(new Date(log.date), "PPP p")}</TableCell>
                     <TableCell>{log.weight}</TableCell>

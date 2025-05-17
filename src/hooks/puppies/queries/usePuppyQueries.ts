@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { litterService } from '@/services/LitterService';
@@ -24,9 +25,18 @@ export const usePuppyQueries = (litterId: string) => {
       
       if (puppy.weightLog && puppy.weightLog.length > 0) {
         console.log(`Latest weight: ${puppy.weightLog[puppy.weightLog.length - 1].weight} kg`);
+        console.log(`Weight log details: ${JSON.stringify(puppy.weightLog)}`);
       }
       
-      return litterService.updatePuppy(litterId, puppy);
+      // Create a deep clone of the puppy data to avoid reference issues
+      const puppyToUpdate = {
+        ...puppy,
+        weightLog: puppy.weightLog ? JSON.parse(JSON.stringify(puppy.weightLog)) : [],
+        heightLog: puppy.heightLog ? JSON.parse(JSON.stringify(puppy.heightLog)) : [],
+        notes: puppy.notes ? JSON.parse(JSON.stringify(puppy.notes)) : []
+      };
+      
+      return litterService.updatePuppy(litterId, puppyToUpdate);
     },
     onSuccess: (updatedLitters: Litter[]) => {
       console.log("Puppy update successful, invalidating queries");
@@ -79,12 +89,12 @@ export const usePuppyQueries = (litterId: string) => {
       // Ensure we're sending a clean copy of the puppy object
       console.log(`Preparing to update puppy ${puppy.name} (${puppy.id})`);
       
-      // Create a clean copy to avoid any reference issues
+      // Create a deep clone to avoid any reference issues
       const puppyToUpdate = {
         ...puppy,
-        weightLog: puppy.weightLog ? [...puppy.weightLog] : [],
-        heightLog: puppy.heightLog ? [...puppy.heightLog] : [],
-        notes: puppy.notes ? [...puppy.notes] : []
+        weightLog: puppy.weightLog ? JSON.parse(JSON.stringify(puppy.weightLog)) : [],
+        heightLog: puppy.heightLog ? JSON.parse(JSON.stringify(puppy.heightLog)) : [],
+        notes: puppy.notes ? JSON.parse(JSON.stringify(puppy.notes)) : []
       };
       
       console.log(`Sending update for puppy with ${puppyToUpdate.weightLog.length} weight records`);

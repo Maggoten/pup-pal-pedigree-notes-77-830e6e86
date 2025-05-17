@@ -10,7 +10,7 @@ export const useUpdatePuppyMutation = (litterId: string) => {
   
   // Query keys for caching
   const puppiesQueryKey = ['litters', litterId, 'puppies'];
-  const litterQueryKey = ['litters', litterId];
+  const litterQueryKey = ['litter', litterId];
   const littersQueryKey = ['litters'];
   
   return useMutation({
@@ -24,8 +24,16 @@ export const useUpdatePuppyMutation = (litterId: string) => {
           throw new Error("No active session found");
         }
         
+        // Create a deep clone of the puppy object to avoid any reference issues
+        const puppyToUpdate = {
+          ...puppy,
+          weightLog: puppy.weightLog ? JSON.parse(JSON.stringify(puppy.weightLog)) : [],
+          heightLog: puppy.heightLog ? JSON.parse(JSON.stringify(puppy.heightLog)) : [],
+          notes: puppy.notes ? JSON.parse(JSON.stringify(puppy.notes)) : []
+        };
+        
         // Proceed with the update
-        return await litterService.updatePuppy(litterId, puppy);
+        return await litterService.updatePuppy(litterId, puppyToUpdate);
       } catch (error) {
         console.error("Error in updatePuppy mutation:", error);
         throw error;
@@ -42,9 +50,18 @@ export const useUpdatePuppyMutation = (litterId: string) => {
       
       if (previousLitter) {
         // Create a new array with the updated puppy
-        const updatedPuppies = previousLitter.puppies.map((p: Puppy) => 
-          p.id === updatedPuppy.id ? updatedPuppy : p
-        );
+        const updatedPuppies = previousLitter.puppies?.map((p: Puppy) => {
+          if (p.id === updatedPuppy.id) {
+            // Create a brand new object for the updated puppy with deep copies of arrays
+            return {
+              ...updatedPuppy,
+              weightLog: updatedPuppy.weightLog ? JSON.parse(JSON.stringify(updatedPuppy.weightLog)) : [],
+              heightLog: updatedPuppy.heightLog ? JSON.parse(JSON.stringify(updatedPuppy.heightLog)) : [],
+              notes: updatedPuppy.notes ? JSON.parse(JSON.stringify(updatedPuppy.notes)) : []
+            };
+          }
+          return p;
+        }) || [];
         
         // Update the cache with the new data
         queryClient.setQueryData(litterQueryKey, {
@@ -60,9 +77,18 @@ export const useUpdatePuppyMutation = (litterId: string) => {
               if (litter.id === litterId) {
                 return {
                   ...litter,
-                  puppies: litter.puppies?.map((p: Puppy) => 
-                    p.id === updatedPuppy.id ? updatedPuppy : p
-                  ) || []
+                  puppies: litter.puppies?.map((p: Puppy) => {
+                    if (p.id === updatedPuppy.id) {
+                      // Create a brand new object for the updated puppy with deep copies of arrays
+                      return {
+                        ...updatedPuppy,
+                        weightLog: updatedPuppy.weightLog ? JSON.parse(JSON.stringify(updatedPuppy.weightLog)) : [],
+                        heightLog: updatedPuppy.heightLog ? JSON.parse(JSON.stringify(updatedPuppy.heightLog)) : [],
+                        notes: updatedPuppy.notes ? JSON.parse(JSON.stringify(updatedPuppy.notes)) : []
+                      };
+                    }
+                    return p;
+                  }) || []
                 };
               }
               return litter;
@@ -96,6 +122,11 @@ export const useUpdatePuppyMutation = (litterId: string) => {
         description: `${updatedPuppy.name}'s data has been updated successfully.`,
         variant: 'default'
       });
+      
+      // Force a hard refresh of the data
+      queryClient.invalidateQueries({ queryKey: puppiesQueryKey });
+      queryClient.invalidateQueries({ queryKey: litterQueryKey });
+      queryClient.invalidateQueries({ queryKey: littersQueryKey });
     },
     onSettled: () => {
       // Always invalidate queries to ensure fresh data

@@ -11,12 +11,23 @@ const PuppiesTable: React.FC<PuppiesTableProps> = ({ puppies }) => {
   // Use memoization to prevent unnecessary recalculations
   const puppiesWithDisplayWeight = useMemo(() => {
     return puppies.map(puppy => {
-      // Use the current_weight value from Supabase if available
-      const displayWeight = puppy.currentWeight 
-        ? `${puppy.currentWeight} kg` 
-        : (puppy.weightLog.length > 0 
-            ? `${puppy.weightLog[puppy.weightLog.length - 1].weight} kg`
-            : 'Not recorded');
+      console.log(`Calculating display weight for puppy ${puppy.name} (${puppy.id})`, {
+        currentWeight: puppy.currentWeight,
+        weightLogLength: puppy.weightLog?.length || 0,
+        weightLog: puppy.weightLog || []
+      });
+      
+      // Use the currentWeight value from Supabase if available
+      let displayWeight = 'Not recorded';
+      
+      if (puppy.currentWeight) {
+        displayWeight = `${puppy.currentWeight} kg`;
+      } else if (puppy.weightLog && puppy.weightLog.length > 0) {
+        // Get the last recorded weight from the weight log
+        const lastWeight = [...puppy.weightLog]
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+        displayWeight = `${lastWeight.weight} kg`;
+      }
             
       return {
         ...puppy,

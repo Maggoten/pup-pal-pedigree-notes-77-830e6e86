@@ -31,13 +31,23 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
   const [selectedTime, setSelectedTime] = useState<string>(
     format(new Date(), 'HH:mm')
   );
-  // Create a local copy of the puppy data to work with
-  const [localPuppy, setLocalPuppy] = useState<Puppy>({...puppy});
+  
+  // Create a deep clone of the puppy data to work with
+  const [localPuppy, setLocalPuppy] = useState<Puppy>(() => {
+    // Ensure we create proper deep copies of all arrays
+    return {
+      ...puppy,
+      weightLog: puppy.weightLog ? JSON.parse(JSON.stringify(puppy.weightLog)) : [],
+      heightLog: puppy.heightLog ? JSON.parse(JSON.stringify(puppy.heightLog)) : [],
+      notes: puppy.notes ? JSON.parse(JSON.stringify(puppy.notes)) : []
+    };
+  });
 
   // Debug the currently loaded puppy data
   console.log(`PuppyMeasurementsDialog for ${puppy.name} (${puppy.id})`, {
-    initialWeightLog: puppy.weightLog ? [...puppy.weightLog] : [],
-    localPuppyWeightLog: localPuppy.weightLog ? [...localPuppy.weightLog] : []
+    initialWeightLogLength: puppy.weightLog?.length || 0,
+    localPuppyWeightLogLength: localPuppy.weightLog?.length || 0,
+    localPuppyWeightLog: localPuppy.weightLog || []
   });
 
   // Memoize event handlers to prevent recreating on each render
@@ -61,20 +71,18 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       weight: weightValue 
     };
     
-    // Ensure weightLog exists before adding to it
-    const existingWeightLog = localPuppy.weightLog || [];
-    
     console.log(`Adding weight record for ${localPuppy.name} (${localPuppy.id})`, {
       newRecord: newWeightRecord,
-      currentLogLength: existingWeightLog.length
+      currentWeightLogLength: localPuppy.weightLog?.length || 0
     });
     
-    const updatedWeightLog = [...existingWeightLog, newWeightRecord]
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    
+    // Create a completely new puppy object with the updated weight log
     const updatedPuppy = {
       ...localPuppy,
-      weightLog: updatedWeightLog,
+      weightLog: [
+        ...(localPuppy.weightLog || []),
+        newWeightRecord
+      ],
       // Update the currentWeight to this new weight value
       currentWeight: weightValue
     };
@@ -82,7 +90,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     console.log(`After adding weight record:`, {
       puppyId: updatedPuppy.id,
       weightLogLength: updatedPuppy.weightLog.length,
-      weightLog: updatedPuppy.weightLog
+      updatedWeightLog: updatedPuppy.weightLog
     });
 
     setLocalPuppy(updatedPuppy);
@@ -115,15 +123,13 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       height: heightValue 
     };
     
-    // Ensure heightLog exists before adding to it
-    const existingHeightLog = localPuppy.heightLog || [];
-    
+    // Create a completely new puppy object with the updated height log
     const updatedPuppy = {
       ...localPuppy,
       heightLog: [
-        ...existingHeightLog,
+        ...(localPuppy.heightLog || []),
         newHeightRecord
-      ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      ]
     };
 
     setLocalPuppy(updatedPuppy);
@@ -155,15 +161,13 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       content: note.trim() 
     };
     
-    // Ensure notes array exists
-    const existingNotes = localPuppy.notes || [];
-    
+    // Create a completely new puppy object with the updated notes
     const updatedPuppy = {
       ...localPuppy,
       notes: [
-        ...existingNotes,
+        ...(localPuppy.notes || []),
         newNote
-      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Newest first
+      ]
     };
 
     setLocalPuppy(updatedPuppy);
