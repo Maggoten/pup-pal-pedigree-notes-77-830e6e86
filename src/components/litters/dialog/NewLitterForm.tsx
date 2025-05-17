@@ -2,20 +2,11 @@
 import React, { useEffect } from 'react';
 import { FormLabel, FormItem } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Calendar as CalendarIcon } from 'lucide-react';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 import { Dog } from '@/context/DogsContext';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFormContext } from 'react-hook-form';
+import DatePicker from '@/components/common/DatePicker';
 
 interface NewLitterFormProps {
   dogs: Dog[];
@@ -27,6 +18,7 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({ dogs }) => {
   const isExternalSire = watch("isExternalSire");
   const selectedDamId = watch("damId");
   const selectedSireId = watch("sireId");
+  const dateOfBirth = watch("dateOfBirth");
   
   const males = dogs.filter(dog => dog.gender === 'male');
   const females = dogs.filter(dog => dog.gender === 'female');
@@ -47,6 +39,11 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({ dogs }) => {
     if (selectedDam) {
       console.log("Selected dam:", selectedDam.name, "with ID:", selectedDamId);
     }
+  };
+  
+  // Handle date change
+  const handleDateChange = (date: Date) => {
+    setValue("dateOfBirth", date);
   };
 
   // Clear internal sire data when switching to external sire
@@ -73,34 +70,12 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({ dogs }) => {
       
       <FormItem>
         <FormLabel>Date of Birth</FormLabel>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal bg-white border-greige-300",
-                !watch("dateOfBirth") && "text-muted-foreground"
-              )}
-              onClick={(e) => e.preventDefault()}
-            >
-              {watch("dateOfBirth") ? (
-                format(watch("dateOfBirth"), "PPP")
-              ) : (
-                <span>Pick a date</span>
-              )}
-              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 bg-white" align="start">
-            <Calendar
-              mode="single"
-              selected={watch("dateOfBirth")}
-              onSelect={(date) => date && setValue("dateOfBirth", date)}
-              disabled={(date) => date > new Date()}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+        <DatePicker
+          date={dateOfBirth}
+          setDate={handleDateChange}
+          label=""
+          className="w-full"
+        />
       </FormItem>
       
       <FormItem className="flex flex-row items-center justify-between rounded-lg border border-greige-300 p-4 bg-white">
