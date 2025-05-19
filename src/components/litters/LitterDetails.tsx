@@ -1,10 +1,9 @@
-
 import React, { useState, useMemo, memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Grid2X2, Archive, Trash2, LayoutGrid, Folder } from 'lucide-react';
+import { Edit, Archive, Trash2, PawPrint, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { Litter, Puppy } from '@/types/breeding';
 import LitterEditDialog from './LitterEditDialog';
 import PuppyList from './PuppyList';
@@ -124,37 +123,42 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
       
       <CardContent>
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium flex items-center gap-2">
-              <LayoutGrid className="h-5 w-5 text-primary" />
-              Litter Information
-            </h3>
-          </div>
+          <h3 className="text-lg font-medium">Litter Information</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-warmbeige-50 shadow-sm border border-warmbeige-100">
-              <CardContent className="pt-6">
-                <div className="text-sm font-medium">Total Puppies</div>
-                <div className="text-2xl font-bold">{puppyCount}</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-warmbeige-50 shadow-sm border border-warmbeige-100">
-              <CardContent className="pt-6">
-                <div className="text-sm font-medium">Litter Age</div>
-                <div className="text-2xl font-bold">{litterAge} weeks</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-warmbeige-50 shadow-sm border border-warmbeige-100">
-              <CardContent className="pt-6">
-                <div className="text-sm font-medium">Status</div>
-                <div className={`text-2xl font-bold ${!litter.archived ? 'text-warmgreen-600' : ''}`}>
-                  {litter.archived ? "Archived" : "Active"}
+          <Card className="bg-warmbeige-50 shadow-sm border border-warmbeige-100 rounded-xl">
+            <CardContent className="p-4">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between py-2 border-b border-warmbeige-200">
+                  <div className="flex items-center gap-2">
+                    <PawPrint className="h-5 w-5 text-primary" />
+                    <span className="font-medium">Total Puppies</span>
+                  </div>
+                  <div className="text-xl font-bold">{puppyCount}</div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+                
+                <div className="flex items-center justify-between py-2 border-b border-warmbeige-200">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-primary" />
+                    <span className="font-medium">Litter Age</span>
+                  </div>
+                  <div className="text-xl font-bold">{litterAge} weeks</div>
+                </div>
+                
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    {litter.archived ? 
+                      <XCircle className="h-5 w-5 text-muted-foreground" /> : 
+                      <CheckCircle className="h-5 w-5 text-warmgreen-600" />
+                    }
+                    <span className="font-medium">Status</span>
+                  </div>
+                  <div className={`text-xl font-bold ${!litter.archived ? 'text-warmgreen-600' : ''}`}>
+                    {litter.archived ? "Archived" : "Active"}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </CardContent>
     </Card>
