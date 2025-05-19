@@ -93,9 +93,9 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <TabsList className="grid grid-cols-3 mb-6">
+          <TabsList className="flex md:grid md:grid-cols-3 mb-6 overflow-x-auto whitespace-nowrap">
             <TabsTrigger value="puppies">Puppies</TabsTrigger>
-            <TabsTrigger value="development">Development</TabsTrigger>
+            <TabsTrigger value="development">Checklist</TabsTrigger>
             <TabsTrigger value="charts">Growth Charts</TabsTrigger>
           </TabsList>
 
