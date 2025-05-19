@@ -113,39 +113,37 @@ const PuppyCard = memo(({
         </div>
       </div>
       
-      <div className="flex items-center justify-end gap-2 border-t pt-2 mt-2">
+      <div className="flex flex-col space-y-2 mt-4 px-1">
         <Button 
           variant="ghost" 
-          size="sm" 
+          size="sm"
           onClick={handleAddMeasurement} 
-          className="h-8 w-8 p-0"
+          className="w-full justify-start"
         >
-          <BarChart2 className="h-4 w-4" />
-          <span className="sr-only">Add measurement</span>
+          <BarChart2 className="h-4 w-4 mr-2" />
+          <span>Add measurements</span>
         </Button>
         
         <Button 
           variant="ghost" 
-          size="sm" 
-          className="h-8 w-8 p-0" 
+          size="sm"
           onClick={handleEditClick}
+          className="w-full justify-start"
         >
-          <Edit className="h-4 w-4" />
-          <span className="sr-only">Edit puppy</span>
+          <Edit className="h-4 w-4 mr-2" />
+          <span>Edit</span>
         </Button>
         
         <Button 
           variant="ghost" 
-          size="sm" 
-          className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10" 
+          size="sm"
           onClick={handleDeletePuppy}
+          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
         >
-          <Trash2 className="h-4 w-4" />
-          <span className="sr-only">Delete puppy</span>
+          <Trash2 className="h-4 w-4 mr-2" />
+          <span>Delete</span>
         </Button>
       </div>
-      
-      {/* Removed dialog implementation here */}
     </div>
   );
 });
