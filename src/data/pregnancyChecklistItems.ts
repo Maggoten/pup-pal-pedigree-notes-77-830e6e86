@@ -2,125 +2,149 @@
 import { v4 as uuidv4 } from "uuid";
 import { ChecklistItem } from "@/types/checklist";
 
-// Early pregnancy symptoms (Weeks 1-3)
-export const getEarlyPregnancyItems = (): ChecklistItem[] => [
+// Week 1 - Conception & Hormonal Shift
+export const getWeek1Items = (): ChecklistItem[] => [
   {
     id: uuidv4(),
-    text: "Morning sickness",
-    description: "Nausea or vomiting, especially in the morning",
+    text: "Slight appetite change",
+    description: "May eat less or become slightly pickier as hormone levels begin to shift.",
     isCompleted: false,
     weekNumber: 1
-  },
+  }
+];
+
+// Week 2 - Early Changes
+export const getWeek2Items = (): ChecklistItem[] => [
   {
     id: uuidv4(),
-    text: "Changes in appetite",
-    description: "May eat less or be more picky about food",
-    isCompleted: false,
-    weekNumber: 1
-  },
-  {
-    id: uuidv4(),
-    text: "Slight behavioral changes",
-    description: "More affectionate or slightly lethargic",
+    text: "Slight behavioral change",
+    description: "May become more affectionate, clingy or tired.",
     isCompleted: false,
     weekNumber: 2
   },
   {
     id: uuidv4(),
+    text: "Mild nausea (morning sickness)",
+    description: "May vomit slightly or seem queasy due to hormonal changes.",
+    isCompleted: false,
+    weekNumber: 2
+  }
+];
+
+// Week 3 - Implantation
+export const getWeek3Items = (): ChecklistItem[] => [
+  {
+    id: uuidv4(),
     text: "Clear vaginal discharge",
-    description: "Small amount of clear, non-smelly discharge",
+    description: "Small amount of clear, non-smelly discharge can appear when embryos implant.",
     isCompleted: false,
     weekNumber: 3
   }
 ];
 
-// Mid pregnancy symptoms (Weeks 4-6)
-export const getMidPregnancyItems = (): ChecklistItem[] => [
-  {
-    id: uuidv4(),
-    text: "Noticeable weight gain",
-    description: "Gradually increasing body weight",
-    isCompleted: false,
-    weekNumber: 4
-  },
+// Week 4 - Physical Signs Begin
+export const getWeek4Items = (): ChecklistItem[] => [
   {
     id: uuidv4(),
     text: "Enlarged nipples",
-    description: "Nipples become darker and more prominent",
+    description: "Nipples become larger, rounder and darker in color.",
     isCompleted: false,
     weekNumber: 4
   },
   {
     id: uuidv4(),
+    text: "Noticeable weight gain",
+    description: "Slight increase in body weight as pregnancy progresses.",
+    isCompleted: false,
+    weekNumber: 4
+  }
+];
+
+// Week 5 - Appetite Returns
+export const getWeek5Items = (): ChecklistItem[] => [
+  {
+    id: uuidv4(),
     text: "Increased appetite",
-    description: "Eating more than usual",
+    description: "Appetite increases as hormone levels stabilize and fetal growth accelerates.",
     isCompleted: false,
     weekNumber: 5
-  },
+  }
+];
+
+// Week 6 - Visible Growth
+export const getWeek6Items = (): ChecklistItem[] => [
   {
     id: uuidv4(),
     text: "Visible belly growth",
-    description: "Abdomen starts to distend noticeably",
+    description: "Abdomen begins to expand visibly.",
     isCompleted: false,
     weekNumber: 6
   },
   {
     id: uuidv4(),
-    text: "Movement in abdomen",
-    description: "Puppies may be felt moving inside",
+    text: "Possible fetal movement",
+    description: "Some may feel slight movement when gently palpating, but more common in Week 7–8.",
     isCompleted: false,
     weekNumber: 6
   }
 ];
 
-// Late pregnancy symptoms (Weeks 7-9)
-export const getLatePregnancyItems = (): ChecklistItem[] => [
+// Week 7 - Preparing for Birth
+export const getWeek7Items = (): ChecklistItem[] => [
   {
     id: uuidv4(),
     text: "Significant abdominal enlargement",
-    description: "Very visible pregnancy with distended abdomen",
+    description: "Belly is clearly distended; pregnancy very visible.",
     isCompleted: false,
     weekNumber: 7
   },
   {
     id: uuidv4(),
-    text: "Nesting behavior",
-    description: "Digging, arranging bedding or seeking quiet places",
+    text: "Nesting behavior begins",
+    description: "May begin arranging bedding, digging or seeking quiet areas.",
     isCompleted: false,
     weekNumber: 7
-  },
+  }
+];
+
+// Week 8 - Approaching Labor
+export const getWeek8Items = (): ChecklistItem[] => [
   {
     id: uuidv4(),
-    text: "Clear discharge increases",
-    description: "More vaginal discharge as birth approaches",
+    text: "Increased vaginal discharge",
+    description: "Clear discharge may increase slightly as the body prepares for labor.",
     isCompleted: false,
     weekNumber: 8
-  },
+  }
+];
+
+// Week 9 - Pre-labor & Whelping
+export const getWeek9Items = (): ChecklistItem[] => [
   {
     id: uuidv4(),
     text: "Temperature drop",
-    description: "Rectal temperature drops below 100°F (37.8°C) 12-24 hours before labor",
+    description: "Rectal temperature drops below 100°F (37.8°C) 12–24 hours before labor.",
     isCompleted: false,
     weekNumber: 9
   },
   {
     id: uuidv4(),
     text: "Restlessness and panting",
-    description: "Unable to get comfortable, excessive panting",
+    description: "Difficulty settling, increased panting and pacing.",
     isCompleted: false,
     weekNumber: 9
   },
   {
     id: uuidv4(),
     text: "Refusing food",
-    description: "Loss of appetite 12-24 hours before labor",
+    description: "Appetite may vanish shortly before labor starts.",
     isCompleted: false,
     weekNumber: 9
   },
   {
     id: uuidv4(),
     text: "Active labor begins",
-    description: "Strong contractions and delivery of puppies",
+    description: "Strong contractions followed by delivery of puppies.",
     isCompleted: false,
     weekNumber: 9
   }
