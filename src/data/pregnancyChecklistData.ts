@@ -1,6 +1,9 @@
 
 import { ChecklistGroup } from "@/types/checklist";
 
+// Add a constant for the current checklist version
+export const CURRENT_CHECKLIST_VERSION = 2;
+
 export const defaultPregnancyChecklist: ChecklistGroup[] = [
   {
     id: "week1",
@@ -169,3 +172,4 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
     ]
   }
 ];
+
