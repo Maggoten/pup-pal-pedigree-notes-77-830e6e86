@@ -8,6 +8,7 @@ import { Edit, Grid2X2, Archive, Trash2, LayoutGrid, Folder } from 'lucide-react
 import { Litter, Puppy } from '@/types/breeding';
 import LitterEditDialog from './LitterEditDialog';
 import PuppyList from './PuppyList';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LitterDetailsProps {
   litter: Litter;
@@ -29,6 +30,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
   onArchiveLitter
 }) => {
   const [showEditLitterDialog, setShowEditLitterDialog] = useState(false);
+  const isMobile = useIsMobile();
   
   // Use useMemo for computed values to prevent unnecessary recalculations
   const breeds = useMemo(() => {
@@ -58,7 +60,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
   return (
     <Card className="mb-6 shadow-sm bg-white border border-warmbeige-100">
       <CardHeader className="pb-4">
-        <div className="flex justify-between items-start gap-4">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
           <div>
             <CardTitle className="text-2xl font-bold flex items-center gap-2">
               {litter.name}
@@ -72,11 +74,15 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             </CardDescription>
           </div>
           
-          <div className="flex gap-2">
+          <div className={`flex ${isMobile ? 'flex-col mt-2 w-full' : 'flex-row'} gap-2`}>
             {/* Only render dialog when it's open to improve performance */}
             <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-1.5 bg-warmbeige-50 hover:bg-warmbeige-100">
+                <Button 
+                  variant="outline" 
+                  size={isMobile ? "default" : "sm"} 
+                  className={`flex items-center gap-1.5 bg-warmbeige-50 hover:bg-warmbeige-100 ${isMobile ? 'w-full justify-center py-3' : ''}`}
+                >
                   <Edit className="h-4 w-4" />
                   <span>Edit</span>
                 </Button>
@@ -95,8 +101,8 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             
             <Button 
               variant="outline" 
-              size="sm" 
-              className="flex items-center gap-1.5 bg-warmbeige-50 hover:bg-warmbeige-100"
+              size={isMobile ? "default" : "sm"}
+              className={`flex items-center gap-1.5 bg-warmbeige-50 hover:bg-warmbeige-100 ${isMobile ? 'w-full justify-center py-3' : ''}`}
               onClick={handleArchiveToggle}
             >
               <Archive className="h-4 w-4" />
@@ -105,8 +111,8 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             
             <Button 
               variant="outline" 
-              size="sm" 
-              className="flex items-center gap-1.5 text-destructive hover:bg-red-50" 
+              size={isMobile ? "default" : "sm"}
+              className={`flex items-center gap-1.5 text-destructive hover:bg-red-50 ${isMobile ? 'w-full justify-center py-3' : ''}`}
               onClick={handleDeleteLitter}
             >
               <Trash2 className="h-4 w-4" />
