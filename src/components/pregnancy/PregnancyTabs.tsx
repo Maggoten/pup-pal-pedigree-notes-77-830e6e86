@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Thermometer, MessageSquare, ClipboardList } from 'lucide-react';
+import { Thermometer, MessageSquare, ClipboardList, ListChecks } from 'lucide-react';
 import TemperatureLog from '@/components/pregnancy/TemperatureLog';
 import SymptomsLog from '@/components/pregnancy/SymptomsLog';
 import PregnancyJourney from '@/components/pregnancy/journey/PregnancyJourney';
+import PregnancyChecklist from '@/components/pregnancy/symptoms/PregnancyChecklist';
 import { Separator } from '@/components/ui/separator';
 
 interface PregnancyTabsProps {
@@ -28,12 +29,18 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
       </div>
       
       <Tabs defaultValue="journey" className="w-full">
-        <TabsList className="grid grid-cols-3 mb-6 bg-warmbeige-100 p-1 rounded-lg">
+        <TabsList className="grid grid-cols-4 mb-6 bg-warmbeige-100 p-1 rounded-lg">
           <TabsTrigger 
             value="journey" 
             className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-warmgreen-700 data-[state=active]:shadow-sm"
           >
             <ClipboardList className="h-4 w-4" /> Journey
+          </TabsTrigger>
+          <TabsTrigger 
+            value="symptoms-tracker" 
+            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-warmgreen-700 data-[state=active]:shadow-sm"
+          >
+            <ListChecks className="h-4 w-4" /> Symptoms
           </TabsTrigger>
           <TabsTrigger 
             value="temperature" 
@@ -55,6 +62,13 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
             femaleName={femaleName}
             matingDate={matingDate}
             expectedDueDate={expectedDueDate}
+          />
+        </TabsContent>
+        
+        <TabsContent value="symptoms-tracker" className="bg-white border border-warmbeige-200 rounded-xl p-6 shadow-sm">
+          <PregnancyChecklist
+            pregnancyId={pregnancyId}
+            femaleName={femaleName}
           />
         </TabsContent>
         
