@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -7,6 +6,7 @@ interface MetricCardProps {
   value: number;
   icon: React.ReactNode;
   linkTo?: string;
+  onClick?: () => void;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({
@@ -14,6 +14,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   value,
   icon,
   linkTo,
+  onClick,
 }) => {
   const content = (
     <div className="bg-white/70 hover:bg-white/90 transition-colors rounded-lg p-3 flex flex-col items-center shadow-sm">
@@ -25,10 +26,25 @@ const MetricCard: React.FC<MetricCardProps> = ({
     </div>
   );
 
+  // If onClick is provided, wrap in a button
+  if (onClick) {
+    return (
+      <button 
+        onClick={onClick} 
+        className="w-full text-left cursor-pointer"
+        aria-label={`View ${title}`}
+      >
+        {content}
+      </button>
+    );
+  }
+  
+  // If linkTo is provided, wrap in a Link
   if (linkTo) {
     return <Link to={linkTo}>{content}</Link>;
   }
 
+  // Otherwise, just render the content
   return content;
 };
 

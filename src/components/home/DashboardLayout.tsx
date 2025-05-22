@@ -24,6 +24,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>(initialActivePregnancies);
   const [isLoadingPregnancies, setIsLoadingPregnancies] = useState(initialActivePregnancies.length === 0);
   
+  // Add shared state for reminders dialog
+  const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
+  
   // Use the custom hook to get all dashboard data and functions
   const dashboardData = useDashboardData();
   
@@ -77,6 +80,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     handleMarkComplete: dashboardData.handleMarkComplete
   };
   
+  // Handler to open reminders dialog
+  const handleOpenRemindersDialog = () => {
+    setRemindersDialogOpen(true);
+  };
+  
   return (
     <PageLayout 
       title="" 
@@ -90,12 +98,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           activePregnancies={activePregnancies}
           recentLitters={recentLittersCount}
           isLoadingPregnancies={isLoadingPregnancies}
+          onRemindersClick={handleOpenRemindersDialog}
         />
         
         <DashboardContent
           isDataReady={dashboardData.isDataReady}
           calendarProps={calendarProps}
           remindersProps={remindersProps}
+          remindersDialogOpen={remindersDialogOpen}
+          setRemindersDialogOpen={setRemindersDialogOpen}
         />
       </div>
     </PageLayout>

@@ -13,6 +13,7 @@ interface DashboardHeroProps {
   activePregnancies?: ActivePregnancy[];
   recentLitters?: number;
   isLoadingPregnancies?: boolean;
+  onRemindersClick?: () => void;
 }
 
 const DashboardHero: React.FC<DashboardHeroProps> = ({
@@ -22,6 +23,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   activePregnancies = [],
   recentLitters = 0,
   isLoadingPregnancies = false,
+  onRemindersClick,
 }) => {
   return (
     <div className="relative rounded-lg bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 shadow-md overflow-hidden border border-warmbeige-200">
@@ -40,6 +42,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
               plannedLittersCount={plannedLitters} 
               activePregnanciesCount={activePregnancies.length} 
               recentLittersCount={recentLitters} 
+              onRemindersClick={onRemindersClick}
             />
           )}
         </div>

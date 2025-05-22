@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddEventFormValues } from '@/components/calendar/types';
@@ -25,6 +24,8 @@ interface DashboardContentProps {
     hasError: boolean;
     handleMarkComplete: (id: string) => void;
   };
+  remindersDialogOpen?: boolean;
+  setRemindersDialogOpen?: (open: boolean) => void;
 }
 
 const CalendarSkeleton = () => (
@@ -81,7 +82,9 @@ const StatsSkeleton = () => (
 const DashboardContent: React.FC<DashboardContentProps> = ({ 
   isDataReady, 
   calendarProps, 
-  remindersProps 
+  remindersProps,
+  remindersDialogOpen,
+  setRemindersDialogOpen
 }) => {
   const showCalendarSkeleton = !isDataReady || calendarProps.isLoading;
   const showRemindersSkeleton = !isDataReady || remindersProps.isLoading;
@@ -106,7 +109,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             {showRemindersSkeleton ? (
               <RemindersSkeleton />
             ) : (
-              <BreedingReminders remindersData={remindersProps} />
+              <BreedingReminders 
+                remindersData={remindersProps}
+                remindersDialogOpen={remindersDialogOpen}
+                setRemindersDialogOpen={setRemindersDialogOpen}
+              />
             )}
           </div>
         </div>

@@ -18,6 +18,8 @@ interface RemindersData {
 
 interface BreedingRemindersProps {
   remindersData?: RemindersData;
+  remindersDialogOpen?: boolean;
+  setRemindersDialogOpen?: (open: boolean) => void;
 }
 
 // Skeleton component for reminders list
@@ -36,8 +38,17 @@ const RemindersListSkeleton = () => (
 );
 
 // Use memo to prevent unnecessary re-renders
-const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersData }) => {
-  const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
+const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ 
+  remindersData,
+  remindersDialogOpen: externalDialogOpen,
+  setRemindersDialogOpen: externalSetDialogOpen
+}) => {
+  // Use internal state only if external state is not provided
+  const [internalDialogOpen, setInternalDialogOpen] = useState(false);
+  
+  // Use either external or internal state based on what's provided
+  const dialogOpen = externalDialogOpen !== undefined ? externalDialogOpen : internalDialogOpen;
+  const setDialogOpen = externalSetDialogOpen || setInternalDialogOpen;
   
   // Use provided data or empty defaults
   const { 
@@ -141,7 +152,7 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
                 <Button
                   variant="ghost"
                   size="sm" 
-                  onClick={() => setRemindersDialogOpen(true)}
+                  onClick={() => setDialogOpen(true)}
                   className="text-xs text-primary hover:text-primary/70 font-medium flex items-center gap-1"
                 >
                   <Bell className="h-3 w-3" />
@@ -167,10 +178,10 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersDat
       </Card>
       
       {/* Only render dialog when it's open */}
-      {remindersDialogOpen && (
+      {dialogOpen && (
         <RemindersDialog 
-          open={remindersDialogOpen} 
-          onOpenChange={setRemindersDialogOpen} 
+          open={dialogOpen} 
+          onOpenChange={setDialogOpen} 
         />
       )}
     </>
