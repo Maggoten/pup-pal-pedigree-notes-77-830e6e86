@@ -6,7 +6,9 @@ import WeekSelector from './WeekSelector';
 import WeeklyDevelopmentCard from './WeeklyDevelopmentCard';
 import WeeklyChecklist from './WeeklyChecklist';
 import JourneyProgress from './JourneyProgress';
-import { PawPrint } from 'lucide-react';
+import { PawPrint, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '@/hooks/useAuth';
 
 interface PregnancyJourneyProps {
   pregnancyId: string;
@@ -21,6 +23,7 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
   matingDate,
   expectedDueDate
 }) => {
+  const { user } = useAuth();
   const {
     currentWeek,
     totalWeeks,
@@ -30,8 +33,16 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
     changeWeek,
     toggleChecklistItem,
     calculateWeekProgress,
-    calculateOverallProgress
+    calculateOverallProgress,
+    isChecklistLoading
   } = usePregnancyJourney(pregnancyId, matingDate, expectedDueDate);
+
+  console.log("✅ PregnancyJourney component rendered", { 
+    pregnancyId, 
+    currentWeek,
+    isAuthenticated: !!user,
+    hasCurrentWeekData: !!currentWeekData
+  });
 
   const overallProgress = calculateOverallProgress();
 
@@ -60,6 +71,15 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
       </CardHeader>
       
       <CardContent className="bg-greige-50">
+        {!user && (
+          <Alert variant="warning" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Sign in to save your checklist data across devices
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <WeekSelector 
           currentWeek={currentWeek} 
           totalWeeks={totalWeeks} 
@@ -78,6 +98,7 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
                 checklistItems={currentWeekData.checklistItems}
                 onToggleItem={toggleChecklistItem}
                 weekNumber={currentWeek}
+                isLoading={isChecklistLoading}
               />
             </>
           )}

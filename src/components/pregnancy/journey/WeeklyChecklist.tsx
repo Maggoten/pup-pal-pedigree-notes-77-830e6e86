@@ -2,21 +2,51 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChecklistItem as ChecklistItemType } from '@/types/checklist';
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList, Loader2 } from 'lucide-react';
 import ChecklistItem from '@/components/checklist/ChecklistItem';
+import { useAuth } from '@/hooks/useAuth';
 
 interface WeeklyChecklistProps {
   checklistItems: ChecklistItemType[];
   onToggleItem: (itemId: string) => void;
   weekNumber: number;
+  isLoading?: boolean;
 }
 
 const WeeklyChecklist: React.FC<WeeklyChecklistProps> = ({
   checklistItems,
   onToggleItem,
-  weekNumber
+  weekNumber,
+  isLoading = false
 }) => {
-  if (checklistItems.length === 0) {
+  const { user } = useAuth();
+  
+  console.log(`📋 WeeklyChecklist rendered for week ${weekNumber}:`, { 
+    itemsCount: checklistItems?.length, 
+    isLoading,
+    isAuthenticated: !!user
+  });
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <ClipboardList className="h-5 w-5 text-primary" />
+            Week {weekNumber} Symptoms
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center h-32 text-muted-foreground">
+          <Loader2 className="h-6 w-6 animate-spin mr-2" />
+          Loading symptoms...
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // No items
+  if (!checklistItems || checklistItems.length === 0) {
     return (
       <Card className="h-full">
         <CardHeader>
@@ -32,6 +62,7 @@ const WeeklyChecklist: React.FC<WeeklyChecklistProps> = ({
     );
   }
 
+  // Render checklist
   return (
     <Card className="h-full">
       <CardHeader>
