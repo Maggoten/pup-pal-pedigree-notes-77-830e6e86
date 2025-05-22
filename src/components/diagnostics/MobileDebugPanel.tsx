@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDogs } from '@/context/DogsContext';
@@ -15,9 +14,9 @@ const isMobileDevice = () => {
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 };
 
-// Only show in development mode
+// Only show in development mode - consistent with our environment checking
 const isDevMode = () => {
-  return process.env.NODE_ENV === 'development';
+  return process.env.NODE_ENV !== 'production';
 };
 
 // Check for common browser compatibility issues
@@ -53,7 +52,7 @@ const MobileDebugPanel: React.FC = () => {
   const [compatibilityIssues, setCompatibilityIssues] = useState<string[]>([]);
   const queryClient = useQueryClient();
   
-  // Only show the panel on mobile devices in development mode
+  // Only show the panel in development mode
   useEffect(() => {
     // Always show in development mode, regardless of device
     const shouldShowPanel = isDevMode();

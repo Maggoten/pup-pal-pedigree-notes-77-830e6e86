@@ -1,13 +1,14 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { addDays } from 'date-fns';
+import { showDevToast } from './toastUtils';
 
 export const migratePregnancyData = async () => {
   try {
     // Check if user is authenticated
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
+      // Keep regular toast for authentication errors as these are user-facing
       toast({
         title: "Authentication required",
         description: "You need to be logged in to migrate pregnancy data.",
@@ -94,7 +95,8 @@ export const migratePregnancyData = async () => {
       }
     }
 
-    toast({
+    // Use the conditional toast for developer notifications
+    showDevToast({
       title: "Migration successful",
       description: "Your pregnancy data has been successfully migrated to the database."
     });
@@ -102,6 +104,7 @@ export const migratePregnancyData = async () => {
     return { success: true };
   } catch (error) {
     console.error('Migration error:', error);
+    // Keep regular toast for errors as these might be relevant to users
     toast({
       title: "Migration failed",
       description: "There was an error migrating your pregnancy data.",
@@ -110,4 +113,3 @@ export const migratePregnancyData = async () => {
     return { success: false, error };
   }
 };
-
