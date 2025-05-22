@@ -31,7 +31,28 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   } = useBreedingReminders();
   
   // Get calendar events data
-  const eventsData = useCalendarEvents();
+  const calendarHookData = useCalendarEvents();
+  
+  // Transform the calendar hook data to match the expected props format
+  const calendarProps = {
+    getEventsForDate: (date: Date) => calendarHookData.getEventsForDay(date),
+    getEventColor: (type: string) => {
+      // Simple color mapping based on event type
+      const colorMap: {[key: string]: string} = {
+        'heat': '#ff6b6b',
+        'breeding': '#339af0',
+        'veterinary': '#20c997',
+        'birthday': '#8c6dff',
+        'custom': '#495057'
+      };
+      return colorMap[type] || '#495057'; // Default color for unknown types
+    },
+    addEvent: calendarHookData.addEvent,
+    deleteEvent: calendarHookData.deleteEvent,
+    editEvent: calendarHookData.updateEvent,
+    isLoading: false, // Default since useCalendarEvents doesn't provide this
+    hasError: false   // Default since useCalendarEvents doesn't provide this
+  };
   
   // Get planned litters count
   const { data: plannedLitters = [] } = useQuery({
@@ -48,10 +69,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   
   // Set data ready state once all data is loaded
   useEffect(() => {
-    if (!remindersLoading && !eventsData.isLoading) {
+    if (!remindersLoading) {
       setIsDataReady(true);
     }
-  }, [remindersLoading, eventsData.isLoading]);
+  }, [remindersLoading]);
   
   return (
     <div className="container max-w-7xl mx-auto px-4 pt-8">
@@ -72,7 +93,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       
       <DashboardContent 
         isDataReady={isDataReady}
-        calendarProps={eventsData}
+        calendarProps={calendarProps}
         remindersProps={{
           reminders,
           isLoading: remindersLoading,
