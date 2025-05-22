@@ -72,7 +72,7 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
       
       <CardContent className="bg-greige-50">
         {!user && (
-          <Alert variant="warning" className="mb-4">
+          <Alert className="mb-4 bg-amber-50 border-amber-200 text-amber-800">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Sign in to save your checklist data across devices
