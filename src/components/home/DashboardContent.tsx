@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddEventFormValues } from '@/components/calendar/types';
 
@@ -86,6 +86,15 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   const showCalendarSkeleton = !isDataReady || calendarProps.isLoading;
   const showRemindersSkeleton = !isDataReady || remindersProps.isLoading;
   const showStatsSkeleton = !isDataReady;
+  
+  // Add state for reminders dialog
+  const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
+
+  // Function to open reminders dialog
+  const handleOpenRemindersDialog = () => {
+    console.log('Opening reminders dialog from dashboard');
+    setRemindersDialogOpen(true);
+  };
 
   return (
     <div className="space-y-12 pb-12">
@@ -106,7 +115,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             {showRemindersSkeleton ? (
               <RemindersSkeleton />
             ) : (
-              <BreedingReminders remindersData={remindersProps} />
+              <BreedingReminders 
+                remindersData={remindersProps} 
+                remindersDialogOpen={remindersDialogOpen}
+                setRemindersDialogOpen={setRemindersDialogOpen}
+              />
             )}
           </div>
         </div>

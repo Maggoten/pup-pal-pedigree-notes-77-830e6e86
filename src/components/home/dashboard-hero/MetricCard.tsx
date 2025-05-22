@@ -7,6 +7,7 @@ interface MetricCardProps {
   value: number;
   icon: React.ReactNode;
   linkTo?: string;
+  onClick?: () => void;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({
@@ -14,9 +15,14 @@ const MetricCard: React.FC<MetricCardProps> = ({
   value,
   icon,
   linkTo,
+  onClick,
 }) => {
   const content = (
-    <div className="bg-white/70 hover:bg-white/90 transition-colors rounded-lg p-3 flex flex-col items-center shadow-sm">
+    <div 
+      className="bg-white/70 hover:bg-white/90 transition-colors rounded-lg p-3 flex flex-col items-center shadow-sm"
+      onClick={onClick}
+      style={{ cursor: onClick ? 'pointer' : 'default' }}
+    >
       <div className="rounded-full bg-warmbeige-100 p-2 mb-1">
         {icon}
       </div>
@@ -25,7 +31,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
     </div>
   );
 
-  if (linkTo) {
+  if (linkTo && !onClick) {
     return <Link to={linkTo}>{content}</Link>;
   }
 
