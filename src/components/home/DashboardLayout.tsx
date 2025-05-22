@@ -6,7 +6,7 @@ import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import ActivePregnanciesSection from './ActivePregnanciesSection';
 import { useBreedingReminders } from '@/hooks/reminders';
-import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import useCalendarEvents from '@/hooks/useCalendarEvents';
 import { useQuery } from '@tanstack/react-query';
 import { plannedLittersService } from '@/services/planned-litters';
 
@@ -66,7 +66,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       
       {activePregnancies.length > 0 && (
         <ActivePregnanciesSection 
-          activePregnancies={activePregnancies} 
+          pregnancies={activePregnancies} 
         />
       )}
       
@@ -79,6 +79,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           hasError: remindersError,
           handleMarkComplete
         }}
+        remindersDialogOpen={remindersDialogOpen}
+        setRemindersDialogOpen={setRemindersDialogOpen}
       />
     </div>
   );

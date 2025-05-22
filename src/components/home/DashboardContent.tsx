@@ -25,6 +25,8 @@ interface DashboardContentProps {
     hasError: boolean;
     handleMarkComplete: (id: string) => void;
   };
+  remindersDialogOpen?: boolean;
+  setRemindersDialogOpen?: (open: boolean) => void;
 }
 
 const CalendarSkeleton = () => (
@@ -81,19 +83,25 @@ const StatsSkeleton = () => (
 const DashboardContent: React.FC<DashboardContentProps> = ({ 
   isDataReady, 
   calendarProps, 
-  remindersProps 
+  remindersProps,
+  remindersDialogOpen,
+  setRemindersDialogOpen
 }) => {
   const showCalendarSkeleton = !isDataReady || calendarProps.isLoading;
   const showRemindersSkeleton = !isDataReady || remindersProps.isLoading;
   const showStatsSkeleton = !isDataReady;
   
-  // Add state for reminders dialog
-  const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
+  // Use provided state if available, otherwise use internal state
+  const [internalRemindersDialogOpen, setInternalRemindersDialogOpen] = useState(false);
+  
+  // Determine which state to use
+  const dialogOpen = remindersDialogOpen !== undefined ? remindersDialogOpen : internalRemindersDialogOpen;
+  const setDialogOpen = setRemindersDialogOpen || setInternalRemindersDialogOpen;
 
   // Function to open reminders dialog
   const handleOpenRemindersDialog = () => {
     console.log('Opening reminders dialog from dashboard');
-    setRemindersDialogOpen(true);
+    setDialogOpen(true);
   };
 
   return (
@@ -117,8 +125,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             ) : (
               <BreedingReminders 
                 remindersData={remindersProps} 
-                remindersDialogOpen={remindersDialogOpen}
-                setRemindersDialogOpen={setRemindersDialogOpen}
+                remindersDialogOpen={dialogOpen}
+                setRemindersDialogOpen={setDialogOpen}
               />
             )}
           </div>
