@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { CalendarEvent } from '@/types/calendar';
-import { AddEventFormValues } from '@/components/calendar/types';
+import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
 import { fetchCalendarEvents, addEventToSupabase, updateEventInSupabase, deleteEventFromSupabase } from '@/services/CalendarEventService';
 import { useDogs } from '@/context/DogsContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -169,30 +168,16 @@ const useSupabaseCalendarEvents = () => {
     fetchEvents();
   };
 
-  // Get color for event type - helper to match expected interface
-  const getEventColor = (type: string): string => {
-    const colorMap: {[key: string]: string} = {
-      'heat': '#ff6b6b',
-      'breeding': '#339af0', 
-      'veterinary': '#20c997',
-      'birthday': '#8c6dff',
-      'custom': '#495057'
-    };
-    return colorMap[type] || '#495057';
-  };
-
   return {
     events,
     isLoading,
+    error,
     hasError,
     addEvent,
     updateEvent,
     deleteEvent,
     getEventsForDay,
-    getEventsForDate: getEventsForDay, // Alias for compatibility
-    getEventColor,
-    editEvent: updateEvent, // Alias for compatibility
-    refreshEvents
+    refreshEvents: fetchEvents
   };
 };
 

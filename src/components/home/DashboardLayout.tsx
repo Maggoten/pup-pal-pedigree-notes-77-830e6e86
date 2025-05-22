@@ -1,109 +1,104 @@
 
-import React, { useState, useEffect } from 'react';
-import DashboardHero from './dashboard-hero';
-import DashboardContent from './DashboardContent';
+import React, { useEffect, useState } from 'react';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
-import ActivePregnanciesSection from './ActivePregnanciesSection';
-import { useBreedingReminders } from '@/hooks/reminders';
-import useCalendarEvents from '@/hooks/useCalendarEvents';
-import { useQuery } from '@tanstack/react-query';
-import { plannedLittersService } from '@/services/planned-litters';
+import { DogsProvider } from '@/context/DogsContext';
+import PageLayout from '@/components/PageLayout';
+import DashboardHero from './dashboard-hero';
+import DashboardContent from './DashboardContent';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { getDisplayUsername } from '@/utils/userDisplayUtils';
+import { getActivePregnancies } from '@/services/PregnancyService';
+import { toast } from '@/components/ui/use-toast';
 
 interface DashboardLayoutProps {
   user: User | null;
-  activePregnancies: ActivePregnancy[];
+  activePregnancies?: ActivePregnancy[];
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
   user, 
-  activePregnancies = []
+  activePregnancies: initialActivePregnancies = []
 }) => {
-  const [isDataReady, setIsDataReady] = useState(false);
-  const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
+  // State for active pregnancies
+  const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>(initialActivePregnancies);
+  const [isLoadingPregnancies, setIsLoadingPregnancies] = useState(initialActivePregnancies.length === 0);
   
-  // Get reminders data
-  const {
-    reminders,
-    isLoading: remindersLoading,
-    hasError: remindersError,
-    handleMarkComplete
-  } = useBreedingReminders();
+  // Use the custom hook to get all dashboard data and functions
+  const dashboardData = useDashboardData();
   
-  // Get calendar events data
-  const calendarHookData = useCalendarEvents();
-  
-  // Transform the calendar hook data to match the expected props format
-  const calendarProps = {
-    getEventsForDate: (date: Date) => calendarHookData.getEventsForDay(date),
-    getEventColor: (type: string) => {
-      // Simple color mapping based on event type
-      const colorMap: {[key: string]: string} = {
-        'heat': '#ff6b6b',
-        'breeding': '#339af0',
-        'veterinary': '#20c997',
-        'birthday': '#8c6dff',
-        'custom': '#495057'
-      };
-      return colorMap[type] || '#495057'; // Default color for unknown types
-    },
-    addEvent: calendarHookData.addEvent,
-    deleteEvent: calendarHookData.deleteEvent,
-    editEvent: calendarHookData.updateEvent,
-    isLoading: false, // Default since useCalendarEvents doesn't provide this
-    hasError: false   // Default since useCalendarEvents doesn't provide this
-  };
-  
-  // Get planned litters count
-  const { data: plannedLitters = [] } = useQuery({
-    queryKey: ['planned-litters-dashboard'],
-    queryFn: () => plannedLittersService.loadPlannedLitters(),
-    enabled: !!user,
-  });
-  
-  // Function to open reminders dialog
-  const handleOpenRemindersDialog = () => {
-    console.log('Opening reminders dialog from dashboard hero');
-    setRemindersDialogOpen(true);
-  };
-  
-  // Set data ready state once all data is loaded
+  // Fetch active pregnancies if not provided
   useEffect(() => {
-    if (!remindersLoading) {
-      setIsDataReady(true);
-    }
-  }, [remindersLoading]);
+    const fetchActivePregnancies = async () => {
+      if (initialActivePregnancies.length === 0) {
+        try {
+          setIsLoadingPregnancies(true);
+          const pregnancies = await getActivePregnancies();
+          setActivePregnancies(pregnancies);
+        } catch (error) {
+          console.error("Error fetching active pregnancies:", error);
+          toast({
+            title: "Error",
+            description: "Could not load active pregnancies",
+            variant: "destructive"
+          });
+        } finally {
+          setIsLoadingPregnancies(false);
+        }
+      }
+    };
+    
+    fetchActivePregnancies();
+  }, [initialActivePregnancies.length]);
+  
+  // Get the personalized username
+  const username = getDisplayUsername(user);
+  
+  // Extract count values from dashboard data for DashboardHero
+  const reminderCount = dashboardData.remindersSummary?.count || 0;
+  const plannedLittersCount = dashboardData.plannedLittersData?.count || 0;
+  const recentLittersCount = dashboardData.recentLittersData?.count || 0;
+  
+  // Prepare props for child components
+  const calendarProps = {
+    getEventsForDate: dashboardData.getEventsForDate,
+    getEventColor: dashboardData.getEventColor,
+    addEvent: dashboardData.handleAddEvent,
+    deleteEvent: dashboardData.deleteEvent,
+    editEvent: dashboardData.handleEditEvent,
+    isLoading: dashboardData.calendarLoading,
+    hasError: dashboardData.calendarError // This now receives a boolean value
+  };
+  
+  const remindersProps = {
+    reminders: dashboardData.reminders,
+    isLoading: dashboardData.remindersLoading,
+    hasError: dashboardData.remindersError,
+    handleMarkComplete: dashboardData.handleMarkComplete
+  };
   
   return (
-    <div className="container max-w-7xl mx-auto px-4 pt-8">
-      <DashboardHero 
-        user={user}
-        reminderCount={reminders.filter(r => !r.isCompleted).length}
-        plannedLittersCount={plannedLitters.length}
-        activePregnanciesCount={activePregnancies.length}
-        recentLittersCount={0} // This would need to be calculated or fetched
-        onRemindersClick={handleOpenRemindersDialog}
-      />
-      
-      {activePregnancies.length > 0 && (
-        <ActivePregnanciesSection 
-          pregnancies={activePregnancies} 
+    <PageLayout 
+      title="" 
+      description=""
+    >
+      <div className="space-y-6">
+        <DashboardHero 
+          username={username}
+          reminders={reminderCount}
+          plannedLitters={plannedLittersCount}
+          activePregnancies={activePregnancies}
+          recentLitters={recentLittersCount}
+          isLoadingPregnancies={isLoadingPregnancies}
         />
-      )}
-      
-      <DashboardContent 
-        isDataReady={isDataReady}
-        calendarProps={calendarProps}
-        remindersProps={{
-          reminders,
-          isLoading: remindersLoading,
-          hasError: remindersError,
-          handleMarkComplete
-        }}
-        remindersDialogOpen={remindersDialogOpen}
-        setRemindersDialogOpen={setRemindersDialogOpen}
-      />
-    </div>
+        
+        <DashboardContent
+          isDataReady={dashboardData.isDataReady}
+          calendarProps={calendarProps}
+          remindersProps={remindersProps}
+        />
+      </div>
+    </PageLayout>
   );
 };
 

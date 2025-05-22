@@ -8,7 +8,6 @@ interface MetricCardGridProps {
   plannedLittersCount: number;
   activePregnanciesCount: number;
   recentLittersCount: number;
-  onRemindersClick?: () => void;
 }
 
 const MetricCardGrid: React.FC<MetricCardGridProps> = ({
@@ -16,7 +15,6 @@ const MetricCardGrid: React.FC<MetricCardGridProps> = ({
   plannedLittersCount,
   activePregnanciesCount,
   recentLittersCount,
-  onRemindersClick,
 }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -24,7 +22,7 @@ const MetricCardGrid: React.FC<MetricCardGridProps> = ({
         title="Reminders" 
         value={reminderCount} 
         icon={<Check className="h-4 w-4" />} 
-        onClick={onRemindersClick}
+        linkTo="/reminders"
       />
       
       <MetricCard 

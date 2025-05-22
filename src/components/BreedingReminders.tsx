@@ -1,3 +1,4 @@
+
 import React, { useState, memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BellRing, PawPrint, Loader2, Bell } from 'lucide-react';
@@ -17,8 +18,6 @@ interface RemindersData {
 
 interface BreedingRemindersProps {
   remindersData?: RemindersData;
-  remindersDialogOpen?: boolean;
-  setRemindersDialogOpen?: (open: boolean) => void;
 }
 
 // Skeleton component for reminders list
@@ -37,17 +36,8 @@ const RemindersListSkeleton = () => (
 );
 
 // Use memo to prevent unnecessary re-renders
-const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ 
-  remindersData,
-  remindersDialogOpen: externalDialogOpen,
-  setRemindersDialogOpen: setExternalDialogOpen
-}) => {
-  // Use internal state if external state is not provided
-  const [internalDialogOpen, setInternalDialogOpen] = useState(false);
-  
-  // Determine which state to use (external or internal)
-  const isDialogOpen = externalDialogOpen !== undefined ? externalDialogOpen : internalDialogOpen;
-  const setDialogOpen = setExternalDialogOpen || setInternalDialogOpen;
+const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({ remindersData }) => {
+  const [remindersDialogOpen, setRemindersDialogOpen] = useState(false);
   
   // Use provided data or empty defaults
   const { 
@@ -94,11 +84,6 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({
   }, [reminders]);
   
   const hasReminders = displayReminders.length > 0;
-  
-  const handleOpenDialog = () => {
-    console.log('Opening reminders dialog from BreedingReminders component');
-    setDialogOpen(true);
-  };
   
   return (
     <>
@@ -156,7 +141,7 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({
                 <Button
                   variant="ghost"
                   size="sm" 
-                  onClick={handleOpenDialog}
+                  onClick={() => setRemindersDialogOpen(true)}
                   className="text-xs text-primary hover:text-primary/70 font-medium flex items-center gap-1"
                 >
                   <Bell className="h-3 w-3" />
@@ -182,10 +167,10 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({
       </Card>
       
       {/* Only render dialog when it's open */}
-      {isDialogOpen && (
+      {remindersDialogOpen && (
         <RemindersDialog 
-          open={isDialogOpen} 
-          onOpenChange={setDialogOpen} 
+          open={remindersDialogOpen} 
+          onOpenChange={setRemindersDialogOpen} 
         />
       )}
     </>
