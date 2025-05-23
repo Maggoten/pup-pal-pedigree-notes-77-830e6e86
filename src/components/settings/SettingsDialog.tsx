@@ -44,7 +44,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onOpenChange }) =
             </TabsContent>
             
             <TabsContent value="account" className="space-y-4">
-              <AccountSettings settings={settings} />
+              <AccountSettings />
             </TabsContent>
             
             <TabsContent value="sharing" className="space-y-4">

@@ -222,7 +222,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       }
       
       // Call the Edge Function with the auth header
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/delete-user`, {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL || supabase.supabaseClient.url}/functions/v1/delete-user`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
