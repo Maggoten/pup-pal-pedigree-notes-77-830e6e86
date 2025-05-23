@@ -12,18 +12,14 @@ const PuppiesTable: React.FC<PuppiesTableProps> = ({ puppies }) => {
   const puppiesWithDisplayWeight = useMemo(() => {
     return puppies.map(puppy => {
       console.log(`PuppiesTable: Calculating display weight for puppy ${puppy.name} (${puppy.id})`, {
-        currentWeight: puppy.currentWeight,
         weightLogLength: puppy.weightLog?.length || 0,
         puppyId: puppy.id
       });
       
-      // Use the currentWeight value if available
+      // Always prioritize weight log entries over currentWeight
       let displayWeight = 'Not recorded';
       
-      if (puppy.currentWeight) {
-        displayWeight = `${puppy.currentWeight} kg`;
-        console.log(`PuppiesTable: Using currentWeight for ${puppy.name}: ${puppy.currentWeight} kg`);
-      } else if (puppy.weightLog && puppy.weightLog.length > 0) {
+      if (puppy.weightLog && puppy.weightLog.length > 0) {
         // Get the last recorded weight from the weight log
         // Sort by date to ensure we get the most recent
         const sortedWeightLog = [...puppy.weightLog]
@@ -35,6 +31,11 @@ const PuppiesTable: React.FC<PuppiesTableProps> = ({ puppies }) => {
           
           console.log(`PuppiesTable: Using last weight log entry for ${puppy.name}: ${lastWeight.weight} kg from ${lastWeight.date}`);
         }
+      } 
+      // Only use currentWeight as fallback if no weight log entries exist
+      else if (puppy.currentWeight) {
+        displayWeight = `${puppy.currentWeight} kg`;
+        console.log(`PuppiesTable: Using fallback currentWeight for ${puppy.name}: ${puppy.currentWeight} kg`);
       }
       
       return {

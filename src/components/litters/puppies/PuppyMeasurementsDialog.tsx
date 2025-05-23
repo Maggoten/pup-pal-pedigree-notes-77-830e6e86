@@ -99,7 +99,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
         ...(localPuppy.weightLog || []),
         newWeightRecord
       ],
-      // Update the currentWeight to this new weight value
+      // Always update the currentWeight to this new weight value for backward compatibility
       currentWeight: weightValue
     };
 

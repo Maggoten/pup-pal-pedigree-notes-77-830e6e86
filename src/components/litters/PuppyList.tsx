@@ -279,21 +279,22 @@ const PuppyList: React.FC<PuppyListProps> = ({
   
   // Memoize the getLatestMeasurement function to avoid recreating it on every render
   const getLatestMeasurement = useCallback((puppy: Puppy, type: 'weight' | 'height') => {
-    // For weight, prioritize the currentWeight field from Supabase
+    // For weight measurements, always prioritize the weight log
     if (type === 'weight') {
       console.log(`PuppyList: Getting weight for ${puppy.name} (${puppy.id})`, {
-        currentWeight: puppy.currentWeight,
         hasWeightLog: Boolean(puppy.weightLog?.length)
       });
-      
-      if (puppy.currentWeight) {
-        console.log(`PuppyList: Using currentWeight for ${puppy.name}: ${puppy.currentWeight} kg`);
-        return `${puppy.currentWeight} kg`;
-      }
     }
     
     const log = type === 'weight' ? puppy.weightLog : puppy.heightLog;
-    if (!log || log.length === 0) return 'Not recorded';
+    if (!log || log.length === 0) {
+      // Only use currentWeight as fallback if no weight log entries exist
+      if (type === 'weight' && puppy.currentWeight) {
+        console.log(`PuppyList: Using fallback currentWeight for ${puppy.name}: ${puppy.currentWeight} kg`);
+        return `${puppy.currentWeight} kg`;
+      }
+      return 'Not recorded';
+    }
 
     // Sort logs by date, most recent first
     const sortedLog = [...log].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
