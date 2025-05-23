@@ -1,9 +1,9 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { verifySession } from '@/utils/storage';
 import { RegisterData, User } from '@/types/auth';
+import { toast } from 'sonner';
 
 // Define SupabaseUser type for internal use
 type SupabaseUser = {
@@ -32,6 +32,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   register: (userData: RegisterData) => Promise<boolean>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<boolean>;
 }
 
 interface AuthProviderProps {
@@ -208,6 +209,49 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
+  // New method for account deletion
+  const deleteAccount = async (): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      // Get the current session for the auth header
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("You must be logged in to delete your account");
+        return false;
+      }
+      
+      // Call the Edge Function with the auth header
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/delete-user`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok || result.error) {
+        console.error("Error deleting account:", result);
+        toast.error(result.message || "Failed to delete account");
+        return false;
+      }
+      
+      // If successful, sign out the user locally
+      await signOut();
+      
+      toast.success("Your account has been successfully deleted");
+      return true;
+    } catch (error) {
+      console.error("Unexpected error during account deletion:", error);
+      toast.error("An unexpected error occurred while deleting your account");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // When using verifySession in this file, update the options to match the new interface
   const checkSession = async () => {
     try {
@@ -241,6 +285,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     logout,
     register,
     signOut,
+    deleteAccount,
   };
 
   return (
