@@ -16,12 +16,17 @@ const RegistrationFields: React.FC<RegistrationFieldsProps> = ({ form, disabled 
       control={form.control}
       name="registrationNumber"
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="flex flex-col">
           <FormLabel>Registration Number</FormLabel>
           <FormControl>
-            <Input placeholder="AKC123456" {...field} disabled={disabled} />
+            <Input 
+              placeholder="AKC123456" 
+              {...field} 
+              disabled={disabled} 
+              className="h-10"
+            />
           </FormControl>
-          <FormDescription>
+          <FormDescription className="text-xs">
             Optional registration or license number
           </FormDescription>
           <FormMessage />

@@ -2,7 +2,7 @@
 import React from 'react';
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { UseFormReturn } from 'react-hook-form';
 import { DogFormValues } from '../DogFormFields';
 import {
@@ -34,7 +34,7 @@ const BirthInfoFields: React.FC<BirthInfoFieldsProps> = ({ form, disabled }) => 
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-full pl-3 text-left font-normal bg-white",
+                    "w-full pl-3 text-left font-normal bg-white h-10",
                     !field.value && "text-muted-foreground"
                   )}
                   disabled={disabled}
@@ -74,6 +74,9 @@ const BirthInfoFields: React.FC<BirthInfoFieldsProps> = ({ form, disabled }) => 
               />
             </PopoverContent>
           </Popover>
+          <FormDescription className="text-xs">
+            Enter your dog's birth date
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}

@@ -37,10 +37,12 @@ interface DogFormFieldsProps {
 
 const DogFormFields: React.FC<DogFormFieldsProps> = ({ form, disabled }) => {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-6 md:grid-cols-2">
       <BasicInfoFields form={form} disabled={disabled} />
-      <BirthInfoFields form={form} disabled={disabled} />
-      <RegistrationFields form={form} disabled={disabled} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:col-span-1">
+        <BirthInfoFields form={form} disabled={disabled} />
+        <RegistrationFields form={form} disabled={disabled} />
+      </div>
       <HealthFields form={form} disabled={disabled} />
       <NotesField form={form} disabled={disabled} />
     </div>
