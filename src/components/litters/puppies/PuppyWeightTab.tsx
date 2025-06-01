@@ -1,11 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
+import { Trash2 } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 
 interface PuppyWeightTabProps {
   puppy: Puppy;
@@ -14,6 +17,7 @@ interface PuppyWeightTabProps {
   selectedDate: Date;
   selectedTime: string;
   onAddWeight: () => void;
+  onDeleteWeight: (index: number) => void;
 }
 
 const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
@@ -22,23 +26,43 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
   setWeight,
   selectedDate,
   selectedTime,
-  onAddWeight
+  onAddWeight,
+  onDeleteWeight
 }) => {
-  // Add more detailed console logs to better understand what's happening
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedWeightIndex, setSelectedWeightIndex] = useState<number | null>(null);
+
   console.log(`PuppyWeightTab: Rendering for ${puppy.name} (${puppy.id})`, {
     puppyId: puppy.id,
     currentWeight: puppy.currentWeight,
     weightLogLength: puppy.weightLog?.length || 0
   });
   
-  // Ensure we're using the correct weight log entries for this specific puppy
-  // Make a safe copy of weight logs to avoid reference issues
   const weightLogEntries = puppy.weightLog ? [...puppy.weightLog] : [];
   
-  // Log the actual entries we're showing
   console.log(`PuppyWeightTab: Weight log entries for ${puppy.name} (${puppy.id})`, 
     weightLogEntries.map(entry => ({ date: entry.date, weight: entry.weight }))
   );
+
+  const handleDeleteClick = (index: number) => {
+    setSelectedWeightIndex(index);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedWeightIndex !== null) {
+      onDeleteWeight(selectedWeightIndex);
+      toast({
+        title: "Weight Record Deleted",
+        description: "The weight measurement has been removed."
+      });
+    }
+    setDeleteDialogOpen(false);
+    setSelectedWeightIndex(null);
+  };
+
+  const selectedWeightEntry = selectedWeightIndex !== null ? weightLogEntries
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[selectedWeightIndex] : null;
   
   return (
     <div className="space-y-4">
@@ -67,6 +91,7 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
                 <TableRow>
                   <TableHead>Date & Time</TableHead>
                   <TableHead>Weight (kg)</TableHead>
+                  <TableHead className="w-16">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -76,6 +101,16 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
                     <TableRow key={`${puppy.id}-weight-${index}-${log.date}`}>
                       <TableCell>{format(new Date(log.date), "PPP p")}</TableCell>
                       <TableCell>{log.weight}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(index)}
+                          className="h-8 w-8 p-0 hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
               </TableBody>
@@ -87,6 +122,15 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
           </div>
         )}
       </div>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleConfirmDelete}
+        title="Delete Weight Measurement"
+        description="Are you sure you want to delete this weight measurement? This action cannot be undone."
+        itemDetails={selectedWeightEntry ? `${selectedWeightEntry.weight} kg recorded on ${format(new Date(selectedWeightEntry.date), "PPP p")}` : undefined}
+      />
     </div>
   );
 };

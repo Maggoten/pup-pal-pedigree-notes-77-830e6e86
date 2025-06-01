@@ -31,11 +31,8 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     format(new Date(), 'HH:mm')
   );
   
-  // Create a deep clone of the puppy data on component mount and when puppy changes
-  // This isolates the data for this specific puppy instance
   const [localPuppy, setLocalPuppy] = useState<Puppy>(() => {
     console.log(`PuppyMeasurementsDialog: Initializing local puppy for ${puppy.name} (${puppy.id})`);
-    // Create proper deep copies of all arrays to avoid reference issues
     return {
       ...puppy,
       weightLog: puppy.weightLog ? JSON.parse(JSON.stringify(puppy.weightLog)) : [],
@@ -44,7 +41,6 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     };
   });
   
-  // Update local puppy state when the prop changes (e.g., after a successful update)
   useEffect(() => {
     console.log(`PuppyMeasurementsDialog: Puppy prop changed for ${puppy.name} (${puppy.id})`, {
       weightLogLength: puppy.weightLog?.length || 0,
@@ -52,7 +48,6 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       puppyId: puppy.id
     });
     
-    // Always create a fresh deep copy when the puppy prop changes
     setLocalPuppy({
       ...puppy,
       weightLog: puppy.weightLog ? JSON.parse(JSON.stringify(puppy.weightLog)) : [],
@@ -60,13 +55,11 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       notes: puppy.notes ? JSON.parse(JSON.stringify(puppy.notes)) : []
     });
     
-    // Reset form states when puppy changes
     setWeight('');
     setHeight('');
     setNote('');
   }, [puppy.id, puppy.weightLog, puppy.heightLog, puppy.notes, puppy.currentWeight, puppy.name]);
 
-  // Memoize event handlers to prevent recreating on each render
   const handleAddWeight = useCallback(() => {
     if (!weight || isNaN(parseFloat(weight))) {
       toast({
@@ -92,14 +85,12 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       currentWeightLogLength: localPuppy.weightLog?.length || 0
     });
     
-    // Create a completely new puppy object with the updated weight log and currentWeight
     const updatedPuppy = {
       ...localPuppy,
       weightLog: [
         ...(localPuppy.weightLog || []),
         newWeightRecord
       ],
-      // Always update the currentWeight to this new weight value for backward compatibility
       currentWeight: weightValue
     };
 
@@ -139,7 +130,6 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       height: heightValue 
     };
     
-    // Create a completely new puppy object with the updated height log
     const updatedPuppy = {
       ...localPuppy,
       heightLog: [
@@ -177,7 +167,6 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       content: note.trim() 
     };
     
-    // Create a completely new puppy object with the updated notes
     const updatedPuppy = {
       ...localPuppy,
       notes: [
@@ -195,6 +184,58 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       description: `Note added for ${puppy.name}.`
     });
   }, [note, selectedDate, selectedTime, localPuppy, puppy.name, onUpdate]);
+
+  const handleDeleteWeight = useCallback((index: number) => {
+    const sortedWeightLog = [...(localPuppy.weightLog || [])]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    sortedWeightLog.splice(index, 1);
+    
+    let newCurrentWeight = localPuppy.currentWeight;
+    if (index === 0 && sortedWeightLog.length > 0) {
+      newCurrentWeight = sortedWeightLog[0].weight;
+    } else if (sortedWeightLog.length === 0) {
+      newCurrentWeight = undefined;
+    }
+    
+    const updatedPuppy = {
+      ...localPuppy,
+      weightLog: sortedWeightLog,
+      currentWeight: newCurrentWeight
+    };
+
+    setLocalPuppy(updatedPuppy);
+    onUpdate(updatedPuppy);
+  }, [localPuppy, onUpdate]);
+
+  const handleDeleteHeight = useCallback((index: number) => {
+    const sortedHeightLog = [...(localPuppy.heightLog || [])]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    sortedHeightLog.splice(index, 1);
+    
+    const updatedPuppy = {
+      ...localPuppy,
+      heightLog: sortedHeightLog
+    };
+
+    setLocalPuppy(updatedPuppy);
+    onUpdate(updatedPuppy);
+  }, [localPuppy, onUpdate]);
+
+  const handleDeleteNote = useCallback((index: number) => {
+    const updatedNotes = [...(localPuppy.notes || [])];
+    
+    updatedNotes.splice(index, 1);
+    
+    const updatedPuppy = {
+      ...localPuppy,
+      notes: updatedNotes
+    };
+
+    setLocalPuppy(updatedPuppy);
+    onUpdate(updatedPuppy);
+  }, [localPuppy, onUpdate]);
 
   return (
     <DialogContent className="sm:max-w-[600px]" onInteractOutside={onClose}>
@@ -226,6 +267,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
             selectedDate={selectedDate}
             selectedTime={selectedTime}
             onAddWeight={handleAddWeight}
+            onDeleteWeight={handleDeleteWeight}
           />
         </TabsContent>
         <TabsContent value="height">
@@ -236,6 +278,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
             selectedDate={selectedDate}
             selectedTime={selectedTime}
             onAddHeight={handleAddHeight}
+            onDeleteHeight={handleDeleteHeight}
           />
         </TabsContent>
         <TabsContent value="notes">
@@ -246,6 +289,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
             selectedDate={selectedDate}
             selectedTime={selectedTime}
             onAddNote={handleAddNote}
+            onDeleteNote={handleDeleteNote}
           />
         </TabsContent>
       </Tabs>
