@@ -284,7 +284,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   // Calculate hasAccess based on subscription status
   const calculateAccess = (paid: boolean, isFriend: boolean, status: string | null, endDate: string | null): boolean => {
-    if (paid || isFriend) return true;
+    // Friend access always takes precedence
+    if (isFriend) {
+      if (import.meta.env.DEV) {
+        console.log('[Auth] Friend access granted');
+      }
+      return true;
+    }
+    if (paid) return true;
     if (status === 'trial' && endDate) {
       return new Date(endDate) > new Date();
     }
@@ -296,6 +303,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     if (!session) return;
     
     try {
+      if (import.meta.env.DEV) {
+        console.log('[Auth] Checking subscription for user:', user?.id);
+      }
+
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -304,15 +315,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
       if (error) {
         console.error('Error checking subscription:', error);
+        // Fallback: check friend status directly from database
+        if (user?.id) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('friend')
+            .eq('id', user.id)
+            .single();
+          
+          if (profile?.friend) {
+            if (import.meta.env.DEV) {
+              console.log('[Auth] Fallback: Friend status found in database');
+            }
+            setFriend(true);
+            setHasAccess(true);
+          }
+        }
         return;
       }
 
       if (data) {
+        if (import.meta.env.DEV) {
+          console.log('[Auth] Subscription check result:', data);
+        }
         setSubscriptionStatus(data.subscription_status);
         setTrialEndDate(data.trial_end_date);
         setHasPaid(data.has_paid);
         setFriend(data.is_friend);
-        setHasAccess(calculateAccess(data.has_paid, data.is_friend, data.subscription_status, data.trial_end_date));
+        const access = calculateAccess(data.has_paid, data.is_friend, data.subscription_status, data.trial_end_date);
+        setHasAccess(access);
+        
+        if (import.meta.env.DEV) {
+          console.log('[Auth] Access granted:', access, { paid: data.has_paid, friend: data.is_friend, status: data.subscription_status });
+        }
       }
     } catch (error) {
       console.error('Error checking subscription:', error);
