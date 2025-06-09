@@ -37,26 +37,19 @@ export const useSubscriptionAccess = (): SubscriptionAccessInfo => {
       isExpired = daysRemaining <= 0 && !hasPaid && !friend;
     }
 
-    // CRITICAL: Implement exact access formula as specified
-    const computedHasAccess = hasPaid || friend || (
-      subscriptionStatus === 'trial' &&
-      trialEnd && new Date(trialEndDate!) > new Date()
-    );
-
     // Development logging to debug access issues
     if (import.meta.env.DEV) {
-      console.log('[useSubscriptionAccess] Access calculation:', {
+      console.log('[useSubscriptionAccess] Using AuthProvider hasAccess value:', {
         friend,
         hasPaid,
         subscriptionStatus,
         trialEndDate,
-        computedHasAccess,
         authProviderHasAccess: hasAccess
       });
     }
 
     return {
-      hasAccess: computedHasAccess, // Use computed access instead of AuthProvider value
+      hasAccess, // Use AuthProvider's hasAccess value directly
       subscriptionStatus,
       trialEndDate,
       hasPaid,
