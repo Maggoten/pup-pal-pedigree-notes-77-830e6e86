@@ -1,0 +1,53 @@
+import { useAuth } from '@/providers/AuthProvider';
+import { useMemo } from 'react';
+
+export interface SubscriptionAccessInfo {
+  hasAccess: boolean;
+  subscriptionStatus: string | null;
+  trialEndDate: string | null;
+  hasPaid: boolean;
+  friend: boolean;
+  daysRemaining: number | null;
+  isTrialActive: boolean;
+  isExpired: boolean;
+}
+
+export const useSubscriptionAccess = (): SubscriptionAccessInfo => {
+  const {
+    hasAccess,
+    subscriptionStatus,
+    trialEndDate,
+    hasPaid,
+    friend,
+    checkSubscription
+  } = useAuth();
+
+  const subscriptionInfo = useMemo(() => {
+    const now = new Date();
+    const trialEnd = trialEndDate ? new Date(trialEndDate) : null;
+    
+    let daysRemaining: number | null = null;
+    let isTrialActive = false;
+    let isExpired = false;
+
+    if (trialEnd) {
+      const timeDiff = trialEnd.getTime() - now.getTime();
+      daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      isTrialActive = subscriptionStatus === 'trial' && daysRemaining > 0;
+      isExpired = daysRemaining <= 0 && !hasPaid && !friend;
+    }
+
+    return {
+      hasAccess,
+      subscriptionStatus,
+      trialEndDate,
+      hasPaid,
+      friend,
+      daysRemaining,
+      isTrialActive,
+      isExpired
+    };
+  }, [hasAccess, subscriptionStatus, trialEndDate, hasPaid, friend]);
+
+  return subscriptionInfo;
+};

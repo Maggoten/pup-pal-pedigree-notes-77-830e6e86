@@ -53,16 +53,28 @@ const Login: React.FC = () => {
         lastName: values.lastName,
       };
       
-      console.log('Login page: Attempting registration with trial');
+      console.log('Login page: Attempting registration');
       const success = await register(registerData);
       
       if (success) {
         console.log('Login page: Registration successful, creating Stripe subscription');
         
-        // Create Stripe subscription with trial
+        // Create Stripe subscription with trial immediately after registration
         try {
-          await supabase.functions.invoke('create-subscription');
-          console.log('Login page: Stripe subscription created');
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            const { data: subscriptionData, error: subscriptionError } = await supabase.functions.invoke('create-subscription', {
+              headers: {
+                Authorization: `Bearer ${session.access_token}`,
+              },
+            });
+            
+            if (subscriptionError) {
+              console.error('Login page: Stripe subscription creation failed:', subscriptionError);
+            } else {
+              console.log('Login page: Stripe subscription created successfully');
+            }
+          }
         } catch (stripeError) {
           console.error('Login page: Stripe subscription creation failed:', stripeError);
           // Continue anyway - user can still use the app

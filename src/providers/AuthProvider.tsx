@@ -27,12 +27,18 @@ interface AuthContextType {
   isAuthReady: boolean;
   isLoading: boolean;
   isLoggedIn: boolean;
+  hasAccess: boolean;
+  subscriptionStatus: string | null;
+  trialEndDate: string | null;
+  hasPaid: boolean;
+  friend: boolean;
   signIn: (email: string) => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   register: (userData: RegisterData) => Promise<boolean>;
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<boolean>;
+  checkSubscription: () => Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -58,6 +64,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // Subscription state
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
+  const [trialEndDate, setTrialEndDate] = useState<string | null>(null);
+  const [hasPaid, setHasPaid] = useState(false);
+  const [friend, setFriend] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
 
   // Helper function to map Supabase user to our User type
   const mapSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
@@ -105,6 +118,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         setUser(mapSupabaseUser(session?.user || null));
         setSession(session || null);
         setIsLoggedIn(!!session);
+        
+        // Check subscription when user signs in
+        if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+          setTimeout(() => {
+            // Use setTimeout to avoid calling Supabase within auth state change callback
+            checkSubscription();
+          }, 100);
+        }
+        
+        // Clear subscription state when user signs out
+        if (event === 'SIGNED_OUT') {
+          setSubscriptionStatus(null);
+          setTrialEndDate(null);
+          setHasPaid(false);
+          setFriend(false);
+          setHasAccess(false);
+        }
         
         // Ensure auth is marked as ready on any auth event
         if (!isAuthReady) setIsAuthReady(true);
@@ -252,6 +282,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
+  // Calculate hasAccess based on subscription status
+  const calculateAccess = (paid: boolean, isFriend: boolean, status: string | null, endDate: string | null): boolean => {
+    if (paid || isFriend) return true;
+    if (status === 'trial' && endDate) {
+      return new Date(endDate) > new Date();
+    }
+    return false;
+  };
+
+  // Check subscription status
+  const checkSubscription = async (): Promise<void> => {
+    if (!session) return;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Error checking subscription:', error);
+        return;
+      }
+
+      if (data) {
+        setSubscriptionStatus(data.subscription_status);
+        setTrialEndDate(data.trial_end_date);
+        setHasPaid(data.has_paid);
+        setFriend(data.is_friend);
+        setHasAccess(calculateAccess(data.has_paid, data.is_friend, data.subscription_status, data.trial_end_date));
+      }
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    }
+  };
+
   // When using verifySession in this file, update the options to match the new interface
   const checkSession = async () => {
     try {
@@ -280,12 +347,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     isAuthReady,
     isLoading,
     isLoggedIn,
+    hasAccess,
+    subscriptionStatus,
+    trialEndDate,
+    hasPaid,
+    friend,
     signIn,
     login,
     logout,
     register,
     signOut,
     deleteAccount,
+    checkSubscription,
   };
 
   return (

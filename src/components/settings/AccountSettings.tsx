@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/providers/AuthProvider';
 import DeleteAccountSection from './DeleteAccountSection';
+import SubscriptionSettings from '@/components/subscription/SubscriptionSettings';
 
 const AccountSettings: React.FC = () => {
   const { user, logout } = useAuth();
@@ -39,6 +40,8 @@ const AccountSettings: React.FC = () => {
           </Button>
         </CardContent>
       </Card>
+      
+      <SubscriptionSettings />
       
       <DeleteAccountSection />
     </div>

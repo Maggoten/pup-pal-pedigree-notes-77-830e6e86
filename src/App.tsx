@@ -21,6 +21,7 @@ import Pregnancy from "./pages/Pregnancy";
 import MobileDebugPanel from "./components/diagnostics/MobileDebugPanel";
 import { isMobileDevice, isAppForeground } from "./utils/fetchUtils";
 import { queryClient, refreshOnVisibilityChange } from "./utils/reactQueryConfig";
+import ProtectedApp from "./components/ProtectedApp";
 
 // RouteChangeTracker to detect navigation changes and refresh data
 const RouteChangeTracker = () => {
@@ -131,9 +132,10 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <AuthGuard>
-                <DogsProvider>
-                  <RouteChangeTracker />
-                  <Routes>
+                <ProtectedApp>
+                  <DogsProvider>
+                    <RouteChangeTracker />
+                    <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/" element={<Index />} />
                     <Route path="/my-dogs" element={<MyDogs />} />
@@ -153,7 +155,8 @@ const App = () => {
                   {/* Add the debug panel - only shown in development on mobile */}
                   <MobileDebugPanel />
                 </DogsProvider>
-              </AuthGuard>
+              </ProtectedApp>
+            </AuthGuard>
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>
