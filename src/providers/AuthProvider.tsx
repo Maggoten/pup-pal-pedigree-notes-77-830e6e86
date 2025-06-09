@@ -32,6 +32,7 @@ interface AuthContextType {
   trialEndDate: string | null;
   hasPaid: boolean;
   friend: boolean;
+  subscriptionLoading: boolean;
   signIn: (email: string) => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -71,6 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const [hasPaid, setHasPaid] = useState(false);
   const [friend, setFriend] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
 
   // Helper function to map Supabase user to our User type
   const mapSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
@@ -318,6 +320,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       return;
     }
     
+    setSubscriptionLoading(true);
     const timestamp = new Date().toISOString();
     
     try {
@@ -427,6 +430,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
           console.error(`[Auth] ${timestamp} - Emergency fallback failed:`, fallbackError);
         }
       }
+    } finally {
+      setSubscriptionLoading(false);
     }
   };
 
@@ -463,6 +468,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     trialEndDate,
     hasPaid,
     friend,
+    subscriptionLoading,
     signIn,
     login,
     logout,

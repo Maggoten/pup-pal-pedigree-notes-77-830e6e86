@@ -8,11 +8,15 @@ interface ProtectedAppProps {
 }
 
 const ProtectedApp: React.FC<ProtectedAppProps> = ({ children }) => {
-  const { isLoggedIn, isAuthReady, checkSubscription } = useAuth();
+  const { isLoggedIn, isAuthReady, checkSubscription, subscriptionLoading } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
 
-  // Show blocking modal if user is logged in but doesn't have access
-  const shouldShowBlockingModal = isAuthReady && isLoggedIn && !hasAccess;
+  // Show blocking modal only if:
+  // 1. Auth is ready
+  // 2. User is logged in 
+  // 3. User doesn't have access
+  // 4. Subscription check is not loading (to prevent premature modal display)
+  const shouldShowBlockingModal = isAuthReady && isLoggedIn && !hasAccess && !subscriptionLoading;
 
   // Development debugging for modal logic
   if (import.meta.env.DEV) {
@@ -20,6 +24,7 @@ const ProtectedApp: React.FC<ProtectedAppProps> = ({ children }) => {
       isAuthReady,
       isLoggedIn,
       hasAccess,
+      subscriptionLoading,
       shouldShowBlockingModal,
       timestamp: new Date().toISOString()
     });
