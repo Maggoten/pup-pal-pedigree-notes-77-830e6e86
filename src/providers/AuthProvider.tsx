@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const [hasPaid, setHasPaid] = useState(false);
   const [friend, setFriend] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
-  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
 
   // Helper function to map Supabase user to our User type
   const mapSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
