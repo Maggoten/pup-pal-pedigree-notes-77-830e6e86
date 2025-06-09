@@ -98,3 +98,5 @@ max_rows = 1000
 enabled = true
 [functions.delete-user]
 verify_jwt = true
+[functions.stripe-webhook]
+verify_jwt = false

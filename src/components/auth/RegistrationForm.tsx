@@ -22,7 +22,6 @@ const registrationSchema = z.object({
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  subscriptionType: z.enum(['free', 'premium']),
   agreeToTerms: z.boolean().refine(val => val === true, {
     message: "You must agree to the terms and conditions"
   })
@@ -43,7 +42,6 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
       lastName: '',
       email: '',
       password: '',
-      subscriptionType: 'free',
       agreeToTerms: false,
     },
   });
@@ -109,41 +107,6 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="subscriptionType"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel className="text-brown-800">Subscription Type</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="flex flex-col space-y-1"
-                >
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="free" />
-                    </FormControl>
-                    <FormLabel className="font-normal">
-                      Free - Basic features only
-                    </FormLabel>
-                  </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="premium" />
-                    </FormControl>
-                    <FormLabel className="font-normal">
-                      Premium - $2.99/month, all features
-                    </FormLabel>
-                  </FormItem>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
         <FormField
           control={form.control}
           name="agreeToTerms"

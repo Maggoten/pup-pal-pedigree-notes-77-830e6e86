@@ -434,11 +434,16 @@ export type Database = {
           created_at: string | null
           email: string
           first_name: string | null
+          friend: boolean | null
+          has_paid: boolean | null
           id: string
           kennel_name: string | null
           last_name: string | null
           phone: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           subscription_status: string | null
+          trial_end_date: string | null
           updated_at: string | null
         }
         Insert: {
@@ -446,11 +451,16 @@ export type Database = {
           created_at?: string | null
           email: string
           first_name?: string | null
+          friend?: boolean | null
+          has_paid?: boolean | null
           id: string
           kennel_name?: string | null
           last_name?: string | null
           phone?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscription_status?: string | null
+          trial_end_date?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -458,11 +468,16 @@ export type Database = {
           created_at?: string | null
           email?: string
           first_name?: string | null
+          friend?: boolean | null
+          has_paid?: boolean | null
           id?: string
           kennel_name?: string | null
           last_name?: string | null
           phone?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscription_status?: string | null
+          trial_end_date?: string | null
           updated_at?: string | null
         }
         Relationships: []

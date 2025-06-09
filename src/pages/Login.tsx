@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/providers/AuthProvider';
+import { supabase } from '@/integrations/supabase/client';
 import AuthTabs from '@/components/auth/AuthTabs';
-import PaymentForm from '@/components/auth/PaymentForm';
 import { LoginFormValues } from '@/components/auth/LoginForm';
 import { RegistrationFormValues } from '@/components/auth/RegistrationForm';
 import { RegisterData } from '@/types/auth';
@@ -12,8 +12,6 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login, register, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [showPayment, setShowPayment] = useState(false);
-  const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
 
   const handleLogin = async (values: LoginFormValues) => {
     setIsLoading(true);
@@ -44,18 +42,7 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleRegistration = (values: RegistrationFormValues) => {
-    setRegistrationData(values);
-    // Only show payment screen for premium subscriptions
-    if (values.subscriptionType === 'premium') {
-      setShowPayment(true);
-    } else {
-      // Proceed directly with free registration
-      handleFreeRegistration(values);
-    }
-  };
-
-  const handleFreeRegistration = async (values: RegistrationFormValues) => {
+  const handleRegistration = async (values: RegistrationFormValues) => {
     setIsLoading(true);
     
     try {
@@ -66,16 +53,22 @@ const Login: React.FC = () => {
         lastName: values.lastName,
       };
       
-      console.log('Login page: Attempting free registration');
+      console.log('Login page: Attempting registration with trial');
       const success = await register(registerData);
       
       if (success) {
-        console.log('Login page: Registration successful');
+        console.log('Login page: Registration successful, creating Stripe subscription');
         
-        // Navigate but only if email confirmation is not required
-        if (document.cookie.includes('supabase-auth-token')) {
-          navigate('/');
+        // Create Stripe subscription with trial
+        try {
+          await supabase.functions.invoke('create-subscription');
+          console.log('Login page: Stripe subscription created');
+        } catch (stripeError) {
+          console.error('Login page: Stripe subscription creation failed:', stripeError);
+          // Continue anyway - user can still use the app
         }
+        
+        navigate('/');
       } else {
         console.log('Login page: Registration failed');
       }
@@ -86,64 +79,15 @@ const Login: React.FC = () => {
     }
   };
 
-  const handlePayment = async () => {
-    setIsLoading(true);
-    
-    if (registrationData) {
-      try {
-        const registerData: RegisterData = {
-          email: registrationData.email,
-          password: registrationData.password,
-          firstName: registrationData.firstName,
-          lastName: registrationData.lastName,
-        };
-        
-        console.log('Login page: Attempting premium registration');
-        const success = await register(registerData);
-        
-        if (success) {
-          console.log('Login page: Registration successful');
-          
-          // Navigate but only if email confirmation is not required
-          if (document.cookie.includes('supabase-auth-token')) {
-            navigate('/');
-          } else {
-            // Stay on login page so user can log in after confirming email
-            setShowPayment(false);
-          }
-        } else {
-          console.log('Login page: Registration failed');
-          setShowPayment(false);
-        }
-      } catch (error) {
-        console.error("Login page: Registration error:", error);
-        setShowPayment(false);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
   const effectiveLoading = isLoading || authLoading;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-warmbeige-50/70 p-4">
-      <div className="text-center mb-8">
-        {/* Removed the Breeding Journey text */}
-      </div>
-      {!showPayment ? (
-        <AuthTabs 
-          onLogin={handleLogin}
-          onRegister={handleRegistration}
-          isLoading={effectiveLoading}
-        />
-      ) : (
-        <PaymentForm
-          onSubmit={handlePayment}
-          onBack={() => setShowPayment(false)}
-          isLoading={effectiveLoading}
-        />
-      )}
+      <AuthTabs 
+        onLogin={handleLogin}
+        onRegister={handleRegistration}
+        isLoading={effectiveLoading}
+      />
     </div>
   );
 };
