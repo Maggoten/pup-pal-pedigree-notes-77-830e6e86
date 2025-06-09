@@ -41,7 +41,7 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    // Get user profile
+    // Get user profile - ALWAYS check friend status first
     const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('*')
@@ -54,17 +54,18 @@ serve(async (req) => {
 
     logStep("Retrieved user profile", { 
       hasStripeCustomer: !!profile.stripe_customer_id,
-      currentStatus: profile.subscription_status 
+      currentStatus: profile.subscription_status,
+      isFriend: profile.friend
     });
 
-    // If user is marked as friend, they have access regardless of Stripe
+    // CRITICAL: If user is marked as friend, they have access regardless of Stripe
     if (profile.friend) {
-      logStep("User is marked as friend - has access");
+      logStep("User is marked as friend - granting full access");
       return new Response(JSON.stringify({
         has_access: true,
         subscription_status: 'friend',
         is_friend: true,
-        has_paid: profile.has_paid,
+        has_paid: profile.has_paid || false,
         trial_end_date: profile.trial_end_date
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -74,7 +75,7 @@ serve(async (req) => {
 
     // If no Stripe customer ID, user doesn't have subscription
     if (!profile.stripe_customer_id) {
-      logStep("No Stripe customer found");
+      logStep("No Stripe customer found - user not subscribed");
       return new Response(JSON.stringify({
         has_access: false,
         subscription_status: 'inactive',
@@ -141,10 +142,18 @@ serve(async (req) => {
       logStep("Updated profile with latest subscription info");
     }
 
+    logStep("Final response", {
+      hasAccess,
+      subscriptionStatus,
+      isFriend: profile.friend,
+      hasPaid,
+      trialEndDate
+    });
+
     return new Response(JSON.stringify({
       has_access: hasAccess,
       subscription_status: subscriptionStatus,
-      is_friend: false,
+      is_friend: profile.friend, // FIXED: Return actual friend status from profile
       has_paid: hasPaid,
       trial_end_date: trialEndDate
     }), {
