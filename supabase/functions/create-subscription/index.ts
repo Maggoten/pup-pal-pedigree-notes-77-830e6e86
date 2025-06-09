@@ -20,11 +20,11 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const stripeKey = Deno.env.get("Stripe Secret Key");
-    const priceId = Deno.env.get("Stripe Price ID (39 SEK/month)");
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    const priceId = Deno.env.get("STRIPE_PRICE_ID");
     
-    if (!stripeKey) throw new Error("Stripe Secret Key is not set");
-    if (!priceId) throw new Error("Stripe Price ID is not set");
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+    if (!priceId) throw new Error("STRIPE_PRICE_ID is not set");
     
     logStep("Stripe credentials verified", { priceId });
 

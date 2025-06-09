@@ -20,8 +20,8 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const stripeKey = Deno.env.get("Stripe Secret Key");
-    if (!stripeKey) throw new Error("Stripe Secret Key is not set");
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
     // Initialize Supabase with service role key
     const supabaseClient = createClient(
