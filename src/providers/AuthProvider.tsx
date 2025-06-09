@@ -98,6 +98,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         
         // Always set isAuthReady to true even if no session
         setIsAuthReady(true);
+        
+        // FORCE subscription check on initial load if user is already logged in
+        if (session) {
+          if (import.meta.env.DEV) {
+            console.log('[Auth] User already logged in on app load - forcing subscription check');
+          }
+          setTimeout(() => {
+            // Use setTimeout to avoid calling during auth initialization
+            checkSubscription();
+          }, 500);
+        }
       } catch (error) {
         console.error("Failed to get initial session:", error);
         // Important: still mark auth as ready even if there's an error
@@ -298,13 +309,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     return false;
   };
 
-  // Check subscription status
+  // Check subscription status with enhanced debugging and fallback
   const checkSubscription = async (): Promise<void> => {
-    if (!session) return;
+    if (!session) {
+      if (import.meta.env.DEV) {
+        console.log('[Auth] No session available for subscription check');
+      }
+      return;
+    }
+    
+    const timestamp = new Date().toISOString();
     
     try {
       if (import.meta.env.DEV) {
-        console.log('[Auth] Checking subscription for user:', user?.id);
+        console.log(`[Auth] ${timestamp} - Starting subscription check for user:`, user?.id);
       }
 
       const { data, error } = await supabase.functions.invoke('check-subscription', {
@@ -314,9 +332,84 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       });
 
       if (error) {
-        console.error('Error checking subscription:', error);
-        // Fallback: check friend status directly from database
+        console.error(`[Auth] ${timestamp} - Edge function error:`, error);
+        
+        // IMMEDIATE FALLBACK: Check friend status directly from database
         if (user?.id) {
+          if (import.meta.env.DEV) {
+            console.log(`[Auth] ${timestamp} - Using fallback: querying profiles table directly`);
+          }
+          
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('friend, has_paid, subscription_status, trial_end_date')
+            .eq('id', user.id)
+            .single();
+          
+          if (profileError) {
+            console.error(`[Auth] ${timestamp} - Fallback query failed:`, profileError);
+            return;
+          }
+          
+          if (profile) {
+            if (import.meta.env.DEV) {
+              console.log(`[Auth] ${timestamp} - Fallback profile data:`, profile);
+            }
+            
+            // Apply friend status immediately if found
+            if (profile.friend) {
+              if (import.meta.env.DEV) {
+                console.log(`[Auth] ${timestamp} - FALLBACK: Friend status found, granting immediate access`);
+              }
+              setFriend(true);
+              setHasAccess(true);
+              setSubscriptionStatus('friend');
+              setHasPaid(profile.has_paid || false);
+              setTrialEndDate(profile.trial_end_date);
+              return;
+            }
+            
+            // Apply other subscription data
+            setFriend(false);
+            setHasPaid(profile.has_paid || false);
+            setSubscriptionStatus(profile.subscription_status || 'inactive');
+            setTrialEndDate(profile.trial_end_date);
+            const access = calculateAccess(profile.has_paid || false, false, profile.subscription_status || 'inactive', profile.trial_end_date);
+            setHasAccess(access);
+          }
+        }
+        return;
+      }
+
+      if (data) {
+        if (import.meta.env.DEV) {
+          console.log(`[Auth] ${timestamp} - Edge function success:`, data);
+        }
+        
+        setSubscriptionStatus(data.subscription_status);
+        setTrialEndDate(data.trial_end_date);
+        setHasPaid(data.has_paid);
+        setFriend(data.is_friend);
+        
+        const access = calculateAccess(data.has_paid, data.is_friend, data.subscription_status, data.trial_end_date);
+        setHasAccess(access);
+        
+        if (import.meta.env.DEV) {
+          console.log(`[Auth] ${timestamp} - Final access state:`, {
+            hasAccess: access,
+            friend: data.is_friend,
+            hasPaid: data.has_paid,
+            subscriptionStatus: data.subscription_status,
+            trialEndDate: data.trial_end_date
+          });
+        }
+      }
+    } catch (error) {
+      console.error(`[Auth] ${timestamp} - Unexpected error:`, error);
+      
+      // Emergency fallback for unexpected errors
+      if (user?.id) {
+        try {
           const { data: profile } = await supabase
             .from('profiles')
             .select('friend')
@@ -325,32 +418,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
           
           if (profile?.friend) {
             if (import.meta.env.DEV) {
-              console.log('[Auth] Fallback: Friend status found in database');
+              console.log(`[Auth] ${timestamp} - Emergency fallback: Friend access granted`);
             }
             setFriend(true);
             setHasAccess(true);
           }
-        }
-        return;
-      }
-
-      if (data) {
-        if (import.meta.env.DEV) {
-          console.log('[Auth] Subscription check result:', data);
-        }
-        setSubscriptionStatus(data.subscription_status);
-        setTrialEndDate(data.trial_end_date);
-        setHasPaid(data.has_paid);
-        setFriend(data.is_friend);
-        const access = calculateAccess(data.has_paid, data.is_friend, data.subscription_status, data.trial_end_date);
-        setHasAccess(access);
-        
-        if (import.meta.env.DEV) {
-          console.log('[Auth] Access granted:', access, { paid: data.has_paid, friend: data.is_friend, status: data.subscription_status });
+        } catch (fallbackError) {
+          console.error(`[Auth] ${timestamp} - Emergency fallback failed:`, fallbackError);
         }
       }
-    } catch (error) {
-      console.error('Error checking subscription:', error);
     }
   };
 
