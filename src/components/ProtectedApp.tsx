@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAuth } from '@/providers/AuthProvider';
-import { useSubscriptionAccess } from '@/hooks/useSubscriptionAccess';
 import SubscriptionBlockingModal from './subscription/SubscriptionBlockingModal';
 
 interface ProtectedAppProps {
@@ -8,22 +7,23 @@ interface ProtectedAppProps {
 }
 
 const ProtectedApp: React.FC<ProtectedAppProps> = ({ children }) => {
-  const { isLoggedIn, isAuthReady, checkSubscription, subscriptionLoading } = useAuth();
-  const { hasAccess } = useSubscriptionAccess();
+  const { isLoggedIn, isAuthReady, hasAccess, accessCheckComplete, checkSubscription, subscriptionLoading } = useAuth();
 
   // Show blocking modal only if:
   // 1. Auth is ready
   // 2. User is logged in 
-  // 3. User doesn't have access
-  // 4. Subscription check is not loading (to prevent premature modal display)
-  const shouldShowBlockingModal = isAuthReady && isLoggedIn && !hasAccess && !subscriptionLoading;
+  // 3. Access check is complete (prevents premature modal display)
+  // 4. User explicitly doesn't have access (hasAccess === false, not just falsy)
+  // 5. Subscription check is not loading
+  const shouldShowBlockingModal = isAuthReady && isLoggedIn && accessCheckComplete && hasAccess === false && !subscriptionLoading;
 
   // Development debugging for modal logic
   if (import.meta.env.DEV) {
-    console.log('[ProtectedApp] Modal decision:', {
+    console.log('[ProtectedApp] Sequential Access Modal Decision:', {
       isAuthReady,
       isLoggedIn,
       hasAccess,
+      accessCheckComplete,
       subscriptionLoading,
       shouldShowBlockingModal,
       timestamp: new Date().toISOString()

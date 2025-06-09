@@ -27,7 +27,8 @@ interface AuthContextType {
   isAuthReady: boolean;
   isLoading: boolean;
   isLoggedIn: boolean;
-  hasAccess: boolean;
+  hasAccess: boolean | null;
+  accessCheckComplete: boolean;
   subscriptionStatus: string | null;
   trialEndDate: string | null;
   hasPaid: boolean;
@@ -71,7 +72,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const [trialEndDate, setTrialEndDate] = useState<string | null>(null);
   const [hasPaid, setHasPaid] = useState(false);
   const [friend, setFriend] = useState(false);
-  const [hasAccess, setHasAccess] = useState(false);
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null); // null = not checked yet, false = no access, true = has access
+  const [accessCheckComplete, setAccessCheckComplete] = useState(false);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
 
   // Helper function to map Supabase user to our User type
@@ -295,18 +297,49 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  // Calculate hasAccess based on subscription status
-  const calculateAccess = (paid: boolean, isFriend: boolean, status: string | null, endDate: string | null): boolean => {
-    // Friend access always takes precedence
+  // Sequential access control flow as specified by user
+  const calculateSequentialAccess = (paid: boolean, isFriend: boolean, status: string | null, endDate: string | null): boolean => {
+    const timestamp = new Date().toISOString();
+    
+    if (import.meta.env.DEV) {
+      console.log(`[Auth] ${timestamp} - Starting sequential access check:`, {
+        isFriend,
+        status,
+        endDate,
+        paid
+      });
+    }
+
+    // Step 1: Check if user is marked as a friend
     if (isFriend) {
       if (import.meta.env.DEV) {
-        console.log('[Auth] Friend access granted');
+        console.log(`[Auth] ${timestamp} - STEP 1: Friend status found - granting immediate access`);
       }
       return true;
     }
-    if (paid) return true;
+
+    // Step 2: Check if user's free trial is active
     if (status === 'trial' && endDate) {
-      return new Date(endDate) > new Date();
+      const isTrialActive = new Date(endDate) > new Date();
+      if (isTrialActive) {
+        if (import.meta.env.DEV) {
+          console.log(`[Auth] ${timestamp} - STEP 2: Active trial found - granting access`);
+        }
+        return true;
+      }
+    }
+
+    // Step 3: Check if user has an active paying membership
+    if (paid) {
+      if (import.meta.env.DEV) {
+        console.log(`[Auth] ${timestamp} - STEP 3: Paid membership found - granting access`);
+      }
+      return true;
+    }
+
+    // Step 4: No access conditions met - blocking modal should be shown
+    if (import.meta.env.DEV) {
+      console.log(`[Auth] ${timestamp} - STEP 4: No access conditions met - denying access`);
     }
     return false;
   };
@@ -377,7 +410,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             setHasPaid(profile.has_paid || false);
             setSubscriptionStatus(profile.subscription_status || 'inactive');
             setTrialEndDate(profile.trial_end_date);
-            const access = calculateAccess(profile.has_paid || false, false, profile.subscription_status || 'inactive', profile.trial_end_date);
+            const access = calculateSequentialAccess(profile.has_paid || false, false, profile.subscription_status || 'inactive', profile.trial_end_date);
             setHasAccess(access);
           }
         }
@@ -394,7 +427,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         setHasPaid(data.has_paid);
         setFriend(data.is_friend);
         
-        const access = calculateAccess(data.has_paid, data.is_friend, data.subscription_status, data.trial_end_date);
+        const access = calculateSequentialAccess(data.has_paid, data.is_friend, data.subscription_status, data.trial_end_date);
         setHasAccess(access);
         
         if (import.meta.env.DEV) {
@@ -432,6 +465,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       }
     } finally {
       setSubscriptionLoading(false);
+      setAccessCheckComplete(true);
     }
   };
 
@@ -464,6 +498,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     isLoading,
     isLoggedIn,
     hasAccess,
+    accessCheckComplete,
     subscriptionStatus,
     trialEndDate,
     hasPaid,
