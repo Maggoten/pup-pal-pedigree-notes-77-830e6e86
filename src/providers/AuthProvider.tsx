@@ -29,6 +29,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   hasAccess: boolean | null;
   accessCheckComplete: boolean;
+  isAccessChecking: boolean;
   subscriptionStatus: string | null;
   trialEndDate: string | null;
   hasPaid: boolean;
@@ -74,6 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const [friend, setFriend] = useState(false);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null); // null = not checked yet, false = no access, true = has access
   const [accessCheckComplete, setAccessCheckComplete] = useState(false);
+  const [isAccessChecking, setIsAccessChecking] = useState(false);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
 
   // Helper function to map Supabase user to our User type
@@ -155,6 +157,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
           setFriend(false);
           setHasAccess(null); // null instead of false to prevent modal flash
           setAccessCheckComplete(true); // Complete the check for signed out state
+          setIsAccessChecking(false); // Clear access checking state
           setSubscriptionLoading(false);
         }
         
@@ -360,6 +363,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       return;
     }
     
+    // Set access checking state immediately when starting the check
+    setIsAccessChecking(true);
     setSubscriptionLoading(true);
     const timestamp = new Date().toISOString();
     
@@ -473,6 +478,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     } finally {
       setSubscriptionLoading(false);
       setAccessCheckComplete(true);
+      setIsAccessChecking(false);
     }
   };
 
@@ -506,6 +512,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     isLoggedIn,
     hasAccess,
     accessCheckComplete,
+    isAccessChecking,
     subscriptionStatus,
     trialEndDate,
     hasPaid,
