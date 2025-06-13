@@ -112,6 +112,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             // Use setTimeout to avoid calling during auth initialization
             checkSubscription();
           }, 500);
+        } else {
+          // CRITICAL: If no session, mark access check as complete to prevent modal flash
+          setAccessCheckComplete(true);
+          setSubscriptionLoading(false);
+          setHasAccess(null); // Explicitly null for no session state
         }
       } catch (error) {
         console.error("Failed to get initial session:", error);
@@ -148,7 +153,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
           setTrialEndDate(null);
           setHasPaid(false);
           setFriend(false);
-          setHasAccess(false);
+          setHasAccess(null); // null instead of false to prevent modal flash
+          setAccessCheckComplete(true); // Complete the check for signed out state
+          setSubscriptionLoading(false);
         }
         
         // Ensure auth is marked as ready on any auth event

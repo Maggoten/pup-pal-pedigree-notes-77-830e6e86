@@ -13,7 +13,7 @@ const ProtectedApp: React.FC<ProtectedAppProps> = ({ children }) => {
   // 1. Auth is ready
   // 2. User is logged in 
   // 3. Access check is complete (prevents premature modal display)
-  // 4. User explicitly doesn't have access (hasAccess === false, not just falsy)
+  // 4. User explicitly doesn't have access (hasAccess === false, not just falsy/null)
   // 5. Subscription check is not loading
   const shouldShowBlockingModal = isAuthReady && isLoggedIn && accessCheckComplete && hasAccess === false && !subscriptionLoading;
 
