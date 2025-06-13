@@ -57,29 +57,42 @@ const Login: React.FC = () => {
       const success = await register(registerData);
       
       if (success) {
-        console.log('Login page: Registration successful, creating Stripe subscription');
+        console.log('Login page: Registration successful, creating Stripe checkout');
         
-        // Create Stripe subscription with trial immediately after registration
+        // Create Stripe checkout session for payment collection
         try {
           const { data: { session } } = await supabase.auth.getSession();
           if (session) {
-            const { data: subscriptionData, error: subscriptionError } = await supabase.functions.invoke('create-subscription', {
+            const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
               headers: {
                 Authorization: `Bearer ${session.access_token}`,
               },
             });
             
-            if (subscriptionError) {
-              console.error('Login page: Stripe subscription creation failed:', subscriptionError);
-            } else {
-              console.log('Login page: Stripe subscription created successfully');
+            if (checkoutError) {
+              console.error('Login page: Stripe checkout creation failed:', checkoutError);
+              toast({
+                title: "Payment setup required",
+                description: "Please complete your payment setup to start your trial.",
+                variant: "destructive",
+              });
+            } else if (checkoutData?.checkout_url) {
+              console.log('Login page: Redirecting to Stripe checkout');
+              // Redirect to Stripe checkout
+              window.location.href = checkoutData.checkout_url;
+              return; // Don't continue with local navigation
             }
           }
         } catch (stripeError) {
-          console.error('Login page: Stripe subscription creation failed:', stripeError);
-          // Continue anyway - user can still use the app
+          console.error('Login page: Stripe checkout creation failed:', stripeError);
+          toast({
+            title: "Payment setup failed",
+            description: "There was an issue setting up payment. Please try again.",
+            variant: "destructive",
+          });
         }
         
+        // Fallback: navigate to home if checkout fails
         navigate('/');
       } else {
         console.log('Login page: Registration failed');

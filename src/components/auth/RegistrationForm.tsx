@@ -107,6 +107,16 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           )}
         />
 
+        <div className="bg-warmbeige-100/50 border border-warmbeige-300 rounded-md p-4 mb-4">
+          <h4 className="text-brown-800 font-semibold mb-2">What happens next?</h4>
+          <div className="text-brown-600 text-sm space-y-1">
+            <p>• Your account will be created instantly</p>
+            <p>• You'll be redirected to secure payment setup</p>
+            <p>• Your 30-day free trial starts immediately</p>
+            <p>• No charges until your trial ends</p>
+          </div>
+        </div>
+
         <FormField
           control={form.control}
           name="agreeToTerms"
