@@ -20,13 +20,26 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    // Check environment variables with detailed logging
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     const priceId = Deno.env.get("STRIPE_PRICE_ID");
     
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    if (!priceId) throw new Error("STRIPE_PRICE_ID is not set");
+    logStep("Environment check", { 
+      hasStripeKey: !!stripeKey, 
+      hasPriceId: !!priceId,
+      priceIdValue: priceId ? `${priceId.substring(0, 8)}...` : 'undefined'
+    });
     
-    logStep("Stripe credentials verified", { priceId });
+    if (!stripeKey) {
+      logStep("ERROR: STRIPE_SECRET_KEY is missing");
+      throw new Error("STRIPE_SECRET_KEY is not configured in Supabase secrets");
+    }
+    if (!priceId) {
+      logStep("ERROR: STRIPE_PRICE_ID is missing");
+      throw new Error("STRIPE_PRICE_ID is not configured in Supabase secrets");
+    }
+    
+    logStep("Stripe credentials verified", { priceId: `${priceId.substring(0, 12)}...` });
 
     // Initialize Supabase with service role key
     const supabaseClient = createClient(
