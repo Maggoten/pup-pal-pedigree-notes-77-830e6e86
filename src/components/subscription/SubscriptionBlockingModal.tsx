@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/providers/AuthProvider';
@@ -10,15 +10,59 @@ interface SubscriptionBlockingModalProps {
 }
 
 const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ isOpen }) => {
-  const { logout, user } = useAuth();
+  const { logout, user, subscriptionStatus, trialEndDate } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [modalMessage, setModalMessage] = useState({
+    title: 'Your free trial has ended',
+    description: 'To continue using Breeding Journey, please activate your subscription.',
+    buttonText: 'Activate Subscription'
+  });
+
+  // Update modal message based on subscription status
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (import.meta.env.DEV) {
+      console.log('[SubscriptionBlockingModal] Current subscription status:', { 
+        subscriptionStatus, 
+        trialEndDate 
+      });
+    }
+
+    if (subscriptionStatus === 'canceled') {
+      setModalMessage({
+        title: 'Subscription Cancelled',
+        description: 'Your subscription was cancelled and your trial period has ended. To continue using Breeding Journey, please reactivate your subscription.',
+        buttonText: 'Reactivate Subscription'
+      });
+    } else if (subscriptionStatus === 'past_due') {
+      setModalMessage({
+        title: 'Payment Required',
+        description: 'Your payment is past due. Please update your payment method to continue using Breeding Journey.',
+        buttonText: 'Update Payment'
+      });
+    } else if (subscriptionStatus === 'inactive' || !subscriptionStatus) {
+      setModalMessage({
+        title: 'Complete Your Registration',
+        description: 'To access Breeding Journey, please complete your payment setup and start your 30-day free trial.',
+        buttonText: 'Start Free Trial'
+      });
+    } else {
+      // Default message for trial ended
+      setModalMessage({
+        title: 'Your free trial has ended',
+        description: 'To continue using Breeding Journey, please activate your subscription.',
+        buttonText: 'Activate Subscription'
+      });
+    }
+  }, [isOpen, subscriptionStatus, trialEndDate]);
 
   const handleActivateSubscription = async () => {
     setIsLoading(true);
     
     try {
       if (import.meta.env.DEV) {
-        console.log('[SubscriptionBlockingModal] Starting activation process');
+        console.log('[SubscriptionBlockingModal] Starting activation process for status:', subscriptionStatus);
       }
 
       const { data: { session } } = await supabase.auth.getSession();
@@ -30,7 +74,7 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
       // Check if user has a stripe_customer_id first
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('stripe_customer_id')
+        .select('stripe_customer_id, subscription_status')
         .eq('id', user?.id)
         .single();
 
@@ -42,34 +86,41 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
         return;
       }
 
-      // If no stripe_customer_id, try to create subscription first
+      // If no stripe_customer_id, use registration checkout for payment collection
       if (!profile?.stripe_customer_id) {
         if (import.meta.env.DEV) {
-          console.log('[SubscriptionBlockingModal] No stripe_customer_id found, creating subscription');
+          console.log('[SubscriptionBlockingModal] No stripe_customer_id found, redirecting to registration checkout');
         }
         
-        const { data: subscriptionData, error: subscriptionError } = await supabase.functions.invoke('create-subscription', {
+        const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
           },
         });
 
-        if (subscriptionError) {
+        if (checkoutError) {
           if (import.meta.env.DEV) {
-            console.error('[SubscriptionBlockingModal] Error creating subscription:', subscriptionError);
+            console.error('[SubscriptionBlockingModal] Error creating registration checkout:', checkoutError);
           }
-          toast.error('Unable to create subscription. Please try again.');
+          toast.error('Unable to start trial setup. Please try again.');
           return;
         }
 
-        if (import.meta.env.DEV) {
-          console.log('[SubscriptionBlockingModal] Subscription created successfully');
+        if (checkoutData?.checkout_url) {
+          if (import.meta.env.DEV) {
+            console.log('[SubscriptionBlockingModal] Redirecting to Stripe checkout for trial setup');
+          }
+          window.location.href = checkoutData.checkout_url;
+          return;
+        } else {
+          toast.error('No checkout URL received');
+          return;
         }
       }
 
-      // Now try to open customer portal
+      // User has stripe_customer_id, open customer portal for subscription management
       if (import.meta.env.DEV) {
-        console.log('[SubscriptionBlockingModal] Opening customer portal');
+        console.log('[SubscriptionBlockingModal] Opening customer portal for existing customer');
       }
 
       const { data, error } = await supabase.functions.invoke('customer-portal', {
@@ -113,13 +164,13 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
       <DialogContent className="sm:max-w-md [&>button]:hidden">
         <DialogHeader className="text-center">
           <DialogTitle className="text-xl font-semibold text-brown-800">
-            Your free trial has ended
+            {modalMessage.title}
           </DialogTitle>
         </DialogHeader>
         
         <div className="text-center py-6">
           <p className="text-brown-600 mb-6">
-            To continue using Breeding Journey, please activate your subscription.
+            {modalMessage.description}
           </p>
           
           <div className="space-y-3">
@@ -129,7 +180,7 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
               size="lg"
               disabled={isLoading}
             >
-              {isLoading ? "Opening..." : "Activate Subscription"}
+              {isLoading ? "Opening..." : modalMessage.buttonText}
             </Button>
             
             <Button 

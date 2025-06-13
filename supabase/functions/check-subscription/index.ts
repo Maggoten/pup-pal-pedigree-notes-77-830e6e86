@@ -90,7 +90,7 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
-    // Get active subscriptions for the customer
+    // Get active subscriptions for the customer (including cancelled ones)
     const subscriptions = await stripe.subscriptions.list({
       customer: profile.stripe_customer_id,
       status: 'all',
@@ -108,24 +108,61 @@ serve(async (req) => {
       logStep("Found subscription", { 
         subscriptionId: subscription.id,
         status: subscription.status,
-        trialEnd: subscription.trial_end 
+        trialEnd: subscription.trial_end,
+        currentPeriodEnd: subscription.current_period_end
       });
 
       subscriptionStatus = subscription.status;
       
-      // Check if subscription gives access
+      // Update trial end date if available
+      if (subscription.trial_end) {
+        trialEndDate = new Date(subscription.trial_end * 1000).toISOString();
+      }
+
+      const now = Date.now();
+      const trialEndTime = subscription.trial_end ? subscription.trial_end * 1000 : 0;
+      const isTrialActive = trialEndTime > now;
+
+      // Determine access based on subscription status and trial period
       if (subscription.status === 'active') {
         hasAccess = true;
-        hasPaid = !subscription.trial_end || subscription.trial_end * 1000 < Date.now();
+        hasPaid = !subscription.trial_end || trialEndTime < now;
+        logStep("Active subscription - granting access", { hasPaid });
       } else if (subscription.status === 'trialing') {
         hasAccess = true;
         hasPaid = false;
         subscriptionStatus = 'trial';
-      }
-
-      // Update trial end date if available
-      if (subscription.trial_end) {
-        trialEndDate = new Date(subscription.trial_end * 1000).toISOString();
+        logStep("Trialing subscription - granting trial access");
+      } else if (subscription.status === 'canceled' && isTrialActive) {
+        // CRITICAL: Cancelled subscription but trial is still active
+        hasAccess = true;
+        hasPaid = false;
+        subscriptionStatus = 'canceled_trial';
+        logStep("Cancelled subscription with active trial - granting trial access", {
+          trialEndTime: new Date(trialEndTime).toISOString(),
+          remainingTrialDays: Math.ceil((trialEndTime - now) / (1000 * 60 * 60 * 24))
+        });
+      } else if (subscription.status === 'canceled' && !isTrialActive) {
+        // Cancelled subscription and trial has ended
+        hasAccess = false;
+        subscriptionStatus = 'canceled';
+        logStep("Cancelled subscription with expired trial - no access");
+      } else if (subscription.status === 'past_due') {
+        // Past due subscriptions - check if trial is still active
+        if (isTrialActive) {
+          hasAccess = true;
+          hasPaid = false;
+          subscriptionStatus = 'trial';
+          logStep("Past due subscription with active trial - granting trial access");
+        } else {
+          hasAccess = false;
+          subscriptionStatus = 'past_due';
+          logStep("Past due subscription - no access");
+        }
+      } else {
+        // Other statuses (incomplete, incomplete_expired, unpaid)
+        hasAccess = false;
+        logStep("Subscription in non-active status", { status: subscription.status });
       }
 
       // Update profile with latest info
@@ -139,7 +176,12 @@ serve(async (req) => {
         })
         .eq('id', user.id);
 
-      logStep("Updated profile with latest subscription info");
+      logStep("Updated profile with latest subscription info", { 
+        subscriptionStatus, 
+        hasAccess, 
+        hasPaid,
+        trialEndDate 
+      });
     }
 
     logStep("Final response", {
