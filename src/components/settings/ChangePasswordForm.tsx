@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Progress } from '@/components/ui/progress';
 import { Eye, EyeOff, Lock, Shield, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
@@ -21,6 +21,7 @@ import {
 const ChangePasswordForm: React.FC = () => {
   const { updatePassword } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -46,6 +47,7 @@ const ChangePasswordForm: React.FC = () => {
       if (success) {
         toast.success('Password updated successfully');
         reset();
+        setIsDialogOpen(false); // Close dialog on success
       } else {
         toast.error('Failed to update password. Please check your current password.');
       }
@@ -54,6 +56,7 @@ const ChangePasswordForm: React.FC = () => {
       toast.error('An unexpected error occurred while updating your password');
     } finally {
       setIsLoading(false);
+      setIsDialogOpen(false); // Close dialog on error too
     }
   };
 
@@ -194,16 +197,16 @@ const ChangePasswordForm: React.FC = () => {
 
           {/* Submit Button */}
           <div className="flex gap-3">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  type="button"
-                  disabled={isLoading || !passwordStrength.meetsRequirements}
-                  className="bg-warmgreen-600 hover:bg-warmgreen-700 text-white"
-                >
-                  {isLoading ? "Updating..." : "Update Password"}
-                </Button>
-              </AlertDialogTrigger>
+            <Button 
+              type="button"
+              disabled={isLoading || !passwordStrength.meetsRequirements}
+              className="bg-warmgreen-600 hover:bg-warmgreen-700 text-white"
+              onClick={() => setIsDialogOpen(true)}
+            >
+              {isLoading ? "Updating..." : "Update Password"}
+            </Button>
+            
+            <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Confirm Password Change</AlertDialogTitle>
