@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/providers/AuthProvider';
 import DeleteAccountSection from './DeleteAccountSection';
 import SubscriptionSettings from '@/components/subscription/SubscriptionSettings';
+import ChangePasswordForm from './ChangePasswordForm';
 
 const AccountSettings: React.FC = () => {
   const { user, logout } = useAuth();
@@ -42,6 +43,8 @@ const AccountSettings: React.FC = () => {
       </Card>
       
       <SubscriptionSettings />
+      
+      <ChangePasswordForm />
       
       <DeleteAccountSection />
     </div>

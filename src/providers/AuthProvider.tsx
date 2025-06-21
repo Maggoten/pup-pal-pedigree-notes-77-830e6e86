@@ -41,6 +41,7 @@ interface AuthContextType {
   register: (userData: RegisterData) => Promise<boolean>;
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<boolean>;
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
   checkSubscription: () => Promise<void>;
 }
 
@@ -307,6 +308,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
+  // Update password method
+  const updatePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    if (!user?.email) {
+      toast.error("You must be logged in to update your password");
+      return false;
+    }
+
+    setIsLoading(true);
+    try {
+      // First verify the current password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword
+      });
+
+      if (signInError) {
+        toast.error("Current password is incorrect");
+        return false;
+      }
+
+      // Update the password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (updateError) {
+        console.error("Password update error:", updateError);
+        toast.error("Failed to update password. Please try again.");
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Unexpected error during password update:", error);
+      toast.error("An unexpected error occurred while updating your password");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Sequential access control flow as specified by user
   const calculateSequentialAccess = (paid: boolean, isFriend: boolean, status: string | null, endDate: string | null): boolean => {
     const timestamp = new Date().toISOString();
@@ -524,6 +566,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     register,
     signOut,
     deleteAccount,
+    updatePassword,
     checkSubscription,
   };
 
