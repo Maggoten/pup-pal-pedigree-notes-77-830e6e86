@@ -186,7 +186,7 @@ const ChangePasswordForm: React.FC = () => {
               <div className="text-sm text-blue-800">
                 <p className="font-medium">Security Notice</p>
                 <p className="text-xs mt-1">
-                  Changing your password will sign you out of all other devices for security.
+                  Your password will be updated securely. You'll remain logged in on this device.
                 </p>
               </div>
             </div>
@@ -208,7 +208,7 @@ const ChangePasswordForm: React.FC = () => {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Confirm Password Change</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to change your password? This action will sign you out of all other devices for security.
+                    Are you sure you want to change your password? Your new password will take effect immediately.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

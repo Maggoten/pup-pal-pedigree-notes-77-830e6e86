@@ -257,9 +257,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // Only show error if it's not a missing session error
+      if (error && !error.message?.includes('session_not_found') && !error.message?.includes('Session not found')) {
+        console.error("Sign out error:", error);
+        toast.error("Failed to sign out properly");
+      }
     } catch (error: any) {
-      alert(error.error_description || error.message);
+      // Handle gracefully - don't show error popups for missing sessions during logout
+      console.error("Sign out error:", error);
+      if (!error.message?.includes('session_not_found') && !error.message?.includes('Session not found')) {
+        toast.error("An error occurred during sign out");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -337,6 +345,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         console.error("Password update error:", updateError);
         toast.error("Failed to update password. Please try again.");
         return false;
+      }
+
+      // Refresh the session to ensure the user stays logged in with updated credentials
+      const { data: { session: refreshedSession }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error("Session refresh error after password update:", sessionError);
+        // Still return true since password was updated successfully
+      } else if (refreshedSession) {
+        // Update the session and user state with fresh data
+        setSession(refreshedSession);
+        setSupabaseUser(refreshedSession.user);
+        setUser(mapSupabaseUser(refreshedSession.user));
+        if (import.meta.env.DEV) {
+          console.log("Session refreshed successfully after password update");
+        }
       }
 
       return true;
