@@ -67,32 +67,32 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         updates.vaccinationDate = null as any;
       }
       
-   if (values.gender === 'female') {
-  if (values.heatHistory) {
-    const currentHeatDates = JSON.stringify(dog.heatHistory || []);
-    const convertedHeatHistory = values.heatHistory.map(heat => ({
-      date: heat.date ? heat.date.toISOString().split('T')[0] : ''
-    }));
+      if (values.gender === 'female') {
+        if (values.heatHistory) {
+          const currentHeatDates = JSON.stringify(dog.heatHistory || []);
+          const convertedHeatHistory = values.heatHistory.map(heat => ({
+            date: heat.date ? heat.date.toISOString().split('T')[0] : ''
+          }));
 
-    const newHeatDates = JSON.stringify(convertedHeatHistory);
-    if (currentHeatDates !== newHeatDates) {
-      updates.heatHistory = convertedHeatHistory;
-    }
-  }
+          const newHeatDates = JSON.stringify(convertedHeatHistory);
+          if (currentHeatDates !== newHeatDates) {
+            updates.heatHistory = convertedHeatHistory;
+          }
+        }
 
-  // ALLTID skicka heatInterval om det är en tik
-  updates.heatInterval = values.heatInterval;
-} // ✅ den här avslutar hela 'if (values.gender === "female")' blocket
+        // Always send heatInterval for female dogs
+        updates.heatInterval = values.heatInterval;
+      }
 
-if (Object.keys(updates).length === 0) {
-  toast({
-    title: "No Changes",
-    description: "No changes were detected to save."
-  });
-  setIsEditing(false);
-  setIsSaving(false);
-  return;
-}
+      if (Object.keys(updates).length === 0) {
+        toast({
+          title: "No Changes",
+          description: "No changes were detected to save."
+        });
+        setIsEditing(false);
+        setIsSaving(false);
+        return;
+      }
    
       const result = await updateDog(dog.id, updates);
       
