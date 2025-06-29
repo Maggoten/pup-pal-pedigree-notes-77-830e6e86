@@ -58,35 +58,95 @@ const ResetPassword: React.FC = () => {
   useEffect(() => {
     const validateTokens = async () => {
       try {
+        // Log all URL parameters for debugging
+        const allParams = Object.fromEntries(searchParams);
+        console.log('Password reset URL parameters:', allParams);
+
+        // Check for different token formats
+        const code = searchParams.get('code');
+        const token = searchParams.get('token');
+        const type = searchParams.get('type');
         const accessToken = searchParams.get('access_token');
         const refreshToken = searchParams.get('refresh_token');
 
-        if (!accessToken || !refreshToken) {
-          setTokenError('Invalid or missing password reset tokens. Please request a new password reset link.');
+        // Handle PKCE flow (code parameter)
+        if (code) {
+          console.log('Using PKCE flow with code parameter');
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          
+          if (error) {
+            console.error('PKCE token exchange error:', error);
+            setTokenError('Invalid or expired password reset link. Please request a new password reset.');
+            setIsValidatingTokens(false);
+            return;
+          }
+
+          if (!data.session) {
+            setTokenError('Unable to establish session. Please request a new password reset link.');
+            setIsValidatingTokens(false);
+            return;
+          }
+
+          console.log('Password reset session established successfully via PKCE');
           setIsValidatingTokens(false);
           return;
         }
 
-        // Set the session using the tokens from the URL
-        const { data, error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken
-        });
+        // Handle legacy token flow (token + type=recovery)
+        if (token && type === 'recovery') {
+          console.log('Using legacy token flow');
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: token,
+            type: 'recovery'
+          });
+          
+          if (error) {
+            console.error('Token verification error:', error);
+            setTokenError('Invalid or expired password reset link. Please request a new password reset.');
+            setIsValidatingTokens(false);
+            return;
+          }
 
-        if (error) {
-          console.error('Token validation error:', error);
-          setTokenError('Invalid or expired password reset link. Please request a new password reset.');
+          if (!data.session) {
+            setTokenError('Unable to establish session. Please request a new password reset link.');
+            setIsValidatingTokens(false);
+            return;
+          }
+
+          console.log('Password reset session established successfully via token verification');
           setIsValidatingTokens(false);
           return;
         }
 
-        if (!data.session) {
-          setTokenError('Unable to establish session. Please request a new password reset link.');
+        // Handle direct access/refresh token flow (fallback)
+        if (accessToken && refreshToken) {
+          console.log('Using direct token flow');
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+
+          if (error) {
+            console.error('Direct token validation error:', error);
+            setTokenError('Invalid or expired password reset link. Please request a new password reset.');
+            setIsValidatingTokens(false);
+            return;
+          }
+
+          if (!data.session) {
+            setTokenError('Unable to establish session. Please request a new password reset link.');
+            setIsValidatingTokens(false);
+            return;
+          }
+
+          console.log('Password reset session established successfully via direct tokens');
           setIsValidatingTokens(false);
           return;
         }
 
-        console.log('Password reset session established successfully');
+        // No valid tokens found
+        console.error('No valid password reset tokens found in URL');
+        setTokenError('Invalid or missing password reset tokens. Please request a new password reset link.');
         setIsValidatingTokens(false);
       } catch (error) {
         console.error('Unexpected error during token validation:', error);
