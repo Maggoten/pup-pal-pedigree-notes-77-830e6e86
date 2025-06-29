@@ -67,22 +67,22 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         updates.vaccinationDate = null as any;
       }
       
-      if (values.gender === 'female') {
-        if (values.heatHistory) {
-          const currentHeatDates = JSON.stringify(dog.heatHistory || []);
-          const convertedHeatHistory = values.heatHistory.map(heat => ({
-            date: heat.date ? heat.date.toISOString().split('T')[0] : ''
-          }));
-          
-          const newHeatDates = JSON.stringify(convertedHeatHistory);
-          if (currentHeatDates !== newHeatDates) {
-            updates.heatHistory = convertedHeatHistory;
-          }
-        }
-        
-        if (values.heatInterval !== dog.heatInterval) {
-          updates.heatInterval = values.heatInterval;
-        }
+     if (values.gender === 'female') {
+     if (values.heatHistory) {
+    const currentHeatDates = JSON.stringify(dog.heatHistory || []);
+    const convertedHeatHistory = values.heatHistory.map(heat => ({
+      date: heat.date ? heat.date.toISOString().split('T')[0] : ''
+    }));
+
+    const newHeatDates = JSON.stringify(convertedHeatHistory);
+    if (currentHeatDates !== newHeatDates) {
+      updates.heatHistory = convertedHeatHistory;
+    }
+  }
+
+  // ALLTID skicka heatInterval om det är en tik
+  updates.heatInterval = values.heatInterval;
+}
       }
       
       if (Object.keys(updates).length === 0) {
