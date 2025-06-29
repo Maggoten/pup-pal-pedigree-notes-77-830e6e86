@@ -13,6 +13,7 @@ import PregnancyDetails from "./pages/PregnancyDetails";
 import MyLitters from "./pages/MyLitters";
 import Login from "./pages/Login";
 import RegistrationSuccess from "./pages/RegistrationSuccess";
+import ResetPassword from "./pages/ResetPassword";
 import AuthGuard from "./components/AuthGuard";
 import { AuthProvider } from "./providers/AuthProvider";
 import { DogsProvider } from "./context/DogsContext";
@@ -138,6 +139,7 @@ const App = () => {
                     <RouteChangeTracker />
                     <Routes>
                     <Route path="/login" element={<Login />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/registration-success" element={<RegistrationSuccess />} />
                     <Route path="/" element={<Index />} />
                     <Route path="/my-dogs" element={<MyDogs />} />
