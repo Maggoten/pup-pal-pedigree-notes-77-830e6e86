@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
 import { Puppy } from '@/types/breeding';
+import { updatePuppyInDb } from '@/services/puppyService';
 
 import DateTimeSelector from './DateTimeSelector';
 import PuppyWeightTab from './PuppyWeightTab';
@@ -185,7 +186,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     });
   }, [note, selectedDate, selectedTime, localPuppy, puppy.name, onUpdate]);
 
-  const handleDeleteWeight = useCallback((index: number) => {
+  const handleDeleteWeight = useCallback(async (index: number) => {
     const sortedWeightLog = [...(localPuppy.weightLog || [])]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     
@@ -206,9 +207,32 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
 
     setLocalPuppy(updatedPuppy);
     onUpdate(updatedPuppy);
+    
+    // Persist to database
+    try {
+      const success = await updatePuppyInDb(updatedPuppy);
+      if (success) {
+        toast({
+          title: "Weight Record Deleted",
+          description: "The weight measurement has been removed and saved."
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to save the deletion to database.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while saving the deletion.",
+        variant: "destructive"
+      });
+    }
   }, [localPuppy, onUpdate]);
 
-  const handleDeleteHeight = useCallback((index: number) => {
+  const handleDeleteHeight = useCallback(async (index: number) => {
     const sortedHeightLog = [...(localPuppy.heightLog || [])]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     
@@ -221,9 +245,32 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
 
     setLocalPuppy(updatedPuppy);
     onUpdate(updatedPuppy);
+    
+    // Persist to database
+    try {
+      const success = await updatePuppyInDb(updatedPuppy);
+      if (success) {
+        toast({
+          title: "Height Record Deleted",
+          description: "The height measurement has been removed and saved."
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to save the deletion to database.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while saving the deletion.",
+        variant: "destructive"
+      });
+    }
   }, [localPuppy, onUpdate]);
 
-  const handleDeleteNote = useCallback((index: number) => {
+  const handleDeleteNote = useCallback(async (index: number) => {
     const updatedNotes = [...(localPuppy.notes || [])];
     
     updatedNotes.splice(index, 1);
@@ -235,6 +282,29 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
 
     setLocalPuppy(updatedPuppy);
     onUpdate(updatedPuppy);
+    
+    // Persist to database
+    try {
+      const success = await updatePuppyInDb(updatedPuppy);
+      if (success) {
+        toast({
+          title: "Note Deleted",
+          description: "The note has been removed and saved."
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to save the deletion to database.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while saving the deletion.",
+        variant: "destructive"
+      });
+    }
   }, [localPuppy, onUpdate]);
 
   return (
