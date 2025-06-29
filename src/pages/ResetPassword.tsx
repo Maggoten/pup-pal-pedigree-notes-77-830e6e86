@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -35,10 +35,9 @@ type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-  const [isValidatingTokens, setIsValidatingTokens] = useState(true);
-  const [tokenError, setTokenError] = useState<string | null>(null);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -54,109 +53,47 @@ const ResetPassword: React.FC = () => {
   const newPassword = watch('newPassword', '');
   const passwordStrength = validatePasswordStrength(newPassword);
 
-  // Validate tokens on component mount
+  // Handle authentication state changes and check for password recovery
   useEffect(() => {
-    const validateTokens = async () => {
+    const checkAuthState = async () => {
       try {
-        // Log all URL parameters for debugging
-        const allParams = Object.fromEntries(searchParams);
-        console.log('Password reset URL parameters:', allParams);
-
-        // Check for different token formats
-        const code = searchParams.get('code');
-        const token = searchParams.get('token');
-        const type = searchParams.get('type');
-        const accessToken = searchParams.get('access_token');
-        const refreshToken = searchParams.get('refresh_token');
-
-        // Handle PKCE flow (code parameter)
-        if (code) {
-          console.log('Using PKCE flow with code parameter');
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-          
-          if (error) {
-            console.error('PKCE token exchange error:', error);
-            setTokenError('Invalid or expired password reset link. Please request a new password reset.');
-            setIsValidatingTokens(false);
-            return;
-          }
-
-          if (!data.session) {
-            setTokenError('Unable to establish session. Please request a new password reset link.');
-            setIsValidatingTokens(false);
-            return;
-          }
-
-          console.log('Password reset session established successfully via PKCE');
-          setIsValidatingTokens(false);
-          return;
+        // Check if user is already authenticated
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          console.log('User is authenticated, enabling password reset form');
+          setIsRecoveryMode(true);
+        } else {
+          console.log('No authenticated session found');
         }
-
-        // Handle legacy token flow (token + type=recovery)
-        if (token && type === 'recovery') {
-          console.log('Using legacy token flow');
-          const { data, error } = await supabase.auth.verifyOtp({
-            token_hash: token,
-            type: 'recovery'
-          });
-          
-          if (error) {
-            console.error('Token verification error:', error);
-            setTokenError('Invalid or expired password reset link. Please request a new password reset.');
-            setIsValidatingTokens(false);
-            return;
-          }
-
-          if (!data.session) {
-            setTokenError('Unable to establish session. Please request a new password reset link.');
-            setIsValidatingTokens(false);
-            return;
-          }
-
-          console.log('Password reset session established successfully via token verification');
-          setIsValidatingTokens(false);
-          return;
-        }
-
-        // Handle direct access/refresh token flow (fallback)
-        if (accessToken && refreshToken) {
-          console.log('Using direct token flow');
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken
-          });
-
-          if (error) {
-            console.error('Direct token validation error:', error);
-            setTokenError('Invalid or expired password reset link. Please request a new password reset.');
-            setIsValidatingTokens(false);
-            return;
-          }
-
-          if (!data.session) {
-            setTokenError('Unable to establish session. Please request a new password reset link.');
-            setIsValidatingTokens(false);
-            return;
-          }
-
-          console.log('Password reset session established successfully via direct tokens');
-          setIsValidatingTokens(false);
-          return;
-        }
-
-        // No valid tokens found
-        console.error('No valid password reset tokens found in URL');
-        setTokenError('Invalid or missing password reset tokens. Please request a new password reset link.');
-        setIsValidatingTokens(false);
       } catch (error) {
-        console.error('Unexpected error during token validation:', error);
-        setTokenError('An unexpected error occurred. Please try again.');
-        setIsValidatingTokens(false);
+        console.error('Error checking auth state:', error);
+      } finally {
+        setIsCheckingAuth(false);
       }
     };
 
-    validateTokens();
-  }, [searchParams]);
+    checkAuthState();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state change:', event, session?.user?.id);
+      
+      if (event === 'PASSWORD_RECOVERY') {
+        console.log('Password recovery event detected');
+        setIsRecoveryMode(true);
+        setIsCheckingAuth(false);
+      } else if (event === 'SIGNED_IN' && session) {
+        console.log('User signed in during password recovery');
+        setIsRecoveryMode(true);
+        setIsCheckingAuth(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     setIsLoading(true);
@@ -173,7 +110,7 @@ const ResetPassword: React.FC = () => {
 
       toast.success('Password updated successfully! You are now logged in.');
       
-      // Clear URL parameters and redirect to home page
+      // Redirect to home page
       navigate('/', { replace: true });
     } catch (error) {
       console.error('Unexpected error during password update:', error);
@@ -219,22 +156,22 @@ const ResetPassword: React.FC = () => {
     );
   };
 
-  // Show loading state while validating tokens
-  if (isValidatingTokens) {
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="flex flex-col items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-warmgreen-600 mb-4"></div>
-            <p className="text-center text-muted-foreground">Validating reset link...</p>
+            <p className="text-center text-muted-foreground">Checking authentication...</p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // Show error state if token validation failed
-  if (tokenError) {
+  // Show error state if not in recovery mode
+  if (!isRecoveryMode) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -242,9 +179,9 @@ const ResetPassword: React.FC = () => {
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
               <AlertCircle className="h-6 w-6 text-red-600" />
             </div>
-            <CardTitle className="text-red-900">Invalid Reset Link</CardTitle>
+            <CardTitle className="text-red-900">Access Denied</CardTitle>
             <CardDescription className="text-red-700">
-              {tokenError}
+              This page can only be accessed through a valid password reset link. Please request a new password reset from the login page.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -332,7 +269,7 @@ const ResetPassword: React.FC = () => {
                 <div className="text-sm text-blue-800">
                   <p className="font-medium">Security Notice</p>
                   <p className="text-xs mt-1">
-                    After resetting your password, you'll be automatically logged in to your account.
+                    After resetting your password, you'll remain logged in to your account.
                   </p>
                 </div>
               </div>
