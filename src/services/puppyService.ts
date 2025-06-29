@@ -1,12 +1,12 @@
 
-import { LitterService } from './LitterService';
+import { litterService } from './LitterService';
 import { Puppy } from '@/types/breeding';
 
 export const updatePuppyInDb = async (updatedPuppy: Puppy): Promise<boolean> => {
   try {
     console.log('Updating puppy in database:', updatedPuppy.id, updatedPuppy.name);
     
-    const success = await LitterService.updatePuppy(updatedPuppy);
+    const success = await litterService.updatePuppy(updatedPuppy);
     
     if (success) {
       console.log('Successfully updated puppy in database');
