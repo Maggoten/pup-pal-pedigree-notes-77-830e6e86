@@ -9,7 +9,9 @@ import { RegistrationFormValues } from '@/components/auth/RegistrationForm';
 import { RegisterData } from '@/types/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, ArrowRight } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { AlertTriangle, ArrowRight, ArrowLeft, Mail } from 'lucide-react';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -17,6 +19,11 @@ const Login: React.FC = () => {
   const { login, register, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showCancellationMessage, setShowCancellationMessage] = useState(false);
+  
+  // Forgot password state
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [isForgotPasswordLoading, setIsForgotPasswordLoading] = useState(false);
 
   // Check for registration cancellation on component mount
   useEffect(() => {
@@ -200,6 +207,67 @@ const Login: React.FC = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!forgotPasswordEmail) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(forgotPasswordEmail)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsForgotPasswordLoading(true);
+    
+    try {
+      const redirectUrl = `${window.location.origin}/reset-password`;
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+        redirectTo: redirectUrl,
+      });
+
+      if (error) {
+        console.error('Password reset error:', error);
+        toast({
+          title: "Reset failed",
+          description: "Unable to send reset email. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Reset email sent",
+          description: "If your email is registered, you'll receive a password reset link shortly.",
+        });
+        
+        // Reset form and hide forgot password section
+        setForgotPasswordEmail('');
+        setShowForgotPassword(false);
+      }
+    } catch (error) {
+      console.error('Unexpected error during password reset:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsForgotPasswordLoading(false);
+    }
+  };
+
   const effectiveLoading = isLoading || authLoading;
 
   return (
@@ -249,11 +317,92 @@ const Login: React.FC = () => {
         </div>
       )}
       
-      <AuthTabs 
-        onLogin={handleLogin}
-        onRegister={handleRegistration}
-        isLoading={effectiveLoading}
-      />
+      {!showForgotPassword ? (
+        <div className="w-full max-w-md">
+          <AuthTabs 
+            onLogin={handleLogin}
+            onRegister={handleRegistration}
+            isLoading={effectiveLoading}
+          />
+          
+          {/* Forgot Password Link */}
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => setShowForgotPassword(true)}
+              className="text-sm text-warmgreen-600 hover:text-warmgreen-700 underline"
+            >
+              Forgot your password?
+            </button>
+          </div>
+        </div>
+      ) : (
+        <Card className="w-full max-w-md shadow-lg bg-white border-warmbeige-200">
+          <CardHeader className="space-y-1 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-warmgreen-100">
+              <Mail className="h-6 w-6 text-warmgreen-600" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-warmgreen-600 font-playfair">
+              Reset Password
+            </CardTitle>
+            <CardDescription className="text-warmgreen-800">
+              Enter your email address and we'll send you a reset link
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="reset-email" className="text-warmgreen-800">
+                  Email Address
+                </Label>
+                <Input
+                  id="reset-email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={forgotPasswordEmail}
+                  onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                  className="border-warmbeige-200 focus:border-warmgreen-300"
+                  disabled={isForgotPasswordLoading}
+                />
+              </div>
+              
+              <div className="space-y-3">
+                <Button 
+                  type="submit"
+                  disabled={isForgotPasswordLoading}
+                  className="w-full bg-warmgreen-600 hover:bg-warmgreen-700 text-white"
+                >
+                  {isForgotPasswordLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Sending Reset Link...
+                    </div>
+                  ) : (
+                    <>
+                      Send Reset Link
+                      <Mail className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setForgotPasswordEmail('');
+                  }}
+                  disabled={isForgotPasswordLoading}
+                  className="w-full border-warmbeige-300 text-warmgreen-800 hover:bg-warmbeige-50"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Login
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
