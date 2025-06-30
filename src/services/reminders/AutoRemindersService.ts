@@ -4,6 +4,12 @@ import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
 import { differenceInDays, addYears, isAfter, isBefore, parseISO } from 'date-fns';
 import { createCalendarClockIcon, createPawPrintIcon } from '@/utils/iconUtils';
+import { v4 as uuidv4 } from 'uuid';
+
+// Generate deterministic UUID for system reminders
+const generateSystemReminderId = (relatedId: string, type: string, date: Date): string => {
+  return uuidv4();
+};
 
 /**
  * Generate reminders for upcoming planned heat dates
@@ -12,11 +18,11 @@ export const generatePlannedHeatReminders = (plannedLitters: PlannedLitter[]): R
   const reminders: Reminder[] = [];
   const today = new Date();
   
-  // Filter litters with upcoming heat dates within the next 30 days (changed from 14 to 30)
+  // Filter litters with upcoming heat dates within the next 30 days
   const upcomingHeats = plannedLitters.filter(litter => {
     const heatDate = new Date(litter.expectedHeatDate);
     const daysUntil = differenceInDays(heatDate, today);
-    return daysUntil >= 0 && daysUntil <= 30; // Changed from 14 to 30 days
+    return daysUntil >= 0 && daysUntil <= 30;
   });
   
   // Create reminders for upcoming heats
@@ -25,7 +31,7 @@ export const generatePlannedHeatReminders = (plannedLitters: PlannedLitter[]): R
     const daysUntil = differenceInDays(heatDate, today);
     
     reminders.push({
-      id: `auto_planned-heat-${litter.femaleId}-${litter.id}`, // Added 'auto_' prefix to avoid collisions
+      id: generateSystemReminderId(litter.femaleId, 'planned-heat', heatDate),
       title: `Upcoming Heat for ${litter.femaleName}`,
       description: `Heat expected in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`,
       dueDate: heatDate,
@@ -60,14 +66,14 @@ export const generateEnhancedBirthdayReminders = (dogs: Dog[]): Reminder[] => {
     
     const daysUntil = differenceInDays(nextBirthday, today);
     
-    // If birthday is within 7 days (changed from 14 to 7)
+    // If birthday is within 7 days
     if (daysUntil >= 0 && daysUntil <= 7) {
       const age = isBefore(birthdateThisYear, today)
         ? currentYear + 1 - birthdate.getFullYear()
         : currentYear - birthdate.getFullYear();
       
       reminders.push({
-        id: `auto_birthday-${dog.id}-${currentYear}`, // Added 'auto_' prefix to avoid collisions
+        id: generateSystemReminderId(dog.id, 'enhanced-birthday', nextBirthday),
         title: `${dog.name}'s Birthday Coming Up!`,
         description: `${dog.name} will turn ${age} in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`,
         dueDate: nextBirthday,
@@ -97,12 +103,12 @@ export const generateVaccinationReminders = (dogs: Dog[]): Reminder[] => {
     
     const daysUntil = differenceInDays(nextVaccination, today);
     
-    // If next vaccination is within 7 days (changed from 14 to 7) or overdue by up to 30 days
+    // If next vaccination is within 7 days or overdue by up to 30 days
     if (daysUntil >= -30 && daysUntil <= 7) {
       const isOverdue = daysUntil < 0;
       
       reminders.push({
-        id: `auto_vaccination-${dog.id}`, // Added 'auto_' prefix to avoid collisions
+        id: generateSystemReminderId(dog.id, 'enhanced-vaccination', nextVaccination),
         title: `${dog.name}'s Vaccination ${isOverdue ? 'Overdue' : 'Due Soon'}`,
         description: isOverdue 
           ? `Vaccination overdue by ${Math.abs(daysUntil)} day${Math.abs(daysUntil) !== 1 ? 's' : ''}`

@@ -163,7 +163,12 @@ export const useBreedingRemindersProvider = () => {
         
         // Add new system reminders to database in batches
         for (const reminder of newSystemReminders) {
-          await addSystemReminder(reminder);
+          try {
+            await addSystemReminder(reminder);
+            console.log(`[Reminders Debug] Successfully added system reminder: ${reminder.title}`);
+          } catch (error) {
+            console.error(`[Reminders Debug] Failed to add system reminder ${reminder.title}:`, error);
+          }
         }
         
         // Fetch updated reminders from database
@@ -197,17 +202,22 @@ export const useBreedingRemindersProvider = () => {
       const reminder = reminders.find(r => r.id === id);
       if (!reminder) {
         console.error(`[Reminders Debug] Reminder with ID ${id} not found`);
-        return false;
+        throw new Error(`Reminder with ID ${id} not found`);
       }
       
       const newCompletedState = !reminder.isCompleted;
       
       // Now all reminders are persisted to database, so we can update all of them
-      return await updateReminder(id, newCompletedState);
+      const success = await updateReminder(id, newCompletedState);
+      if (!success) {
+        throw new Error('Failed to update reminder in database');
+      }
+      
+      return { id, newCompletedState };
     },
     onMutate: async (id) => {
       // Cancel any outgoing refetches to avoid overwriting our optimistic update
-      await queryClient.cancelQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+      await queryClient.cancelQueries({ queryKey: ['reminders', user?.id, dogs.length, plannedLitters.length] });
       
       // Find the current reminder to toggle its state
       const reminder = reminders.find(r => r.id === id);
@@ -218,10 +228,10 @@ export const useBreedingRemindersProvider = () => {
       const newCompletedState = !reminder.isCompleted;
       
       // Snapshot the previous value
-      const previousReminders = queryClient.getQueryData(['reminders', user?.id, dogs.length]);
+      const previousReminders = queryClient.getQueryData(['reminders', user?.id, dogs.length, plannedLitters.length]);
       
       // Optimistically update the cache
-      queryClient.setQueryData(['reminders', user?.id, dogs.length], (old: Reminder[] = []) => 
+      queryClient.setQueryData(['reminders', user?.id, dogs.length, plannedLitters.length], (old: Reminder[] = []) => 
         old.map(r => r.id === id ? {...r, isCompleted: newCompletedState} : r)
       );
       
@@ -231,22 +241,27 @@ export const useBreedingRemindersProvider = () => {
       console.error("[Reminders Debug] Error marking reminder complete:", err);
       // Rollback to the previous state
       if (context?.previousReminders) {
-        queryClient.setQueryData(['reminders', user?.id, dogs.length], context.previousReminders);
+        queryClient.setQueryData(['reminders', user?.id, dogs.length, plannedLitters.length], context.previousReminders);
       }
-    },
-    onSuccess: (result, id) => {
-      // Find the current reminder to get its new state for the message
-      const reminder = reminders.find(r => r.id === id);
-      const newCompletedState = reminder ? !reminder.isCompleted : true;
-      
-      console.log(`[Reminders Debug] Successfully marked reminder ${id} as ${newCompletedState ? 'completed' : 'not completed'}`);
       
       toast({
-        title: newCompletedState ? "Reminder Completed" : "Reminder Reopened",
-        description: newCompletedState 
+        title: "Error",
+        description: "Failed to update reminder. Please try again.",
+        variant: "destructive"
+      });
+    },
+    onSuccess: (result) => {
+      console.log(`[Reminders Debug] Successfully marked reminder ${result.id} as ${result.newCompletedState ? 'completed' : 'not completed'}`);
+      
+      toast({
+        title: result.newCompletedState ? "Reminder Completed" : "Reminder Reopened",
+        description: result.newCompletedState 
           ? "This task has been marked as completed."
           : "This task has been marked as not completed."
       });
+      
+      // Force a refetch to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length, plannedLitters.length] });
     }
   });
   
@@ -262,7 +277,7 @@ export const useBreedingRemindersProvider = () => {
       });
       
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+      queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length, plannedLitters.length] });
     },
     onError: (error) => {
       console.error("Error adding reminder:", error);
@@ -281,13 +296,13 @@ export const useBreedingRemindersProvider = () => {
     },
     onMutate: async (id) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+      await queryClient.cancelQueries({ queryKey: ['reminders', user?.id, dogs.length, plannedLitters.length] });
       
       // Snapshot the previous value
-      const previousReminders = queryClient.getQueryData(['reminders', user?.id, dogs.length]);
+      const previousReminders = queryClient.getQueryData(['reminders', user?.id, dogs.length, plannedLitters.length]);
       
       // Optimistically update
-      queryClient.setQueryData(['reminders', user?.id, dogs.length], (old: Reminder[] = []) => 
+      queryClient.setQueryData(['reminders', user?.id, dogs.length, plannedLitters.length], (old: Reminder[] = []) => 
         old.filter(r => r.id !== id)
       );
       
@@ -297,7 +312,7 @@ export const useBreedingRemindersProvider = () => {
       console.error("Error deleting reminder:", err);
       // Rollback on error
       if (context?.previousReminders) {
-        queryClient.setQueryData(['reminders', user?.id, dogs.length], context.previousReminders);
+        queryClient.setQueryData(['reminders', user?.id, dogs.length, plannedLitters.length], context.previousReminders);
       }
     },
     onSuccess: () => {
@@ -333,7 +348,7 @@ export const useBreedingRemindersProvider = () => {
   
   // Force refetch function for manual refresh
   const refreshReminderData = () => {
-    queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length] });
+    queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length, plannedLitters.length] });
   };
   
   return {

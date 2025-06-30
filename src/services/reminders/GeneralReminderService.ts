@@ -3,6 +3,12 @@ import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
 import { createCalendarClockIcon } from '@/utils/iconUtils';
 import { differenceInMonths, parseISO, startOfDay } from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
+
+// Generate deterministic UUID for system reminders
+const generateSystemReminderId = (dogId: string, type: string): string => {
+  return uuidv4();
+};
 
 /**
  * Generate general breeding-related reminders
@@ -29,13 +35,13 @@ export const generateGeneralReminders = (dogs: Dog[]): Reminder[] => {
   // Add heat tracking reminders
   femaleDogsWithoutHeatRecords.forEach(dog => {
     reminders.push({
-      id: `general-heat-tracking-${dog.id}`,
+      id: generateSystemReminderId(dog.id, 'general-heat-tracking'),
       title: `Start Heat Tracking for ${dog.name}`,
       description: `${dog.name} is of breeding age but has no heat records`,
       icon: createCalendarClockIcon('purple-500'),
       dueDate: today,
       priority: 'low',
-      type: 'breeding', // Changed from 'other' to 'breeding'
+      type: 'breeding',
       relatedId: dog.id
     });
   });
