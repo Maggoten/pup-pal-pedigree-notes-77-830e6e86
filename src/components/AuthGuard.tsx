@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
@@ -30,7 +29,7 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
-  const { isLoggedIn, user, isAuthReady, isLoading } = useAuth();
+  const { isLoggedIn, user, isAuthReady, isLoading, isLoggingOut } = useAuth();
   const { toast } = useToast();
   const [showingToast, setShowingToast] = useState(false);
   const [delayComplete, setDelayComplete] = useState(false);
@@ -110,7 +109,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     return () => clearTimeout(timer);
   }, [isAuthReady]);
   
-  // Show toast for authentication issues
+  // Show toast for authentication issues - UPDATED to respect logout state
   useEffect(() => {
     // Only show authentication toast when:
     // 1. Auth is fully ready OR timeout has been reached
@@ -120,6 +119,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     // 5. Delay has completed (prevents flash)
     // 6. No toast is currently showing
     // 7. No active uploads are in progress
+    // 8. NOT currently logging out (prevents "auth needed" during logout)
     const shouldShowToast = 
       (isAuthReady || authTimeout) && 
       !isLoggedIn && 
@@ -127,7 +127,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       !user && 
       delayComplete && 
       !showingToast &&
-      !hasActiveUploads;
+      !hasActiveUploads &&
+      !isLoggingOut; // NEW: Don't show toast during logout
     
     if (shouldShowToast) {
       console.log('[AuthGuard] Showing auth required toast');
@@ -152,7 +153,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     delayComplete, 
     showingToast,
     hasActiveUploads,
-    authTimeout
+    authTimeout,
+    isLoggingOut // NEW: Include logout state in dependencies
   ]);
 
   // Allow bypassing auth check after timeout to prevent infinite loading
@@ -179,11 +181,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // 3. Not on login page
   // 4. No active uploads are in progress
   // 5. Not offline on mobile
+  // 6. NOT currently logging out (prevents redirect race condition)
   const shouldRedirectToLogin = (isAuthReady || authCheckFailed) && 
                               !isLoggedIn && 
                               !isLoginPage && 
                               !hasActiveUploads &&
-                              !(isMobile && isOffline);
+                              !(isMobile && isOffline) &&
+                              !isLoggingOut; // NEW: Don't redirect during logout
   
   if (shouldRedirectToLogin) {
     console.log('[AuthGuard] Redirecting to login page from:', location.pathname);

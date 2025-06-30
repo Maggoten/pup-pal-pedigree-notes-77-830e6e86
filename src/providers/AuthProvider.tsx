@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session } from '@supabase/supabase-js';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { verifySession } from '@/utils/storage';
 import { RegisterData, User } from '@/types/auth';
@@ -27,6 +28,7 @@ interface AuthContextType {
   isAuthReady: boolean;
   isLoading: boolean;
   isLoggedIn: boolean;
+  isLoggingOut: boolean;
   hasAccess: boolean | null;
   accessCheckComplete: boolean;
   isAccessChecking: boolean;
@@ -62,12 +64,14 @@ export const useAuth = (): AuthContextType => {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ 
   children 
 }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   // Subscription state
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
@@ -248,28 +252,69 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  // Logout method to match expected interface
+  // Enhanced logout method with state management and direct navigation
   const logout = async (): Promise<void> => {
-    return signOut();
-  };
-
-  const signOut = async () => {
-    setIsLoading(true);
+    setIsLoggingOut(true);
+    
     try {
       const { error } = await supabase.auth.signOut();
+      
       // Only show error if it's not a missing session error
       if (error && !error.message?.includes('session_not_found') && !error.message?.includes('Session not found')) {
         console.error("Sign out error:", error);
         toast.error("Failed to sign out properly");
+        return;
       }
+      
+      // Immediate navigation to login page with replace to prevent back navigation issues
+      navigate('/login', { replace: true });
+      
     } catch (error: any) {
-      // Handle gracefully - don't show error popups for missing sessions during logout
       console.error("Sign out error:", error);
       if (!error.message?.includes('session_not_found') && !error.message?.includes('Session not found')) {
         toast.error("An error occurred during sign out");
       }
     } finally {
-      setIsLoading(false);
+      // Always reset logout state, even on error
+      setIsLoggingOut(false);
+      
+      // Add timeout fallback to ensure state is reset
+      setTimeout(() => {
+        setIsLoggingOut(false);
+      }, 2000);
+    }
+  };
+
+  // Enhanced signOut method with state management and direct navigation
+  const signOut = async () => {
+    setIsLoggingOut(true);
+    
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      // Only show error if it's not a missing session error
+      if (error && !error.message?.includes('session_not_found') && !error.message?.includes('Session not found')) {
+        console.error("Sign out error:", error);
+        toast.error("Failed to sign out properly");
+        return;
+      }
+      
+      // Immediate navigation to login page with replace to prevent back navigation issues
+      navigate('/login', { replace: true });
+      
+    } catch (error: any) {
+      console.error("Sign out error:", error);
+      if (!error.message?.includes('session_not_found') && !error.message?.includes('Session not found')) {
+        toast.error("An error occurred during sign out");
+      }
+    } finally {
+      // Always reset logout state, even on error
+      setIsLoggingOut(false);
+      
+      // Add timeout fallback to ensure state is reset
+      setTimeout(() => {
+        setIsLoggingOut(false);
+      }, 2000);
     }
   };
 
@@ -576,6 +621,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     isAuthReady,
     isLoading,
     isLoggedIn,
+    isLoggingOut,
     hasAccess,
     accessCheckComplete,
     isAccessChecking,
