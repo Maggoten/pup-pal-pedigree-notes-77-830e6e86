@@ -1,6 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session } from '@supabase/supabase-js';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { verifySession } from '@/utils/storage';
 import { RegisterData, User } from '@/types/auth';
@@ -64,7 +63,6 @@ export const useAuth = (): AuthContextType => {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ 
   children 
 }) => {
-  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -252,7 +250,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  // Enhanced logout method with state management and direct navigation
+  // Enhanced logout method with state management (NO navigation)
   const logout = async (): Promise<void> => {
     setIsLoggingOut(true);
     
@@ -266,8 +264,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         return;
       }
       
-      // Immediate navigation to login page with replace to prevent back navigation issues
-      navigate('/login', { replace: true });
+      // Navigation will be handled by AuthGuard when it detects auth state change
       
     } catch (error: any) {
       console.error("Sign out error:", error);
@@ -285,7 +282,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  // Enhanced signOut method with state management and direct navigation
+  // Enhanced signOut method with state management (NO navigation)
   const signOut = async () => {
     setIsLoggingOut(true);
     
@@ -299,8 +296,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         return;
       }
       
-      // Immediate navigation to login page with replace to prevent back navigation issues
-      navigate('/login', { replace: true });
+      // Navigation will be handled by AuthGuard when it detects auth state change
       
     } catch (error: any) {
       console.error("Sign out error:", error);

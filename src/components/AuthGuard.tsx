@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
@@ -29,6 +29,7 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isLoggedIn, user, isAuthReady, isLoading, isLoggingOut } = useAuth();
   const { toast } = useToast();
   const [showingToast, setShowingToast] = useState(false);
@@ -56,6 +57,15 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     
     return () => clearInterval(uploadCheckInterval);
   }, []);
+  
+  // Handle navigation when user logs out
+  useEffect(() => {
+    // Navigate to login when user becomes logged out (but not during initial loading)
+    if (isAuthReady && !isLoggedIn && !isLoginPage && !isLoading) {
+      console.log('[AuthGuard] User logged out, navigating to login page');
+      navigate('/login', { replace: true });
+    }
+  }, [isLoggedIn, isAuthReady, isLoginPage, isLoading, navigate]);
   
   // Track network state
   useEffect(() => {
