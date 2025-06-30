@@ -36,8 +36,10 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const isMobile = platform.mobile || platform.safari;
   const lastToastTimeRef = useRef<number>(0);
 
-  // Check if user is on the login page
-  const isLoginPage = location.pathname === '/login';
+  // Enhanced check for login-related pages
+  const isLoginRelatedPage = location.pathname === '/login' || 
+                            location.pathname === '/reset-password' || 
+                            location.pathname === '/registration-success';
   
   // Track if there are active uploads to prevent premature redirects
   const [hasActiveUploads, setHasActiveUploads] = useState(false);
@@ -90,7 +92,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     const timer = setTimeout(() => {
       setDelayComplete(true);
       console.log('[AuthGuard] Initial delay complete, can show auth errors now');
-    }, 1000); // Reduced from previous values for faster response
+    }, 1200); // Slightly increased from 1000ms to help with race conditions
     
     return () => clearTimeout(timer);
   }, []);
@@ -109,45 +111,63 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     return () => clearTimeout(timer);
   }, [isAuthReady]);
   
-  // Simplified toast logic using Sonner with debouncing
+  // Enhanced toast logic with improved timing and robust login page detection
   useEffect(() => {
-    // Core conditions for showing auth required toast:
-    // 1. Auth is ready (or timeout reached)
-    // 2. User is not logged in
-    // 3. Not on login page
-    // 4. Not currently logging out
-    // 5. Initial delay complete
-    const shouldShowToast = 
-      (isAuthReady || authTimeout) && 
-      !isLoggedIn && 
-      !isLoginPage && 
-      !isLoggingOut &&
-      delayComplete;
-    
-    if (shouldShowToast) {
-      const currentTime = Date.now();
-      const timeSinceLastToast = currentTime - lastToastTimeRef.current;
+    // Add a small delay to allow location to fully update before showing toast
+    const showToastWithDelay = () => {
+      // Core conditions for showing auth required toast:
+      // 1. Auth is ready (or timeout reached)
+      // 2. User is not logged in
+      // 3. Not on any login-related page (with robust checking)
+      // 4. Not currently logging out
+      // 5. Initial delay complete
+      const shouldShowToast = 
+        (isAuthReady || authTimeout) && 
+        !isLoggedIn && 
+        !isLoginRelatedPage && // Enhanced login page detection
+        !isLoggingOut &&
+        delayComplete;
       
-      // Debounce: only show toast if 3 seconds have passed since last one
-      if (timeSinceLastToast > 3000) {
-        console.log('[AuthGuard] Showing auth required toast');
+      if (shouldShowToast) {
+        const currentTime = Date.now();
+        const timeSinceLastToast = currentTime - lastToastTimeRef.current;
         
-        toast.error("Authentication required", {
-          description: "Please log in to access this page",
-          duration: isMobile ? 4000 : 3000, // Longer duration on mobile
+        // Debounce: only show toast if 3 seconds have passed since last one
+        if (timeSinceLastToast > 3000) {
+          console.log('[AuthGuard] Showing auth required toast for path:', location.pathname);
+          
+          toast.error("Authentication required", {
+            description: "Please log in to access this page",
+            duration: isMobile ? 4000 : 3000, // Longer duration on mobile
+          });
+          
+          lastToastTimeRef.current = currentTime;
+        }
+      } else {
+        console.log('[AuthGuard] Toast conditions not met:', {
+          isAuthReady: isAuthReady || authTimeout,
+          isLoggedIn,
+          isLoginRelatedPage,
+          isLoggingOut,
+          delayComplete,
+          currentPath: location.pathname
         });
-        
-        lastToastTimeRef.current = currentTime;
       }
-    }
+    };
+
+    // Add a slight delay to ensure location is fully updated
+    const timer = setTimeout(showToastWithDelay, 100);
+    
+    return () => clearTimeout(timer);
   }, [
     isLoggedIn, 
-    isLoginPage, 
+    isLoginRelatedPage, // Include in dependencies to react to route changes
     isAuthReady, 
     delayComplete, 
     authTimeout,
     isLoggingOut,
-    isMobile
+    isMobile,
+    location.pathname // Include pathname to ensure updates on navigation
   ]);
 
   // Clear toast debounce timer on successful login
@@ -178,13 +198,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // Only redirect if:
   // 1. Auth is ready
   // 2. User is not logged in 
-  // 3. Not on login page
+  // 3. Not on login-related page
   // 4. No active uploads are in progress
   // 5. Not offline on mobile
   // 6. NOT currently logging out (prevents redirect race condition)
   const shouldRedirectToLogin = (isAuthReady || authCheckFailed) && 
                               !isLoggedIn && 
-                              !isLoginPage && 
+                              !isLoginRelatedPage &&
                               !hasActiveUploads &&
                               !(isMobile && isOffline) &&
                               !isLoggingOut;
@@ -195,8 +215,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   }
 
   // Only redirect if auth is ready and user is logged in and on login page
-  if (isAuthReady && isLoggedIn && isLoginPage) {
-    console.log('[AuthGuard] User already logged in, redirecting from login page');
+  if (isAuthReady && isLoggedIn && isLoginRelatedPage) {
+    console.log('[AuthGuard] User already logged in, redirecting from login-related page');
     return <Navigate to="/" replace />;
   }
 
