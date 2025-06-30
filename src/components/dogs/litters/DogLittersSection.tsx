@@ -58,7 +58,7 @@ const DogLittersSection: React.FC<DogLittersSectionProps> = ({ dog }) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{dog.name}'s Litters</CardTitle>
+          <CardTitle className="text-lg">{dog.name}'s Litters</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
@@ -74,7 +74,7 @@ const DogLittersSection: React.FC<DogLittersSectionProps> = ({ dog }) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{dog.name}'s Litters</CardTitle>
+          <CardTitle className="text-lg">{dog.name}'s Litters</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-red-600 text-center py-4">
@@ -88,7 +88,7 @@ const DogLittersSection: React.FC<DogLittersSectionProps> = ({ dog }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg">
           <Heart className="h-5 w-5" />
           {dog.name}'s Litters
         </CardTitle>
