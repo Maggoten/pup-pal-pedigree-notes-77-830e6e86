@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+
+import React, { useEffect, useState, useRef } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
-import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { debounce, isOnline } from '@/utils/fetchUtils';
+import { toast } from 'sonner';
 
 // Add a global state to track active uploads across components
 let activeUploadsCount = 0;
@@ -29,13 +30,11 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { isLoggedIn, user, isAuthReady, isLoading, isLoggingOut } = useAuth();
-  const { toast } = useToast();
-  const [showingToast, setShowingToast] = useState(false);
   const [delayComplete, setDelayComplete] = useState(false);
   const platform = getPlatformInfo();
   const isMobile = platform.mobile || platform.safari;
+  const lastToastTimeRef = useRef<number>(0);
 
   // Check if user is on the login page
   const isLoginPage = location.pathname === '/login';
@@ -57,15 +56,6 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     
     return () => clearInterval(uploadCheckInterval);
   }, []);
-  
-  // Handle navigation when user logs out
-  useEffect(() => {
-    // Navigate to login when user becomes logged out (but not during initial loading)
-    if (isAuthReady && !isLoggedIn && !isLoginPage && !isLoading) {
-      console.log('[AuthGuard] User logged out, navigating to login page');
-      navigate('/login', { replace: true });
-    }
-  }, [isLoggedIn, isAuthReady, isLoginPage, isLoading, navigate]);
   
   // Track network state
   useEffect(() => {
@@ -119,53 +109,53 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     return () => clearTimeout(timer);
   }, [isAuthReady]);
   
-  // Show toast for authentication issues - UPDATED to respect logout state
+  // Simplified toast logic using Sonner with debouncing
   useEffect(() => {
-    // Only show authentication toast when:
-    // 1. Auth is fully ready OR timeout has been reached
+    // Core conditions for showing auth required toast:
+    // 1. Auth is ready (or timeout reached)
     // 2. User is not logged in
     // 3. Not on login page
-    // 4. No user object exists
-    // 5. Delay has completed (prevents flash)
-    // 6. No toast is currently showing
-    // 7. No active uploads are in progress
-    // 8. NOT currently logging out (prevents "auth needed" during logout)
+    // 4. Not currently logging out
+    // 5. Initial delay complete
     const shouldShowToast = 
       (isAuthReady || authTimeout) && 
       !isLoggedIn && 
       !isLoginPage && 
-      !user && 
-      delayComplete && 
-      !showingToast &&
-      !hasActiveUploads &&
-      !isLoggingOut; // NEW: Don't show toast during logout
+      !isLoggingOut &&
+      delayComplete;
     
     if (shouldShowToast) {
-      console.log('[AuthGuard] Showing auth required toast');
+      const currentTime = Date.now();
+      const timeSinceLastToast = currentTime - lastToastTimeRef.current;
       
-      setShowingToast(true);
-      
-      toast({
-        title: "Authentication required",
-        description: "Please log in to access this page",
-        variant: "destructive",
-        onOpenChange: (open) => {
-          if (!open) setShowingToast(false);
-        }
-      });
+      // Debounce: only show toast if 3 seconds have passed since last one
+      if (timeSinceLastToast > 3000) {
+        console.log('[AuthGuard] Showing auth required toast');
+        
+        toast.error("Authentication required", {
+          description: "Please log in to access this page",
+          duration: isMobile ? 4000 : 3000, // Longer duration on mobile
+        });
+        
+        lastToastTimeRef.current = currentTime;
+      }
     }
   }, [
     isLoggedIn, 
     isLoginPage, 
-    user, 
-    toast, 
     isAuthReady, 
     delayComplete, 
-    showingToast,
-    hasActiveUploads,
     authTimeout,
-    isLoggingOut // NEW: Include logout state in dependencies
+    isLoggingOut,
+    isMobile
   ]);
+
+  // Clear toast debounce timer on successful login
+  useEffect(() => {
+    if (isLoggedIn) {
+      lastToastTimeRef.current = 0;
+    }
+  }, [isLoggedIn]);
 
   // Allow bypassing auth check after timeout to prevent infinite loading
   const authCheckFailed = authTimeout && !isAuthReady;
@@ -197,7 +187,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                               !isLoginPage && 
                               !hasActiveUploads &&
                               !(isMobile && isOffline) &&
-                              !isLoggingOut; // NEW: Don't redirect during logout
+                              !isLoggingOut;
   
   if (shouldRedirectToLogin) {
     console.log('[AuthGuard] Redirecting to login page from:', location.pathname);
