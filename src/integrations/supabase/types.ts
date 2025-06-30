@@ -674,6 +674,7 @@ export type Database = {
           is_deleted: boolean | null
           priority: string
           related_id: string | null
+          source: string | null
           title: string
           type: string
           updated_at: string | null
@@ -688,6 +689,7 @@ export type Database = {
           is_deleted?: boolean | null
           priority: string
           related_id?: string | null
+          source?: string | null
           title: string
           type: string
           updated_at?: string | null
@@ -702,6 +704,7 @@ export type Database = {
           is_deleted?: boolean | null
           priority?: string
           related_id?: string | null
+          source?: string | null
           title?: string
           type?: string
           updated_at?: string | null

@@ -22,7 +22,7 @@ export const fetchReminders = async (): Promise<Reminder[]> => {
       .from('reminders')
       .select('*')
       .eq('is_deleted', false)
-      .eq('user_id', userId)  // Make sure to filter by user_id
+      .eq('user_id', userId)
       .order('due_date', { ascending: true });
       
     if (error) {
@@ -56,7 +56,7 @@ export const fetchReminders = async (): Promise<Reminder[]> => {
   }
 };
 
-// Add a new reminder to Supabase
+// Add a new reminder to Supabase (works for both custom and system-generated)
 export const addReminder = async (input: CustomReminderInput): Promise<boolean> => {
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -75,7 +75,8 @@ export const addReminder = async (input: CustomReminderInput): Promise<boolean> 
         due_date: input.dueDate.toISOString(),
         priority: input.priority,
         type: 'custom',
-        user_id: userId
+        user_id: userId,
+        source: 'custom'
       });
     
     if (error) {
@@ -100,7 +101,50 @@ export const addReminder = async (input: CustomReminderInput): Promise<boolean> 
   }
 };
 
-// Update an existing reminder (including mark as complete/incomplete)
+// New function to add system-generated reminders
+export const addSystemReminder = async (reminder: Reminder): Promise<boolean> => {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData?.session) {
+      console.error('No active session:', sessionError);
+      return false;
+    }
+    
+    const userId = sessionData.session.user.id;
+    
+    // Use upsert to handle conflicts with the unique constraint
+    const { error } = await supabase
+      .from('reminders')
+      .upsert({
+        id: reminder.id,
+        title: reminder.title,
+        description: reminder.description,
+        due_date: reminder.dueDate.toISOString(),
+        priority: reminder.priority,
+        type: reminder.type,
+        related_id: reminder.relatedId,
+        user_id: userId,
+        source: 'system',
+        is_completed: reminder.isCompleted || false,
+        is_deleted: false
+      }, {
+        onConflict: 'user_id,type,related_id,due_date',
+        ignoreDuplicates: false
+      });
+    
+    if (error) {
+      console.error("Error adding system reminder:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error in addSystemReminder:", error);
+    return false;
+  }
+};
+
+// Update an existing reminder (now works for all reminder types)
 export const updateReminder = async (id: string, isCompleted: boolean): Promise<boolean> => {
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -118,7 +162,7 @@ export const updateReminder = async (id: string, isCompleted: boolean): Promise<
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
-      .eq('user_id', userId);  // Make sure we're only updating the user's own reminders
+      .eq('user_id', userId);
     
     if (error) {
       console.error("Error updating reminder:", error);
@@ -137,7 +181,7 @@ export const updateReminder = async (id: string, isCompleted: boolean): Promise<
   }
 };
 
-// Delete (soft delete) a reminder
+// Delete (soft delete) a reminder - now works for all reminder types
 export const deleteReminder = async (id: string): Promise<boolean> => {
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -154,7 +198,7 @@ export const deleteReminder = async (id: string): Promise<boolean> => {
         .from('reminders')
         .delete()
         .eq('id', id)
-        .eq('user_id', userId);  // Make sure we're only deleting the user's own reminders
+        .eq('user_id', userId);
         
       if (error) {
         console.error("Error deleting reminder:", error);
@@ -174,7 +218,7 @@ export const deleteReminder = async (id: string): Promise<boolean> => {
           updated_at: new Date().toISOString()
         })
         .eq('id', id)
-        .eq('user_id', userId);  // Make sure we're only updating the user's own reminders
+        .eq('user_id', userId);
         
       if (error) {
         console.error("Error soft-deleting reminder:", error);
@@ -229,7 +273,8 @@ export const migrateRemindersFromLocalStorage = async (): Promise<boolean> => {
         type: reminder.type,
         related_id: reminder.relatedId,
         is_completed: completedReminderIds.has(reminder.id),
-        user_id: userId
+        user_id: userId,
+        source: 'custom'
       }));
       
       const { error } = await supabase
@@ -253,5 +298,31 @@ export const migrateRemindersFromLocalStorage = async (): Promise<boolean> => {
   } catch (error) {
     console.error("Error in migrateRemindersFromLocalStorage:", error);
     return false;
+  }
+};
+
+// New function to clean up old completed system reminders
+export const cleanupOldReminders = async (): Promise<void> => {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData?.session) {
+      return;
+    }
+    
+    const userId = sessionData.session.user.id;
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    // Delete old completed system reminders
+    await supabase
+      .from('reminders')
+      .delete()
+      .eq('user_id', userId)
+      .eq('source', 'system')
+      .eq('is_completed', true)
+      .lt('updated_at', thirtyDaysAgo.toISOString());
+      
+  } catch (error) {
+    console.error("Error cleaning up old reminders:", error);
   }
 };

@@ -8,7 +8,9 @@ import {
   migrateRemindersFromLocalStorage,
   addReminder,
   updateReminder,
-  deleteReminder as deleteReminderFromSupabase
+  deleteReminder as deleteReminderFromSupabase,
+  addSystemReminder,
+  cleanupOldReminders
 } from '@/services/RemindersService';
 import { generateDogReminders } from '@/services/reminders/DogReminderService';
 import { generateLitterReminders } from '@/services/reminders/LitterReminderService';
@@ -86,26 +88,29 @@ export const useBreedingRemindersProvider = () => {
       // Ensure migration happens before fetching
       await migrateRemindersIfNeeded();
       
-      // Fetch custom reminders from Supabase
-      console.log(`[Reminders Debug] Fetching custom reminders from Supabase`);
+      // Clean up old reminders periodically
+      await cleanupOldReminders();
+      
+      // Fetch existing reminders from Supabase first
+      console.log(`[Reminders Debug] Fetching existing reminders from Supabase`);
       const startTime = performance.now();
-      const supabaseReminders = await fetchReminders();
+      const existingReminders = await fetchReminders();
       const endTime = performance.now();
       
       console.log(`[Reminders Debug] Fetch duration: ${Math.round(endTime - startTime)}ms`);
-      console.log(`[Reminders Debug] Fetched ${supabaseReminders.length} custom reminders`);
+      console.log(`[Reminders Debug] Fetched ${existingReminders.length} existing reminders`);
       
       // Use only dogs belonging to current user
       const userDogs = dogs.filter(dog => dog.owner_id === user.id);
       console.log(`[Reminders Debug] Found ${userDogs.length} dogs belonging to user ${user.id}`);
       
       if (userDogs.length === 0 && plannedLitters.length === 0) {
-        console.log(`[Reminders Debug] No user data available, showing only custom reminders`);
-        return supabaseReminders;
+        console.log(`[Reminders Debug] No user data available, showing only existing reminders`);
+        return existingReminders;
       }
       
       try {
-        // Generate all reminders in sequence
+        // Generate all system reminders in sequence
         console.log(`[Reminders Debug] Generating dog reminders`);
         const dogReminders = generateDogReminders(userDogs);
         console.log(`[Reminders Debug] Generated ${dogReminders.length} dog reminders`);
@@ -131,24 +136,46 @@ export const useBreedingRemindersProvider = () => {
         const vaccinationReminders = generateVaccinationReminders(userDogs);
         console.log(`[Reminders Debug] Generated ${vaccinationReminders.length} vaccination reminders`);
         
-        // Use our mergeReminders function to combine all reminders without duplicates
-        const allReminders = mergeReminders(
-          supabaseReminders,
-          dogReminders,
-          litterReminders,
-          generalReminders,
-          plannedHeatReminders,
-          birthdayReminders,
-          vaccinationReminders
+        // Collect all system-generated reminders
+        const allSystemReminders = [
+          ...dogReminders,
+          ...litterReminders,
+          ...generalReminders,
+          ...plannedHeatReminders,
+          ...birthdayReminders,
+          ...vaccinationReminders
+        ];
+        
+        // Create a map of existing reminders by their unique key
+        const existingReminderKeys = new Set(
+          existingReminders
+            .filter(r => r.relatedId && r.type)
+            .map(r => `${r.type}-${r.relatedId}-${r.dueDate.toISOString().split('T')[0]}`)
         );
         
-        console.log(`[Reminders Debug] Total: ${allReminders.length} reminders loaded`);
+        // Add system reminders to database that don't already exist
+        const newSystemReminders = allSystemReminders.filter(reminder => {
+          const key = `${reminder.type}-${reminder.relatedId}-${reminder.dueDate.toISOString().split('T')[0]}`;
+          return !existingReminderKeys.has(key);
+        });
         
-        return allReminders;
+        console.log(`[Reminders Debug] Adding ${newSystemReminders.length} new system reminders to database`);
+        
+        // Add new system reminders to database in batches
+        for (const reminder of newSystemReminders) {
+          await addSystemReminder(reminder);
+        }
+        
+        // Fetch updated reminders from database
+        const finalReminders = await fetchReminders();
+        
+        console.log(`[Reminders Debug] Total: ${finalReminders.length} reminders loaded`);
+        
+        return finalReminders;
       } catch (error) {
         console.error(`[Reminders Debug] Error generating reminders:`, error);
-        // Return at least the custom reminders to prevent total failure
-        return supabaseReminders;
+        // Return at least the existing reminders to prevent total failure
+        return existingReminders;
       }
     },
     enabled: !!user,
@@ -175,12 +202,8 @@ export const useBreedingRemindersProvider = () => {
       
       const newCompletedState = !reminder.isCompleted;
       
-      // Only update custom reminders in database (those with UUIDs)
-      if (id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
-        return await updateReminder(id, newCompletedState);
-      }
-      // For system-generated reminders, we still return success but don't persist to DB
-      return true;
+      // Now all reminders are persisted to database, so we can update all of them
+      return await updateReminder(id, newCompletedState);
     },
     onMutate: async (id) => {
       // Cancel any outgoing refetches to avoid overwriting our optimistic update
@@ -253,11 +276,8 @@ export const useBreedingRemindersProvider = () => {
   
   const deleteReminderMutation = useMutation({
     mutationFn: async (id: string) => {
-      // Only delete from database if it's a custom reminder (has UUID format)
-      if (id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
-        return await deleteReminderFromSupabase(id);
-      }
-      return true;
+      // All reminders are now in the database, so we can delete all of them
+      return await deleteReminderFromSupabase(id);
     },
     onMutate: async (id) => {
       // Cancel any outgoing refetches
