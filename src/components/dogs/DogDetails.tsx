@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import DeleteDogDialog from './delete-dialog/DeleteDogDialog';
 import DogDetailsCard from './details/DogDetailsCard';
 import DogActions from './actions/DogActions';
+import DogLittersSection from './litters/DogLittersSection';
 import { checkDogDependencies } from '@/utils/dogDependencyCheck';
 
 interface DogDetailsProps {
@@ -177,6 +178,8 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         onSave={handleSave}
         onCancelEdit={() => setIsEditing(false)}
       />
+      
+      <DogLittersSection dog={dog} />
       
       <DogActions
         isEditing={isEditing}

@@ -1,4 +1,3 @@
-
 import { Litter, Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
@@ -936,6 +935,58 @@ class LitterService {
       return archivedLitters;
     } catch (error) {
       console.error("Error getting archived litters:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all litters where a specific dog is involved as dam or sire
+   */
+  async getDogLitters(dogId: string): Promise<Litter[]> {
+    try {
+      console.log(`Loading litters for dog: ${dogId}`);
+
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData.session) {
+        console.error("Session error or no session found");
+        throw sessionError || new Error("No active session");
+      }
+
+      // Fetch litters where the dog is either dam or sire
+      const { data: litters, error } = await supabase
+        .from('litters')
+        .select('*')
+        .eq('user_id', sessionData.session.user.id)
+        .or(`dam_id.eq.${dogId},sire_id.eq.${dogId}`);
+
+      if (error) {
+        console.error("Error loading dog litters:", error);
+        throw error;
+      }
+
+      console.log(`Found ${litters?.length || 0} litters for dog ${dogId}`);
+
+      if (!litters || litters.length === 0) {
+        return [];
+      }
+
+      // Map the litter data to our Litter type
+      const mappedLitters = litters.map(litter => ({
+        id: litter.id,
+        name: litter.name,
+        dateOfBirth: litter.date_of_birth,
+        sireId: litter.sire_id || '',
+        damId: litter.dam_id || '',
+        sireName: litter.sire_name || '',
+        damName: litter.dam_name || '',
+        puppies: [], // Initialize with empty puppies array for this view
+        archived: litter.archived || false,
+        user_id: litter.user_id
+      }));
+
+      return mappedLitters;
+    } catch (error) {
+      console.error("Error in getDogLitters:", error);
       throw error;
     }
   }
