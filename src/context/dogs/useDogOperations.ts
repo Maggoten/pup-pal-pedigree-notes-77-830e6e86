@@ -5,8 +5,8 @@ import { Dog } from '@/types/dogs';
 
 interface UseDogOperationsProps {
   updateDogBase: (id: string, updates: Partial<Dog>) => Promise<Dog | null>;
-  deleteDog: (id: string) => Promise<boolean>; // Updated from Promise<void> to Promise<boolean>
-  refreshDogs: () => Promise<void>;
+  deleteDog: (id: string) => Promise<boolean>;
+  refreshDogs: (skipCache?: boolean) => Promise<Dog[]>; // Updated to match the actual return type
   activeDog: Dog | null;
   setActiveDog: (dog: Dog | null) => void;
 }
@@ -32,7 +32,7 @@ export const useDogOperations = ({
         setActiveDog(updatedDog);
       }
       
-      await refreshDogs();
+      await refreshDogs(); // This now returns Dog[] but we don't need to use the result
       
       return updatedDog;
     } catch (e) {
