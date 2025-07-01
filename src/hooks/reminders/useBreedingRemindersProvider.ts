@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Reminder, CustomReminderInput } from '@/types/reminders';
 import { useAuth } from '@/hooks/useAuth';
@@ -100,9 +99,14 @@ export const useBreedingRemindersProvider = () => {
       console.log(`[Reminders Debug] Fetch duration: ${Math.round(endTime - startTime)}ms`);
       console.log(`[Reminders Debug] Fetched ${existingReminders.length} existing reminders`);
       
-      // Use only dogs belonging to current user
+      // Use only dogs belonging to current user - ENSURE USER FILTERING
       const userDogs = dogs.filter(dog => dog.owner_id === user.id);
       console.log(`[Reminders Debug] Found ${userDogs.length} dogs belonging to user ${user.id}`);
+      
+      // Log each dog for debugging
+      userDogs.forEach(dog => {
+        console.log(`[Reminders Debug] User dog: ${dog.name} (ID: ${dog.id}, Birthday: ${dog.dateOfBirth || 'none'}, Vaccination: ${dog.vaccinationDate || 'none'})`);
+      });
       
       if (userDogs.length === 0 && plannedLitters.length === 0) {
         console.log(`[Reminders Debug] No user data available, showing only existing reminders`);
@@ -146,35 +150,33 @@ export const useBreedingRemindersProvider = () => {
           ...vaccinationReminders
         ];
         
-        // Create a map of existing reminders by their unique key
-        const existingReminderKeys = new Set(
-          existingReminders
-            .filter(r => r.relatedId && r.type)
-            .map(r => `${r.type}-${r.relatedId}-${r.dueDate.toISOString().split('T')[0]}`)
-        );
+        console.log(`[Reminders Debug] Total system reminders generated: ${allSystemReminders.length}`);
         
         // Add system reminders to database that don't already exist
-        const newSystemReminders = allSystemReminders.filter(reminder => {
-          const key = `${reminder.type}-${reminder.relatedId}-${reminder.dueDate.toISOString().split('T')[0]}`;
-          return !existingReminderKeys.has(key);
-        });
-        
-        console.log(`[Reminders Debug] Adding ${newSystemReminders.length} new system reminders to database`);
+        console.log(`[Reminders Debug] Attempting to save system reminders to database`);
         
         // Add new system reminders to database in batches
-        for (const reminder of newSystemReminders) {
+        let savedCount = 0;
+        for (const reminder of allSystemReminders) {
           try {
-            await addSystemReminder(reminder);
-            console.log(`[Reminders Debug] Successfully added system reminder: ${reminder.title}`);
+            const success = await addSystemReminder(reminder);
+            if (success) {
+              savedCount++;
+              console.log(`[Reminders Debug] Successfully saved system reminder: ${reminder.title}`);
+            } else {
+              console.log(`[Reminders Debug] Skipped system reminder (already exists): ${reminder.title}`);
+            }
           } catch (error) {
-            console.error(`[Reminders Debug] Failed to add system reminder ${reminder.title}:`, error);
+            console.error(`[Reminders Debug] Failed to save system reminder ${reminder.title}:`, error);
           }
         }
+        
+        console.log(`[Reminders Debug] Saved ${savedCount} new system reminders to database`);
         
         // Fetch updated reminders from database
         const finalReminders = await fetchReminders();
         
-        console.log(`[Reminders Debug] Total: ${finalReminders.length} reminders loaded`);
+        console.log(`[Reminders Debug] Final result: ${finalReminders.length} reminders loaded from database`);
         
         return finalReminders;
       } catch (error) {

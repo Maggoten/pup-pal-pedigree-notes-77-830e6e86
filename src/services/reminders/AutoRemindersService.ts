@@ -46,7 +46,7 @@ export const generatePlannedHeatReminders = (plannedLitters: PlannedLitter[]): R
 };
 
 /**
- * Generate enhanced birthday reminders for dogs
+ * Generate enhanced birthday reminders for dogs - EXTENDED TO 14 DAYS
  */
 export const generateEnhancedBirthdayReminders = (dogs: Dog[]): Reminder[] => {
   const reminders: Reminder[] = [];
@@ -66,8 +66,8 @@ export const generateEnhancedBirthdayReminders = (dogs: Dog[]): Reminder[] => {
     
     const daysUntil = differenceInDays(nextBirthday, today);
     
-    // If birthday is within 7 days
-    if (daysUntil >= 0 && daysUntil <= 7) {
+    // If birthday is within 14 days (extended from 7 days)
+    if (daysUntil >= 0 && daysUntil <= 14) {
       const age = isBefore(birthdateThisYear, today)
         ? currentYear + 1 - birthdate.getFullYear()
         : currentYear - birthdate.getFullYear();
@@ -89,7 +89,7 @@ export const generateEnhancedBirthdayReminders = (dogs: Dog[]): Reminder[] => {
 };
 
 /**
- * Generate vaccination reminders for dogs
+ * Generate vaccination reminders for dogs - EXTENDED TO 14 DAYS
  */
 export const generateVaccinationReminders = (dogs: Dog[]): Reminder[] => {
   const reminders: Reminder[] = [];
@@ -103,8 +103,8 @@ export const generateVaccinationReminders = (dogs: Dog[]): Reminder[] => {
     
     const daysUntil = differenceInDays(nextVaccination, today);
     
-    // If next vaccination is within 7 days or overdue by up to 30 days
-    if (daysUntil >= -30 && daysUntil <= 7) {
+    // If next vaccination is within 14 days or overdue by up to 30 days (extended from 7 days)
+    if (daysUntil >= -30 && daysUntil <= 14) {
       const isOverdue = daysUntil < 0;
       
       reminders.push({

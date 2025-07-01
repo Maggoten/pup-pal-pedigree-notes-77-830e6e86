@@ -101,7 +101,7 @@ export const addReminder = async (input: CustomReminderInput): Promise<boolean> 
   }
 };
 
-// New function to add system-generated reminders
+// Improved function to add system-generated reminders with better conflict handling
 export const addSystemReminder = async (reminder: Reminder): Promise<boolean> => {
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -112,10 +112,34 @@ export const addSystemReminder = async (reminder: Reminder): Promise<boolean> =>
     
     const userId = sessionData.session.user.id;
     
-    // Use upsert to handle conflicts with the unique constraint
+    console.log(`[RemindersService] Attempting to save system reminder: ${reminder.title} for user ${userId}`);
+    
+    // Check if a similar reminder already exists
+    const { data: existingReminders, error: checkError } = await supabase
+      .from('reminders')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('type', reminder.type)
+      .eq('related_id', reminder.relatedId)
+      .eq('due_date', reminder.dueDate.toISOString().split('T')[0])
+      .eq('is_deleted', false)
+      .limit(1);
+    
+    if (checkError) {
+      console.error("Error checking existing reminders:", checkError);
+      return false;
+    }
+    
+    // If reminder already exists, skip it
+    if (existingReminders && existingReminders.length > 0) {
+      console.log(`[RemindersService] Reminder already exists, skipping: ${reminder.title}`);
+      return true;
+    }
+    
+    // Insert the new system reminder
     const { error } = await supabase
       .from('reminders')
-      .upsert({
+      .insert({
         id: reminder.id,
         title: reminder.title,
         description: reminder.description,
@@ -127,9 +151,6 @@ export const addSystemReminder = async (reminder: Reminder): Promise<boolean> =>
         source: 'system',
         is_completed: reminder.isCompleted || false,
         is_deleted: false
-      }, {
-        onConflict: 'user_id,type,related_id,due_date',
-        ignoreDuplicates: false
       });
     
     if (error) {
@@ -137,6 +158,7 @@ export const addSystemReminder = async (reminder: Reminder): Promise<boolean> =>
       return false;
     }
     
+    console.log(`[RemindersService] Successfully saved system reminder: ${reminder.title}`);
     return true;
   } catch (error) {
     console.error("Error in addSystemReminder:", error);
@@ -181,7 +203,6 @@ export const updateReminder = async (id: string, isCompleted: boolean): Promise<
   }
 };
 
-// Delete (soft delete) a reminder - now works for all reminder types
 export const deleteReminder = async (id: string): Promise<boolean> => {
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -238,7 +259,6 @@ export const deleteReminder = async (id: string): Promise<boolean> => {
   }
 };
 
-// Migrate reminders from localStorage to Supabase (one-time operation)
 export const migrateRemindersFromLocalStorage = async (): Promise<boolean> => {
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -301,7 +321,6 @@ export const migrateRemindersFromLocalStorage = async (): Promise<boolean> => {
   }
 };
 
-// New function to clean up old completed system reminders
 export const cleanupOldReminders = async (): Promise<void> => {
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();

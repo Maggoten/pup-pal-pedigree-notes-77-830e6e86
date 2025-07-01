@@ -53,7 +53,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
       }
     }
     
-    // Check for upcoming vaccinations
+    // Check for upcoming vaccinations - EXTENDED TO 14 DAYS
     if (dog.vaccinationDate) {
       console.log(`Dog ${dog.name}: Has vaccination date: ${dog.vaccinationDate}`);
       const lastVaccination = parseISO(dog.vaccinationDate);
@@ -62,13 +62,13 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
       const daysUntilVaccination = differenceInDays(nextVaccination, today);
       console.log(`Dog ${dog.name}: Next vaccination date: ${nextVaccination.toISOString()}, Days until: ${daysUntilVaccination}`);
       
-      // Create reminder if vaccination is due within the next 7 days or up to 7 days overdue
-      if (daysUntilVaccination >= -7 && daysUntilVaccination <= 7) {
+      // Create reminder if vaccination is due within the next 14 days or up to 7 days overdue
+      if (daysUntilVaccination >= -7 && daysUntilVaccination <= 14) {
         const isOverdue = daysUntilVaccination < 0;
         
         reminders.push({
           id: generateSystemReminderId(dog.id, 'vaccination', nextVaccination),
-          title: `${dog.name}'s Vaccination ${isOverdue ? 'Overdue' : 'Due'}`,
+          title: `${dog.name}'s Vaccination ${isOverdue ? 'Overdue' : 'Due Soon'}`,
           description: isOverdue 
             ? `Vaccination overdue by ${Math.abs(daysUntilVaccination)} days`
             : `Vaccination due in ${daysUntilVaccination} days`,
@@ -84,7 +84,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
       console.log(`Dog ${dog.name}: No vaccination date recorded`);
     }
     
-    // Check for dog birthdays
+    // Check for dog birthdays - EXTENDED TO 14 DAYS
     if (dog.dateOfBirth) {
       const birthdate = parseISO(dog.dateOfBirth);
       const currentYear = today.getFullYear();
@@ -98,8 +98,8 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
       const daysUntilBirthday = differenceInDays(nextBirthday, today);
       console.log(`Dog ${dog.name}: Birthday: ${birthdate.toISOString()}, Next birthday: ${nextBirthday.toISOString()}, Days until: ${daysUntilBirthday}`);
       
-      // Show birthday reminders within 7 days before and 2 days after
-      if (daysUntilBirthday <= 7 && daysUntilBirthday >= -2) {
+      // Show birthday reminders within 14 days before and 2 days after
+      if (daysUntilBirthday <= 14 && daysUntilBirthday >= -2) {
         const age = isToday(nextBirthday) 
           ? currentYear - birthdate.getFullYear() 
           : (currentYear + (isBefore(birthdateThisYear, today) ? 1 : 0)) - birthdate.getFullYear();
@@ -114,7 +114,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
               : `${dog.name} turned ${age} ${Math.abs(daysUntilBirthday)} day${Math.abs(daysUntilBirthday) !== 1 ? 's' : ''} ago`,
           icon: createPawPrintIcon("blue-500"),
           dueDate: nextBirthday,
-          priority: 'low',
+          priority: 'medium',
           type: 'birthday',
           relatedId: dog.id
         });
