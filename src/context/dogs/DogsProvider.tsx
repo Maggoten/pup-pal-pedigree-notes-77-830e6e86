@@ -38,14 +38,18 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
   const { updateDog, removeDog } = useDogOperations({
     updateDogBase,
     deleteDog,
-    refreshDogs: async () => { await fetchDogs(); },
+    refreshDogs: async () => { 
+      const result = await fetchDogs(); 
+      return result;
+    },
     activeDog,
     setActiveDog
   });
 
-  const wrappedRefreshDogs = async (): Promise<void> => {
+  const wrappedRefreshDogs = async (skipCache?: boolean): Promise<Dog[]> => {
     try {
-      await fetchDogs();
+      const result = await fetchDogs(skipCache);
+      return result;
     } catch (e) {
       console.error('Error refreshing dogs:', e);
       toast({
@@ -53,6 +57,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
         description: "Could not refresh data. Please try again.",
         variant: "destructive"
       });
+      return [];
     }
   };
 
@@ -85,8 +90,8 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
       error: 'Authentication required',
       activeDog: null,
       setActiveDog: () => {},
-      refreshDogs: async () => {},
-      fetchDogs: async () => {},
+      refreshDogs: async () => [],
+      fetchDogs: async () => [],
       addDog: async () => { throw new Error('Authentication required'); },
       updateDog: async () => { throw new Error('Authentication required'); },
       removeDog: async () => { throw new Error('Authentication required'); }
