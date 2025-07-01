@@ -40,7 +40,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     updateDogBase,
     deleteDog,
     refreshDogs: async () => { 
-      await fetchDogs(); 
+      return await fetchDogs(); 
     },
     activeDog,
     setActiveDog
