@@ -17,7 +17,8 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
   }
 
   try {
-    console.log('Starting dog update process for ID:', id);
+    console.log('[Dogs Debug] Starting dog update process for ID:', id);
+    console.log('[Dogs Debug] Updates received:', updates);
     
     // First fetch the current dog data to check for image changes
     const { data: currentDog, error: fetchError } = await supabase
@@ -33,6 +34,7 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
 
     // Convert Dog object to database format
     const dbUpdates = sanitizeDogForDb(updates);
+    console.log('[Dogs Debug] DB updates after sanitization:', dbUpdates);
     
     // Validate image URL if present to prevent invalid URLs from being saved
     if (dbUpdates.image_url) {
@@ -81,13 +83,26 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
       }
     });
     
+    console.log('[Dogs Debug] Clean updates before validation:', cleanUpdates);
+    
+    // Special handling for heat history - ensure it's always included if present in updates
+    if ('heatHistory' in updates) {
+      console.log('[Dogs Debug] Heat history update detected, ensuring it gets saved');
+      // Force the update to proceed by ensuring we always have at least one field to update
+      if (Object.keys(cleanUpdates).length === 0) {
+        // Add explicit updated_at to ensure we have something to update
+        cleanUpdates.updated_at = new Date().toISOString();
+        console.log('[Dogs Debug] Added updated_at to force heat history update');
+      }
+    }
+    
     // Only proceed with update if there are actual changes
     if (Object.keys(cleanUpdates).length === 0) {
-      console.log('No changes detected, skipping update');
+      console.log('[Dogs Debug] No changes detected, skipping update');
       return enrichDog(currentDog);
     }
     
-    console.log('Cleaned updates for Supabase:', cleanUpdates);
+    console.log('[Dogs Debug] Final cleaned updates for Supabase:', cleanUpdates);
     
     // Add explicit updated_at timestamp to force update detection
     cleanUpdates.updated_at = new Date().toISOString();
@@ -117,6 +132,7 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
     
     // Execute the update with timeout protection but with retry mechanism
     try {
+      console.log('[Dogs Debug] Executing database update...');
       const updateResponse = await withTimeout<PostgrestResponse<DbDog>>(
         updateQuery,
         TIMEOUT
@@ -134,6 +150,8 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
         throw new Error('Update succeeded but no data was returned');
       }
 
+      console.log('[Dogs Debug] Database update successful, returned data:', updateResponse.data[0]);
+      
       // Check if the image was changed and cleanup old image if needed
       if (cleanUpdates.image_url && currentDog.image_url && 
           currentDog.image_url !== cleanUpdates.image_url && 
@@ -154,7 +172,15 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
 
       // Convert DB response to Dog object
       updatedDog = enrichDog(updateResponse.data[0]);
-      console.log('Successfully updated dog:', updatedDog);
+      console.log('[Dogs Debug] Successfully updated dog with heat history:', updatedDog);
+      
+      // Validate that heat history was saved correctly
+      if ('heatHistory' in updates && updatedDog.heatHistory) {
+        console.log('[Dogs Debug] Heat history validation - saved entries:', updatedDog.heatHistory.length);
+        updatedDog.heatHistory.forEach((heat, index) => {
+          console.log(`[Dogs Debug] Heat entry ${index}: ${heat.date}`);
+        });
+      }
       
       // Create or update calendar events based on dog data changes
       try {
@@ -164,7 +190,7 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
         
         // Only sync events if relevant data was updated
         if (needsBirthdaySync || needsVaccinationSync || needsHeatSync) {
-          console.log('Syncing calendar events after dog update');
+          console.log('[Dogs Debug] Syncing calendar events after dog update');
           
           if (needsBirthdaySync && updatedDog.dateOfBirth) {
             await ReminderCalendarSyncService.syncBirthdayEvents(updatedDog);
@@ -199,9 +225,9 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
     }
   } catch (error) {
     // Enhanced error logging
-    console.error('Failed to update dog:', error);
+    console.error('[Dogs Debug] Failed to update dog:', error);
     if (error instanceof Error) {
-      console.error('Error details:', error.stack);
+      console.error('[Dogs Debug] Error details:', error.stack);
     }
     
     throw error instanceof Error 

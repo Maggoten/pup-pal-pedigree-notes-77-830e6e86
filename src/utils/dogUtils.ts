@@ -1,3 +1,4 @@
+
 import { Dog, BreedingHistory, Heat } from '@/types/dogs';
 import { Database } from '@/integrations/supabase/types';
 import { dateToISOString } from './dateUtils';
@@ -160,7 +161,7 @@ export const enrichDog = (dog: any): Dog => {
  * @returns A database-compatible dog object ready for Supabase
  */
 export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
-  console.log('Original dog object for DB sanitization:', dog);
+  console.log('[Dogs Debug] Starting DB sanitization for dog object:', dog);
   
   // Create a new object to avoid mutation
   const dbDog: Partial<DbDog> = {};
@@ -174,37 +175,55 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
         ? dateToISOString(dog.dateOfBirth as unknown as Date)
         : undefined;
     
-    console.log('Mapped dateOfBirth to birthdate:', dbDog.birthdate);
+    console.log('[Dogs Debug] Mapped dateOfBirth to birthdate:', dbDog.birthdate);
   }
   
   if ('registrationNumber' in dog && dog.registrationNumber !== undefined) {
     dbDog.registration_number = dog.registrationNumber;
-    console.log('Mapped registrationNumber to registration_number:', dog.registrationNumber);
+    console.log('[Dogs Debug] Mapped registrationNumber to registration_number:', dog.registrationNumber);
   }
   
   if ('image' in dog && dog.image !== undefined) {
     dbDog.image_url = dog.image;
-    console.log('Mapped image to image_url:', dog.image);
+    console.log('[Dogs Debug] Mapped image to image_url:', dog.image);
   }
   
-  // Process heat history if present, ensuring dates are YYYY-MM-DD strings
-  if ('heatHistory' in dog && dog.heatHistory) {
-    const processedHeatHistory = dog.heatHistory.map((heat: Heat) => {
-      // First check if heat.date exists, then check its type
-      if (typeof heat.date === 'string') {
-        return { date: heat.date.split('T')[0] };
-      } else if (heat.date) {
-        // Check if it's a Date object
-        if (Object.prototype.toString.call(heat.date) === '[object Date]') {
-          return { date: dateToISOString(heat.date as unknown as Date) };
+  // Process heat history with enhanced validation and logging
+  if ('heatHistory' in dog && dog.heatHistory !== undefined) {
+    console.log('[Dogs Debug] Processing heat history for DB save:', dog.heatHistory);
+    
+    // Ensure we have an array to work with
+    const heatArray = Array.isArray(dog.heatHistory) ? dog.heatHistory : [];
+    
+    const processedHeatHistory = heatArray.map((heat: Heat, index: number) => {
+      console.log(`[Dogs Debug] Processing heat entry ${index}:`, heat);
+      
+      // Validate heat entry structure
+      if (!heat || typeof heat !== 'object') {
+        console.warn(`[Dogs Debug] Invalid heat entry at index ${index}, creating empty entry`);
+        return { date: '' };
+      }
+      
+      // Process the date field
+      let processedDate = '';
+      if (heat.date) {
+        if (typeof heat.date === 'string') {
+          processedDate = heat.date.split('T')[0]; // Extract YYYY-MM-DD
+        } else if (Object.prototype.toString.call(heat.date) === '[object Date]') {
+          processedDate = dateToISOString(heat.date as unknown as Date);
+        } else {
+          console.warn(`[Dogs Debug] Unexpected date format at index ${index}:`, heat.date);
+          processedDate = '';
         }
       }
-      // Fallback
-      return { date: '' };
+      
+      console.log(`[Dogs Debug] Processed heat date ${index}: "${processedDate}"`);
+      return { date: processedDate };
     });
     
+    // Always include heatHistory in the update, even if it's an empty array
     dbDog.heatHistory = processedHeatHistory;
-    console.log('Processed heatHistory for DB:', processedHeatHistory);
+    console.log('[Dogs Debug] Final processed heatHistory for DB:', processedHeatHistory);
   }
   
   // Process optional dates to ensure YYYY-MM-DD format
@@ -238,11 +257,11 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   directFields.forEach(field => {
     if (field in dog && dog[field] !== undefined) {
       (dbDog[field] as any) = dog[field];
-      console.log(`Copied field ${field}:`, dog[field]);
+      console.log(`[Dogs Debug] Copied field ${field}:`, dog[field]);
     }
   });
   
-  console.log('Sanitized dog object for DB:', dbDog);
+  console.log('[Dogs Debug] Final sanitized dog object for DB:', dbDog);
   return dbDog;
 };
 

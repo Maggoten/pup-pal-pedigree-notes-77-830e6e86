@@ -32,6 +32,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
     setIsSaving(true);
     
     try {
+      console.log('[Dogs Debug] DogDetails handleSave called with values:', values);
       const updates: Partial<Dog> = {};
       
       if (values.name !== dog.name) updates.name = values.name;
@@ -68,33 +69,39 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         updates.vaccinationDate = null as any;
       }
       
+      // Enhanced heat history handling for female dogs
       if (values.gender === 'female') {
+        console.log('[Dogs Debug] Processing female dog heat history');
+        console.log('[Dogs Debug] Current dog heat history:', dog.heatHistory);
+        console.log('[Dogs Debug] Form heat history values:', values.heatHistory);
+        
         if (values.heatHistory) {
-          const currentHeatDates = JSON.stringify(dog.heatHistory || []);
+          // Convert form heat history to database format
           const convertedHeatHistory = values.heatHistory.map(heat => ({
             date: heat.date ? heat.date.toISOString().split('T')[0] : ''
           }));
-
-          const newHeatDates = JSON.stringify(convertedHeatHistory);
-          if (currentHeatDates !== newHeatDates) {
-            updates.heatHistory = convertedHeatHistory;
-          }
+          
+          console.log('[Dogs Debug] Converted heat history:', convertedHeatHistory);
+          
+          // Always include heat history in updates for female dogs to ensure it gets saved
+          // This prevents the "no changes detected" issue
+          updates.heatHistory = convertedHeatHistory;
+          console.log('[Dogs Debug] Added heat history to updates');
+        } else {
+          // If no heat history provided, ensure we set an empty array
+          updates.heatHistory = [];
+          console.log('[Dogs Debug] Set empty heat history array');
         }
 
         // Always send heatInterval for female dogs
         updates.heatInterval = values.heatInterval;
+        console.log('[Dogs Debug] Added heat interval to updates:', values.heatInterval);
       }
 
-      if (Object.keys(updates).length === 0) {
-        toast({
-          title: "No Changes",
-          description: "No changes were detected to save."
-        });
-        setIsEditing(false);
-        setIsSaving(false);
-        return;
-      }
-   
+      console.log('[Dogs Debug] Final updates object:', updates);
+
+      // Remove the "no changes" validation - let the backend handle this
+      // This ensures heat history updates are always attempted
       const result = await updateDog(dog.id, updates);
       
       if (result) {
@@ -103,9 +110,11 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
           title: "Success",
           description: `${values.name} has been updated successfully.`,
         });
+        console.log('[Dogs Debug] Dog update completed successfully');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      console.error('[Dogs Debug] Error during dog update:', errorMessage);
       setLastError(errorMessage);
       toast({
         title: "Error",
