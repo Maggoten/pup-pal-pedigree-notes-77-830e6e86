@@ -3,6 +3,7 @@ import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useDogs as useDogsHook } from '@/hooks/dogs';
+import { Dog } from '@/types/dogs';
 import { DogsContextType } from './types';
 import { useForceReload } from './useForceReload';
 import { useActiveDog } from './useActiveDog';
@@ -39,8 +40,7 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     updateDogBase,
     deleteDog,
     refreshDogs: async () => { 
-      const result = await fetchDogs(); 
-      return result;
+      await fetchDogs(); 
     },
     activeDog,
     setActiveDog
