@@ -63,6 +63,14 @@ const useSupabaseCalendarEvents = () => {
     fetchEvents();
   }, [fetchEvents]);
 
+  // Auto-refresh calendar when dogs data changes
+  useEffect(() => {
+    if (user && dogs.length >= 0) { // Check for >= 0 to handle empty arrays
+      console.log('[Calendar] Dogs data changed, refreshing calendar events');
+      fetchEvents();
+    }
+  }, [dogs, user, fetchEvents]);
+
   // Add a new event
   const addEvent = async (eventData: AddEventFormValues) => {
     try {
