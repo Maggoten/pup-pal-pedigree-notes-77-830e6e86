@@ -26,20 +26,23 @@ const MyDogsContent: React.FC = () => {
   const [retryAttempts, setRetryAttempts] = useState(0);
   const [showError, setShowError] = useState(false);
   
-  // Enhanced delay after auth is ready to avoid premature fetching
+  // Wait for auth to be ready before considering the page ready
   useEffect(() => {
     if (isAuthReady && isLoggedIn) {
       const timer = setTimeout(() => {
         setPageReady(true);
-      }, 500); // Increased from 300ms for more stability
+      }, 500);
       return () => clearTimeout(timer);
+    } else if (isAuthReady && !isLoggedIn) {
+      // Auth is ready but user is not logged in
+      setPageReady(true);
     }
   }, [isAuthReady, isLoggedIn]);
   
   // Add visibility change handler to refresh data when tab becomes active
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && pageReady) {
+      if (document.visibilityState === 'visible' && pageReady && isLoggedIn) {
         console.log('MyDogs: Document became visible, refreshing data');
         fetchDogs(false).catch(err => {
           console.error('Error refreshing dogs on visibility change:', err);
@@ -51,14 +54,13 @@ const MyDogsContent: React.FC = () => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [fetchDogs, pageReady]);
+  }, [fetchDogs, pageReady, isLoggedIn]);
   
-  // Add timeout before showing errors to allow recovery
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
         setShowError(true);
-      }, 2000); // Only show errors after 2 seconds of failure
+      }, 2000);
       
       return () => clearTimeout(timer);
     } else {
@@ -66,27 +68,40 @@ const MyDogsContent: React.FC = () => {
     }
   }, [error]);
   
-  // Filter dogs based on selected gender
   const filteredDogs = genderFilter === 'all' 
     ? dogs 
     : dogs.filter(dog => dog.gender === genderFilter);
 
-  // Handle retry for loading dogs with incremental backoff
   const handleRetry = () => {
     setRetryAttempts(prev => prev + 1);
-    setShowError(false); // Hide error while retrying
+    setShowError(false);
     
     const backoffTime = Math.min(500 * Math.pow(1.5, retryAttempts), 3000);
     setTimeout(() => {
-      fetchDogs(true); // Use skipCache=true to force refresh
+      fetchDogs(true);
     }, backoffTime);
   };
 
-  // Formatting the error message
   const errorMessage = typeof error === 'string' ? error : 'Failed to load dogs';
   const isNetworkError = errorMessage.includes('Failed to fetch') || 
                          errorMessage.includes('Network error') ||
                          errorMessage.includes('timeout');
+
+  // Show loading while waiting for auth to be ready
+  if (!isAuthReady) {
+    return (
+      <PageLayout 
+        title="My Dogs" 
+        description="Manage your breeding dogs"
+        className="bg-warmbeige-50 overflow-y-auto"
+      >
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
+          <p className="text-muted-foreground">Preparing connection...</p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout 
@@ -114,12 +129,10 @@ const MyDogsContent: React.FC = () => {
         </Alert>
       )}
       
-      {(loading || !pageReady || !isAuthReady) ? (
+      {(loading || !pageReady) ? (
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
-          <p className="text-muted-foreground">
-            {!isAuthReady ? "Preparing connection..." : "Loading your dogs..."}
-          </p>
+          <p className="text-muted-foreground">Loading your dogs...</p>
         </div>
       ) : activeDog ? (
         <DogDetails dog={activeDog} />

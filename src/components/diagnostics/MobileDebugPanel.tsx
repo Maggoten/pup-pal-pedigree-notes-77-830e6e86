@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDogs } from '@/context/DogsContext';
@@ -8,27 +9,22 @@ import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import { X, Database, User, RefreshCw, ChevronDown, ChevronUp, Bug, Calendar } from 'lucide-react';
 import { triggerAllReminders } from '@/services/ReminderService';
 import { useQueryClient } from '@tanstack/react-query';
-import { TriggerAllRemindersFunction } from '@/types/reminderFunctions';
 
 const isMobileDevice = () => {
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 };
 
-// Only show in development mode - consistent with our environment checking
 const isDevMode = () => {
   return process.env.NODE_ENV !== 'production';
 };
 
-// Check for common browser compatibility issues
 const checkBrowserCompatibility = () => {
   const issues = [];
   
-  // Safer check for module support without passing multiple arguments
   if (!('noModule' in document.createElement('script'))) {
     issues.push('ES Modules not fully supported');
   }
   
-  // Check for other potential issues
   if (typeof window.IntersectionObserver === 'undefined') {
     issues.push('IntersectionObserver not supported');
   }
@@ -40,11 +36,34 @@ const checkBrowserCompatibility = () => {
   return issues;
 };
 
+// Safe hook wrapper to handle context not being ready
+const useSafeDogs = () => {
+  const { isAuthReady, isLoggedIn } = useAuth();
+  
+  try {
+    if (!isAuthReady || !isLoggedIn) {
+      return {
+        dogs: [],
+        loading: false,
+        refreshDogs: async () => {}
+      };
+    }
+    return useDogs();
+  } catch (error) {
+    console.warn('[MobileDebugPanel] Dogs context not ready:', error);
+    return {
+      dogs: [],
+      loading: false,
+      refreshDogs: async () => {}
+    };
+  }
+};
+
 const MobileDebugPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const { user, session } = useAuth();
-  const { dogs, loading: dogsLoading, refreshDogs } = useDogs();
+  const { user, session, isAuthReady } = useAuth();
+  const { dogs, loading: dogsLoading, refreshDogs } = useSafeDogs();
   const { reminders, isLoading: remindersLoading, refreshReminderData } = useBreedingReminders();
   const [deviceInfo, setDeviceInfo] = useState('');
   const [networkType, setNetworkType] = useState('');
@@ -52,9 +71,7 @@ const MobileDebugPanel: React.FC = () => {
   const [compatibilityIssues, setCompatibilityIssues] = useState<string[]>([]);
   const queryClient = useQueryClient();
   
-  // Only show the panel in development mode
   useEffect(() => {
-    // Always show in development mode, regardless of device
     const shouldShowPanel = isDevMode();
     setIsVisible(shouldShowPanel);
     
@@ -63,12 +80,10 @@ const MobileDebugPanel: React.FC = () => {
       setNetworkType((navigator as any).connection?.effectiveType || 'unknown');
       setCompatibilityIssues(checkBrowserCompatibility());
       
-      // Log mobile detection
       console.log(`[MobileDebug] Is mobile device: ${isMobileDevice()}`);
       console.log(`[MobileDebug] User agent: ${navigator.userAgent}`);
       console.log(`[MobileDebug] Screen size: ${window.innerWidth}x${window.innerHeight}`);
       
-      // Listen for network changes
       const connection = (navigator as any).connection;
       if (connection) {
         const updateNetworkInfo = () => {
@@ -85,23 +100,22 @@ const MobileDebugPanel: React.FC = () => {
     try {
       console.log('[MobileDebug] Refreshing all data');
       
-      // Clear React Query cache
       await queryClient.invalidateQueries();
       
-      // Refresh dogs data
-      await refreshDogs();
-      console.log('[MobileDebug] Dogs refreshed');
+      // Only refresh dogs if context is available
+      if (isAuthReady && refreshDogs) {
+        await refreshDogs();
+        console.log('[MobileDebug] Dogs refreshed');
+      }
       
-      // Give time for dogs to load before refreshing reminders
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Refresh reminders
-      await refreshReminderData();
-      console.log('[MobileDebug] Reminders refreshed');
+      if (refreshReminderData) {
+        await refreshReminderData();
+        console.log('[MobileDebug] Reminders refreshed');
+      }
       
-      // Manual trigger for reminders if user is available
       if (user && dogs.length > 0) {
-        // Fix: pass only userId as the first argument since that's what the type expects
         const manualReminders = await triggerAllReminders(user.id);
         console.log(`[MobileDebug] Manually generated ${manualReminders.length} reminders`);
       }
@@ -139,6 +153,14 @@ const MobileDebugPanel: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent className="py-2 px-4 text-xs space-y-3">
+            <div>
+              <div className="font-bold">Auth Status:</div> 
+              <div className="ml-2">
+                <div>Auth Ready: {isAuthReady ? 'Yes' : 'No'}</div>
+                <div>Session valid: {session ? 'Yes' : 'No'}</div>
+              </div>
+            </div>
+            
             <div>
               <div className="font-bold">Network:</div> 
               <div className="ml-2">{networkType}</div>
