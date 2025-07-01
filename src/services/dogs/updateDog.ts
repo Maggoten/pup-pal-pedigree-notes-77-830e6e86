@@ -20,7 +20,7 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
     console.log('[Dogs Debug] Starting dog update process for ID:', id);
     console.log('[Dogs Debug] Updates received:', updates);
     
-    // First fetch the current dog data to check for image changes
+    // First fetch the current dog data to check for changes that affect calendar events
     const { data: currentDog, error: fetchError } = await supabase
       .from('dogs')
       .select('*')
@@ -31,6 +31,14 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
       console.error('Error fetching current dog data:', fetchError);
       throw new Error('Could not fetch current dog data');
     }
+
+    // Check what data is changing to determine calendar event cleanup needs
+    const needsBirthdaySync = updates.dateOfBirth !== undefined && 
+      updates.dateOfBirth !== currentDog.birthdate;
+    const needsVaccinationSync = updates.vaccinationDate !== undefined && 
+      updates.vaccinationDate !== currentDog.vaccinationDate;
+    const needsHeatSync = updates.heatHistory !== undefined || 
+      updates.heatInterval !== undefined;
 
     // Convert Dog object to database format
     const dbUpdates = sanitizeDogForDb(updates);
@@ -184,29 +192,25 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
       
       // Create or update calendar events based on dog data changes
       try {
-        const needsBirthdaySync = updates.dateOfBirth !== undefined;
-        const needsVaccinationSync = updates.vaccinationDate !== undefined;
-        const needsHeatSync = updates.heatHistory !== undefined || updates.heatInterval !== undefined;
+        console.log('[Dogs Debug] Syncing calendar events after dog update');
         
-        // Only sync events if relevant data was updated
-        if (needsBirthdaySync || needsVaccinationSync || needsHeatSync) {
-          console.log('[Dogs Debug] Syncing calendar events after dog update');
+        if (needsBirthdaySync && updatedDog.dateOfBirth) {
+          console.log('[Dogs Debug] Syncing birthday events due to date change');
+          await ReminderCalendarSyncService.syncBirthdayEvents(updatedDog);
+        }
+        
+        if (needsVaccinationSync && updatedDog.vaccinationDate) {
+          console.log('[Dogs Debug] Syncing vaccination events due to date change');
+          await ReminderCalendarSyncService.syncVaccinationEvents(updatedDog);
+        }
+        
+        if (needsHeatSync && updatedDog.gender === 'female') {
+          console.log('[Dogs Debug] Syncing heat cycle events due to heat data change');
+          const { calculateUpcomingHeats } = await import('@/utils/heatCalculator');
+          const upcomingHeats = calculateUpcomingHeats([updatedDog]);
           
-          if (needsBirthdaySync && updatedDog.dateOfBirth) {
-            await ReminderCalendarSyncService.syncBirthdayEvents(updatedDog);
-          }
-          
-          if (needsVaccinationSync && updatedDog.vaccinationDate) {
-            await ReminderCalendarSyncService.syncVaccinationEvents(updatedDog);
-          }
-          
-          if (needsHeatSync && updatedDog.gender === 'female') {
-            const { calculateUpcomingHeats } = await import('@/utils/heatCalculator');
-            const upcomingHeats = calculateUpcomingHeats([updatedDog]);
-            
-            for (const heat of upcomingHeats) {
-              await ReminderCalendarSyncService.syncHeatCycleEvents(heat);
-            }
+          for (const heat of upcomingHeats) {
+            await ReminderCalendarSyncService.syncHeatCycleEvents(heat);
           }
         }
       } catch (syncError) {

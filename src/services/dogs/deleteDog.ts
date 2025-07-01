@@ -1,8 +1,10 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { DbDog } from '@/utils/dogUtils';
 import { PostgrestResponse } from '@supabase/supabase-js';
 import { withTimeout, TIMEOUT } from '@/utils/timeoutUtils';
 import { cleanupStorageImage } from '@/utils/storage/cleanup';
+import { ReminderCalendarSyncService } from '@/services/ReminderCalendarSyncService';
 
 export async function deleteDog(id: string): Promise<boolean> {
   if (!id) {
@@ -27,7 +29,14 @@ export async function deleteDog(id: string): Promise<boolean> {
 
     // Begin a series of cleanup operations
     
-    // 1. Clean up references in planned_litters where this dog is used
+    // 1. Delete all calendar events for this dog FIRST
+    console.log('Deleting calendar events for this dog...');
+    const calendarCleanupSuccess = await ReminderCalendarSyncService.deleteCalendarEventsForDog(id);
+    if (!calendarCleanupSuccess) {
+      console.warn('Calendar event cleanup failed, but continuing with deletion');
+    }
+    
+    // 2. Clean up references in planned_litters where this dog is used
     console.log('Checking for planned litters using this dog...');
     const { error: plannedLittersErrorMale } = await supabase
       .from('planned_litters')
@@ -45,17 +54,6 @@ export async function deleteDog(id: string): Promise<boolean> {
       
     if (plannedLittersErrorFemale) {
       console.error('Error updating planned litters (female references):', plannedLittersErrorFemale);
-    }
-
-    // 2. Check calendar events referencing this dog
-    console.log('Checking for calendar events referencing this dog...');
-    const { error: calendarEventsError } = await supabase
-      .from('calendar_events')
-      .update({ dog_name: 'Deleted Dog', dog_id: null })
-      .eq('dog_id', id);
-      
-    if (calendarEventsError) {
-      console.error('Error updating calendar events:', calendarEventsError);
     }
 
     // 3. Handle references in litters table
@@ -138,7 +136,7 @@ export async function deleteDog(id: string): Promise<boolean> {
       }
     }
     
-    console.log('Successfully deleted dog:', id);
+    console.log('Successfully deleted dog and all associated calendar events:', id);
     return true;
   } catch (error) {
     console.error('Failed to delete dog:', error);
