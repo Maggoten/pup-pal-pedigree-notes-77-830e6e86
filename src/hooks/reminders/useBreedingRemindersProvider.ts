@@ -38,6 +38,9 @@ export const useBreedingRemindersProvider = () => {
   const queryClient = useQueryClient();
   const deviceType = isMobileDevice() ? 'Mobile' : 'Desktop';
   
+  // Prevent multiple instances from running the same heavy operations
+  const [isInitializing, setIsInitializing] = useState<boolean>(false);
+  
   console.log(`[Reminders Debug] Hook initialized on ${deviceType}, user ID: ${user?.id || 'none'}, dogs count: ${dogs.length}`);
   
   // Handle migration first (happens once per session)
@@ -185,9 +188,18 @@ export const useBreedingRemindersProvider = () => {
         return existingReminders;
       }
     },
-    enabled: !!user,
+    enabled: !!user && !isInitializing,
     staleTime: 1000 * 60 * (isMobileDevice() ? 1 : 5), // Consider data fresh for 1 min on mobile, 5 min on desktop
-    retry: 2, // Retry twice to handle mobile connection issues
+    retry: (failureCount, error) => {
+      // Don't retry if it's a validation error or constraint violation
+      if (error && typeof error === 'object' && 'code' in error) {
+        const dbError = error as any;
+        if (dbError.code === '23505' || dbError.code === '22P02') {
+          return false;
+        }
+      }
+      return failureCount < 2;
+    },
     refetchOnMount: true,
     refetchOnWindowFocus: isMobileDevice() ? true : false, // Refetch when regaining focus on mobile
   });

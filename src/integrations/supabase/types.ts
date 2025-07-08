@@ -816,6 +816,10 @@ export type Database = {
         Args: { dog_id: string }
         Returns: Json
       }
+      cleanup_old_system_reminders: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       delete_old_heat_entries: {
         Args: Record<PropertyKey, never>
         Returns: undefined
