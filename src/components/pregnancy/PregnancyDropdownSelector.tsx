@@ -13,20 +13,24 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Baby } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Heart, Baby, MoreHorizontal } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface PregnancyDropdownSelectorProps {
   activePregnancies: ActivePregnancy[];
   completedPregnancies: ActivePregnancy[];
   currentPregnancyId?: string;
   fullWidth?: boolean;
+  onShowAllCompleted?: () => void;
 }
 
 const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({ 
   activePregnancies, 
   completedPregnancies,
   currentPregnancyId,
-  fullWidth = false
+  fullWidth = false,
+  onShowAllCompleted
 }) => {
   const navigate = useNavigate();
   
@@ -45,8 +49,20 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
     : activePregnancies[0] || completedPregnancies[0];
   
   const isCurrentPregnancyCompleted = completedPregnancies.some(p => p.id === currentPregnancyId);
+  
+  const formatPregnancyDisplayName = (pregnancy: ActivePregnancy, isCompleted: boolean) => {
+    if (isCompleted) {
+      const monthYear = format(pregnancy.expectedDueDate, 'MMM yyyy');
+      return `${pregnancy.femaleName}'s Pregnancy (${monthYear})`;
+    }
+    return `${pregnancy.femaleName}'s Pregnancy`;
+  };
     
   const handlePregnancyChange = (pregnancyId: string) => {
+    if (pregnancyId === 'view-all-completed') {
+      onShowAllCompleted?.();
+      return;
+    }
     console.log(`Selecting pregnancy: ${pregnancyId}`);
     navigate(`/pregnancy/${pregnancyId}`);
   };
@@ -68,7 +84,7 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
                     <Heart className="h-4 w-4 text-primary" />
                   )}
                   <span className={isCurrentPregnancyCompleted ? 'text-muted-foreground' : ''}>
-                    {currentPregnancy.femaleName}'s Pregnancy
+                    {formatPregnancyDisplayName(currentPregnancy, isCurrentPregnancyCompleted)}
                   </span>
                   {isCurrentPregnancyCompleted && (
                     <Badge variant="secondary" className="text-xs">Completed</Badge>
@@ -93,7 +109,7 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <Heart className="h-4 w-4 text-primary" />
-                    {pregnancy.femaleName}'s Pregnancy
+                    {formatPregnancyDisplayName(pregnancy, false)}
                   </div>
                 </SelectItem>
               ))}
@@ -118,12 +134,23 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <Baby className="h-4 w-4 text-muted-foreground" />
-                    {pregnancy.femaleName}'s Pregnancy
-                    <Badge variant="secondary" className="text-xs ml-auto">Completed</Badge>
+                    {formatPregnancyDisplayName(pregnancy, true)}
                   </div>
                 </SelectItem>
               ))}
             </SelectGroup>
+          )}
+          
+          {completedPregnancies.length >= 12 && onShowAllCompleted && (
+            <>
+              <SelectSeparator />
+              <SelectItem value="view-all-completed" className="cursor-pointer justify-center">
+                <div className="flex items-center gap-2 text-primary">
+                  <MoreHorizontal className="h-4 w-4" />
+                  View All Completed Pregnancies
+                </div>
+              </SelectItem>
+            </>
           )}
         </SelectContent>
       </Select>

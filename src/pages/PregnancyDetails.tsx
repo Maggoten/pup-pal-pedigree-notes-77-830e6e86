@@ -10,6 +10,7 @@ import PregnancySummaryCards from '@/components/pregnancy/PregnancySummaryCards'
 import PregnancyDropdownSelector from '@/components/pregnancy/PregnancyDropdownSelector';
 import AddPregnancyDialog from '@/components/pregnancy/AddPregnancyDialog';
 import ManagePregnancyDialog from '@/components/pregnancy/ManagePregnancyDialog';
+import AllCompletedPregnanciesDialog from '@/components/pregnancy/AllCompletedPregnanciesDialog';
 import { Button } from '@/components/ui/button';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -22,6 +23,7 @@ const PregnancyDetails = () => {
   const [loadingPregnancies, setLoadingPregnancies] = useState(true);
   const [addPregnancyDialogOpen, setAddPregnancyDialogOpen] = useState(false);
   const [managePregnancyDialogOpen, setManagePregnancyDialogOpen] = useState(false);
+  const [allCompletedDialogOpen, setAllCompletedDialogOpen] = useState(false);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -67,6 +69,10 @@ const PregnancyDetails = () => {
 
   const handleManagePregnancyDialogClose = () => {
     setManagePregnancyDialogOpen(false);
+  };
+
+  const handleShowAllCompleted = () => {
+    setAllCompletedDialogOpen(true);
   };
 
   if (loading || loadingPregnancies) {
@@ -134,6 +140,7 @@ const PregnancyDetails = () => {
             completedPregnancies={completedPregnancies}
             currentPregnancyId={pregnancy.id}
             fullWidth={true}
+            onShowAllCompleted={handleShowAllCompleted}
           />
         </div>
       </div>
@@ -172,6 +179,11 @@ const PregnancyDetails = () => {
           onClose={handleManagePregnancyDialogClose}
         />
       )}
+
+      <AllCompletedPregnanciesDialog
+        open={allCompletedDialogOpen}
+        onOpenChange={setAllCompletedDialogOpen}
+      />
     </PageLayout>
   );
 };

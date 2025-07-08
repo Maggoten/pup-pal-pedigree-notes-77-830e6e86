@@ -229,7 +229,7 @@ export const getPregnancyDetails = async (pregnancyId: string): Promise<Pregnanc
   }
 };
 
-export const getCompletedPregnancies = async (): Promise<ActivePregnancy[]> => {
+export const getCompletedPregnancies = async (limit?: number): Promise<ActivePregnancy[]> => {
   try {
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
@@ -239,7 +239,7 @@ export const getCompletedPregnancies = async (): Promise<ActivePregnancy[]> => {
 
     console.log("Fetching completed pregnancies for user:", sessionData.session.user.id);
 
-    const { data: pregnancies, error } = await supabase
+    let query = supabase
       .from('pregnancies')
       .select(`
         id,
@@ -256,6 +256,12 @@ export const getCompletedPregnancies = async (): Promise<ActivePregnancy[]> => {
       .eq('status', 'completed')
       .eq('user_id', sessionData.session.user.id)
       .order('expected_due_date', { ascending: false });
+
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const { data: pregnancies, error } = await query;
 
     if (error) {
       console.error("Error fetching completed pregnancies:", error);
@@ -341,11 +347,11 @@ export const reactivatePregnancy = async (pregnancyId: string): Promise<boolean>
   }
 };
 
-export const getAllPregnancies = async (): Promise<{ active: ActivePregnancy[], completed: ActivePregnancy[] }> => {
+export const getAllPregnancies = async (limitCompleted = true): Promise<{ active: ActivePregnancy[], completed: ActivePregnancy[] }> => {
   try {
     const [activeData, completedData] = await Promise.all([
       getActivePregnancies(),
-      getCompletedPregnancies()
+      getCompletedPregnancies(limitCompleted ? 12 : undefined)
     ]);
     
     console.log("Fetched all pregnancies - Active:", activeData.length, "Completed:", completedData.length);
@@ -358,6 +364,10 @@ export const getAllPregnancies = async (): Promise<{ active: ActivePregnancy[], 
     console.error('Error in getAllPregnancies:', error);
     return { active: [], completed: [] };
   }
+};
+
+export const getAllCompletedPregnancies = async (): Promise<ActivePregnancy[]> => {
+  return getCompletedPregnancies(); // No limit - returns all completed pregnancies
 };
 
 export const getFirstActivePregnancy = async (): Promise<string | null> => {
