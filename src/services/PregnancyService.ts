@@ -341,6 +341,25 @@ export const reactivatePregnancy = async (pregnancyId: string): Promise<boolean>
   }
 };
 
+export const getAllPregnancies = async (): Promise<{ active: ActivePregnancy[], completed: ActivePregnancy[] }> => {
+  try {
+    const [activeData, completedData] = await Promise.all([
+      getActivePregnancies(),
+      getCompletedPregnancies()
+    ]);
+    
+    console.log("Fetched all pregnancies - Active:", activeData.length, "Completed:", completedData.length);
+    
+    return {
+      active: activeData,
+      completed: completedData
+    };
+  } catch (error) {
+    console.error('Error in getAllPregnancies:', error);
+    return { active: [], completed: [] };
+  }
+};
+
 export const getFirstActivePregnancy = async (): Promise<string | null> => {
   try {
     const pregnancies = await getActivePregnancies();

@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
 import { Loader2, Heart, Plus, Settings } from 'lucide-react';
 import { usePregnancyDetails } from '@/hooks/usePregnancyDetails';
-import { getActivePregnancies } from '@/services/PregnancyService';
+import { getAllPregnancies } from '@/services/PregnancyService';
 import PregnancyTabs from '@/components/pregnancy/PregnancyTabs';
 import PregnancySummaryCards from '@/components/pregnancy/PregnancySummaryCards';
 import PregnancyDropdownSelector from '@/components/pregnancy/PregnancyDropdownSelector';
@@ -18,6 +18,7 @@ const PregnancyDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { pregnancy, loading } = usePregnancyDetails(id);
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
+  const [completedPregnancies, setCompletedPregnancies] = useState<ActivePregnancy[]>([]);
   const [loadingPregnancies, setLoadingPregnancies] = useState(true);
   const [addPregnancyDialogOpen, setAddPregnancyDialogOpen] = useState(false);
   const [managePregnancyDialogOpen, setManagePregnancyDialogOpen] = useState(false);
@@ -27,9 +28,10 @@ const PregnancyDetails = () => {
     const fetchPregnancies = async () => {
       try {
         setLoadingPregnancies(true);
-        const pregnancies = await getActivePregnancies();
-        console.log("Fetched pregnancies for dropdown:", pregnancies.length);
-        setActivePregnancies(pregnancies);
+        const { active, completed } = await getAllPregnancies();
+        console.log("Fetched pregnancies for dropdown - Active:", active.length, "Completed:", completed.length);
+        setActivePregnancies(active);
+        setCompletedPregnancies(completed);
       } catch (error) {
         console.error("Error fetching pregnancies:", error);
       } finally {
@@ -53,8 +55,9 @@ const PregnancyDetails = () => {
     // Refresh pregnancies list after adding a new pregnancy
     const fetchPregnancies = async () => {
       try {
-        const pregnancies = await getActivePregnancies();
-        setActivePregnancies(pregnancies);
+        const { active, completed } = await getAllPregnancies();
+        setActivePregnancies(active);
+        setCompletedPregnancies(completed);
       } catch (error) {
         console.error("Error refreshing pregnancies:", error);
       }
@@ -127,7 +130,8 @@ const PregnancyDetails = () => {
         {/* 3. Pregnancy selection dropdown */}
         <div className="w-full">
           <PregnancyDropdownSelector 
-            pregnancies={activePregnancies} 
+            activePregnancies={activePregnancies}
+            completedPregnancies={completedPregnancies}
             currentPregnancyId={pregnancy.id}
             fullWidth={true}
           />
