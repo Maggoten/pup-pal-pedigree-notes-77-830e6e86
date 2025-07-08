@@ -72,11 +72,24 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     }
   }, [shouldInitializeDogs, dogLoadingAttempted, fetchDogs]);
 
-  // Show loading state until auth is ready
+  // Provide loading context when auth is not ready
   if (!isAuthReady) {
     console.log('[DogsProvider] Waiting for auth to be ready');
+    const loadingValue: DogsContextType = {
+      dogs: [],
+      loading: true,
+      error: null,
+      activeDog: null,
+      setActiveDog: () => {},
+      refreshDogs: async () => [],
+      fetchDogs: async () => [],
+      addDog: async () => { throw new Error('Authentication initializing'); },
+      updateDog: async () => { throw new Error('Authentication initializing'); },
+      removeDog: async () => { throw new Error('Authentication initializing'); }
+    };
+
     return (
-      <DogsContext.Provider value={undefined}>
+      <DogsContext.Provider value={loadingValue}>
         {children}
       </DogsContext.Provider>
     );
