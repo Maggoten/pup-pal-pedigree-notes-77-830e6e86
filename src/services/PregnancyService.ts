@@ -229,6 +229,118 @@ export const getPregnancyDetails = async (pregnancyId: string): Promise<Pregnanc
   }
 };
 
+export const getCompletedPregnancies = async (): Promise<ActivePregnancy[]> => {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.log("No active session found for completed pregnancy data");
+      return [];
+    }
+
+    console.log("Fetching completed pregnancies for user:", sessionData.session.user.id);
+
+    const { data: pregnancies, error } = await supabase
+      .from('pregnancies')
+      .select(`
+        id,
+        mating_date,
+        expected_due_date,
+        external_male_name,
+        user_id,
+        female_dog_id,
+        male_dog_id,
+        status,
+        femaleDog:dogs!fk_pregnancies_female_dog_id(id, name),
+        maleDog:dogs!pregnancies_female_dog_id_fkey(id, name)
+      `)
+      .eq('status', 'completed')
+      .eq('user_id', sessionData.session.user.id)
+      .order('expected_due_date', { ascending: false });
+
+    if (error) {
+      console.error("Error fetching completed pregnancies:", error);
+      throw error;
+    }
+
+    console.log("Raw completed pregnancies data:", pregnancies);
+    
+    if (!pregnancies || pregnancies.length === 0) {
+      console.log("No completed pregnancies found for this user");
+      return [];
+    }
+
+    const completedPregnancies = pregnancies.map((pregnancy) => {
+      const matingDate = new Date(pregnancy.mating_date);
+      const expectedDueDate = new Date(pregnancy.expected_due_date);
+      const daysLeft = 0; // Completed pregnancies don't have days left
+      
+      const femaleDog = pregnancy.femaleDog;
+      const maleDog = pregnancy.maleDog;
+      
+      let femaleName = "Unknown Female";
+      if (femaleDog && Array.isArray(femaleDog) && femaleDog.length > 0) {
+        femaleName = femaleDog[0]?.name || "Unknown Female";
+      } else if (femaleDog && typeof femaleDog === 'object' && 'name' in femaleDog) {
+        femaleName = femaleDog.name;
+      }
+      
+      let maleName = pregnancy.external_male_name || "Unknown Male";
+      if (pregnancy.male_dog_id) {
+        if (maleDog && Array.isArray(maleDog) && maleDog.length > 0) {
+          maleName = maleDog[0]?.name || "Unknown Male";
+        } else if (maleDog && typeof maleDog === 'object' && 'name' in maleDog) {
+          maleName = maleDog.name;
+        }
+      }
+
+      return {
+        id: pregnancy.id,
+        maleName,
+        femaleName,
+        matingDate,
+        expectedDueDate,
+        daysLeft
+      };
+    });
+
+    console.log("Processed completed pregnancies:", completedPregnancies);
+    return completedPregnancies;
+
+  } catch (err) {
+    console.error('Error in getCompletedPregnancies:', err);
+    return [];
+  }
+};
+
+export const reactivatePregnancy = async (pregnancyId: string): Promise<boolean> => {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.log("No active session found");
+      return false;
+    }
+
+    console.log(`Reactivating pregnancy with ID: ${pregnancyId}`);
+    
+    const { error } = await supabase
+      .from('pregnancies')
+      .update({ status: 'active' })
+      .eq('id', pregnancyId)
+      .eq('user_id', sessionData.session.user.id);
+    
+    if (error) {
+      console.error("Error reactivating pregnancy:", error);
+      throw error;
+    }
+    
+    console.log("Successfully reactivated pregnancy");
+    return true;
+  } catch (err) {
+    console.error('Error in reactivatePregnancy:', err);
+    return false;
+  }
+};
+
 export const getFirstActivePregnancy = async (): Promise<string | null> => {
   try {
     const pregnancies = await getActivePregnancies();

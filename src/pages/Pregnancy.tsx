@@ -6,12 +6,14 @@ import { Heart, AlertCircle, Loader2, Baby } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDogs } from '@/context/DogsContext';
-import { getActivePregnancies, getFirstActivePregnancy } from '@/services/PregnancyService';
+import { getActivePregnancies, getCompletedPregnancies, getFirstActivePregnancy } from '@/services/PregnancyService';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/providers/AuthProvider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import ActivePregnanciesList from '@/components/pregnancy/ActivePregnanciesList';
+import CompletedPregnanciesList from '@/components/pregnancy/CompletedPregnanciesList';
 import PregnancyDropdownSelector from '@/components/pregnancy/PregnancyDropdownSelector';
 import PregnancySummaryCards from '@/components/pregnancy/PregnancySummaryCards';
 import PregnancyTabs from '@/components/pregnancy/PregnancyTabs';
@@ -25,11 +27,13 @@ const Pregnancy: React.FC = () => {
   const { user } = useAuth();
   
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
+  const [completedPregnancies, setCompletedPregnancies] = useState<ActivePregnancy[]>([]);
   const [selectedPregnancy, setSelectedPregnancy] = useState<PregnancyDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [dataFetched, setDataFetched] = useState(false);
   const [addPregnancyDialogOpen, setAddPregnancyDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('active');
 
   useEffect(() => {
     // Skip refetching if we've already loaded data
@@ -46,12 +50,17 @@ const Pregnancy: React.FC = () => {
         setHasError(false);
         
         console.log("Fetching active pregnancies...");
-        const pregnancies = await getActivePregnancies();
-        console.log("Fetched pregnancies count:", pregnancies.length);
-        setActivePregnancies(pregnancies);
+        const [activeData, completedData] = await Promise.all([
+          getActivePregnancies(),
+          getCompletedPregnancies()
+        ]);
+        console.log("Fetched active pregnancies count:", activeData.length);
+        console.log("Fetched completed pregnancies count:", completedData.length);
+        setActivePregnancies(activeData);
+        setCompletedPregnancies(completedData);
         
         // If no pregnancies found
-        if (pregnancies.length === 0) {
+        if (activeData.length === 0) {
           console.log("No active pregnancies found");
           setIsLoading(false);
           setDataFetched(true);
@@ -61,9 +70,9 @@ const Pregnancy: React.FC = () => {
         let targetPregnancyId = pregnancyId;
         
         // If no pregnancy ID in URL, redirect to the first pregnancy detail page
-        if (!targetPregnancyId && pregnancies.length > 0) {
+        if (!targetPregnancyId && activeData.length > 0) {
           console.log("No ID in URL, redirecting to first pregnancy");
-          navigate(`/pregnancy/${pregnancies[0].id}`, { replace: true });
+          navigate(`/pregnancy/${activeData[0].id}`, { replace: true });
           return;
         }
         
@@ -93,6 +102,10 @@ const Pregnancy: React.FC = () => {
     setDataFetched(false);
   };
 
+  const handleRefreshData = () => {
+    setDataFetched(false);
+  };
+
   return (
     <PageLayout 
       title="Pregnancy" 
@@ -117,11 +130,36 @@ const Pregnancy: React.FC = () => {
         </div>
       ) : (
         <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm overflow-y-visible">
-          <ActivePregnanciesList 
-            pregnancies={activePregnancies} 
-            onAddPregnancy={handleAddPregnancyClick}
-            isLoading={false}
-          />
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <div className="p-6 border-b border-greige-200">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="active" className="flex items-center gap-2">
+                  <Heart className="h-4 w-4" />
+                  Active Pregnancies ({activePregnancies.length})
+                </TabsTrigger>
+                <TabsTrigger value="completed" className="flex items-center gap-2">
+                  <Baby className="h-4 w-4" />
+                  Completed ({completedPregnancies.length})
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <TabsContent value="active" className="p-6 pt-4">
+              <ActivePregnanciesList 
+                pregnancies={activePregnancies} 
+                onAddPregnancy={handleAddPregnancyClick}
+                isLoading={false}
+              />
+            </TabsContent>
+            
+            <TabsContent value="completed" className="p-6 pt-4">
+              <CompletedPregnanciesList 
+                pregnancies={completedPregnancies}
+                isLoading={false}
+                onRefresh={handleRefreshData}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       )}
       
