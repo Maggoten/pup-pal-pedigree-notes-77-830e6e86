@@ -198,23 +198,26 @@ export const useBreedingRemindersProvider = () => {
   // Use mutations for state changes with optimistic updates
   const markCompleteReminderMutation = useMutation({
     mutationFn: async (id: string) => {
-      console.log(`[Reminders Debug] Marking reminder ${id} as completed`);
+      console.log(`[Reminders Debug] Starting mutation for reminder ${id}`);
       
       // Find the current reminder to toggle its state
       const reminder = reminders.find(r => r.id === id);
       if (!reminder) {
-        console.error(`[Reminders Debug] Reminder with ID ${id} not found`);
+        console.error(`[Reminders Debug] Reminder with ID ${id} not found in current list`);
         throw new Error(`Reminder with ID ${id} not found`);
       }
       
       const newCompletedState = !reminder.isCompleted;
+      console.log(`[Reminders Debug] Toggling reminder ${id} from ${reminder.isCompleted} to ${newCompletedState}`);
       
-      // Now all reminders are persisted to database, so we can update all of them
+      // Update reminder in database
       const success = await updateReminder(id, newCompletedState);
       if (!success) {
+        console.error(`[Reminders Debug] Failed to update reminder ${id} in database`);
         throw new Error('Failed to update reminder in database');
       }
       
+      console.log(`[Reminders Debug] Successfully updated reminder ${id} in database`);
       return { id, newCompletedState };
     },
     onMutate: async (id) => {

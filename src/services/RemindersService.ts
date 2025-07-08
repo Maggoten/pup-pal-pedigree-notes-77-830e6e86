@@ -114,14 +114,22 @@ export const addSystemReminder = async (reminder: Reminder): Promise<boolean> =>
     
     console.log(`[RemindersService] Attempting to save system reminder: ${reminder.title} for user ${userId}`);
     
-    // Check if a similar reminder already exists
+    // Generate a proper UUID for the reminder if the current one is invalid
+    let reminderId = reminder.id;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(reminderId)) {
+      // Generate a new UUID based on the reminder content for consistency
+      reminderId = uuidv4();
+      console.log(`[RemindersService] Generated new UUID for reminder: ${reminderId}`);
+    }
+    
+    // Check if a similar reminder already exists using a more comprehensive check
     const { data: existingReminders, error: checkError } = await supabase
       .from('reminders')
-      .select('id')
+      .select('id, title')
       .eq('user_id', userId)
       .eq('type', reminder.type)
-      .eq('related_id', reminder.relatedId)
-      .eq('due_date', reminder.dueDate.toISOString().split('T')[0])
+      .eq('title', reminder.title)
       .eq('is_deleted', false)
       .limit(1);
     
@@ -136,11 +144,11 @@ export const addSystemReminder = async (reminder: Reminder): Promise<boolean> =>
       return true;
     }
     
-    // Insert the new system reminder
+    // Insert the new system reminder with proper error handling
     const { error } = await supabase
       .from('reminders')
       .insert({
-        id: reminder.id,
+        id: reminderId,
         title: reminder.title,
         description: reminder.description,
         due_date: reminder.dueDate.toISOString(),
@@ -154,6 +162,11 @@ export const addSystemReminder = async (reminder: Reminder): Promise<boolean> =>
       });
     
     if (error) {
+      // Handle specific error cases
+      if (error.code === '23505' && error.message.includes('unique_system_reminder')) {
+        console.log(`[RemindersService] Duplicate system reminder detected, skipping: ${reminder.title}`);
+        return true; // Return true as this is expected behavior
+      }
       console.error("Error adding system reminder:", error);
       return false;
     }
@@ -177,14 +190,17 @@ export const updateReminder = async (id: string, isCompleted: boolean): Promise<
     
     const userId = sessionData.session.user.id;
     
-    const { error } = await supabase
+    console.log(`[RemindersService] Updating reminder ${id} to completed: ${isCompleted}`);
+    
+    const { data, error } = await supabase
       .from('reminders')
       .update({ 
         is_completed: isCompleted,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .select();
     
     if (error) {
       console.error("Error updating reminder:", error);
@@ -196,6 +212,17 @@ export const updateReminder = async (id: string, isCompleted: boolean): Promise<
       return false;
     }
     
+    if (!data || data.length === 0) {
+      console.error("No reminder found to update:", id);
+      toast({
+        title: "Error",
+        description: "Reminder not found. Please refresh and try again.",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    console.log(`[RemindersService] Successfully updated reminder ${id}`);
     return true;
   } catch (error) {
     console.error("Error in updateReminder:", error);

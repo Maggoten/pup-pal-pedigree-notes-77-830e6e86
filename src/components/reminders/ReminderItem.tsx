@@ -42,9 +42,26 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
     !isOverdue && 
     isBefore(new Date(dueDate), addDays(new Date(), 2));
   
-  // Handle completion toggle
-  const handleComplete = () => {
-    onComplete(id);
+  // Handle completion toggle with loading state
+  const [isUpdating, setIsUpdating] = useState(false);
+  
+  const handleComplete = async () => {
+    if (isUpdating) {
+      console.log(`[ReminderItem] Already updating reminder ${id}, ignoring click`);
+      return;
+    }
+    
+    console.log(`[ReminderItem] User clicked checkbox for reminder ${id}`);
+    setIsUpdating(true);
+    
+    try {
+      onComplete(id);
+      // Add a small delay to prevent rapid clicking
+      setTimeout(() => setIsUpdating(false), 500);
+    } catch (error) {
+      console.error(`[ReminderItem] Error in handleComplete:`, error);
+      setIsUpdating(false);
+    }
   };
   
   // Handle delete with confirmation state
@@ -76,15 +93,20 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
         <div className="mt-1 flex-shrink-0">
           <button
             onClick={handleComplete}
+            disabled={isUpdating}
             className={cn(
               "h-5 w-5 rounded-full border flex-shrink-0 flex items-center justify-center transition-colors",
               isCompleted ? "bg-green-500 border-green-600" : "border-greige-300 hover:border-primary/70",
               priority === 'high' && !isCompleted ? "border-rose-400" : "",
               priority === 'medium' && !isCompleted ? "border-amber-400" : "",
-              priority === 'low' && !isCompleted ? "border-green-400" : ""
+              priority === 'low' && !isCompleted ? "border-green-400" : "",
+              isUpdating ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
             )}
           >
             {isCompleted && <Check className="h-3 w-3 text-white" />}
+            {isUpdating && !isCompleted && (
+              <div className="h-2 w-2 border border-current border-t-transparent rounded-full animate-spin" />
+            )}
           </button>
         </div>
         
