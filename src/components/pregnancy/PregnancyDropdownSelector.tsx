@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, Baby, MoreHorizontal } from 'lucide-react';
+import { Heart, Baby, MoreHorizontal, PawPrint } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface PregnancyDropdownSelectorProps {
@@ -79,7 +79,7 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
               {currentPregnancy && (
                 <>
                   {isCurrentPregnancyCompleted ? (
-                    <Baby className="h-4 w-4 text-muted-foreground" />
+                    <PawPrint className="h-4 w-4 text-muted-foreground" />
                   ) : (
                     <Heart className="h-4 w-4 text-primary" />
                   )}
@@ -123,7 +123,7 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
           {completedPregnancies.length > 0 && (
             <SelectGroup>
               <SelectLabel className="flex items-center gap-2 text-muted-foreground">
-                <Baby className="h-4 w-4" />
+                <PawPrint className="h-4 w-4" />
                 Completed Pregnancies
               </SelectLabel>
               {completedPregnancies.map(pregnancy => (
@@ -133,7 +133,7 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
                   className="cursor-pointer text-muted-foreground"
                 >
                   <div className="flex items-center gap-2">
-                    <Baby className="h-4 w-4 text-muted-foreground" />
+                    <PawPrint className="h-4 w-4 text-muted-foreground" />
                     {formatPregnancyDisplayName(pregnancy, true)}
                   </div>
                 </SelectItem>
