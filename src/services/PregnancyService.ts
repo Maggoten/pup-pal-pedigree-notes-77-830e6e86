@@ -239,7 +239,7 @@ export const getFirstActivePregnancy = async (): Promise<string | null> => {
   }
 };
 
-export const archivePregnancy = async (pregnancyId: string): Promise<boolean> => {
+export const completePregnancy = async (pregnancyId: string): Promise<boolean> => {
   try {
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
@@ -247,26 +247,29 @@ export const archivePregnancy = async (pregnancyId: string): Promise<boolean> =>
       return false;
     }
 
-    console.log(`Archiving pregnancy with ID: ${pregnancyId}`);
+    console.log(`Completing pregnancy with ID: ${pregnancyId}`);
     
     const { error } = await supabase
       .from('pregnancies')
-      .update({ status: 'archived' })
+      .update({ status: 'completed' })
       .eq('id', pregnancyId)
       .eq('user_id', sessionData.session.user.id);
     
     if (error) {
-      console.error("Error archiving pregnancy:", error);
+      console.error("Error completing pregnancy:", error);
       throw error;
     }
     
-    console.log("Successfully archived pregnancy");
+    console.log("Successfully completed pregnancy");
     return true;
   } catch (err) {
-    console.error('Error in archivePregnancy:', err);
+    console.error('Error in completePregnancy:', err);
     return false;
   }
 };
+
+// Legacy function name for backwards compatibility
+export const archivePregnancy = completePregnancy;
 
 export const deletePregnancy = async (pregnancyId: string): Promise<boolean> => {
   try {

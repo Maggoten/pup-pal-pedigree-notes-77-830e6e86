@@ -22,7 +22,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Archive, Trash } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { archivePregnancy, deletePregnancy } from '@/services/PregnancyService';
+import { completePregnancy, deletePregnancy } from '@/services/PregnancyService';
 
 interface ManagePregnancyDialogProps {
   pregnancyId: string;
@@ -40,38 +40,38 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
   onClose,
 }) => {
   const navigate = useNavigate();
-  const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
+  const [isCompleteConfirmOpen, setIsCompleteConfirmOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleArchive = async () => {
+  const handleComplete = async () => {
     setIsProcessing(true);
     try {
-      const success = await archivePregnancy(pregnancyId);
+      const success = await completePregnancy(pregnancyId);
       if (success) {
         toast({
-          title: "Pregnancy Archived",
-          description: `${femaleName}'s pregnancy has been archived successfully.`,
+          title: "Pregnancy Completed",
+          description: `${femaleName}'s pregnancy has been marked as completed successfully.`,
         });
         onClose();
         navigate('/pregnancy');
       } else {
         toast({
-          title: "Archive Failed",
-          description: "There was a problem archiving the pregnancy.",
+          title: "Complete Failed",
+          description: "There was a problem completing the pregnancy.",
           variant: "destructive"
         });
       }
     } catch (error) {
-      console.error("Error archiving pregnancy:", error);
+      console.error("Error completing pregnancy:", error);
       toast({
-        title: "Archive Failed",
-        description: "An unexpected error occurred while archiving the pregnancy.",
+        title: "Complete Failed",
+        description: "An unexpected error occurred while completing the pregnancy.",
         variant: "destructive"
       });
     } finally {
       setIsProcessing(false);
-      setIsArchiveConfirmOpen(false);
+      setIsCompleteConfirmOpen(false);
     }
   };
 
@@ -121,11 +121,11 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
             <Button 
               variant="outline" 
               className="flex items-center justify-start gap-2"
-              onClick={() => setIsArchiveConfirmOpen(true)}
+              onClick={() => setIsCompleteConfirmOpen(true)}
               disabled={isProcessing}
             >
               <Archive className="h-4 w-4" />
-              Archive Pregnancy
+              Complete Pregnancy
             </Button>
             <Button 
               variant="destructive" 
@@ -146,14 +146,14 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={isArchiveConfirmOpen} onOpenChange={setIsArchiveConfirmOpen}>
+      <AlertDialog open={isCompleteConfirmOpen} onOpenChange={setIsCompleteConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Archive Pregnancy</AlertDialogTitle>
+            <AlertDialogTitle>Complete Pregnancy</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to archive this pregnancy? 
+              Are you sure you want to mark this pregnancy as completed? 
               <br /><br />
-              Archived pregnancies will be removed from your active pregnancies list, 
+              Completed pregnancies will be removed from your active pregnancies list, 
               but can be retrieved later if needed. This will also free up the female dog 
               for a new pregnancy.
             </AlertDialogDescription>
@@ -161,11 +161,11 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleArchive}
+              onClick={handleComplete}
               disabled={isProcessing}
               className="bg-primary hover:bg-primary-hover"
             >
-              {isProcessing ? "Archiving..." : "Archive Pregnancy"}
+              {isProcessing ? "Completing..." : "Complete Pregnancy"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
