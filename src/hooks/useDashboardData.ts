@@ -37,7 +37,8 @@ export const useDashboardData = () => {
     addEvent,
     updateEvent: editEvent,
     deleteEvent,
-    getEventsForDay
+    getEventsForDay,
+    refreshEvents
   } = useSupabaseCalendarEvents();
   
   // Fetch planned litters data
@@ -175,6 +176,7 @@ export const useDashboardData = () => {
     recentLittersData,
     remindersSummary,
     hasCalendarData,
-    hasReminderData
+    hasReminderData,
+    refreshEvents
   };
 };

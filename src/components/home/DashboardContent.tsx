@@ -17,6 +17,7 @@ interface DashboardContentProps {
     editEvent: (eventId: string, data: AddEventFormValues) => Promise<boolean> | boolean;
     isLoading: boolean;
     hasError: boolean;
+    refreshEvents?: () => void;
   };
   remindersProps: {
     reminders: any[];

@@ -20,6 +20,8 @@ interface CalendarContentProps {
   onAddEvent: (data: AddEventFormValues) => boolean;
   onEditEvent?: (eventId: string, data: AddEventFormValues) => boolean;
   compact?: boolean;
+  onSyncCalendar?: () => void;
+  isSyncing?: boolean;
 }
 
 const CalendarContent: React.FC<CalendarContentProps> = ({
@@ -29,7 +31,9 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
   onDeleteEvent,
   onAddEvent,
   onEditEvent,
-  compact = false
+  compact = false,
+  onSyncCalendar,
+  isSyncing = false
 }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -115,6 +119,8 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
         onAddEvent={() => setIsAddDialogOpen(true)}
         todayButton={true}
         onTodayClick={handleTodayClick}
+        onSyncCalendar={onSyncCalendar}
+        isSyncing={isSyncing}
       />
       
       <CardContent className={`p-3 bg-white border-t border-warmbeige-100 ${compact ? 'max-h-[300px] overflow-y-auto' : ''}`}>

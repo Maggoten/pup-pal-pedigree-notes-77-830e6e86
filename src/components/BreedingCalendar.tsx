@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AddEventFormValues } from './calendar/types';
 import CalendarContent from './calendar/CalendarContent';
+import { useComprehensiveCalendarSync } from '@/hooks/useComprehensiveCalendarSync';
 
 // Define props interface for calendar events data
 interface CalendarEventsData {
@@ -16,6 +17,7 @@ interface CalendarEventsData {
   editEvent: (eventId: string, data: AddEventFormValues) => Promise<boolean> | boolean;
   isLoading: boolean;
   hasError: boolean;
+  refreshEvents?: () => void;
 }
 
 interface BreedingCalendarProps {
@@ -33,6 +35,7 @@ const CalendarSkeleton = () => (
 // Use memo to prevent unnecessary re-renders
 const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) => {
   const { dogs } = useDogs();
+  const { syncCalendar, isSyncing } = useComprehensiveCalendarSync();
   
   // If no events data is provided, we need to fetch it - for backward compatibility
   // We'll use the provided eventsData directly from props if available
@@ -43,7 +46,8 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
     deleteEvent,
     editEvent,
     isLoading,
-    hasError
+    hasError,
+    refreshEvents
   } = eventsData || { 
     getEventsForDate: () => [], 
     getEventColor: () => '', 
@@ -51,7 +55,8 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
     deleteEvent: () => {}, 
     editEvent: () => false, 
     isLoading: true, 
-    hasError: false 
+    hasError: false,
+    refreshEvents: () => {}
   };
   
   // Create wrapper functions to handle the async nature of the original functions
@@ -76,6 +81,14 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
     }
     return true; // Always return true synchronously for UI feedback
   };
+
+  const handleSyncCalendar = async () => {
+    const success = await syncCalendar();
+    if (success && refreshEvents) {
+      // Force refresh calendar events after sync
+      refreshEvents();
+    }
+  };
   
   return (
     <Card className="border-warmbeige-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 bg-warmbeige-50 flex flex-col">
@@ -99,6 +112,8 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
             onAddEvent={handleAddEvent}
             onEditEvent={handleEditEvent}
             compact={false} // Use full size calendar now
+            onSyncCalendar={handleSyncCalendar}
+            isSyncing={isSyncing}
           />
         )}
       </div>
