@@ -23,8 +23,24 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
   dogs.forEach((dog) => {
     console.log(`Processing dog: ${dog.name}, ID: ${dog.id}, Owner ID: ${dog.owner_id}`);
     
-    // If female, add heat cycle reminders (assuming a 6-month cycle)
-    if (dog.gender === 'female' && dog.heatHistory && dog.heatHistory.length > 0) {
+    // If female, check if heat tracking should be suggested or if cycle reminders should be created
+    if (dog.gender === 'female') {
+      // Check if dog has heat history
+      if (!dog.heatHistory || dog.heatHistory.length === 0) {
+        // Suggest starting heat tracking
+        reminders.push({
+          id: generateSystemReminderId(dog.id, 'heat-tracking', today),
+          title: `Start Heat Tracking for ${dog.name}`,
+          description: `Begin tracking heat cycles for better breeding management`,
+          icon: createPawPrintIcon("pink-500"),
+          dueDate: today,
+          priority: 'medium',
+          type: 'other', 
+          relatedId: dog.id
+        });
+        console.log(`Created heat tracking suggestion for dog ${dog.name}`);
+      } else {
+        // Has heat history, create cycle reminders
       // Find the last heat date
       const sortedHeatDates = [...dog.heatHistory].sort((a, b) => 
         new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -52,6 +68,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
         console.log(`Created heat reminder for dog ${dog.name}`);
       }
     }
+  }
     
     // Check for upcoming vaccinations - EXTENDED TO 14 DAYS
     if (dog.vaccinationDate) {

@@ -18,10 +18,25 @@ interface DogEditFormProps {
 }
 
 const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isLoading = false }) => {
-  // Transform date strings to Date objects for form
-  const transformHeatHistory = dog.heatHistory 
-    ? dog.heatHistory.map(heat => ({ date: new Date(heat.date) }))
+  // Transform date strings to Date objects for form - FIXED: Better error handling
+  const transformHeatHistory = dog.heatHistory && Array.isArray(dog.heatHistory)
+    ? dog.heatHistory
+        .filter(heat => heat && heat.date) // Filter out invalid entries
+        .map(heat => {
+          try {
+            const date = new Date(heat.date);
+            // Set to noon to avoid timezone issues
+            date.setHours(12, 0, 0, 0);
+            return { date };
+          } catch (error) {
+            console.error('Error converting heat date:', heat.date, error);
+            return null;
+          }
+        })
+        .filter(Boolean) // Remove failed conversions
     : [];
+  
+  console.log('[DogEditForm] Transformed heat history:', transformHeatHistory);
 
   const form = useForm<DogFormValues>({
     resolver: zodResolver(dogFormSchema),

@@ -93,9 +93,16 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
     
     console.log('[Dogs Debug] Clean updates before validation:', cleanUpdates);
     
-    // Special handling for heat history - ensure it's always included if present in updates
+    // CRITICAL: Special handling for heat history - ensure it's always included
     if ('heatHistory' in updates) {
-      console.log('[Dogs Debug] Heat history update detected, ensuring it gets saved');
+      console.log('[Dogs Debug] Heat history update detected, ensuring it gets saved:', updates.heatHistory);
+      
+      // Ensure heatHistory is included in cleanUpdates even if it's an empty array
+      if (!cleanUpdates.heatHistory && updates.heatHistory !== undefined) {
+        cleanUpdates.heatHistory = updates.heatHistory;
+        console.log('[Dogs Debug] Forced inclusion of heatHistory in cleanUpdates');
+      }
+      
       // Force the update to proceed by ensuring we always have at least one field to update
       if (Object.keys(cleanUpdates).length === 0) {
         // Add explicit updated_at to ensure we have something to update

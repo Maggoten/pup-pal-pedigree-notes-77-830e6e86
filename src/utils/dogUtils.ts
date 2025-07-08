@@ -188,42 +188,64 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
     console.log('[Dogs Debug] Mapped image to image_url:', dog.image);
   }
   
-  // Process heat history with enhanced validation and logging
+  // Process heat history - CRITICAL: Handle both Date objects and Heat objects
   if ('heatHistory' in dog && dog.heatHistory !== undefined) {
     console.log('[Dogs Debug] Processing heat history for DB save:', dog.heatHistory);
     
     // Ensure we have an array to work with
     const heatArray = Array.isArray(dog.heatHistory) ? dog.heatHistory : [];
     
-    const processedHeatHistory = heatArray.map((heat: Heat, index: number) => {
-      console.log(`[Dogs Debug] Processing heat entry ${index}:`, heat);
+    const processedHeatHistory = heatArray.map((heat: any, index: number) => {
+      console.log(`[Dogs Debug] Processing heat entry ${index}:`, heat, 'Type:', typeof heat);
+      
+      // Handle the case where heat is a Date object directly (from form)
+      if (heat instanceof Date) {
+        const processedDate = dateToISOString(heat);
+        console.log(`[Dogs Debug] Converted Date object to string: "${processedDate}"`);
+        return { date: processedDate };
+      }
+      
+      // Handle the case where heat has a date property that's a Date object
+      if (heat && typeof heat === 'object' && heat.date instanceof Date) {
+        const processedDate = dateToISOString(heat.date);
+        console.log(`[Dogs Debug] Converted heat.date Date object to string: "${processedDate}"`);
+        return { date: processedDate };
+      }
+      
+      // Handle the case where heat is already in the correct format
+      if (heat && typeof heat === 'object' && typeof heat.date === 'string') {
+        const processedDate = heat.date.split('T')[0]; // Extract YYYY-MM-DD
+        console.log(`[Dogs Debug] Using existing string date: "${processedDate}"`);
+        return { date: processedDate };
+      }
       
       // Validate heat entry structure
       if (!heat || typeof heat !== 'object') {
-        console.warn(`[Dogs Debug] Invalid heat entry at index ${index}, creating empty entry`);
-        return { date: '' };
+        console.warn(`[Dogs Debug] Invalid heat entry at index ${index}, skipping:`, heat);
+        return null; // Skip invalid entries instead of creating empty ones
       }
       
-      // Process the date field
+      // Process other date field formats
       let processedDate = '';
       if (heat.date) {
         if (typeof heat.date === 'string') {
           processedDate = heat.date.split('T')[0]; // Extract YYYY-MM-DD
-        } else if (Object.prototype.toString.call(heat.date) === '[object Date]') {
-          processedDate = dateToISOString(heat.date as unknown as Date);
         } else {
           console.warn(`[Dogs Debug] Unexpected date format at index ${index}:`, heat.date);
-          processedDate = '';
         }
       }
       
-      console.log(`[Dogs Debug] Processed heat date ${index}: "${processedDate}"`);
-      return { date: processedDate };
-    });
+      if (processedDate) {
+        console.log(`[Dogs Debug] Processed heat date ${index}: "${processedDate}"`);
+        return { date: processedDate };
+      }
+      
+      return null; // Skip entries without valid dates
+    }).filter(Boolean); // Remove null entries
     
-    // Always include heatHistory in the update, even if it's an empty array
+    // Always include heatHistory in the update
     dbDog.heatHistory = processedHeatHistory;
-    console.log('[Dogs Debug] Final processed heatHistory for DB:', processedHeatHistory);
+    console.log('[Dogs Debug] Final processed heatHistory for DB (filtered):', processedHeatHistory);
   }
   
   // Process optional dates to ensure YYYY-MM-DD format
