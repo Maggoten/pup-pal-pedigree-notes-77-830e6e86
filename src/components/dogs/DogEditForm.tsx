@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Dog } from '@/context/DogsContext';
 import DogFormFields, { dogFormSchema, DogFormValues } from './DogFormFields';
 import DogImageField from './DogImageField';
-import HeatRecordsField from './HeatRecordsField';
+import HeatRecordsField from './heat-records/HeatRecordsField';
 import { Loader2 } from 'lucide-react';
 
 interface DogEditFormProps {

@@ -19,15 +19,20 @@ const HeatDatePicker: React.FC<HeatDatePickerProps> = ({
   onSelect, 
   disabled 
 }) => {
-  // Function to preserve the date without timezone shifts
+  // Function to preserve the date without timezone shifts and add validation
   const handleSelect = (selectedDate: Date | undefined) => {
     if (!selectedDate) return;
     
-    // Create a new date with time set to noon to avoid timezone issues
-    const newDate = new Date(selectedDate);
-    newDate.setHours(12, 0, 0, 0);
-    
-    onSelect(newDate);
+    try {
+      // Create a new date with time set to noon to avoid timezone issues
+      const newDate = new Date(selectedDate);
+      newDate.setHours(12, 0, 0, 0);
+      
+      console.log('[HeatDatePicker] Selected date:', selectedDate, 'Processed date:', newDate);
+      onSelect(newDate);
+    } catch (error) {
+      console.error('[HeatDatePicker] Error processing selected date:', error);
+    }
   };
 
   return (

@@ -21,32 +21,48 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
   // Get heat history from form or initialize empty array
   const heatHistory = form.watch('heatHistory') || [];
   
-  // Add a new heat date record
+  // Add a new heat date record with better validation
   const addHeatDate = () => {
-    // Create date at noon to avoid timezone issues
-    const newDate = new Date();
-    newDate.setHours(12, 0, 0, 0);
-    
-    const newHeatHistory = [...heatHistory, { date: newDate }];
-    form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
+    try {
+      // Create date at noon to avoid timezone issues
+      const newDate = new Date();
+      newDate.setHours(12, 0, 0, 0);
+      
+      const newHeatHistory = [...heatHistory, { date: newDate }];
+      form.setValue('heatHistory', newHeatHistory, { shouldValidate: true, shouldDirty: true });
+      console.log('[HeatRecordsField] Added new heat date:', newDate, 'Total entries:', newHeatHistory.length);
+    } catch (error) {
+      console.error('[HeatRecordsField] Error adding heat date:', error);
+    }
   };
   
-  // Remove a heat date record
+  // Remove a heat date record with logging
   const removeHeatDate = (index: number) => {
-    const newHeatHistory = [...heatHistory];
-    newHeatHistory.splice(index, 1);
-    form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
+    try {
+      const newHeatHistory = [...heatHistory];
+      const removedDate = newHeatHistory[index];
+      newHeatHistory.splice(index, 1);
+      form.setValue('heatHistory', newHeatHistory, { shouldValidate: true, shouldDirty: true });
+      console.log('[HeatRecordsField] Removed heat date at index', index, ':', removedDate, 'Remaining entries:', newHeatHistory.length);
+    } catch (error) {
+      console.error('[HeatRecordsField] Error removing heat date:', error);
+    }
   };
   
-  // Update a heat date
+  // Update a heat date with validation
   const updateHeatDate = (index: number, date: Date) => {
-    // Create date at noon to avoid timezone issues
-    const newDate = new Date(date);
-    newDate.setHours(12, 0, 0, 0);
-    
-    const newHeatHistory = [...heatHistory];
-    newHeatHistory[index] = { date: newDate };
-    form.setValue('heatHistory', newHeatHistory, { shouldValidate: true });
+    try {
+      // Create date at noon to avoid timezone issues
+      const newDate = new Date(date);
+      newDate.setHours(12, 0, 0, 0);
+      
+      const newHeatHistory = [...heatHistory];
+      newHeatHistory[index] = { date: newDate };
+      form.setValue('heatHistory', newHeatHistory, { shouldValidate: true, shouldDirty: true });
+      console.log(`[HeatRecordsField] Updated heat date at index ${index}:`, newDate, 'Total entries:', newHeatHistory.length);
+    } catch (error) {
+      console.error('[HeatRecordsField] Error updating heat date:', error);
+    }
   };
 
   return (

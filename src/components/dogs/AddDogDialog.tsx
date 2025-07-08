@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import DogFormFields, { dogFormSchema } from './DogFormFields';
 import DogImageField from './image-upload/DogImageField';
-import HeatRecordsField from './HeatRecordsField';
+import HeatRecordsField from './heat-records/HeatRecordsField';
 import { toast } from '@/hooks/use-toast';
 import { useDogs } from '@/context/DogsContext';
 import { Dog } from '@/types/dogs';
