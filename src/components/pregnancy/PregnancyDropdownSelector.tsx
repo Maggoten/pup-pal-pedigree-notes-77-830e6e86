@@ -141,7 +141,7 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
             </SelectGroup>
           )}
           
-          {completedPregnancies.length >= 12 && onShowAllCompleted && (
+          {completedPregnancies.length >= 5 && onShowAllCompleted && (
             <>
               <SelectSeparator />
               <SelectItem value="view-all-completed" className="cursor-pointer justify-center">
