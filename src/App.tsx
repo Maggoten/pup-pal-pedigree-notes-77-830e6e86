@@ -24,6 +24,7 @@ import MobileDebugPanel from "./components/diagnostics/MobileDebugPanel";
 import { isMobileDevice, isAppForeground } from "./utils/fetchUtils";
 import { queryClient, refreshOnVisibilityChange } from "./utils/reactQueryConfig";
 import ProtectedApp from "./components/ProtectedApp";
+import I18nProvider from "./providers/I18nProvider";
 
 // RouteChangeTracker to detect navigation changes and refresh data
 const RouteChangeTracker = () => {
@@ -128,8 +129,9 @@ const App = () => {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <TooltipProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <TooltipProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -162,8 +164,9 @@ const App = () => {
               </ProtectedApp>
             </AuthGuard>
             </BrowserRouter>
-          </TooltipProvider>
-        </AuthProvider>
+            </TooltipProvider>
+          </AuthProvider>
+        </I18nProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

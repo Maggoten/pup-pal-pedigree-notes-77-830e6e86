@@ -2,6 +2,7 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import './i18n'
 
 // Add global error handler for debugging mobile issues
 if (process.env.NODE_ENV === 'development') {

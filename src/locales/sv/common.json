@@ -1,0 +1,17 @@
+{
+  "myDogs": "Mina hundar",
+  "addDog": "Lägg till hund",
+  "save": "Spara", 
+  "logout": "Logga ut",
+  "language": "Språk",
+  "english": "English (EN)",
+  "svenska": "Svenska (SV)",
+  "navigation": {
+    "home": "Hem",
+    "myDogs": "Mina hundar",
+    "plannedLitters": "Planerade kullar",
+    "pregnancies": "Dräktigheter", 
+    "myLitters": "Mina kullar",
+    "settings": "Inställningar"
+  }
+}

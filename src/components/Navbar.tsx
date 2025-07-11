@@ -3,6 +3,7 @@ import { Dog, FileText, Settings, PawPrint, LogOut, Menu, Calendar, Heart } from
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/providers/AuthProvider';
+import { useTranslation } from 'react-i18next';
 import {
   Drawer,
   DrawerContent,
@@ -15,6 +16,7 @@ import SettingsDialog from '@/components/settings/SettingsDialog';
 export const Navbar: React.FC = () => {
   const location = useLocation();
   const { logout } = useAuth();
+  const { t } = useTranslation('common');
   const [settingsOpen, setSettingsOpen] = useState(false);
   
   const isActive = (path: string) => {
@@ -36,11 +38,11 @@ export const Navbar: React.FC = () => {
   };
   
   const navItems = [
-    { path: "/", label: "Home", icon: Calendar },
-    { path: "/my-dogs", label: "My Dogs", icon: Dog },
-    { path: "/planned-litters", label: "Planned Litters", icon: FileText },
-    { path: "/pregnancy", label: "Pregnancy", icon: Heart },
-    { path: "/my-litters", label: "My Litters", icon: PawPrint }
+    { path: "/", label: t('navigation.home'), icon: Calendar },
+    { path: "/my-dogs", label: t('navigation.myDogs'), icon: Dog },
+    { path: "/planned-litters", label: t('navigation.plannedLitters'), icon: FileText },
+    { path: "/pregnancy", label: t('navigation.pregnancies'), icon: Heart },
+    { path: "/my-litters", label: t('navigation.myLitters'), icon: PawPrint }
   ];
   
   return (
@@ -78,7 +80,7 @@ export const Navbar: React.FC = () => {
                     onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4 mr-2" />
-                    <span>Logout</span>
+                    <span>{t('logout')}</span>
                   </Button>
                 </DrawerClose>
               </nav>

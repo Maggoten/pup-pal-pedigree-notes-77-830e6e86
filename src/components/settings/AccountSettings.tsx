@@ -3,12 +3,15 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/providers/AuthProvider';
+import { useTranslation } from 'react-i18next';
 import DeleteAccountSection from './DeleteAccountSection';
 import SubscriptionSettings from '@/components/subscription/SubscriptionSettings';
 import ChangePasswordForm from './ChangePasswordForm';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const AccountSettings: React.FC = () => {
   const { user, logout } = useAuth();
+  const { t } = useTranslation('common');
 
   const handleLogout = async () => {
     await logout();
@@ -36,8 +39,13 @@ const AccountSettings: React.FC = () => {
             </p>
           </div>
           
+          <div className="space-y-2">
+            <p className="text-sm font-medium">{t('language')}</p>
+            <LanguageSwitcher />
+          </div>
+          
           <Button variant="outline" onClick={handleLogout}>
-            Sign out
+            {t('logout')}
           </Button>
         </CardContent>
       </Card>
