@@ -20,15 +20,6 @@ const PlannedLittersContent: React.FC = () => {
     refreshLitters
   } = usePlannedLitters();
 
-  // Run cleanup of old heat entries when the page loads
-  useEffect(() => {
-    const cleanup = async () => {
-      await HeatService.deleteOldHeatEntries();
-    };
-    
-    cleanup();
-    // Only run once when the component mounts
-  }, []);
 
   const handleHeatDeleted = () => {
     // Refresh data after a heat entry is deleted
