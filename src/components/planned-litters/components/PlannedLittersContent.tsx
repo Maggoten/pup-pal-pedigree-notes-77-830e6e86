@@ -1,9 +1,8 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import PlannedLittersList from '@/components/planned-litters/PlannedLittersList';
 import MatingSection from '@/components/planned-litters/mating/MatingSection';
 import { usePlannedLitters } from '../hooks/usePlannedLitters';
-import { HeatService } from '@/services/HeatService';
 
 const PlannedLittersContent: React.FC = () => {
   const {

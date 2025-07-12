@@ -1,28 +1,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export class HeatService {
-  /**
-   * Deletes heat history entries that are older than 30 days
-   * This calls a database function that handles the cleanup
-   * @returns A boolean indicating whether the operation was successful
-   */
-  static async deleteOldHeatEntries(): Promise<boolean> {
-    try {
-      const { error } = await supabase.rpc('delete_old_heat_entries');
-      
-      if (error) {
-        console.error('Error deleting old heat entries:', error);
-        return false;
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Unexpected error in deleteOldHeatEntries:', error);
-      return false;
-    }
-  }
 
+export class HeatService {
   /**
    * Deletes a specific heat entry from a dog's heat history
    * @param dogId The ID of the dog

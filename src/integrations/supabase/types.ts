@@ -820,10 +820,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      delete_old_heat_entries: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       delete_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
