@@ -101,7 +101,7 @@ export const addReminder = async (input: CustomReminderInput): Promise<boolean> 
   }
 };
 
-// Improved function to add system-generated reminders with better conflict handling
+// Improved function to add system-generated reminders with better duplicate detection
 export const addSystemReminder = async (reminder: Reminder): Promise<boolean> => {
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -114,22 +114,23 @@ export const addSystemReminder = async (reminder: Reminder): Promise<boolean> =>
     
     console.log(`[RemindersService] Attempting to save system reminder: ${reminder.title} for user ${userId}`);
     
-    // Generate a proper UUID for the reminder if the current one is invalid
-    let reminderId = reminder.id;
+    // Validate that we have a proper UUID - system reminders should always have deterministic IDs
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(reminderId)) {
-      // Generate a new UUID based on the reminder content for consistency
-      reminderId = uuidv4();
-      console.log(`[RemindersService] Generated new UUID for reminder: ${reminderId}`);
+    if (!uuidRegex.test(reminder.id)) {
+      console.error(`[RemindersService] Invalid UUID for system reminder: ${reminder.id}`);
+      return false;
     }
     
-    // Check if a similar reminder already exists using a more comprehensive check
+    // Enhanced duplicate check - look for exact matches on key fields
+    const dueDateStr = reminder.dueDate.toISOString();
     const { data: existingReminders, error: checkError } = await supabase
       .from('reminders')
-      .select('id, title')
+      .select('id, title, source')
       .eq('user_id', userId)
       .eq('type', reminder.type)
-      .eq('title', reminder.title)
+      .eq('related_id', reminder.relatedId || '')
+      .eq('due_date', dueDateStr)
+      .eq('source', 'system')
       .eq('is_deleted', false)
       .limit(1);
     
@@ -138,23 +139,23 @@ export const addSystemReminder = async (reminder: Reminder): Promise<boolean> =>
       return false;
     }
     
-    // If reminder already exists, skip it
+    // If exact duplicate exists, skip it (safety check)
     if (existingReminders && existingReminders.length > 0) {
-      console.log(`[RemindersService] Reminder already exists, skipping: ${reminder.title}`);
+      console.log(`[RemindersService] Exact duplicate system reminder found, skipping: ${reminder.title}`);
       return true;
     }
     
-    // Insert the new system reminder with proper error handling
+    // Insert the new system reminder - the database constraint will prevent duplicates
     const { error } = await supabase
       .from('reminders')
       .insert({
-        id: reminderId,
+        id: reminder.id,
         title: reminder.title,
         description: reminder.description,
-        due_date: reminder.dueDate.toISOString(),
+        due_date: dueDateStr,
         priority: reminder.priority,
         type: reminder.type,
-        related_id: reminder.relatedId,
+        related_id: reminder.relatedId || null,
         user_id: userId,
         source: 'system',
         is_completed: reminder.isCompleted || false,
@@ -162,9 +163,9 @@ export const addSystemReminder = async (reminder: Reminder): Promise<boolean> =>
       });
     
     if (error) {
-      // Handle specific error cases
+      // Handle database constraint violations gracefully
       if (error.code === '23505' && error.message.includes('unique_system_reminder')) {
-        console.log(`[RemindersService] Duplicate system reminder detected, skipping: ${reminder.title}`);
+        console.log(`[RemindersService] Database prevented duplicate system reminder: ${reminder.title}`);
         return true; // Return true as this is expected behavior
       }
       console.error("Error adding system reminder:", error);

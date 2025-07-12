@@ -4,11 +4,17 @@ import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
 import { differenceInDays, addYears, isAfter, isBefore, parseISO } from 'date-fns';
 import { createCalendarClockIcon, createPawPrintIcon } from '@/utils/iconUtils';
-import { v4 as uuidv4 } from 'uuid';
+import { v5 as uuidv5 } from 'uuid';
+
+// Namespace UUID for deterministic reminder IDs (prevents collisions)
+const REMINDER_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
 
 // Generate deterministic UUID for system reminders
 const generateSystemReminderId = (relatedId: string, type: string, date: Date): string => {
-  return uuidv4();
+  // Create a deterministic seed from related ID, type, and date
+  const seed = `${relatedId}-${type}-${date.toDateString()}`;
+  // Generate deterministic UUID that will always be the same for the same inputs
+  return uuidv5(seed, REMINDER_NAMESPACE);
 };
 
 /**
@@ -126,101 +132,70 @@ export const generateVaccinationReminders = (dogs: Dog[]): Reminder[] => {
 };
 
 /**
- * Merge multiple reminder sources while avoiding duplicates
+ * Enhanced merge function that prevents duplicates more robustly
+ * Prioritizes custom reminders over system reminders
+ * Uses deterministic IDs and type+relatedId+date matching for safety
  */
 export const mergeReminders = (...reminderSets: Reminder[][]): Reminder[] => {
   const allReminders: Reminder[] = [];
   const seenIds = new Set<string>();
-  const typeToIdsMap = new Map<string, Set<string>>(); // Track dog IDs by reminder type
+  const duplicateKeys = new Set<string>(); // Track type+relatedId+date combinations
   
   // Create debug helper
-  const debugMerge = (source: string, reminder: Reminder, isAdded: boolean) => {
-    console.log(`[Reminders Debug] ${source} - ${reminder.title} (${reminder.id}) - ${isAdded ? 'Added' : 'Skipped (duplicate)'}`);
+  const debugMerge = (source: string, reminder: Reminder, isAdded: boolean, reason?: string) => {
+    console.log(`[Reminders Debug] ${source} - ${reminder.title} (${reminder.id}) - ${isAdded ? 'Added' : `Skipped${reason ? ': ' + reason : ''}`}`);
   };
   
-  // First pass: add reminders from regulated sources (custom user reminders)
-  const userReminders = reminderSets[0] || [];
-  userReminders.forEach(reminder => {
-    seenIds.add(reminder.id);
-    allReminders.push(reminder);
-    
-    // Track by type and related ID
-    if (reminder.relatedId && reminder.type) {
-      const key = `${reminder.type}-${reminder.relatedId}`;
-      if (!typeToIdsMap.has(key)) {
-        typeToIdsMap.set(key, new Set());
-      }
-      typeToIdsMap.get(key)?.add(reminder.id);
-    }
-    
-    debugMerge('UserReminder', reminder, true);
-  });
+  // Helper to create duplicate detection key
+  const createDuplicateKey = (reminder: Reminder): string => {
+    const dateKey = reminder.dueDate.toDateString();
+    return `${reminder.type}-${reminder.relatedId || 'none'}-${dateKey}`;
+  };
   
-  // Next priority: dog reminders from generateDogReminders
-  const dogReminders = reminderSets[1] || [];
-  dogReminders.forEach(reminder => {
-    // If we already have this ID, skip it
-    if (seenIds.has(reminder.id)) {
-      debugMerge('DogReminder', reminder, false);
-      return;
-    }
+  // Process all reminder sets with priority order
+  reminderSets.forEach((reminderSet, setIndex) => {
+    const source = setIndex === 0 ? 'UserReminder' :
+                   setIndex === 1 ? 'DogReminder' :
+                   setIndex === 2 ? 'LitterReminder' :
+                   setIndex === 3 ? 'GeneralReminder' :
+                   setIndex === 4 ? 'PlannedHeatReminder' :
+                   setIndex === 5 ? 'BirthdayReminder' : 'VaccinationReminder';
     
-    // Check if we already have a reminder of the same type for the same dog
-    // from user reminders (priority to user-created reminders)
-    if (reminder.relatedId && reminder.type) {
-      const key = `${reminder.type}-${reminder.relatedId}`;
-      if (typeToIdsMap.has(key) && typeToIdsMap.get(key)!.size > 0) {
-        debugMerge('DogReminder', reminder, false);
-        return;
-      }
-      
-      // Track this reminder
-      if (!typeToIdsMap.has(key)) {
-        typeToIdsMap.set(key, new Set());
-      }
-      typeToIdsMap.get(key)?.add(reminder.id);
-    }
-    
-    seenIds.add(reminder.id);
-    allReminders.push(reminder);
-    debugMerge('DogReminder', reminder, true);
-  });
-  
-  // Process remaining reminders
-  for (let i = 2; i < reminderSets.length; i++) {
-    const reminderSet = reminderSets[i] || [];
-    const source = i === 2 ? 'LitterReminder' :
-                 i === 3 ? 'GeneralReminder' :
-                 i === 4 ? 'PlannedHeatReminder' :
-                 i === 5 ? 'BirthdayReminder' : 'VaccinationReminder';
-    
-    reminderSet.forEach(reminder => {
-      // Skip if we've already seen this ID
+    (reminderSet || []).forEach(reminder => {
+      // Check for exact ID match (deterministic IDs should prevent this)
       if (seenIds.has(reminder.id)) {
-        debugMerge(source, reminder, false);
+        debugMerge(source, reminder, false, 'duplicate ID');
         return;
       }
       
-      // Check for type+relatedId collision
-      if (reminder.relatedId && reminder.type) {
-        const key = `${reminder.type}-${reminder.relatedId}`;
-        if (typeToIdsMap.has(key) && typeToIdsMap.get(key)!.size > 0) {
-          debugMerge(source, reminder, false);
+      // Check for logical duplicate (same type, related item, and date)
+      const duplicateKey = createDuplicateKey(reminder);
+      if (duplicateKeys.has(duplicateKey)) {
+        debugMerge(source, reminder, false, 'duplicate type+relatedId+date');
+        return;
+      }
+      
+      // Additional safety check: don't add system reminders that are too similar to custom ones
+      if (source !== 'UserReminder') {
+        const hasSimilarCustomReminder = allReminders.some(existing => 
+          existing.type === reminder.type && 
+          existing.relatedId === reminder.relatedId &&
+          Math.abs(existing.dueDate.getTime() - reminder.dueDate.getTime()) < 24 * 60 * 60 * 1000 // Within 1 day
+        );
+        
+        if (hasSimilarCustomReminder) {
+          debugMerge(source, reminder, false, 'similar custom reminder exists');
           return;
         }
-        
-        // Track this reminder
-        if (!typeToIdsMap.has(key)) {
-          typeToIdsMap.set(key, new Set());
-        }
-        typeToIdsMap.get(key)?.add(reminder.id);
       }
       
+      // Add the reminder
       seenIds.add(reminder.id);
+      duplicateKeys.add(duplicateKey);
       allReminders.push(reminder);
       debugMerge(source, reminder, true);
     });
-  }
+  });
   
   console.log(`[Reminders Debug] Merged ${allReminders.length} reminders from ${reminderSets.length} sources`);
   

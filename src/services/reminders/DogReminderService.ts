@@ -3,14 +3,17 @@ import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
 import { differenceInDays, parseISO, addDays, isSameMonth, isSameDay, addYears, startOfDay, isAfter, isBefore, isToday } from 'date-fns';
 import { createPawPrintIcon, createCalendarClockIcon } from '@/utils/iconUtils';
-import { v4 as uuidv4 } from 'uuid';
+import { v5 as uuidv5 } from 'uuid';
+
+// Namespace UUID for deterministic reminder IDs (prevents collisions)
+const REMINDER_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
 
 // Generate deterministic UUID based on dog ID, type, and date
 const generateSystemReminderId = (dogId: string, type: string, date: Date): string => {
   // Create a deterministic seed from dog ID, type, and date
   const seed = `${dogId}-${type}-${date.toDateString()}`;
-  // For now, we'll use a regular UUID but store the seed info for uniqueness checks
-  return uuidv4();
+  // Generate deterministic UUID that will always be the same for the same inputs
+  return uuidv5(seed, REMINDER_NAMESPACE);
 };
 
 export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
