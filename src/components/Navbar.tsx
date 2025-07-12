@@ -16,7 +16,7 @@ import SettingsDialog from '@/components/settings/SettingsDialog';
 export const Navbar: React.FC = () => {
   const location = useLocation();
   const { logout } = useAuth();
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('navigation');
   const [settingsOpen, setSettingsOpen] = useState(false);
   
   const isActive = (path: string) => {
@@ -38,11 +38,11 @@ export const Navbar: React.FC = () => {
   };
   
   const navItems = [
-    { path: "/", label: t('navigation.home'), icon: Calendar },
-    { path: "/my-dogs", label: t('navigation.myDogs'), icon: Dog },
-    { path: "/planned-litters", label: t('navigation.plannedLitters'), icon: FileText },
-    { path: "/pregnancy", label: t('navigation.pregnancies'), icon: Heart },
-    { path: "/my-litters", label: t('navigation.myLitters'), icon: PawPrint }
+    { path: "/", label: t('home'), icon: Calendar },
+    { path: "/my-dogs", label: t('myDogs'), icon: Dog },
+    { path: "/planned-litters", label: t('plannedLitters'), icon: FileText },
+    { path: "/pregnancy", label: t('pregnancies'), icon: Heart },
+    { path: "/my-litters", label: t('myLitters'), icon: PawPrint }
   ];
   
   return (
@@ -80,7 +80,7 @@ export const Navbar: React.FC = () => {
                     onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4 mr-2" />
-                    <span>{t('logout')}</span>
+                    <span>{t('common:logout')}</span>
                   </Button>
                 </DrawerClose>
               </nav>

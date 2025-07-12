@@ -1,18 +1,8 @@
 {
-  "myDogs": "My Dogs",
-  "addDog": "Add Dog", 
   "save": "Save",
   "logout": "Log out",
   "language": "Language",
   "english": "English (EN)",
   "svenska": "Svenska (SV)",
-  "testFallback": "This text should fallback to English",
-  "navigation": {
-    "home": "Home",
-    "myDogs": "My Dogs",
-    "plannedLitters": "Planned Litters", 
-    "pregnancies": "Pregnancies",
-    "myLitters": "My Litters",
-    "settings": "Settings"
-  }
+  "testFallback": "This text should fallback to English"
 }
