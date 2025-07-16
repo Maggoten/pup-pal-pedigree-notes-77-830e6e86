@@ -43,7 +43,7 @@ const SterilizationDateField: React.FC<SterilizationDateFieldProps> = ({
         }} disabled={date => date > new Date() || !!disabled} initialFocus className={cn("p-3 pointer-events-auto")} />
             </PopoverContent>
           </Popover>
-          <FormDescription>Optional - For female dogs only</FormDescription>
+          
           <FormMessage />
         </FormItem>} />;
 };
