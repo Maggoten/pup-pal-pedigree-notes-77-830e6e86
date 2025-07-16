@@ -4,7 +4,7 @@ import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlusCircle, Filter, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useDogs, DogsProvider } from '@/context/DogsContext';
+import { useDogs } from '@/context/DogsContext';
 import DogList from '@/components/DogList';
 import DogDetails from '@/components/dogs/DogDetails';
 import AddDogDialog from '@/components/dogs/AddDogDialog';
@@ -211,11 +211,7 @@ const MyDogsContent: React.FC = () => {
 };
 
 const MyDogs: React.FC = () => {
-  return (
-    <DogsProvider>
-      <MyDogsContent />
-    </DogsProvider>
-  );
+  return <MyDogsContent />;
 };
 
 export default MyDogs;
