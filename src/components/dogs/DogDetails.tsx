@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -188,8 +187,6 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         onCancelEdit={() => setIsEditing(false)}
       />
       
-      <DogLittersSection dog={dog} />
-      
       <DogActions
         isEditing={isEditing}
         onDelete={() => setShowDeleteDialog(true)}
@@ -197,6 +194,8 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         loading={loading}
         isSaving={isSaving}
       />
+      
+      <DogLittersSection dog={dog} />
       
       <DeleteDogDialog
         dogName={dog.name}
