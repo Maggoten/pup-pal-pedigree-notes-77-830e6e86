@@ -26,8 +26,8 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
   dogs.forEach((dog) => {
     console.log(`Processing dog: ${dog.name}, ID: ${dog.id}, Owner ID: ${dog.owner_id}`);
     
-    // If female, check if heat tracking should be suggested or if cycle reminders should be created
-    if (dog.gender === 'female') {
+    // If female and not sterilized, check if heat tracking should be suggested or if cycle reminders should be created
+    if (dog.gender === 'female' && !dog.sterilization_date) {
       // Check if dog has heat history
       if (!dog.heatHistory || dog.heatHistory.length === 0) {
         // Suggest starting heat tracking

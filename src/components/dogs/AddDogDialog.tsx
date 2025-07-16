@@ -79,6 +79,9 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
         dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
         color: data.color,
         registrationNumber: data.registrationNumber,
+        dewormingDate: data.dewormingDate ? data.dewormingDate.toISOString().split('T')[0] : undefined,
+        vaccinationDate: data.vaccinationDate ? data.vaccinationDate.toISOString().split('T')[0] : undefined,
+        sterilization_date: data.sterilizationDate ? data.sterilizationDate.toISOString().split('T')[0] : undefined,
         notes: data.notes || '',
         image: imageUrl, // Use the image URL from state
         heatHistory: data.heatHistory?.map(heat => ({ 

@@ -54,6 +54,7 @@ export interface Dog {
   // Health tracking
   dewormingDate?: string;
   vaccinationDate?: string;
+  sterilization_date?: string;
   
   // Breeding-related fields
   heatHistory?: Heat[];

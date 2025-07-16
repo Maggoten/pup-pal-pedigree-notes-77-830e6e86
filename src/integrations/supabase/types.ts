@@ -110,6 +110,7 @@ export type Database = {
           notes: string | null
           owner_id: string | null
           registration_number: string | null
+          sterilization_date: string | null
           updated_at: string | null
           vaccinationDate: string | null
         }
@@ -131,6 +132,7 @@ export type Database = {
           notes?: string | null
           owner_id?: string | null
           registration_number?: string | null
+          sterilization_date?: string | null
           updated_at?: string | null
           vaccinationDate?: string | null
         }
@@ -152,6 +154,7 @@ export type Database = {
           notes?: string | null
           owner_id?: string | null
           registration_number?: string | null
+          sterilization_date?: string | null
           updated_at?: string | null
           vaccinationDate?: string | null
         }

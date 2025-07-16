@@ -18,6 +18,7 @@ export const dogFormSchema = z.object({
   registrationNumber: z.string().optional(),
   dewormingDate: z.instanceof(Date).optional().nullable(),
   vaccinationDate: z.instanceof(Date).optional().nullable(),
+  sterilizationDate: z.instanceof(Date).optional().nullable(),
   notes: z.string().optional(),
   image: z.string().optional(),
   heatHistory: z.array(
