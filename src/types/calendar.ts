@@ -11,4 +11,7 @@ export interface CalendarEvent {
   notes?: string;
   time?: string;
   description?: string;
+  // New Phase 1 fields for advanced heat tracking
+  status?: 'predicted' | 'active' | 'ended';
+  heatPhase?: 'proestrus' | 'estrus' | 'metestrus' | 'anestrus';
 }

@@ -10,6 +10,9 @@ export interface CalendarEvent {
   notes?: string;
   startDate?: Date; // Added for new format compatibility
   endDate?: Date;   // Added for new format compatibility
+  // New Phase 1 fields for advanced heat tracking
+  status?: 'predicted' | 'active' | 'ended';
+  heatPhase?: 'proestrus' | 'estrus' | 'metestrus' | 'anestrus';
 }
 
 export interface AddEventFormValues {

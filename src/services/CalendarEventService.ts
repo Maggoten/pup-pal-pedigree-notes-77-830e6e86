@@ -4,9 +4,12 @@ import { CalendarEvent, AddEventFormValues } from '@/components/calendar/types';
 import { Dog } from '@/types/dogs';
 import { toast } from '@/components/ui/use-toast';
 
-// Map event types to colors with softer tones
+// Map event types to colors with enhanced heat tracking
 const eventTypeColors = {
   'heat': 'bg-rose-200 text-rose-800 border-rose-300',
+  'heat-active': 'bg-rose-300 text-rose-900 border-rose-400', // Active heat phase
+  'ovulation-predicted': 'bg-amber-200 text-amber-900 border-amber-300', // Predicted ovulation
+  'fertility-window': 'bg-yellow-200 text-yellow-900 border-yellow-300', // Optimal breeding days
   'mating': 'bg-violet-100 text-violet-800 border-violet-200',
   'due-date': 'bg-amber-100 text-amber-800 border-amber-200',
   'vaccination': 'bg-warmgreen-100 text-warmgreen-800 border-warmgreen-200',
@@ -51,11 +54,15 @@ export async function fetchCalendarEvents(): Promise<CalendarEvent[]> {
       id: event.id,
       title: event.title,
       date: new Date(event.date),
+      startDate: new Date(event.date),
+      endDate: event.end_date ? new Date(event.end_date) : new Date(event.date),
       type: event.type,
       dogId: event.dog_id || undefined,
       dogName: event.dog_name || undefined,
       notes: event.notes || undefined,
-      time: event.time || undefined
+      time: event.time || undefined,
+      status: (event.status as 'predicted' | 'active' | 'ended') || 'predicted',
+      heatPhase: event.heat_phase as 'proestrus' | 'estrus' | 'metestrus' | 'anestrus' | undefined
     }));
     
     return events;
@@ -121,11 +128,15 @@ export async function addEventToSupabase(
       id: result.id,
       title: result.title,
       date: new Date(result.date),
+      startDate: new Date(result.date),
+      endDate: result.end_date ? new Date(result.end_date) : new Date(result.date),
       type: result.type,
       dogId: result.dog_id || undefined,
       dogName: result.dog_name || undefined,
       notes: result.notes || undefined,
-      time: result.time || undefined
+      time: result.time || undefined,
+      status: (result.status as 'predicted' | 'active' | 'ended') || 'predicted',
+      heatPhase: result.heat_phase as 'proestrus' | 'estrus' | 'metestrus' | 'anestrus' | undefined
     };
   } catch (error) {
     console.error('Error in addEventToSupabase:', error);
@@ -190,11 +201,15 @@ export async function updateEventInSupabase(
       id: result.id,
       title: result.title,
       date: new Date(result.date),
+      startDate: new Date(result.date),
+      endDate: result.end_date ? new Date(result.end_date) : new Date(result.date),
       type: result.type,
       dogId: result.dog_id || undefined,
       dogName: result.dog_name || undefined,
       notes: result.notes || undefined,
-      time: result.time || undefined
+      time: result.time || undefined,
+      status: (result.status as 'predicted' | 'active' | 'ended') || 'predicted',
+      heatPhase: result.heat_phase as 'proestrus' | 'estrus' | 'metestrus' | 'anestrus' | undefined
     };
   } catch (error) {
     console.error('Error in updateEventInSupabase:', error);
@@ -277,4 +292,145 @@ export async function migrateCalendarEventsFromLocalStorage(dogs: Dog[]): Promis
     console.error('Error in migrateCalendarEventsFromLocalStorage:', error);
     return false;
   }
+}
+
+// Phase 1: Advanced Heat Tracking Functions
+
+// Mark a heat cycle as started - creates active heat period and ovulation prediction
+export async function markHeatAsStarted(eventId: string, dogs: Dog[]): Promise<boolean> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData?.session) {
+      console.error('No active session:', sessionError);
+      return false;
+    }
+    
+    const userId = sessionData.session.user.id;
+    
+    // Get the current event
+    const { data: event, error: fetchError } = await supabase
+      .from('calendar_events')
+      .select('*')
+      .eq('id', eventId)
+      .eq('user_id', userId)
+      .single();
+      
+    if (fetchError || !event) {
+      console.error('Error fetching event:', fetchError);
+      return false;
+    }
+    
+    const startDate = new Date(event.date);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 20); // 21-day heat period (day 0-20)
+    
+    // Update the heat event to active status with end date
+    const { error: updateError } = await supabase
+      .from('calendar_events')
+      .update({
+        status: 'active',
+        heat_phase: 'proestrus',
+        end_date: endDate.toISOString(),
+        type: 'heat-active'
+      })
+      .eq('id', eventId)
+      .eq('user_id', userId);
+      
+    if (updateError) {
+      console.error('Error updating heat event:', updateError);
+      return false;
+    }
+    
+    // Create ovulation prediction (days 12-14, peak at day 13)
+    const ovulationDate = new Date(startDate);
+    ovulationDate.setDate(startDate.getDate() + 12);
+    
+    const ovulationData = {
+      title: `${event.dog_name} - Predicted Ovulation`,
+      date: ovulationDate.toISOString(),
+      type: 'ovulation-predicted',
+      dog_id: event.dog_id,
+      dog_name: event.dog_name,
+      notes: 'Peak fertility window (days 12-14)',
+      user_id: userId,
+      status: 'predicted'
+    };
+    
+    const { error: ovulationError } = await supabase
+      .from('calendar_events')
+      .insert(ovulationData);
+      
+    if (ovulationError) {
+      console.error('Error creating ovulation event:', ovulationError);
+      // Don't fail the whole operation if ovulation creation fails
+    }
+    
+    // Create fertility window markers
+    const fertilityStart = new Date(startDate);
+    fertilityStart.setDate(startDate.getDate() + 9); // Day 10
+    const fertilityEnd = new Date(startDate);
+    fertilityEnd.setDate(startDate.getDate() + 15); // Day 16
+    
+    const fertilityData = {
+      title: `${event.dog_name} - Fertility Window`,
+      date: fertilityStart.toISOString(),
+      end_date: fertilityEnd.toISOString(),
+      type: 'fertility-window',
+      dog_id: event.dog_id,
+      dog_name: event.dog_name,
+      notes: 'Optimal breeding window (days 10-16)',
+      user_id: userId,
+      status: 'active'
+    };
+    
+    const { error: fertilityError } = await supabase
+      .from('calendar_events')
+      .insert(fertilityData);
+      
+    if (fertilityError) {
+      console.error('Error creating fertility window:', fertilityError);
+    }
+    
+    toast({
+      title: 'Heat Started',
+      description: `${event.dog_name}'s heat cycle has been marked as started. Ovulation prediction and fertility window have been added.`
+    });
+    
+    return true;
+  } catch (error) {
+    console.error('Error in markHeatAsStarted:', error);
+    return false;
+  }
+}
+
+// Get heat phase color based on day in cycle
+export function getHeatPhaseColor(dayInCycle: number): string {
+  if (dayInCycle <= 9) {
+    return 'bg-rose-200 text-rose-800 border-rose-300'; // Proestrus
+  } else if (dayInCycle <= 16) {
+    return 'bg-rose-400 text-rose-900 border-rose-500'; // Estrus (fertile)
+  } else {
+    return 'bg-rose-300 text-rose-800 border-rose-400'; // Metestrus
+  }
+}
+
+// Get heat phase name based on day in cycle
+export function getHeatPhaseName(dayInCycle: number): string {
+  if (dayInCycle <= 9) {
+    return 'Proestrus';
+  } else if (dayInCycle <= 16) {
+    return 'Estrus (Fertile)';
+  } else {
+    return 'Metestrus';
+  }
+}
+
+// Check if an event spans multiple days
+export function isMultiDayEvent(event: CalendarEvent): boolean {
+  if (!event.endDate || !event.startDate) return false;
+  
+  const start = new Date(event.startDate);
+  const end = new Date(event.endDate);
+  
+  return end.getTime() > start.getTime() + (24 * 60 * 60 * 1000); // More than 1 day difference
 }

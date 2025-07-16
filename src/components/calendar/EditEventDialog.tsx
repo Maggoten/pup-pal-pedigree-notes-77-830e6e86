@@ -5,15 +5,17 @@ import { Dog } from '@/context/DogsContext';
 import { CalendarEvent } from './types';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
+import HeatEventControl from './HeatEventControl';
 
 interface EditEventDialogProps {
   event: CalendarEvent;
   dogs: Dog[];
   onSubmit: (data: AddEventFormValues) => void;
   onDelete: () => void;
+  onEventUpdate?: () => void;
 }
 
-const EditEventDialog: React.FC<EditEventDialogProps> = ({ event, dogs, onSubmit, onDelete }) => {
+const EditEventDialog: React.FC<EditEventDialogProps> = ({ event, dogs, onSubmit, onDelete, onEventUpdate }) => {
   const canDelete = event.type === 'custom';
   
   // Convert the event to form values
@@ -26,7 +28,16 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({ event, dogs, onSubmit
   };
   
   return (
-    <div className="bg-cream-50 p-1">
+    <div className="bg-cream-50 p-1 space-y-4">
+      {/* Heat Event Control for heat cycles */}
+      {(event.type === 'heat' || event.type === 'heat-active') && onEventUpdate && (
+        <HeatEventControl 
+          event={event}
+          dogs={dogs}
+          onEventUpdate={onEventUpdate}
+        />
+      )}
+      
       <EventForm 
         dogs={dogs} 
         onSubmit={onSubmit} 

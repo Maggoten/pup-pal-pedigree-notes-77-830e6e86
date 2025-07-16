@@ -20,8 +20,11 @@ export type Database = {
           date: string
           dog_id: string | null
           dog_name: string | null
+          end_date: string | null
+          heat_phase: string | null
           id: string
           notes: string | null
+          status: string | null
           time: string | null
           title: string
           type: string
@@ -33,8 +36,11 @@ export type Database = {
           date: string
           dog_id?: string | null
           dog_name?: string | null
+          end_date?: string | null
+          heat_phase?: string | null
           id?: string
           notes?: string | null
+          status?: string | null
           time?: string | null
           title: string
           type: string
@@ -46,8 +52,11 @@ export type Database = {
           date?: string
           dog_id?: string | null
           dog_name?: string | null
+          end_date?: string | null
+          heat_phase?: string | null
           id?: string
           notes?: string | null
+          status?: string | null
           time?: string | null
           title?: string
           type?: string
