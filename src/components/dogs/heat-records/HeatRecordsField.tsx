@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { UseFormReturn } from 'react-hook-form';
 import HeatDateList from './HeatDateList';
 import HeatIntervalField from './HeatIntervalField';
+import SterilizationDateField from './SterilizationDateField';
 
 interface HeatRecordsFieldProps {
   form: UseFormReturn<any>;
@@ -66,37 +67,41 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col space-y-1.5">
-        <Label>Heat Cycles History</Label>
-        
-        <div className="space-y-2">
-          {heatHistory.length > 0 ? (
-            <HeatDateList
-              dates={heatHistory}
-              onRemove={removeHeatDate}
-              onUpdate={updateHeatDate}
-              disabled={disabled}
-            />
-          ) : (
-            <div className="text-sm text-muted-foreground">No heat cycles recorded</div>
-          )}
-          
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={addHeatDate}
-            className="mt-2"
-            disabled={disabled}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Heat Date
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <SterilizationDateField form={form} disabled={disabled} />
       
-      <HeatIntervalField form={form} disabled={disabled} />
+      <div className="space-y-4">
+        <div className="flex flex-col space-y-1.5">
+          <Label>Heat Cycles History</Label>
+          
+          <div className="space-y-2">
+            {heatHistory.length > 0 ? (
+              <HeatDateList
+                dates={heatHistory}
+                onRemove={removeHeatDate}
+                onUpdate={updateHeatDate}
+                disabled={disabled}
+              />
+            ) : (
+              <div className="text-sm text-muted-foreground">No heat cycles recorded</div>
+            )}
+            
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addHeatDate}
+              className="mt-2"
+              disabled={disabled}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Heat Date
+            </Button>
+          </div>
+        </div>
+        
+        <HeatIntervalField form={form} disabled={disabled} />
+      </div>
     </div>
   );
 };

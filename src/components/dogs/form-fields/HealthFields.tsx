@@ -130,62 +130,6 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
           </FormItem>
         )}
       />
-      
-      <FormField
-        control={form.control}
-        name="sterilizationDate"
-        render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel>Sterilization Date</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "pl-3 text-left font-normal bg-white border-input shadow-sm",
-                      !field.value && "text-muted-foreground"
-                    )}
-                    disabled={disabled}
-                  >
-                    {field.value ? (
-                      // Handle both string dates and Date objects
-                      typeof field.value === 'string'
-                        ? format(parseISODate(field.value) || new Date(), "PPP")
-                        : format(field.value, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-white" align="start">
-                <Calendar
-                  mode="single"
-                  selected={typeof field.value === 'string' 
-                    ? parseISODate(field.value) || undefined 
-                    : field.value}
-                  onSelect={(date) => {
-                    if (date) {
-                      // Set time to noon to avoid timezone issues
-                      date.setHours(12, 0, 0, 0);
-                      field.onChange(date);
-                    } else {
-                      field.onChange(null);
-                    }
-                  }}
-                  disabled={(date) => date > new Date() || !!disabled}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-            <FormDescription>Optional - For female dogs only</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </>
   );
 };
