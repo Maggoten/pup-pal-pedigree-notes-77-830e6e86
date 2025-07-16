@@ -185,14 +185,8 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         lastError={lastError}
         onSave={handleSave}
         onCancelEdit={() => setIsEditing(false)}
-      />
-      
-      <DogActions
-        isEditing={isEditing}
         onDelete={() => setShowDeleteDialog(true)}
         onEdit={() => setIsEditing(true)}
-        loading={loading}
-        isSaving={isSaving}
       />
       
       <DogLittersSection dog={dog} />

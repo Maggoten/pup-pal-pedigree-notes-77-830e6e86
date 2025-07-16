@@ -5,6 +5,7 @@ import { Dog } from '@/types/dogs';
 import DogInfoDisplay from '../DogInfoDisplay';
 import DogEditForm from '../DogEditForm';
 import { DogFormValues } from '../DogFormFields';
+import DogActions from '../actions/DogActions';
 
 interface DogDetailsCardProps {
   dog: Dog;
@@ -14,6 +15,8 @@ interface DogDetailsCardProps {
   lastError: string | null;
   onSave: (values: DogFormValues) => Promise<void>;
   onCancelEdit: () => void;
+  onDelete: () => void;
+  onEdit: () => void;
 }
 
 const DogDetailsCard: React.FC<DogDetailsCardProps> = ({
@@ -24,6 +27,8 @@ const DogDetailsCard: React.FC<DogDetailsCardProps> = ({
   lastError,
   onSave,
   onCancelEdit,
+  onDelete,
+  onEdit,
 }) => {
   return (
     <Card>
@@ -55,6 +60,14 @@ const DogDetailsCard: React.FC<DogDetailsCardProps> = ({
           </div>
         )}
       </CardContent>
+
+      <DogActions
+        isEditing={isEditing}
+        onDelete={onDelete}
+        onEdit={onEdit}
+        loading={loading}
+        isSaving={isSaving}
+      />
     </Card>
   );
 };
