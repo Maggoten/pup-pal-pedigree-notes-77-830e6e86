@@ -68,6 +68,15 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         updates.vaccinationDate = null as any;
       }
       
+      if (values.sterilizationDate) {
+        const newSterilizationDate = values.sterilizationDate.toISOString().split('T')[0];
+        if (newSterilizationDate !== dog.sterilization_date) {
+          updates.sterilization_date = newSterilizationDate;
+        }
+      } else if (dog.sterilization_date) {
+        updates.sterilization_date = null as any;
+      }
+      
       // Enhanced heat history handling for female dogs
       if (values.gender === 'female') {
         console.log('[Dogs Debug] Processing female dog heat history');

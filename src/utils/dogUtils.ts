@@ -188,6 +188,16 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
     console.log('[Dogs Debug] Mapped image to image_url:', dog.image);
   }
   
+  // Handle sterilization date
+  if ('sterilizationDate' in dog && dog.sterilizationDate !== undefined) {
+    dbDog.sterilization_date = typeof dog.sterilizationDate === 'string' 
+      ? dog.sterilizationDate.split('T')[0]
+      : Object.prototype.toString.call(dog.sterilizationDate) === '[object Date]'
+        ? dateToISOString(dog.sterilizationDate as unknown as Date)
+        : (dog.sterilizationDate as string);
+    console.log('[Dogs Debug] Mapped sterilizationDate to sterilization_date:', dbDog.sterilization_date);
+  }
+  
   // Process heat history - CRITICAL: Handle both Date objects and Heat objects
   if ('heatHistory' in dog && dog.heatHistory !== undefined) {
     console.log('[Dogs Debug] Processing heat history for DB save:', dog.heatHistory);
