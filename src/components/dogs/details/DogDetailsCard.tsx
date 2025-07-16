@@ -30,6 +30,14 @@ const DogDetailsCard: React.FC<DogDetailsCardProps> = ({
   onDelete,
   onEdit,
 }) => {
+  const handleFormSave = () => {
+    // Trigger form submission
+    const form = document.querySelector('form');
+    if (form) {
+      form.requestSubmit();
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -65,6 +73,8 @@ const DogDetailsCard: React.FC<DogDetailsCardProps> = ({
         isEditing={isEditing}
         onDelete={onDelete}
         onEdit={onEdit}
+        onCancel={onCancelEdit}
+        onSave={handleFormSave}
         loading={loading}
         isSaving={isSaving}
       />
