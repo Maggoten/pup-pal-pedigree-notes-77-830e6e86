@@ -115,6 +115,7 @@ export const enrichDog = (dog: any): Dog => {
       dateOfBirth: dog.birthdate ? dog.birthdate.split('T')[0] : '',
       image: dog.image_url || '',
       registrationNumber: dog.registration_number || '',
+      sterilizationDate: dog.sterilization_date ? dog.sterilization_date.split('T')[0] : undefined,
 
       // Processed fields
       heatHistory: processedHeatHistory,

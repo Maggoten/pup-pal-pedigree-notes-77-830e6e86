@@ -55,6 +55,7 @@ export interface Dog {
   dewormingDate?: string;
   vaccinationDate?: string;
   sterilization_date?: string;
+  sterilizationDate?: string;    // Alias for UI components
   
   // Breeding-related fields
   heatHistory?: Heat[];

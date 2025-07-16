@@ -67,6 +67,11 @@ const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({ dog }) => {
             <h3 className="text-sm font-medium text-muted-foreground">Vaccination Date</h3>
             <p>{dog.vaccinationDate ? format(new Date(dog.vaccinationDate), 'PPP') : 'N/A'}</p>
           </div>
+          
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground">Sterilization Date</h3>
+            <p>{dog.sterilizationDate ? format(new Date(dog.sterilizationDate), 'PPP') : 'N/A'}</p>
+          </div>
         </div>
         
         {dog.gender === 'female' && (
