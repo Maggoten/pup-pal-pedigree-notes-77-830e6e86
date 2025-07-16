@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -68,8 +67,6 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
 
   return (
     <div className="space-y-6">
-      <SterilizationDateField form={form} disabled={disabled} />
-      
       <div className="space-y-4">
         <div className="flex flex-col space-y-1.5">
           <Label>Heat Cycles History</Label>
@@ -102,6 +99,8 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
         
         <HeatIntervalField form={form} disabled={disabled} />
       </div>
+      
+      <SterilizationDateField form={form} disabled={disabled} />
     </div>
   );
 };
