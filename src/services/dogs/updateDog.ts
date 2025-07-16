@@ -83,6 +83,13 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
         : dateToISOString(dbUpdates.vaccinationDate as any);
     }
     
+    if (dbUpdates.sterilization_date) {
+      dbUpdates.sterilization_date = typeof dbUpdates.sterilization_date === 'string'
+        ? dbUpdates.sterilization_date.split('T')[0]
+        : dateToISOString(dbUpdates.sterilization_date as any);
+      console.log('[Dogs Debug] Sterilization date formatted for DB:', dbUpdates.sterilization_date);
+    }
+    
     // Remove undefined values from dbUpdates to prevent Supabase errors
     const cleanUpdates: Record<string, any> = {};
     Object.entries(dbUpdates).forEach(([key, value]) => {

@@ -70,11 +70,13 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       
       if (values.sterilizationDate) {
         const newSterilizationDate = values.sterilizationDate.toISOString().split('T')[0];
-        if (newSterilizationDate !== dog.sterilization_date) {
-          updates.sterilization_date = newSterilizationDate;
+        if (newSterilizationDate !== dog.sterilizationDate) {
+          updates.sterilizationDate = newSterilizationDate;
+          console.log('[Dogs Debug] Sterilization date updated:', newSterilizationDate);
         }
-      } else if (dog.sterilization_date) {
-        updates.sterilization_date = null as any;
+      } else if (dog.sterilizationDate) {
+        updates.sterilizationDate = null as any;
+        console.log('[Dogs Debug] Sterilization date cleared');
       }
       
       // Enhanced heat history handling for female dogs
