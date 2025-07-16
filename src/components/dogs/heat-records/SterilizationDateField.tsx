@@ -43,7 +43,21 @@ const SterilizationDateField: React.FC<SterilizationDateFieldProps> = ({
     <div className="space-y-3">
       <FormLabel>Sterilized?</FormLabel>
       
-      {sterilizationDate ? (
+      {!sterilizationDate && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleAddDate}
+          disabled={disabled}
+          className="w-fit"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Add Sterilization Date
+        </Button>
+      )}
+      
+      {sterilizationDate && (
         <div className="flex items-center gap-2">
           <Popover>
             <PopoverTrigger asChild>
@@ -85,18 +99,6 @@ const SterilizationDateField: React.FC<SterilizationDateFieldProps> = ({
             <X className="h-4 w-4" />
           </Button>
         </div>
-      ) : (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleAddDate}
-          disabled={disabled}
-          className="w-fit"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Sterilization Date
-        </Button>
       )}
       
       <FormField
