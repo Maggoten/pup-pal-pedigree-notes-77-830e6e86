@@ -41,25 +41,45 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   };
   
   return (
-    <CardHeader className="px-4 py-4 flex-row flex items-center justify-between space-y-0 pb-2 bg-warmbeige-100 border-b border-warmbeige-200">
+    <CardHeader className="px-4 py-4 flex-col space-y-0 pb-2 bg-warmbeige-100 border-b border-warmbeige-200">
       {isMobile ? (
-        // Mobile layout: Previous button | Month title | Next button
-        <>
-          <Button variant="outline" size="icon" className="bg-white hover:bg-warmbeige-100" onClick={handlePrevMonth}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          
-          <div className="flex-1 text-center">
+        // Mobile layout: Two rows
+        <div className="w-full space-y-3">
+          {/* First row: Previous button | Month title | Next button */}
+          <div className="flex items-center justify-between">
+            <Button variant="outline" size="icon" className="bg-white hover:bg-warmbeige-100" onClick={handlePrevMonth}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            
             <CardTitle className="font-bold text-darkgray-800 text-xl">{headerMonthYear}</CardTitle>
+            
+            <Button variant="outline" size="icon" className="bg-white hover:bg-warmbeige-100" onClick={handleNextMonth}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
           
-          <Button variant="outline" size="icon" className="bg-white hover:bg-warmbeige-100" onClick={handleNextMonth}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </>
+          {/* Second row: Today button (if needed) and Add Event button */}
+          <div className="flex items-center justify-center gap-2">
+            {todayButton && !isCurrentMonth && (
+              <Button 
+                variant="secondary" 
+                size="sm"
+                className="flex items-center gap-1 bg-warmbeige-200 hover:bg-warmbeige-300 text-darkgray-800"
+                onClick={handleTodayClick}
+              >
+                <CalendarIcon className="h-4 w-4" />
+                Today
+              </Button>
+            )}
+            <Button variant="outline" size="sm" className="bg-white hover:bg-warmbeige-100" onClick={onAddEvent}>
+              <Plus className="h-4 w-4 mr-1" />
+              <span>Add Event</span>
+            </Button>
+          </div>
+        </div>
       ) : (
         // Desktop layout: Keep original structure
-        <>
+        <div className="flex items-center justify-between">
           <CardTitle className="font-bold text-darkgray-800 text-xl">{headerMonthYear}</CardTitle>
           
           <div className="flex items-center space-x-2">
@@ -99,7 +119,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
               <span>Add Event</span>
             </Button>
           </div>
-        </>
+        </div>
       )}
     </CardHeader>
   );
