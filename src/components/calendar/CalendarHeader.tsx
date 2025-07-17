@@ -78,9 +78,17 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           </div>
         </div>
       ) : (
-        // Desktop layout: Keep original structure
+        // Desktop layout: Arrows on sides of month title
         <div className="flex items-center justify-between">
-          <CardTitle className="font-bold text-darkgray-800 text-xl">{headerMonthYear}</CardTitle>
+          <div className="flex items-center space-x-2">
+            <Button variant="outline" size="icon" className="bg-white hover:bg-warmbeige-100" onClick={handlePrevMonth}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <CardTitle className="font-bold text-darkgray-800 text-xl">{headerMonthYear}</CardTitle>
+            <Button variant="outline" size="icon" className="bg-white hover:bg-warmbeige-100" onClick={handleNextMonth}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
           
           <div className="flex items-center space-x-2">
             {todayButton && !isCurrentMonth && (
@@ -94,14 +102,6 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                 Today
               </Button>
             )}
-            <div className="space-x-1">
-              <Button variant="outline" size="icon" className="bg-white hover:bg-warmbeige-100" onClick={handlePrevMonth}>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" className="bg-white hover:bg-warmbeige-100" onClick={handleNextMonth}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
             {onSyncCalendar && (
               <Button 
                 variant="outline" 
