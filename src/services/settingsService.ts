@@ -102,25 +102,33 @@ export const cancelSubscription = async (user: User | null): Promise<boolean> =>
   }
   
   try {
-    // In a real implementation, this would call a Supabase edge function
-    // that would interact with the payment provider's API to cancel the subscription
-    
-    // Update the user's subscription status in the database
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        subscription_status: 'free', // Will be downgraded at the end of the billing period
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', user.id);
-    
-    if (error) {
-      throw error;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('No active session');
     }
-    
+
+    console.log('[SETTINGS] Calling cancel-subscription edge function for user:', user.id);
+
+    const { data, error } = await supabase.functions.invoke('cancel-subscription', {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (error) {
+      console.error('[SETTINGS] Error from cancel-subscription function:', error);
+      throw new Error(`Failed to cancel subscription: ${error.message}`);
+    }
+
+    if (!data?.success) {
+      console.error('[SETTINGS] Cancel subscription function returned failure:', data);
+      throw new Error(data?.error || 'Failed to cancel subscription');
+    }
+
+    console.log('[SETTINGS] Subscription cancelled successfully:', data);
     return true;
   } catch (error) {
-    console.error('Error cancelling subscription:', error);
+    console.error('[SETTINGS] Error cancelling subscription:', error);
     throw error;
   }
 };
