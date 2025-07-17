@@ -42,45 +42,65 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   
   return (
     <CardHeader className="px-4 py-4 flex-row flex items-center justify-between space-y-0 pb-2 bg-warmbeige-100 border-b border-warmbeige-200">
-      <CardTitle className="font-bold text-darkgray-800 text-xl">{headerMonthYear}</CardTitle>
-      
-      <div className="flex items-center space-x-2">
-        {todayButton && !isCurrentMonth && (
-          <Button 
-            variant="secondary" 
-            size="sm"
-            className="flex items-center gap-1 bg-warmbeige-200 hover:bg-warmbeige-300 text-darkgray-800"
-            onClick={handleTodayClick}
-          >
-            <CalendarIcon className="h-4 w-4" />
-            Today
-          </Button>
-        )}
-        <div className="space-x-1">
+      {isMobile ? (
+        // Mobile layout: Previous button | Month title | Next button
+        <>
           <Button variant="outline" size="icon" className="bg-white hover:bg-warmbeige-100" onClick={handlePrevMonth}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
+          
+          <div className="flex-1 text-center">
+            <CardTitle className="font-bold text-darkgray-800 text-xl">{headerMonthYear}</CardTitle>
+          </div>
+          
           <Button variant="outline" size="icon" className="bg-white hover:bg-warmbeige-100" onClick={handleNextMonth}>
             <ChevronRight className="h-4 w-4" />
           </Button>
-        </div>
-        {onSyncCalendar && !isMobile && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="bg-white hover:bg-warmbeige-100"
-            onClick={onSyncCalendar}
-            disabled={isSyncing}
-          >
-            <RefreshCcw className={`h-4 w-4 mr-1 ${isSyncing ? 'animate-spin' : ''}`} />
-            <span>{isSyncing ? 'Syncing...' : 'Sync Calendar'}</span>
-          </Button>
-        )}
-        <Button variant="outline" size="sm" className="bg-white hover:bg-warmbeige-100" onClick={onAddEvent}>
-          <Plus className="h-4 w-4 mr-1" />
-          <span>Add Event</span>
-        </Button>
-      </div>
+        </>
+      ) : (
+        // Desktop layout: Keep original structure
+        <>
+          <CardTitle className="font-bold text-darkgray-800 text-xl">{headerMonthYear}</CardTitle>
+          
+          <div className="flex items-center space-x-2">
+            {todayButton && !isCurrentMonth && (
+              <Button 
+                variant="secondary" 
+                size="sm"
+                className="flex items-center gap-1 bg-warmbeige-200 hover:bg-warmbeige-300 text-darkgray-800"
+                onClick={handleTodayClick}
+              >
+                <CalendarIcon className="h-4 w-4" />
+                Today
+              </Button>
+            )}
+            <div className="space-x-1">
+              <Button variant="outline" size="icon" className="bg-white hover:bg-warmbeige-100" onClick={handlePrevMonth}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" className="bg-white hover:bg-warmbeige-100" onClick={handleNextMonth}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            {onSyncCalendar && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-white hover:bg-warmbeige-100"
+                onClick={onSyncCalendar}
+                disabled={isSyncing}
+              >
+                <RefreshCcw className={`h-4 w-4 mr-1 ${isSyncing ? 'animate-spin' : ''}`} />
+                <span>{isSyncing ? 'Syncing...' : 'Sync Calendar'}</span>
+              </Button>
+            )}
+            <Button variant="outline" size="sm" className="bg-white hover:bg-warmbeige-100" onClick={onAddEvent}>
+              <Plus className="h-4 w-4 mr-1" />
+              <span>Add Event</span>
+            </Button>
+          </div>
+        </>
+      )}
     </CardHeader>
   );
 };
