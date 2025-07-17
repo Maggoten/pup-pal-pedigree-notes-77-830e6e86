@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, ChevronLeft, ChevronRight, Plus, RefreshCcw } from 'lucide-react';
 import { CardHeader, CardTitle } from '@/components/ui/card';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -26,6 +27,8 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   onSyncCalendar,
   isSyncing = false
 }) => {
+  const isMobile = useIsMobile();
+  
   // Get current month name and year
   const headerMonthYear = format(currentDate, 'MMMM yyyy');
   const isCurrentMonth = format(new Date(), 'MMMM yyyy') === headerMonthYear;
@@ -61,7 +64,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        {onSyncCalendar && (
+        {onSyncCalendar && !isMobile && (
           <Button 
             variant="outline" 
             size="sm" 
