@@ -18,13 +18,18 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const MyDogsContent: React.FC = () => {
-  const { dogs, activeDog, loading, error, fetchDogs } = useDogs();
+  const { dogs, activeDog, loading, error, fetchDogs, setActiveDog } = useDogs();
   const [showAddDogDialog, setShowAddDogDialog] = useState(false);
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const { isAuthReady, isLoggedIn } = useAuth();
   const [pageReady, setPageReady] = useState(false);
   const [retryAttempts, setRetryAttempts] = useState(0);
   const [showError, setShowError] = useState(false);
+  
+  // Clear active dog when navigating to My Dogs page
+  useEffect(() => {
+    setActiveDog(null);
+  }, [setActiveDog]);
   
   // Wait for auth to be ready before considering the page ready
   useEffect(() => {
