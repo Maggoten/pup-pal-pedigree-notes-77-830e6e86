@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -167,7 +166,7 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
               <h3 className="text-lg font-medium">Account Sharing Coming Soon</h3>
               <p className="text-sm text-muted-foreground mt-1">
                 We're working on a secure way for you to share your breeding records with collaborators. 
-                This feature will be available after launch.
+                This feature is currently in development and will be available soon.
               </p>
             </div>
           </div>
