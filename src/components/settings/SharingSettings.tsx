@@ -32,6 +32,7 @@ import { UserSettings, SharedUser } from '@/types/settings';
 import { useSettings } from '@/hooks/useSettings';
 import { format } from 'date-fns';
 import { Mail, Shield, Pencil, Eye, Trash2, UserPlus } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/use-toast';
 import {
   AlertDialog,
@@ -147,91 +148,29 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Share Your Account</CardTitle>
-          <CardDescription>
-            Invite others to collaborate on your breeding records
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Share Your Account</CardTitle>
+              <CardDescription>
+                Invite others to collaborate on your breeding records
+              </CardDescription>
+            </div>
+            <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-200">
+              Coming Soon
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-2">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="colleague@example.com" 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <div>
-                  <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a role" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="editor">Editor</SelectItem>
-                            <SelectItem value="viewer">Viewer</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-              
-              <div className="mt-2">
-                <h4 className="text-sm font-medium mb-1">Role Description</h4>
-                <p className="text-sm text-muted-foreground">
-                  {roleDescriptions[form.watch('role') || 'viewer']}
-                </p>
-              </div>
-              
-              <div className="mt-4">
-                <Button 
-                  type="submit" 
-                  disabled={isAddingSharedUser}
-                  className="w-full md:w-auto"
-                >
-                  {isAddingSharedUser ? (
-                    <span className="flex items-center gap-2">
-                      <span className="animate-spin h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
-                      Sending...
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <UserPlus className="h-4 w-4" />
-                      Send Invitation
-                    </span>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </Form>
+          <div className="p-6 border border-dashed rounded-md bg-muted/30">
+            <div className="text-center">
+              <UserPlus className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+              <h3 className="text-lg font-medium">Account Sharing Coming Soon</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                We're working on a secure way for you to share your breeding records with collaborators. 
+                This feature will be available after launch.
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
       
