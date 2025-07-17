@@ -19,17 +19,41 @@ export const generateGeneralReminders = (dogs: Dog[]): Reminder[] => {
   
   // Female dogs of breeding age without heat records
   const femaleDogsWithoutHeatRecords = dogs.filter(dog => {
-    if (dog.gender !== 'female') return false;
-    if (!dog.dateOfBirth) return false;
+    console.log(`[GeneralReminders] Checking dog: ${dog.name}, gender: ${dog.gender}, sterilized: ${dog.sterilization_date || dog.sterilizationDate}`);
     
-    const birthDate = parseISO(dog.dateOfBirth);
+    if (dog.gender !== 'female') return false;
+    
+    // Skip sterilized dogs
+    if (dog.sterilization_date || dog.sterilizationDate) {
+      console.log(`[GeneralReminders] Skipping sterilized dog: ${dog.name}`);
+      return false;
+    }
+    
+    // Check for birth date (handle both field variations)
+    const birthDateString = dog.dateOfBirth || dog.birthdate;
+    if (!birthDateString) {
+      console.log(`[GeneralReminders] No birth date for dog: ${dog.name}`);
+      return false;
+    }
+    
+    const birthDate = parseISO(birthDateString);
     const ageInMonths = differenceInMonths(today, birthDate);
     
     // Only consider dogs older than 6 months (potential breeding age)
-    if (ageInMonths < 6) return false;
+    if (ageInMonths < 6) {
+      console.log(`[GeneralReminders] Dog too young: ${dog.name}, age: ${ageInMonths} months`);
+      return false;
+    }
     
     // Check if the dog has heat records
-    return !dog.heatHistory || dog.heatHistory.length === 0;
+    const hasHeatHistory = dog.heatHistory && dog.heatHistory.length > 0;
+    if (hasHeatHistory) {
+      console.log(`[GeneralReminders] Dog already has heat history: ${dog.name}, records: ${dog.heatHistory.length}`);
+      return false;
+    }
+    
+    console.log(`[GeneralReminders] Adding heat tracking reminder for: ${dog.name}`);
+    return true;
   });
   
   // Add heat tracking reminders
