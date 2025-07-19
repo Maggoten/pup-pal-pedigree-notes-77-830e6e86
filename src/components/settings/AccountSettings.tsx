@@ -8,10 +8,13 @@ import DeleteAccountSection from './DeleteAccountSection';
 import SubscriptionSettings from '@/components/subscription/SubscriptionSettings';
 import ChangePasswordForm from './ChangePasswordForm';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import SharingSettings from './SharingSettings';
+import { useSettings } from '@/hooks/useSettings';
 
 const AccountSettings: React.FC = () => {
   const { user, logout } = useAuth();
   const { t } = useTranslation('common');
+  const { settings } = useSettings();
 
   const handleLogout = async () => {
     await logout();
@@ -53,6 +56,8 @@ const AccountSettings: React.FC = () => {
       <SubscriptionSettings />
       
       <ChangePasswordForm />
+      
+      {settings && <SharingSettings settings={settings} />}
       
       <DeleteAccountSection />
     </div>

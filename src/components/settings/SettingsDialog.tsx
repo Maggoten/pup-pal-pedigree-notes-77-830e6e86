@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import PersonalSettings from './PersonalSettings';
 import AccountSettings from './AccountSettings';
-import SharingSettings from './SharingSettings';
+import HelpSettings from './HelpSettings';
 import { useSettings } from '@/hooks/useSettings';
 
 interface SettingsDialogProps {
@@ -36,7 +36,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onOpenChange }) =
             <TabsList className="grid grid-cols-3 mb-6">
               <TabsTrigger value="personal">Personal</TabsTrigger>
               <TabsTrigger value="account">Account</TabsTrigger>
-              <TabsTrigger value="sharing">Sharing</TabsTrigger>
+              <TabsTrigger value="help">Help</TabsTrigger>
             </TabsList>
             
             <TabsContent value="personal" className="space-y-4">
@@ -47,8 +47,8 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onOpenChange }) =
               <AccountSettings />
             </TabsContent>
             
-            <TabsContent value="sharing" className="space-y-4">
-              <SharingSettings settings={settings} />
+            <TabsContent value="help" className="space-y-4">
+              <HelpSettings />
             </TabsContent>
           </Tabs>
         ) : (
