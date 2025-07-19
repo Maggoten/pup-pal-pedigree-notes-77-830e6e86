@@ -5,7 +5,6 @@ import { AddEventFormValues } from '@/components/calendar/types';
 // Static imports to replace lazy loading
 import BreedingCalendar from '@/components/BreedingCalendar';
 import BreedingReminders from '@/components/BreedingReminders';
-import BreedingStats from '@/components/BreedingStats';
 import { HomeOfferCarousel } from '@/components/home/HomeOfferCarousel';
 
 interface DashboardContentProps {
@@ -63,23 +62,6 @@ const RemindersSkeleton = () => (
   </div>
 );
 
-const StatsSkeleton = () => (
-  <div className="rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
-    <div className="flex flex-col">
-      <Skeleton className="h-14 w-full mb-6" />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        {Array(4).fill(0).map((_, i) => (
-          <div key={i} className="flex flex-col items-center">
-            <Skeleton className="h-16 w-16 rounded-full mb-4" />
-            <Skeleton className="h-6 w-1/2 mb-2" />
-            <Skeleton className="h-4 w-3/4" />
-          </div>
-        ))}
-      </div>
-      <Skeleton className="h-24 w-full" />
-    </div>
-  </div>
-);
 
 const DashboardContent: React.FC<DashboardContentProps> = ({ 
   isDataReady, 
@@ -90,7 +72,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 }) => {
   const showCalendarSkeleton = !isDataReady || calendarProps.isLoading;
   const showRemindersSkeleton = !isDataReady || remindersProps.isLoading;
-  const showStatsSkeleton = !isDataReady;
 
   return (
     <div className="space-y-12 pb-12">
@@ -124,15 +105,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       {/* Home Offer Carousel section */}
       <section>
         <HomeOfferCarousel />
-      </section>
-      
-      {/* Annual Breeding Statistics in a separate section */}
-      <section>
-        {showStatsSkeleton ? (
-          <StatsSkeleton />
-        ) : (
-          <BreedingStats />
-        )}
       </section>
     </div>
   );
