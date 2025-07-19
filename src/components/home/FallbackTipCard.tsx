@@ -1,5 +1,5 @@
 import React from 'react';
-import { PawPrint } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { CarouselCard } from './CarouselCard';
 
 interface FallbackTipCardProps {
@@ -8,9 +8,9 @@ interface FallbackTipCardProps {
 }
 
 const tipIcons = {
-  tip: PawPrint,
-  offer: PawPrint,
-  info: PawPrint
+  tip: Heart,
+  offer: Heart,
+  info: Heart
 };
 
 const tips = [
