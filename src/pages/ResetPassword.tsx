@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -35,11 +35,13 @@ type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isValidRecovery, setIsValidRecovery] = useState(false);
+  const [isCheckingRecovery, setIsCheckingRecovery] = useState(true);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [recoveryError, setRecoveryError] = useState<string | null>(null);
 
   const {
     register,
@@ -53,64 +55,102 @@ const ResetPassword: React.FC = () => {
   const newPassword = watch('newPassword', '');
   const passwordStrength = validatePasswordStrength(newPassword);
 
-  // Handle authentication state changes and check for password recovery
+  // Handle password recovery token verification
   useEffect(() => {
-    const checkAuthState = async () => {
+    const verifyRecoveryToken = async () => {
       try {
-        // Check if user is already authenticated
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session) {
-          console.log('User is authenticated, enabling password reset form');
-          setIsRecoveryMode(true);
+        // Check for recovery parameters in URL
+        const accessToken = searchParams.get('access_token');
+        const refreshToken = searchParams.get('refresh_token');
+        const type = searchParams.get('type');
+
+        console.log('Recovery parameters:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
+
+        if (type === 'recovery' && accessToken && refreshToken) {
+          console.log('Valid recovery parameters found, setting session');
+          
+          // Set the session using the tokens from the URL
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+
+          if (error) {
+            console.error('Error setting recovery session:', error);
+            setRecoveryError('Invalid or expired recovery link. Please request a new password reset.');
+            setIsValidRecovery(false);
+          } else if (data.session) {
+            console.log('Recovery session established successfully');
+            setIsValidRecovery(true);
+            setRecoveryError(null);
+          } else {
+            console.error('No session created from recovery tokens');
+            setRecoveryError('Unable to establish recovery session. Please try again.');
+            setIsValidRecovery(false);
+          }
         } else {
-          console.log('No authenticated session found');
+          console.log('No valid recovery parameters found in URL');
+          setRecoveryError('This page can only be accessed through a valid password reset link.');
+          setIsValidRecovery(false);
         }
       } catch (error) {
-        console.error('Error checking auth state:', error);
+        console.error('Unexpected error during recovery verification:', error);
+        setRecoveryError('An error occurred while verifying the recovery link.');
+        setIsValidRecovery(false);
       } finally {
-        setIsCheckingAuth(false);
+        setIsCheckingRecovery(false);
       }
     };
 
-    checkAuthState();
+    verifyRecoveryToken();
 
-    // Listen for auth state changes
+    // Listen for auth state changes during recovery
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change:', event, session?.user?.id);
+      console.log('Auth state change during recovery:', event, !!session);
       
-      if (event === 'PASSWORD_RECOVERY') {
-        console.log('Password recovery event detected');
-        setIsRecoveryMode(true);
-        setIsCheckingAuth(false);
-      } else if (event === 'SIGNED_IN' && session) {
-        console.log('User signed in during password recovery');
-        setIsRecoveryMode(true);
-        setIsCheckingAuth(false);
+      if (event === 'PASSWORD_RECOVERY' && session) {
+        console.log('Password recovery event with session detected');
+        setIsValidRecovery(true);
+        setRecoveryError(null);
+        setIsCheckingRecovery(false);
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [searchParams]);
 
   const onSubmit = async (data: ResetPasswordFormData) => {
+    if (!isValidRecovery) {
+      toast.error('Invalid recovery session. Please request a new password reset.');
+      return;
+    }
+
     setIsLoading(true);
     try {
+      console.log('Attempting to update password');
+      
       const { error } = await supabase.auth.updateUser({
         password: data.newPassword
       });
 
       if (error) {
         console.error('Password update error:', error);
-        toast.error('Failed to update password. Please try again.');
+        
+        if (error.message.includes('session_not_found') || error.message.includes('Session not found')) {
+          toast.error('Your recovery session has expired. Please request a new password reset.');
+          setTimeout(() => navigate('/login'), 2000);
+        } else {
+          toast.error('Failed to update password. Please try again.');
+        }
         return;
       }
 
+      console.log('Password updated successfully');
       toast.success('Password updated successfully! You are now logged in.');
       
-      // Redirect to home page
+      // Clear the URL parameters and redirect
       navigate('/', { replace: true });
     } catch (error) {
       console.error('Unexpected error during password update:', error);
@@ -156,22 +196,22 @@ const ResetPassword: React.FC = () => {
     );
   };
 
-  // Show loading state while checking auth
-  if (isCheckingAuth) {
+  // Show loading state while checking recovery
+  if (isCheckingRecovery) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="flex flex-col items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-warmgreen-600 mb-4"></div>
-            <p className="text-center text-muted-foreground">Checking authentication...</p>
+            <p className="text-center text-muted-foreground">Verifying recovery link...</p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // Show error state if not in recovery mode
-  if (!isRecoveryMode) {
+  // Show error state if recovery is invalid
+  if (!isValidRecovery || recoveryError) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -181,7 +221,7 @@ const ResetPassword: React.FC = () => {
             </div>
             <CardTitle className="text-red-900">Access Denied</CardTitle>
             <CardDescription className="text-red-700">
-              This page can only be accessed through a valid password reset link. Please request a new password reset from the login page.
+              {recoveryError || 'This page can only be accessed through a valid password reset link.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
