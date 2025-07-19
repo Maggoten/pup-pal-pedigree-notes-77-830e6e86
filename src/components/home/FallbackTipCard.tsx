@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lightbulb, Star, BookOpen } from 'lucide-react';
+import { PawPrint } from 'lucide-react';
 import { CarouselCard } from './CarouselCard';
 
 interface FallbackTipCardProps {
@@ -8,9 +8,9 @@ interface FallbackTipCardProps {
 }
 
 const tipIcons = {
-  tip: Lightbulb,
-  offer: Star,
-  info: BookOpen
+  tip: PawPrint,
+  offer: PawPrint,
+  info: PawPrint
 };
 
 const tips = [
