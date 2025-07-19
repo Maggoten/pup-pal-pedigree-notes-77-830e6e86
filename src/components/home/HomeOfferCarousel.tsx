@@ -8,6 +8,7 @@ import { PartnerOfferCard } from './PartnerOfferCard';
 import { FallbackTipCard, getRandomFallbackTips } from './FallbackTipCard';
 
 export const HomeOfferCarousel: React.FC = () => {
+  // ALL hooks must be called at the top before any conditional returns
   const { stats, isLoading: statsLoading } = useUserStats();
   const { offers, isLoading: offersLoading } = usePartnerOffers();
 
@@ -28,6 +29,10 @@ export const HomeOfferCarousel: React.FC = () => {
     setSelectedIndex(emblaApi.selectedScrollSnap());
   }, [emblaApi]);
 
+  const scrollTo = useCallback((index: number) => {
+    if (emblaApi) emblaApi.scrollTo(index);
+  }, [emblaApi]);
+
   useEffect(() => {
     if (!emblaApi) return;
     
@@ -35,6 +40,8 @@ export const HomeOfferCarousel: React.FC = () => {
     emblaApi.on('select', updateSelectedIndex);
     updateSelectedIndex();
   }, [emblaApi, updateSelectedIndex]);
+
+  // NOW we can do conditional returns after all hooks are called
 
   if (statsLoading || offersLoading) {
     return (
@@ -82,10 +89,6 @@ export const HomeOfferCarousel: React.FC = () => {
       );
     });
   }
-
-  const scrollTo = useCallback((index: number) => {
-    if (emblaApi) emblaApi.scrollTo(index);
-  }, [emblaApi]);
 
   return (
     <div className="w-full">
