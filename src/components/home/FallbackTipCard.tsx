@@ -15,7 +15,6 @@ const tipIcons = {
 
 const tips = [
   { text: "Weigh your puppies daily during the first week to ensure healthy growth.", type: "tip" as const },
-  { text: "Soon you'll find exclusive member offers here.", type: "offer" as const },
   { text: "Remember to register your litter with the kennel club.", type: "info" as const }
 ];
 
