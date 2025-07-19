@@ -1,0 +1,29 @@
+
+{
+  "welcome": {
+    "title": "Välkommen tillbaka, {{username}}!",
+    "subtitle": "Här är en översikt av din avelresa"
+  },
+  "metrics": {
+    "reminders": "Påminnelser",
+    "plannedLitters": "Planerade Kullar",
+    "activePregnancies": "Aktiva Dräktigheter",
+    "recentLitters": "Senaste Kullar"
+  },
+  "loading": {
+    "statistics": "Laddar statistik..."
+  },
+  "userStats": {
+    "yourJourneyTitle": "Din {{year}} Resa",
+    "noDataMessage": "Du har inte registrerat några kullar under {{year}} än – din resa börjar snart!",
+    "yourStatsTitle": "Din {{year}} Statistik",
+    "litters": "Kullar",
+    "puppies": "Valpar",
+    "avgSize": "Snitt Storlek",
+    "keepUpWork": "Fortsätt det bra arbetet!"
+  },
+  "tips": {
+    "weighPuppies": "Väg dina valpar dagligen under den första veckan för att säkerställa hälsosam tillväxt.",
+    "registerLitter": "Kom ihåg att registrera din kull hos kennelklubben."
+  }
+}

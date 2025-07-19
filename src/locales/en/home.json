@@ -1,0 +1,29 @@
+
+{
+  "welcome": {
+    "title": "Welcome back, {{username}}!",
+    "subtitle": "Here's your breeding journey overview"
+  },
+  "metrics": {
+    "reminders": "Reminders",
+    "plannedLitters": "Planned Litters",
+    "activePregnancies": "Active Pregnancies",
+    "recentLitters": "Recent Litters"
+  },
+  "loading": {
+    "statistics": "Loading statistics..."
+  },
+  "userStats": {
+    "yourJourneyTitle": "Your {{year}} Journey",
+    "noDataMessage": "You haven't recorded any litters in {{year}} yet – your journey starts soon!",
+    "yourStatsTitle": "Your {{year}} Stats",
+    "litters": "Litters",
+    "puppies": "Puppies",
+    "avgSize": "Avg Size",
+    "keepUpWork": "Keep up the great work!"
+  },
+  "tips": {
+    "weighPuppies": "Weigh your puppies daily during the first week to ensure healthy growth.",
+    "registerLitter": "Remember to register your litter with the kennel club."
+  }
+}
