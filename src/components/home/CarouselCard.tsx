@@ -14,7 +14,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
 }) => {
   return (
     <Card 
-      className={`h-48 bg-card border-border hover:shadow-lg transition-all duration-300 cursor-pointer ${className}`}
+      className={`h-48 bg-greige-50 border-greige-200 hover:shadow-md transition-all duration-300 cursor-pointer ${className}`}
       onClick={onClick}
     >
       {children}
