@@ -6,6 +6,7 @@ import { AddEventFormValues } from '@/components/calendar/types';
 import BreedingCalendar from '@/components/BreedingCalendar';
 import BreedingReminders from '@/components/BreedingReminders';
 import BreedingStats from '@/components/BreedingStats';
+import { HomeOfferCarousel } from '@/components/home/HomeOfferCarousel';
 
 interface DashboardContentProps {
   isDataReady: boolean;
@@ -118,6 +119,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             )}
           </div>
         </div>
+      </section>
+      
+      {/* Home Offer Carousel section */}
+      <section>
+        <HomeOfferCarousel />
       </section>
       
       {/* Annual Breeding Statistics in a separate section */}

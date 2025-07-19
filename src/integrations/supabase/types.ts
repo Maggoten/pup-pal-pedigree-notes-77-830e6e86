@@ -256,6 +256,42 @@ export type Database = {
           },
         ]
       }
+      partner_offers: {
+        Row: {
+          active: boolean
+          created_at: string
+          end_date: string
+          id: string
+          image_url: string
+          link: string | null
+          start_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          end_date: string
+          id?: string
+          image_url: string
+          link?: string | null
+          start_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          end_date?: string
+          id?: string
+          image_url?: string
+          link?: string | null
+          start_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       planned_litters: {
         Row: {
           created_at: string
