@@ -2,7 +2,7 @@
 {
   "welcome": {
     "title": "Välkommen tillbaka, {{username}}!",
-    "subtitle": "Här är en översikt av din avelresa"
+    "subtitle": "Här är en översikt över din uppfödarresa"
   },
   "metrics": {
     "reminders": "Påminnelser",
@@ -20,10 +20,10 @@
     "litters": "Kullar",
     "puppies": "Valpar",
     "avgSize": "Snitt Storlek",
-    "keepUpWork": "Fortsätt det bra arbetet!"
+    "keepUpWork": "Bra jobbat, fortsätt så!"
   },
   "tips": {
-    "weighPuppies": "Väg dina valpar dagligen under den första veckan för att säkerställa hälsosam tillväxt.",
+    "weighPuppies": "Väg dina valpar dagligen under den första veckan för att säkerställa en hälsosam tillväxt.",
     "registerLitter": "Kom ihåg att registrera din kull hos kennelklubben."
   }
 }
