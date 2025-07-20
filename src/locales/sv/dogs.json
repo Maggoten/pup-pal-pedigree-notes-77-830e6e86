@@ -2,8 +2,8 @@
 {
   "page": {
     "title": "Mina Hundar",
-    "description": "Hantera dina avelsdjur",
-    "backToList": "Tillbaka till listan"
+    "description": "Hantera dina hundar",
+    "backToList": "Tillbaka"
   },
   "navigation": {
     "addNewDog": "Lägg till Ny Hund",
@@ -12,8 +12,8 @@
   "form": {
     "title": {
       "add": "Lägg till Ny Hund",
-      "edit": "Redigera Hund",
-      "details": "Hunddetaljer"
+      "edit": "Redigera",
+      "details": "Detaljer"
     },
     "description": {
       "add": "Lägg till en ny hund i ditt avel program.",
@@ -53,7 +53,7 @@
         "description": "Hälsoproblem, temperament eller särskilda vårdinstruktioner"
       },
       "photo": {
-        "label": "Hundfoto"
+        "label": "Foto"
       }
     },
     "health": {
@@ -75,14 +75,14 @@
       }
     },
     "breeding": {
-      "title": "Löptidsinformation",
+      "title": "Löpinformation",
       "heatHistory": {
-        "label": "Löptidshistorik",
+        "label": "Löphistorik",
         "noRecords": "Inga löptider registrerade",
         "addDate": "Lägg till Löptidsdatum"
       },
       "heatInterval": {
-        "label": "Löptidsintervall (dagar)",
+        "label": "Löpintervall (dagar)",
         "placeholder": "180"
       },
       "sterilized": {
@@ -133,14 +133,14 @@
       "female": "Tikar"
     },
     "descriptions": {
-      "all": "Alla hundar i ditt avel program",
-      "male": "Hanarna i ditt avel program",
-      "female": "Tikarna i ditt avel program"
+      "all": "Alla hundar i ditt avels program",
+      "male": "Hanarna i ditt avels program",
+      "female": "Tikarna i ditt avels program"
     },
     "empty": {
       "noDogs": "Inga hundar hittades.",
       "noResults": "Inga hundar hittades som matchar dina kriterier",
-      "addFirst": "Inga hundar hittades. Lägg till din första hund för att komma igång!",
+      "addFirst": "Lägg till din första hund för att komma igång!",
       "addFirstButton": "Lägg till Din Första Hund"
     },
     "loading": "Laddar dina hundar..."
