@@ -84,7 +84,7 @@ export const HomeOfferCarousel: React.FC = () => {
     fallbackTips.forEach((tip, index) => {
       carouselItems.push(
         <div key={`tip-${index}`} className="flex-[0_0_100%] min-w-0">
-          <FallbackTipCard tip={tip.text} type={tip.type} />
+          <FallbackTipCard tipKey={tip.tipKey} type={tip.type} />
         </div>
       );
     });
