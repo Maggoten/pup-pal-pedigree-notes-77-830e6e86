@@ -1,4 +1,187 @@
+
 {
-  "myDogs": "My Dogs",
-  "addDog": "Add Dog"
+  "page": {
+    "title": "My Dogs",
+    "description": "Manage your breeding dogs",
+    "backToList": "Back to list"
+  },
+  "navigation": {
+    "addNewDog": "Add New Dog",
+    "viewProfile": "View Profile"
+  },
+  "form": {
+    "title": {
+      "add": "Add New Dog",
+      "edit": "Edit Dog",
+      "details": "Dog Details"
+    },
+    "description": {
+      "add": "Add a new dog to your breeding program.",
+      "edit": "Update your dog's information."
+    },
+    "fields": {
+      "name": {
+        "label": "Name",
+        "placeholder": "Bella"
+      },
+      "breed": {
+        "label": "Breed"
+      },
+      "gender": {
+        "label": "Gender",
+        "placeholder": "Select gender",
+        "male": "Male",
+        "female": "Female"
+      },
+      "color": {
+        "label": "Color",
+        "placeholder": "Golden"
+      },
+      "dateOfBirth": {
+        "label": "Date of Birth",
+        "placeholder": "Pick a date",
+        "description": "Enter your dog's birth date"
+      },
+      "registrationNumber": {
+        "label": "Registration Number",
+        "placeholder": "AKC123456",
+        "description": "Optional registration or license number"
+      },
+      "notes": {
+        "label": "Notes",
+        "placeholder": "Any additional information...",
+        "description": "Health concerns, temperament, or special care instructions"
+      },
+      "photo": {
+        "label": "Dog Photo"
+      }
+    },
+    "health": {
+      "title": "Health Information",
+      "deworming": {
+        "label": "Last Deworming Date",
+        "placeholder": "Pick a date",
+        "description": "Optional"
+      },
+      "vaccination": {
+        "label": "Last Vaccination Date", 
+        "placeholder": "Pick a date",
+        "description": "Optional"
+      },
+      "sterilization": {
+        "label": "Sterilization Date",
+        "placeholder": "Pick a date",
+        "description": "Optional - For female dogs only"
+      }
+    },
+    "breeding": {
+      "title": "Heat Cycle Information",
+      "heatHistory": {
+        "label": "Heat Cycles History",
+        "noRecords": "No heat cycles recorded",
+        "addDate": "Add Heat Date"
+      },
+      "heatInterval": {
+        "label": "Heat Interval (days)",
+        "placeholder": "180"
+      },
+      "sterilized": {
+        "label": "Sterilized?",
+        "addDate": "Add Sterilization Date"
+      }
+    },
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "adding": "Adding...",
+      "saving": "Saving...",
+      "loading": "Loading..."
+    }
+  },
+  "display": {
+    "age": "Age",
+    "litters": "Litters",
+    "details": {
+      "basicInfo": "Basic Information",
+      "healthInfo": "Health Information",
+      "breedingInfo": "Breeding Information",
+      "notAvailable": "N/A",
+      "optional": "Optional"
+    },
+    "genderBadge": {
+      "male": "Male",
+      "female": "Female"
+    }
+  },
+  "filters": {
+    "gender": {
+      "all": "All Dogs",
+      "male": "Dogs (Males)",
+      "female": "Bitches (Females)",
+      "placeholder": "Filter by gender"
+    },
+    "search": {
+      "placeholder": "Search dogs by name or breed..."
+    }
+  },
+  "list": {
+    "headers": {
+      "all": "All Dogs",
+      "male": "Dogs (Males)",
+      "female": "Bitches (Females)"
+    },
+    "descriptions": {
+      "all": "All dogs in your breeding program",
+      "male": "Male dogs in your breeding program", 
+      "female": "Female dogs in your breeding program"
+    },
+    "empty": {
+      "noDogs": "No dogs found.",
+      "noResults": "No dogs found matching your criteria",
+      "addFirst": "No dogs found. Add your first dog to get started!",
+      "addFirstButton": "Add Your First Dog"
+    },
+    "loading": "Loading your dogs..."
+  },
+  "litters": {
+    "title": "Litters",
+    "noLitters": "No litters recorded for this dog yet."
+  },
+  "delete": {
+    "title": "Delete Dog",
+    "message": "Are you sure you want to delete {{dogName}}? This action cannot be undone.",
+    "confirm": "Delete Dog",
+    "cancel": "Cancel"
+  },
+  "toast": {
+    "success": {
+      "added": "{{dogName}} has been added to your dogs",
+      "updated": "{{dogName}} has been updated successfully",
+      "deleted": "Dog deleted successfully"
+    },
+    "error": {
+      "add": "Failed to add dog. Please try again.",
+      "update": "Failed to update dog. Please try again.",
+      "delete": "Failed to delete dog. Please try again.",
+      "load": "Failed to load dogs",
+      "generic": "An error occurred",
+      "cannotDelete": "Cannot Delete Dog",
+      "hasDependencies": "This dog cannot be deleted because it has associated records (litters, pregnancies, etc.)"
+    },
+    "loading": {
+      "preparing": "Preparing connection...",
+      "wait": "Please wait"
+    },
+    "network": {
+      "error": "Network connection problem. Please check your internet connection.",
+      "retry": "Try Again"
+    }
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "breedRequired": "Breed is required", 
+    "dateOfBirthRequired": "Date of birth is required"
+  }
 }

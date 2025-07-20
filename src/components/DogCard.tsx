@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Heart, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { useTranslation } from 'react-i18next';
 
 interface DogCardProps {
   dog: Dog;
@@ -13,6 +14,8 @@ interface DogCardProps {
 }
 
 const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
+  const { t } = useTranslation('dogs');
+  
   const calculateAge = (dateOfBirth: string) => {
     const birth = new Date(dateOfBirth);
     const now = new Date();
@@ -56,7 +59,7 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
           </AspectRatio>
           <div className="absolute top-2 right-2">
             <Badge className={dog.gender === 'male' ? 'bg-blue-500' : 'bg-rose-400'}>
-              {dog.gender === 'male' ? 'Male' : 'Female'}
+              {dog.gender === 'male' ? t('display.genderBadge.male') : t('display.genderBadge.female')}
             </Badge>
           </div>
         </div>
@@ -66,12 +69,12 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
         <p className="text-sm text-muted-foreground mb-2">{dog.breed}</p>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Calendar className="h-3 w-3" />
-          <span>Age: {calculateAge(dog.dateOfBirth)}</span>
+          <span>{t('display.age')}: {calculateAge(dog.dateOfBirth)}</span>
         </div>
         {dog.breedingHistory?.litters && dog.breedingHistory.litters.length > 0 && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
             <Heart className="h-3 w-3" />
-            <span>Litters: {dog.breedingHistory.litters.length}</span>
+            <span>{t('display.litters')}: {dog.breedingHistory.litters.length}</span>
           </div>
         )}
       </CardContent>
@@ -80,7 +83,7 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
           e.stopPropagation();
           onClick(dog);
         }}>
-          View Profile
+          {t('navigation.viewProfile')}
         </Button>
       </CardFooter>
     </Card>

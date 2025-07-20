@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useTranslation } from 'react-i18next';
 
 interface BasicInfoFieldsProps {
   form: UseFormReturn<DogFormValues>;
@@ -19,6 +20,8 @@ interface BasicInfoFieldsProps {
 }
 
 const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form, disabled }) => {
+  const { t } = useTranslation('dogs');
+  
   return (
     <>
       <FormField
@@ -26,9 +29,9 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form, disabled }) => 
         name="name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Name</FormLabel>
+            <FormLabel>{t('form.fields.name.label')}</FormLabel>
             <FormControl>
-              <Input placeholder="Bella" {...field} disabled={disabled} />
+              <Input placeholder={t('form.fields.name.placeholder')} {...field} disabled={disabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -40,7 +43,7 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form, disabled }) => 
         name="breed"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Breed</FormLabel>
+            <FormLabel>{t('form.fields.breed.label')}</FormLabel>
             <FormControl>
               <BreedDropdown
                 value={field.value}
@@ -58,7 +61,7 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form, disabled }) => 
         name="gender"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Gender</FormLabel>
+            <FormLabel>{t('form.fields.gender.label')}</FormLabel>
             <Select 
               onValueChange={field.onChange} 
               defaultValue={field.value}
@@ -66,12 +69,12 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form, disabled }) => 
             >
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
+                  <SelectValue placeholder={t('form.fields.gender.placeholder')} />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="male">{t('form.fields.gender.male')}</SelectItem>
+                <SelectItem value="female">{t('form.fields.gender.female')}</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />
@@ -84,9 +87,9 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form, disabled }) => 
         name="color"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Color</FormLabel>
+            <FormLabel>{t('form.fields.color.label')}</FormLabel>
             <FormControl>
-              <Input placeholder="Golden" {...field} disabled={disabled} />
+              <Input placeholder={t('form.fields.color.placeholder')} {...field} disabled={disabled} />
             </FormControl>
             <FormMessage />
           </FormItem>

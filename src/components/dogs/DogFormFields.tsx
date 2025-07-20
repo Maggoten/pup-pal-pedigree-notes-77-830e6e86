@@ -8,6 +8,7 @@ import RegistrationFields from './form-fields/RegistrationFields';
 import HealthFields from './form-fields/HealthFields';
 import NotesField from './form-fields/NotesField';
 import BirthInfoFields from './form-fields/BirthInfoFields';
+import { useTranslation } from 'react-i18next';
 
 export const dogFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -33,7 +34,7 @@ export type DogFormValues = z.infer<typeof dogFormSchema>;
 
 interface DogFormFieldsProps {
   form: UseFormReturn<DogFormValues>;
-  disabled?: boolean; // Added disabled prop
+  disabled?: boolean;
 }
 
 const DogFormFields: React.FC<DogFormFieldsProps> = ({ form, disabled }) => {

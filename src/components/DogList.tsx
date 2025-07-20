@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { Loader2, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
+import { useTranslation } from 'react-i18next';
 
 interface DogListProps {
   dogsList?: Dog[];
@@ -21,6 +21,7 @@ const DogList: React.FC<DogListProps> = ({
     loading
   } = useDogs();
   const [search, setSearch] = useState('');
+  const { t } = useTranslation('dogs');
 
   // Use the provided dogsList or fall back to all dogs from context
   const dogs = dogsList || allDogs;
@@ -69,7 +70,7 @@ const DogList: React.FC<DogListProps> = ({
           <Search className="h-5 w-5 text-muted-foreground" />
         </div>
         <Input 
-          placeholder="Search dogs by name or breed..." 
+          placeholder={t('filters.search.placeholder')} 
           value={search} 
           onChange={e => setSearch(e.target.value)} 
           className="pl-10 py-0 bg-white border-warmbeige-100 rounded-lg" 
@@ -79,7 +80,7 @@ const DogList: React.FC<DogListProps> = ({
       {filteredDogs.length === 0 ? (
         <div className="text-center py-12 bg-white border border-warmbeige-100 rounded-xl shadow-sm">
           <p className="text-muted-foreground">
-            {search ? 'No dogs found matching your criteria' : 'No dogs found. Add your first dog to get started!'}
+            {search ? t('list.empty.noResults') : t('list.empty.addFirst')}
           </p>
         </div>
       ) : (

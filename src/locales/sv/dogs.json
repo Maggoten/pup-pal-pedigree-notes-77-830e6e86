@@ -1,4 +1,187 @@
+
 {
-  "myDogs": "Mina hundar",
-  "addDog": "Lägg till hund"
+  "page": {
+    "title": "Mina Hundar",
+    "description": "Hantera dina avelsdjur",
+    "backToList": "Tillbaka till listan"
+  },
+  "navigation": {
+    "addNewDog": "Lägg till Ny Hund",
+    "viewProfile": "Visa Profil"
+  },
+  "form": {
+    "title": {
+      "add": "Lägg till Ny Hund",
+      "edit": "Redigera Hund",
+      "details": "Hunddetaljer"
+    },
+    "description": {
+      "add": "Lägg till en ny hund i ditt avel program.",
+      "edit": "Uppdatera din hunds information."
+    },
+    "fields": {
+      "name": {
+        "label": "Namn",
+        "placeholder": "Bella"
+      },
+      "breed": {
+        "label": "Ras"
+      },
+      "gender": {
+        "label": "Kön",
+        "placeholder": "Välj kön",
+        "male": "Hane",
+        "female": "Tik"
+      },
+      "color": {
+        "label": "Färg",
+        "placeholder": "Gyllene"
+      },
+      "dateOfBirth": {
+        "label": "Födelsedatum",
+        "placeholder": "Välj ett datum",
+        "description": "Ange din hunds födelsedatum"
+      },
+      "registrationNumber": {
+        "label": "Registreringsnummer",
+        "placeholder": "SKK123456",
+        "description": "Valfritt registrerings- eller licensnummer"
+      },
+      "notes": {
+        "label": "Anteckningar",
+        "placeholder": "Ytterligare information...",
+        "description": "Hälsoproblem, temperament eller särskilda vårdinstruktioner"
+      },
+      "photo": {
+        "label": "Hundfoto"
+      }
+    },
+    "health": {
+      "title": "Hälsoinformation",
+      "deworming": {
+        "label": "Senaste Avmaskning",
+        "placeholder": "Välj ett datum",
+        "description": "Valfritt"
+      },
+      "vaccination": {
+        "label": "Senaste Vaccination",
+        "placeholder": "Välj ett datum", 
+        "description": "Valfritt"
+      },
+      "sterilization": {
+        "label": "Steriliseringsdatum",
+        "placeholder": "Välj ett datum",
+        "description": "Valfritt - Endast för tikar"
+      }
+    },
+    "breeding": {
+      "title": "Löptidsinformation",
+      "heatHistory": {
+        "label": "Löptidshistorik",
+        "noRecords": "Inga löptider registrerade",
+        "addDate": "Lägg till Löptidsdatum"
+      },
+      "heatInterval": {
+        "label": "Löptidsintervall (dagar)",
+        "placeholder": "180"
+      },
+      "sterilized": {
+        "label": "Steriliserad?",
+        "addDate": "Lägg till Steriliseringsdatum"
+      }
+    },
+    "actions": {
+      "save": "Spara",
+      "cancel": "Avbryt",
+      "edit": "Redigera",
+      "delete": "Ta bort",
+      "adding": "Lägger till...",
+      "saving": "Sparar...",
+      "loading": "Laddar..."
+    }
+  },
+  "display": {
+    "age": "Ålder",
+    "litters": "Kullar",
+    "details": {
+      "basicInfo": "Grundläggande Information",
+      "healthInfo": "Hälsoinformation",
+      "breedingInfo": "Avelinformation",
+      "notAvailable": "Ej Tillgänglig",
+      "optional": "Valfritt"
+    },
+    "genderBadge": {
+      "male": "Hane",
+      "female": "Tik"
+    }
+  },
+  "filters": {
+    "gender": {
+      "all": "Alla Hundar",
+      "male": "Hanar",
+      "female": "Tikar",
+      "placeholder": "Filtrera efter kön"
+    },
+    "search": {
+      "placeholder": "Sök hundar efter namn eller ras..."
+    }
+  },
+  "list": {
+    "headers": {
+      "all": "Alla Hundar",
+      "male": "Hanar",
+      "female": "Tikar"
+    },
+    "descriptions": {
+      "all": "Alla hundar i ditt avel program",
+      "male": "Hanarna i ditt avel program",
+      "female": "Tikarna i ditt avel program"
+    },
+    "empty": {
+      "noDogs": "Inga hundar hittades.",
+      "noResults": "Inga hundar hittades som matchar dina kriterier",
+      "addFirst": "Inga hundar hittades. Lägg till din första hund för att komma igång!",
+      "addFirstButton": "Lägg till Din Första Hund"
+    },
+    "loading": "Laddar dina hundar..."
+  },
+  "litters": {
+    "title": "Kullar",
+    "noLitters": "Inga kullar registrerade för denna hund ännu."
+  },
+  "delete": {
+    "title": "Ta bort Hund",
+    "message": "Är du säker på att du vill ta bort {{dogName}}? Denna åtgärd kan inte ångras.",
+    "confirm": "Ta bort Hund",
+    "cancel": "Avbryt"
+  },
+  "toast": {
+    "success": {
+      "added": "{{dogName}} har lagts till i dina hundar",
+      "updated": "{{dogName}} har uppdaterats framgångsrikt",
+      "deleted": "Hunden borttagen framgångsrikt"
+    },
+    "error": {
+      "add": "Misslyckades att lägga till hund. Försök igen.",
+      "update": "Misslyckades att uppdatera hund. Försök igen.",
+      "delete": "Misslyckades att ta bort hund. Försök igen.",
+      "load": "Misslyckades att ladda hundar",
+      "generic": "Ett fel uppstod",
+      "cannotDelete": "Kan Inte Ta Bort Hund",
+      "hasDependencies": "Denna hund kan inte tas bort eftersom den har associerade poster (kullar, dräktigheter, etc.)"
+    },
+    "loading": {
+      "preparing": "Förbereder anslutning...",
+      "wait": "Vänligen vänta"
+    },
+    "network": {
+      "error": "Problem med nätverksanslutning. Kontrollera din internetanslutning.",
+      "retry": "Försök Igen"
+    }
+  },
+  "validation": {
+    "nameRequired": "Namn krävs",
+    "breedRequired": "Ras krävs",
+    "dateOfBirthRequired": "Födelsedatum krävs"
+  }
 }

@@ -14,6 +14,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { parseISODate } from '@/utils/dateUtils';
+import { useTranslation } from 'react-i18next';
 
 interface BirthInfoFieldsProps {
   form: UseFormReturn<DogFormValues>;
@@ -21,13 +22,15 @@ interface BirthInfoFieldsProps {
 }
 
 const BirthInfoFields: React.FC<BirthInfoFieldsProps> = ({ form, disabled }) => {
+  const { t } = useTranslation('dogs');
+  
   return (
     <FormField
       control={form.control}
       name="dateOfBirth"
       render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>Date of Birth</FormLabel>
+          <FormLabel>{t('form.fields.dateOfBirth.label')}</FormLabel>
           <Popover>
             <PopoverTrigger asChild>
               <FormControl>
@@ -45,7 +48,7 @@ const BirthInfoFields: React.FC<BirthInfoFieldsProps> = ({ form, disabled }) => 
                       ? format(parseISODate(field.value) || new Date(), "PPP")
                       : format(field.value, "PPP")
                   ) : (
-                    <span>Pick a date</span>
+                    <span>{t('form.fields.dateOfBirth.placeholder')}</span>
                   )}
                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button>
@@ -75,7 +78,7 @@ const BirthInfoFields: React.FC<BirthInfoFieldsProps> = ({ form, disabled }) => 
             </PopoverContent>
           </Popover>
           <FormDescription className="text-xs">
-            Enter your dog's birth date
+            {t('form.fields.dateOfBirth.description')}
           </FormDescription>
           <FormMessage />
         </FormItem>

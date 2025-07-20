@@ -16,6 +16,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useTranslation } from 'react-i18next';
 
 const MyDogsContent: React.FC = () => {
   const { dogs, activeDog, loading, error, fetchDogs, setActiveDog } = useDogs();
@@ -25,6 +26,7 @@ const MyDogsContent: React.FC = () => {
   const [pageReady, setPageReady] = useState(false);
   const [retryAttempts, setRetryAttempts] = useState(0);
   const [showError, setShowError] = useState(false);
+  const { t } = useTranslation('dogs');
   
   // Clear active dog when navigating to My Dogs page
   useEffect(() => {
@@ -87,7 +89,7 @@ const MyDogsContent: React.FC = () => {
     }, backoffTime);
   };
 
-  const errorMessage = typeof error === 'string' ? error : 'Failed to load dogs';
+  const errorMessage = typeof error === 'string' ? error : t('toast.error.load');
   const isNetworkError = errorMessage.includes('Failed to fetch') || 
                          errorMessage.includes('Network error') ||
                          errorMessage.includes('timeout');
@@ -96,13 +98,13 @@ const MyDogsContent: React.FC = () => {
   if (!isAuthReady) {
     return (
       <PageLayout 
-        title="My Dogs" 
-        description="Manage your breeding dogs"
+        title={t('page.title')} 
+        description={t('page.description')}
         className="bg-warmbeige-50 overflow-y-auto"
       >
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
-          <p className="text-muted-foreground">Preparing connection...</p>
+          <p className="text-muted-foreground">{t('toast.loading.preparing')}</p>
         </div>
       </PageLayout>
     );
@@ -110,8 +112,8 @@ const MyDogsContent: React.FC = () => {
 
   return (
     <PageLayout 
-      title="My Dogs" 
-      description="Manage your breeding dogs"
+      title={t('page.title')} 
+      description={t('page.description')}
       className="bg-warmbeige-50 overflow-y-auto"
     >
       {error && showError && (
@@ -119,7 +121,7 @@ const MyDogsContent: React.FC = () => {
           <AlertCircle className="h-4 w-4 mr-2" />
           <AlertDescription className="flex items-center justify-between w-full">
             <span>{isNetworkError ? 
-              'Network connection problem. Please check your internet connection.' : 
+              t('toast.network.error') : 
               errorMessage}
             </span>
             <Button 
@@ -128,7 +130,7 @@ const MyDogsContent: React.FC = () => {
               onClick={handleRetry}
               className="ml-2 bg-white"
             >
-              Try Again
+              {t('toast.network.retry')}
             </Button>
           </AlertDescription>
         </Alert>
@@ -137,7 +139,7 @@ const MyDogsContent: React.FC = () => {
       {(loading || !pageReady) ? (
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
-          <p className="text-muted-foreground">Loading your dogs...</p>
+          <p className="text-muted-foreground">{t('list.loading')}</p>
         </div>
       ) : activeDog ? (
         <DogDetails dog={activeDog} />
@@ -152,13 +154,13 @@ const MyDogsContent: React.FC = () => {
                 <SelectTrigger className="bg-white border border-warmbeige-100 w-full">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder="Filter by gender" />
+                    <SelectValue placeholder={t('filters.gender.placeholder')} />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Dogs</SelectItem>
-                  <SelectItem value="male">Dogs (Males)</SelectItem>
-                  <SelectItem value="female">Bitches (Females)</SelectItem>
+                  <SelectItem value="all">{t('filters.gender.all')}</SelectItem>
+                  <SelectItem value="male">{t('filters.gender.male')}</SelectItem>
+                  <SelectItem value="female">{t('filters.gender.female')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -169,21 +171,21 @@ const MyDogsContent: React.FC = () => {
               disabled={loading}
             >
               <PlusCircle className="h-4 w-4" />
-              Add New Dog
+              {t('navigation.addNewDog')}
             </Button>
           </div>
           
           <Card className="bg-white border border-warmbeige-100 shadow-sm overflow-y-auto">
             <CardHeader className="bg-warmbeige-50/50 border-b border-warmbeige-100">
               <CardTitle>
-                {genderFilter === 'all' ? 'All Dogs' : 
-                 genderFilter === 'male' ? 'Dogs (Males)' : 
-                 'Bitches (Females)'}
+                {genderFilter === 'all' ? t('list.headers.all') : 
+                 genderFilter === 'male' ? t('list.headers.male') : 
+                 t('list.headers.female')}
               </CardTitle>
               <CardDescription>
-                {genderFilter === 'all' ? 'All dogs in your breeding program' :
-                 genderFilter === 'male' ? 'Male dogs in your breeding program' :
-                 'Female dogs in your breeding program'}
+                {genderFilter === 'all' ? t('list.descriptions.all') :
+                 genderFilter === 'male' ? t('list.descriptions.male') :
+                 t('list.descriptions.female')}
               </CardDescription>
             </CardHeader>
             <CardContent className="bg-white">
@@ -191,14 +193,14 @@ const MyDogsContent: React.FC = () => {
               
               {filteredDogs.length === 0 && !loading && (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">No dogs found.</p>
+                  <p className="text-muted-foreground">{t('list.empty.noDogs')}</p>
                   <Button 
                     variant="outline" 
                     onClick={() => setShowAddDogDialog(true)}
                     className="mt-4"
                   >
                     <PlusCircle className="h-4 w-4 mr-2" />
-                    Add Your First Dog
+                    {t('list.empty.addFirstButton')}
                   </Button>
                 </div>
               )}
