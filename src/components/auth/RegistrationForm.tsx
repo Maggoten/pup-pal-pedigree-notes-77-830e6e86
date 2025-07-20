@@ -3,6 +3,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 import { UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,19 +16,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
-const registrationSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  agreeToTerms: z.boolean().refine(val => val === true, {
-    message: "You must agree to the terms and conditions"
-  })
-});
-
-export type RegistrationFormValues = z.infer<typeof registrationSchema>;
+export type RegistrationFormValues = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  agreeToTerms: boolean;
+};
 
 interface RegistrationFormProps {
   onSubmit: (values: RegistrationFormValues) => void;
@@ -35,6 +31,18 @@ interface RegistrationFormProps {
 }
 
 const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading }) => {
+  const { t } = useTranslation('auth');
+
+  const registrationSchema = z.object({
+    firstName: z.string().min(2, t('validation.firstNameMin')),
+    lastName: z.string().min(2, t('validation.lastNameMin')),
+    email: z.string().email(t('validation.emailRequired')),
+    password: z.string().min(6, t('validation.passwordMin')),
+    agreeToTerms: z.boolean().refine(val => val === true, {
+      message: t('validation.termsRequired')
+    })
+  });
+
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
@@ -55,9 +63,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-brown-800">First Name</FormLabel>
+                <FormLabel className="text-brown-800">{t('firstName')}</FormLabel>
                 <FormControl>
-                  <Input placeholder="John" {...field} className="border-warmbeige-300 focus:border-warmgreen-600 bg-white" />
+                  <Input placeholder={t('placeholders.firstName')} {...field} className="border-warmbeige-300 focus:border-warmgreen-600 bg-white" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -69,9 +77,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
             name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-brown-800">Last Name</FormLabel>
+                <FormLabel className="text-brown-800">{t('lastName')}</FormLabel>
                 <FormControl>
-                  <Input placeholder="Doe" {...field} className="border-warmbeige-300 focus:border-warmgreen-600 bg-white" />
+                  <Input placeholder={t('placeholders.lastName')} {...field} className="border-warmbeige-300 focus:border-warmgreen-600 bg-white" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -84,9 +92,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-brown-800">Email</FormLabel>
+              <FormLabel className="text-brown-800">{t('email')}</FormLabel>
               <FormControl>
-                <Input placeholder="your@email.com" {...field} className="border-warmbeige-300 focus:border-warmgreen-600 bg-white" />
+                <Input placeholder={t('placeholders.email')} {...field} className="border-warmbeige-300 focus:border-warmgreen-600 bg-white" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -98,7 +106,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-brown-800">Password</FormLabel>
+              <FormLabel className="text-brown-800">{t('password')}</FormLabel>
               <FormControl>
                 <Input type="password" {...field} className="border-warmbeige-300 focus:border-warmgreen-600 bg-white" />
               </FormControl>
@@ -108,12 +116,12 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
         />
 
         <div className="bg-warmbeige-100/50 border border-warmbeige-300 rounded-md p-4 mb-4">
-          <h4 className="text-brown-800 font-semibold mb-2">What happens next?</h4>
+          <h4 className="text-brown-800 font-semibold mb-2">{t('whatHappensNext')}</h4>
           <div className="text-brown-600 text-sm space-y-1">
-            <p>• Your account will be created instantly</p>
-            <p>• You'll be redirected to secure payment setup</p>
-            <p>• Your 30-day free trial starts immediately</p>
-            <p>• No charges until your trial ends</p>
+            <p>• {t('accountCreatedInstantly')}</p>
+            <p>• {t('redirectToPayment')}</p>
+            <p>• {t('trialStarts')}</p>
+            <p>• {t('noCharges')}</p>
           </div>
         </div>
 
@@ -131,9 +139,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel className="text-brown-800">Accept terms and conditions</FormLabel>
+                <FormLabel className="text-brown-800">{t('agreeToTerms')}</FormLabel>
                 <FormDescription className="text-brown-600">
-                  By creating an account, you agree to our Terms of Service and Privacy Policy. 
+                  {t('termsDescription')}
                 </FormDescription>
               </div>
               <FormMessage />
@@ -146,7 +154,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           type="submit"
           disabled={isLoading}
         >
-          {isLoading ? "Processing..." : "Create Account"}
+          {isLoading ? t('processing') : t('createAccount')}
           <UserPlus className="ml-2 h-4 w-4" />
         </Button>
       </form>

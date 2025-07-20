@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import LoginForm, { LoginFormValues } from './LoginForm';
@@ -17,6 +18,8 @@ const AuthTabs: React.FC<AuthTabsProps> = ({
   onRegister,
   isLoading
 }) => {
+  const { t } = useTranslation('auth');
+
   return (
     <Card className="w-full max-w-md shadow-lg bg-white border-warmbeige-200">
       <CardHeader className="space-y-1 text-center">
@@ -32,8 +35,8 @@ const AuthTabs: React.FC<AuthTabsProps> = ({
       <CardContent>
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4 bg-warmbeige-100">
-            <TabsTrigger value="login" className="data-[state=active]:bg-white data-[state=active]:text-warmgreen-700">Login</TabsTrigger>
-            <TabsTrigger value="register" className="data-[state=active]:bg-white data-[state=active]:text-warmgreen-700">Register</TabsTrigger>
+            <TabsTrigger value="login" className="data-[state=active]:bg-white data-[state=active]:text-warmgreen-700">{t('login')}</TabsTrigger>
+            <TabsTrigger value="register" className="data-[state=active]:bg-white data-[state=active]:text-warmgreen-700">{t('register')}</TabsTrigger>
           </TabsList>
           
           <TabsContent value="login">

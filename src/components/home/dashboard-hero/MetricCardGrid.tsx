@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import MetricCard from './MetricCard';
 import { Calendar, Check, Heart, PawPrint } from 'lucide-react';
 
@@ -18,31 +19,33 @@ const MetricCardGrid: React.FC<MetricCardGridProps> = ({
   recentLittersCount,
   onRemindersClick,
 }) => {
+  const { t } = useTranslation('home');
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       <MetricCard 
-        title="Reminders" 
+        title={t('metrics.reminders')} 
         value={reminderCount} 
         icon={<Check className="h-4 w-4" />} 
-        onClick={onRemindersClick} // Use onClick instead of linkTo for Reminders
+        onClick={onRemindersClick}
       />
       
       <MetricCard 
-        title="Planned Litters" 
+        title={t('metrics.plannedLitters')} 
         value={plannedLittersCount} 
         icon={<Calendar className="h-4 w-4" />} 
         linkTo="/planned-litters"
       />
       
       <MetricCard 
-        title="Active Pregnancies" 
+        title={t('metrics.activePregnancies')} 
         value={activePregnanciesCount} 
         icon={<Heart className="h-4 w-4" />} 
         linkTo="/pregnancy"
       />
       
       <MetricCard 
-        title="Recent Litters" 
+        title={t('metrics.recentLitters')} 
         value={recentLittersCount} 
         icon={<PawPrint className="h-4 w-4" />} 
         linkTo="/my-litters"

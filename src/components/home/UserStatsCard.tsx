@@ -1,4 +1,6 @@
+
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { TrendingUp, Heart, Award } from 'lucide-react';
 import { CarouselCard } from './CarouselCard';
 
@@ -13,6 +15,7 @@ export const UserStatsCard: React.FC<UserStatsCardProps> = ({
   totalPuppies,
   averageLitterSize
 }) => {
+  const { t } = useTranslation('home');
   const currentYear = new Date().getFullYear();
   const hasData = totalLitters > 0;
 
@@ -24,10 +27,10 @@ export const UserStatsCard: React.FC<UserStatsCardProps> = ({
             <Heart className="w-6 h-6 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-card-foreground">
-            Your {currentYear} Journey
+            {t('userStats.yourJourneyTitle', { year: currentYear })}
           </h3>
           <p className="text-sm text-muted-foreground">
-            You haven't recorded any litters in {currentYear} yet – your journey starts soon!
+            {t('userStats.noDataMessage', { year: currentYear })}
           </p>
         </div>
       </CarouselCard>
@@ -40,30 +43,30 @@ export const UserStatsCard: React.FC<UserStatsCardProps> = ({
         <div className="flex items-center space-x-2">
           <Award className="w-5 h-5 text-primary" />
           <h3 className="text-lg font-semibold text-card-foreground">
-            Your {currentYear} Stats
+            {t('userStats.yourStatsTitle', { year: currentYear })}
           </h3>
         </div>
         
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">{totalLitters}</div>
-            <div className="text-xs text-muted-foreground">Litters</div>
+            <div className="text-xs text-muted-foreground">{t('userStats.litters')}</div>
           </div>
           
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">{totalPuppies}</div>
-            <div className="text-xs text-muted-foreground">Puppies</div>
+            <div className="text-xs text-muted-foreground">{t('userStats.puppies')}</div>
           </div>
           
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">{averageLitterSize}</div>
-            <div className="text-xs text-muted-foreground">Avg Size</div>
+            <div className="text-xs text-muted-foreground">{t('userStats.avgSize')}</div>
           </div>
         </div>
         
         <div className="flex items-center justify-center space-x-1 text-xs text-muted-foreground">
           <TrendingUp className="w-3 h-3" />
-          <span>Keep up the great work!</span>
+          <span>{t('userStats.keepUpWork')}</span>
         </div>
       </div>
     </CarouselCard>

@@ -1,10 +1,13 @@
+
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Heart } from 'lucide-react';
 import { CarouselCard } from './CarouselCard';
 
 interface FallbackTipCardProps {
-  tip: string;
+  tip?: string;
   type?: 'tip' | 'offer' | 'info';
+  tipKey?: 'weighPuppies' | 'registerLitter';
 }
 
 const tipIcons = {
@@ -13,16 +16,16 @@ const tipIcons = {
   info: Heart
 };
 
-const tips = [
-  { text: "Weigh your puppies daily during the first week to ensure healthy growth.", type: "tip" as const },
-  { text: "Remember to register your litter with the kennel club.", type: "info" as const }
-];
-
 export const FallbackTipCard: React.FC<FallbackTipCardProps> = ({
   tip,
-  type = 'tip'
+  type = 'tip',
+  tipKey
 }) => {
+  const { t } = useTranslation('home');
   const Icon = tipIcons[type];
+
+  // Use translation key if provided, otherwise use the passed tip text
+  const displayTip = tipKey ? t(`tips.${tipKey}`) : tip;
 
   return (
     <CarouselCard className="p-6">
@@ -31,7 +34,7 @@ export const FallbackTipCard: React.FC<FallbackTipCardProps> = ({
           <Icon className="w-5 h-5 text-primary" />
         </div>
         <p className="text-sm text-card-foreground leading-relaxed">
-          {tip}
+          {displayTip}
         </p>
       </div>
     </CarouselCard>
@@ -39,5 +42,10 @@ export const FallbackTipCard: React.FC<FallbackTipCardProps> = ({
 };
 
 export const getRandomFallbackTips = (count: number = 3) => {
-  return [...tips].sort(() => Math.random() - 0.5).slice(0, count);
+  const tipKeys: Array<{ tipKey: 'weighPuppies' | 'registerLitter'; type: 'tip' | 'info' }> = [
+    { tipKey: 'weighPuppies', type: 'tip' },
+    { tipKey: 'registerLitter', type: 'info' }
+  ];
+
+  return [...tipKeys].sort(() => Math.random() - 0.5).slice(0, count);
 };

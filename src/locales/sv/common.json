@@ -1,7 +1,44 @@
+
 {
   "save": "Spara", 
   "logout": "Logga ut",
   "language": "Språk",
   "english": "English (EN)",
-  "svenska": "Svenska (SV)"
+  "svenska": "Svenska (SV)",
+  "actions": {
+    "add": "Lägg till",
+    "edit": "Redigera",
+    "delete": "Ta bort",
+    "cancel": "Avbryt",
+    "close": "Stäng",
+    "confirm": "Bekräfta",
+    "submit": "Skicka",
+    "create": "Skapa",
+    "update": "Uppdatera",
+    "remove": "Ta bort",
+    "view": "Visa",
+    "back": "Tillbaka",
+    "next": "Nästa",
+    "previous": "Föregående",
+    "search": "Sök",
+    "filter": "Filtrera",
+    "sort": "Sortera",
+    "refresh": "Uppdatera"
+  },
+  "status": {
+    "loading": "Laddar...",
+    "saving": "Sparar...",
+    "success": "Framgång",
+    "error": "Fel",
+    "completed": "Slutförd",
+    "pending": "Väntande",
+    "active": "Aktiv",
+    "inactive": "Inaktiv"
+  },
+  "validation": {
+    "required": "Detta fält är obligatoriskt",
+    "invalid": "Ogiltigt värde",
+    "tooShort": "Värdet är för kort",
+    "tooLong": "Värdet är för långt"
+  }
 }

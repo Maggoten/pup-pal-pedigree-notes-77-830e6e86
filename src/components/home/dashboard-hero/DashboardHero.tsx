@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { User } from '@/types/auth';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Loader2 } from 'lucide-react';
@@ -25,6 +26,8 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   isLoadingPregnancies = false,
   onRemindersClick,
 }) => {
+  const { t } = useTranslation('home');
+
   return (
     <div className="relative rounded-lg bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 shadow-md overflow-hidden border border-warmbeige-200">
       <div className="px-5 py-6 sm:px-8">
@@ -34,7 +37,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
           {isLoadingPregnancies ? (
             <div className="flex items-center justify-center py-4">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              <span className="ml-2 text-muted-foreground">Loading statistics...</span>
+              <span className="ml-2 text-muted-foreground">{t('loading.statistics')}</span>
             </div>
           ) : (
             <MetricCardGrid 
