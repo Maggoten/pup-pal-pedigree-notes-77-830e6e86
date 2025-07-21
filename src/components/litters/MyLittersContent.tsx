@@ -72,28 +72,6 @@ const MyLittersContent: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Selected Litter Section */}
-      {selectedLitter && (
-        <div className="space-y-4">
-          <SelectedLitterHeader 
-            litter={selectedLitter} 
-            damImageUrl={selectedLitterDamImage}
-            onUpdateLitter={handleUpdateLitter}
-            onDeleteLitter={handleDeleteLitter}
-            onArchiveLitter={handleArchiveLitter}
-          />
-          <SelectedLitterSection 
-            litter={selectedLitter} 
-            onUpdateLitter={handleUpdateLitter}
-            onAddPuppy={handleAddPuppy}
-            onUpdatePuppy={handleUpdatePuppy}
-            onDeletePuppy={handleDeletePuppy}
-            onDeleteLitter={handleDeleteLitter}
-            onArchiveLitter={handleArchiveLitter}
-          />
-        </div>
-      )}
-
       {/* Main Litters Card */}
       <Card className="h-full">
         <CardHeader>
@@ -173,6 +151,28 @@ const MyLittersContent: React.FC = () => {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Selected Litter Section */}
+      {selectedLitter && (
+        <div className="space-y-4">
+          <SelectedLitterHeader 
+            litter={selectedLitter} 
+            damImageUrl={selectedLitterDamImage}
+            onUpdateLitter={handleUpdateLitter}
+            onDeleteLitter={handleDeleteLitter}
+            onArchiveLitter={handleArchiveLitter}
+          />
+          <SelectedLitterSection 
+            litter={selectedLitter} 
+            onUpdateLitter={handleUpdateLitter}
+            onAddPuppy={handleAddPuppy}
+            onUpdatePuppy={handleUpdatePuppy}
+            onDeletePuppy={handleDeletePuppy}
+            onDeleteLitter={handleDeleteLitter}
+            onArchiveLitter={handleArchiveLitter}
+          />
+        </div>
+      )}
 
       {/* Add Litter Dialog */}
       <AddLitterDialog 
