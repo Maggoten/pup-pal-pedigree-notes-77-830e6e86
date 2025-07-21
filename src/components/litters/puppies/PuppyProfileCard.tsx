@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
@@ -5,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { BarChart2, Edit, Trash2, Circle, Scale, Ruler, Image } from 'lucide-react';
+import { BarChart2, Edit, Trash2, Scale, Ruler } from 'lucide-react';
 import { Puppy } from '@/types/breeding';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -60,20 +61,12 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
     const status = puppy.status || 'Available';
     switch (status) {
       case 'Reserved':
-        return <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">Reserved</Badge>;
+        return <Badge variant="warning" className="text-xs">Reserved</Badge>;
       case 'Sold':
-        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">Sold</Badge>;
+        return <Badge variant="success" className="text-xs">Sold</Badge>;
       default:
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">Available</Badge>;
+        return <Badge variant="info" className="text-xs">Available</Badge>;
     }
-  };
-
-  // Get birth date display
-  const getBirthDate = () => {
-    if (puppy.birthDateTime) {
-      return format(parseISO(puppy.birthDateTime), 'MMM d, yyyy');
-    }
-    return 'Birth date not set';
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
@@ -95,122 +88,102 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
 
   return (
     <Card 
-      className={`transition-all duration-200 hover:shadow-lg cursor-pointer ${
+      className={`transition-all duration-200 hover:shadow-lg cursor-pointer bg-white ${
         isSelected ? 'ring-2 ring-primary shadow-lg' : ''
       }`}
       onClick={() => navigate(`/my-litters/${litterId}/puppy/${puppy.id}`)}
     >
-      <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
-        {/* Header - responsive layout */}
-        <div className={`flex items-start gap-3 ${isMobile ? 'mb-3' : 'mb-4'}`}>
-          <div className={`${isMobile ? 'h-16 w-16' : 'h-20 w-20'} border-2 border-warmbeige-200 shadow-sm flex-shrink-0 rounded-lg overflow-hidden`}>
-            <AspectRatio ratio={1/1}>
-              {puppy.imageUrl ? (
-                <img 
-                  src={puppy.imageUrl} 
-                  alt={puppy.name} 
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <div className="bg-warmgreen-100 text-warmgreen-800 font-medium text-lg w-full h-full flex items-center justify-center">
-                  {puppy.name.charAt(0)}
-                </div>
-              )}
-            </AspectRatio>
+      <CardContent className="p-4">
+        {/* Main Content */}
+        <div className="space-y-4">
+          {/* Image Section */}
+          <div className="flex justify-center">
+            <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-warmbeige-200 shadow-sm">
+              <AspectRatio ratio={1/1}>
+                {puppy.imageUrl ? (
+                  <img 
+                    src={puppy.imageUrl} 
+                    alt={puppy.name} 
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <div className="bg-warmgreen-100 text-warmgreen-800 font-semibold text-2xl w-full h-full flex items-center justify-center">
+                    {puppy.name.charAt(0)}
+                  </div>
+                )}
+              </AspectRatio>
+            </div>
           </div>
-          
-          <div className="flex-1 min-w-0">
-            <h3 className={`font-semibold text-warmgreen-800 truncate ${isMobile ? 'text-lg mb-1' : 'text-xl mb-1'}`}>
+
+          {/* Header Info */}
+          <div className="text-center space-y-2">
+            <h3 className="text-lg font-semibold text-warmgreen-800">
               {puppy.name}
             </h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-              <Circle className={`h-3 w-3 ${puppy.gender === 'male' ? 'text-blue-500 fill-blue-500' : 'text-pink-500 fill-pink-500'}`} />
-              <span className="capitalize">{puppy.gender}</span>
-              <span>•</span>
-              <span className="truncate">{puppy.color}</span>
-            </div>
-            <div className="flex justify-start">
+            <p className="text-sm text-muted-foreground">
+              {puppy.gender === 'male' ? '♂' : '♀'} {puppy.gender} • {puppy.color}
+            </p>
+            <div className="flex justify-center">
               {getStatusBadge()}
             </div>
           </div>
-        </div>
-         
-        {/* Birth Info - above measurements for mobile */}
-        {isMobile && (
-          <div className="flex justify-between items-center mb-3 px-1 text-xs text-muted-foreground">
-            <span>Born: {getBirthDate()}</span>
-            <span>Age: {litterAge} weeks</span>
-          </div>
-        )}
-        
-        {/* Measurements - responsive grid */}
-        <div className={`grid gap-3 ${isMobile ? 'grid-cols-2 mb-3' : 'grid-cols-2 gap-4 mb-4'}`}>
-          <div className="bg-warmbeige-50 p-3 rounded-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <Scale className="h-3 w-3 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">Weight</p>
-            </div>
-            <p className={`font-medium ${isMobile ? 'text-sm' : ''}`}>{getLatestWeight()}</p>
-          </div>
-          
-          <div className="bg-warmbeige-50 p-3 rounded-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <Ruler className="h-3 w-3 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">Height</p>
-            </div>
-            <p className={`font-medium ${isMobile ? 'text-sm' : ''}`}>{getLatestHeight()}</p>
-          </div>
-          
-          {!isMobile && (
-            <>
-              <div className="bg-warmbeige-50 p-3 rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">Born</p>
-                <p className="font-medium">{getBirthDate()}</p>
+
+          {/* Measurements Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-warmbeige-50 p-3 rounded-lg text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Scale className="h-3 w-3 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Weight</span>
               </div>
-              
-              <div className="bg-warmbeige-50 p-3 rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">Age</p>
-                <p className="font-medium">{litterAge} weeks</p>
+              <p className="text-sm font-medium">{getLatestWeight()}</p>
+            </div>
+            
+            <div className="bg-warmbeige-50 p-3 rounded-lg text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Ruler className="h-3 w-3 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Height</span>
               </div>
-            </>
-          )}
-        </div>
-        
-        {/* Actions - responsive layout */}
-        <div className={`flex justify-between items-center ${isMobile ? 'gap-2' : ''}`}>
-          <div className={`flex ${isMobile ? 'gap-1' : 'gap-2'}`}>
+              <p className="text-sm font-medium">{getLatestHeight()}</p>
+            </div>
+          </div>
+
+          {/* Birth Info */}
+          <div className="text-center text-xs text-muted-foreground space-y-1">
+            <p>Born: {puppy.birthDateTime ? format(parseISO(puppy.birthDateTime), 'MMM d, yyyy') : 'Not set'}</p>
+            <p>Age: {litterAge} weeks</p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-center gap-2 pt-2">
             <Button
               variant="outline"
-              size={isMobile ? "sm" : "sm"}
+              size="sm"
               onClick={handleMeasurementClick}
-              className={`flex items-center ${isMobile ? 'px-2 min-w-[44px] h-10' : 'gap-1'}`}
-              title="Add measurements"
+              className="flex items-center gap-1 text-xs px-2 py-1 h-8"
             >
-              <BarChart2 className="h-4 w-4" />
-              {!isMobile && <span>Measurements</span>}
+              <BarChart2 className="h-3 w-3" />
+              Measure
             </Button>
             
             <Button
               variant="outline"
-              size={isMobile ? "sm" : "sm"}
+              size="sm"
               onClick={handleEditClick}
-              className={`flex items-center ${isMobile ? 'px-2 min-w-[44px] h-10' : 'gap-1'}`}
-              title="Edit puppy"
+              className="flex items-center gap-1 text-xs px-2 py-1 h-8"
             >
-              <Edit className="h-4 w-4" />
-              {!isMobile && <span>Edit</span>}
+              <Edit className="h-3 w-3" />
+              Edit
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteClick}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 text-xs px-2 py-1 h-8"
+            >
+              <Trash2 className="h-3 w-3" />
             </Button>
           </div>
-          
-          <Button
-            variant="ghost"
-            size={isMobile ? "sm" : "sm"}
-            onClick={handleDeleteClick}
-            className={`text-destructive hover:text-destructive hover:bg-destructive/10 ${isMobile ? 'px-2 min-w-[44px] h-10' : ''}`}
-            title="Delete puppy"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
         </div>
       </CardContent>
     </Card>
