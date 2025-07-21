@@ -3,80 +3,66 @@ import { useMemo, useCallback } from 'react';
 import { Litter } from '@/types/breeding';
 import { useLitterFilter } from '@/components/litters/LitterFilterProvider';
 
-// This hook encapsulates all the filtering and pagination logic
-// to avoid recalculating these values on every render
-const useLitterFilteredData = (activeLitters: Litter[], archivedLitters: Litter[]) => {
+// Updated hook to work with unified litter filtering
+const useLitterFilteredData = (allLitters: Litter[]) => {
   const { 
     searchQuery, 
     selectedYear: filterYear, 
-    activePage,
-    archivedPage,
+    statusFilter,
+    currentPage,
     itemsPerPage 
   } = useLitterFilter();
   
   // Check if any filter is active - memoized to prevent recomputation
   const isFilterActive = useMemo(() => {
-    return !!searchQuery || filterYear !== null;
-  }, [searchQuery, filterYear]);
+    return !!searchQuery || filterYear !== null || statusFilter !== 'all';
+  }, [searchQuery, filterYear, statusFilter]);
   
   // Create a memoized filter function to improve performance
   const filterLitter = useCallback((litter: Litter) => {
-    // If no filters are active, return true (include all litters)
-    if (!searchQuery && filterYear === null) {
-      return true;
+    // Status filter
+    if (statusFilter === 'active' && litter.archived) return false;
+    if (statusFilter === 'archived' && !litter.archived) return false;
+    
+    // Search filter
+    if (searchQuery) {
+      const matchesSearch = 
+        litter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        litter.sireName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        litter.damName.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchesSearch) return false;
     }
     
-    const matchesSearch = !searchQuery || 
-      litter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      litter.sireName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      litter.damName.toLowerCase().includes(searchQuery.toLowerCase());
+    // Year filter
+    if (filterYear !== null) {
+      const matchesYear = new Date(litter.dateOfBirth).getFullYear() === filterYear;
+      if (!matchesYear) return false;
+    }
     
-    const matchesYear = filterYear === null || 
-      new Date(litter.dateOfBirth).getFullYear() === filterYear;
-    
-    return matchesSearch && matchesYear;
-  }, [searchQuery, filterYear]);
+    return true;
+  }, [searchQuery, filterYear, statusFilter]);
   
-  // Filter active litters - memoized to prevent recomputation
-  const filteredActiveLitters = useMemo(() => {
-    return activeLitters.filter(filterLitter);
-  }, [activeLitters, filterLitter]);
+  // Filter litters - memoized to prevent recomputation
+  const filteredLitters = useMemo(() => {
+    return allLitters.filter(filterLitter);
+  }, [allLitters, filterLitter]);
   
-  // Filter archived litters - memoized to prevent recomputation
-  const filteredArchivedLitters = useMemo(() => {
-    return archivedLitters.filter(filterLitter);
-  }, [archivedLitters, filterLitter]);
+  // Calculate pagination - memoized
+  const pageCount = useMemo(() => {
+    return Math.ceil(filteredLitters.length / itemsPerPage);
+  }, [filteredLitters.length, itemsPerPage]);
   
-  // Calculate pagination for active litters - memoized
-  const activePageCount = useMemo(() => {
-    return Math.ceil(filteredActiveLitters.length / itemsPerPage);
-  }, [filteredActiveLitters.length, itemsPerPage]);
-  
-  // Calculate pagination for archived litters - memoized
-  const archivedPageCount = useMemo(() => {
-    return Math.ceil(filteredArchivedLitters.length / itemsPerPage);
-  }, [filteredArchivedLitters.length, itemsPerPage]);
-  
-  // Get paginated active litters - memoized
-  const paginatedActiveLitters = useMemo(() => {
-    const startIndex = (activePage - 1) * itemsPerPage;
-    return filteredActiveLitters.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredActiveLitters, activePage, itemsPerPage]);
-  
-  // Get paginated archived litters - memoized
-  const paginatedArchivedLitters = useMemo(() => {
-    const startIndex = (archivedPage - 1) * itemsPerPage;
-    return filteredArchivedLitters.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredArchivedLitters, archivedPage, itemsPerPage]);
+  // Get paginated litters - memoized
+  const paginatedLitters = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredLitters.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredLitters, currentPage, itemsPerPage]);
   
   // Return all calculated values
   return {
-    filteredActiveLitters,
-    paginatedActiveLitters,
-    activePageCount,
-    filteredArchivedLitters,
-    paginatedArchivedLitters,
-    archivedPageCount,
+    filteredLitters,
+    paginatedLitters,
+    pageCount,
     isFilterActive
   };
 };

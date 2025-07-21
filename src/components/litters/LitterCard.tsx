@@ -4,7 +4,7 @@ import { format, parseISO } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Dog, Archive, Users } from 'lucide-react';
+import { Calendar, Dog, Archive, Users, ChevronRight } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Litter } from '@/types/breeding';
 
@@ -29,9 +29,6 @@ const LitterCard: React.FC<LitterCardProps> = ({
   // Calculate litter age in weeks
   const ageInWeeks = Math.floor((new Date().getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
   
-  // Determine if the litter is recent (less than 12 weeks old)
-  const isRecent = ageInWeeks < 12;
-  
   // Get count of puppies, 0 if none
   const puppyCount = litter.puppies?.length || 0;
   const maleCount = litter.puppies?.filter(p => p.gender === 'male').length || 0;
@@ -44,7 +41,7 @@ const LitterCard: React.FC<LitterCardProps> = ({
       } cursor-pointer bg-white border border-warmbeige-100 hover:shadow-md`}
       onClick={() => onSelect(litter)}
     >
-      <CardHeader className={`pb-3 pt-4 px-4 ${litter.archived ? 'bg-warmbeige-50' : 'bg-warmgreen-50/30'}`}>
+      <CardHeader className="pb-3 pt-4 px-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3 flex-1">
             <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
@@ -65,23 +62,26 @@ const LitterCard: React.FC<LitterCardProps> = ({
             </div>
           </div>
           
-          <div className="flex flex-col gap-1 items-end">
-            {isRecent && !litter.archived && (
-              <Badge variant="active" className="text-xs px-2.5 py-0.5 rounded-full">Active</Badge>
-            )}
-            {litter.archived && (
-              <Badge variant="archived" className="text-xs px-2.5 py-0.5 rounded-full">Archived</Badge>
-            )}
-            {puppyCount > 0 && (
-              <Badge variant="secondary" className="text-xs">
-                {puppyCount} {puppyCount === 1 ? 'puppy' : 'puppies'}
-              </Badge>
-            )}
+          <div className="flex flex-col gap-2 items-end">
+            {/* Status Badge */}
+            <Badge 
+              variant={litter.archived ? "secondary" : "default"}
+              className={`text-xs px-2.5 py-0.5 rounded-full ${
+                litter.archived 
+                  ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' 
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+              }`}
+            >
+              {litter.archived ? 'Archived' : 'Active'}
+            </Badge>
+            
+            {/* Expand Arrow */}
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </div>
         </div>
       </CardHeader>
       
-      <CardContent className="pb-3 pt-3 px-4">
+      <CardContent className="pb-4 pt-0 px-4">
         <div className="space-y-3 text-sm">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5 text-primary opacity-70" />
@@ -98,10 +98,17 @@ const LitterCard: React.FC<LitterCardProps> = ({
               </div>
             </div>
           )}
+
+          {litter.archived && (
+            <div className="text-xs text-muted-foreground">
+              Archived on {format(new Date(litter.updated_at || litter.created_at), 'MMM d, yyyy')}
+            </div>
+          )}
         </div>
         
-        {onArchive && (
-          <div className="flex justify-end mt-3">
+        <div className="flex justify-between items-center mt-4">
+          <div className="flex-1" />
+          {onArchive && (
             <Button 
               variant="ghost" 
               size="icon"
@@ -114,8 +121,8 @@ const LitterCard: React.FC<LitterCardProps> = ({
             >
               <Archive className="h-3.5 w-3.5" />
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </CardContent>
     </Card>
   );

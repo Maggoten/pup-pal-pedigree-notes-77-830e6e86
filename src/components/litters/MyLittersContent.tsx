@@ -1,9 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Search, Filter } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { PlusCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { toast } from '@/components/ui/use-toast';
@@ -11,15 +9,14 @@ import { useLitterFilter } from './LitterFilterProvider';
 import useLitterManagement from '@/hooks/litters/useLitterManagement';
 import useLitterFilteredData from '@/hooks/useLitterFilteredData';
 import AddLitterDialog from './AddLitterDialog';
+import LitterFilterBar from './LitterFilterBar';
 import LitterTabContent from './tabs/LitterTabContent';
 import SelectedLitterSection from './SelectedLitterSection';
 import SelectedLitterHeader from './SelectedLitterHeader';
 import { dogImageService } from '@/services/dogImageService';
 
 const MyLittersContent: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
-  const [showFilters, setShowFilters] = useState(false);
-  const { searchQuery, setSearchQuery, activePage, setActivePage, archivedPage, setArchivedPage } = useLitterFilter();
+  const { searchQuery, setSearchQuery, currentPage, setCurrentPage } = useLitterFilter();
   const {
     activeLitters,
     archivedLitters,
@@ -44,15 +41,17 @@ const MyLittersContent: React.FC = () => {
     refreshPlannedLitters,
     refreshLitters
   } = useLitterManagement();
+
+  // Combine all litters for unified filtering
+  const allLitters = [...activeLitters, ...archivedLitters];
+
   const {
-    filteredActiveLitters,
-    paginatedActiveLitters,
-    activePageCount,
-    filteredArchivedLitters,
-    paginatedArchivedLitters,
-    archivedPageCount,
+    filteredLitters,
+    paginatedLitters,
+    pageCount,
     isFilterActive
-  } = useLitterFilteredData(activeLitters, archivedLitters);
+  } = useLitterFilteredData(allLitters);
+
   const [selectedLitterDamImage, setSelectedLitterDamImage] = useState<string | null>(null);
   
   // Fetch dam image for selected litter
@@ -89,66 +88,28 @@ const MyLittersContent: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Search and Filter Section */}
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="flex flex-1 gap-2 w-full sm:w-auto">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search litters..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-              </Button>
-            </div>
-          </div>
+          {/* Filter Bar */}
+          <LitterFilterBar
+            activeCount={activeLitters.length}
+            archivedCount={archivedLitters.length}
+            totalCount={allLitters.length}
+          />
 
-          {/* Litter Tabs */}
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "active" | "archived")} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="active">Active Litters ({activeLitters.length})</TabsTrigger>
-              <TabsTrigger value="archived">Archived Litters ({archivedLitters.length})</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="active" className="mt-6">
-              <LitterTabContent
-                litters={activeLitters}
-                filteredLitters={filteredActiveLitters}
-                paginatedLitters={paginatedActiveLitters}
-                selectedLitterId={selectedLitterId}
-                onSelectLitter={handleSelectLitter}
-                onAddLitter={() => setShowAddLitterDialog(true)}
-                onArchive={(litter) => handleArchiveLitter(litter.id, true)}
-                pageCount={activePageCount}
-                currentPage={activePage}
-                onPageChange={setActivePage}
-                isFilterActive={isFilterActive}
-                onClearFilter={() => setSearchQuery('')}
-              />
-            </TabsContent>
-            
-            <TabsContent value="archived" className="mt-6">
-              <LitterTabContent
-                litters={archivedLitters}
-                filteredLitters={filteredArchivedLitters}
-                paginatedLitters={paginatedArchivedLitters}
-                selectedLitterId={selectedLitterId}
-                onSelectLitter={handleSelectLitter}
-                onAddLitter={() => setShowAddLitterDialog(true)}
-                onArchive={(litter) => handleArchiveLitter(litter.id, false)}
-                pageCount={archivedPageCount}
-                currentPage={archivedPage}
-                onPageChange={setArchivedPage}
-                isFilterActive={isFilterActive}
-                onClearFilter={() => setSearchQuery('')}
-              />
-            </TabsContent>
-          </Tabs>
+          {/* Litter Content */}
+          <LitterTabContent
+            litters={allLitters}
+            filteredLitters={filteredLitters}
+            paginatedLitters={paginatedLitters}
+            selectedLitterId={selectedLitterId}
+            onSelectLitter={handleSelectLitter}
+            onAddLitter={() => setShowAddLitterDialog(true)}
+            onArchive={(litter) => handleArchiveLitter(litter.id, !litter.archived)}
+            pageCount={pageCount}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+            isFilterActive={isFilterActive}
+            onClearFilter={() => setSearchQuery('')}
+          />
         </CardContent>
       </Card>
 

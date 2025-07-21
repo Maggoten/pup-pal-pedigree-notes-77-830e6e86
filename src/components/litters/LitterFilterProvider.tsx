@@ -4,20 +4,21 @@ import { Litter } from '@/types/breeding';
 
 export type ViewType = 'grid' | 'list';
 export type ListDisplayMode = 'compact' | 'detailed';
+export type StatusFilter = 'all' | 'active' | 'archived';
 
 export interface LitterFilterContext {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   selectedYear: number | null;
   setSelectedYear: (year: number | null) => void;
+  statusFilter: StatusFilter;
+  setStatusFilter: (filter: StatusFilter) => void;
   view: ViewType;
   setView: (view: ViewType) => void;
   displayMode: ListDisplayMode;
   setDisplayMode: (mode: ListDisplayMode) => void;
-  activePage: number;
-  setActivePage: (page: number) => void;
-  archivedPage: number;
-  setArchivedPage: (page: number) => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
   itemsPerPage: number;
 }
 
@@ -26,14 +27,14 @@ const defaultContext: LitterFilterContext = {
   setSearchQuery: () => {},
   selectedYear: null,
   setSelectedYear: () => {},
+  statusFilter: 'all',
+  setStatusFilter: () => {},
   view: 'grid',
   setView: () => {},
   displayMode: 'compact',
   setDisplayMode: () => {},
-  activePage: 1,
-  setActivePage: () => {},
-  archivedPage: 1,
-  setArchivedPage: () => {},
+  currentPage: 1,
+  setCurrentPage: () => {},
   itemsPerPage: 12,
 };
 
@@ -44,10 +45,10 @@ export const useLitterFilter = () => useContext(FilterContext);
 export const LitterFilterProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [view, setView] = useState<ViewType>('grid');
   const [displayMode, setDisplayMode] = useState<ListDisplayMode>('compact');
-  const [activePage, setActivePage] = useState(1);
-  const [archivedPage, setArchivedPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
   const contextValue = {
@@ -55,14 +56,14 @@ export const LitterFilterProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setSearchQuery,
     selectedYear,
     setSelectedYear,
+    statusFilter,
+    setStatusFilter,
     view,
     setView,
     displayMode,
     setDisplayMode,
-    activePage,
-    setActivePage,
-    archivedPage,
-    setArchivedPage,
+    currentPage,
+    setCurrentPage,
     itemsPerPage,
   };
 

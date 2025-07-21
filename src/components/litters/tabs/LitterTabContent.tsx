@@ -6,6 +6,7 @@ import LitterGridView from '../LitterGridView';
 import EmptyLitterState from '../EmptyLitterState';
 import LitterPagination from '../LitterPagination';
 import { useVirtualization } from '@/hooks/litters/operations/useVirtualization';
+import { useLitterFilter } from '../LitterFilterProvider';
 
 interface LitterTabContentProps {
   litters: Litter[];
@@ -22,7 +23,7 @@ interface LitterTabContentProps {
   onClearFilter: () => void;
 }
 
-// Create a memoized Empty State component
+// Create a memoized Empty Filter State component
 const EmptyFilterState = memo(({ onClearFilter }: { onClearFilter: () => void }) => (
   <div className="text-center py-10">
     <h3 className="text-lg font-medium mb-2">No litters found</h3>
@@ -47,6 +48,8 @@ const LitterTabContent: React.FC<LitterTabContentProps> = ({
   isFilterActive,
   onClearFilter
 }) => {
+  const { statusFilter } = useLitterFilter();
+  
   // Use virtualization hook for optimized rendering
   const { visibleLitters, hasMore, loadingMore, loadMore } = useVirtualization(paginatedLitters);
   
