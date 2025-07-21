@@ -110,6 +110,23 @@
       "notAvailable": "Ej Tillgänglig",
       "optional": "Valfritt"
     },
+    "fields": {
+      "photo": "Foto",
+      "breed": "Ras",
+      "gender": "Kön",
+      "dateOfBirth": "Födelsedatum",
+      "color": "Färg",
+      "registrationNumber": "Registreringsnummer",
+      "dewormingDate": "Avmasningsdatum",
+      "vaccinationDate": "Vaccinationsdatum",
+      "sterilizationDate": "Steriliseringsdatum",
+      "heatRecords": "Löpregistreringar",
+      "notes": "Anteckningar",
+      "previousHeatDates": "Tidigare löpdatum:",
+      "heatInterval": "Löpintervall:",
+      "noHeatRecords": "Inga löpregistreringar",
+      "days": "dagar"
+    },
     "genderBadge": {
       "male": "Hane",
       "female": "Tik"

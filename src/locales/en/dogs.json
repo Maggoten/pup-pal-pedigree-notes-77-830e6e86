@@ -110,6 +110,23 @@
       "notAvailable": "N/A",
       "optional": "Optional"
     },
+    "fields": {
+      "photo": "Photo",
+      "breed": "Breed",
+      "gender": "Gender",
+      "dateOfBirth": "Date of Birth",
+      "color": "Color",
+      "registrationNumber": "Registration Number",
+      "dewormingDate": "Deworming Date",
+      "vaccinationDate": "Vaccination Date",
+      "sterilizationDate": "Sterilization Date",
+      "heatRecords": "Heat Records",
+      "notes": "Notes",
+      "previousHeatDates": "Previous heat dates:",
+      "heatInterval": "Heat interval:",
+      "noHeatRecords": "No heat records",
+      "days": "days"
+    },
     "genderBadge": {
       "male": "Male",
       "female": "Female"
@@ -161,7 +178,7 @@
       "reminder": "Prepare for {{dogName}}'s Birthday",
       "description": "Birthday celebration for {{dogName}}",
       "reminderDescription": "Reminder to prepare for {{dogName}}'s birthday in 1 week",
-      "upcoming": "{{dogName} turns {{age}} in {{days}} days",
+      "upcoming": "{{dogName}} turns {{age}} in {{days}} days",
       "today": "{{dogName}} turns {{age}} today!",
       "past": "{{dogName}} turned {{age}} {{days}} day{{plural}} ago"
     },
