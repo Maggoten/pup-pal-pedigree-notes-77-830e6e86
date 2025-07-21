@@ -61,11 +61,11 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
     const status = puppy.status || 'Available';
     switch (status) {
       case 'Reserved':
-        return <Badge variant="warning" className="text-sm px-4 py-1">Reserved</Badge>;
+        return <Badge variant="warning" className="text-xs px-3 py-0.5">Reserved</Badge>;
       case 'Sold':
-        return <Badge variant="success" className="text-sm px-4 py-1">Sold</Badge>;
+        return <Badge variant="success" className="text-xs px-3 py-0.5">Sold</Badge>;
       default:
-        return <Badge variant="info" className="text-sm px-4 py-1">Available</Badge>;
+        return <Badge variant="info" className="text-xs px-3 py-0.5">Available</Badge>;
     }
   };
 
