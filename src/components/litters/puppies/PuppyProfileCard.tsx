@@ -150,6 +150,13 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             <p className={`font-medium ${isMobile ? 'text-sm' : ''}`}>{getLatestWeight()}</p>
           </div>
           
+          {/* Mobile age info - between weight and height */}
+          {isMobile && (
+            <div className="col-span-2 text-xs text-muted-foreground mb-1 px-1">
+              <span>Age: {litterAge} weeks</span>
+            </div>
+          )}
+          
           <div className="bg-warmbeige-50 p-3 rounded-lg">
             <div className="flex items-center gap-2 mb-1">
               <Ruler className="h-3 w-3 text-muted-foreground" />
@@ -172,13 +179,6 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             </>
           )}
         </div>
-         
-        {/* Mobile age info - below measurements */}
-        {isMobile && (
-          <div className="text-xs text-muted-foreground mb-3 px-1">
-            <span>Age: {litterAge} weeks</span>
-          </div>
-        )}
         
         {/* Actions - responsive layout */}
         <div className={`flex justify-between items-center ${isMobile ? 'gap-2' : ''}`}>
