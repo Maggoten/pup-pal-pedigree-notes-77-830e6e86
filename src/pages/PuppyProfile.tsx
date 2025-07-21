@@ -1,22 +1,23 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { ArrowLeft, Edit, Circle, Calendar, Weight, Ruler, FileText } from 'lucide-react';
+import { ArrowLeft, Edit, Circle, Calendar, Weight, Ruler, FileText, BarChart2 } from 'lucide-react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Puppy } from '@/types/breeding';
 import { usePuppyQueries } from '@/hooks/usePuppyQueries';
 import { toast } from '@/components/ui/use-toast';
 import EditPuppyDialog from '@/components/litters/puppies/EditPuppyDialog';
 import PuppyMeasurementsChart from '@/components/litters/puppies/PuppyMeasurementsChart';
+import PuppyMeasurementsDialog from '@/components/litters/puppies/PuppyMeasurementsDialog';
 
 const PuppyProfile: React.FC = () => {
   const { litterId, puppyId } = useParams<{ litterId: string; puppyId: string }>();
   const navigate = useNavigate();
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showMeasurementsDialog, setShowMeasurementsDialog] = useState(false);
 
   // Use the proper hook for puppy data
   const {
@@ -80,6 +81,22 @@ const PuppyProfile: React.FC = () => {
       toast({
         title: "Error",
         description: "Failed to update puppy information",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdateMeasurements = async (updatedPuppy: Puppy) => {
+    try {
+      await updatePuppy(updatedPuppy);
+      toast({
+        title: "Success",
+        description: "Measurements updated successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update measurements",
         variant: "destructive"
       });
     }
@@ -289,7 +306,14 @@ const PuppyProfile: React.FC = () => {
           </div>
         </CardContent>
 
-        <CardFooter className="flex justify-end">
+        <CardFooter className="flex justify-end gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowMeasurementsDialog(true)}
+          >
+            <BarChart2 className="h-4 w-4 mr-2" />
+            Record Measurements
+          </Button>
           <Button onClick={() => setShowEditDialog(true)}>
             <Edit className="h-4 w-4 mr-2" />
             Edit Puppy
@@ -304,6 +328,15 @@ const PuppyProfile: React.FC = () => {
           open={showEditDialog}
           onOpenChange={setShowEditDialog}
           onUpdatePuppy={handleEditPuppy}
+        />
+      )}
+
+      {/* Measurements Dialog */}
+      {showMeasurementsDialog && (
+        <PuppyMeasurementsDialog
+          puppy={selectedPuppy}
+          onClose={() => setShowMeasurementsDialog(false)}
+          onUpdate={handleUpdateMeasurements}
         />
       )}
     </div>
