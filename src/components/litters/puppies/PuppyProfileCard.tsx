@@ -160,7 +160,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
 
 
           {/* Action Buttons */}
-          <div className="flex justify-center gap-3 pt-3">
+          <div className="flex justify-start gap-3 pt-3">
             <Button
               variant="outline"
               size="sm"
