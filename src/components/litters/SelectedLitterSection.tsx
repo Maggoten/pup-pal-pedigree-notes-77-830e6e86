@@ -83,14 +83,14 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
           className="w-full"
         >
           <TabsList className="grid grid-cols-3 mb-6 w-full h-12 bg-muted p-1 gap-1">
-            <TabsTrigger value="puppies" className="font-bold text-primary data-[state=active]:text-primary">
+            <TabsTrigger value="puppies" className="font-sourcesans font-bold text-primary data-[state=active]:text-primary">
               Puppies
             </TabsTrigger>
-            <TabsTrigger value="development" className="font-bold text-primary data-[state=active]:text-primary">
+            <TabsTrigger value="development" className="font-sourcesans font-bold text-primary data-[state=active]:text-primary">
               <span className="hidden sm:inline">Checklist</span>
               <span className="sm:hidden">Tasks</span>
             </TabsTrigger>
-            <TabsTrigger value="charts" className="font-bold text-primary data-[state=active]:text-primary">
+            <TabsTrigger value="charts" className="font-sourcesans font-bold text-primary data-[state=active]:text-primary">
               <span className="hidden sm:inline">Growth Charts</span>
               <span className="sm:hidden">Charts</span>
             </TabsTrigger>
