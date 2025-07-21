@@ -158,19 +158,6 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             </div>
           </div>
 
-          {/* Birth and Age Info Row */}
-          <div className="flex justify-between text-lg">
-            <div>
-              <span className="text-muted-foreground">Born: </span>
-              <span className="font-medium">
-                {puppy.birthDateTime ? format(parseISO(puppy.birthDateTime), 'MMM d, yyyy') : 'Not set'}
-              </span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Age: </span>
-              <span className="font-medium">{litterAge} weeks</span>
-            </div>
-          </div>
 
           {/* Action Buttons */}
           <div className="flex justify-center gap-4 pt-4">
