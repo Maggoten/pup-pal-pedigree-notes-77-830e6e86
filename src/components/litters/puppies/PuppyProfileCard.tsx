@@ -120,7 +120,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
           </h3>
 
           {/* Gender and Color Info - Centered */}
-          <div className="flex items-center justify-center gap-3 text-muted-foreground text-sm">
+          <div className="flex items-center justify-start gap-3 text-muted-foreground text-sm">
             <span className="flex items-center gap-1">
               {puppy.gender === 'male' ? '♂' : '♀'} {puppy.gender}
             </span>
