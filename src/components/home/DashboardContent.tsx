@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddEventFormValues } from '@/components/calendar/types';
@@ -62,6 +63,11 @@ const RemindersSkeleton = () => (
   </div>
 );
 
+const CarouselSkeleton = () => (
+  <div className="rounded-lg bg-greige-50 border border-greige-200 p-4 shadow-sm transition-opacity duration-200">
+    <Skeleton className="h-32 w-full" />
+  </div>
+);
 
 const DashboardContent: React.FC<DashboardContentProps> = ({ 
   isDataReady, 
@@ -72,10 +78,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 }) => {
   const showCalendarSkeleton = !isDataReady || calendarProps.isLoading;
   const showRemindersSkeleton = !isDataReady || remindersProps.isLoading;
+  const showCarouselSkeleton = !isDataReady;
 
   return (
-    <div className="space-y-12 pb-12">
-      {/* Calendar and Reminders section */}
+    <div className="space-y-6 pb-12">
+      {/* Main content grid */}
       <section>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendar taking 2/3 of the width */}
@@ -87,24 +94,31 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             )}
           </div>
           
-          {/* Reminders taking 1/3 of the width */}
-          <div className="lg:col-span-1">
-            {showRemindersSkeleton ? (
-              <RemindersSkeleton />
-            ) : (
-              <BreedingReminders 
-                remindersData={remindersProps}
-                remindersDialogOpen={remindersDialogOpen}
-                setRemindersDialogOpen={setRemindersDialogOpen}
-              />
-            )}
+          {/* Right column with reminders and carousel */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Reminders */}
+            <div>
+              {showRemindersSkeleton ? (
+                <RemindersSkeleton />
+              ) : (
+                <BreedingReminders 
+                  remindersData={remindersProps}
+                  remindersDialogOpen={remindersDialogOpen}
+                  setRemindersDialogOpen={setRemindersDialogOpen}
+                />
+              )}
+            </div>
+            
+            {/* Carousel beneath reminders */}
+            <div>
+              {showCarouselSkeleton ? (
+                <CarouselSkeleton />
+              ) : (
+                <HomeOfferCarousel />
+              )}
+            </div>
           </div>
         </div>
-      </section>
-      
-      {/* Home Offer Carousel section */}
-      <section>
-        <HomeOfferCarousel />
       </section>
     </div>
   );
