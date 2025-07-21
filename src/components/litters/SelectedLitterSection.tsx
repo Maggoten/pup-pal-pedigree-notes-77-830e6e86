@@ -82,10 +82,21 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <TabsList className="flex flex-col md:grid md:grid-cols-3 mb-6 w-full gap-2 md:gap-0 h-auto md:h-10 bg-muted p-1">
-            <TabsTrigger value="puppies">Puppies</TabsTrigger>
-            <TabsTrigger value="development">Checklist</TabsTrigger>
-            <TabsTrigger value="charts">Growth Charts</TabsTrigger>
+          <TabsList className="grid grid-cols-3 mb-6 w-full h-12 bg-muted p-1 gap-1">
+            <TabsTrigger value="puppies" className="flex flex-col md:flex-row items-center gap-1 text-xs md:text-sm px-2 py-2">
+              <span>🐕</span>
+              <span>Puppies</span>
+            </TabsTrigger>
+            <TabsTrigger value="development" className="flex flex-col md:flex-row items-center gap-1 text-xs md:text-sm px-2 py-2">
+              <span>✅</span>
+              <span className="hidden sm:inline">Checklist</span>
+              <span className="sm:hidden">Tasks</span>
+            </TabsTrigger>
+            <TabsTrigger value="charts" className="flex flex-col md:flex-row items-center gap-1 text-xs md:text-sm px-2 py-2">
+              <span>📊</span>
+              <span className="hidden sm:inline">Growth Charts</span>
+              <span className="sm:hidden">Charts</span>
+            </TabsTrigger>
           </TabsList>
 
           {/* No Suspense wrapper needed anymore since we're using static imports */}
