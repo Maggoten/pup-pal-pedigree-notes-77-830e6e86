@@ -59,66 +59,19 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
         </Avatar>
         
         <div className="flex-1 min-w-0">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-2">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-warmgreen-800">{litter.name}</h1>
-              <div className="flex gap-2">
-                {isRecent && !litter.archived && (
-                  <Badge variant="active" className="px-3 py-1">Active</Badge>
-                )}
-                {litter.archived && (
-                  <Badge variant="archived" className="px-3 py-1">Archived</Badge>
-                )}
-              </div>
-            </div>
-            
-            <div className={`flex ${isMobile ? 'flex-col mt-2 w-full' : 'flex-row'} gap-2`}>
-              <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
-                <DialogTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size={isMobile ? "default" : "sm"} 
-                    className={`flex items-center gap-1.5 bg-warmbeige-50 hover:bg-warmbeige-100 ${isMobile ? 'w-full justify-center py-3' : ''}`}
-                  >
-                    <Edit className="h-4 w-4" />
-                    <span>Edit</span>
-                  </Button>
-                </DialogTrigger>
-                {showEditLitterDialog && (
-                  <LitterEditDialog 
-                    litter={litter} 
-                    onClose={() => setShowEditLitterDialog(false)} 
-                    onUpdate={onUpdateLitter}
-                    onUpdateLitter={onUpdateLitter}
-                    onDelete={onDeleteLitter}
-                    onArchive={onArchiveLitter}
-                  />
-                )}
-              </Dialog>
-              
-              <Button 
-                variant="outline" 
-                size={isMobile ? "default" : "sm"}
-                className={`flex items-center gap-1.5 bg-warmbeige-50 hover:bg-warmbeige-100 ${isMobile ? 'w-full justify-center py-3' : ''}`}
-                onClick={handleArchiveToggle}
-              >
-                <Archive className="h-4 w-4" />
-                <span>{litter.archived ? "Unarchive" : "Archive"}</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size={isMobile ? "default" : "sm"}
-                className={`flex items-center gap-1.5 text-destructive hover:bg-red-50 ${isMobile ? 'w-full justify-center py-3' : ''}`}
-                onClick={handleDeleteLitter}
-              >
-                <Trash2 className="h-4 w-4" />
-                <span>Delete</span>
-              </Button>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-2xl font-bold text-warmgreen-800">{litter.name}</h1>
+            <div className="flex gap-2">
+              {isRecent && !litter.archived && (
+                <Badge variant="active" className="px-3 py-1">Active</Badge>
+              )}
+              {litter.archived && (
+                <Badge variant="archived" className="px-3 py-1">Archived</Badge>
+              )}
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
             <div>
               <p className="text-muted-foreground">Parents</p>
               <p className="font-medium">{litter.damName} × {litter.sireName}</p>
@@ -144,6 +97,51 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
                 </p>
               </div>
             )}
+          </div>
+          
+          <div className={`flex ${isMobile ? 'flex-col gap-2' : 'flex-row gap-3'} mt-4`}>
+            <Dialog open={showEditLitterDialog} onOpenChange={setShowEditLitterDialog}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size={isMobile ? "sm" : "sm"} 
+                  className={`flex items-center gap-1.5 bg-warmbeige-50 hover:bg-warmbeige-100 ${isMobile ? 'h-8 px-3 text-xs' : 'h-9 px-4 text-sm'}`}
+                >
+                  <Edit className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
+                  <span>Edit</span>
+                </Button>
+              </DialogTrigger>
+              {showEditLitterDialog && (
+                <LitterEditDialog 
+                  litter={litter} 
+                  onClose={() => setShowEditLitterDialog(false)} 
+                  onUpdate={onUpdateLitter}
+                  onUpdateLitter={onUpdateLitter}
+                  onDelete={onDeleteLitter}
+                  onArchive={onArchiveLitter}
+                />
+              )}
+            </Dialog>
+            
+            <Button 
+              variant="outline" 
+              size={isMobile ? "sm" : "sm"}
+              className={`flex items-center gap-1.5 bg-warmbeige-50 hover:bg-warmbeige-100 ${isMobile ? 'h-8 px-3 text-xs' : 'h-9 px-4 text-sm'}`}
+              onClick={handleArchiveToggle}
+            >
+              <Archive className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
+              <span>{litter.archived ? "Unarchive" : "Archive"}</span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size={isMobile ? "sm" : "sm"}
+              className={`flex items-center gap-1.5 text-destructive hover:bg-red-50 ${isMobile ? 'h-8 px-3 text-xs' : 'h-9 px-4 text-sm'}`}
+              onClick={handleDeleteLitter}
+            >
+              <Trash2 className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
+              <span>Delete</span>
+            </Button>
           </div>
         </div>
       </div>
