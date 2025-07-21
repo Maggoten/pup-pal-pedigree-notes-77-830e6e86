@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { ArrowLeft, Edit, Circle, Calendar, Weight, Ruler, FileText } from 'lucide-react';
+import { ArrowLeft, Edit, Circle, Calendar, Weight, Ruler, FileText, Trash2 } from 'lucide-react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Puppy } from '@/types/breeding';
 import { usePuppyQueries } from '@/hooks/usePuppyQueries';
@@ -12,19 +12,22 @@ import { toast } from '@/components/ui/use-toast';
 import EditPuppyDialog from '@/components/litters/puppies/EditPuppyDialog';
 import PuppyMeasurementsChart from '@/components/litters/puppies/PuppyMeasurementsChart';
 import PuppyMeasurementsDialog from '@/components/litters/puppies/PuppyMeasurementsDialog';
+import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
 
 const PuppyProfile: React.FC = () => {
   const { litterId, puppyId } = useParams<{ litterId: string; puppyId: string }>();
   const navigate = useNavigate();
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showMeasurementsDialog, setShowMeasurementsDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Use the proper hook for puppy data
   const {
     litter,
     error,
     isLoading,
-    updatePuppy
+    updatePuppy,
+    deletePuppy
   } = usePuppyQueries(litterId || '');
 
   // Find the puppy in the litter
@@ -97,6 +100,26 @@ const PuppyProfile: React.FC = () => {
       toast({
         title: "Error",
         description: "Failed to update measurements",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeletePuppy = async () => {
+    if (!selectedPuppy) return;
+    
+    try {
+      await deletePuppy(selectedPuppy.id);
+      setShowDeleteDialog(false);
+      navigate('/my-litters');
+      toast({
+        title: "Puppy Deleted",
+        description: `${selectedPuppy.name} has been deleted successfully`
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete puppy",
         variant: "destructive"
       });
     }
@@ -307,6 +330,13 @@ const PuppyProfile: React.FC = () => {
         </CardContent>
 
         <CardFooter className="flex justify-end gap-2">
+          <Button 
+            variant="destructive" 
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </Button>
           <Button onClick={() => setShowEditDialog(true)}>
             <Edit className="h-4 w-4 mr-2" />
             Edit
@@ -330,6 +360,18 @@ const PuppyProfile: React.FC = () => {
           puppy={selectedPuppy}
           onClose={() => setShowMeasurementsDialog(false)}
           onUpdate={handleUpdateMeasurements}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteDialog && selectedPuppy && (
+        <DeleteConfirmationDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          onConfirm={handleDeletePuppy}
+          title="Delete Puppy"
+          description="Are you sure you want to delete this puppy? This action cannot be undone."
+          itemDetails={selectedPuppy.name}
         />
       )}
     </div>
