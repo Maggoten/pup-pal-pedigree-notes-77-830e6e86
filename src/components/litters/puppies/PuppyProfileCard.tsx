@@ -42,7 +42,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
       );
       return `${sortedWeights[0].weight} kg`;
     }
-    return puppy.currentWeight ? `${puppy.currentWeight} kg` : 'Not recorded';
+    return puppy.currentWeight ? `${puppy.currentWeight} kg` : '-';
   };
 
   // Get latest height measurement
@@ -53,7 +53,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
       );
       return `${sortedHeights[0].height} cm`;
     }
-    return 'Not recorded';
+    return '-';
   };
 
   // Get status badge
