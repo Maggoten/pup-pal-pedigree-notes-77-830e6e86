@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
@@ -103,43 +102,36 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
     >
       <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
         {/* Header - responsive layout */}
-        <div className={`flex items-start justify-between ${isMobile ? 'mb-3' : 'mb-4'}`}>
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className={`${isMobile ? 'h-16 w-16' : 'h-20 w-20'} border-2 border-warmbeige-200 shadow-sm flex-shrink-0 rounded-lg overflow-hidden relative`}>
-              <AspectRatio ratio={1/1}>
-                {puppy.imageUrl ? (
-                  <img 
-                    src={puppy.imageUrl} 
-                    alt={puppy.name} 
-                    className="object-cover w-full h-full"
-                  />
-                ) : (
-                  <div className="bg-warmgreen-100 text-warmgreen-800 font-medium text-lg w-full h-full flex items-center justify-center">
-                    {puppy.name.charAt(0)}
-                  </div>
-                )}
-              </AspectRatio>
-              
-              {/* Gender badge overlay */}
-              <div className="absolute top-1 right-1">
-                <Badge className={`text-xs px-1.5 py-0.5 ${puppy.gender === 'male' ? 'bg-blue-500 text-white' : 'bg-rose-400 text-white'}`}>
-                  {puppy.gender === 'male' ? 'M' : 'F'}
-                </Badge>
-              </div>
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <h3 className={`font-semibold text-warmgreen-800 truncate ${isMobile ? 'text-lg mb-1' : 'text-xl mb-1'}`}>
-                {puppy.name}
-              </h3>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span className="truncate">{puppy.color}</span>
-              </div>
-            </div>
+        <div className={`flex items-start gap-3 ${isMobile ? 'mb-3' : 'mb-4'}`}>
+          <div className={`${isMobile ? 'h-16 w-16' : 'h-20 w-20'} border-2 border-warmbeige-200 shadow-sm flex-shrink-0 rounded-lg overflow-hidden`}>
+            <AspectRatio ratio={1/1}>
+              {puppy.imageUrl ? (
+                <img 
+                  src={puppy.imageUrl} 
+                  alt={puppy.name} 
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <div className="bg-warmgreen-100 text-warmgreen-800 font-medium text-lg w-full h-full flex items-center justify-center">
+                  {puppy.name.charAt(0)}
+                </div>
+              )}
+            </AspectRatio>
           </div>
           
-          <div className="flex-shrink-0 ml-2">
-            {getStatusBadge()}
+          <div className="flex-1 min-w-0">
+            <h3 className={`font-semibold text-warmgreen-800 truncate ${isMobile ? 'text-lg mb-1' : 'text-xl mb-1'}`}>
+              {puppy.name}
+            </h3>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+              <Circle className={`h-3 w-3 ${puppy.gender === 'male' ? 'text-blue-500 fill-blue-500' : 'text-pink-500 fill-pink-500'}`} />
+              <span className="capitalize">{puppy.gender}</span>
+              <span>•</span>
+              <span className="truncate">{puppy.color}</span>
+            </div>
+            <div className="flex justify-start">
+              {getStatusBadge()}
+            </div>
           </div>
         </div>
          
@@ -160,7 +152,6 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             </div>
             <p className={`font-medium ${isMobile ? 'text-sm' : ''}`}>{getLatestWeight()}</p>
           </div>
-          
           
           <div className="bg-warmbeige-50 p-3 rounded-lg">
             <div className="flex items-center gap-2 mb-1">
