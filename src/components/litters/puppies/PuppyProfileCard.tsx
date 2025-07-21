@@ -88,17 +88,16 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
 
   return (
     <Card 
-      className={`transition-all duration-200 hover:shadow-lg cursor-pointer bg-white ${
+      className={`transition-all duration-200 hover:shadow-lg cursor-pointer bg-white max-w-sm mx-auto ${
         isSelected ? 'ring-2 ring-primary shadow-lg' : ''
       }`}
       onClick={() => navigate(`/my-litters/${litterId}/puppy/${puppy.id}`)}
     >
       <CardContent className="p-6">
-        <div className="flex gap-6">
-          {/* Left side - Profile Picture and Name */}
-          <div className="flex-shrink-0">
-            {/* Profile Picture */}
-            <div className="w-32 h-32 rounded-lg overflow-hidden border-2 border-warmbeige-200 shadow-sm mb-4">
+        <div className="space-y-4">
+          {/* Profile Picture - Centered at top */}
+          <div className="flex justify-center">
+            <div className="w-48 h-48 rounded-2xl overflow-hidden border-2 border-warmbeige-200 shadow-sm">
               <AspectRatio ratio={1/1}>
                 {puppy.imageUrl ? (
                   <img 
@@ -107,97 +106,100 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
                     className="object-cover w-full h-full"
                   />
                 ) : (
-                  <div className="bg-warmgreen-100 text-warmgreen-800 font-semibold text-4xl w-full h-full flex items-center justify-center">
+                  <div className="bg-warmgreen-100 text-warmgreen-800 font-semibold text-6xl w-full h-full flex items-center justify-center">
                     {puppy.name.charAt(0)}
                   </div>
                 )}
               </AspectRatio>
             </div>
-
-            {/* Puppy Name under picture */}
-            <h3 className="text-2xl font-bold text-warmgreen-800 mb-2">
-              Puppy {puppy.name.split(' ')[0]} – {puppy.name}
-            </h3>
           </div>
 
-          {/* Right side - Information */}
-          <div className="flex-1 space-y-4">
-            {/* Gender and Color Info */}
-            <div className="flex items-center gap-4 text-muted-foreground">
-              <span className="flex items-center gap-1">
-                {puppy.gender === 'male' ? '♂' : '♀'} {puppy.gender}
+          {/* Puppy Name - Centered below picture */}
+          <h3 className="text-3xl font-bold text-warmgreen-800 text-center">
+            Puppy {puppy.name.split(' ')[0]} – {puppy.name}
+          </h3>
+
+          {/* Gender and Color Info - Centered */}
+          <div className="flex items-center justify-center gap-4 text-muted-foreground text-lg">
+            <span className="flex items-center gap-1">
+              {puppy.gender === 'male' ? '♂' : '♀'} {puppy.gender}
+            </span>
+            <span>•</span>
+            <span>{puppy.color}</span>
+          </div>
+
+          {/* Birth Info and Status Badge Row */}
+          <div className="flex justify-between items-center">
+            <div className="text-lg">
+              <span className="text-muted-foreground">Born: </span>
+              <span className="font-medium">
+                {puppy.birthDateTime ? format(parseISO(puppy.birthDateTime), 'MMM d, yyyy') : 'Not set'}
               </span>
-              <span>•</span>
-              <span>{puppy.color}</span>
             </div>
+            {getStatusBadge()}
+          </div>
 
-            {/* Status Badge */}
-            <div className="flex justify-end">
-              {getStatusBadge()}
+          {/* Weight and Height Measurements */}
+          <div className="grid grid-cols-2 gap-6 py-4">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Scale className="h-5 w-5 text-muted-foreground" />
+                <span className="text-lg font-medium">Weight</span>
+              </div>
+              <p className="text-2xl font-semibold">{getLatestWeight()}</p>
             </div>
+            
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Ruler className="h-5 w-5 text-muted-foreground" />
+                <span className="text-lg font-medium">Height</span>
+              </div>
+              <p className="text-2xl font-semibold">{getLatestHeight()}</p>
+            </div>
+          </div>
 
-            {/* Birth and Age Info */}
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">Born: </span>
-                <span className="font-medium">
-                  {puppy.birthDateTime ? format(parseISO(puppy.birthDateTime), 'MMM d, yyyy') : 'Not set'}
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Age: </span>
-                <span className="font-medium">{litterAge} weeks</span>
-              </div>
+          {/* Birth and Age Info Row */}
+          <div className="flex justify-between text-lg">
+            <div>
+              <span className="text-muted-foreground">Born: </span>
+              <span className="font-medium">
+                {puppy.birthDateTime ? format(parseISO(puppy.birthDateTime), 'MMM d, yyyy') : 'Not set'}
+              </span>
             </div>
+            <div>
+              <span className="text-muted-foreground">Age: </span>
+              <span className="font-medium">{litterAge} weeks</span>
+            </div>
+          </div>
 
-            {/* Weight and Height Measurements */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Scale className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground font-medium">Weight</span>
-                </div>
-                <p className="text-lg font-semibold">{getLatestWeight()}</p>
-              </div>
-              
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Ruler className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground font-medium">Height</span>
-                </div>
-                <p className="text-lg font-semibold">{getLatestHeight()}</p>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex justify-center gap-3 pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleMeasurementClick}
-                className="flex items-center gap-2 rounded-full px-4 py-2"
-              >
-                <BarChart2 className="h-4 w-4" />
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleEditClick}
-                className="flex items-center gap-2 rounded-full px-4 py-2"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDeleteClick}
-                className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full px-4 py-2"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+          {/* Action Buttons */}
+          <div className="flex justify-center gap-4 pt-4">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handleMeasurementClick}
+              className="rounded-2xl w-16 h-16 p-0"
+            >
+              <BarChart2 className="h-6 w-6" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handleEditClick}
+              className="rounded-2xl w-16 h-16 p-0"
+            >
+              <Edit className="h-6 w-6" />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="lg"
+              onClick={handleDeleteClick}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-2xl w-16 h-16 p-0"
+            >
+              <Trash2 className="h-6 w-6" />
+            </Button>
           </div>
         </div>
       </CardContent>
