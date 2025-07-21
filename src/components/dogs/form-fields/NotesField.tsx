@@ -4,6 +4,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescripti
 import { Textarea } from '@/components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
 import { DogFormValues } from '../DogFormFields';
+import { useTranslation } from 'react-i18next';
 
 interface NotesFieldProps {
   form: UseFormReturn<DogFormValues>;
@@ -11,23 +12,25 @@ interface NotesFieldProps {
 }
 
 const NotesField: React.FC<NotesFieldProps> = ({ form, disabled }) => {
+  const { t } = useTranslation('dogs');
+  
   return (
     <FormField
       control={form.control}
       name="notes"
       render={({ field }) => (
         <FormItem className="col-span-2">
-          <FormLabel>Notes</FormLabel>
+          <FormLabel>{t('form.fields.notes.label')}</FormLabel>
           <FormControl>
             <Textarea
-              placeholder="Any additional information..."
+              placeholder={t('form.fields.notes.placeholder')}
               className="resize-none"
               {...field}
               disabled={disabled}
             />
           </FormControl>
           <FormDescription>
-            Health concerns, temperament, or special care instructions
+            {t('form.fields.notes.description')}
           </FormDescription>
           <FormMessage />
         </FormItem>

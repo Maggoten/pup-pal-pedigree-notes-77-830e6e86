@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { UseFormReturn } from 'react-hook-form';
 import { DogFormValues } from '../DogFormFields';
 import { parseISODate } from '@/utils/dateUtils';
+import { useTranslation } from 'react-i18next';
 
 interface HealthFieldsProps {
   form: UseFormReturn<DogFormValues>;
@@ -17,6 +18,8 @@ interface HealthFieldsProps {
 }
 
 const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
+  const { t } = useTranslation('dogs');
+  
   return (
     <>
       <FormField
@@ -24,7 +27,7 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
         name="dewormingDate"
         render={({ field }) => (
           <FormItem className="flex flex-col">
-            <FormLabel>Last Deworming Date</FormLabel>
+            <FormLabel>{t('form.health.deworming.label')}</FormLabel>
             <Popover>
               <PopoverTrigger asChild>
                 <FormControl>
@@ -42,7 +45,7 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
                         ? format(parseISODate(field.value) || new Date(), "PPP")
                         : format(field.value, "PPP")
                     ) : (
-                      <span>Pick a date</span>
+                      <span>{t('form.fields.pickADate')}</span>
                     )}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
@@ -69,7 +72,7 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
                 />
               </PopoverContent>
             </Popover>
-            <FormDescription>Optional</FormDescription>
+            <FormDescription>{t('form.fields.optional')}</FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -80,7 +83,7 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
         name="vaccinationDate"
         render={({ field }) => (
           <FormItem className="flex flex-col">
-            <FormLabel>Last Vaccination Date</FormLabel>
+            <FormLabel>{t('form.health.vaccination.label')}</FormLabel>
             <Popover>
               <PopoverTrigger asChild>
                 <FormControl>
@@ -98,7 +101,7 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
                         ? format(parseISODate(field.value) || new Date(), "PPP")
                         : format(field.value, "PPP")
                     ) : (
-                      <span>Pick a date</span>
+                      <span>{t('form.fields.pickADate')}</span>
                     )}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
@@ -125,7 +128,7 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
                 />
               </PopoverContent>
             </Popover>
-            <FormDescription>Optional</FormDescription>
+            <FormDescription>{t('form.fields.optional')}</FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -136,7 +139,7 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
         name="sterilizationDate"
         render={({ field }) => (
           <FormItem className="flex flex-col">
-            <FormLabel>Sterilization Date</FormLabel>
+            <FormLabel>{t('form.health.sterilization.label')}</FormLabel>
             <Popover>
               <PopoverTrigger asChild>
                 <FormControl>
@@ -154,7 +157,7 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
                         ? format(parseISODate(field.value) || new Date(), "PPP")
                         : format(field.value, "PPP")
                     ) : (
-                      <span>Pick a date</span>
+                      <span>{t('form.fields.pickADate')}</span>
                     )}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
@@ -181,7 +184,7 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
                 />
               </PopoverContent>
             </Popover>
-            <FormDescription>Optional - For female dogs only</FormDescription>
+            <FormDescription>{t('form.fields.optionalFemaleOnly')}</FormDescription>
             <FormMessage />
           </FormItem>
         )}

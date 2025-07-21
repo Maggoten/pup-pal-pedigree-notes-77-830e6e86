@@ -53,8 +53,11 @@
         "description": "Hälsoproblem, temperament eller särskilda vårdinstruktioner"
       },
       "photo": {
-        "label": "Foto"
-      }
+        "label": "Hundfoto"
+      },
+      "pickADate": "Välj ett datum",
+      "optional": "Valfritt",
+      "optionalFemaleOnly": "Valfritt - Endast för tikar"
     },
     "health": {
       "title": "Hälsoinformation",

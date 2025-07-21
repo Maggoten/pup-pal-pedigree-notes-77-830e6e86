@@ -6,6 +6,7 @@ import { UseFormReturn } from 'react-hook-form';
 import HeatDateList from './HeatDateList';
 import HeatIntervalField from './HeatIntervalField';
 import SterilizationDateField from './SterilizationDateField';
+import { useTranslation } from 'react-i18next';
 
 interface HeatRecordsFieldProps {
   form: UseFormReturn<any>;
@@ -13,6 +14,8 @@ interface HeatRecordsFieldProps {
 }
 
 const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) => {
+  const { t } = useTranslation('dogs');
+  
   // Skip rendering for male dogs
   if (form.getValues('gender') === 'male') {
     return null;
@@ -69,7 +72,7 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
     <div className="space-y-6">
       <div className="space-y-4">
         <div className="flex flex-col space-y-1.5">
-          <Label>Heat Cycles History</Label>
+          <Label>{t('form.breeding.heatHistory.label')}</Label>
           
           <div className="space-y-2">
             {heatHistory.length > 0 ? (
@@ -80,7 +83,7 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
                 disabled={disabled}
               />
             ) : (
-              <div className="text-sm text-muted-foreground">No heat cycles recorded</div>
+              <div className="text-sm text-muted-foreground">{t('form.breeding.heatHistory.noRecords')}</div>
             )}
             
             <Button
@@ -92,7 +95,7 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
               disabled={disabled}
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add Heat Date
+              {t('form.breeding.heatHistory.addDate')}
             </Button>
           </div>
         </div>

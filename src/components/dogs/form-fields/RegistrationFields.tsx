@@ -4,6 +4,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescripti
 import { Input } from '@/components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
 import { DogFormValues } from '../DogFormFields';
+import { useTranslation } from 'react-i18next';
 
 interface RegistrationFieldsProps {
   form: UseFormReturn<DogFormValues>;
@@ -11,23 +12,25 @@ interface RegistrationFieldsProps {
 }
 
 const RegistrationFields: React.FC<RegistrationFieldsProps> = ({ form, disabled }) => {
+  const { t } = useTranslation('dogs');
+  
   return (
     <FormField
       control={form.control}
       name="registrationNumber"
       render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>Registration Number</FormLabel>
+          <FormLabel>{t('form.fields.registrationNumber.label')}</FormLabel>
           <FormControl>
             <Input 
-              placeholder="AKC123456" 
+              placeholder={t('form.fields.registrationNumber.placeholder')} 
               {...field} 
               disabled={disabled} 
               className="h-10"
             />
           </FormControl>
           <FormDescription className="text-xs">
-            Optional registration or license number
+            {t('form.fields.registrationNumber.description')}
           </FormDescription>
           <FormMessage />
         </FormItem>

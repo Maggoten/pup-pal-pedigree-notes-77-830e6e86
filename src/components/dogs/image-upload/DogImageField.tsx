@@ -4,6 +4,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import ImageUploader from '@/components/ImageUploader';
 import { UseFormReturn } from 'react-hook-form';
 import { DogFormValues } from '../DogFormFields';
+import { useTranslation } from 'react-i18next';
 
 interface DogImageFieldProps {
   form: UseFormReturn<DogFormValues>;
@@ -12,13 +13,15 @@ interface DogImageFieldProps {
 }
 
 const DogImageField: React.FC<DogImageFieldProps> = ({ form, handleImageChange, disabled }) => {
+  const { t } = useTranslation('dogs');
+  
   return (
     <FormField
       control={form.control}
       name="image"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Dog Photo</FormLabel>
+          <FormLabel>{t('form.fields.photo.label')}</FormLabel>
           <FormControl>
             <div className="max-w-[200px] w-full">
               <ImageUploader 

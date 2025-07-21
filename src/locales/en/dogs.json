@@ -54,7 +54,10 @@
       },
       "photo": {
         "label": "Dog Photo"
-      }
+      },
+      "pickADate": "Pick a date",
+      "optional": "Optional",
+      "optionalFemaleOnly": "Optional - For female dogs only"
     },
     "health": {
       "title": "Health Information",
