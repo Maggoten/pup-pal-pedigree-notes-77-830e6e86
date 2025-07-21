@@ -146,14 +146,6 @@ const PuppyProfile: React.FC = () => {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Litters
         </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-warmgreen-800">
-            {selectedPuppy.name}
-          </h1>
-          <p className="text-muted-foreground">
-            {litter?.name} • {puppyAge} weeks old
-          </p>
-        </div>
       </div>
 
       {/* Main Profile Card */}
