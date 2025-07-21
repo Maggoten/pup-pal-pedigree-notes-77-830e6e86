@@ -96,7 +96,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
       <CardContent className="p-6">
         <div className="space-y-4">
           {/* Profile Picture - Centered at top */}
-          <div className="flex justify-center">
+          <div className="flex justify-end">
             <div className="w-48 h-48 rounded-2xl overflow-hidden border-2 border-warmbeige-200 shadow-sm">
               <AspectRatio ratio={1/1}>
                 {puppy.imageUrl ? (
