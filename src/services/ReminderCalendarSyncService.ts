@@ -1,15 +1,22 @@
+
 import { Dog } from '@/types/dogs';
 import { Reminder } from '@/types/reminders';
 import { UpcomingHeat } from '@/types/reminders';
 import { addDays, format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { CalendarEvent } from '@/types/calendar';
+import i18n from '@/i18n';
 
 /**
  * Service to synchronize reminders with calendar events
  * Ensures that when reminders are created, corresponding calendar events are also created
  */
 export class ReminderCalendarSyncService {
+  // Helper method to get translation with fallback
+  private static t(key: string, options?: any): string {
+    return i18n.t(key, { ...options, ns: 'dogs' });
+  }
+
   /**
    * Clean up all calendar events for a specific dog before syncing new ones
    * This prevents duplicate events when dog data is updated
@@ -112,12 +119,12 @@ export class ReminderCalendarSyncService {
 
       // Create main birthday event
       const eventData = {
-        title: `${dog.name}'s Birthday`,
+        title: this.t('events.birthday.title', { dogName: dog.name }),
         date: targetDate.toISOString(),
         type: 'birthday',
         dog_id: dog.id,
         dog_name: dog.name,
-        notes: `Birthday celebration for ${dog.name}`,
+        notes: this.t('events.birthday.description', { dogName: dog.name }),
         user_id: userId
       };
 
@@ -134,12 +141,12 @@ export class ReminderCalendarSyncService {
       const reminderDate = addDays(targetDate, -7);
       
       const reminderEventData = {
-        title: `Prepare for ${dog.name}'s Birthday`,
+        title: this.t('events.birthday.reminder', { dogName: dog.name }),
         date: reminderDate.toISOString(),
         type: 'birthday-reminder',
         dog_id: dog.id,
         dog_name: dog.name,
-        notes: `Reminder to prepare for ${dog.name}'s birthday in 1 week`,
+        notes: this.t('events.birthday.reminderDescription', { dogName: dog.name }),
         user_id: userId
       };
 
@@ -203,12 +210,12 @@ export class ReminderCalendarSyncService {
 
       // Create main vaccination event
       const eventData = {
-        title: `${dog.name}'s Vaccination Due`,
+        title: this.t('events.vaccination.title', { dogName: dog.name }),
         date: nextVaccinationDate.toISOString(),
         type: 'vaccination',
         dog_id: dog.id,
         dog_name: dog.name,
-        notes: `Annual vaccination due for ${dog.name}`,
+        notes: this.t('events.vaccination.description', { dogName: dog.name }),
         user_id: userId
       };
 
@@ -225,12 +232,12 @@ export class ReminderCalendarSyncService {
       const reminderDate = addDays(nextVaccinationDate, -7);
       
       const reminderEventData = {
-        title: `Vaccination Reminder for ${dog.name}`,
+        title: this.t('events.vaccination.reminder', { dogName: dog.name }),
         date: reminderDate.toISOString(),
         type: 'vaccination-reminder',
         dog_id: dog.id,
         dog_name: dog.name,
-        notes: `Reminder to schedule vaccination for ${dog.name} in 1 week`,
+        notes: this.t('events.vaccination.reminderDescription', { dogName: dog.name }),
         user_id: userId
       };
 
@@ -278,12 +285,12 @@ export class ReminderCalendarSyncService {
 
       // Create main heat cycle event
       const eventData = {
-        title: `${heat.dogName}'s Heat Cycle`,
+        title: this.t('events.heat.title', { dogName: heat.dogName }),
         date: heat.date.toISOString(),
         type: 'heat',
         dog_id: heat.dogId,
         dog_name: heat.dogName,
-        notes: `Expected heat cycle for ${heat.dogName}`,
+        notes: this.t('events.heat.description', { dogName: heat.dogName }),
         user_id: userId
       };
 
@@ -300,12 +307,12 @@ export class ReminderCalendarSyncService {
       const reminderDate = addDays(heat.date, -30);
 
       const reminderEventData = {
-        title: `Upcoming Heat for ${heat.dogName}`,
+        title: this.t('events.heat.reminder', { dogName: heat.dogName }),
         date: reminderDate.toISOString(),
         type: 'heat-reminder',
         dog_id: heat.dogId,
         dog_name: heat.dogName,
-        notes: `Reminder about ${heat.dogName}'s upcoming heat cycle in 30 days`,
+        notes: this.t('events.heat.reminderDescription', { dogName: heat.dogName }),
         user_id: userId
       };
 

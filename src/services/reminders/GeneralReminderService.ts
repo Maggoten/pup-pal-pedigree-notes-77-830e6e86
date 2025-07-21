@@ -4,6 +4,12 @@ import { Reminder } from '@/types/reminders';
 import { createCalendarClockIcon } from '@/utils/iconUtils';
 import { differenceInMonths, parseISO, startOfDay } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
+import i18n from '@/i18n';
+
+// Helper method to get translation with fallback
+const t = (key: string, options?: any): string => {
+  return i18n.t(key, { ...options, ns: 'dogs' });
+};
 
 // Generate deterministic UUID for system reminders
 const generateSystemReminderId = (dogId: string, type: string): string => {
@@ -60,8 +66,8 @@ export const generateGeneralReminders = (dogs: Dog[]): Reminder[] => {
   femaleDogsWithoutHeatRecords.forEach(dog => {
     reminders.push({
       id: generateSystemReminderId(dog.id, 'general-heat-tracking'),
-      title: `Start Heat Tracking for ${dog.name}`,
-      description: `${dog.name} is of breeding age but has no heat records`,
+      title: t('reminders.heatTracking.title', { dogName: dog.name }),
+      description: t('reminders.heatTracking.description', { dogName: dog.name }),
       icon: createCalendarClockIcon('purple-500'),
       dueDate: today,
       priority: 'low',

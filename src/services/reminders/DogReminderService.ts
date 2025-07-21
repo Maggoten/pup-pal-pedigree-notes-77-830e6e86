@@ -4,9 +4,15 @@ import { Reminder } from '@/types/reminders';
 import { differenceInDays, parseISO, addDays, isSameMonth, isSameDay, addYears, startOfDay, isAfter, isBefore, isToday } from 'date-fns';
 import { createPawPrintIcon, createCalendarClockIcon } from '@/utils/iconUtils';
 import { v5 as uuidv5 } from 'uuid';
+import i18n from '@/i18n';
 
 // Namespace UUID for deterministic reminder IDs (prevents collisions)
 const REMINDER_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
+
+// Helper method to get translation with fallback
+const t = (key: string, options?: any): string => {
+  return i18n.t(key, { ...options, ns: 'dogs' });
+};
 
 // Generate deterministic UUID based on dog ID, type, and date
 const generateSystemReminderId = (dogId: string, type: string, date: Date): string => {
@@ -33,8 +39,8 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
         // Suggest starting heat tracking
         reminders.push({
           id: generateSystemReminderId(dog.id, 'heat-tracking', today),
-          title: `Start Heat Tracking for ${dog.name}`,
-          description: `Begin tracking heat cycles for better breeding management`,
+          title: t('reminders.heatTracking.title', { dogName: dog.name }),
+          description: t('reminders.heatTracking.suggestion'),
           icon: createPawPrintIcon("pink-500"),
           dueDate: today,
           priority: 'medium',
@@ -44,34 +50,35 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
         console.log(`Created heat tracking suggestion for dog ${dog.name}`);
       } else {
         // Has heat history, create cycle reminders
-      // Find the last heat date
-      const sortedHeatDates = [...dog.heatHistory].sort((a, b) => 
-        new Date(b.date).getTime() - new Date(a.date).getTime()
-      );
-      
-      const lastHeatDate = parseISO(sortedHeatDates[0].date);
-      // Use heat interval if available, otherwise default to 180 days (6 months)
-      const intervalDays = dog.heatInterval || 180;
-      const nextHeatDate = addDays(lastHeatDate, intervalDays);
-      
-      console.log(`Dog ${dog.name}: Last heat date: ${lastHeatDate.toISOString()}, Next heat: ${nextHeatDate.toISOString()}, Days until: ${differenceInDays(nextHeatDate, today)}`);
-      
-      // Show reminder for upcoming heat 30 days in advance
-      if (isAfter(nextHeatDate, today) && differenceInDays(nextHeatDate, today) <= 30) {
-        reminders.push({
-          id: generateSystemReminderId(dog.id, 'heat', nextHeatDate),
-          title: `${dog.name}'s Heat Approaching`,
-          description: `Expected heat cycle in ${differenceInDays(nextHeatDate, today)} days`,
-          icon: createPawPrintIcon("rose-500"),
-          dueDate: nextHeatDate,
-          priority: 'high',
-          type: 'heat', 
-          relatedId: dog.id
-        });
-        console.log(`Created heat reminder for dog ${dog.name}`);
+        // Find the last heat date
+        const sortedHeatDates = [...dog.heatHistory].sort((a, b) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        
+        const lastHeatDate = parseISO(sortedHeatDates[0].date);
+        // Use heat interval if available, otherwise default to 180 days (6 months)
+        const intervalDays = dog.heatInterval || 180;
+        const nextHeatDate = addDays(lastHeatDate, intervalDays);
+        
+        console.log(`Dog ${dog.name}: Last heat date: ${lastHeatDate.toISOString()}, Next heat: ${nextHeatDate.toISOString()}, Days until: ${differenceInDays(nextHeatDate, today)}`);
+        
+        // Show reminder for upcoming heat 30 days in advance
+        if (isAfter(nextHeatDate, today) && differenceInDays(nextHeatDate, today) <= 30) {
+          const days = differenceInDays(nextHeatDate, today);
+          reminders.push({
+            id: generateSystemReminderId(dog.id, 'heat', nextHeatDate),
+            title: t('events.heat.approaching', { dogName: dog.name }),
+            description: t('events.heat.expected', { days }),
+            icon: createPawPrintIcon("rose-500"),
+            dueDate: nextHeatDate,
+            priority: 'high',
+            type: 'heat', 
+            relatedId: dog.id
+          });
+          console.log(`Created heat reminder for dog ${dog.name}`);
+        }
       }
     }
-  }
     
     // Check for upcoming vaccinations - EXTENDED TO 14 DAYS
     if (dog.vaccinationDate) {
@@ -85,13 +92,14 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
       // Create reminder if vaccination is due within the next 14 days or up to 7 days overdue
       if (daysUntilVaccination >= -7 && daysUntilVaccination <= 14) {
         const isOverdue = daysUntilVaccination < 0;
+        const days = Math.abs(daysUntilVaccination);
         
         reminders.push({
           id: generateSystemReminderId(dog.id, 'vaccination', nextVaccination),
-          title: `${dog.name}'s Vaccination ${isOverdue ? 'Overdue' : 'Due Soon'}`,
+          title: t('events.vaccination.title', { dogName: dog.name }) + (isOverdue ? ' (Overdue)' : ''),
           description: isOverdue 
-            ? `Vaccination overdue by ${Math.abs(daysUntilVaccination)} days`
-            : `Vaccination due in ${daysUntilVaccination} days`,
+            ? t('events.vaccination.overdue', { days })
+            : t('events.vaccination.upcoming', { days }),
           icon: createCalendarClockIcon("amber-500"),
           dueDate: nextVaccination,
           priority: isOverdue ? 'high' : 'medium',
@@ -124,14 +132,21 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
           ? currentYear - birthdate.getFullYear() 
           : (currentYear + (isBefore(birthdateThisYear, today) ? 1 : 0)) - birthdate.getFullYear();
         
+        let description: string;
+        if (daysUntilBirthday === 0) {
+          description = t('events.birthday.today', { dogName: dog.name, age });
+        } else if (daysUntilBirthday > 0) {
+          description = t('events.birthday.upcoming', { dogName: dog.name, age, days: daysUntilBirthday });
+        } else {
+          const daysAgo = Math.abs(daysUntilBirthday);
+          const plural = daysAgo !== 1 ? 's' : '';
+          description = t('events.birthday.past', { dogName: dog.name, age, days: daysAgo, plural });
+        }
+        
         reminders.push({
           id: generateSystemReminderId(dog.id, 'birthday', nextBirthday),
-          title: `${dog.name}'s Birthday`,
-          description: daysUntilBirthday === 0 
-            ? `${dog.name} turns ${age} today!` 
-            : daysUntilBirthday > 0 
-              ? `${dog.name} turns ${age} in ${daysUntilBirthday} days`
-              : `${dog.name} turned ${age} ${Math.abs(daysUntilBirthday)} day${Math.abs(daysUntilBirthday) !== 1 ? 's' : ''} ago`,
+          title: t('events.birthday.title', { dogName: dog.name }),
+          description,
           icon: createPawPrintIcon("blue-500"),
           dueDate: nextBirthday,
           priority: 'medium',
