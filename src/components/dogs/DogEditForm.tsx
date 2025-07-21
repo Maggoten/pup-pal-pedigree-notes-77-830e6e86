@@ -1,14 +1,12 @@
 
 import React from 'react';
 import { Form } from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Dog } from '@/context/DogsContext';
 import DogFormFields, { dogFormSchema, DogFormValues } from './DogFormFields';
 import DogImageField from './DogImageField';
 import HeatRecordsField from './heat-records/HeatRecordsField';
-import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface DogEditFormProps {
@@ -83,24 +81,6 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isLoad
               </div>
             )}
           </div>
-        </div>
-        
-        <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isLoading}
-          >
-            {t('form.actions.cancel')}
-          </Button>
-          <Button
-            type="submit"
-            disabled={isLoading}
-          >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isLoading ? t('form.actions.saving') : t('form.actions.saveChanges')}
-          </Button>
         </div>
       </form>
     </Form>

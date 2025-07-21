@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { CardFooter } from '@/components/ui/card';
 import { Trash2, Save } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface DogActionsProps {
   isEditing: boolean;
@@ -23,6 +24,8 @@ const DogActions: React.FC<DogActionsProps> = ({
   loading,
   isSaving
 }) => {
+  const { t } = useTranslation('dogs');
+
   return (
     <CardFooter className="flex justify-between">
       <Button
@@ -31,7 +34,7 @@ const DogActions: React.FC<DogActionsProps> = ({
         disabled={loading || isSaving}
       >
         <Trash2 className="h-4 w-4 mr-2" />
-        Delete
+        {t('form.actions.delete')}
       </Button>
       
       {isEditing ? (
@@ -42,7 +45,7 @@ const DogActions: React.FC<DogActionsProps> = ({
             onClick={onCancel}
             disabled={isSaving}
           >
-            Cancel
+            {t('form.actions.cancel')}
           </Button>
           <Button 
             type="submit" 
@@ -53,17 +56,17 @@ const DogActions: React.FC<DogActionsProps> = ({
             {isSaving ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
+                {t('form.actions.saving')}
               </>
             ) : (
-              'Save Changes'
+              t('form.actions.saveChanges')
             )}
           </Button>
         </div>
       ) : (
         <Button onClick={onEdit} disabled={loading || isSaving}>
           <Save className="h-4 w-4 mr-2" />
-          Edit
+          {t('form.actions.edit')}
         </Button>
       )}
     </CardFooter>
