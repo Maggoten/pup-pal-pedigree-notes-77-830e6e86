@@ -52,42 +52,78 @@ const SterilizationDateField: React.FC<SterilizationDateFieldProps> = ({
   };
 
   return (
-    <FormField
-      control={form.control}
-      name="sterilizationDate"
-      render={({ field }) => (
-        <FormItem className="flex flex-col">
-          <FormLabel>{t('form.health.sterilization.label')}</FormLabel>
+    <div className="space-y-3">
+      <Label className="text-sm font-medium">{t('form.breeding.sterilized.label')}</Label>
+      
+      {!sterilizationDate && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleAddDate}
+          disabled={disabled}
+          className="w-fit"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          {t('form.breeding.sterilized.addDate')}
+        </Button>
+      )}
+      
+      {sterilizationDate && (
+        <div className="flex items-center gap-2">
           <Popover>
             <PopoverTrigger asChild>
-              <FormControl>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "pl-3 text-left font-normal",
-                    !field.value && "text-muted-foreground"
-                  )}
-                  disabled={disabled}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {field.value ? format(field.value, "PPP") : <span>{t('form.fields.pickADate')}</span>}
-                </Button>
-              </FormControl>
+              <Button
+                variant="outline"
+                className="pl-3 text-left font-normal bg-white border-input shadow-sm flex-1"
+                disabled={disabled}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {typeof sterilizationDate === 'string'
+                  ? format(parseISODate(sterilizationDate) || new Date(), "PPP")
+                  : format(sterilizationDate, "PPP")}
+              </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 bg-white" align="start">
               <Calendar
                 mode="single"
-                selected={field.value}
-                onSelect={field.onChange}
+                selected={typeof sterilizationDate === 'string'
+                  ? parseISODate(sterilizationDate) || undefined
+                  : sterilizationDate}
+                onSelect={handleDateSelect}
                 disabled={date => date > new Date() || !!disabled}
                 initialFocus
+                className={cn("p-3 pointer-events-auto")}
               />
             </PopoverContent>
           </Popover>
-          <FormMessage />
-        </FormItem>
+          
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleRemoveDate}
+            disabled={disabled}
+            className="px-2"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       )}
-    />
+      
+      <FormField
+        control={form.control}
+        name="sterilizationDate"
+        render={() => (
+          <FormItem className="hidden">
+            <FormControl>
+              <input type="hidden" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
   );
 };
 

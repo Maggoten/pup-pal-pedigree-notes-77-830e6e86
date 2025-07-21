@@ -95,7 +95,7 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
               disabled={disabled}
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add Heat Date
+              {t('form.breeding.heatHistory.addDate')}
             </Button>
           </div>
         </div>
