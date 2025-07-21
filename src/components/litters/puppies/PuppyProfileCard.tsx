@@ -105,7 +105,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
         {/* Header - responsive layout */}
         <div className={`flex items-start justify-between ${isMobile ? 'mb-3' : 'mb-4'}`}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <Avatar className={`${isMobile ? 'h-12 w-12' : 'h-16 w-16'} border-2 border-warmbeige-200 shadow-sm flex-shrink-0`}>
+            <Avatar className={`${isMobile ? 'h-16 w-16' : 'h-20 w-20'} border-2 border-warmbeige-200 shadow-sm flex-shrink-0`}>
               {puppy.imageUrl ? (
                 <AvatarImage src={puppy.imageUrl} alt={puppy.name} className="object-cover" />
               ) : (
