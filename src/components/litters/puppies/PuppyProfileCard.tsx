@@ -52,7 +52,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
       );
       return `${sortedHeights[0].height} cm`;
     }
-    return '-';
+    return '- cm';
   };
 
   // Get status badge
