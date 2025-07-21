@@ -5,8 +5,8 @@ import { format, parseISO } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { BarChart2, Edit, Trash2, Circle, Scale, Ruler } from 'lucide-react';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { BarChart2, Edit, Trash2, Circle, Scale, Ruler, Image } from 'lucide-react';
 import { Puppy } from '@/types/breeding';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -105,24 +105,34 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
         {/* Header - responsive layout */}
         <div className={`flex items-start justify-between ${isMobile ? 'mb-3' : 'mb-4'}`}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <Avatar className={`${isMobile ? 'h-16 w-16' : 'h-20 w-20'} border-2 border-warmbeige-200 shadow-sm flex-shrink-0`}>
-              {puppy.imageUrl ? (
-                <AvatarImage src={puppy.imageUrl} alt={puppy.name} className="object-cover" />
-              ) : (
-                <AvatarFallback className="bg-warmgreen-100 text-warmgreen-800 font-medium text-lg">
-                  {puppy.name.charAt(0)}
-                </AvatarFallback>
-              )}
-            </Avatar>
+            <div className={`${isMobile ? 'h-16 w-16' : 'h-20 w-20'} border-2 border-warmbeige-200 shadow-sm flex-shrink-0 rounded-lg overflow-hidden relative`}>
+              <AspectRatio ratio={1/1}>
+                {puppy.imageUrl ? (
+                  <img 
+                    src={puppy.imageUrl} 
+                    alt={puppy.name} 
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <div className="bg-warmgreen-100 text-warmgreen-800 font-medium text-lg w-full h-full flex items-center justify-center">
+                    {puppy.name.charAt(0)}
+                  </div>
+                )}
+              </AspectRatio>
+              
+              {/* Gender badge overlay */}
+              <div className="absolute top-1 right-1">
+                <Badge className={`text-xs px-1.5 py-0.5 ${puppy.gender === 'male' ? 'bg-blue-500 text-white' : 'bg-rose-400 text-white'}`}>
+                  {puppy.gender === 'male' ? 'M' : 'F'}
+                </Badge>
+              </div>
+            </div>
             
             <div className="flex-1 min-w-0">
               <h3 className={`font-semibold text-warmgreen-800 truncate ${isMobile ? 'text-lg mb-1' : 'text-xl mb-1'}`}>
                 {puppy.name}
               </h3>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Circle className={`h-3 w-3 ${puppy.gender === 'male' ? 'text-blue-500 fill-blue-500' : 'text-pink-500 fill-pink-500'}`} />
-                <span className="capitalize">{puppy.gender}</span>
-                <span>•</span>
                 <span className="truncate">{puppy.color}</span>
               </div>
             </div>
