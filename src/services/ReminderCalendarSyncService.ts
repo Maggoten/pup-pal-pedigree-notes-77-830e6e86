@@ -14,7 +14,7 @@ import i18n from '@/i18n';
 export class ReminderCalendarSyncService {
   // Helper method to get translation with fallback
   private static t(key: string, options?: any): string {
-    return i18n.t(key, { ...options, ns: 'dogs' });
+    return i18n.t(key, { ...options, ns: 'dogs' }) as string;
   }
 
   /**

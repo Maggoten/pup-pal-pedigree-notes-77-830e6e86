@@ -11,7 +11,7 @@ const REMINDER_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
 
 // Helper method to get translation with fallback
 const t = (key: string, options?: any): string => {
-  return i18n.t(key, { ...options, ns: 'dogs' });
+  return i18n.t(key, { ...options, ns: 'dogs' }) as string;
 };
 
 // Generate deterministic UUID based on dog ID, type, and date
