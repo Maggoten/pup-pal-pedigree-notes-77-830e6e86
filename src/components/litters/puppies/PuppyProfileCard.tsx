@@ -115,7 +115,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
           </div>
 
           {/* Puppy Name - Centered below picture */}
-          <h3 className="text-2xl font-bold text-warmgreen-800 text-center">
+          <h3 className="text-2xl font-bold text-warmgreen-800 text-left">
             {puppy.name}
           </h3>
 
