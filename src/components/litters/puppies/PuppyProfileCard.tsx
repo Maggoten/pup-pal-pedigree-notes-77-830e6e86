@@ -6,8 +6,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { BarChart2, Edit, Trash2, Circle } from 'lucide-react';
+import { BarChart2, Edit, Trash2, Circle, Scale, Ruler } from 'lucide-react';
 import { Puppy } from '@/types/breeding';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PuppyProfileCardProps {
   puppy: Puppy;
@@ -31,6 +32,8 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
   litterId
 }) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  
   // Get latest weight measurement
   const getLatestWeight = () => {
     if (puppy.weightLog && puppy.weightLog.length > 0) {
@@ -98,10 +101,11 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
       }`}
       onClick={() => navigate(`/my-litters/${litterId}/puppy/${puppy.id}`)}
     >
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16 border-2 border-warmbeige-200 shadow-sm">
+      <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+        {/* Header - responsive layout */}
+        <div className={`flex items-start justify-between ${isMobile ? 'mb-3' : 'mb-4'}`}>
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Avatar className={`${isMobile ? 'h-12 w-12' : 'h-16 w-16'} border-2 border-warmbeige-200 shadow-sm flex-shrink-0`}>
               {puppy.imageUrl ? (
                 <AvatarImage src={puppy.imageUrl} alt={puppy.name} className="object-cover" />
               ) : (
@@ -111,72 +115,97 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
               )}
             </Avatar>
             
-            <div>
-              <h3 className="text-xl font-semibold text-warmgreen-800 mb-1">{puppy.name}</h3>
+            <div className="flex-1 min-w-0">
+              <h3 className={`font-semibold text-warmgreen-800 truncate ${isMobile ? 'text-lg mb-1' : 'text-xl mb-1'}`}>
+                {puppy.name}
+              </h3>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Circle className={`h-4 w-4 ${puppy.gender === 'male' ? 'text-blue-500 fill-blue-500' : 'text-pink-500 fill-pink-500'}`} />
+                <Circle className={`h-3 w-3 ${puppy.gender === 'male' ? 'text-blue-500 fill-blue-500' : 'text-pink-500 fill-pink-500'}`} />
                 <span className="capitalize">{puppy.gender}</span>
                 <span>•</span>
-                <span>{puppy.color}</span>
+                <span className="truncate">{puppy.color}</span>
               </div>
             </div>
           </div>
           
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex-shrink-0 ml-2">
             {getStatusBadge()}
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        {/* Measurements - responsive grid */}
+        <div className={`grid gap-3 ${isMobile ? 'grid-cols-2 mb-3' : 'grid-cols-2 gap-4 mb-4'}`}>
           <div className="bg-warmbeige-50 p-3 rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Born</p>
-            <p className="font-medium">{getBirthDate()}</p>
+            <div className="flex items-center gap-2 mb-1">
+              <Scale className="h-3 w-3 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">Weight</p>
+            </div>
+            <p className={`font-medium ${isMobile ? 'text-sm' : ''}`}>{getLatestWeight()}</p>
           </div>
           
           <div className="bg-warmbeige-50 p-3 rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Current Weight</p>
-            <p className="font-medium">{getLatestWeight()}</p>
+            <div className="flex items-center gap-2 mb-1">
+              <Ruler className="h-3 w-3 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">Height</p>
+            </div>
+            <p className={`font-medium ${isMobile ? 'text-sm' : ''}`}>{getLatestHeight()}</p>
           </div>
           
-          <div className="bg-warmbeige-50 p-3 rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Current Height</p>
-            <p className="font-medium">{getLatestHeight()}</p>
-          </div>
-          
-          <div className="bg-warmbeige-50 p-3 rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Age</p>
-            <p className="font-medium">{litterAge} weeks</p>
-          </div>
+          {!isMobile && (
+            <>
+              <div className="bg-warmbeige-50 p-3 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Born</p>
+                <p className="font-medium">{getBirthDate()}</p>
+              </div>
+              
+              <div className="bg-warmbeige-50 p-3 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Age</p>
+                <p className="font-medium">{litterAge} weeks</p>
+              </div>
+            </>
+          )}
         </div>
         
-        <div className="flex justify-between items-center">
-          <div className="flex gap-2">
+        {/* Mobile compact info */}
+        {isMobile && (
+          <div className="flex justify-between items-center text-xs text-muted-foreground mb-3 px-1">
+            <span>Born: {getBirthDate()}</span>
+            <span>Age: {litterAge} weeks</span>
+          </div>
+        )}
+        
+        {/* Actions - responsive layout */}
+        <div className={`flex justify-between items-center ${isMobile ? 'gap-2' : ''}`}>
+          <div className={`flex ${isMobile ? 'gap-1' : 'gap-2'}`}>
             <Button
               variant="outline"
-              size="sm"
+              size={isMobile ? "sm" : "sm"}
               onClick={handleMeasurementClick}
-              className="flex items-center gap-1"
+              className={`flex items-center ${isMobile ? 'px-2 min-w-[44px] h-10' : 'gap-1'}`}
+              title="Add measurements"
             >
               <BarChart2 className="h-4 w-4" />
-              <span>Measurements</span>
+              {!isMobile && <span>Measurements</span>}
             </Button>
             
             <Button
               variant="outline"
-              size="sm"
+              size={isMobile ? "sm" : "sm"}
               onClick={handleEditClick}
-              className="flex items-center gap-1"
+              className={`flex items-center ${isMobile ? 'px-2 min-w-[44px] h-10' : 'gap-1'}`}
+              title="Edit puppy"
             >
               <Edit className="h-4 w-4" />
-              <span>Edit</span>
+              {!isMobile && <span>Edit</span>}
             </Button>
           </div>
           
           <Button
             variant="ghost"
-            size="sm"
+            size={isMobile ? "sm" : "sm"}
             onClick={handleDeleteClick}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            className={`text-destructive hover:text-destructive hover:bg-destructive/10 ${isMobile ? 'px-2 min-w-[44px] h-10' : ''}`}
+            title="Delete puppy"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
