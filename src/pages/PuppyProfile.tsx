@@ -240,10 +240,6 @@ const PuppyProfile: React.FC = () => {
                       <span className="text-sm text-muted-foreground">Current Weight:</span>
                       <span className="text-sm">{getLatestWeight(selectedPuppy)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Markings:</span>
-                      <span className="text-sm">{selectedPuppy.markings || 'None'}</span>
-                    </div>
                   </div>
                 </div>
 
