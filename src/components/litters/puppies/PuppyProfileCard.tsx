@@ -124,7 +124,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             <span className="flex items-center gap-1">
               {puppy.gender === 'male' ? '♂' : '♀'} {puppy.gender}
             </span>
-            <span>•</span>
+            <span className="text-base">•</span>
             <span>{puppy.color}</span>
           </div>
 
