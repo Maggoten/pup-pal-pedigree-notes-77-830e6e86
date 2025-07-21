@@ -1,2 +1,171 @@
 {
+  "navigation": {
+    "settings": "Inställningar"
+  },
+  "dialog": {
+    "title": "Inställningar",
+    "loadingError": "Inställningar kunde inte laddas. Vänligen försök igen senare."
+  },
+  "tabs": {
+    "personal": "Personligt",
+    "account": "Konto",
+    "help": "Hjälp"
+  },
+  "personal": {
+    "title": "Personlig Information",
+    "description": "Uppdatera din personliga information och kontaktuppgifter",
+    "kennel": {
+      "title": "Kennelinfo",
+      "description": "Ange ditt kennelnamn och andra affärsdetaljer"
+    },
+    "fields": {
+      "firstName": "Förnamn",
+      "lastName": "Efternamn",
+      "kennelName": "Kennelnamn",
+      "address": "Adress",
+      "website": "Webbsida",
+      "phone": "Telefon",
+      "firstNamePlaceholder": "Förnamn",
+      "lastNamePlaceholder": "Efternamn",
+      "kennelNamePlaceholder": "Kennelnamn",
+      "addressPlaceholder": "Adress",
+      "websitePlaceholder": "https://...",
+      "phonePlaceholder": "Telefonnummer"
+    },
+    "actions": {
+      "saveChanges": "Spara Ändringar",
+      "saving": "Sparar..."
+    }
+  },
+  "account": {
+    "title": "Konto",
+    "description": "Hantera dina kontoinställningar och användarpreferenser",
+    "fields": {
+      "email": "E-post",
+      "name": "Namn",
+      "language": "Språk"
+    },
+    "actions": {
+      "logout": "Logga ut"
+    },
+    "subscription": {
+      "title": "Prenumeration",
+      "description": "Hantera din prenumeration och fakturering"
+    },
+    "password": {
+      "title": "Byt Lösenord",
+      "description": "Uppdatera ditt kontolösenord",
+      "currentPassword": "Nuvarande Lösenord",
+      "newPassword": "Nytt Lösenord",
+      "confirmPassword": "Bekräfta Nytt Lösenord",
+      "changePassword": "Byt Lösenord"
+    },
+    "sharing": {
+      "title": "Kontodelning",
+      "description": "Dela åtkomst till dina avelregister med andra användare",
+      "addUser": "Lägg till Användare",
+      "removeUser": "Ta bort Användare",
+      "email": "E-postadress",
+      "role": "Roll",
+      "dateAdded": "Datum Tillagd",
+      "roles": {
+        "viewer": "Tittare",
+        "editor": "Redigerare"
+      },
+      "roleDescriptions": {
+        "viewer": "Kan visa avelregister och hundinformation men kan inte göra ändringar",
+        "editor": "Kan redigera avelregister och hantera hundar men kan inte ändra kontoinställningar"
+      },
+      "emptyState": {
+        "title": "Inga delade användare",
+        "description": "Du har inte delat åtkomst med någon ännu"
+      }
+    },
+    "deleteAccount": {
+      "title": "Ta bort Konto",
+      "description": "Ta bort ditt konto och all associerad data permanent",
+      "warning": "Denna åtgärd kan inte ångras",
+      "button": "Ta bort Konto",
+      "confirmTitle": "Är du säker?",
+      "confirmDescription": "Detta kommer permanent ta bort ditt konto och all din data. Denna åtgärd kan inte ångras.",
+      "confirmButton": "Ja, ta bort mitt konto",
+      "cancelButton": "Avbryt"
+    }
+  },
+  "help": {
+    "title": "Hjälp & Support",
+    "description": "Få hjälp med att använda applikationen",
+    "sections": {
+      "gettingStarted": {
+        "title": "Komma Igång",
+        "description": "Lär dig grunderna i att använda avelhanteringssystemet"
+      },
+      "managingDogs": {
+        "title": "Hantera Hundar",
+        "description": "Hur man lägger till, redigerar och organiserar dina hundprofiler"
+      },
+      "trackingPregnancies": {
+        "title": "Spåra Dräktigheter",
+        "description": "Övervaka dräktigheter och registrera viktiga milstolpar"
+      },
+      "planningLitters": {
+        "title": "Planera Kullar",
+        "description": "Planera framtida avelskombinationer och spåra löpcykler"
+      },
+      "recordKeeping": {
+        "title": "Föra Register",
+        "description": "Bästa praxis för att upprätthålla korrekta avelregister"
+      }
+    },
+    "support": {
+      "title": "Behöver Mer Hjälp?",
+      "description": "Kontakta vårt supportteam för ytterligare hjälp",
+      "email": "support@breedingapp.com"
+    }
+  },
+  "language": {
+    "title": "Språkinställningar",
+    "description": "Välj ditt föredragna språk",
+    "english": "English",
+    "swedish": "Svenska",
+    "changeLanguage": "Byt Språk"
+  },
+  "validation": {
+    "firstNameRequired": "Förnamn krävs",
+    "lastNameRequired": "Efternamn krävs",
+    "kennelNameRequired": "Kennelnamn krävs",
+    "invalidWebsite": "Ogiltig webbsida-URL",
+    "emailRequired": "E-postadress krävs",
+    "invalidEmail": "Vänligen ange en giltig e-postadress",
+    "passwordRequired": "Lösenord krävs",
+    "passwordMinLength": "Lösenord måste vara minst 8 tecken",
+    "passwordsDoNotMatch": "Lösenorden stämmer inte överens"
+  },
+  "toasts": {
+    "success": {
+      "personalInfoUpdated": "Personlig information uppdaterad",
+      "kennelInfoUpdated": "Kennelinformation uppdaterad",
+      "passwordChanged": "Lösenord ändrat",
+      "userAdded": "Användare tillagd",
+      "userRemoved": "Användare borttagen",
+      "languageChanged": "Språk ändrat"
+    },
+    "error": {
+      "failedToUpdatePersonalInfo": "Misslyckades med att uppdatera personlig information",
+      "failedToUpdateKennelInfo": "Misslyckades med att uppdatera kennelinformation",
+      "failedToChangePassword": "Misslyckades med att ändra lösenord",
+      "failedToAddUser": "Misslyckades med att lägga till användare",
+      "failedToRemoveUser": "Misslyckades med att ta bort användare",
+      "failedToLoadSettings": "Misslyckades med att ladda inställningar",
+      "incorrectCurrentPassword": "Nuvarande lösenord är felaktigt"
+    }
+  },
+  "loading": {
+    "settings": "Laddar inställningar...",
+    "saving": "Sparar...",
+    "updating": "Uppdaterar...",
+    "adding": "Lägger till...",
+    "removing": "Tar bort...",
+    "changingPassword": "Byter lösenord..."
+  }
 }

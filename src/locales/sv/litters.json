@@ -1,2 +1,134 @@
 {
+  "navigation": {
+    "myLitters": "Mina Kullar",
+    "plannedLitters": "Planerade Kullar"
+  },
+  "pages": {
+    "myLitters": {
+      "title": "Mina Kullar",
+      "description": "Visa och hantera alla dina registrerade kullar, spåra födslar och få tillgång till detaljerad kullinfo"
+    },
+    "plannedLitters": {
+      "title": "Planerade Kullar & Parning",
+      "description": "Planera dina framtida kullar, spåra löpcykler och hantera avelaktiviteter"
+    }
+  },
+  "actions": {
+    "addPlannedLitter": "Lägg till Planerad Kull",
+    "addFirstPlannedLitter": "Lägg till Din Första Planerade Kull",
+    "addMatingDate": "Lägg till Parningsdatum",
+    "editMatingDate": "Redigera Parningsdatum",
+    "deleteMatingDate": "Ta bort Parningsdatum",
+    "deleteLitter": "Ta bort Kull",
+    "viewDetails": "Visa Detaljer",
+    "archiveLitter": "Arkivera Kull",
+    "unarchiveLitter": "Aktivera Kull",
+    "save": "Spara",
+    "cancel": "Avbryt"
+  },
+  "display": {
+    "litterLabel": "{{damName}} × {{sireName}}",
+    "dateOfBirth": "Födelsedatum",
+    "matingDate": "Parningsdatum",
+    "expectedDueDate": "Förväntat Födelsedatum",
+    "daysRemaining": "Dagar Kvar",
+    "puppies": "Valpar",
+    "males": "Hanar",
+    "females": "Honor",
+    "totalPuppies": "Totalt Valpar",
+    "archived": "Arkiverad",
+    "active": "Aktiv",
+    "completed": "Avslutad"
+  },
+  "forms": {
+    "plannedLitter": {
+      "title": "Lägg till Planerad Kull",
+      "damLabel": "Tik",
+      "sireLabel": "Hanhund",
+      "damPlaceholder": "Välj tik",
+      "sirePlaceholder": "Välj hanhund",
+      "description": "Välj avelspar för din planerade kull"
+    }
+  },
+  "empty": {
+    "plannedLitters": {
+      "title": "Inga Planerade Kullar",
+      "description": "Börja planera dina framtida kullar genom att skapa din första avelskombination"
+    },
+    "myLitters": {
+      "title": "Inga Kullar Ännu",
+      "description": "Dina registrerade kullar kommer att visas här när du börjar spåra födslar"
+    }
+  },
+  "mating": {
+    "section": {
+      "title": "Löpcykler & Parning",
+      "description": "Spåra löpcykler och senaste parningsaktiviteter"
+    },
+    "upcomingHeats": {
+      "title": "Kommande Löpcykler",
+      "description": "Tikar som närmar sig sin nästa löpcykel",
+      "daysUntil": "{{days}} dagar till löp"
+    },
+    "recentMatings": {
+      "title": "Senaste Parningar",
+      "description": "Avelaktiviteter under de senaste 30 dagarna",
+      "daysAgo": "{{days}} dagar sedan"
+    },
+    "tips": {
+      "title": "Parningstips",
+      "optimalTiming": "Optimal parningsperiod är vanligtvis dag 10-14 i löpcykeln",
+      "multipleMatings": "Två parningar med 24–48 timmars mellanrum ökar ofta chansen för dräktighet",
+      "monitoring": "Övervaka tikens beteende och fysiska förändringar under löp"
+    }
+  },
+  "filters": {
+    "all": "Alla Kullar",
+    "active": "Aktiva",
+    "archived": "Arkiverade",
+    "planned": "Planerade",
+    "viewMode": "Visningsläge",
+    "grid": "Rutnät",
+    "list": "Lista"
+  },
+  "status": {
+    "planning": "Planering",
+    "mated": "Parad",
+    "pregnant": "Dräktig",
+    "born": "Födda",
+    "weaning": "Avvänjning",
+    "ready": "Redo för Nya Hem"
+  },
+  "validation": {
+    "damRequired": "Tik krävs",
+    "sireRequired": "Hanhund krävs",
+    "dateRequired": "Datum krävs",
+    "invalidDate": "Vänligen ange ett giltigt datum"
+  },
+  "toasts": {
+    "success": {
+      "litterAdded": "Planerad kull tillagd",
+      "matingDateAdded": "Parningsdatum tillagt",
+      "matingDateUpdated": "Parningsdatum uppdaterat",
+      "matingDateDeleted": "Parningsdatum borttaget",
+      "litterDeleted": "Kull borttagen",
+      "litterArchived": "Kull arkiverad",
+      "litterUnarchived": "Kull aktiverad"
+    },
+    "error": {
+      "failedToAddLitter": "Misslyckades med att lägga till planerad kull",
+      "failedToAddMatingDate": "Misslyckades med att lägga till parningsdatum",
+      "failedToUpdateMatingDate": "Misslyckades med att uppdatera parningsdatum",
+      "failedToDeleteMatingDate": "Misslyckades med att ta bort parningsdatum",
+      "failedToDeleteLitter": "Misslyckades med att ta bort kull",
+      "failedToArchiveLitter": "Misslyckades med att arkivera kull",
+      "failedToLoad": "Misslyckades med att ladda kullar"
+    }
+  },
+  "loading": {
+    "litters": "Laddar kullar...",
+    "saving": "Sparar...",
+    "deleting": "Tar bort...",
+    "archiving": "Arkiverar..."
+  }
 }

@@ -1,2 +1,134 @@
 {
+  "navigation": {
+    "myLitters": "My Litters",
+    "plannedLitters": "Planned Litters"
+  },
+  "pages": {
+    "myLitters": {
+      "title": "My Litters",
+      "description": "View and manage all your recorded litters, track births, and access detailed litter information"
+    },
+    "plannedLitters": {
+      "title": "Planned Litters & Mating",
+      "description": "Plan your future litters, track heat cycles, and manage breeding activities"
+    }
+  },
+  "actions": {
+    "addPlannedLitter": "Add Planned Litter",
+    "addFirstPlannedLitter": "Add Your First Planned Litter",
+    "addMatingDate": "Add Mating Date",
+    "editMatingDate": "Edit Mating Date",
+    "deleteMatingDate": "Delete Mating Date",
+    "deleteLitter": "Delete Litter",
+    "viewDetails": "View Details",
+    "archiveLitter": "Archive Litter",
+    "unarchiveLitter": "Unarchive Litter",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "display": {
+    "litterLabel": "{{damName}} × {{sireName}}",
+    "dateOfBirth": "Date of Birth",
+    "matingDate": "Mating Date",
+    "expectedDueDate": "Expected Due Date",
+    "daysRemaining": "Days Remaining",
+    "puppies": "Puppies",
+    "males": "Males",
+    "females": "Females",
+    "totalPuppies": "Total Puppies",
+    "archived": "Archived",
+    "active": "Active",
+    "completed": "Completed"
+  },
+  "forms": {
+    "plannedLitter": {
+      "title": "Add Planned Litter",
+      "damLabel": "Dam (Female)",
+      "sireLabel": "Sire (Male)",
+      "damPlaceholder": "Select female dog",
+      "sirePlaceholder": "Select male dog",
+      "description": "Select the breeding pair for your planned litter"
+    }
+  },
+  "empty": {
+    "plannedLitters": {
+      "title": "No Planned Litters",
+      "description": "Start planning your future litters by creating your first breeding combination"
+    },
+    "myLitters": {
+      "title": "No Litters Yet",
+      "description": "Your recorded litters will appear here once you start tracking births"
+    }
+  },
+  "mating": {
+    "section": {
+      "title": "Heat Cycles & Mating",
+      "description": "Track heat cycles and recent mating activities"
+    },
+    "upcomingHeats": {
+      "title": "Upcoming Heat Cycles",
+      "description": "Females approaching their next heat cycle",
+      "daysUntil": "{{days}} days until heat"
+    },
+    "recentMatings": {
+      "title": "Recent Matings",
+      "description": "Breeding activities in the last 30 days",
+      "daysAgo": "{{days}} days ago"
+    },
+    "tips": {
+      "title": "Mating Tips",
+      "optimalTiming": "Optimal breeding window is typically days 10-14 of the heat cycle",
+      "multipleMatings": "Two matings 24–48 hours apart often increase the chance of pregnancy",
+      "monitoring": "Monitor the female's behavior and physical changes during heat"
+    }
+  },
+  "filters": {
+    "all": "All Litters",
+    "active": "Active",
+    "archived": "Archived",
+    "planned": "Planned",
+    "viewMode": "View Mode",
+    "grid": "Grid",
+    "list": "List"
+  },
+  "status": {
+    "planning": "Planning",
+    "mated": "Mated",
+    "pregnant": "Pregnant",
+    "born": "Born",
+    "weaning": "Weaning",
+    "ready": "Ready for New Homes"
+  },
+  "validation": {
+    "damRequired": "Dam (female dog) is required",
+    "sireRequired": "Sire (male dog) is required",
+    "dateRequired": "Date is required",
+    "invalidDate": "Please enter a valid date"
+  },
+  "toasts": {
+    "success": {
+      "litterAdded": "Planned litter added successfully",
+      "matingDateAdded": "Mating date added successfully",
+      "matingDateUpdated": "Mating date updated successfully",
+      "matingDateDeleted": "Mating date deleted successfully",
+      "litterDeleted": "Litter deleted successfully",
+      "litterArchived": "Litter archived successfully",
+      "litterUnarchived": "Litter unarchived successfully"
+    },
+    "error": {
+      "failedToAddLitter": "Failed to add planned litter",
+      "failedToAddMatingDate": "Failed to add mating date",
+      "failedToUpdateMatingDate": "Failed to update mating date",
+      "failedToDeleteMatingDate": "Failed to delete mating date",
+      "failedToDeleteLitter": "Failed to delete litter",
+      "failedToArchiveLitter": "Failed to archive litter",
+      "failedToLoad": "Failed to load litters"
+    }
+  },
+  "loading": {
+    "litters": "Loading litters...",
+    "saving": "Saving...",
+    "deleting": "Deleting...",
+    "archiving": "Archiving..."
+  }
 }

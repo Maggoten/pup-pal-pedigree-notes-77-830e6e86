@@ -12,19 +12,31 @@ import enHome from './locales/en/home.json';
 import svHome from './locales/sv/home.json';
 import enDogs from './locales/en/dogs.json';
 import svDogs from './locales/sv/dogs.json';
+import enLitters from './locales/en/litters.json';
+import svLitters from './locales/sv/litters.json';
+import enPregnancy from './locales/en/pregnancy.json';
+import svPregnancy from './locales/sv/pregnancy.json';
+import enSettings from './locales/en/settings.json';
+import svSettings from './locales/sv/settings.json';
 
 const resources = {
   en: {
     auth: enAuth,
     common: enCommon,
     home: enHome,
-    dogs: enDogs
+    dogs: enDogs,
+    litters: enLitters,
+    pregnancy: enPregnancy,
+    settings: enSettings
   },
   sv: {
     auth: svAuth,
     common: svCommon,
     home: svHome,
-    dogs: svDogs
+    dogs: svDogs,
+    litters: svLitters,
+    pregnancy: svPregnancy,
+    settings: svSettings
   }
 };
 
@@ -36,7 +48,7 @@ i18n
     fallbackLng: 'en',
     debug: false,
     
-    ns: ['common', 'auth', 'home', 'dogs'],
+    ns: ['common', 'auth', 'home', 'dogs', 'litters', 'pregnancy', 'settings'],
     defaultNS: 'common',
     
     interpolation: {

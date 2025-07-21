@@ -1,2 +1,228 @@
 {
+  "navigation": {
+    "pregnancies": "Pregnancies"
+  },
+  "pages": {
+    "pregnancy": {
+      "title": "Pregnancy Management",
+      "description": "Track active and completed pregnancies, monitor development, and manage breeding records"
+    },
+    "pregnancyDetails": {
+      "title": "Pregnancy Details",
+      "description": "Detailed pregnancy tracking and management"
+    }
+  },
+  "tabs": {
+    "journey": "Journey",
+    "temperature": "Temperature", 
+    "symptoms": "Notes",
+    "active": "Active",
+    "completed": "Completed"
+  },
+  "actions": {
+    "addPregnancy": "Add Pregnancy",
+    "managePregnancy": "Manage Pregnancy",
+    "addTemperature": "Add Temperature",
+    "addSymptom": "Add Note",
+    "deleteTemperature": "Delete Temperature",
+    "deleteSymptom": "Delete Note",
+    "save": "Save",
+    "cancel": "Cancel",
+    "showAllCompleted": "Show All Completed"
+  },
+  "display": {
+    "matingDate": "Mating Date",
+    "dueDate": "Due Date",
+    "expectedDueDate": "Expected Due Date",
+    "daysLeft": "Days Left",
+    "daysRemaining": "Days Remaining",
+    "currentWeek": "Week {{week}}",
+    "weekOf": "Week {{week}} of {{total}}",
+    "progressComplete": "{{percent}}% complete",
+    "femaleName": "Female",
+    "maleName": "Male",
+    "breedingPair": "{{femaleName}} × {{maleName}}"
+  },
+  "summary": {
+    "cards": {
+      "matingDate": "Mating Date",
+      "dueDate": "Due Date", 
+      "daysRemaining": "Days Remaining"
+    }
+  },
+  "temperature": {
+    "log": {
+      "title": "Temperature Log",
+      "description": "Track {{femaleName}}'s body temperature",
+      "addTitle": "Record Temperature",
+      "historyTitle": "Temperature History"
+    },
+    "form": {
+      "temperatureLabel": "Temperature (°C)",
+      "temperaturePlaceholder": "38.5",
+      "dateLabel": "Date",
+      "timeLabel": "Time",
+      "notesLabel": "Notes (optional)",
+      "notesPlaceholder": "Any observations..."
+    },
+    "display": {
+      "recorded": "Recorded on {{date}} at {{time}}",
+      "noTemperatures": "No temperature readings recorded yet",
+      "trend": "Temperature trend shows {{trend}}"
+    }
+  },
+  "symptoms": {
+    "log": {
+      "title": "Notes & Symptoms",
+      "description": "Record observations during {{femaleName}}'s pregnancy",
+      "addTitle": "Add Note",
+      "historyTitle": "Pregnancy Notes"
+    },
+    "form": {
+      "symptomLabel": "Observation",
+      "symptomPlaceholder": "Describe what you observed...",
+      "dateLabel": "Date",
+      "timeLabel": "Time",
+      "severityLabel": "Severity",
+      "severityOptions": {
+        "mild": "Mild",
+        "moderate": "Moderate",
+        "severe": "Severe"
+      }
+    },
+    "display": {
+      "recorded": "Recorded on {{date}} at {{time}}",
+      "noSymptoms": "No observations recorded yet for {{femaleName}}",
+      "severity": "Severity: {{level}}"
+    }
+  },
+  "journey": {
+    "title": "Pregnancy Journey",
+    "weeklyDevelopment": "Weekly Development",
+    "currentPhase": "Current Phase",
+    "keyPoints": "Key Points",
+    "checklist": "Week {{week}} Checklist",
+    "noChecklist": "No checklist items for this week",
+    "development": {
+      "week1": {
+        "title": "Fertilization & Early Development",
+        "description": "The eggs are fertilized and begin their journey to the uterus."
+      },
+      "week2": {
+        "title": "Implantation",
+        "description": "Embryos implant in the uterine wall and begin developing."
+      },
+      "week3": {
+        "title": "Organ Formation Begins",
+        "description": "Basic organ systems start to form in the developing puppies."
+      },
+      "week4": {
+        "title": "Heartbeat Development",
+        "description": "Puppy hearts begin beating and can be detected via ultrasound."
+      },
+      "week5": {
+        "title": "Limb Development",
+        "description": "Limbs and facial features begin to develop more distinctly."
+      },
+      "week6": {
+        "title": "Rapid Growth Phase",
+        "description": "Puppies enter a period of rapid growth and development."
+      },
+      "week7": {
+        "title": "Coat Development",
+        "description": "Puppy coats begin to develop and take on their characteristic colors."
+      },
+      "week8": {
+        "title": "Final Development",
+        "description": "Puppies are nearly fully developed and preparing for birth."
+      },
+      "week9": {
+        "title": "Birth Preparation",
+        "description": "Final preparations for birth. Labor may begin any day now."
+      }
+    }
+  },
+  "forms": {
+    "addPregnancy": {
+      "title": "Add New Pregnancy",
+      "femaleLabel": "Female Dog",
+      "maleLabel": "Male Dog",
+      "matingDateLabel": "Mating Date",
+      "expectedDueDateLabel": "Expected Due Date",
+      "femalePlaceholder": "Select female dog",
+      "malePlaceholder": "Select male dog",
+      "description": "Record a new pregnancy for tracking"
+    },
+    "managePregnancy": {
+      "title": "Manage Pregnancy",
+      "markAsCompleted": "Mark as Completed",
+      "deletePregnancy": "Delete Pregnancy",
+      "confirmDelete": "Are you sure you want to delete this pregnancy?",
+      "confirmComplete": "Mark this pregnancy as completed?"
+    }
+  },
+  "empty": {
+    "activePregnancies": {
+      "title": "No Active Pregnancies",
+      "description": "Add a pregnancy to start tracking"
+    },
+    "completedPregnancies": {
+      "title": "No Completed Pregnancies",
+      "description": "Completed pregnancies will appear here"
+    },
+    "allPregnancies": {
+      "title": "No Pregnancies",
+      "description": "Start by adding your first pregnancy"
+    }
+  },
+  "status": {
+    "active": "Active",
+    "completed": "Completed",
+    "overdue": "Overdue"
+  },
+  "validation": {
+    "femaleRequired": "Female dog is required",
+    "maleRequired": "Male dog is required", 
+    "matingDateRequired": "Mating date is required",
+    "dueDateRequired": "Due date is required",
+    "temperatureRequired": "Temperature is required",
+    "temperatureRange": "Temperature must be between 35°C and 42°C",
+    "symptomRequired": "Observation description is required",
+    "dateRequired": "Date is required",
+    "timeRequired": "Time is required",
+    "invalidDate": "Please enter a valid date",
+    "invalidTime": "Please enter a valid time"
+  },
+  "toasts": {
+    "success": {
+      "pregnancyAdded": "Pregnancy added successfully",
+      "pregnancyUpdated": "Pregnancy updated successfully",
+      "pregnancyDeleted": "Pregnancy deleted successfully",
+      "pregnancyCompleted": "Pregnancy marked as completed",
+      "temperatureAdded": "Temperature recorded successfully",
+      "temperatureDeleted": "Temperature deleted successfully",
+      "symptomAdded": "Note added successfully",
+      "symptomDeleted": "Note deleted successfully"
+    },
+    "error": {
+      "failedToAddPregnancy": "Failed to add pregnancy",
+      "failedToUpdatePregnancy": "Failed to update pregnancy",
+      "failedToDeletePregnancy": "Failed to delete pregnancy",
+      "failedToCompletePregnancy": "Failed to complete pregnancy",
+      "failedToAddTemperature": "Failed to record temperature",
+      "failedToDeleteTemperature": "Failed to delete temperature",
+      "failedToAddSymptom": "Failed to add note",
+      "failedToDeleteSymptom": "Failed to delete note",
+      "failedToLoad": "Failed to load pregnancy data",
+      "pregnancyNotFound": "Pregnancy not found"
+    }
+  },
+  "loading": {
+    "pregnancies": "Loading pregnancies...",
+    "temperatures": "Loading temperature log...",
+    "symptoms": "Loading notes...",
+    "saving": "Saving...",
+    "deleting": "Deleting...",
+    "completing": "Completing..."
+  }
 }

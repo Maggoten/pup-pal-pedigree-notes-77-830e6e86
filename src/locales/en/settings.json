@@ -1,2 +1,171 @@
 {
+  "navigation": {
+    "settings": "Settings"
+  },
+  "dialog": {
+    "title": "Settings",
+    "loadingError": "Settings could not be loaded. Please try again later."
+  },
+  "tabs": {
+    "personal": "Personal",
+    "account": "Account",
+    "help": "Help"
+  },
+  "personal": {
+    "title": "Personal Information",
+    "description": "Update your personal information and contact details",
+    "kennel": {
+      "title": "Kennel Information", 
+      "description": "Set your kennel name and other business details"
+    },
+    "fields": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "kennelName": "Kennel Name",
+      "address": "Address",
+      "website": "Website",
+      "phone": "Phone",
+      "firstNamePlaceholder": "First name",
+      "lastNamePlaceholder": "Last name",
+      "kennelNamePlaceholder": "Kennel name",
+      "addressPlaceholder": "Address",
+      "websitePlaceholder": "https://...",
+      "phonePlaceholder": "Phone number"
+    },
+    "actions": {
+      "saveChanges": "Save Changes",
+      "saving": "Saving..."
+    }
+  },
+  "account": {
+    "title": "Account",
+    "description": "Manage your account settings and user preferences",
+    "fields": {
+      "email": "Email",
+      "name": "Name",
+      "language": "Language"
+    },
+    "actions": {
+      "logout": "Logout"
+    },
+    "subscription": {
+      "title": "Subscription",
+      "description": "Manage your subscription and billing"
+    },
+    "password": {
+      "title": "Change Password",
+      "description": "Update your account password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "changePassword": "Change Password"
+    },
+    "sharing": {
+      "title": "Account Sharing",
+      "description": "Share access to your breeding records with other users",
+      "addUser": "Add User",
+      "removeUser": "Remove User",
+      "email": "Email Address",
+      "role": "Role",
+      "dateAdded": "Date Added",
+      "roles": {
+        "viewer": "Viewer",
+        "editor": "Editor"
+      },
+      "roleDescriptions": {
+        "viewer": "Can view breeding records and dog information but cannot make changes",
+        "editor": "Can edit breeding records and manage dogs but cannot change account settings"
+      },
+      "emptyState": {
+        "title": "No shared users",
+        "description": "You haven't shared access with anyone yet"
+      }
+    },
+    "deleteAccount": {
+      "title": "Delete Account",
+      "description": "Permanently delete your account and all associated data",
+      "warning": "This action cannot be undone",
+      "button": "Delete Account",
+      "confirmTitle": "Are you sure?",
+      "confirmDescription": "This will permanently delete your account and all your data. This action cannot be undone.",
+      "confirmButton": "Yes, delete my account",
+      "cancelButton": "Cancel"
+    }
+  },
+  "help": {
+    "title": "Help & Support",
+    "description": "Get help with using the application",
+    "sections": {
+      "gettingStarted": {
+        "title": "Getting Started",
+        "description": "Learn the basics of using the breeding management system"
+      },
+      "managingDogs": {
+        "title": "Managing Dogs",
+        "description": "How to add, edit, and organize your dog profiles"
+      },
+      "trackingPregnancies": {
+        "title": "Tracking Pregnancies",
+        "description": "Monitor pregnancies and record important milestones"
+      },
+      "planningLitters": {
+        "title": "Planning Litters",
+        "description": "Plan future breeding combinations and track heat cycles"
+      },
+      "recordKeeping": {
+        "title": "Record Keeping",
+        "description": "Best practices for maintaining accurate breeding records"
+      }
+    },
+    "support": {
+      "title": "Need More Help?",
+      "description": "Contact our support team for additional assistance",
+      "email": "support@breedingapp.com"
+    }
+  },
+  "language": {
+    "title": "Language Settings",
+    "description": "Choose your preferred language",
+    "english": "English",
+    "swedish": "Svenska",
+    "changeLanguage": "Change Language"
+  },
+  "validation": {
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "kennelNameRequired": "Kennel name is required",
+    "invalidWebsite": "Invalid website URL",
+    "emailRequired": "Email address is required",
+    "invalidEmail": "Please enter a valid email address",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordsDoNotMatch": "Passwords do not match"
+  },
+  "toasts": {
+    "success": {
+      "personalInfoUpdated": "Personal information updated successfully",
+      "kennelInfoUpdated": "Kennel information updated successfully",
+      "passwordChanged": "Password changed successfully",
+      "userAdded": "User added successfully",
+      "userRemoved": "User removed successfully",
+      "languageChanged": "Language changed successfully"
+    },
+    "error": {
+      "failedToUpdatePersonalInfo": "Failed to update personal information",
+      "failedToUpdateKennelInfo": "Failed to update kennel information",
+      "failedToChangePassword": "Failed to change password",
+      "failedToAddUser": "Failed to add user",
+      "failedToRemoveUser": "Failed to remove user",
+      "failedToLoadSettings": "Failed to load settings",
+      "incorrectCurrentPassword": "Current password is incorrect"
+    }
+  },
+  "loading": {
+    "settings": "Loading settings...",
+    "saving": "Saving...",
+    "updating": "Updating...",
+    "adding": "Adding...",
+    "removing": "Removing...",
+    "changingPassword": "Changing password..."
+  }
 }

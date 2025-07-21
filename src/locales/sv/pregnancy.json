@@ -1,2 +1,228 @@
 {
+  "navigation": {
+    "pregnancies": "Dräktigheter"
+  },
+  "pages": {
+    "pregnancy": {
+      "title": "Dräktighetshantering",
+      "description": "Spåra aktiva och avslutade dräktigheter, övervaka utveckling och hantera avelregister"
+    },
+    "pregnancyDetails": {
+      "title": "Dräktighetsdetaljer",
+      "description": "Detaljerad dräktighetsspårning och hantering"
+    }
+  },
+  "tabs": {
+    "journey": "Utveckling",
+    "temperature": "Temperatur",
+    "symptoms": "Anteckningar",
+    "active": "Aktiva",
+    "completed": "Avslutade"
+  },
+  "actions": {
+    "addPregnancy": "Lägg till Dräktighet",
+    "managePregnancy": "Hantera Dräktighet",
+    "addTemperature": "Lägg till Temperatur",
+    "addSymptom": "Lägg till Anteckning",
+    "deleteTemperature": "Ta bort Temperatur",
+    "deleteSymptom": "Ta bort Anteckning",
+    "save": "Spara",
+    "cancel": "Avbryt",
+    "showAllCompleted": "Visa Alla Avslutade"
+  },
+  "display": {
+    "matingDate": "Parningsdatum",
+    "dueDate": "Födelsedatum",
+    "expectedDueDate": "Förväntat Födelsedatum",
+    "daysLeft": "Dagar Kvar",
+    "daysRemaining": "Dagar Kvar",
+    "currentWeek": "Vecka {{week}}",
+    "weekOf": "Vecka {{week}} av {{total}}",
+    "progressComplete": "{{percent}}% klart",
+    "femaleName": "Tik",
+    "maleName": "Hanhund",
+    "breedingPair": "{{femaleName}} × {{maleName}}"
+  },
+  "summary": {
+    "cards": {
+      "matingDate": "Parningsdatum",
+      "dueDate": "Födelsedatum",
+      "daysRemaining": "Dagar Kvar"
+    }
+  },
+  "temperature": {
+    "log": {
+      "title": "Temperaturlogg",
+      "description": "Spåra {{femaleName}}s kroppstemperatur",
+      "addTitle": "Registrera Temperatur",
+      "historyTitle": "Temperaturhistorik"
+    },
+    "form": {
+      "temperatureLabel": "Temperatur (°C)",
+      "temperaturePlaceholder": "38,5",
+      "dateLabel": "Datum",
+      "timeLabel": "Tid",
+      "notesLabel": "Anteckningar (valfritt)",
+      "notesPlaceholder": "Eventuella observationer..."
+    },
+    "display": {
+      "recorded": "Registrerad {{date}} kl {{time}}",
+      "noTemperatures": "Inga temperaturmätningar registrerade ännu",
+      "trend": "Temperaturtrend visar {{trend}}"
+    }
+  },
+  "symptoms": {
+    "log": {
+      "title": "Anteckningar & Symptom",
+      "description": "Registrera observationer under {{femaleName}}s dräktighet",
+      "addTitle": "Lägg till Anteckning",
+      "historyTitle": "Dräktighetsanteckningar"
+    },
+    "form": {
+      "symptomLabel": "Observation",
+      "symptomPlaceholder": "Beskriv vad du observerade...",
+      "dateLabel": "Datum",
+      "timeLabel": "Tid",
+      "severityLabel": "Allvarlighetsgrad",
+      "severityOptions": {
+        "mild": "Mild",
+        "moderate": "Måttlig",
+        "severe": "Allvarlig"
+      }
+    },
+    "display": {
+      "recorded": "Registrerad {{date}} kl {{time}}",
+      "noSymptoms": "Inga observationer registrerade ännu för {{femaleName}}",
+      "severity": "Allvarlighetsgrad: {{level}}"
+    }
+  },
+  "journey": {
+    "title": "Dräktighetsutveckling",
+    "weeklyDevelopment": "Veckovis Utveckling",
+    "currentPhase": "Aktuell Fas",
+    "keyPoints": "Viktiga Punkter",
+    "checklist": "Vecka {{week}} Checklista",
+    "noChecklist": "Inga checklistepunkter för denna vecka",
+    "development": {
+      "week1": {
+        "title": "Befruktning & Tidig Utveckling",
+        "description": "Äggen befruktats och börjar sin resa till livmodern."
+      },
+      "week2": {
+        "title": "Implantation",
+        "description": "Embryon implanteras i livmoderväggen och börjar utvecklas."
+      },
+      "week3": {
+        "title": "Organbildning Börjar",
+        "description": "Grundläggande organsystem börjar bildas hos de utvecklande valparna."
+      },
+      "week4": {
+        "title": "Hjärtslagsutveckling",
+        "description": "Valparnas hjärtan börjar slå och kan upptäckas via ultraljud."
+      },
+      "week5": {
+        "title": "Extremitetsutveckling",
+        "description": "Extremiteter och ansiktsdrag börjar utvecklas mer distinkt."
+      },
+      "week6": {
+        "title": "Snabb Tillväxtfas",
+        "description": "Valparna går in i en period av snabb tillväxt och utveckling."
+      },
+      "week7": {
+        "title": "Pälsutveckling",
+        "description": "Valparnas päls börjar utvecklas och anta sina karakteristiska färger."
+      },
+      "week8": {
+        "title": "Slutlig Utveckling",
+        "description": "Valparna är nästan fullt utvecklade och förbereder sig för födelse."
+      },
+      "week9": {
+        "title": "Förberedelser för Födelse",
+        "description": "Slutliga förberedelser för födelse. Förlossning kan börja när som helst nu."
+      }
+    }
+  },
+  "forms": {
+    "addPregnancy": {
+      "title": "Lägg till Ny Dräktighet",
+      "femaleLabel": "Tik",
+      "maleLabel": "Hanhund",
+      "matingDateLabel": "Parningsdatum",
+      "expectedDueDateLabel": "Förväntat Födelsedatum",
+      "femalePlaceholder": "Välj tik",
+      "malePlaceholder": "Välj hanhund",
+      "description": "Registrera en ny dräktighet för spårning"
+    },
+    "managePregnancy": {
+      "title": "Hantera Dräktighet",
+      "markAsCompleted": "Markera som Avslutad",
+      "deletePregnancy": "Ta bort Dräktighet",
+      "confirmDelete": "Är du säker på att du vill ta bort denna dräktighet?",
+      "confirmComplete": "Markera denna dräktighet som avslutad?"
+    }
+  },
+  "empty": {
+    "activePregnancies": {
+      "title": "Inga Aktiva Dräktigheter",
+      "description": "Lägg till en dräktighet för att börja spåra"
+    },
+    "completedPregnancies": {
+      "title": "Inga Avslutade Dräktigheter",
+      "description": "Avslutade dräktigheter kommer att visas här"
+    },
+    "allPregnancies": {
+      "title": "Inga Dräktigheter",
+      "description": "Börja med att lägga till din första dräktighet"
+    }
+  },
+  "status": {
+    "active": "Aktiv",
+    "completed": "Avslutad",
+    "overdue": "Försenad"
+  },
+  "validation": {
+    "femaleRequired": "Tik krävs",
+    "maleRequired": "Hanhund krävs",
+    "matingDateRequired": "Parningsdatum krävs",
+    "dueDateRequired": "Födelsedatum krävs",
+    "temperatureRequired": "Temperatur krävs",
+    "temperatureRange": "Temperatur måste vara mellan 35°C och 42°C",
+    "symptomRequired": "Observationsbeskrivning krävs",
+    "dateRequired": "Datum krävs",
+    "timeRequired": "Tid krävs",
+    "invalidDate": "Vänligen ange ett giltigt datum",
+    "invalidTime": "Vänligen ange en giltig tid"
+  },
+  "toasts": {
+    "success": {
+      "pregnancyAdded": "Dräktighet tillagd",
+      "pregnancyUpdated": "Dräktighet uppdaterad",
+      "pregnancyDeleted": "Dräktighet borttagen",
+      "pregnancyCompleted": "Dräktighet markerad som avslutad",
+      "temperatureAdded": "Temperatur registrerad",
+      "temperatureDeleted": "Temperatur borttagen",
+      "symptomAdded": "Anteckning tillagd",
+      "symptomDeleted": "Anteckning borttagen"
+    },
+    "error": {
+      "failedToAddPregnancy": "Misslyckades med att lägga till dräktighet",
+      "failedToUpdatePregnancy": "Misslyckades med att uppdatera dräktighet",
+      "failedToDeletePregnancy": "Misslyckades med att ta bort dräktighet",
+      "failedToCompletePregnancy": "Misslyckades med att avsluta dräktighet",
+      "failedToAddTemperature": "Misslyckades med att registrera temperatur",
+      "failedToDeleteTemperature": "Misslyckades med att ta bort temperatur",
+      "failedToAddSymptom": "Misslyckades med att lägga till anteckning",
+      "failedToDeleteSymptom": "Misslyckades med att ta bort anteckning",
+      "failedToLoad": "Misslyckades med att ladda dräktighetsdata",
+      "pregnancyNotFound": "Dräktighet hittades inte"
+    }
+  },
+  "loading": {
+    "pregnancies": "Laddar dräktigheter...",
+    "temperatures": "Laddar temperaturlogg...",
+    "symptoms": "Laddar anteckningar...",
+    "saving": "Sparar...",
+    "deleting": "Tar bort...",
+    "completing": "Avslutar..."
+  }
 }
