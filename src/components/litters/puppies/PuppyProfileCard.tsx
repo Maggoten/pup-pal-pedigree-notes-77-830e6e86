@@ -160,8 +160,8 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             className="flex-1"
             onClick={handleRecordMeasurement}
           >
-            <BarChart2 className="h-4 w-4 mr-1" />
-            {isMobile ? "Record" : "Record Data"}
+            <BarChart2 className={`h-4 w-4 ${isMobile ? '' : 'mr-1'}`} />
+            {!isMobile && "Record Data"}
           </Button>
           <Button 
             variant="outline" 
