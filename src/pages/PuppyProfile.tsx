@@ -178,10 +178,6 @@ const PuppyProfile: React.FC = () => {
 
             {/* Basic Info */}
             <div className="space-y-6">
-              <div className="flex items-center gap-4">
-                <h2 className="text-3xl font-bold text-warmgreen-800">{selectedPuppy.name}</h2>
-                {getStatusBadge(selectedPuppy)}
-              </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="flex items-center gap-2">
