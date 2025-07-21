@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { ArrowLeft, Edit, Circle, Calendar, Weight, Ruler, FileText, BarChart2 } from 'lucide-react';
+import { ArrowLeft, Edit, Circle, Calendar, Weight, Ruler, FileText } from 'lucide-react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Puppy } from '@/types/breeding';
 import { usePuppyQueries } from '@/hooks/usePuppyQueries';
@@ -307,13 +307,6 @@ const PuppyProfile: React.FC = () => {
         </CardContent>
 
         <CardFooter className="flex justify-end gap-2">
-          <Button 
-            variant="outline" 
-            onClick={() => setShowMeasurementsDialog(true)}
-          >
-            <BarChart2 className="h-4 w-4 mr-2" />
-            Record Measurements
-          </Button>
           <Button onClick={() => setShowEditDialog(true)}>
             <Edit className="h-4 w-4 mr-2" />
             Edit Puppy
