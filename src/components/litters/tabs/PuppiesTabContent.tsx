@@ -146,10 +146,10 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
       
       <CardContent className={isMobile ? 'p-4' : 'p-6'}>
         {localPuppies && localPuppies.length > 0 ? (
-          <div className={`grid gap-4 ${
+          <div className={`grid gap-3 ${
             isMobile 
               ? 'grid-cols-1' 
-              : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'
+              : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
           }`}>
             {localPuppies.map((puppy) => (
               <PuppyProfileCard
