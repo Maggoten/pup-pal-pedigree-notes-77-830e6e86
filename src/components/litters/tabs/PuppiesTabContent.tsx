@@ -10,6 +10,7 @@ import { PlusCircle, PawPrint } from 'lucide-react';
 import AddPuppyDialog from '../AddPuppyDialog';
 import PuppyMeasurementsDialog from '../puppies/PuppyMeasurementsDialog';
 import PuppyDetailsDialog from '../PuppyDetailsDialog';
+import PuppyProfileCard from '../puppies/PuppyProfileCard';
 
 interface PuppiesTabContentProps {
   puppies: Puppy[];
@@ -134,20 +135,27 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
         </div>
       </CardHeader>
       
-      <CardContent className="p-4">
+      <CardContent className="p-6">
         {localPuppies && localPuppies.length > 0 ? (
-          <PuppyList 
-            puppies={localPuppies} 
-            onUpdatePuppy={updatePuppyNames} 
-            onDeletePuppy={handleDeletePuppy}
-            onPuppyClick={handlePuppyClick}
-            selectedPuppyId={selectedPuppy?.id}
-            onAddMeasurement={handleAddMeasurement}
-            litterAge={litterAge}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {localPuppies.map((puppy) => (
+              <PuppyProfileCard
+                key={puppy.id}
+                puppy={puppy}
+                onPuppyClick={handlePuppyClick}
+                onAddMeasurement={handleAddMeasurement}
+                onUpdatePuppy={updatePuppyNames}
+                onDeletePuppy={handleDeletePuppy}
+                isSelected={selectedPuppy?.id === puppy.id}
+                litterAge={litterAge}
+              />
+            ))}
+          </div>
         ) : (
-          <div className="text-center py-8 space-y-3">
-            <Skeleton className="h-12 w-12 rounded-full mx-auto" />
+          <div className="text-center py-12 space-y-4">
+            <div className="w-20 h-20 bg-warmbeige-100 rounded-full flex items-center justify-center mx-auto">
+              <PawPrint className="h-10 w-10 text-warmbeige-400" />
+            </div>
             <h3 className="text-lg font-medium">No Puppies Added Yet</h3>
             <p className="text-muted-foreground max-w-md mx-auto">
               Add your puppies to track their growth, development milestones, and keep detailed records.

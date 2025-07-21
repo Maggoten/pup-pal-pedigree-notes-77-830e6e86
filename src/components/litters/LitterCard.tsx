@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, Dog, Archive, Users } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Litter } from '@/types/breeding';
 
 interface LitterCardProps {
@@ -12,9 +13,16 @@ interface LitterCardProps {
   onSelect: (litter: Litter) => void;
   onArchive?: (litter: Litter) => void;
   isSelected?: boolean;
+  damImageUrl?: string;
 }
 
-const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, isSelected = false }) => {
+const LitterCard: React.FC<LitterCardProps> = ({ 
+  litter, 
+  onSelect, 
+  onArchive, 
+  isSelected = false,
+  damImageUrl 
+}) => {
   // Parse ISO date string to Date object
   const birthDate = parseISO(litter.dateOfBirth);
   
@@ -36,10 +44,28 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
       } cursor-pointer bg-white border border-warmbeige-100 hover:shadow-md`}
       onClick={() => onSelect(litter)}
     >
-      <CardHeader className={`pb-1 pt-4 px-4 ${litter.archived ? 'bg-warmbeige-50' : 'bg-warmgreen-50/30'}`}>
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg font-semibold">{litter.name}</CardTitle>
-          <div className="flex gap-1">
+      <CardHeader className={`pb-3 pt-4 px-4 ${litter.archived ? 'bg-warmbeige-50' : 'bg-warmgreen-50/30'}`}>
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3 flex-1">
+            <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
+              {damImageUrl ? (
+                <AvatarImage src={damImageUrl} alt={litter.damName} className="object-cover" />
+              ) : (
+                <AvatarFallback className="bg-warmgreen-100 text-warmgreen-800 font-medium">
+                  {litter.damName.charAt(0)}
+                </AvatarFallback>
+              )}
+            </Avatar>
+            
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg font-semibold truncate">{litter.name}</CardTitle>
+              <p className="text-sm text-muted-foreground truncate mt-1">
+                {litter.damName} × {litter.sireName}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex flex-col gap-1 items-end">
             {isRecent && !litter.archived && (
               <Badge variant="active" className="text-xs px-2.5 py-0.5 rounded-full">Active</Badge>
             )}
@@ -60,11 +86,6 @@ const LitterCard: React.FC<LitterCardProps> = ({ litter, onSelect, onArchive, is
           <div className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5 text-primary opacity-70" />
             <span>Born: {format(birthDate, 'MMM d, yyyy')}</span>
-          </div>
-          
-          <div className="flex items-center gap-1.5">
-            <Dog className="h-3.5 w-3.5 text-primary opacity-70" />
-            <span className="line-clamp-1">{litter.damName} × {litter.sireName}</span>
           </div>
           
           {puppyCount > 0 && (
