@@ -28,7 +28,7 @@
   },
   "reminders": {
     "title": "Påminnelser",
-    "hasRemindersDesc": "Viktiga uppgifter och kommande händelser",
+    "hasRemindersDesc": "Uppgifter och kommande händelser",
     "noRemindersDesc": "Alla uppgifter slutförda - bra jobbat!",
     "loading": "Laddar påminnelser...",
     "error": "Det uppstod ett problem med att ladda dina påminnelser. Vänligen försök igen senare.",
@@ -36,7 +36,7 @@
   },
   "calendar": {
     "loading": "Laddar kalender...",
-    "error": "Det uppstod ett problem med att ladda dina kalenderhändelser. Vänligen uppdatera sidan.",
+    "error": "Det uppstod ett problem med att ladda dina kalenderhändelser. Vänligen försök igen senare.",
     "today": "Idag",
     "addEvent": "Lägg till Händelse",
     "syncCalendar": "Synkronisera Kalender",
@@ -45,33 +45,33 @@
   },
   "dialogs": {
     "reminders": {
-      "title": "Avelpåminnelser",
-      "description": "Hantera dina avelprogramuppgifter och påminnelser",
+      "title": "Avelspåminnelser",
+      "description": "Hantera dina uppgifter och påminnelser",
       "addNewReminder": "Lägg till Ny Påminnelse",
       "loadingError": "Det uppstod ett problem med att ladda dina påminnelser. Vänligen uppdatera sidan.",
       "close": "Stäng"
     },
     "addEvent": {
-      "title": "Lägg till Kalenderhändelse"
+      "title": "Lägg till Event"
     },
     "editEvent": {
-      "title": "Redigera Kalenderhändelse",
-      "updateEvent": "Uppdatera Händelse",
-      "deleteEvent": "Ta bort Händelse"
+      "title": "Redigera Event",
+      "updateEvent": "Uppdatera Event",
+      "deleteEvent": "Ta bort Event"
     }
   },
   "forms": {
     "event": {
-      "eventTitle": "Händelsetitel",
-      "eventTitlePlaceholder": "Ange händelsetitel",
+      "eventTitle": "Eventtitel",
+      "eventTitlePlaceholder": "Ange eventtitel",
       "date": "Datum",
       "pickDate": "Välj ett datum",
       "time": "Tid",
-      "associatedDog": "Associerad Hund (Valfritt)",
+      "associatedDog": "Hund (Valfritt)",
       "selectDogPlaceholder": "Välj en hund (valfritt)",
       "notes": "Anteckningar (Valfritt)",
-      "notesPlaceholder": "Lägg till anteckningar om denna händelse",
-      "addEvent": "Lägg till Händelse"
+      "notesPlaceholder": "Lägg till anteckningar om detta event",
+      "addEvent": "Lägg till Event"
     },
     "reminder": {
       "title": "Titel",
