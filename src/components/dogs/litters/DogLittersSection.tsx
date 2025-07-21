@@ -8,6 +8,7 @@ import { litterService } from '@/services/LitterService';
 import { toast } from '@/hooks/use-toast';
 import DogLitterItem from './DogLitterItem';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface DogLittersSectionProps {
   dog: Dog;
@@ -18,6 +19,7 @@ const DogLittersSection: React.FC<DogLittersSectionProps> = ({ dog }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { t } = useTranslation('dogs');
 
   useEffect(() => {
     const fetchDogLitters = async () => {
@@ -36,7 +38,7 @@ const DogLittersSection: React.FC<DogLittersSectionProps> = ({ dog }) => {
         setError(errorMessage);
         toast({
           title: "Error",
-          description: `Failed to load ${dog.name}'s litters: ${errorMessage}`,
+          description: t('litters.error', { error: errorMessage }),
           variant: "destructive"
         });
       } finally {
@@ -58,12 +60,12 @@ const DogLittersSection: React.FC<DogLittersSectionProps> = ({ dog }) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">{dog.name}'s Litters</CardTitle>
+          <CardTitle className="text-lg">{t('litters.title', { dogName: dog.name })}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin mr-2" />
-            <span>Loading litters...</span>
+            <span>{t('litters.loading')}</span>
           </div>
         </CardContent>
       </Card>
@@ -74,11 +76,11 @@ const DogLittersSection: React.FC<DogLittersSectionProps> = ({ dog }) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">{dog.name}'s Litters</CardTitle>
+          <CardTitle className="text-lg">{t('litters.title', { dogName: dog.name })}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-red-600 text-center py-4">
-            Error loading litters: {error}
+            {t('litters.error', { error })}
           </p>
         </CardContent>
       </Card>
@@ -90,11 +92,17 @@ const DogLittersSection: React.FC<DogLittersSectionProps> = ({ dog }) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Heart className="h-5 w-5" />
-          {dog.name}'s Litters
+          {t('litters.title', { dogName: dog.name })}
         </CardTitle>
         <CardDescription>
-          All litters where {dog.name} is involved as {dog.gender === 'male' ? 'sire' : 'dam'}
-          {litters.length > 0 && ` (${litters.length} litter${litters.length === 1 ? '' : 's'})`}
+          {t('litters.description', { 
+            dogName: dog.name, 
+            role: t(`litters.roles.${dog.gender === 'male' ? 'sire' : 'dam'}`)
+          })}
+          {litters.length > 0 && ` ${litters.length === 1 
+            ? t('litters.count', { count: litters.length })
+            : t('litters.countPlural', { count: litters.length })
+          }`}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -102,12 +110,12 @@ const DogLittersSection: React.FC<DogLittersSectionProps> = ({ dog }) => {
           <div className="text-center py-8">
             <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-muted-foreground">
-              {dog.name} hasn't been involved in any litters yet.
+              {t('litters.empty.title', { dogName: dog.name })}
             </p>
             <p className="text-sm text-muted-foreground mt-2">
               {dog.gender === 'male' 
-                ? 'When this dog sires a litter, it will appear here.'
-                : 'When this dog has a litter, it will appear here.'
+                ? t('litters.empty.sireLine')
+                : t('litters.empty.damLine')
               }
             </p>
           </div>

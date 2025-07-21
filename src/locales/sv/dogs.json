@@ -181,10 +181,6 @@
     },
     "loading": "Laddar dina hundar..."
   },
-  "litters": {
-    "title": "Kullar",
-    "noLitters": "Inga kullar registrerade för denna hund ännu."
-  },
   "delete": {
     "title": "Ta bort Hund",
     "message": "Är du säker på att du vill ta bort {{dogName}}? Denna åtgärd kan inte ångras.",
@@ -225,6 +221,28 @@
       "title": "Börja spåra löp för {{dogName}}",
       "description": "{{dogName}} är i avelsålder men har inga löpregistreringar",
       "suggestion": "Börja spåra löp för bättre avelshantering"
+    }
+  },
+  "litters": {
+    "title": "{{dogName}}s Kullar",
+    "description": "Alla kullar där {{dogName}} är involverad som {{role}}",
+    "count": "({{count}} kull)",
+    "countPlural": "({{count}} kullar)",
+    "loading": "Laddar kullar...",
+    "error": "Fel vid laddning av kullar: {{error}}",
+    "empty": {
+      "title": "{{dogName}} har inte varit involverad i några kullar än.",
+      "sireLine": "När denna hund blir far till en kull kommer den att visas här.",
+      "damLine": "När denna hund får en kull kommer den att visas här."
+    },
+    "item": {
+      "born": "Född: {{date}}",
+      "archived": "Arkiverad",
+      "viewDetails": "Visa Detaljer"
+    },
+    "roles": {
+      "sire": "far",
+      "dam": "mor"
     }
   },
   "toast": {

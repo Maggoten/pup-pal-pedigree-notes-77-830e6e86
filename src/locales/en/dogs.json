@@ -181,10 +181,6 @@
     },
     "loading": "Loading your dogs..."
   },
-  "litters": {
-    "title": "Litters",
-    "noLitters": "No litters recorded for this dog yet."
-  },
   "delete": {
     "title": "Delete Dog",
     "message": "Are you sure you want to delete {{dogName}}? This action cannot be undone.",
@@ -225,6 +221,28 @@
       "title": "Start Heat Tracking for {{dogName}}",
       "description": "{{dogName}} is of breeding age but has no heat records",
       "suggestion": "Begin tracking heat cycles for better breeding management"
+    }
+  },
+  "litters": {
+    "title": "{{dogName}}'s Litters",
+    "description": "All litters where {{dogName}} is involved as {{role}}",
+    "count": "({{count}} litter)",
+    "countPlural": "({{count}} litters)",
+    "loading": "Loading litters...",
+    "error": "Error loading litters: {{error}}",
+    "empty": {
+      "title": "{{dogName}} hasn't been involved in any litters yet.",
+      "sireLine": "When this dog sires a litter, it will appear here.",
+      "damLine": "When this dog has a litter, it will appear here."
+    },
+    "item": {
+      "born": "Born: {{date}}",
+      "archived": "Archived",
+      "viewDetails": "View Details"
+    },
+    "roles": {
+      "sire": "sire",
+      "dam": "dam"
     }
   },
   "toast": {

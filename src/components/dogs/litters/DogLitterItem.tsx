@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { Eye } from 'lucide-react';
 import { Litter } from '@/types/breeding';
+import { useTranslation } from 'react-i18next';
 
 interface DogLitterItemProps {
   litter: Litter;
@@ -12,6 +13,7 @@ interface DogLitterItemProps {
 }
 
 const DogLitterItem: React.FC<DogLitterItemProps> = ({ litter, onViewDetails }) => {
+  const { t } = useTranslation('dogs');
   const formattedDate = format(new Date(litter.dateOfBirth), 'yyyy-MM-dd');
   const litterLabel = `${litter.damName} × ${litter.sireName}`;
 
@@ -24,11 +26,11 @@ const DogLitterItem: React.FC<DogLitterItemProps> = ({ litter, onViewDetails }) 
               {litterLabel}
             </p>
             <p className="text-sm text-muted-foreground">
-              Born: {formattedDate}
+              {t('litters.item.born', { date: formattedDate })}
             </p>
             {litter.archived && (
               <span className="inline-block mt-1 px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                Archived
+                {t('litters.item.archived')}
               </span>
             )}
           </div>
@@ -39,7 +41,7 @@ const DogLitterItem: React.FC<DogLitterItemProps> = ({ litter, onViewDetails }) 
             className="ml-4"
           >
             <Eye className="h-4 w-4 mr-1" />
-            View Details
+            {t('litters.item.viewDetails')}
           </Button>
         </div>
       </CardContent>
