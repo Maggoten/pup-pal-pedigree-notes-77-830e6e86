@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CalendarIcon, ChevronLeft, ChevronRight, Plus, RefreshCcw } from 'lucide-react';
 import { CardHeader, CardTitle } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslation } from 'react-i18next';
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -28,6 +29,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   isSyncing = false
 }) => {
   const isMobile = useIsMobile();
+  const { t } = useTranslation('home');
   
   // Get current month name and year
   const headerMonthYear = format(currentDate, 'MMMM yyyy');
@@ -68,12 +70,12 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                 onClick={handleTodayClick}
               >
                 <CalendarIcon className="h-4 w-4" />
-                Today
+                {t('calendar.today')}
               </Button>
             )}
             <Button variant="outline" size="sm" className="bg-white hover:bg-warmbeige-100" onClick={onAddEvent}>
               <Plus className="h-4 w-4 mr-1" />
-              <span>Add Event</span>
+              <span>{t('calendar.addEvent')}</span>
             </Button>
           </div>
         </div>
@@ -99,7 +101,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                 onClick={handleTodayClick}
               >
                 <CalendarIcon className="h-4 w-4" />
-                Today
+                {t('calendar.today')}
               </Button>
             )}
             {onSyncCalendar && (
@@ -111,12 +113,12 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                 disabled={isSyncing}
               >
                 <RefreshCcw className={`h-4 w-4 mr-1 ${isSyncing ? 'animate-spin' : ''}`} />
-                <span>{isSyncing ? 'Syncing...' : 'Sync Calendar'}</span>
+                <span>{isSyncing ? t('calendar.syncing') : t('calendar.syncCalendar')}</span>
               </Button>
             )}
             <Button variant="outline" size="sm" className="bg-white hover:bg-warmbeige-100" onClick={onAddEvent}>
               <Plus className="h-4 w-4 mr-1" />
-              <span>Add Event</span>
+              <span>{t('calendar.addEvent')}</span>
             </Button>
           </div>
         </div>

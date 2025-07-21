@@ -25,5 +25,21 @@
   "tips": {
     "weighPuppies": "Väg dina valpar dagligen under den första veckan för att säkerställa en hälsosam tillväxt.",
     "registerLitter": "Kom ihåg att registrera din kull hos kennelklubben."
+  },
+  "reminders": {
+    "title": "Påminnelser",
+    "hasRemindersDesc": "Viktiga uppgifter och kommande händelser",
+    "noRemindersDesc": "Alla uppgifter slutförda - bra jobbat!",
+    "loading": "Laddar påminnelser...",
+    "error": "Det uppstod ett problem med att ladda dina påminnelser. Vänligen försök igen senare.",
+    "viewAll": "Visa Alla Påminnelser"
+  },
+  "calendar": {
+    "loading": "Laddar kalender...",
+    "error": "Det uppstod ett problem med att ladda dina kalenderhändelser. Vänligen uppdatera sidan.",
+    "today": "Idag",
+    "addEvent": "Lägg till Händelse",
+    "syncCalendar": "Synkronisera Kalender",
+    "syncing": "Synkroniserar..."
   }
 }

@@ -25,5 +25,21 @@
   "tips": {
     "weighPuppies": "Weigh your puppies daily during the first week to ensure healthy growth.",
     "registerLitter": "Remember to register your litter with the kennel club."
+  },
+  "reminders": {
+    "title": "Reminders",
+    "hasRemindersDesc": "Important tasks and upcoming events",
+    "noRemindersDesc": "All tasks completed - great job!",
+    "loading": "Loading reminders...",
+    "error": "There was a problem loading your reminders. Please try again later.",
+    "viewAll": "View All Reminders"
+  },
+  "calendar": {
+    "loading": "Loading calendar...",
+    "error": "There was a problem loading your calendar events. Please try refreshing the page.",
+    "today": "Today",
+    "addEvent": "Add Event",
+    "syncCalendar": "Sync Calendar",
+    "syncing": "Syncing..."
   }
 }

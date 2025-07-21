@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AddEventFormValues } from './calendar/types';
 import CalendarContent from './calendar/CalendarContent';
 import { useComprehensiveCalendarSync } from '@/hooks/useComprehensiveCalendarSync';
+import { useTranslation } from 'react-i18next';
 
 // Define props interface for calendar events data
 interface CalendarEventsData {
@@ -25,10 +26,10 @@ interface BreedingCalendarProps {
 }
 
 // Skeleton loader for calendar content
-const CalendarSkeleton = () => (
+const CalendarSkeleton = ({ t }: { t: any }) => (
   <div className="flex flex-col items-center justify-center py-12">
     <Loader2 className="h-10 w-10 animate-spin text-primary mb-3" />
-    <span className="text-muted-foreground">Loading calendar...</span>
+    <span className="text-muted-foreground">{t('calendar.loading')}</span>
   </div>
 );
 
@@ -36,6 +37,7 @@ const CalendarSkeleton = () => (
 const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) => {
   const { dogs } = useDogs();
   const { syncCalendar, isSyncing } = useComprehensiveCalendarSync();
+  const { t } = useTranslation('home');
   
   // If no events data is provided, we need to fetch it - for backward compatibility
   // We'll use the provided eventsData directly from props if available
@@ -94,12 +96,12 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
     <Card className="border-warmbeige-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 bg-warmbeige-50 flex flex-col">
       <div className="flex flex-col">
         {isLoading ? (
-          <CalendarSkeleton />
+          <CalendarSkeleton t={t} />
         ) : hasError ? (
           <div className="p-6 flex items-center justify-center">
             <Alert variant="destructive">
               <AlertDescription>
-                There was a problem loading your calendar events. Please try refreshing the page.
+                {t('calendar.error')}
               </AlertDescription>
             </Alert>
           </div>

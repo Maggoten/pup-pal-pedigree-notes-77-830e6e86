@@ -8,6 +8,7 @@ import { Button } from './ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import RemindersList from './reminders/RemindersList';
 import RemindersDialog from './reminders/RemindersDialog';
+import { useTranslation } from 'react-i18next';
 
 interface RemindersData {
   reminders: Reminder[];
@@ -43,6 +44,8 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({
   remindersDialogOpen: externalDialogOpen,
   setRemindersDialogOpen: externalSetDialogOpen
 }) => {
+  const { t } = useTranslation('home');
+  
   // Use internal state only if external state is not provided
   const [internalDialogOpen, setInternalDialogOpen] = useState(false);
   
@@ -114,25 +117,25 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({
           
           <CardTitle className="flex items-center gap-2 text-primary">
             <BellRing className="h-5 w-5" />
-            Reminders
+            {t('reminders.title')}
           </CardTitle>
           <CardDescription>
             {hasReminders 
-              ? "Important tasks and upcoming events" 
-              : "All tasks completed - great job!"}
+              ? t('reminders.hasRemindersDesc')
+              : t('reminders.noRemindersDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0 flex flex-col overflow-hidden">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
-              <span className="text-sm text-muted-foreground">Loading reminders...</span>
+              <span className="text-sm text-muted-foreground">{t('reminders.loading')}</span>
             </div>
           ) : hasError ? (
             <div className="p-4">
               <Alert variant="destructive">
                 <AlertDescription>
-                  There was a problem loading your reminders. Please try again later.
+                  {t('reminders.error')}
                 </AlertDescription>
               </Alert>
             </div>
@@ -156,7 +159,7 @@ const BreedingReminders: React.FC<BreedingRemindersProps> = memo(({
                   className="text-xs text-primary hover:text-primary/70 font-medium flex items-center gap-1"
                 >
                   <Bell className="h-3 w-3" />
-                  View All Reminders {reminders.length > 0 && `(${reminders.length})`}
+                  {t('reminders.viewAll')} {reminders.length > 0 && `(${reminders.length})`}
                 </Button>
               </div>
             </>
