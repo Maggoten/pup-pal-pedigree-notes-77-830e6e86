@@ -329,7 +329,7 @@ const PuppyProfile: React.FC = () => {
           </div>
         </CardContent>
 
-        <CardFooter className="flex justify-end gap-2">
+        <CardFooter className="flex justify-between items-center">
           <Button 
             variant="destructive" 
             onClick={() => setShowDeleteDialog(true)}
