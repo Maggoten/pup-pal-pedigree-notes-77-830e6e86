@@ -132,6 +132,13 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             {getStatusBadge()}
           </div>
         </div>
+         
+        {/* Birth Info - above measurements for mobile */}
+        {isMobile && (
+          <div className="mb-3 px-1 text-xs text-muted-foreground">
+            <span>Born: {getBirthDate()}</span>
+          </div>
+        )}
         
         {/* Measurements - responsive grid */}
         <div className={`grid gap-3 ${isMobile ? 'grid-cols-2 mb-3' : 'grid-cols-2 gap-4 mb-4'}`}>
@@ -165,11 +172,10 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             </>
           )}
         </div>
-        
-        {/* Mobile compact info */}
+         
+        {/* Mobile age info - below measurements */}
         {isMobile && (
-          <div className="flex justify-between items-center text-xs text-muted-foreground mb-3 px-1">
-            <span>Born: {getBirthDate()}</span>
+          <div className="text-xs text-muted-foreground mb-3 px-1">
             <span>Age: {litterAge} weeks</span>
           </div>
         )}
