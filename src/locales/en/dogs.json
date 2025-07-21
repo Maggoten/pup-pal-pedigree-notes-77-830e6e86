@@ -25,7 +25,16 @@
         "placeholder": "Bella"
       },
       "breed": {
-        "label": "Breed"
+        "label": "Breed",
+        "searchPlaceholder": "Search breeds...",
+        "noBreedFound": "No breed found. Add a custom breed:",
+        "addCustomBreed": "Add \"{{breed}}\" as custom breed",
+        "customBreedDialog": {
+          "title": "Add Custom Breed",
+          "placeholder": "Enter custom breed name",
+          "cancel": "Cancel",
+          "addBreed": "Add Breed"
+        }
       },
       "gender": {
         "label": "Gender",
@@ -93,8 +102,15 @@
         "addDate": "Add Sterilization Date"
       }
     },
+    "imageUpload": {
+      "upload": "Upload",
+      "change": "Change",
+      "uploading": "Uploading...",
+      "remove": "Remove"
+    },
     "actions": {
       "save": "Save",
+      "saveChanges": "Save Changes",
       "cancel": "Cancel",
       "edit": "Edit",
       "delete": "Delete",

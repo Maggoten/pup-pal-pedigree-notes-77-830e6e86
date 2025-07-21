@@ -2,6 +2,7 @@
 import React from 'react';
 import { UploadIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface ImageUploadButtonsProps {
   hasImage: boolean;
@@ -18,6 +19,8 @@ const ImageUploadButtons: React.FC<ImageUploadButtonsProps> = ({
   onUploadClick,
   onRemoveClick
 }) => {
+  const { t } = useTranslation('dogs');
+  
   return (
     <div className="mt-2 flex gap-2">
       <Button 
@@ -28,7 +31,7 @@ const ImageUploadButtons: React.FC<ImageUploadButtonsProps> = ({
         disabled={isUploading}
       >
         <UploadIcon className="mr-2 h-4 w-4" />
-        {isUploading ? 'Uploading...' : (hasImage && !isPlaceholder ? 'Change' : 'Upload')}
+        {isUploading ? t('form.imageUpload.uploading') : (hasImage && !isPlaceholder ? t('form.imageUpload.change') : t('form.imageUpload.upload'))}
       </Button>
       
       {hasImage && !isPlaceholder && (

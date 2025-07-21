@@ -19,6 +19,7 @@ import {
 import { commonDogBreeds } from '@/utils/dogBreeds';
 import { Search, Plus, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface BreedDropdownProps {
   value: string;
@@ -37,6 +38,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({
   const [customBreed, setCustomBreed] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { t } = useTranslation('dogs');
   
   // Display the selected value in the input when not searching
   useEffect(() => {
@@ -104,7 +106,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({
       <div className={cn("relative w-full", className)}>
         <div className="relative">
           <Input
-            placeholder={value ? value : "Search breeds..."}
+            placeholder={value ? value : t('form.fields.breed.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={handleInputFocus}
@@ -137,7 +139,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({
               </ul>
             ) : (
               <div className="p-3">
-                <p className="text-sm text-gray-500 mb-2">No breed found. Add a custom breed:</p>
+                <p className="text-sm text-gray-500 mb-2">{t('form.fields.breed.noBreedFound')}</p>
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -146,7 +148,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({
                   disabled={disabled}
                 >
                   <Plus className="h-4 w-4" /> 
-                  Add "{searchTerm}" as custom breed
+                  {t('form.fields.breed.addCustomBreed', { breed: searchTerm })}
                 </Button>
               </div>
             )}
@@ -161,7 +163,7 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({
                   disabled={disabled}
                 >
                   <Plus className="h-4 w-4" /> 
-                  Add "{searchTerm}" as custom breed
+                  {t('form.fields.breed.addCustomBreed', { breed: searchTerm })}
                 </Button>
               </div>
             )}
@@ -173,11 +175,11 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({
       <Dialog open={customBreedDialogOpen} onOpenChange={setCustomBreedDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add Custom Breed</DialogTitle>
+            <DialogTitle>{t('form.fields.breed.customBreedDialog.title')}</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <Input
-              placeholder="Enter custom breed name"
+              placeholder={t('form.fields.breed.customBreedDialog.placeholder')}
               value={customBreed}
               onChange={(e) => setCustomBreed(e.target.value)}
               className="w-full"
@@ -186,10 +188,10 @@ const BreedDropdown: React.FC<BreedDropdownProps> = ({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCustomBreedDialogOpen(false)}>
-              Cancel
+              {t('form.fields.breed.customBreedDialog.cancel')}
             </Button>
             <Button onClick={handleCustomBreedSubmit} disabled={!customBreed.trim()}>
-              Add Breed
+              {t('form.fields.breed.customBreedDialog.addBreed')}
             </Button>
           </DialogFooter>
         </DialogContent>

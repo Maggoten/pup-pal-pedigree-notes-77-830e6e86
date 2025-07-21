@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { format } from 'date-fns';
 import { CalendarIcon, Plus, X } from 'lucide-react';
@@ -9,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { UseFormReturn } from 'react-hook-form';
 import { parseISODate } from '@/utils/dateUtils';
+import { useTranslation } from 'react-i18next';
 
 interface SterilizationDateFieldProps {
   form: UseFormReturn<any>;
@@ -20,6 +22,7 @@ const SterilizationDateField: React.FC<SterilizationDateFieldProps> = ({
   disabled
 }) => {
   const sterilizationDate = form.watch('sterilizationDate');
+  const { t } = useTranslation('dogs');
 
   const handleAddDate = () => {
     const newDate = new Date();
@@ -50,7 +53,7 @@ const SterilizationDateField: React.FC<SterilizationDateFieldProps> = ({
 
   return (
     <div className="space-y-3">
-      <Label className="text-sm font-medium">Sterilized?</Label>
+      <Label className="text-sm font-medium">{t('form.breeding.sterilized.label')}</Label>
       
       {!sterilizationDate && (
         <Button
@@ -62,7 +65,7 @@ const SterilizationDateField: React.FC<SterilizationDateFieldProps> = ({
           className="w-fit"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add Sterilization Date
+          {t('form.breeding.sterilized.addDate')}
         </Button>
       )}
       

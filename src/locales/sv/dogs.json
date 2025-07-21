@@ -25,7 +25,16 @@
         "placeholder": "Bella"
       },
       "breed": {
-        "label": "Ras"
+        "label": "Ras",
+        "searchPlaceholder": "Sök raser...",
+        "noBreedFound": "Ingen ras hittades. Lägg till en anpassad ras:",
+        "addCustomBreed": "Lägg till \"{{breed}}\" som anpassad ras",
+        "customBreedDialog": {
+          "title": "Lägg till Anpassad Ras",
+          "placeholder": "Ange anpassat rasnamn",
+          "cancel": "Avbryt",
+          "addBreed": "Lägg till Ras"
+        }
       },
       "gender": {
         "label": "Kön",
@@ -93,8 +102,15 @@
         "addDate": "Lägg till Steriliseringsdatum"
       }
     },
+    "imageUpload": {
+      "upload": "Ladda upp",
+      "change": "Ändra",
+      "uploading": "Laddar upp...",
+      "remove": "Ta bort"
+    },
     "actions": {
       "save": "Spara",
+      "saveChanges": "Spara Ändringar",
       "cancel": "Avbryt",
       "edit": "Redigera",
       "delete": "Ta bort",
