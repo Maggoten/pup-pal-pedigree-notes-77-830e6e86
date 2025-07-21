@@ -93,11 +93,11 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
       }`}
       onClick={() => navigate(`/my-litters/${litterId}/puppy/${puppy.id}`)}
     >
-      <CardContent className="p-6">
-        <div className="space-y-4">
+      <CardContent className="p-4">
+        <div className="space-y-3">
           {/* Profile Picture - Centered at top */}
           <div className="flex justify-start">
-            <div className="w-48 h-48 rounded-2xl overflow-hidden border-2 border-warmbeige-200 shadow-sm">
+            <div className="w-36 h-36 rounded-2xl overflow-hidden border-2 border-warmbeige-200 shadow-sm">
               <AspectRatio ratio={1/1}>
                 {puppy.imageUrl ? (
                   <img 
@@ -106,7 +106,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
                     className="object-cover object-left w-full h-full"
                   />
                 ) : (
-                  <div className="bg-warmgreen-100 text-warmgreen-800 font-semibold text-6xl w-full h-full flex items-center justify-center">
+                  <div className="bg-warmgreen-100 text-warmgreen-800 font-semibold text-4xl w-full h-full flex items-center justify-center">
                     {puppy.name.charAt(0)}
                   </div>
                 )}
@@ -115,22 +115,22 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
           </div>
 
           {/* Puppy Name - Centered below picture */}
-          <h3 className="text-3xl font-bold text-warmgreen-800 text-center">
+          <h3 className="text-2xl font-bold text-warmgreen-800 text-center">
             {puppy.name}
           </h3>
 
           {/* Gender and Color Info - Centered */}
-          <div className="flex items-center justify-center gap-4 text-muted-foreground text-base">
+          <div className="flex items-center justify-center gap-3 text-muted-foreground text-sm">
             <span className="flex items-center gap-1">
               {puppy.gender === 'male' ? '♂' : '♀'} {puppy.gender}
             </span>
-            <span className="text-base">•</span>
+            <span className="text-sm">•</span>
             <span>{puppy.color}</span>
           </div>
 
           {/* Birth Info and Status Badge Row */}
           <div className="flex justify-between items-center">
-            <div className="text-lg">
+            <div className="text-sm">
               <span className="text-muted-foreground">Born: </span>
               <span className="font-medium">
                 {puppy.birthDateTime ? format(parseISO(puppy.birthDateTime), 'MMM d, yyyy') : 'Not set'}
@@ -140,52 +140,52 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
           </div>
 
           {/* Weight and Height Measurements */}
-          <div className="grid grid-cols-2 gap-6 py-4">
+          <div className="grid grid-cols-2 gap-4 py-3">
             <div className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <Scale className="h-5 w-5 text-muted-foreground" />
-                <span className="text-lg font-medium">Weight</span>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Scale className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Weight</span>
               </div>
-              <p className="text-2xl font-semibold">{getLatestWeight()}</p>
+              <p className="text-lg font-semibold">{getLatestWeight()}</p>
             </div>
             
             <div className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <Ruler className="h-5 w-5 text-muted-foreground" />
-                <span className="text-lg font-medium">Height</span>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Ruler className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Height</span>
               </div>
-              <p className="text-2xl font-semibold">{getLatestHeight()}</p>
+              <p className="text-lg font-semibold">{getLatestHeight()}</p>
             </div>
           </div>
 
 
           {/* Action Buttons */}
-          <div className="flex justify-center gap-4 pt-4">
+          <div className="flex justify-center gap-3 pt-3">
             <Button
               variant="outline"
-              size="lg"
+              size="sm"
               onClick={handleMeasurementClick}
-              className="rounded-2xl w-16 h-16 p-0"
+              className="rounded-xl w-12 h-12 p-0"
             >
-              <BarChart2 className="h-6 w-6" />
+              <BarChart2 className="h-4 w-4" />
             </Button>
             
             <Button
               variant="outline"
-              size="lg"
+              size="sm"
               onClick={handleEditClick}
-              className="rounded-2xl w-16 h-16 p-0"
+              className="rounded-xl w-12 h-12 p-0"
             >
-              <Edit className="h-6 w-6" />
+              <Edit className="h-4 w-4" />
             </Button>
             
             <Button
               variant="ghost"
-              size="lg"
+              size="sm"
               onClick={handleDeleteClick}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-2xl w-16 h-16 p-0"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl w-12 h-12 p-0"
             >
-              <Trash2 className="h-6 w-6" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </div>
