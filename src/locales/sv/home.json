@@ -36,12 +36,12 @@
   },
   "calendar": {
     "loading": "Laddar kalender...",
-    "error": "Det uppstod ett problem med att ladda dina kalenderhändelser. Vänligen försök igen senare.",
+    "error": "Det uppstod ett problem med att ladda dina event. Vänligen försök igen senare.",
     "today": "Idag",
-    "addEvent": "Lägg till Händelse",
+    "addEvent": "Lägg till Event",
     "syncCalendar": "Synkronisera Kalender",
     "syncing": "Synkroniserar...",
-    "tapToEdit": "Tryck på händelser för att visa/redigera"
+    "tapToEdit": "Tryck på event för att visa/redigera"
   },
   "dialogs": {
     "reminders": {
