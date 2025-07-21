@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Scale, Ruler } from 'lucide-react';
+import { Scale, Ruler, BarChart2 } from 'lucide-react';
 import { Puppy } from '@/types/breeding';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -72,6 +71,11 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
   const handleViewProfile = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/my-litters/${litterId}/puppy/${puppy.id}`);
+  };
+
+  const handleRecordMeasurement = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onAddMeasurement(puppy);
   };
 
   return (
@@ -149,13 +153,25 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
       </CardContent>
       
       <CardFooter className="p-4 mt-auto">
-        <Button 
-          variant="outline" 
-          className="w-full text-sm" 
-          onClick={handleViewProfile}
-        >
-          View Profile
-        </Button>
+        <div className="flex gap-2 w-full">
+          <Button 
+            variant="default" 
+            size={isMobile ? "sm" : "default"}
+            className="flex-1"
+            onClick={handleRecordMeasurement}
+          >
+            <BarChart2 className="h-4 w-4 mr-1" />
+            {isMobile ? "Record" : "Record Data"}
+          </Button>
+          <Button 
+            variant="outline" 
+            size={isMobile ? "sm" : "default"}
+            className="flex-1"
+            onClick={handleViewProfile}
+          >
+            {isMobile ? "Profile" : "View Profile"}
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );
