@@ -101,7 +101,7 @@ const LitterCard: React.FC<LitterCardProps> = ({
 
           {litter.archived && (
             <div className="text-xs text-muted-foreground">
-              Archived on {format(new Date(litter.updated_at || litter.created_at), 'MMM d, yyyy')}
+              Archived on {format(new Date(litter.dateOfBirth), 'MMM d, yyyy')}
             </div>
           )}
         </div>

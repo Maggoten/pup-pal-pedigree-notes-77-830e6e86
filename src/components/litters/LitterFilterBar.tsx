@@ -39,19 +39,19 @@ const LitterFilterBar: React.FC<LitterFilterBarProps> = ({
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
       {/* Filter Buttons */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-1 sm:gap-2 flex-nowrap sm:flex-wrap">
         {filterButtons.map(({ key, label, count }) => (
           <Button
             key={key}
             variant={statusFilter === key ? 'default' : 'outline'}
             size="sm"
             onClick={() => handleFilterChange(key)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 sm:gap-2 flex-1 sm:flex-none text-xs sm:text-sm px-2 sm:px-3"
           >
             <span>{label}</span>
             <Badge 
               variant="secondary" 
-              className={`ml-1 ${statusFilter === key ? 'bg-white/20 text-white' : 'bg-muted'}`}
+              className={`ml-0.5 sm:ml-1 text-xs px-1 sm:px-2 ${statusFilter === key ? 'bg-white/20 text-white' : 'bg-muted'}`}
             >
               {count}
             </Badge>
