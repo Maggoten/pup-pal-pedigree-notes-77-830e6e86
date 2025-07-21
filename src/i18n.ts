@@ -18,6 +18,8 @@ import enPregnancy from './locales/en/pregnancy.json';
 import svPregnancy from './locales/sv/pregnancy.json';
 import enSettings from './locales/en/settings.json';
 import svSettings from './locales/sv/settings.json';
+import enNavigation from './locales/en/navigation.json';
+import svNavigation from './locales/sv/navigation.json';
 
 const resources = {
   en: {
@@ -27,7 +29,8 @@ const resources = {
     dogs: enDogs,
     litters: enLitters,
     pregnancy: enPregnancy,
-    settings: enSettings
+    settings: enSettings,
+    navigation: enNavigation
   },
   sv: {
     auth: svAuth,
@@ -36,7 +39,8 @@ const resources = {
     dogs: svDogs,
     litters: svLitters,
     pregnancy: svPregnancy,
-    settings: svSettings
+    settings: svSettings,
+    navigation: svNavigation
   }
 };
 
@@ -48,7 +52,7 @@ i18n
     fallbackLng: 'en',
     debug: false,
     
-    ns: ['common', 'auth', 'home', 'dogs', 'litters', 'pregnancy', 'settings'],
+    ns: ['common', 'auth', 'home', 'dogs', 'litters', 'pregnancy', 'settings', 'navigation'],
     defaultNS: 'common',
     
     interpolation: {
