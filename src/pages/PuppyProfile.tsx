@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Edit, Circle, Calendar, Weight, Ruler, FileText } from 'lucide-react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Puppy } from '@/types/breeding';
-import useLitterManagement from '@/hooks/litters/useLitterManagement';
+import { usePuppyQueries } from '@/hooks/usePuppyQueries';
 import { toast } from '@/components/ui/use-toast';
 import EditPuppyDialog from '@/components/litters/puppies/EditPuppyDialog';
 import PuppyMeasurementsChart from '@/components/litters/puppies/PuppyMeasurementsChart';
@@ -16,55 +17,54 @@ import PuppyMeasurementsChart from '@/components/litters/puppies/PuppyMeasuremen
 const PuppyProfile: React.FC = () => {
   const { litterId, puppyId } = useParams<{ litterId: string; puppyId: string }>();
   const navigate = useNavigate();
-  const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
+  // Use the proper hook for puppy data
   const {
-    selectedLitter,
-    handleSelectLitter,
-    handleUpdatePuppy,
-    isLoadingDetails
-  } = useLitterManagement();
+    litter,
+    error,
+    isLoading,
+    updatePuppy
+  } = usePuppyQueries(litterId || '');
 
-  // Load litter and find puppy when component mounts
+  // Find the puppy in the litter
+  const selectedPuppy = litter?.puppies?.find(p => p.id === puppyId);
+
+  // Handle missing parameters
   useEffect(() => {
-    const loadPuppyData = async () => {
-      if (!litterId || !puppyId) {
-        toast({
-          title: "Error",
-          description: "Missing litter or puppy ID",
-          variant: "destructive"
-        });
-        navigate('/my-litters');
-        return;
-      }
-
-      // Load the litter if not already loaded
-      if (!selectedLitter || selectedLitter.id !== litterId) {
-        await handleSelectLitter({ id: litterId } as any);
-      }
-    };
-
-    loadPuppyData();
-  }, [litterId, puppyId, selectedLitter, handleSelectLitter, navigate]);
-
-  // Find the puppy in the selected litter
-  useEffect(() => {
-    if (selectedLitter && selectedLitter.puppies && puppyId) {
-      const puppy = selectedLitter.puppies.find(p => p.id === puppyId);
-      if (puppy) {
-        setSelectedPuppy(puppy);
-      } else {
-        toast({
-          title: "Puppy not found",
-          description: "The puppy you're looking for doesn't exist in this litter",
-          variant: "destructive"
-        });
-        navigate('/my-litters');
-      }
+    if (!litterId || !puppyId) {
+      toast({
+        title: "Error",
+        description: "Missing litter or puppy ID",
+        variant: "destructive"
+      });
+      navigate('/my-litters');
     }
-  }, [selectedLitter, puppyId, navigate]);
+  }, [litterId, puppyId, navigate]);
+
+  // Handle errors
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load puppy information",
+        variant: "destructive"
+      });
+    }
+  }, [error]);
+
+  // Handle puppy not found (only after data is loaded)
+  useEffect(() => {
+    if (!isLoading && litter && puppyId && !selectedPuppy) {
+      toast({
+        title: "Puppy not found",
+        description: "The puppy you're looking for doesn't exist in this litter",
+        variant: "destructive"
+      });
+      navigate('/my-litters');
+    }
+  }, [isLoading, litter, puppyId, selectedPuppy, navigate]);
 
   const handleBack = () => {
     navigate('/my-litters');
@@ -72,8 +72,7 @@ const PuppyProfile: React.FC = () => {
 
   const handleEditPuppy = async (updatedPuppy: Puppy) => {
     try {
-      await handleUpdatePuppy(updatedPuppy);
-      setSelectedPuppy(updatedPuppy);
+      await updatePuppy(updatedPuppy);
       setShowEditDialog(false);
       toast({
         title: "Success",
@@ -124,10 +123,10 @@ const PuppyProfile: React.FC = () => {
     if (puppy.birthDateTime) {
       return differenceInWeeks(new Date(), parseISO(puppy.birthDateTime));
     }
-    return selectedLitter ? differenceInWeeks(new Date(), parseISO(selectedLitter.dateOfBirth)) : 0;
+    return litter ? differenceInWeeks(new Date(), parseISO(litter.dateOfBirth)) : 0;
   };
 
-  if (isLoadingDetails || !selectedPuppy) {
+  if (isLoading || !selectedPuppy) {
     return (
       <div className="container mx-auto p-6">
         <div className="animate-pulse space-y-6">
@@ -154,7 +153,7 @@ const PuppyProfile: React.FC = () => {
             {selectedPuppy.name}
           </h1>
           <p className="text-muted-foreground">
-            {selectedLitter?.name} • {puppyAge} weeks old
+            {litter?.name} • {puppyAge} weeks old
           </p>
         </div>
         <Button onClick={() => setShowEditDialog(true)}>
