@@ -2,11 +2,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { BarChart2, Edit, Trash2, Scale, Ruler } from 'lucide-react';
+import { Scale, Ruler } from 'lucide-react';
 import { Puppy } from '@/types/breeding';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -69,31 +69,19 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
     }
   };
 
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (confirm(`Are you sure you want to delete "${puppy.name}"?`)) {
-      onDeletePuppy(puppy.id);
-    }
-  };
-
-  const handleEditClick = (e: React.MouseEvent) => {
+  const handleViewProfile = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/my-litters/${litterId}/puppy/${puppy.id}`);
   };
 
-  const handleMeasurementClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onAddMeasurement(puppy);
-  };
-
   return (
     <Card 
-      className={`transition-all duration-200 hover:shadow-lg cursor-pointer bg-white max-w-sm mx-auto ${
+      className={`transition-all duration-200 hover:shadow-lg cursor-pointer bg-white max-w-sm mx-auto h-full flex flex-col ${
         isSelected ? 'ring-2 ring-primary shadow-lg' : ''
       }`}
       onClick={() => navigate(`/my-litters/${litterId}/puppy/${puppy.id}`)}
     >
-      <CardContent className="p-4">
+      <CardContent className="p-4 flex-grow">
         <div className="space-y-3">
           {/* Profile Picture - Centered at top */}
           <div className="flex justify-start">
@@ -157,39 +145,18 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
               <p className="text-lg font-semibold">{getLatestHeight()}</p>
             </div>
           </div>
-
-
-          {/* Action Buttons */}
-          <div className="flex justify-start gap-3 pt-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleMeasurementClick}
-              className="rounded-xl w-12 h-12 p-0"
-            >
-              <BarChart2 className="h-4 w-4" />
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleEditClick}
-              className="rounded-xl w-12 h-12 p-0"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleDeleteClick}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl w-12 h-12 p-0"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
         </div>
       </CardContent>
+      
+      <CardFooter className="p-4 mt-auto">
+        <Button 
+          variant="outline" 
+          className="w-full text-sm" 
+          onClick={handleViewProfile}
+        >
+          View Profile
+        </Button>
+      </CardFooter>
     </Card>
   );
 };
