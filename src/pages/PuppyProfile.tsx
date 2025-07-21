@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -13,7 +14,6 @@ import EditPuppyDialog from '@/components/litters/puppies/EditPuppyDialog';
 import PuppyMeasurementsChart from '@/components/litters/puppies/PuppyMeasurementsChart';
 import PuppyMeasurementsDialog from '@/components/litters/puppies/PuppyMeasurementsDialog';
 import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
-import PuppyImageUploader from '@/components/litters/puppies/PuppyImageUploader';
 
 const PuppyProfile: React.FC = () => {
   const { litterId, puppyId } = useParams<{ litterId: string; puppyId: string }>();
@@ -126,28 +126,6 @@ const PuppyProfile: React.FC = () => {
     }
   };
 
-  const handleImageChange = async (imageUrl: string) => {
-    if (!selectedPuppy) return;
-    
-    try {
-      const updatedPuppy = {
-        ...selectedPuppy,
-        imageUrl
-      };
-      await updatePuppy(updatedPuppy);
-      toast({
-        title: "Success",
-        description: "Profile picture updated successfully"
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update profile picture",
-        variant: "destructive"
-      });
-    }
-  };
-
   const getStatusBadge = (puppy: Puppy) => {
     const status = puppy.status || 'Available';
     switch (status) {
@@ -223,7 +201,7 @@ const PuppyProfile: React.FC = () => {
           {/* Main Info Grid - Photo and Details */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr] mb-8">
             {/* Profile Photo */}
-            <div className="w-full max-w-[200px] mx-auto md:mx-0 relative">
+            <div className="w-full max-w-[200px] mx-auto md:mx-0">
               <AspectRatio ratio={1/1} className="overflow-hidden rounded-lg border-2 border-warmbeige-200 shadow-sm">
                 {selectedPuppy.imageUrl ? (
                   <img 
@@ -237,15 +215,6 @@ const PuppyProfile: React.FC = () => {
                   </div>
                 )}
               </AspectRatio>
-              
-              {/* Image Upload Overlay */}
-              <div className="absolute top-2 right-2">
-                <PuppyImageUploader
-                  puppyName={selectedPuppy.name}
-                  currentImage={selectedPuppy.imageUrl}
-                  onImageChange={handleImageChange}
-                />
-              </div>
             </div>
 
             {/* Basic Info */}
