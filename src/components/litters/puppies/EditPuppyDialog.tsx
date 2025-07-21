@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
+import PuppyImageUploader from './PuppyImageUploader';
 
 interface EditPuppyDialogProps {
   puppy: Puppy;
@@ -32,7 +33,8 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
     newOwner: puppy.newOwner || '',
     birthDateTime: puppy.birthDateTime ? format(new Date(puppy.birthDateTime), "yyyy-MM-dd'T'HH:mm") : '',
     currentWeight: puppy.currentWeight?.toString() || '',
-    birthWeight: puppy.birthWeight?.toString() || ''
+    birthWeight: puppy.birthWeight?.toString() || '',
+    imageUrl: puppy.imageUrl || ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,7 +52,8 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
       newOwner: formData.newOwner || null,
       birthDateTime: formData.birthDateTime ? new Date(formData.birthDateTime).toISOString() : puppy.birthDateTime,
       currentWeight: formData.currentWeight ? parseFloat(formData.currentWeight) : puppy.currentWeight,
-      birthWeight: formData.birthWeight ? parseFloat(formData.birthWeight) : puppy.birthWeight
+      birthWeight: formData.birthWeight ? parseFloat(formData.birthWeight) : puppy.birthWeight,
+      imageUrl: formData.imageUrl
     };
 
     await onUpdatePuppy(updatedPuppy);
@@ -64,6 +67,19 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Profile Picture */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Profile Picture</h3>
+            <div className="flex justify-center">
+              <PuppyImageUploader
+                puppyName={formData.name}
+                currentImage={formData.imageUrl}
+                onImageChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                large
+              />
+            </div>
+          </div>
+
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Basic Information</h3>
