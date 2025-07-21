@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Search, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Dialog } from '@/components/ui/dialog';
+
 import { toast } from '@/components/ui/use-toast';
 import { useLitterFilter } from './LitterFilterProvider';
 import useLitterManagement from '@/hooks/litters/useLitterManagement';
@@ -17,7 +17,7 @@ import { dogImageService } from '@/services/dogImageService';
 const MyLittersContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
   const [showFilters, setShowFilters] = useState(false);
-  const { searchQuery, setSearchQuery, clearFilters, activePage, setActivePage, archivedPage, setArchivedPage } = useLitterFilter();
+  const { searchQuery, setSearchQuery, activePage, setActivePage, archivedPage, setArchivedPage } = useLitterFilter();
   const {
     activeLitters,
     archivedLitters,
@@ -107,12 +107,14 @@ const MyLittersContent: React.FC = () => {
             onAddPuppy={handleAddPuppy}
             onUpdatePuppy={handleUpdatePuppy}
             onDeletePuppy={handleDeletePuppy}
+            onDeleteLitter={handleDeleteLitter}
+            onArchiveLitter={handleArchiveLitter}
           />
         </div>
       )}
 
       {/* Litter Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "active" | "archived")} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="active">Active Litters ({activeLitters.length})</TabsTrigger>
           <TabsTrigger value="archived">Archived Litters ({archivedLitters.length})</TabsTrigger>
@@ -126,12 +128,12 @@ const MyLittersContent: React.FC = () => {
             selectedLitterId={selectedLitterId}
             onSelectLitter={handleSelectLitter}
             onAddLitter={() => setShowAddLitterDialog(true)}
-            onArchive={handleArchiveLitter}
+            onArchive={(litter) => handleArchiveLitter(litter.id, true)}
             pageCount={activePageCount}
             currentPage={activePage}
             onPageChange={setActivePage}
             isFilterActive={isFilterActive}
-            onClearFilter={clearFilters}
+            onClearFilter={() => setSearchQuery('')}
           />
         </TabsContent>
         
@@ -143,23 +145,22 @@ const MyLittersContent: React.FC = () => {
             selectedLitterId={selectedLitterId}
             onSelectLitter={handleSelectLitter}
             onAddLitter={() => setShowAddLitterDialog(true)}
-            onArchive={handleArchiveLitter}
+            onArchive={(litter) => handleArchiveLitter(litter.id, false)}
             pageCount={archivedPageCount}
             currentPage={archivedPage}
             onPageChange={setArchivedPage}
             isFilterActive={isFilterActive}
-            onClearFilter={clearFilters}
+            onClearFilter={() => setSearchQuery('')}
           />
         </TabsContent>
       </Tabs>
 
       {/* Add Litter Dialog */}
-      <Dialog open={showAddLitterDialog} onOpenChange={setShowAddLitterDialog}>
-        <AddLitterDialog 
-          onAddLitter={handleAddLitter}
-          onClose={() => setShowAddLitterDialog(false)}
-        />
-      </Dialog>
+      <AddLitterDialog 
+        open={showAddLitterDialog}
+        onOpenChange={setShowAddLitterDialog}
+        onAddLitter={handleAddLitter}
+      />
     </div>
   );
 };

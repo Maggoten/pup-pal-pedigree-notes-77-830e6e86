@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { BarChart2, Edit, Trash2, Venus, Mars } from 'lucide-react';
+import { BarChart2, Edit, Trash2, Circle } from 'lucide-react';
 import { Puppy } from '@/types/breeding';
 
 interface PuppyProfileCardProps {
@@ -110,11 +110,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             <div>
               <h3 className="text-xl font-semibold text-warmgreen-800 mb-1">{puppy.name}</h3>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                {puppy.gender === 'male' ? (
-                  <Mars className="h-4 w-4 text-blue-500" />
-                ) : (
-                  <Venus className="h-4 w-4 text-pink-500" />
-                )}
+                <Circle className={`h-4 w-4 ${puppy.gender === 'male' ? 'text-blue-500 fill-blue-500' : 'text-pink-500 fill-pink-500'}`} />
                 <span className="capitalize">{puppy.gender}</span>
                 <span>•</span>
                 <span>{puppy.color}</span>
