@@ -11,6 +11,7 @@ import EditEventDialog from './EditEventDialog';
 import { Dog } from '@/context/DogsContext';
 import { AddEventFormValues } from './types';
 import { CalendarEvent } from './types';
+import { useTranslation } from 'react-i18next';
 
 interface CalendarContentProps {
   dogs: Dog[];
@@ -40,6 +41,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const isMobile = useIsMobile();
+  const { t } = useTranslation('home');
   
   const startDate = startOfMonth(currentDate);
   const endDate = endOfMonth(currentDate);
@@ -126,7 +128,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
       <CardContent className={`p-3 bg-white border-t border-warmbeige-100 ${compact ? 'max-h-[300px] overflow-y-auto' : ''}`}>
         {isMobile && (
           <div className="text-xs text-darkgray-500 mb-2">
-            Tap events to view/edit
+            {t('calendar.tapToEdit')}
           </div>
         )}
         <div className={isMobile ? "overflow-x-auto -mx-4 px-4" : ""}>
@@ -144,7 +146,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="bg-white border border-warmbeige-200">
           <DialogHeader>
-            <DialogTitle>Add Calendar Event</DialogTitle>
+            <DialogTitle>{t('dialogs.addEvent.title')}</DialogTitle>
           </DialogHeader>
           <AddEventDialog dogs={dogs} onSubmit={handleAddEvent} />
         </DialogContent>
@@ -153,7 +155,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="bg-white border border-warmbeige-200">
           <DialogHeader>
-            <DialogTitle>Edit Calendar Event</DialogTitle>
+            <DialogTitle>{t('dialogs.editEvent.title')}</DialogTitle>
           </DialogHeader>
           {selectedEvent && (
             <EditEventDialog 

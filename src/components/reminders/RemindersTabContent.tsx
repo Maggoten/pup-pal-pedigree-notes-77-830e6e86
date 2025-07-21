@@ -3,6 +3,7 @@ import React from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import RemindersList from './RemindersList';
 import { Reminder } from '@/types/reminders';
+import { useTranslation } from 'react-i18next';
 
 interface RemindersTabContentProps {
   reminders: Reminder[];
@@ -15,6 +16,7 @@ const RemindersTabContent: React.FC<RemindersTabContentProps> = ({
   onComplete, 
   onDelete 
 }) => {
+  const { t } = useTranslation('home');
   const highPriorityReminders = reminders.filter(r => r.priority === 'high');
   const mediumPriorityReminders = reminders.filter(r => r.priority === 'medium');
   const lowPriorityReminders = reminders.filter(r => r.priority === 'low');
@@ -22,10 +24,10 @@ const RemindersTabContent: React.FC<RemindersTabContentProps> = ({
   return (
     <Tabs defaultValue="all" className="w-full">
       <TabsList className="grid grid-cols-4 w-full">
-        <TabsTrigger value="all">All</TabsTrigger>
-        <TabsTrigger value="high" className="text-rose-600">High Priority</TabsTrigger>
-        <TabsTrigger value="medium" className="text-amber-600">Medium</TabsTrigger>
-        <TabsTrigger value="low" className="text-green-600">Low</TabsTrigger>
+        <TabsTrigger value="all">{t('tabs.reminders.all')}</TabsTrigger>
+        <TabsTrigger value="high" className="text-rose-600">{t('tabs.reminders.highPriority')}</TabsTrigger>
+        <TabsTrigger value="medium" className="text-amber-600">{t('tabs.reminders.medium')}</TabsTrigger>
+        <TabsTrigger value="low" className="text-green-600">{t('tabs.reminders.low')}</TabsTrigger>
       </TabsList>
       
       <TabsContent value="all" className="space-y-4">

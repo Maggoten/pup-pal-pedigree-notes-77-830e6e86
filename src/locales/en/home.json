@@ -40,6 +40,68 @@
     "today": "Today",
     "addEvent": "Add Event",
     "syncCalendar": "Sync Calendar",
-    "syncing": "Syncing..."
+    "syncing": "Syncing...",
+    "tapToEdit": "Tap events to view/edit"
+  },
+  "dialogs": {
+    "reminders": {
+      "title": "Breeding Reminders",
+      "description": "Manage your breeding program tasks and reminders",
+      "addNewReminder": "Add New Reminder",
+      "loadingError": "There was a problem loading your reminders. Please try refreshing the page.",
+      "close": "Close"
+    },
+    "addEvent": {
+      "title": "Add Calendar Event"
+    },
+    "editEvent": {
+      "title": "Edit Calendar Event",
+      "updateEvent": "Update Event",
+      "deleteEvent": "Delete Event"
+    }
+  },
+  "forms": {
+    "event": {
+      "eventTitle": "Event Title",
+      "eventTitlePlaceholder": "Enter event title",
+      "date": "Date",
+      "pickDate": "Pick a date",
+      "time": "Time",
+      "associatedDog": "Associated Dog (Optional)",
+      "selectDogPlaceholder": "Select a dog (optional)",
+      "notes": "Notes (Optional)",
+      "notesPlaceholder": "Add notes about this event",
+      "addEvent": "Add Event"
+    },
+    "reminder": {
+      "title": "Title",
+      "titlePlaceholder": "Reminder title",
+      "description": "Description",
+      "descriptionPlaceholder": "Details about this reminder",
+      "dueDate": "Due Date",
+      "priority": "Priority",
+      "selectPriority": "Select priority",
+      "addReminder": "Add Reminder",
+      "priorities": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+      },
+      "validation": {
+        "titleRequired": "Please enter a reminder title"
+      },
+      "success": {
+        "added": "Reminder Added",
+        "addedDesc": "Your reminder has been added successfully."
+      }
+    }
+  },
+  "tabs": {
+    "reminders": {
+      "all": "All",
+      "highPriority": "High Priority",
+      "medium": "Medium",
+      "low": "Low"
+    }
   }
 }

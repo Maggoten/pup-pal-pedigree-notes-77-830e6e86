@@ -40,6 +40,68 @@
     "today": "Idag",
     "addEvent": "Lägg till Händelse",
     "syncCalendar": "Synkronisera Kalender",
-    "syncing": "Synkroniserar..."
+    "syncing": "Synkroniserar...",
+    "tapToEdit": "Tryck på händelser för att visa/redigera"
+  },
+  "dialogs": {
+    "reminders": {
+      "title": "Avelpåminnelser",
+      "description": "Hantera dina avelprogramuppgifter och påminnelser",
+      "addNewReminder": "Lägg till Ny Påminnelse",
+      "loadingError": "Det uppstod ett problem med att ladda dina påminnelser. Vänligen uppdatera sidan.",
+      "close": "Stäng"
+    },
+    "addEvent": {
+      "title": "Lägg till Kalenderhändelse"
+    },
+    "editEvent": {
+      "title": "Redigera Kalenderhändelse",
+      "updateEvent": "Uppdatera Händelse",
+      "deleteEvent": "Ta bort Händelse"
+    }
+  },
+  "forms": {
+    "event": {
+      "eventTitle": "Händelsetitel",
+      "eventTitlePlaceholder": "Ange händelsetitel",
+      "date": "Datum",
+      "pickDate": "Välj ett datum",
+      "time": "Tid",
+      "associatedDog": "Associerad Hund (Valfritt)",
+      "selectDogPlaceholder": "Välj en hund (valfritt)",
+      "notes": "Anteckningar (Valfritt)",
+      "notesPlaceholder": "Lägg till anteckningar om denna händelse",
+      "addEvent": "Lägg till Händelse"
+    },
+    "reminder": {
+      "title": "Titel",
+      "titlePlaceholder": "Påminnelsetitel",
+      "description": "Beskrivning",
+      "descriptionPlaceholder": "Detaljer om denna påminnelse",
+      "dueDate": "Förfallodatum",
+      "priority": "Prioritet",
+      "selectPriority": "Välj prioritet",
+      "addReminder": "Lägg till Påminnelse",
+      "priorities": {
+        "high": "Hög",
+        "medium": "Medel",
+        "low": "Låg"
+      },
+      "validation": {
+        "titleRequired": "Vänligen ange en påminnelsetitel"
+      },
+      "success": {
+        "added": "Påminnelse Tillagd",
+        "addedDesc": "Din påminnelse har lagts till framgångsrikt."
+      }
+    }
+  },
+  "tabs": {
+    "reminders": {
+      "all": "Alla",
+      "highPriority": "Hög Prioritet",
+      "medium": "Medel",
+      "low": "Låg"
+    }
   }
 }

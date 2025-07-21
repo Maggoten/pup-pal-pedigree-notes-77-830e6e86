@@ -6,6 +6,7 @@ import { CalendarEvent } from './types';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import HeatEventControl from './HeatEventControl';
+import { useTranslation } from 'react-i18next';
 
 interface EditEventDialogProps {
   event: CalendarEvent;
@@ -16,6 +17,7 @@ interface EditEventDialogProps {
 }
 
 const EditEventDialog: React.FC<EditEventDialogProps> = ({ event, dogs, onSubmit, onDelete, onEventUpdate }) => {
+  const { t } = useTranslation('home');
   const canDelete = event.type === 'custom';
   
   // Convert the event to form values
@@ -42,7 +44,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({ event, dogs, onSubmit
         dogs={dogs} 
         onSubmit={onSubmit} 
         defaultValues={defaultValues}
-        submitLabel="Update Event"
+        submitLabel={t('dialogs.editEvent.updateEvent')}
       />
       
       {canDelete && (
@@ -53,7 +55,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({ event, dogs, onSubmit
             onClick={onDelete}
           >
             <Trash2 className="h-4 w-4" />
-            Delete Event
+            {t('dialogs.editEvent.deleteEvent')}
           </Button>
         </div>
       )}

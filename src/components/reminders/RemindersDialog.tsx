@@ -14,6 +14,7 @@ import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import AddReminderForm from './AddReminderForm';
 import RemindersTabContent from './RemindersTabContent';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useTranslation } from 'react-i18next';
 
 interface RemindersDialogProps {
   open: boolean;
@@ -21,6 +22,8 @@ interface RemindersDialogProps {
 }
 
 const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange }) => {
+  const { t } = useTranslation('home');
+  
   // Since this is a modal dialog, it's okay to use the hook here
   // It will only fetch once when the dialog is opened
   const { 
@@ -38,10 +41,10 @@ const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange })
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <Calendar className="h-6 w-6 text-primary" />
-            Breeding Reminders
+            {t('dialogs.reminders.title')}
           </DialogTitle>
           <DialogDescription>
-            Manage your breeding program tasks and reminders
+            {t('dialogs.reminders.description')}
           </DialogDescription>
         </DialogHeader>
         
@@ -49,7 +52,7 @@ const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange })
           {/* Left side - Add new reminder */}
           <div className="space-y-4">
             <div className="font-medium text-sm flex items-center gap-2 text-primary">
-              Add New Reminder
+              {t('dialogs.reminders.addNewReminder')}
             </div>
             
             <AddReminderForm onSubmit={addCustomReminder} />
@@ -60,12 +63,12 @@ const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange })
             {isLoading ? (
               <div className="flex flex-col items-center justify-center h-60">
                 <Loader2 className="h-10 w-10 animate-spin text-primary mb-3" />
-                <span className="text-muted-foreground">Loading reminders...</span>
+                <span className="text-muted-foreground">{t('reminders.loading')}</span>
               </div>
             ) : hasError ? (
               <Alert variant="destructive" className="mb-6">
                 <AlertDescription>
-                  There was a problem loading your reminders. Please try refreshing the page.
+                  {t('dialogs.reminders.loadingError')}
                 </AlertDescription>
               </Alert>
             ) : (
@@ -79,7 +82,7 @@ const RemindersDialog: React.FC<RemindersDialogProps> = ({ open, onOpenChange })
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('dialogs.reminders.close')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

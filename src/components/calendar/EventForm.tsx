@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Dog } from '@/context/DogsContext';
+import { useTranslation } from 'react-i18next';
 
 export interface AddEventFormValues {
   title: string;
@@ -31,8 +32,11 @@ const EventForm: React.FC<EventFormProps> = ({
   dogs, 
   onSubmit, 
   defaultValues, 
-  submitLabel = "Add Event" 
+  submitLabel 
 }) => {
+  const { t } = useTranslation('home');
+  const finalSubmitLabel = submitLabel || t('forms.event.addEvent');
+  
   const form = useForm<AddEventFormValues>({
     defaultValues: defaultValues || {
       title: '',
@@ -51,9 +55,9 @@ const EventForm: React.FC<EventFormProps> = ({
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Event Title</FormLabel>
+              <FormLabel>{t('forms.event.eventTitle')}</FormLabel>
               <FormControl>
-                <Input placeholder="Enter event title" {...field} />
+                <Input placeholder={t('forms.event.eventTitlePlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -66,7 +70,7 @@ const EventForm: React.FC<EventFormProps> = ({
             name="date"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Date</FormLabel>
+                <FormLabel>{t('forms.event.date')}</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -77,7 +81,7 @@ const EventForm: React.FC<EventFormProps> = ({
                         {field.value ? (
                           format(field.value, "PP")
                         ) : (
-                          <span>Pick a date</span>
+                          <span>{t('forms.event.pickDate')}</span>
                         )}
                       </Button>
                     </FormControl>
@@ -102,7 +106,7 @@ const EventForm: React.FC<EventFormProps> = ({
             name="time"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Time</FormLabel>
+                <FormLabel>{t('forms.event.time')}</FormLabel>
                 <div className="flex items-center">
                   <FormControl>
                     <Input
@@ -124,11 +128,11 @@ const EventForm: React.FC<EventFormProps> = ({
           name="dogId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Associated Dog (Optional)</FormLabel>
+              <FormLabel>{t('forms.event.associatedDog')}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a dog (optional)" />
+                    <SelectValue placeholder={t('forms.event.selectDogPlaceholder')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -149,16 +153,16 @@ const EventForm: React.FC<EventFormProps> = ({
           name="notes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Notes (Optional)</FormLabel>
+              <FormLabel>{t('forms.event.notes')}</FormLabel>
               <FormControl>
-                <Input placeholder="Add notes about this event" {...field} />
+                <Input placeholder={t('forms.event.notesPlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         
-        <Button type="submit" className="w-full">{submitLabel}</Button>
+        <Button type="submit" className="w-full">{finalSubmitLabel}</Button>
       </form>
     </Form>
   );
