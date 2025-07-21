@@ -141,7 +141,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
 
           {/* Weight and Height Measurements */}
           <div className="grid grid-cols-2 gap-4 py-3">
-            <div className="text-center">
+            <div className="text-center bg-greige-50 rounded-lg p-3">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Scale className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Weight</span>
@@ -149,7 +149,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
               <p className="text-lg font-semibold">{getLatestWeight()}</p>
             </div>
             
-            <div className="text-center">
+            <div className="text-center bg-greige-50 rounded-lg p-3">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Ruler className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Height</span>
