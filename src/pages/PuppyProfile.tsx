@@ -1,11 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { ArrowLeft, Edit, Circle, Calendar, Weight, Ruler, FileText } from 'lucide-react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Puppy } from '@/types/breeding';
@@ -18,7 +17,6 @@ const PuppyProfile: React.FC = () => {
   const { litterId, puppyId } = useParams<{ litterId: string; puppyId: string }>();
   const navigate = useNavigate();
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
 
   // Use the proper hook for puppy data
   const {
@@ -156,31 +154,38 @@ const PuppyProfile: React.FC = () => {
             {litter?.name} • {puppyAge} weeks old
           </p>
         </div>
-        <Button onClick={() => setShowEditDialog(true)}>
-          <Edit className="h-4 w-4 mr-2" />
-          Edit Puppy
-        </Button>
       </div>
 
       {/* Main Profile Card */}
-      <Card className="mb-6">
+      <Card className="shadow-sm">
+        <CardHeader className="bg-primary/5">
+          <CardTitle className="text-2xl font-bold text-warmgreen-800">
+            {selectedPuppy.name}
+          </CardTitle>
+        </CardHeader>
+
         <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Profile Picture */}
-            <div className="flex-shrink-0">
-              <Avatar className="h-32 w-32 border-4 border-warmbeige-200 shadow-lg">
+          {/* Main Info Grid - Photo and Details */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr] mb-8">
+            {/* Profile Photo */}
+            <div className="w-full max-w-[200px] mx-auto md:mx-0">
+              <AspectRatio ratio={1/1} className="overflow-hidden rounded-lg border-2 border-warmbeige-200 shadow-sm">
                 {selectedPuppy.imageUrl ? (
-                  <AvatarImage src={selectedPuppy.imageUrl} alt={selectedPuppy.name} className="object-cover" />
+                  <img 
+                    src={selectedPuppy.imageUrl} 
+                    alt={selectedPuppy.name} 
+                    className="object-cover w-full h-full"
+                  />
                 ) : (
-                  <AvatarFallback className="bg-warmgreen-100 text-warmgreen-800 font-medium text-3xl">
+                  <div className="bg-warmgreen-100 text-warmgreen-800 font-medium text-6xl w-full h-full flex items-center justify-center">
                     {selectedPuppy.name.charAt(0)}
-                  </AvatarFallback>
+                  </div>
                 )}
-              </Avatar>
+              </AspectRatio>
             </div>
 
             {/* Basic Info */}
-            <div className="flex-1 space-y-4">
+            <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <h2 className="text-3xl font-bold text-warmgreen-800">{selectedPuppy.name}</h2>
                 {getStatusBadge(selectedPuppy)}
@@ -221,123 +226,92 @@ const PuppyProfile: React.FC = () => {
                   {selectedPuppy.breed}
                 </Badge>
               </div>
+
+              {/* Physical and Registration Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Physical Details</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Birth Weight:</span>
+                      <span className="text-sm">{selectedPuppy.birthWeight ? `${selectedPuppy.birthWeight} kg` : 'Not recorded'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Current Weight:</span>
+                      <span className="text-sm">{getLatestWeight(selectedPuppy)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Markings:</span>
+                      <span className="text-sm">{selectedPuppy.markings || 'None'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Registration</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Microchip:</span>
+                      <span className="text-sm">{selectedPuppy.microchip || 'Not set'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Collar:</span>
+                      <span className="text-sm">{selectedPuppy.collar || 'Not set'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Breed:</span>
+                      <span className="text-sm">{selectedPuppy.breed}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Buyer Information */}
+              {(selectedPuppy.status === 'Reserved' || selectedPuppy.status === 'Sold') && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Buyer Information</h3>
+                  <p className="text-sm">{selectedPuppy.newOwner || 'Information not available'}</p>
+                </div>
+              )}
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Tabs for detailed information */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="measurements">Growth Charts</TabsTrigger>
-          <TabsTrigger value="notes">Notes & Records</TabsTrigger>
-        </TabsList>
+          {/* Growth Chart */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-4">Growth Charts</h3>
+            <PuppyMeasurementsChart puppy={selectedPuppy} />
+          </div>
 
-        <TabsContent value="overview" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Physical Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Physical Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Birth Weight</p>
-                    <p className="text-lg">{selectedPuppy.birthWeight ? `${selectedPuppy.birthWeight} kg` : 'Not recorded'}</p>
+          {/* Notes Section */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Notes & Records
+            </h3>
+            {selectedPuppy.notes && selectedPuppy.notes.length > 0 ? (
+              <div className="space-y-4">
+                {selectedPuppy.notes.map((note, index) => (
+                  <div key={index} className="border-l-4 border-primary pl-4 py-2">
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(note.date), 'MMM d, yyyy')}
+                    </p>
+                    <p>{note.content}</p>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Current Weight</p>
-                    <p className="text-lg">{getLatestWeight(selectedPuppy)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Color</p>
-                    <p className="text-lg">{selectedPuppy.color}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Markings</p>
-                    <p className="text-lg">{selectedPuppy.markings || 'None'}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Registration Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Registration & Identification</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Microchip</p>
-                    <p className="text-lg">{selectedPuppy.microchip || 'Not set'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Collar</p>
-                    <p className="text-lg">{selectedPuppy.collar || 'Not set'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Breed</p>
-                    <p className="text-lg">{selectedPuppy.breed}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Buyer Information */}
-            {(selectedPuppy.status === 'Reserved' || selectedPuppy.status === 'Sold') && (
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle>Buyer Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-lg">{selectedPuppy.newOwner || 'Information not available'}</p>
-                </CardContent>
-              </Card>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground">No notes recorded yet.</p>
             )}
           </div>
-        </TabsContent>
+        </CardContent>
 
-        <TabsContent value="measurements" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Growth Charts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PuppyMeasurementsChart puppy={selectedPuppy} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="notes" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Notes & Records
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {selectedPuppy.notes && selectedPuppy.notes.length > 0 ? (
-                <div className="space-y-4">
-                  {selectedPuppy.notes.map((note, index) => (
-                    <div key={index} className="border-l-4 border-primary pl-4 py-2">
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(note.date), 'MMM d, yyyy')}
-                      </p>
-                      <p>{note.content}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground">No notes recorded yet.</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        <CardFooter className="flex justify-end">
+          <Button onClick={() => setShowEditDialog(true)}>
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Puppy
+          </Button>
+        </CardFooter>
+      </Card>
 
       {/* Edit Dialog */}
       {showEditDialog && (
