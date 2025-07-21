@@ -3,7 +3,6 @@ import React, { useState, useEffect, memo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Litter, Puppy } from '@/types/breeding';
 import { differenceInWeeks, parseISO } from 'date-fns';
-import LitterDetails from './LitterDetails';
 import { useDogsQueries } from '@/hooks/dogs/useDogsQueries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
@@ -70,16 +69,6 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
 
   return (
     <div className="space-y-6 mt-6">
-      <LitterDetails 
-        litter={litter}
-        onAddPuppy={onAddPuppy}
-        onUpdatePuppy={onUpdatePuppy}
-        onDeletePuppy={onDeletePuppy}
-        onUpdateLitter={onUpdateLitter}
-        onDeleteLitter={onDeleteLitter}
-        onArchiveLitter={onArchiveLitter}
-      />
-
       {isLoadingDetails ? (
         <div className="flex items-center justify-center h-40 bg-background border rounded-lg">
           <div className="flex flex-col items-center gap-2">

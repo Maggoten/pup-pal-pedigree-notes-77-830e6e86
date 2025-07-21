@@ -100,6 +100,9 @@ const MyLittersContent: React.FC = () => {
           <SelectedLitterHeader 
             litter={selectedLitter} 
             damImageUrl={selectedLitterDamImage}
+            onUpdateLitter={handleUpdateLitter}
+            onDeleteLitter={handleDeleteLitter}
+            onArchiveLitter={handleArchiveLitter}
           />
           <SelectedLitterSection 
             litter={selectedLitter} 
