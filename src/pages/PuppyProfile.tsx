@@ -147,9 +147,8 @@ const PuppyProfile: React.FC = () => {
           Back to Litters
         </Button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-warmgreen-800 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-warmgreen-800">
             {selectedPuppy.name}
-            {getStatusBadge(selectedPuppy)}
           </h1>
           <p className="text-muted-foreground">
             {litter?.name} • {puppyAge} weeks old
@@ -189,6 +188,7 @@ const PuppyProfile: React.FC = () => {
             <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <h2 className="text-3xl font-bold text-warmgreen-800">{selectedPuppy.name}</h2>
+                {getStatusBadge(selectedPuppy)}
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
