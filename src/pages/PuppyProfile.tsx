@@ -309,7 +309,7 @@ const PuppyProfile: React.FC = () => {
         <CardFooter className="flex justify-end gap-2">
           <Button onClick={() => setShowEditDialog(true)}>
             <Edit className="h-4 w-4 mr-2" />
-            Edit Puppy
+            Edit
           </Button>
         </CardFooter>
       </Card>
