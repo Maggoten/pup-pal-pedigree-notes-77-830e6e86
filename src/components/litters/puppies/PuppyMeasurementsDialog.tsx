@@ -259,7 +259,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
   return (
     <DialogContent className="sm:max-w-[600px]" onInteractOutside={onClose}>
       <DialogHeader>
-        <DialogTitle>Record Measurements for {puppy.name}</DialogTitle>
+        <DialogTitle>Measurements and notes for {puppy.name}</DialogTitle>
         <DialogDescription>
           Add weight, height, or notes for tracking puppy development.
         </DialogDescription>
