@@ -53,20 +53,22 @@ const SterilizationDateField: React.FC<SterilizationDateFieldProps> = ({
 
   return (
     <div className="space-y-3">
-      <Label className="text-sm font-medium">{t('form.breeding.sterilized.label')}</Label>
+      <Label className="text-sm font-medium block">{t('form.breeding.sterilized.label')}</Label>
       
       {!sterilizationDate && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleAddDate}
-          disabled={disabled}
-          className="w-fit"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          {t('form.breeding.sterilized.addDate')}
-        </Button>
+        <div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddDate}
+            disabled={disabled}
+            className="w-fit"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            {t('form.breeding.sterilized.addDate')}
+          </Button>
+        </div>
       )}
       
       {sterilizationDate && (
