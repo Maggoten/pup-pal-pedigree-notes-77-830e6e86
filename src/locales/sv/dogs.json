@@ -16,7 +16,7 @@
       "details": "Detaljer"
     },
     "description": {
-      "add": "Lägg till en ny hund i ditt avel program.",
+      "add": "Lägg till en ny hund i ditt avelsprogram.",
       "edit": "Uppdatera din hunds information."
     },
     "fields": {
@@ -78,8 +78,8 @@
       "title": "Löpinformation",
       "heatHistory": {
         "label": "Löphistorik",
-        "noRecords": "Inga löptider registrerade",
-        "addDate": "Lägg till Löptidsdatum"
+        "noRecords": "Inga löp registrerade",
+        "addDate": "Lägg till Löpdatum"
       },
       "heatInterval": {
         "label": "Löpintervall (dagar)",
@@ -134,12 +134,12 @@
     },
     "descriptions": {
       "all": "Alla hundar i ditt avels program",
-      "male": "Hanarna i ditt avels program",
-      "female": "Tikarna i ditt avels program"
+      "male": "Hanar i ditt avels program",
+      "female": "Tikar i ditt avels program"
     },
     "empty": {
       "noDogs": "Inga hundar hittades.",
-      "noResults": "Inga hundar hittades som matchar dina kriterier",
+      "noResults": "Inga hundar hittades som matchar dina sökkriterier",
       "addFirst": "Lägg till din första hund för att komma igång!",
       "addFirstButton": "Lägg till Din Första Hund"
     },
@@ -186,16 +186,16 @@
   },
   "reminders": {
     "heatTracking": {
-      "title": "Börja spåra löptider för {{dogName}}",
-      "description": "{{dogName}} är i avelsålder men har inga löptidsregistreringar",
-      "suggestion": "Börja spåra löptider för bättre avelshantering"
+      "title": "Börja spåra löp för {{dogName}}",
+      "description": "{{dogName}} är i avelsålder men har inga löpregistreringar",
+      "suggestion": "Börja spåra löp för bättre avelshantering"
     }
   },
   "toast": {
     "success": {
       "added": "{{dogName}} har lagts till i dina hundar",
-      "updated": "{{dogName}} har uppdaterats framgångsrikt",
-      "deleted": "Hunden borttagen framgångsrikt"
+      "updated": "{{dogName}} har uppdaterats",
+      "deleted": "Hund borttagen"
     },
     "error": {
       "add": "Misslyckades att lägga till hund. Försök igen.",
