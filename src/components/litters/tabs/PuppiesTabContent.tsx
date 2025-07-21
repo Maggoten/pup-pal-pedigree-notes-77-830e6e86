@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
-import { Puppy } from '@/types/breeding';
+import { Litter, Puppy } from '@/types/breeding';
 import PuppyList from '../PuppyList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -22,6 +22,7 @@ interface PuppiesTabContentProps {
   onSelectPuppy: (puppy: Puppy | null) => void;
   selectedPuppy: Puppy | null;
   litterAge: number;
+  litter: Litter;
 }
 
 const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
@@ -34,6 +35,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   onSelectPuppy,
   selectedPuppy,
   litterAge,
+  litter,
 }) => {
   const [measurementDialogOpen, setMeasurementDialogOpen] = useState(false);
   const [addPuppyDialogOpen, setAddPuppyDialogOpen] = useState(false);
@@ -148,6 +150,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
                 onDeletePuppy={handleDeletePuppy}
                 isSelected={selectedPuppy?.id === puppy.id}
                 litterAge={litterAge}
+                litterId={litter.id}
               />
             ))}
           </div>

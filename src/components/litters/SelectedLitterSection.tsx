@@ -112,6 +112,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
                 onSelectPuppy={setSelectedPuppy}
                 selectedPuppy={selectedPuppy}
                 litterAge={litterAge}
+                litter={litter}
               />
             )}
           </TabsContent>

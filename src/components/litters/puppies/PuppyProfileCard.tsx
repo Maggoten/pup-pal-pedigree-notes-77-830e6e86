@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +17,7 @@ interface PuppyProfileCardProps {
   onDeletePuppy: (puppyId: string) => void;
   isSelected?: boolean;
   litterAge: number;
+  litterId: string;
 }
 
 const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
@@ -25,8 +27,10 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
   onUpdatePuppy,
   onDeletePuppy,
   isSelected = false,
-  litterAge
+  litterAge,
+  litterId
 }) => {
+  const navigate = useNavigate();
   // Get latest weight measurement
   const getLatestWeight = () => {
     if (puppy.weightLog && puppy.weightLog.length > 0) {
@@ -79,7 +83,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onPuppyClick(puppy);
+    navigate(`/my-litters/${litterId}/puppy/${puppy.id}`);
   };
 
   const handleMeasurementClick = (e: React.MouseEvent) => {
@@ -92,7 +96,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
       className={`transition-all duration-200 hover:shadow-lg cursor-pointer ${
         isSelected ? 'ring-2 ring-primary shadow-lg' : ''
       }`}
-      onClick={() => onPuppyClick(puppy)}
+      onClick={() => navigate(`/my-litters/${litterId}/puppy/${puppy.id}`)}
     >
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-4">
