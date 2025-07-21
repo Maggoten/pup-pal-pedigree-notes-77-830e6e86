@@ -105,24 +105,6 @@ const LitterCard: React.FC<LitterCardProps> = ({
             </div>
           )}
         </div>
-        
-        <div className="flex justify-between items-center mt-4">
-          <div className="flex-1" />
-          {onArchive && (
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                onArchive(litter);
-              }}
-              title={litter.archived ? "Unarchive Litter" : "Archive Litter"}
-              className="h-7 w-7 opacity-60 hover:opacity-100 transition-opacity"
-            >
-              <Archive className="h-3.5 w-3.5" />
-            </Button>
-          )}
-        </div>
       </CardContent>
     </Card>
   );
