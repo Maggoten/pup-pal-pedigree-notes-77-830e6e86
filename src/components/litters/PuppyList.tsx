@@ -1,10 +1,10 @@
-
 import React, { useMemo, useCallback, memo } from 'react';
 import { Edit, Trash2, BarChart2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Puppy, PuppyWeightRecord, PuppyHeightRecord } from '@/types/breeding';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 interface PuppyListProps {
   puppies: Puppy[];
@@ -78,84 +78,86 @@ const PuppyCard = memo(({
   };
 
   return (
-    <div 
-      className={`border-2 border-warmbeige-300 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden ${
-        selectedPuppyId === puppy.id ? 'bg-primary/10 border-primary/30' : 'bg-white'
+    <Card 
+      className={`w-full h-full flex flex-col overflow-hidden cursor-pointer ${
+        selectedPuppyId === puppy.id ? 'bg-primary/10 border-primary/30' : ''
       }`}
       onClick={handleCardClick}
     >
-      {/* Photo section - full width, no padding, rounded top corners */}
-      <div className="relative w-full h-48 rounded-t-xl overflow-hidden">
-        {puppy.imageUrl ? (
-          <img 
-            src={puppy.imageUrl} 
-            alt={puppy.name} 
-            className="object-cover w-full h-full rounded-t-xl"
-          />
-        ) : (
-          <div className="w-full h-full bg-primary/10 flex items-center justify-center rounded-t-xl">
-            <span className="text-primary text-2xl font-semibold">
-              {puppy.name.substring(0, 2).toUpperCase()}
-            </span>
+      {/* Photo section - edge to edge with no padding */}
+      <CardHeader className="p-0">
+        <div className="relative w-full h-48">
+          {puppy.imageUrl ? (
+            <img 
+              src={puppy.imageUrl} 
+              alt={puppy.name} 
+              className="object-cover w-full h-full"
+            />
+          ) : (
+            <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+              <span className="text-primary text-2xl font-semibold">
+                {puppy.name.substring(0, 2).toUpperCase()}
+              </span>
+            </div>
+          )}
+          {/* Badge positioned on top of photo */}
+          <div className="absolute top-2 right-2">
+            {getStatusBadge()}
           </div>
-        )}
-        {/* Badge positioned on top of photo */}
-        <div className="absolute top-2 right-2">
-          {getStatusBadge()}
         </div>
-      </div>
+      </CardHeader>
       
       {/* Content section with padding */}
-      <div className="p-4">
+      <CardContent className="p-4 flex-grow">
         <div className="mb-3">
           <h3 className="font-semibold text-warmgreen-800">{puppy.name}</h3>
           <p className="text-sm text-muted-foreground capitalize">{puppy.gender} • {puppy.color}</p>
         </div>
         
         <div className="grid grid-cols-2 gap-2 mb-3">
-        <div className="bg-warmbeige-50 p-2 rounded-md">
-          <p className="text-xs text-muted-foreground">Weight</p>
-          <p className="font-medium">{getLatestMeasurement(puppy, 'weight')}</p>
+          <div className="bg-warmbeige-50 p-2 rounded-md">
+            <p className="text-xs text-muted-foreground">Weight</p>
+            <p className="font-medium">{getLatestMeasurement(puppy, 'weight')}</p>
+          </div>
+          <div className="bg-warmbeige-50 p-2 rounded-md">
+            <p className="text-xs text-muted-foreground">Height</p>
+            <p className="font-medium">{getLatestMeasurement(puppy, 'height')}</p>
+          </div>
         </div>
-        <div className="bg-warmbeige-50 p-2 rounded-md">
-          <p className="text-xs text-muted-foreground">Height</p>
-          <p className="font-medium">{getLatestMeasurement(puppy, 'height')}</p>
+        
+        <div className="flex flex-col space-y-2 mt-4 px-1">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleAddMeasurement} 
+            className="w-full justify-start"
+          >
+            <BarChart2 className="h-4 w-4 mr-2" />
+            <span>Add measurements</span>
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleEditClick}
+            className="w-full justify-start"
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            <span>Edit</span>
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleDeletePuppy}
+            className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            <span>Delete</span>
+          </Button>
         </div>
-      </div>
-      
-      <div className="flex flex-col space-y-2 mt-4 px-1">
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={handleAddMeasurement} 
-          className="w-full justify-start"
-        >
-          <BarChart2 className="h-4 w-4 mr-2" />
-          <span>Add measurements</span>
-        </Button>
-        
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={handleEditClick}
-          className="w-full justify-start"
-        >
-          <Edit className="h-4 w-4 mr-2" />
-          <span>Edit</span>
-        </Button>
-        
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={handleDeletePuppy}
-          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          <span>Delete</span>
-        </Button>
-      </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 });
 
