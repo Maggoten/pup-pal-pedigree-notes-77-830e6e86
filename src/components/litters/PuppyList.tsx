@@ -78,30 +78,40 @@ const PuppyCard = memo(({
 
   return (
     <div 
-      className={`border-2 border-warmbeige-300 rounded-xl p-4 shadow-sm hover:shadow-md transition-all ${
+      className={`border-2 border-warmbeige-300 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden ${
         selectedPuppyId === puppy.id ? 'bg-primary/10 border-primary/30' : 'bg-white'
       }`}
       onClick={handleCardClick}
     >
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
-            {puppy.imageUrl ? 
-              <AvatarImage src={puppy.imageUrl} alt={puppy.name} className="object-cover" /> : 
-              <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                {puppy.name.substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            }
-          </Avatar>
-          <div>
-            <h3 className="font-semibold text-warmgreen-800">{puppy.name}</h3>
-            <p className="text-sm text-muted-foreground capitalize">{puppy.gender} • {puppy.color}</p>
+      {/* Photo section - full width, no padding */}
+      <div className="relative w-full h-48">
+        {puppy.imageUrl ? (
+          <img 
+            src={puppy.imageUrl} 
+            alt={puppy.name} 
+            className="object-cover w-full h-full"
+          />
+        ) : (
+          <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+            <span className="text-primary text-2xl font-semibold">
+              {puppy.name.substring(0, 2).toUpperCase()}
+            </span>
           </div>
+        )}
+        {/* Badge positioned on top of photo */}
+        <div className="absolute top-2 right-2">
+          {getStatusBadge()}
         </div>
-        <div>{getStatusBadge()}</div>
       </div>
       
-      <div className="grid grid-cols-2 gap-2 mb-3">
+      {/* Content section with padding */}
+      <div className="p-4">
+        <div className="mb-3">
+          <h3 className="font-semibold text-warmgreen-800">{puppy.name}</h3>
+          <p className="text-sm text-muted-foreground capitalize">{puppy.gender} • {puppy.color}</p>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-2 mb-3">
         <div className="bg-warmbeige-50 p-2 rounded-md">
           <p className="text-xs text-muted-foreground">Weight</p>
           <p className="font-medium">{getLatestMeasurement(puppy, 'weight')}</p>
@@ -142,6 +152,7 @@ const PuppyCard = memo(({
           <Trash2 className="h-4 w-4 mr-2" />
           <span>Delete</span>
         </Button>
+      </div>
       </div>
     </div>
   );
