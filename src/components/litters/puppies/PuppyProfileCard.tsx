@@ -95,7 +95,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
                   <img 
                     src={puppy.imageUrl} 
                     alt={puppy.name} 
-                    className="object-cover object-left w-full h-full"
+                    className="object-cover object-center w-full h-full"
                   />
                 ) : (
                   <div className="bg-warmgreen-100 text-warmgreen-800 font-semibold text-4xl w-full h-full flex items-center justify-center">
