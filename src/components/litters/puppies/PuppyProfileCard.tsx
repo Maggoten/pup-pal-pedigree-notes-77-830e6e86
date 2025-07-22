@@ -88,7 +88,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
       <CardContent className="p-4 flex-grow">
         <div className="space-y-3">
           {/* Profile Picture - Centered at top */}
-          <div className="flex justify-start">
+          <div className="flex justify-center">
             <div className="w-36 h-36 rounded-2xl overflow-hidden border-2 border-warmbeige-200 shadow-sm">
               <AspectRatio ratio={1/1}>
                 {puppy.imageUrl ? (
@@ -107,12 +107,12 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
           </div>
 
           {/* Puppy Name - Centered below picture */}
-          <h3 className="text-2xl font-bold text-warmgreen-800 text-left">
+          <h3 className="text-2xl font-bold text-warmgreen-800 text-center">
             {puppy.name}
           </h3>
 
           {/* Gender and Color Info - Centered */}
-          <div className="flex items-center justify-start gap-3 text-muted-foreground text-sm">
+          <div className="flex items-center justify-center gap-3 text-muted-foreground text-sm">
             <span className="flex items-center gap-1">
               {puppy.gender === 'male' ? '♂' : '♀'} {puppy.gender}
             </span>
