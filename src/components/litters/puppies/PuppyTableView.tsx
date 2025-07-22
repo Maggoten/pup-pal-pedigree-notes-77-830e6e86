@@ -82,8 +82,8 @@ const PuppyTableRow = memo(({
 
   // Format birthdate
   const formatBirthdate = () => {
-    if (puppy.birth_date_time) {
-      return format(parseISO(puppy.birth_date_time), 'MMM d, yyyy');
+    if (puppy.birthDateTime) {
+      return format(parseISO(puppy.birthDateTime), 'MMM d, yyyy');
     } else {
       return format(parseISO(litterDob), 'MMM d, yyyy');
     }
