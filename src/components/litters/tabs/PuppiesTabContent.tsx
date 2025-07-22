@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Litter, Puppy } from '@/types/breeding';
@@ -11,6 +12,8 @@ import AddPuppyDialog from '../AddPuppyDialog';
 import PuppyMeasurementsDialog from '../puppies/PuppyMeasurementsDialog';
 import PuppyDetailsDialog from '../PuppyDetailsDialog';
 import PuppyProfileCard from '../puppies/PuppyProfileCard';
+import PuppyTableView from '../puppies/PuppyTableView';
+import ViewToggle from '../ViewToggle';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PuppiesTabContentProps {
@@ -43,6 +46,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [activePuppy, setActivePuppy] = useState<Puppy | null>(null);
   const [localPuppies, setLocalPuppies] = useState<Puppy[]>([]);
+  const [view, setView] = useState<'grid' | 'list'>('grid');
   const isMobile = useIsMobile();
   
   // Keep local state in sync with props
@@ -121,50 +125,66 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
             </CardTitle>
           </div>
           
-          <Dialog open={addPuppyDialogOpen} onOpenChange={setAddPuppyDialogOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                variant="outline" 
-                size={isMobile ? "sm" : "sm"}
-                className={`flex items-center bg-warmbeige-50 hover:bg-warmbeige-200 ${isMobile ? 'gap-1 px-2' : 'gap-1.5'}`}
-                onClick={() => setAddPuppyDialogOpen(true)}
-              >
-                <PlusCircle className="h-4 w-4" />
-                <span className={isMobile ? 'text-sm' : ''}>Add Puppy</span>
-              </Button>
-            </DialogTrigger>
-            <AddPuppyDialog 
-              onAddPuppy={handleAddPuppy} 
-              onClose={() => setAddPuppyDialogOpen(false)}
-              litterDob={litterDob} 
-              damBreed={damBreed}
-              puppyNumber={getNextPuppyNumber()}
-            />
-          </Dialog>
+          <div className="flex items-center gap-2">
+            <ViewToggle view={view} onViewChange={setView} />
+            
+            <Dialog open={addPuppyDialogOpen} onOpenChange={setAddPuppyDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size={isMobile ? "sm" : "sm"}
+                  className={`flex items-center bg-warmbeige-50 hover:bg-warmbeige-200 ${isMobile ? 'gap-1 px-2' : 'gap-1.5'}`}
+                  onClick={() => setAddPuppyDialogOpen(true)}
+                >
+                  <PlusCircle className="h-4 w-4" />
+                  <span className={isMobile ? 'text-sm' : ''}>Add Puppy</span>
+                </Button>
+              </DialogTrigger>
+              <AddPuppyDialog 
+                onAddPuppy={handleAddPuppy} 
+                onClose={() => setAddPuppyDialogOpen(false)}
+                litterDob={litterDob} 
+                damBreed={damBreed}
+                puppyNumber={getNextPuppyNumber()}
+              />
+            </Dialog>
+          </div>
         </div>
       </CardHeader>
       
       <CardContent className={isMobile ? 'p-4' : 'p-6'}>
         {localPuppies && localPuppies.length > 0 ? (
-          <div className={`grid gap-6 ${
-            isMobile 
-              ? 'grid-cols-1' 
-              : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-          }`}>
-            {localPuppies.map((puppy) => (
-              <PuppyProfileCard
-                key={puppy.id}
-                puppy={puppy}
-                onPuppyClick={handlePuppyClick}
-                onAddMeasurement={handleAddMeasurement}
-                onUpdatePuppy={updatePuppyNames}
-                onDeletePuppy={handleDeletePuppy}
-                isSelected={selectedPuppy?.id === puppy.id}
-                litterAge={litterAge}
-                litterId={litter.id}
-              />
-            ))}
-          </div>
+          view === 'grid' ? (
+            <div className={`grid gap-6 ${
+              isMobile 
+                ? 'grid-cols-1' 
+                : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+            }`}>
+              {localPuppies.map((puppy) => (
+                <PuppyProfileCard
+                  key={puppy.id}
+                  puppy={puppy}
+                  onPuppyClick={handlePuppyClick}
+                  onAddMeasurement={handleAddMeasurement}
+                  onUpdatePuppy={updatePuppyNames}
+                  onDeletePuppy={handleDeletePuppy}
+                  isSelected={selectedPuppy?.id === puppy.id}
+                  litterAge={litterAge}
+                  litterId={litter.id}
+                />
+              ))}
+            </div>
+          ) : (
+            <PuppyTableView
+              puppies={localPuppies}
+              onPuppyClick={handlePuppyClick}
+              onAddMeasurement={handleAddMeasurement}
+              onUpdatePuppy={updatePuppyNames}
+              onDeletePuppy={handleDeletePuppy}
+              selectedPuppyId={selectedPuppy?.id}
+              litterDob={litterDob}
+            />
+          )
         ) : (
           <div className={`text-center space-y-4 ${isMobile ? 'py-8' : 'py-12'}`}>
             <div className={`bg-warmbeige-100 rounded-full flex items-center justify-center mx-auto ${isMobile ? 'w-16 h-16' : 'w-20 h-20'}`}>
