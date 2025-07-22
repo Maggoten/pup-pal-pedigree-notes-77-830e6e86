@@ -1,3 +1,4 @@
+
 import React, { useMemo, useCallback, memo } from 'react';
 import { Edit, Trash2, BarChart2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -83,16 +84,16 @@ const PuppyCard = memo(({
       }`}
       onClick={handleCardClick}
     >
-      {/* Photo section - full width, no padding */}
-      <div className="relative w-full h-48">
+      {/* Photo section - full width, no padding, rounded top corners */}
+      <div className="relative w-full h-48 rounded-t-xl overflow-hidden">
         {puppy.imageUrl ? (
           <img 
             src={puppy.imageUrl} 
             alt={puppy.name} 
-            className="object-cover w-full h-full"
+            className="object-cover w-full h-full rounded-t-xl"
           />
         ) : (
-          <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+          <div className="w-full h-full bg-primary/10 flex items-center justify-center rounded-t-xl">
             <span className="text-primary text-2xl font-semibold">
               {puppy.name.substring(0, 2).toUpperCase()}
             </span>
