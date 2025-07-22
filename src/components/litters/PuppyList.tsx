@@ -5,6 +5,7 @@ import { Puppy, PuppyWeightRecord, PuppyHeightRecord } from '@/types/breeding';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface PuppyListProps {
   puppies: Puppy[];
@@ -86,20 +87,22 @@ const PuppyCard = memo(({
     >
       {/* Photo section - edge to edge with no padding */}
       <CardHeader className="p-0">
-        <div className="relative w-full h-48">
-          {puppy.imageUrl ? (
-            <img 
-              src={puppy.imageUrl} 
-              alt={puppy.name} 
-              className="object-cover w-full h-full"
-            />
-          ) : (
-            <div className="w-full h-full bg-primary/10 flex items-center justify-center">
-              <span className="text-primary text-2xl font-semibold">
-                {puppy.name.substring(0, 2).toUpperCase()}
-              </span>
-            </div>
-          )}
+        <div className="relative w-full">
+          <AspectRatio ratio={1/1}>
+            {puppy.imageUrl ? (
+              <img 
+                src={puppy.imageUrl} 
+                alt={puppy.name} 
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+                <span className="text-primary text-2xl font-semibold">
+                  {puppy.name.substring(0, 2).toUpperCase()}
+                </span>
+              </div>
+            )}
+          </AspectRatio>
           {/* Badge positioned on top of photo */}
           <div className="absolute top-2 right-2">
             {getStatusBadge()}
