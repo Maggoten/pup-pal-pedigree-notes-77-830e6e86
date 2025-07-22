@@ -1,12 +1,13 @@
-
 import React, { useCallback, memo } from 'react';
 import { format, parseISO } from 'date-fns';
-import { Edit, Trash2, BarChart2 } from 'lucide-react';
+import { Edit, Trash2, BarChart2, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Puppy, PuppyWeightRecord, PuppyHeightRecord } from '@/types/breeding';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PuppyTableViewProps {
   puppies: Puppy[];
@@ -46,6 +47,8 @@ const PuppyTableRow = memo(({
   onDeletePuppy: (puppyId: string) => void;
   litterDob: string;
 }) => {
+  const isMobile = useIsMobile();
+
   const handleDeletePuppy = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm(`Do you want to delete "${puppy.name}"?`)) {
@@ -72,20 +75,20 @@ const PuppyTableRow = memo(({
     const status = puppy.status || 'Available';
     switch (status) {
       case 'Reserved':
-        return <Badge variant="outline" className="bg-rustbrown-100">Reserved</Badge>;
+        return <Badge variant="outline" className="bg-rustbrown-100 text-xs">Reserved</Badge>;
       case 'Sold':
-        return <Badge variant="outline" className="bg-warmgreen-100">Sold</Badge>;
+        return <Badge variant="outline" className="bg-warmgreen-100 text-xs">Sold</Badge>;
       default:
-        return <Badge variant="outline">Available</Badge>;
+        return <Badge variant="outline" className="text-xs">Available</Badge>;
     }
   };
 
   // Format birthdate
   const formatBirthdate = () => {
     if (puppy.birthDateTime) {
-      return format(parseISO(puppy.birthDateTime), 'MMM d, yyyy');
+      return format(parseISO(puppy.birthDateTime), isMobile ? 'MMM d' : 'MMM d, yyyy');
     } else {
-      return format(parseISO(litterDob), 'MMM d, yyyy');
+      return format(parseISO(litterDob), isMobile ? 'MMM d' : 'MMM d, yyyy');
     }
   };
 
@@ -94,9 +97,9 @@ const PuppyTableRow = memo(({
       className={`cursor-pointer ${selectedPuppyId === puppy.id ? 'bg-primary/5' : ''}`} 
       onClick={handleRowClick}
     >
-      <TableCell>
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
+      <TableCell className="p-2">
+        <div className="flex items-center gap-2">
+          <Avatar className={`${isMobile ? 'h-6 w-6' : 'h-8 w-8'}`}>
             {puppy.imageUrl ? 
               <AvatarImage src={puppy.imageUrl} alt={puppy.name} className="object-cover" /> : 
               <AvatarFallback className="bg-primary/10 text-primary text-xs">
@@ -104,47 +107,95 @@ const PuppyTableRow = memo(({
               </AvatarFallback>
             }
           </Avatar>
-          <span className="font-medium">{puppy.name}</span>
+          <div className="min-w-0 flex-1">
+            <span className={`font-medium block truncate ${isMobile ? 'text-sm' : ''}`}>{puppy.name}</span>
+            {isMobile && (
+              <span className="text-xs text-muted-foreground capitalize">{puppy.gender}</span>
+            )}
+          </div>
         </div>
       </TableCell>
-      <TableCell className="capitalize">{puppy.gender}</TableCell>
-      <TableCell>{puppy.color || 'Not specified'}</TableCell>
-      <TableCell>{formatBirthdate()}</TableCell>
-      <TableCell>{getLatestMeasurement(puppy, 'weight')}</TableCell>
-      <TableCell>{getLatestMeasurement(puppy, 'height')}</TableCell>
+      
+      {!isMobile && <TableCell className="capitalize text-sm">{puppy.gender}</TableCell>}
+      
+      <TableCell className={`${isMobile ? 'text-xs' : 'text-sm'}`}>
+        {isMobile ? (puppy.color || 'N/A') : (puppy.color || 'Not specified')}
+      </TableCell>
+      
+      <TableCell className={`${isMobile ? 'text-xs' : 'text-sm'}`}>
+        {formatBirthdate()}
+      </TableCell>
+      
+      {!isMobile && (
+        <>
+          <TableCell className="text-sm">{getLatestMeasurement(puppy, 'weight')}</TableCell>
+          <TableCell className="text-sm">{getLatestMeasurement(puppy, 'height')}</TableCell>
+        </>
+      )}
+      
       <TableCell>{getStatusBadge()}</TableCell>
-      <TableCell>
-        <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleAddMeasurement} 
-            className="h-8 w-8"
-            title="Add measurements"
-          >
-            <BarChart2 className="h-4 w-4" />
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8" 
-            onClick={handleEditClick}
-            title="View profile"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" 
-            onClick={handleDeletePuppy}
-            title="Delete puppy"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+      
+      <TableCell className="p-2">
+        {isMobile ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-7 w-7"
+                onClick={e => e.stopPropagation()}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleAddMeasurement}>
+                <BarChart2 className="h-4 w-4 mr-2" />
+                Add Data
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleEditClick}>
+                <Edit className="h-4 w-4 mr-2" />
+                View Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDeletePuppy} className="text-destructive">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleAddMeasurement} 
+              className="h-8 w-8"
+              title="Add measurements"
+            >
+              <BarChart2 className="h-4 w-4" />
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8" 
+              onClick={handleEditClick}
+              title="View profile"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" 
+              onClick={handleDeletePuppy}
+              title="Delete puppy"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </TableCell>
     </TableRow>
   );
@@ -161,7 +212,8 @@ const PuppyTableView: React.FC<PuppyTableViewProps> = ({
   selectedPuppyId,
   litterDob
 }) => {
-  // Memoize the getLatestMeasurement function
+  const isMobile = useIsMobile();
+
   const getLatestMeasurement = useCallback((puppy: Puppy, type: 'weight' | 'height') => {
     // For weight measurements, always prioritize the weight log
     if (type === 'weight') {
@@ -203,14 +255,18 @@ const PuppyTableView: React.FC<PuppyTableViewProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Sex</TableHead>
-            <TableHead>Color</TableHead>
-            <TableHead>Birthdate</TableHead>
-            <TableHead>Current Weight</TableHead>
-            <TableHead>Height</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className={isMobile ? 'text-xs p-2' : ''}>Name</TableHead>
+            {!isMobile && <TableHead className="text-xs">Sex</TableHead>}
+            <TableHead className={isMobile ? 'text-xs p-2' : ''}>Color</TableHead>
+            <TableHead className={isMobile ? 'text-xs p-2' : ''}>Birth</TableHead>
+            {!isMobile && (
+              <>
+                <TableHead>Weight</TableHead>
+                <TableHead>Height</TableHead>
+              </>
+            )}
+            <TableHead className={isMobile ? 'text-xs p-2' : ''}>Status</TableHead>
+            <TableHead className={`text-right ${isMobile ? 'text-xs p-2' : ''}`}>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

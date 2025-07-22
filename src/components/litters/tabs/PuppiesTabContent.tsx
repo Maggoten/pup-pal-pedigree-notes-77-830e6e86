@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Litter, Puppy } from '@/types/breeding';
@@ -117,7 +116,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   return (
     <Card className="shadow-sm bg-white border border-warmbeige-200">
       <CardHeader className={`bg-warmbeige-100 ${isMobile ? 'pb-3' : 'pb-4'}`}>
-        <div className="flex items-center justify-between">
+        <div className={`flex items-center justify-between ${isMobile ? 'flex-col gap-3' : ''}`}>
           <div className="flex items-center gap-2">
             <PawPrint className="h-5 w-5 text-primary" />
             <CardTitle className={`font-semibold ${isMobile ? 'text-base' : 'text-lg'}`}>
@@ -125,15 +124,15 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
             </CardTitle>
           </div>
           
-          <div className="flex items-center gap-2">
-            <ViewToggle view={view} onViewChange={setView} />
+          <div className={`flex items-center gap-2 ${isMobile ? 'w-full justify-between' : ''}`}>
+            {!isMobile && <ViewToggle view={view} onViewChange={setView} />}
             
             <Dialog open={addPuppyDialogOpen} onOpenChange={setAddPuppyDialogOpen}>
               <DialogTrigger asChild>
                 <Button 
                   variant="outline" 
                   size={isMobile ? "sm" : "sm"}
-                  className={`flex items-center bg-warmbeige-50 hover:bg-warmbeige-200 ${isMobile ? 'gap-1 px-2' : 'gap-1.5'}`}
+                  className={`flex items-center bg-warmbeige-50 hover:bg-warmbeige-200 ${isMobile ? 'gap-1 px-3 flex-1' : 'gap-1.5'}`}
                   onClick={() => setAddPuppyDialogOpen(true)}
                 >
                   <PlusCircle className="h-4 w-4" />
@@ -148,6 +147,8 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
                 puppyNumber={getNextPuppyNumber()}
               />
             </Dialog>
+
+            {isMobile && <ViewToggle view={view} onViewChange={setView} />}
           </div>
         </div>
       </CardHeader>
@@ -175,15 +176,17 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
               ))}
             </div>
           ) : (
-            <PuppyTableView
-              puppies={localPuppies}
-              onPuppyClick={handlePuppyClick}
-              onAddMeasurement={handleAddMeasurement}
-              onUpdatePuppy={updatePuppyNames}
-              onDeletePuppy={handleDeletePuppy}
-              selectedPuppyId={selectedPuppy?.id}
-              litterDob={litterDob}
-            />
+            <div className={isMobile ? 'overflow-x-auto -mx-4 px-4' : ''}>
+              <PuppyTableView
+                puppies={localPuppies}
+                onPuppyClick={handlePuppyClick}
+                onAddMeasurement={handleAddMeasurement}
+                onUpdatePuppy={updatePuppyNames}
+                onDeletePuppy={handleDeletePuppy}
+                selectedPuppyId={selectedPuppy?.id}
+                litterDob={litterDob}
+              />
+            </div>
           )
         ) : (
           <div className={`text-center space-y-4 ${isMobile ? 'py-8' : 'py-12'}`}>
