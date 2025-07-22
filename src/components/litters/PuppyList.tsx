@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Puppy, PuppyWeightRecord, PuppyHeightRecord } from '@/types/breeding';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PuppyListProps {
   puppies: Puppy[];
@@ -79,7 +78,7 @@ const PuppyCard = memo(({
 
   return (
     <div 
-      className={`border-2 border-warmbeige-300 rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-all ${
+      className={`border-2 border-warmbeige-300 rounded-xl p-4 shadow-sm hover:shadow-md transition-all ${
         selectedPuppyId === puppy.id ? 'bg-primary/10 border-primary/30' : 'bg-white'
       }`}
       onClick={handleCardClick}
@@ -275,8 +274,6 @@ const PuppyList: React.FC<PuppyListProps> = ({
   onAddMeasurement,
   litterAge
 }) => {
-  const isMobile = useIsMobile();
-  
   // Memoize the getLatestMeasurement function to avoid recreating it on every render
   const getLatestMeasurement = useCallback((puppy: Puppy, type: 'weight' | 'height') => {
     // For weight measurements, always prioritize the weight log
@@ -316,54 +313,20 @@ const PuppyList: React.FC<PuppyListProps> = ({
     return 'Invalid record';
   }, []);
   
-  if (isMobile) {
-    return (
-      <div className="space-y-2">
-        {puppies.map(puppy => (
-          <PuppyCard
-            key={puppy.id}
-            puppy={puppy}
-            selectedPuppyId={selectedPuppyId}
-            getLatestMeasurement={getLatestMeasurement}
-            onPuppyClick={onPuppyClick}
-            onAddMeasurement={onAddMeasurement}
-            onUpdatePuppy={onUpdatePuppy}
-            onDeletePuppy={onDeletePuppy}
-          />
-        ))}
-      </div>
-    );
-  }
-  
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-b text-left bg-warmbeige-200">
-            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Name</th>
-            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Gender</th>
-            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Color</th>
-            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Current Weight</th>
-            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Current Height</th>
-            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Status</th>
-            <th className="px-4 py-3 font-medium text-sm text-warmgreen-800">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {puppies.map(puppy => (
-            <PuppyRow
-              key={puppy.id}
-              puppy={puppy}
-              selectedPuppyId={selectedPuppyId}
-              getLatestMeasurement={getLatestMeasurement}
-              onPuppyClick={onPuppyClick}
-              onAddMeasurement={onAddMeasurement}
-              onUpdatePuppy={onUpdatePuppy}
-              onDeletePuppy={onDeletePuppy}
-            />
-          ))}
-        </tbody>
-      </table>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {puppies.map(puppy => (
+        <PuppyCard
+          key={puppy.id}
+          puppy={puppy}
+          selectedPuppyId={selectedPuppyId}
+          getLatestMeasurement={getLatestMeasurement}
+          onPuppyClick={onPuppyClick}
+          onAddMeasurement={onAddMeasurement}
+          onUpdatePuppy={onUpdatePuppy}
+          onDeletePuppy={onDeletePuppy}
+        />
+      ))}
     </div>
   );
 };
