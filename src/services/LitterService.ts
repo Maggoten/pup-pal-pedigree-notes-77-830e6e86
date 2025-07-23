@@ -1,8 +1,11 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Litter, Puppy, PlannedLitter } from '@/types/breeding';
 
 export class LitterService {
-  private transformLitterFromDB(dbLitter: any): Litter {
+  private transformLitterFromDB(dbLitter: any, puppies?: any[]): Litter {
+    const transformedPuppies = puppies ? puppies.map(p => this.transformPuppyFromDB(p)) : [];
+    
     return {
       id: dbLitter.id,
       name: dbLitter.name,
@@ -11,7 +14,7 @@ export class LitterService {
       damId: dbLitter.dam_id,
       sireName: dbLitter.sire_name,
       damName: dbLitter.dam_name,
-      puppies: [],
+      puppies: transformedPuppies,
       archived: dbLitter.archived,
       user_id: dbLitter.user_id
     };
@@ -149,6 +152,55 @@ export class LitterService {
       return data ? this.transformLitterFromDB(data) : null;
     } catch (error) {
       console.error('Error fetching litter by ID:', error);
+      return null;
+    }
+  }
+
+  async getLitterDetails(litterId: string): Promise<Litter | null> {
+    try {
+      console.log(`Fetching detailed litter data for: ${litterId}`);
+      
+      // Fetch litter data
+      const { data: litterData, error: litterError } = await supabase
+        .from('litters')
+        .select('*')
+        .eq('id', litterId)
+        .single();
+
+      if (litterError) {
+        console.error('Error fetching litter details:', litterError);
+        return null;
+      }
+
+      if (!litterData) {
+        console.log(`No litter found with ID: ${litterId}`);
+        return null;
+      }
+
+      console.log(`Found litter: ${litterData.name}`);
+
+      // Fetch associated puppies
+      const { data: puppiesData, error: puppiesError } = await supabase
+        .from('puppies')
+        .select('*')
+        .eq('litter_id', litterId);
+
+      if (puppiesError) {
+        console.error('Error fetching puppies for litter:', puppiesError);
+        // Return litter without puppies rather than failing completely
+        return this.transformLitterFromDB(litterData, []);
+      }
+
+      console.log(`Found ${puppiesData?.length || 0} puppies for litter ${litterData.name}`);
+      
+      // Log puppy details for debugging
+      if (puppiesData && puppiesData.length > 0) {
+        console.log('Puppies found:', puppiesData.map(p => ({ id: p.id, name: p.name, litter_id: p.litter_id })));
+      }
+
+      return this.transformLitterFromDB(litterData, puppiesData || []);
+    } catch (error) {
+      console.error('Error fetching litter details:', error);
       return null;
     }
   }
@@ -487,10 +539,6 @@ export class LitterService {
 
   async loadLitters(userId: string): Promise<Litter[]> {
     return this.getAllLitters(userId);
-  }
-
-  async getLitterDetails(litterId: string): Promise<Litter | null> {
-    return this.getLitterById(litterId);
   }
 }
 
