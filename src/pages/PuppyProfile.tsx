@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { ArrowLeft, Edit, Circle, Calendar, Weight, Ruler, FileText, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, Circle, Calendar, Weight, Ruler, FileText, Trash2, RefreshCw } from 'lucide-react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Puppy } from '@/types/breeding';
 import { usePuppyQueries } from '@/hooks/usePuppyQueries';
@@ -21,6 +20,7 @@ const PuppyProfile: React.FC = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showMeasurementsDialog, setShowMeasurementsDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Use the proper hook for puppy data
   const {
@@ -28,11 +28,26 @@ const PuppyProfile: React.FC = () => {
     error,
     isLoading,
     updatePuppy,
-    deletePuppy
+    deletePuppy,
+    refreshLitterData
   } = usePuppyQueries(litterId || '');
 
   // Find the puppy in the litter
   const selectedPuppy = litter?.puppies?.find(p => p.id === puppyId);
+
+  // Add logging to track when puppy data changes
+  useEffect(() => {
+    if (selectedPuppy) {
+      console.log(`PuppyProfile: Puppy data updated for ${selectedPuppy.name}:`, {
+        id: selectedPuppy.id,
+        notesCount: selectedPuppy.notes?.length || 0,
+        notes: selectedPuppy.notes?.map(n => ({
+          date: n.date,
+          content: n.content.substring(0, 30) + '...'
+        })) || []
+      });
+    }
+  }, [selectedPuppy?.notes]);
 
   // Handle missing parameters
   useEffect(() => {
@@ -60,6 +75,7 @@ const PuppyProfile: React.FC = () => {
   // Handle puppy not found (only after data is loaded)
   useEffect(() => {
     if (!isLoading && litter && puppyId && !selectedPuppy) {
+      console.log(`PuppyProfile: Puppy ${puppyId} not found in litter ${litter.name}`);
       toast({
         title: "Puppy not found",
         description: "The puppy you're looking for doesn't exist in this litter",
@@ -71,6 +87,27 @@ const PuppyProfile: React.FC = () => {
 
   const handleBack = () => {
     navigate('/my-litters');
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      console.log("PuppyProfile: Manual refresh initiated");
+      await refreshLitterData();
+      toast({
+        title: "Refreshed",
+        description: "Puppy data has been refreshed",
+      });
+    } catch (error) {
+      console.error("PuppyProfile: Manual refresh failed:", error);
+      toast({
+        title: "Refresh Failed",
+        description: "Failed to refresh puppy data",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const handleEditPuppy = async (updatedPuppy: Puppy) => {
@@ -92,6 +129,7 @@ const PuppyProfile: React.FC = () => {
 
   const handleUpdateMeasurements = async (updatedPuppy: Puppy) => {
     try {
+      console.log(`PuppyProfile: Updating measurements for ${updatedPuppy.name}, notes count: ${updatedPuppy.notes?.length || 0}`);
       await updatePuppy(updatedPuppy);
       toast({
         title: "Success",
@@ -182,10 +220,19 @@ const PuppyProfile: React.FC = () => {
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center justify-between gap-4 mb-6">
         <Button variant="outline" size="sm" onClick={handleBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Litters
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Refresh
         </Button>
       </div>
 
@@ -315,14 +362,16 @@ const PuppyProfile: React.FC = () => {
             </h3>
             {selectedPuppy.notes && selectedPuppy.notes.length > 0 ? (
               <div className="space-y-4">
-                {selectedPuppy.notes.map((note, index) => (
-                  <div key={index} className="border-l-4 border-primary pl-4 py-2">
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(note.date), 'MMM d, yyyy')}
-                    </p>
-                    <p>{note.content}</p>
-                  </div>
-                ))}
+                {selectedPuppy.notes
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map((note, index) => (
+                    <div key={index} className="border-l-4 border-primary pl-4 py-2">
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(note.date), 'MMM d, yyyy - h:mm a')}
+                      </p>
+                      <p>{note.content}</p>
+                    </div>
+                  ))}
               </div>
             ) : (
               <p className="text-muted-foreground">No notes recorded yet.</p>
