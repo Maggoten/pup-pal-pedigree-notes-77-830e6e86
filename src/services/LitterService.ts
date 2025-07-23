@@ -2,8 +2,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Litter, Puppy, PlannedLitter } from '@/types/breeding';
 
 export class LitterService {
-  private transformLitterFromDB(dbLitter: any, puppies?: any[]): Litter {
-    const transformedPuppies = puppies ? puppies.map(p => this.transformPuppyFromDB(p)) : [];
+  private transformLitterFromDB(dbLitter: any, puppies?: Puppy[]): Litter {
+    // Puppies parameter can be either raw DB data or already transformed Puppy objects
+    // Check if puppies are already transformed (have weightLog property) or need transformation
+    const transformedPuppies = puppies ? 
+      (puppies.length > 0 && 'weightLog' in puppies[0] ? 
+        puppies as Puppy[] : 
+        puppies.map(p => this.transformPuppyFromDB(p))
+      ) : [];
     
     return {
       id: dbLitter.id,
