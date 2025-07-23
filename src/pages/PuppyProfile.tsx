@@ -86,7 +86,8 @@ const PuppyProfile: React.FC = () => {
   }, [isLoading, litter, puppyId, selectedPuppy, navigate]);
 
   const handleBack = () => {
-    navigate('/my-litters');
+    // Navigate back to My Litters with the current litter selected
+    navigate(`/my-litters?selected=${litterId}`);
   };
 
   const handleRefresh = async () => {

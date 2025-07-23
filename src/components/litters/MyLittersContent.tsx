@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import SelectedLitterHeader from './SelectedLitterHeader';
 import { dogImageService } from '@/services/dogImageService';
 
 const MyLittersContent: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { searchQuery, setSearchQuery, currentPage, setCurrentPage } = useLitterFilter();
   const {
     activeLitters,
@@ -51,6 +52,24 @@ const MyLittersContent: React.FC = () => {
     pageCount,
     isFilterActive
   } = useLitterFilteredData(allLitters);
+
+  // Check for selected litter in URL parameters on mount
+  useEffect(() => {
+    const selectedFromUrl = searchParams.get('selected');
+    if (selectedFromUrl && !selectedLitterId) {
+      // Find the litter in our data
+      const litterExists = allLitters.find(litter => litter.id === selectedFromUrl);
+      if (litterExists) {
+        console.log(`MyLittersContent: Auto-selecting litter from URL: ${selectedFromUrl}`);
+        handleSelectLitter(litterExists);
+        // Clean up the URL parameter after selection
+        setSearchParams(params => {
+          params.delete('selected');
+          return params;
+        });
+      }
+    }
+  }, [searchParams, selectedLitterId, allLitters, handleSelectLitter, setSearchParams]);
 
   const [selectedLitterDamImage, setSelectedLitterDamImage] = useState<string | null>(null);
   
