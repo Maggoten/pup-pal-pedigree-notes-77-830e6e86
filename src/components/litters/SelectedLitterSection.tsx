@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Litter, Puppy } from '@/types/breeding';
 import { differenceInWeeks, parseISO } from 'date-fns';
@@ -51,6 +50,12 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
 
   // Calculate litter age in weeks - memoized by component memo
   const litterAge = differenceInWeeks(new Date(), parseISO(litter.dateOfBirth));
+
+  // Handle checklist item toggle
+  const handleToggleChecklistItem = useCallback((itemId: string, completed: boolean) => {
+    console.log(`Checklist item ${itemId} toggled to ${completed ? 'completed' : 'uncompleted'} for litter ${litter.id}`);
+    // The actual saving is handled by the useChecklistData hook
+  }, [litter.id]);
 
   // Find the dam's breed when dogs data is loaded
   useEffect(() => {
@@ -116,7 +121,6 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
             </TabsTrigger>
           </TabsList>
 
-          {/* No Suspense wrapper needed anymore since we're using static imports */}
           <TabsContent value="puppies" className="mt-0">
             {activeTab === 'puppies' && (
               <PuppiesTabContent 
@@ -138,7 +142,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
             {activeTab === 'development' && (
               <DevelopmentTabContent 
                 litter={litter}
-                onToggleItem={() => {}}
+                onToggleItem={handleToggleChecklistItem}
               />
             )}
           </TabsContent>

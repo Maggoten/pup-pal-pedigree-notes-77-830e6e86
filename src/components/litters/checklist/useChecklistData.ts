@@ -4,15 +4,36 @@ import { differenceInDays, differenceInWeeks, parseISO } from 'date-fns';
 import { Litter } from '@/types/breeding';
 import { ChecklistItem, timelineSegments } from './types';
 import { generateChecklist, saveChecklistItemStatus } from './checklistService';
+import { useToast } from '@/hooks/use-toast';
 
 export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, completed: boolean) => void) => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
   
   // Load checklist when litter changes
   useEffect(() => {
-    setChecklist(generateChecklist(litter));
-  }, [litter]);
+    const loadChecklist = async () => {
+      setIsLoading(true);
+      try {
+        const items = await generateChecklist(litter);
+        setChecklist(items);
+      } catch (error) {
+        console.error('Error loading checklist:', error);
+        toast({
+          title: "Error loading checklist",
+          description: "Failed to load checklist items. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadChecklist();
+  }, [litter, toast]);
   
   const birthDate = parseISO(litter.dateOfBirth);
   const today = new Date();
@@ -25,23 +46,48 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
   const completionPercentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
   
   // Handle toggling an item's completion status
-  const handleToggle = useCallback((itemId: string) => {
+  const handleToggle = useCallback(async (itemId: string) => {
     const item = checklist.find(item => item.id === itemId);
     if (item) {
       const newStatus = !item.isCompleted;
       
-      // Update local state immediately
+      // Update local state immediately for responsive UI
       setChecklist(prev => prev.map(i => 
         i.id === itemId ? { ...i, isCompleted: newStatus } : i
       ));
       
-      // Save to localStorage
-      saveChecklistItemStatus(litter.id, itemId, newStatus);
+      // Save to Supabase
+      setIsSaving(true);
+      try {
+        const success = await saveChecklistItemStatus(litter.id, itemId, newStatus);
+        
+        if (success) {
+          toast({
+            title: "Checklist updated",
+            description: `Task ${newStatus ? 'completed' : 'unchecked'} successfully.`,
+          });
+        } else {
+          toast({
+            title: "Save failed",
+            description: "Failed to save to server, but saved locally.",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        console.error('Error saving checklist item:', error);
+        toast({
+          title: "Error saving",
+          description: "Failed to save checklist item. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsSaving(false);
+      }
       
       // Call the parent handler
       onToggleItem(itemId, newStatus);
     }
-  }, [checklist, litter.id, onToggleItem]);
+  }, [checklist, litter.id, onToggleItem, toast]);
   
   // Filter items based on active category and current puppy age
   const getFilteredItems = useCallback((compact: boolean = false) => {
@@ -77,6 +123,8 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
     completionPercentage,
     handleToggle,
     getFilteredItems,
-    getItemsByTimeline
+    getItemsByTimeline,
+    isLoading,
+    isSaving
   };
 };

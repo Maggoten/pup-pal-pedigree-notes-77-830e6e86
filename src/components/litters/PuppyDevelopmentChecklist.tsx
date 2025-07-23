@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2 } from 'lucide-react';
 import { useChecklistData } from './checklist/useChecklistData';
 import { PuppyDevelopmentChecklistProps } from './checklist/types';
 import ChecklistHeader from './checklist/ChecklistHeader';
@@ -20,7 +22,9 @@ const PuppyDevelopmentChecklist: React.FC<PuppyDevelopmentChecklistProps> = ({
     completionPercentage,
     handleToggle,
     getFilteredItems,
-    getItemsByTimeline
+    getItemsByTimeline,
+    isLoading,
+    isSaving
   } = useChecklistData(litter, onToggleItem);
   
   const filteredItems = getFilteredItems(compact);
@@ -29,6 +33,21 @@ const PuppyDevelopmentChecklist: React.FC<PuppyDevelopmentChecklistProps> = ({
   // For compact view with no items, don't show the checklist
   if (compact && filteredItems.length === 0) {
     return null;
+  }
+  
+  // Show loading state
+  if (isLoading) {
+    return (
+      <Card className="mb-6">
+        <CardContent className="p-4">
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-40 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
   
   return (
@@ -41,7 +60,13 @@ const PuppyDevelopmentChecklist: React.FC<PuppyDevelopmentChecklistProps> = ({
         puppyWeeks={puppyWeeks}
       />
       
-      <CardContent className="p-4">
+      <CardContent className="p-4 relative">
+        {isSaving && (
+          <div className="absolute top-2 right-2 z-10">
+            <Loader2 className="w-4 h-4 animate-spin text-primary" />
+          </div>
+        )}
+        
         {compact ? (
           <CompactView items={filteredItems} onToggle={handleToggle} />
         ) : (
