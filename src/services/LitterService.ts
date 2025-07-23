@@ -278,6 +278,88 @@ export class LitterService {
     }
   }
 
+  private async savePuppyWeightLogs(puppyId: string, weightLogs: any[]): Promise<boolean> {
+    try {
+      console.log(`Saving ${weightLogs.length} weight logs for puppy ${puppyId}`);
+      
+      // First, delete all existing weight logs for this puppy
+      const { error: deleteError } = await supabase
+        .from('puppy_weight_logs')
+        .delete()
+        .eq('puppy_id', puppyId);
+
+      if (deleteError) {
+        console.error('Error deleting existing weight logs:', deleteError);
+        return false;
+      }
+
+      // Then insert all current weight logs
+      if (weightLogs.length > 0) {
+        const logsToInsert = weightLogs.map(log => ({
+          puppy_id: puppyId,
+          weight: log.weight,
+          date: log.date
+        }));
+
+        const { error: insertError } = await supabase
+          .from('puppy_weight_logs')
+          .insert(logsToInsert);
+
+        if (insertError) {
+          console.error('Error inserting weight logs:', insertError);
+          return false;
+        }
+      }
+
+      console.log(`Successfully saved ${weightLogs.length} weight logs for puppy ${puppyId}`);
+      return true;
+    } catch (error) {
+      console.error('Error saving puppy weight logs:', error);
+      return false;
+    }
+  }
+
+  private async savePuppyHeightLogs(puppyId: string, heightLogs: any[]): Promise<boolean> {
+    try {
+      console.log(`Saving ${heightLogs.length} height logs for puppy ${puppyId}`);
+      
+      // First, delete all existing height logs for this puppy
+      const { error: deleteError } = await supabase
+        .from('puppy_height_logs')
+        .delete()
+        .eq('puppy_id', puppyId);
+
+      if (deleteError) {
+        console.error('Error deleting existing height logs:', deleteError);
+        return false;
+      }
+
+      // Then insert all current height logs
+      if (heightLogs.length > 0) {
+        const logsToInsert = heightLogs.map(log => ({
+          puppy_id: puppyId,
+          height: log.height,
+          date: log.date
+        }));
+
+        const { error: insertError } = await supabase
+          .from('puppy_height_logs')
+          .insert(logsToInsert);
+
+        if (insertError) {
+          console.error('Error inserting height logs:', insertError);
+          return false;
+        }
+      }
+
+      console.log(`Successfully saved ${heightLogs.length} height logs for puppy ${puppyId}`);
+      return true;
+    } catch (error) {
+      console.error('Error saving puppy height logs:', error);
+      return false;
+    }
+  }
+
   private transformPlannedLitterFromDB(dbLitter: any): PlannedLitter {
     return {
       id: dbLitter.id,
@@ -558,7 +640,7 @@ export class LitterService {
 
   async updatePuppy(litterId: string, puppy: Puppy): Promise<Puppy | null> {
     try {
-      console.log(`Updating puppy ${puppy.id} with ${puppy.notes?.length || 0} notes`);
+      console.log(`Updating puppy ${puppy.id} with ${puppy.notes?.length || 0} notes, ${puppy.weightLog?.length || 0} weight logs, and ${puppy.heightLog?.length || 0} height logs`);
       
       // Update basic puppy information in the puppies table
       const dbPuppy = { ...this.transformPuppyToDB(puppy), litter_id: litterId };
@@ -582,8 +664,24 @@ export class LitterService {
         }
       }
 
-      console.log(`Successfully updated puppy ${puppy.id} with notes`);
-      return data ? this.transformPuppyFromDB(data, [], [], puppy.notes) : null;
+      // Save weight logs to the puppy_weight_logs table
+      if (puppy.weightLog) {
+        const weightLogsSuccess = await this.savePuppyWeightLogs(puppy.id, puppy.weightLog);
+        if (!weightLogsSuccess) {
+          console.error('Failed to save puppy weight logs, but basic puppy info was updated');
+        }
+      }
+
+      // Save height logs to the puppy_height_logs table
+      if (puppy.heightLog) {
+        const heightLogsSuccess = await this.savePuppyHeightLogs(puppy.id, puppy.heightLog);
+        if (!heightLogsSuccess) {
+          console.error('Failed to save puppy height logs, but basic puppy info was updated');
+        }
+      }
+
+      console.log(`Successfully updated puppy ${puppy.id} with all logs and notes`);
+      return data ? this.transformPuppyFromDB(data, puppy.weightLog, puppy.heightLog, puppy.notes) : null;
     } catch (error) {
       console.error('Error updating puppy:', error);
       return null;
