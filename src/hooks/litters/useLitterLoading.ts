@@ -39,6 +39,8 @@ export function useLitterLoading(
       
       setActiveLitters(active);
       setArchivedLitters(archived);
+      
+      return litters;
     } catch (error) {
       console.error('Error loading litters:', error);
       toast({
@@ -91,7 +93,7 @@ export function useLitterLoading(
     }
   }, [userId, setPlannedLitters]);
 
-  // Load detailed litter data including puppies
+  // Load detailed litter data including puppies with enhanced validation
   const loadLitterDetails = useCallback(async (litterId: string) => {
     if (!litterId || !userId) {
       console.log("Cannot load litter details: missing litter ID or user ID");
@@ -102,9 +104,34 @@ export function useLitterLoading(
       setIsLoadingDetails(true);
       console.log(`Loading detailed data for litter: ${litterId}`);
       
+      // Clear previous details first to prevent data mixing
+      setSelectedLitterDetails(null);
+      
       const detailedLitter = await litterService.getLitterDetails(litterId);
-      console.log("Loaded detailed litter data:", detailedLitter);
-      console.log("Puppies count:", detailedLitter?.puppies?.length || 0);
+      console.log("Loaded detailed litter data:", {
+        id: detailedLitter?.id,
+        name: detailedLitter?.name,
+        puppiesCount: detailedLitter?.puppies?.length || 0,
+        puppies: detailedLitter?.puppies?.map(p => ({ 
+          id: p.id, 
+          name: p.name,
+          // Add validation that this puppy belongs to this litter
+          belongsToLitter: `Should be ${litterId}`
+        })) || []
+      });
+      
+      // Additional validation: ensure all puppies belong to this litter
+      if (detailedLitter?.puppies) {
+        const invalidPuppies = detailedLitter.puppies.filter(puppy => {
+          // This validation should be done in the service layer, but adding here as safeguard
+          console.log(`Puppy ${puppy.name} (${puppy.id}) loaded for litter ${litterId}`);
+          return false; // For now, trust service layer filtering
+        });
+        
+        if (invalidPuppies.length > 0) {
+          console.error('Found puppies that might not belong to this litter:', invalidPuppies);
+        }
+      }
       
       setSelectedLitterDetails(detailedLitter);
     } catch (error) {

@@ -55,13 +55,18 @@ export function useLitterManagement() {
   // Update selectedLitterDetails when it changes in useLitterLoading
   useEffect(() => {
     if (loadedLitterDetails) {
+      console.log(`Loading litter details for ${loadedLitterDetails.name}:`, {
+        id: loadedLitterDetails.id,
+        puppiesCount: loadedLitterDetails.puppies?.length || 0,
+        puppies: loadedLitterDetails.puppies?.map(p => ({ id: p.id, name: p.name })) || []
+      });
       setSelectedLitterDetails(loadedLitterDetails);
     }
   }, [loadedLitterDetails, setSelectedLitterDetails]);
   
   // Use the operations hook, passing selectedLitterId as an argument
   const {
-    handleAddLitter,
+    handleAddLitter: originalHandleAddLitter,
     updateLitter,
     addPuppy,
     updatePuppy,
@@ -78,6 +83,28 @@ export function useLitterManagement() {
     selectedLitterId
   );
   
+  // Enhanced handleAddLitter with proper state cleanup
+  const handleAddLitter = useCallback(async (newLitter: Litter) => {
+    try {
+      console.log('Adding new litter, clearing previous selected litter details');
+      
+      // Clear selected litter details immediately to prevent showing old data
+      setSelectedLitterDetails(null);
+      
+      // Add the litter
+      const result = await originalHandleAddLitter(newLitter);
+      
+      // Set the new litter as selected
+      console.log(`Setting new litter ${newLitter.id} as selected`);
+      setSelectedLitterId(newLitter.id);
+      
+      return result;
+    } catch (error) {
+      console.error('Error in enhanced handleAddLitter:', error);
+      throw error;
+    }
+  }, [originalHandleAddLitter, setSelectedLitterDetails, setSelectedLitterId]);
+  
   // Use utility functions
   const { getAvailableYears, findSelectedLitter } = useLitterUtils(activeLitters, archivedLitters);
   
@@ -92,13 +119,16 @@ export function useLitterManagement() {
       // First invalidate React Query cache
       queryClient.invalidateQueries({ queryKey: littersQueryKey });
       
+      // Clear selected litter details to prevent stale data
+      setSelectedLitterDetails(null);
+      
       // Then do a manual refresh
       const result = await loadLittersData();
       return result;
     } catch (error) {
       console.error("Error refreshing litters:", error);
     }
-  }, [queryClient, loadLittersData]);
+  }, [queryClient, loadLittersData, setSelectedLitterDetails]);
   
   // Initial data load
   useEffect(() => {
@@ -116,16 +146,42 @@ export function useLitterManagement() {
       console.log("No user ID available, cannot load litters");
       setActiveLitters([]);
       setArchivedLitters([]);
+      setSelectedLitterDetails(null);
     }
-  }, [loadLittersData, loadPlannedLitters, setupSubscription, user?.id, setActiveLitters, setArchivedLitters]);
+  }, [loadLittersData, loadPlannedLitters, setupSubscription, user?.id, setActiveLitters, setArchivedLitters, setSelectedLitterDetails]);
+  
+  // Enhanced litter selection handler with proper state cleanup
+  const handleSelectLitter = useCallback((litter: Litter) => {
+    console.log(`Selecting litter: ${litter.name} (${litter.id})`);
+    
+    // If it's the same litter, don't reload
+    if (selectedLitterId === litter.id) {
+      console.log('Same litter selected, skipping reload');
+      return;
+    }
+    
+    // Clear previous litter details immediately
+    setSelectedLitterDetails(null);
+    
+    // Set the new selected litter ID
+    setSelectedLitterId(litter.id);
+  }, [selectedLitterId, setSelectedLitterDetails, setSelectedLitterId]);
   
   // Load detailed litter data when selectedLitterId changes
   useEffect(() => {
     if (selectedLitterId && user?.id) {
-      console.log("Selected litter changed, loading details:", selectedLitterId);
+      console.log(`Selected litter changed to ${selectedLitterId}, loading details`);
+      
+      // Clear previous details first
+      setSelectedLitterDetails(null);
+      
+      // Load new details
       loadLitterDetails(selectedLitterId);
+    } else if (!selectedLitterId) {
+      // Clear details if no litter is selected
+      setSelectedLitterDetails(null);
     }
-  }, [selectedLitterId, user?.id, loadLitterDetails]);
+  }, [selectedLitterId, user?.id, loadLitterDetails, setSelectedLitterDetails]);
   
   // Auto-select first litter when activeLitters changes and none is selected
   useEffect(() => {
@@ -135,14 +191,24 @@ export function useLitterManagement() {
     }
   }, [activeLitters, selectedLitterId, isLoading, setSelectedLitterId]);
   
-  // Handle selecting a litter
-  const handleSelectLitter = useCallback((litter: Litter) => {
-    console.log("Selected litter:", litter.id);
-    setSelectedLitterId(litter.id);
-  }, [setSelectedLitterId]);
-  
   // Get the currently selected litter - prioritize detailed data if available
   const selectedLitter = selectedLitterDetails || findSelectedLitter(selectedLitterId);
+  
+  // Enhanced logging for debugging
+  useEffect(() => {
+    if (selectedLitter) {
+      console.log(`Current selected litter: ${selectedLitter.name}`, {
+        id: selectedLitter.id,
+        puppiesCount: selectedLitter.puppies?.length || 0,
+        isDetailed: !!selectedLitterDetails,
+        puppies: selectedLitter.puppies?.map(p => ({ 
+          id: p.id, 
+          name: p.name,
+          validatedLitterId: 'litter_id validation needed in service' 
+        })) || []
+      });
+    }
+  }, [selectedLitter, selectedLitterDetails]);
   
   // Create wrapper functions with proper parameters
   const handleUpdateLitter = useCallback((litter: Litter) => {

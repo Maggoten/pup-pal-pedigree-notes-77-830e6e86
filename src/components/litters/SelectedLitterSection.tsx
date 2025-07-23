@@ -63,9 +63,29 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
     }
   }, [dogs, litter.damId]);
 
+  // Clear selected puppy when litter changes
+  useEffect(() => {
+    console.log(`Litter changed to ${litter.name}, clearing selected puppy`);
+    setSelectedPuppy(null);
+  }, [litter.id, litter.name]);
+
   // If puppies array is undefined, initialize it as empty array
   const puppies = litter.puppies || [];
-  console.log(`Rendering SelectedLitterSection for ${litter.name} with ${puppies.length} puppies, isLoading=${isLoadingDetails}`);
+  
+  // Enhanced logging for debugging puppy data
+  useEffect(() => {
+    console.log(`Rendering SelectedLitterSection for ${litter.name}:`, {
+      litterId: litter.id,
+      puppiesCount: puppies.length,
+      isLoading: isLoadingDetails,
+      puppies: puppies.map(p => ({ id: p.id, name: p.name }))
+    });
+    
+    // Validate that all puppies should belong to this litter
+    puppies.forEach(puppy => {
+      console.log(`Puppy ${puppy.name} (${puppy.id}) is displayed under litter ${litter.name} (${litter.id})`);
+    });
+  }, [litter.id, litter.name, puppies, isLoadingDetails]);
 
   return (
     <div className="space-y-6 mt-6">

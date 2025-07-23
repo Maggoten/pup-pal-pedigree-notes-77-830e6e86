@@ -28,6 +28,7 @@ export function useAddLitter(
       return;
     }
     
+    // Ensure new litter has no puppies and is not archived
     newLitter.puppies = [];
     newLitter.archived = false;
     
@@ -52,7 +53,14 @@ export function useAddLitter(
     newLitter.user_id = sessionData.session.user.id;
     
     try {
-      console.log("Adding new litter with user ID:", newLitter.user_id);
+      console.log("Adding new litter with clean state:", {
+        id: newLitter.id,
+        name: newLitter.name,
+        user_id: newLitter.user_id,
+        puppies: newLitter.puppies.length,
+        archived: newLitter.archived
+      });
+      
       const result = await litterService.addLitter(newLitter);
       
       // Immediately invalidate queries to refresh data
@@ -66,12 +74,13 @@ export function useAddLitter(
         const active = updatedLitters.filter(litter => !litter.archived);
         const archived = updatedLitters.filter(litter => litter.archived);
         
-        console.log("Updated active litters:", active);
+        console.log("Updated active litters after add:", active.length);
         setActiveLitters(active);
         setArchivedLitters(archived);
       }
       
       // Set the newly created litter as selected
+      console.log(`Setting newly created litter ${newLitter.id} as selected`);
       setSelectedLitterId(newLitter.id);
       
       toast({
