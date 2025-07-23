@@ -100,7 +100,7 @@ export function usePuppyOperations(
     }
     
     try {
-      const result = await litterService.deletePuppy(selectedLitterId, puppyId);
+      const result = await litterService.deletePuppy(puppyId);
       
       // Update React Query cache immediately
       const litterQueryKey = ['litters', selectedLitterId];

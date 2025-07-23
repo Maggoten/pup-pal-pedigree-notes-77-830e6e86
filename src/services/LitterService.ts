@@ -1,7 +1,118 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Litter, Puppy } from '@/types/breeding';
+import { Litter, Puppy, PlannedLitter } from '@/types/breeding';
 
 export class LitterService {
+  private transformLitterFromDB(dbLitter: any): Litter {
+    return {
+      id: dbLitter.id,
+      name: dbLitter.name,
+      dateOfBirth: dbLitter.date_of_birth,
+      sireId: dbLitter.sire_id,
+      damId: dbLitter.dam_id,
+      sireName: dbLitter.sire_name,
+      damName: dbLitter.dam_name,
+      puppies: [],
+      archived: dbLitter.archived,
+      user_id: dbLitter.user_id
+    };
+  }
+
+  private transformLitterToDB(litter: Litter | Omit<Litter, 'id'>): any {
+    return {
+      id: 'id' in litter ? litter.id : undefined,
+      name: litter.name,
+      date_of_birth: litter.dateOfBirth,
+      sire_id: litter.sireId,
+      dam_id: litter.damId,
+      sire_name: litter.sireName,
+      dam_name: litter.damName,
+      archived: litter.archived,
+      user_id: litter.user_id
+    };
+  }
+
+  private transformPuppyFromDB(dbPuppy: any): Puppy {
+    return {
+      id: dbPuppy.id,
+      name: dbPuppy.name,
+      gender: dbPuppy.gender,
+      color: dbPuppy.color,
+      markings: dbPuppy.markings,
+      birthWeight: dbPuppy.birth_weight,
+      currentWeight: dbPuppy.current_weight,
+      sold: dbPuppy.sold,
+      reserved: dbPuppy.reserved,
+      newOwner: dbPuppy.new_owner,
+      collar: dbPuppy.collar,
+      microchip: dbPuppy.microchip,
+      breed: dbPuppy.breed,
+      imageUrl: dbPuppy.image_url,
+      birthDateTime: dbPuppy.birth_date_time,
+      registered_name: dbPuppy.registered_name,
+      registration_number: dbPuppy.registration_number,
+      status: dbPuppy.status,
+      buyer_name: dbPuppy.buyer_name,
+      buyer_phone: dbPuppy.buyer_phone,
+      weightLog: [],
+      heightLog: []
+    };
+  }
+
+  private transformPuppyToDB(puppy: Puppy | Omit<Puppy, 'id'>): any {
+    return {
+      id: 'id' in puppy ? puppy.id : undefined,
+      name: puppy.name,
+      gender: puppy.gender,
+      color: puppy.color,
+      markings: puppy.markings,
+      birth_weight: puppy.birthWeight,
+      current_weight: puppy.currentWeight,
+      sold: puppy.sold,
+      reserved: puppy.reserved,
+      new_owner: puppy.newOwner,
+      collar: puppy.collar,
+      microchip: puppy.microchip,
+      breed: puppy.breed,
+      image_url: puppy.imageUrl,
+      birth_date_time: puppy.birthDateTime,
+      registered_name: puppy.registered_name,
+      registration_number: puppy.registration_number,
+      status: puppy.status,
+      buyer_name: puppy.buyer_name,
+      buyer_phone: puppy.buyer_phone
+    };
+  }
+
+  private transformPlannedLitterFromDB(dbLitter: any): PlannedLitter {
+    return {
+      id: dbLitter.id,
+      maleId: dbLitter.male_id,
+      femaleId: dbLitter.female_id,
+      maleName: dbLitter.male_name,
+      femaleName: dbLitter.female_name,
+      expectedHeatDate: dbLitter.expected_heat_date,
+      notes: dbLitter.notes,
+      externalMale: dbLitter.external_male,
+      externalMaleBreed: dbLitter.external_male_breed,
+      externalMaleRegistration: dbLitter.external_male_registration
+    };
+  }
+
+  private transformPlannedLitterToDB(litter: PlannedLitter | Omit<PlannedLitter, 'id'>): any {
+    return {
+      id: 'id' in litter ? litter.id : undefined,
+      male_id: litter.maleId,
+      female_id: litter.femaleId,
+      male_name: litter.maleName,
+      female_name: litter.femaleName,
+      expected_heat_date: litter.expectedHeatDate,
+      notes: litter.notes,
+      external_male: litter.externalMale,
+      external_male_breed: litter.externalMaleBreed,
+      external_male_registration: litter.externalMaleRegistration
+    };
+  }
+
   async getAllLitters(userId: string): Promise<Litter[]> {
     try {
       const { data, error } = await supabase
@@ -15,7 +126,7 @@ export class LitterService {
         return [];
       }
 
-      return data || [];
+      return (data || []).map(item => this.transformLitterFromDB(item));
     } catch (error) {
       console.error('Error fetching litters:', error);
       return [];
@@ -35,7 +146,7 @@ export class LitterService {
         return null;
       }
 
-      return data || null;
+      return data ? this.transformLitterFromDB(data) : null;
     } catch (error) {
       console.error('Error fetching litter by ID:', error);
       return null;
@@ -44,9 +155,10 @@ export class LitterService {
 
   async addLitter(litter: Omit<Litter, 'id'>): Promise<Litter | null> {
     try {
+      const dbLitter = this.transformLitterToDB(litter);
       const { data, error } = await supabase
         .from('litters')
-        .insert([litter])
+        .insert([dbLitter])
         .select()
         .single();
 
@@ -55,7 +167,7 @@ export class LitterService {
         return null;
       }
 
-      return data || null;
+      return data ? this.transformLitterFromDB(data) : null;
     } catch (error) {
       console.error('Error adding litter:', error);
       return null;
@@ -64,9 +176,10 @@ export class LitterService {
 
   async updateLitter(litter: Litter): Promise<Litter | null> {
     try {
+      const dbLitter = this.transformLitterToDB(litter);
       const { data, error } = await supabase
         .from('litters')
-        .update(litter)
+        .update(dbLitter)
         .eq('id', litter.id)
         .select()
         .single();
@@ -76,7 +189,7 @@ export class LitterService {
         return null;
       }
 
-      return data || null;
+      return data ? this.transformLitterFromDB(data) : null;
     } catch (error) {
       console.error('Error updating litter:', error);
       return null;
@@ -124,9 +237,10 @@ export class LitterService {
   // Puppy Methods
   async addPuppy(litterId: string, puppy: Omit<Puppy, 'id'>): Promise<Puppy | null> {
     try {
+      const dbPuppy = { ...this.transformPuppyToDB(puppy), litter_id: litterId };
       const { data, error } = await supabase
         .from('puppies')
-        .insert([{ ...puppy, litter_id: litterId }])
+        .insert([dbPuppy])
         .select()
         .single();
 
@@ -135,7 +249,7 @@ export class LitterService {
         return null;
       }
 
-      return data || null;
+      return data ? this.transformPuppyFromDB(data) : null;
     } catch (error) {
       console.error('Error adding puppy:', error);
       return null;
@@ -144,9 +258,10 @@ export class LitterService {
 
   async updatePuppy(litterId: string, puppy: Puppy): Promise<Puppy | null> {
      try {
+      const dbPuppy = { ...this.transformPuppyToDB(puppy), litter_id: litterId };
       const { data, error } = await supabase
         .from('puppies')
-        .update({ ...puppy, litter_id: litterId })
+        .update(dbPuppy)
         .eq('id', puppy.id)
         .select()
         .single();
@@ -156,7 +271,7 @@ export class LitterService {
         return null;
       }
 
-      return data || null;
+      return data ? this.transformPuppyFromDB(data) : null;
     } catch (error) {
       console.error('Error updating puppy:', error);
       return null;
@@ -196,7 +311,7 @@ export class LitterService {
         return [];
       }
 
-      return data || [];
+      return (data || []).map(item => this.transformPlannedLitterFromDB(item));
     } catch (error) {
       console.error('Error fetching planned litters:', error);
       return [];
@@ -216,7 +331,7 @@ export class LitterService {
         return null;
       }
 
-      return data || null;
+      return data ? this.transformPlannedLitterFromDB(data) : null;
     } catch (error) {
       console.error('Error fetching planned litter by ID:', error);
       return null;
@@ -225,9 +340,10 @@ export class LitterService {
 
   async addPlannedLitter(plannedLitter: Omit<PlannedLitter, 'id'>): Promise<PlannedLitter | null> {
     try {
+      const dbLitter = this.transformPlannedLitterToDB(plannedLitter);
       const { data, error } = await supabase
         .from('planned_litters')
-        .insert([plannedLitter])
+        .insert([dbLitter])
         .select()
         .single();
 
@@ -236,7 +352,7 @@ export class LitterService {
         return null;
       }
 
-      return data || null;
+      return data ? this.transformPlannedLitterFromDB(data) : null;
     } catch (error) {
       console.error('Error adding planned litter:', error);
       return null;
@@ -245,9 +361,10 @@ export class LitterService {
 
   async updatePlannedLitter(plannedLitter: PlannedLitter): Promise<PlannedLitter | null> {
     try {
+      const dbLitter = this.transformPlannedLitterToDB(plannedLitter);
       const { data, error } = await supabase
         .from('planned_litters')
-        .update(plannedLitter)
+        .update(dbLitter)
         .eq('id', plannedLitter.id)
         .select()
         .single();
@@ -257,7 +374,7 @@ export class LitterService {
         return null;
       }
 
-      return data || null;
+      return data ? this.transformPlannedLitterFromDB(data) : null;
     } catch (error) {
       console.error('Error updating planned litter:', error);
       return null;
@@ -345,4 +462,37 @@ export class LitterService {
       return false;
     }
   }
+
+  // Convenience methods with proper naming for backwards compatibility
+  async getActiveLitters(userId?: string): Promise<Litter[]> {
+    if (!userId) return [];
+    const allLitters = await this.getAllLitters(userId);
+    return allLitters.filter(litter => !litter.archived);
+  }
+
+  async getArchivedLitters(userId?: string): Promise<Litter[]> {
+    if (!userId) return [];
+    const allLitters = await this.getAllLitters(userId);
+    return allLitters.filter(litter => litter.archived);
+  }
+
+  async toggleArchiveLitter(litterId: string, archive: boolean): Promise<void> {
+    await this.archiveLitter(litterId, archive);
+  }
+
+  // Additional methods for backwards compatibility
+  async getDogLitters(dogId: string): Promise<Litter[]> {
+    return [];
+  }
+
+  async loadLitters(userId: string): Promise<Litter[]> {
+    return this.getAllLitters(userId);
+  }
+
+  async getLitterDetails(litterId: string): Promise<Litter | null> {
+    return this.getLitterById(litterId);
+  }
 }
+
+// Export a singleton instance for use across the app
+export const litterService = new LitterService();

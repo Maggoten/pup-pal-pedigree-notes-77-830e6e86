@@ -11,7 +11,7 @@ export const useDeletePuppyMutation = (litterId: string) => {
   const puppiesQueryKey = ['litters', litterId, 'puppies'];
   
   return useMutation({
-    mutationFn: (puppyId: string) => litterService.deletePuppy(litterId, puppyId),
+    mutationFn: (puppyId: string) => litterService.deletePuppy(puppyId),
     onMutate: async (puppyId) => {
       await queryClient.cancelQueries({ queryKey: puppiesQueryKey });
       

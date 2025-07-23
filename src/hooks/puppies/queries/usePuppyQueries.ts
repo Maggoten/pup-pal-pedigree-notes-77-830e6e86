@@ -42,7 +42,7 @@ export const usePuppyQueries = (litterId: string) => {
       
       return litterService.updatePuppy(litterId, puppyToUpdate);
     },
-    onSuccess: (updatedLitters: Litter[]) => {
+    onSuccess: () => {
       console.log("Puppy update successful, invalidating queries");
       // Force refetch all litter data to ensure we have the most up-to-date information
       queryClient.invalidateQueries({queryKey: ['litter']});
@@ -70,7 +70,7 @@ export const usePuppyQueries = (litterId: string) => {
 
   // Mutation to delete a puppy
   const deletePuppyMutation = useMutation({
-    mutationFn: (puppyId: string) => litterService.deletePuppy(litterId, puppyId),
+    mutationFn: (puppyId: string) => litterService.deletePuppy(puppyId),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['litter', litterId]});
       queryClient.invalidateQueries({queryKey: ['litters']});

@@ -30,7 +30,7 @@ export function useLitterLoading(
       setIsLoading(true);
       console.log("Loading litters data for user:", userId);
       
-      const litters = await litterService.loadLitters();
+      const litters = await litterService.loadLitters(userId);
       console.log("Loaded litters:", litters.length);
       
       // Split litters into active and archived
