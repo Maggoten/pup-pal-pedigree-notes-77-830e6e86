@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, differenceInWeeks, differenceInDays } from 'date-fns';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -53,6 +53,22 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
       return `${sortedHeights[0].height} cm`;
     }
     return '- cm';
+  };
+
+  // Get puppy age
+  const getPuppyAge = () => {
+    if (!puppy.birthDateTime) return 'Unknown';
+    
+    const birthDate = parseISO(puppy.birthDateTime);
+    const today = new Date();
+    const weeks = differenceInWeeks(today, birthDate);
+    const days = differenceInDays(today, birthDate);
+    
+    if (weeks >= 1) {
+      return `${weeks} week${weeks > 1 ? 's' : ''}`;
+    } else {
+      return `${days} day${days > 1 ? 's' : ''}`;
+    }
   };
 
   // Get status badge
@@ -120,12 +136,12 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             <span>{puppy.color}</span>
           </div>
 
-          {/* Birth Info and Status Badge Row */}
+          {/* Age and Status Badge Row */}
           <div className="flex justify-between items-center">
             <div className="text-sm">
-              <span className="text-muted-foreground">Born: </span>
+              <span className="text-muted-foreground">Age: </span>
               <span className="font-medium">
-                {puppy.birthDateTime ? format(parseISO(puppy.birthDateTime), 'MMM d, yyyy') : 'Not set'}
+                {getPuppyAge()}
               </span>
             </div>
             {getStatusBadge()}
