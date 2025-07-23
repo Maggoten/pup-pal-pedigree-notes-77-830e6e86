@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Litter, Puppy, PlannedLitter } from '@/types/breeding';
+import { Litter, Puppy, PlannedLitter, PuppyNote } from '@/types/breeding';
 
 export class LitterService {
   private transformLitterFromDB(dbLitter: any, puppies?: Puppy[]): Litter {
@@ -49,7 +49,7 @@ export class LitterService {
     };
   }
 
-  private transformPuppyFromDB(dbPuppy: any, weightLogs?: any[], heightLogs?: any[]): Puppy {
+  private transformPuppyFromDB(dbPuppy: any, weightLogs?: any[], heightLogs?: any[], notes?: PuppyNote[]): Puppy {
     const weightLogArray = weightLogs ? weightLogs.map(wl => ({
       date: wl.date,
       weight: parseFloat(wl.weight)
@@ -59,6 +59,9 @@ export class LitterService {
       date: hl.date,
       height: parseFloat(hl.height)
     })) : [];
+    
+    // Use the notes parameter if provided, otherwise empty array
+    const notesArray = notes || [];
     
     const transformedPuppy = {
       id: dbPuppy.id,
@@ -82,7 +85,8 @@ export class LitterService {
       buyer_name: dbPuppy.buyer_name,
       buyer_phone: dbPuppy.buyer_phone,
       weightLog: weightLogArray,
-      heightLog: heightLogArray
+      heightLog: heightLogArray,
+      notes: notesArray
     };
     
     console.log(`transformPuppyFromDB - Puppy ${transformedPuppy.name}:`, {
@@ -90,8 +94,10 @@ export class LitterService {
       name: transformedPuppy.name,
       weightLogCount: transformedPuppy.weightLog.length,
       heightLogCount: transformedPuppy.heightLog.length,
+      notesCount: transformedPuppy.notes.length,
       weightLogs: transformedPuppy.weightLog,
       heightLogs: transformedPuppy.heightLog,
+      notes: transformedPuppy.notes,
       imageUrl: transformedPuppy.imageUrl
     });
     
@@ -190,6 +196,85 @@ export class LitterService {
     } catch (error) {
       console.error('Error fetching puppy height logs:', error);
       return new Map();
+    }
+  }
+
+  private async fetchPuppyNotes(puppyIds: string[]): Promise<Map<string, PuppyNote[]>> {
+    if (puppyIds.length === 0) return new Map();
+    
+    try {
+      const { data: notes, error } = await supabase
+        .from('puppy_notes')
+        .select('*')
+        .in('puppy_id', puppyIds)
+        .order('date', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching puppy notes:', error);
+        return new Map();
+      }
+
+      console.log('Raw notes from database:', notes);
+
+      // Group notes by puppy_id
+      const notesByPuppy = new Map<string, PuppyNote[]>();
+      notes?.forEach(note => {
+        const puppyId = note.puppy_id;
+        if (!notesByPuppy.has(puppyId)) {
+          notesByPuppy.set(puppyId, []);
+        }
+        notesByPuppy.get(puppyId)!.push({
+          date: note.date,
+          content: note.content
+        });
+      });
+
+      console.log('Grouped notes by puppy:', Object.fromEntries(notesByPuppy));
+      return notesByPuppy;
+    } catch (error) {
+      console.error('Error fetching puppy notes:', error);
+      return new Map();
+    }
+  }
+
+  private async savePuppyNotes(puppyId: string, notes: PuppyNote[]): Promise<boolean> {
+    try {
+      console.log(`Saving ${notes.length} notes for puppy ${puppyId}`);
+      
+      // First, delete all existing notes for this puppy
+      const { error: deleteError } = await supabase
+        .from('puppy_notes')
+        .delete()
+        .eq('puppy_id', puppyId);
+
+      if (deleteError) {
+        console.error('Error deleting existing notes:', deleteError);
+        return false;
+      }
+
+      // Then insert all current notes
+      if (notes.length > 0) {
+        const notesToInsert = notes.map(note => ({
+          puppy_id: puppyId,
+          content: note.content,
+          date: note.date
+        }));
+
+        const { error: insertError } = await supabase
+          .from('puppy_notes')
+          .insert(notesToInsert);
+
+        if (insertError) {
+          console.error('Error inserting notes:', insertError);
+          return false;
+        }
+      }
+
+      console.log(`Successfully saved ${notes.length} notes for puppy ${puppyId}`);
+      return true;
+    } catch (error) {
+      console.error('Error saving puppy notes:', error);
+      return false;
     }
   }
 
@@ -307,38 +392,44 @@ export class LitterService {
         return this.transformLitterFromDB(litterData, []);
       }
 
-      // Extract puppy IDs for batch fetching logs
+      // Extract puppy IDs for batch fetching logs and notes
       const puppyIds = puppiesData.map(p => p.id);
-      console.log(`Fetching weight and height logs for ${puppyIds.length} puppies:`, puppyIds);
+      console.log(`Fetching weight logs, height logs, and notes for ${puppyIds.length} puppies:`, puppyIds);
 
-      // Fetch weight and height logs for all puppies
-      const [weightLogsByPuppy, heightLogsByPuppy] = await Promise.all([
+      // Fetch weight logs, height logs, and notes for all puppies
+      const [weightLogsByPuppy, heightLogsByPuppy, notesByPuppy] = await Promise.all([
         this.fetchPuppyWeightLogs(puppyIds),
-        this.fetchPuppyHeightLogs(puppyIds)
+        this.fetchPuppyHeightLogs(puppyIds),
+        this.fetchPuppyNotes(puppyIds)
       ]);
 
       console.log(`Fetched weight logs for ${weightLogsByPuppy.size} puppies`);
       console.log(`Fetched height logs for ${heightLogsByPuppy.size} puppies`);
+      console.log(`Fetched notes for ${notesByPuppy.size} puppies`);
 
-      // Transform puppies with their logs
+      // Transform puppies with their logs and notes
       const transformedPuppies = puppiesData.map(puppy => {
         const weightLogs = weightLogsByPuppy.get(puppy.id) || [];
         const heightLogs = heightLogsByPuppy.get(puppy.id) || [];
+        const notes = notesByPuppy.get(puppy.id) || [];
         
-        console.log(`Puppy ${puppy.name}: ${weightLogs.length} weight logs, ${heightLogs.length} height logs`);
+        console.log(`Puppy ${puppy.name}: ${weightLogs.length} weight logs, ${heightLogs.length} height logs, ${notes.length} notes`);
         console.log(`Weight logs for ${puppy.name}:`, weightLogs);
         console.log(`Height logs for ${puppy.name}:`, heightLogs);
+        console.log(`Notes for ${puppy.name}:`, notes);
         
-        return this.transformPuppyFromDB(puppy, weightLogs, heightLogs);
+        return this.transformPuppyFromDB(puppy, weightLogs, heightLogs, notes);
       });
 
-      console.log('Puppies transformed with logs:', transformedPuppies.map(p => ({ 
+      console.log('Puppies transformed with logs and notes:', transformedPuppies.map(p => ({ 
         id: p.id, 
         name: p.name,
         weightLogCount: p.weightLog.length,
         heightLogCount: p.heightLog.length,
+        notesCount: p.notes.length,
         weightLogs: p.weightLog,
-        heightLogs: p.heightLog
+        heightLogs: p.heightLog,
+        notes: p.notes
       })));
 
       const finalLitter = this.transformLitterFromDB(litterData, transformedPuppies);
@@ -350,7 +441,8 @@ export class LitterService {
           id: p.id,
           name: p.name,
           weightLogCount: p.weightLog?.length || 0,
-          heightLogCount: p.heightLog?.length || 0
+          heightLogCount: p.heightLog?.length || 0,
+          notesCount: p.notes?.length || 0
         }))
       });
 
@@ -465,7 +557,10 @@ export class LitterService {
   }
 
   async updatePuppy(litterId: string, puppy: Puppy): Promise<Puppy | null> {
-     try {
+    try {
+      console.log(`Updating puppy ${puppy.id} with ${puppy.notes?.length || 0} notes`);
+      
+      // Update basic puppy information in the puppies table
       const dbPuppy = { ...this.transformPuppyToDB(puppy), litter_id: litterId };
       const { data, error } = await supabase
         .from('puppies')
@@ -479,7 +574,16 @@ export class LitterService {
         return null;
       }
 
-      return data ? this.transformPuppyFromDB(data) : null;
+      // Save notes to the puppy_notes table
+      if (puppy.notes) {
+        const notesSuccess = await this.savePuppyNotes(puppy.id, puppy.notes);
+        if (!notesSuccess) {
+          console.error('Failed to save puppy notes, but basic puppy info was updated');
+        }
+      }
+
+      console.log(`Successfully updated puppy ${puppy.id} with notes`);
+      return data ? this.transformPuppyFromDB(data, [], [], puppy.notes) : null;
     } catch (error) {
       console.error('Error updating puppy:', error);
       return null;
