@@ -48,12 +48,16 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const isMobile = useIsMobile();
   
-  // Keep local state in sync with props
+  // Keep local state in sync with props - FIXED: Always update, even for empty arrays
   useEffect(() => {
-    if (puppies && puppies.length > 0) {
-      setLocalPuppies(puppies);
-    }
-  }, [puppies]);
+    console.log(`PuppiesTabContent: Updating localPuppies for litter ${litter.id}:`, {
+      incomingPuppies: puppies?.length || 0,
+      puppiesList: puppies?.map(p => ({ id: p.id, name: p.name })) || []
+    });
+    
+    // Always update localPuppies with the current puppies prop, even if it's empty
+    setLocalPuppies(puppies || []);
+  }, [puppies, litter.id]);
   
   useEffect(() => {
     console.log("PuppiesTabContent rendered with puppies:", puppies);
