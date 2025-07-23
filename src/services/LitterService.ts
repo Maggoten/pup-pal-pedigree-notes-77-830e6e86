@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Litter, Puppy, PlannedLitter } from '@/types/breeding';
 
@@ -34,7 +33,7 @@ export class LitterService {
     };
   }
 
-  private transformPuppyFromDB(dbPuppy: any): Puppy {
+  private transformPuppyFromDB(dbPuppy: any, weightLogs?: any[], heightLogs?: any[]): Puppy {
     return {
       id: dbPuppy.id,
       name: dbPuppy.name,
@@ -56,8 +55,14 @@ export class LitterService {
       status: dbPuppy.status,
       buyer_name: dbPuppy.buyer_name,
       buyer_phone: dbPuppy.buyer_phone,
-      weightLog: [],
-      heightLog: []
+      weightLog: weightLogs ? weightLogs.map(wl => ({
+        date: wl.date,
+        weight: parseFloat(wl.weight)
+      })) : [],
+      heightLog: heightLogs ? heightLogs.map(hl => ({
+        date: hl.date,
+        height: parseFloat(hl.height)
+      })) : []
     };
   }
 
@@ -84,6 +89,72 @@ export class LitterService {
       buyer_name: puppy.buyer_name,
       buyer_phone: puppy.buyer_phone
     };
+  }
+
+  // Helper method to fetch weight logs for specific puppies
+  private async fetchPuppyWeightLogs(puppyIds: string[]): Promise<Map<string, any[]>> {
+    if (puppyIds.length === 0) return new Map();
+    
+    try {
+      const { data: weightLogs, error } = await supabase
+        .from('puppy_weight_logs')
+        .select('*')
+        .in('puppy_id', puppyIds)
+        .order('date', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching puppy weight logs:', error);
+        return new Map();
+      }
+
+      // Group logs by puppy_id
+      const logsByPuppy = new Map<string, any[]>();
+      weightLogs?.forEach(log => {
+        const puppyId = log.puppy_id;
+        if (!logsByPuppy.has(puppyId)) {
+          logsByPuppy.set(puppyId, []);
+        }
+        logsByPuppy.get(puppyId)!.push(log);
+      });
+
+      return logsByPuppy;
+    } catch (error) {
+      console.error('Error fetching puppy weight logs:', error);
+      return new Map();
+    }
+  }
+
+  // Helper method to fetch height logs for specific puppies
+  private async fetchPuppyHeightLogs(puppyIds: string[]): Promise<Map<string, any[]>> {
+    if (puppyIds.length === 0) return new Map();
+    
+    try {
+      const { data: heightLogs, error } = await supabase
+        .from('puppy_height_logs')
+        .select('*')
+        .in('puppy_id', puppyIds)
+        .order('date', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching puppy height logs:', error);
+        return new Map();
+      }
+
+      // Group logs by puppy_id
+      const logsByPuppy = new Map<string, any[]>();
+      heightLogs?.forEach(log => {
+        const puppyId = log.puppy_id;
+        if (!logsByPuppy.has(puppyId)) {
+          logsByPuppy.set(puppyId, []);
+        }
+        logsByPuppy.get(puppyId)!.push(log);
+      });
+
+      return logsByPuppy;
+    } catch (error) {
+      console.error('Error fetching puppy height logs:', error);
+      return new Map();
+    }
   }
 
   private transformPlannedLitterFromDB(dbLitter: any): PlannedLitter {
@@ -193,12 +264,43 @@ export class LitterService {
 
       console.log(`Found ${puppiesData?.length || 0} puppies for litter ${litterData.name}`);
       
-      // Log puppy details for debugging
-      if (puppiesData && puppiesData.length > 0) {
-        console.log('Puppies found:', puppiesData.map(p => ({ id: p.id, name: p.name, litter_id: p.litter_id })));
+      // If no puppies, return early
+      if (!puppiesData || puppiesData.length === 0) {
+        console.log('No puppies found for this litter');
+        return this.transformLitterFromDB(litterData, []);
       }
 
-      return this.transformLitterFromDB(litterData, puppiesData || []);
+      // Extract puppy IDs for batch fetching logs
+      const puppyIds = puppiesData.map(p => p.id);
+      console.log(`Fetching weight and height logs for ${puppyIds.length} puppies`);
+
+      // Fetch weight and height logs for all puppies
+      const [weightLogsByPuppy, heightLogsByPuppy] = await Promise.all([
+        this.fetchPuppyWeightLogs(puppyIds),
+        this.fetchPuppyHeightLogs(puppyIds)
+      ]);
+
+      console.log(`Fetched weight logs for ${weightLogsByPuppy.size} puppies`);
+      console.log(`Fetched height logs for ${heightLogsByPuppy.size} puppies`);
+
+      // Transform puppies with their logs
+      const transformedPuppies = puppiesData.map(puppy => {
+        const weightLogs = weightLogsByPuppy.get(puppy.id) || [];
+        const heightLogs = heightLogsByPuppy.get(puppy.id) || [];
+        
+        console.log(`Puppy ${puppy.name}: ${weightLogs.length} weight logs, ${heightLogs.length} height logs`);
+        
+        return this.transformPuppyFromDB(puppy, weightLogs, heightLogs);
+      });
+
+      console.log('Puppies transformed with logs:', transformedPuppies.map(p => ({ 
+        id: p.id, 
+        name: p.name,
+        weightLogCount: p.weightLog.length,
+        heightLogCount: p.heightLog.length
+      })));
+
+      return this.transformLitterFromDB(litterData, transformedPuppies);
     } catch (error) {
       console.error('Error fetching litter details:', error);
       return null;
