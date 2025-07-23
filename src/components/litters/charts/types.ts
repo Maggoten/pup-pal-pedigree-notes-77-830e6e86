@@ -13,6 +13,17 @@ export interface ChartColorConfig {
   };
 }
 
+export interface LogTypeToggleProps {
+  logType: 'weight' | 'height';
+  setLogType: (type: 'weight' | 'height') => void;
+}
+
+export interface PuppySelectProps {
+  puppies: Puppy[];
+  selectedPuppy: Puppy | null;
+  onSelectPuppy: (puppy: Puppy | null) => void;
+}
+
 export interface PuppyGrowthChartProps {
   selectedPuppy: Puppy | null;
   puppies: Puppy[];
