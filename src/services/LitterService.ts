@@ -278,6 +278,75 @@ export class LitterService {
     }
   }
 
+  // Delete individual puppy weight log
+  async deletePuppyWeightLog(logId: string): Promise<boolean> {
+    try {
+      console.log('Deleting weight log:', logId);
+      
+      const { error } = await supabase
+        .from('puppy_weight_logs')
+        .delete()
+        .eq('id', logId);
+
+      if (error) {
+        console.error('Error deleting weight log:', error);
+        return false;
+      }
+      
+      console.log('Weight log deleted successfully');
+      return true;
+    } catch (error) {
+      console.error('Failed to delete weight log:', error);
+      return false;
+    }
+  }
+
+  // Delete individual puppy height log
+  async deletePuppyHeightLog(logId: string): Promise<boolean> {
+    try {
+      console.log('Deleting height log:', logId);
+      
+      const { error } = await supabase
+        .from('puppy_height_logs')
+        .delete()
+        .eq('id', logId);
+
+      if (error) {
+        console.error('Error deleting height log:', error);
+        return false;
+      }
+      
+      console.log('Height log deleted successfully');
+      return true;
+    } catch (error) {
+      console.error('Failed to delete height log:', error);
+      return false;
+    }
+  }
+
+  // Delete individual puppy note
+  async deletePuppyNote(noteId: string): Promise<boolean> {
+    try {
+      console.log('Deleting puppy note:', noteId);
+      
+      const { error } = await supabase
+        .from('puppy_notes')
+        .delete()
+        .eq('id', noteId);
+
+      if (error) {
+        console.error('Error deleting puppy note:', error);
+        return false;
+      }
+      
+      console.log('Puppy note deleted successfully');
+      return true;
+    } catch (error) {
+      console.error('Failed to delete puppy note:', error);
+      return false;
+    }
+  }
+
   private async savePuppyWeightLogs(puppyId: string, weightLogs: any[]): Promise<boolean> {
     try {
       console.log(`Saving ${weightLogs.length} weight logs for puppy ${puppyId}`);
@@ -302,7 +371,7 @@ export class LitterService {
         return false;
       }
 
-      // Then insert all current weight logs
+      // Then insert all current weight logs with conflict handling
       if (deduplicatedLogs.length > 0) {
         const logsToInsert = deduplicatedLogs.map(log => ({
           puppy_id: puppyId,
@@ -316,11 +385,16 @@ export class LitterService {
 
         if (insertError) {
           console.error('Error inserting weight logs:', insertError);
+          // Handle unique constraint violations gracefully
+          if (insertError.code === '23505') {
+            console.warn('Duplicate weight log detected during insert, skipping...');
+            return true;
+          }
           return false;
         }
       }
 
-      console.log(`Successfully saved ${weightLogs.length} weight logs for puppy ${puppyId}`);
+      console.log(`Successfully saved ${deduplicatedLogs.length} weight logs for puppy ${puppyId}`);
       return true;
     } catch (error) {
       console.error('Error saving puppy weight logs:', error);
@@ -352,7 +426,7 @@ export class LitterService {
         return false;
       }
 
-      // Then insert all current height logs
+      // Then insert all current height logs with conflict handling
       if (deduplicatedLogs.length > 0) {
         const logsToInsert = deduplicatedLogs.map(log => ({
           puppy_id: puppyId,
@@ -366,11 +440,16 @@ export class LitterService {
 
         if (insertError) {
           console.error('Error inserting height logs:', insertError);
+          // Handle unique constraint violations gracefully
+          if (insertError.code === '23505') {
+            console.warn('Duplicate height log detected during insert, skipping...');
+            return true;
+          }
           return false;
         }
       }
 
-      console.log(`Successfully saved ${heightLogs.length} height logs for puppy ${puppyId}`);
+      console.log(`Successfully saved ${deduplicatedLogs.length} height logs for puppy ${puppyId}`);
       return true;
     } catch (error) {
       console.error('Error saving puppy height logs:', error);

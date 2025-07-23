@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,6 +6,8 @@ import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
 import { Puppy } from '@/types/breeding';
 import { updatePuppyInDb } from '@/services/puppyService';
+import { supabase } from '@/integrations/supabase/client';
+import { LitterService } from '@/services/LitterService';
 
 import DateTimeSelector from './DateTimeSelector';
 import PuppyWeightTab from './PuppyWeightTab';
@@ -43,11 +45,12 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
   });
   
   // Track if we're in the middle of an operation to prevent race conditions
-  const [isUpdating, setIsUpdating] = useState(false);
+  const isUpdating = useRef(false);
+  const litterService = new LitterService();
   
   useEffect(() => {
     // Only update local state if we're not in the middle of an operation
-    if (isUpdating) {
+    if (isUpdating.current) {
       console.log(`PuppyMeasurementsDialog: Skipping update during operation for ${puppy.name}`);
       return;
     }
@@ -68,7 +71,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     setWeight('');
     setHeight('');
     setNote('');
-  }, [puppy.id, puppy.weightLog, puppy.heightLog, puppy.notes, puppy.currentWeight, puppy.name, isUpdating]);
+  }, [puppy.id, puppy.weightLog, puppy.heightLog, puppy.notes, puppy.currentWeight, puppy.name]);
 
   const handleAddWeight = useCallback(() => {
     if (!weight || isNaN(parseFloat(weight))) {
@@ -80,7 +83,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       return;
     }
 
-    setIsUpdating(true);
+    isUpdating.current = true;
     
     const measurementDate = new Date(selectedDate);
     const [hours, minutes] = selectedTime.split(':').map(Number);
@@ -122,7 +125,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     onUpdate(updatedPuppy);
     setWeight('');
     
-    setTimeout(() => setIsUpdating(false), 100);
+    setTimeout(() => { isUpdating.current = false; }, 100);
     
     toast({
       title: "Weight Recorded",
@@ -140,7 +143,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       return;
     }
 
-    setIsUpdating(true);
+    isUpdating.current = true;
     
     const measurementDate = new Date(selectedDate);
     const [hours, minutes] = selectedTime.split(':').map(Number);
@@ -170,7 +173,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     onUpdate(updatedPuppy);
     setHeight('');
     
-    setTimeout(() => setIsUpdating(false), 100);
+    setTimeout(() => { isUpdating.current = false; }, 100);
     
     toast({
       title: "Height Recorded",
@@ -216,74 +219,184 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
   }, [note, selectedDate, selectedTime, localPuppy, puppy.name, onUpdate]);
 
   const handleDeleteWeight = useCallback(async (index: number) => {
-    const sortedWeightLog = [...(localPuppy.weightLog || [])]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    if (isUpdating.current) return;
     
-    sortedWeightLog.splice(index, 1);
-    
-    let newCurrentWeight = localPuppy.currentWeight;
-    if (index === 0 && sortedWeightLog.length > 0) {
-      newCurrentWeight = sortedWeightLog[0].weight;
-    } else if (sortedWeightLog.length === 0) {
-      newCurrentWeight = undefined;
-    }
-    
-    const updatedPuppy = {
-      ...localPuppy,
-      weightLog: sortedWeightLog,
-      currentWeight: newCurrentWeight
-    };
+    isUpdating.current = true;
+    try {
+      const sortedWeightLog = [...(localPuppy.weightLog || [])]
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      const weightLogToDelete = sortedWeightLog[index];
+      if (!weightLogToDelete) return;
+      
+      // Find the corresponding database entry by date and weight
+      const weightsQuery = await supabase
+        .from('puppy_weight_logs')
+        .select('id')
+        .eq('puppy_id', localPuppy.id)
+        .eq('date', weightLogToDelete.date)
+        .eq('weight', weightLogToDelete.weight)
+        .limit(1);
+      
+      if (weightsQuery.data && weightsQuery.data.length > 0) {
+        const success = await litterService.deletePuppyWeightLog(weightsQuery.data[0].id);
+        if (!success) {
+          toast({
+            title: "Error",
+            description: "Failed to delete weight entry",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+      
+      sortedWeightLog.splice(index, 1);
+      
+      let newCurrentWeight = localPuppy.currentWeight;
+      if (index === 0 && sortedWeightLog.length > 0) {
+        newCurrentWeight = sortedWeightLog[0].weight;
+      } else if (sortedWeightLog.length === 0) {
+        newCurrentWeight = undefined;
+      }
+      
+      const updatedPuppy = {
+        ...localPuppy,
+        weightLog: sortedWeightLog,
+        currentWeight: newCurrentWeight
+      };
 
-    setLocalPuppy(updatedPuppy);
-    onUpdate(updatedPuppy);
-    
-    // Persist to database - we need the litterId, which we can get from the puppy's litter context
-    // For now, we'll skip the database update since we don't have direct access to litterId
-    // The parent component should handle persistence through onUpdate
-    toast({
-      title: "Weight Record Deleted",
-      description: "The weight measurement has been removed."
-    });
-  }, [localPuppy, onUpdate]);
+      setLocalPuppy(updatedPuppy);
+      onUpdate(updatedPuppy);
+      
+      toast({
+        title: "Weight Record Deleted",
+        description: "The weight measurement has been removed."
+      });
+    } catch (error) {
+      console.error('Error deleting weight:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete weight entry",
+        variant: "destructive"
+      });
+    } finally {
+      isUpdating.current = false;
+    }
+  }, [localPuppy, onUpdate, litterService]);
 
   const handleDeleteHeight = useCallback(async (index: number) => {
-    const sortedHeightLog = [...(localPuppy.heightLog || [])]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    if (isUpdating.current) return;
     
-    sortedHeightLog.splice(index, 1);
-    
-    const updatedPuppy = {
-      ...localPuppy,
-      heightLog: sortedHeightLog
-    };
+    isUpdating.current = true;
+    try {
+      const sortedHeightLog = [...(localPuppy.heightLog || [])]
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      const heightLogToDelete = sortedHeightLog[index];
+      if (!heightLogToDelete) return;
+      
+      // Find the corresponding database entry by date and height
+      const heightsQuery = await supabase
+        .from('puppy_height_logs')
+        .select('id')
+        .eq('puppy_id', localPuppy.id)
+        .eq('date', heightLogToDelete.date)
+        .eq('height', heightLogToDelete.height)
+        .limit(1);
+      
+      if (heightsQuery.data && heightsQuery.data.length > 0) {
+        const success = await litterService.deletePuppyHeightLog(heightsQuery.data[0].id);
+        if (!success) {
+          toast({
+            title: "Error",
+            description: "Failed to delete height entry",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+      
+      sortedHeightLog.splice(index, 1);
+      
+      const updatedPuppy = {
+        ...localPuppy,
+        heightLog: sortedHeightLog
+      };
 
-    setLocalPuppy(updatedPuppy);
-    onUpdate(updatedPuppy);
-    
-    toast({
-      title: "Height Record Deleted",
-      description: "The height measurement has been removed."
-    });
-  }, [localPuppy, onUpdate]);
+      setLocalPuppy(updatedPuppy);
+      onUpdate(updatedPuppy);
+      
+      toast({
+        title: "Height Record Deleted",
+        description: "The height measurement has been removed."
+      });
+    } catch (error) {
+      console.error('Error deleting height:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete height entry",
+        variant: "destructive"
+      });
+    } finally {
+      isUpdating.current = false;
+    }
+  }, [localPuppy, onUpdate, litterService]);
 
   const handleDeleteNote = useCallback(async (index: number) => {
-    const updatedNotes = [...(localPuppy.notes || [])];
+    if (isUpdating.current) return;
     
-    updatedNotes.splice(index, 1);
-    
-    const updatedPuppy = {
-      ...localPuppy,
-      notes: updatedNotes
-    };
+    isUpdating.current = true;
+    try {
+      const updatedNotes = [...(localPuppy.notes || [])];
+      const noteToDelete = updatedNotes[index];
+      if (!noteToDelete) return;
+      
+      // Find the corresponding database entry by date and content
+      const notesQuery = await supabase
+        .from('puppy_notes')
+        .select('id')
+        .eq('puppy_id', localPuppy.id)
+        .eq('date', noteToDelete.date)
+        .eq('content', noteToDelete.content)
+        .limit(1);
+      
+      if (notesQuery.data && notesQuery.data.length > 0) {
+        const success = await litterService.deletePuppyNote(notesQuery.data[0].id);
+        if (!success) {
+          toast({
+            title: "Error",
+            description: "Failed to delete note",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+      
+      updatedNotes.splice(index, 1);
+      
+      const updatedPuppy = {
+        ...localPuppy,
+        notes: updatedNotes
+      };
 
-    setLocalPuppy(updatedPuppy);
-    onUpdate(updatedPuppy);
-    
-    toast({
-      title: "Note Deleted",
-      description: "The note has been removed."
-    });
-  }, [localPuppy, onUpdate]);
+      setLocalPuppy(updatedPuppy);
+      onUpdate(updatedPuppy);
+      
+      toast({
+        title: "Note Deleted",
+        description: "The note has been removed."
+      });
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete note",
+        variant: "destructive"
+      });
+    } finally {
+      isUpdating.current = false;
+    }
+  }, [localPuppy, onUpdate, litterService]);
 
   return (
     <DialogContent className="sm:max-w-[600px]" onInteractOutside={onClose}>
