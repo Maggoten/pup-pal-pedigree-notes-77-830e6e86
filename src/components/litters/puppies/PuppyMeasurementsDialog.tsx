@@ -42,7 +42,16 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     };
   });
   
+  // Track if we're in the middle of an operation to prevent race conditions
+  const [isUpdating, setIsUpdating] = useState(false);
+  
   useEffect(() => {
+    // Only update local state if we're not in the middle of an operation
+    if (isUpdating) {
+      console.log(`PuppyMeasurementsDialog: Skipping update during operation for ${puppy.name}`);
+      return;
+    }
+    
     console.log(`PuppyMeasurementsDialog: Puppy prop changed for ${puppy.name} (${puppy.id})`, {
       weightLogLength: puppy.weightLog?.length || 0,
       currentWeight: puppy.currentWeight,
@@ -59,7 +68,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     setWeight('');
     setHeight('');
     setNote('');
-  }, [puppy.id, puppy.weightLog, puppy.heightLog, puppy.notes, puppy.currentWeight, puppy.name]);
+  }, [puppy.id, puppy.weightLog, puppy.heightLog, puppy.notes, puppy.currentWeight, puppy.name, isUpdating]);
 
   const handleAddWeight = useCallback(() => {
     if (!weight || isNaN(parseFloat(weight))) {
@@ -71,6 +80,8 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       return;
     }
 
+    setIsUpdating(true);
+    
     const measurementDate = new Date(selectedDate);
     const [hours, minutes] = selectedTime.split(':').map(Number);
     measurementDate.setHours(hours, minutes);
@@ -86,10 +97,16 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       currentWeightLogLength: localPuppy.weightLog?.length || 0
     });
     
+    // Deduplicate existing weight logs before adding new one
+    const existingLogs = localPuppy.weightLog || [];
+    const deduplicatedLogs = existingLogs.filter((log, index, arr) => 
+      arr.findIndex(l => l.date === log.date && l.weight === log.weight) === index
+    );
+    
     const updatedPuppy = {
       ...localPuppy,
       weightLog: [
-        ...(localPuppy.weightLog || []),
+        ...deduplicatedLogs,
         newWeightRecord
       ],
       currentWeight: weightValue
@@ -104,6 +121,8 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     setLocalPuppy(updatedPuppy);
     onUpdate(updatedPuppy);
     setWeight('');
+    
+    setTimeout(() => setIsUpdating(false), 100);
     
     toast({
       title: "Weight Recorded",
@@ -121,6 +140,8 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       return;
     }
 
+    setIsUpdating(true);
+    
     const measurementDate = new Date(selectedDate);
     const [hours, minutes] = selectedTime.split(':').map(Number);
     measurementDate.setHours(hours, minutes);
@@ -131,10 +152,16 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       height: heightValue 
     };
     
+    // Deduplicate existing height logs before adding new one
+    const existingLogs = localPuppy.heightLog || [];
+    const deduplicatedLogs = existingLogs.filter((log, index, arr) => 
+      arr.findIndex(l => l.date === log.date && l.height === log.height) === index
+    );
+    
     const updatedPuppy = {
       ...localPuppy,
       heightLog: [
-        ...(localPuppy.heightLog || []),
+        ...deduplicatedLogs,
         newHeightRecord
       ]
     };
@@ -142,6 +169,8 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     setLocalPuppy(updatedPuppy);
     onUpdate(updatedPuppy);
     setHeight('');
+    
+    setTimeout(() => setIsUpdating(false), 100);
     
     toast({
       title: "Height Recorded",

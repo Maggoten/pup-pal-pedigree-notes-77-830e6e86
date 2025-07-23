@@ -87,7 +87,7 @@ const PuppyHeightTab: React.FC<PuppyHeightTabProps> = ({
                 {heightLogEntries
                   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                   .map((log, index) => (
-                    <TableRow key={index}>
+                    <TableRow key={`${puppy.id}-height-${log.date}-${log.height}-${index}`}>
                       <TableCell>{format(new Date(log.date), "PPP p")}</TableCell>
                       <TableCell>{log.height}</TableCell>
                       <TableCell>

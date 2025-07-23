@@ -282,6 +282,15 @@ export class LitterService {
     try {
       console.log(`Saving ${weightLogs.length} weight logs for puppy ${puppyId}`);
       
+      // Deduplicate weight logs before saving
+      const deduplicatedLogs = weightLogs.filter((log, index, arr) => 
+        arr.findIndex(l => l.date === log.date && l.weight === log.weight) === index
+      );
+      
+      if (deduplicatedLogs.length !== weightLogs.length) {
+        console.log(`Removed ${weightLogs.length - deduplicatedLogs.length} duplicate weight logs`);
+      }
+      
       // First, delete all existing weight logs for this puppy
       const { error: deleteError } = await supabase
         .from('puppy_weight_logs')
@@ -294,8 +303,8 @@ export class LitterService {
       }
 
       // Then insert all current weight logs
-      if (weightLogs.length > 0) {
-        const logsToInsert = weightLogs.map(log => ({
+      if (deduplicatedLogs.length > 0) {
+        const logsToInsert = deduplicatedLogs.map(log => ({
           puppy_id: puppyId,
           weight: log.weight,
           date: log.date
@@ -323,6 +332,15 @@ export class LitterService {
     try {
       console.log(`Saving ${heightLogs.length} height logs for puppy ${puppyId}`);
       
+      // Deduplicate height logs before saving
+      const deduplicatedLogs = heightLogs.filter((log, index, arr) => 
+        arr.findIndex(l => l.date === log.date && l.height === log.height) === index
+      );
+      
+      if (deduplicatedLogs.length !== heightLogs.length) {
+        console.log(`Removed ${heightLogs.length - deduplicatedLogs.length} duplicate height logs`);
+      }
+      
       // First, delete all existing height logs for this puppy
       const { error: deleteError } = await supabase
         .from('puppy_height_logs')
@@ -335,8 +353,8 @@ export class LitterService {
       }
 
       // Then insert all current height logs
-      if (heightLogs.length > 0) {
-        const logsToInsert = heightLogs.map(log => ({
+      if (deduplicatedLogs.length > 0) {
+        const logsToInsert = deduplicatedLogs.map(log => ({
           puppy_id: puppyId,
           height: log.height,
           date: log.date

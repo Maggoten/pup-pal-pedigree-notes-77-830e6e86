@@ -98,7 +98,7 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
                 {weightLogEntries
                   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                   .map((log, index) => (
-                    <TableRow key={`${puppy.id}-weight-${index}-${log.date}`}>
+                    <TableRow key={`${puppy.id}-weight-${log.date}-${log.weight}-${index}`}>
                       <TableCell>{format(new Date(log.date), "PPP p")}</TableCell>
                       <TableCell>{log.weight}</TableCell>
                       <TableCell>
