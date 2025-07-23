@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChartBar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Puppy } from '@/types/breeding';
@@ -19,6 +19,32 @@ const GrowthChartsTabContent: React.FC<GrowthChartsTabContentProps> = ({
   onSelectPuppy
 }) => {
   const [logType, setLogType] = useState<'weight' | 'height'>('weight');
+  
+  // Debug logging for growth charts
+  useEffect(() => {
+    console.log('GrowthChartsTabContent - Props received:', {
+      selectedPuppy: selectedPuppy ? {
+        id: selectedPuppy.id,
+        name: selectedPuppy.name,
+        weightLogCount: selectedPuppy.weightLog?.length || 0,
+        heightLogCount: selectedPuppy.heightLog?.length || 0,
+        sampleWeightLog: selectedPuppy.weightLog?.slice(0, 2),
+        sampleHeightLog: selectedPuppy.heightLog?.slice(0, 2)
+      } : null,
+      puppiesCount: puppies.length,
+      puppies: puppies.map(p => ({
+        id: p.id,
+        name: p.name,
+        weightLogCount: p.weightLog?.length || 0,
+        heightLogCount: p.heightLog?.length || 0,
+        hasWeightLog: !!(p.weightLog && p.weightLog.length > 0),
+        hasHeightLog: !!(p.heightLog && p.heightLog.length > 0),
+        sampleWeightLog: p.weightLog?.slice(0, 2),
+        sampleHeightLog: p.heightLog?.slice(0, 2)
+      })),
+      logType
+    });
+  }, [selectedPuppy, puppies, logType]);
   
   return (
     <Card className="shadow-sm">

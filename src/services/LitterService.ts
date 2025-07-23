@@ -11,6 +11,16 @@ export class LitterService {
         puppies.map(p => this.transformPuppyFromDB(p))
       ) : [];
     
+    // Debug logging for transformed puppies
+    console.log('transformLitterFromDB - Transformed puppies:', transformedPuppies.map(p => ({
+      id: p.id,
+      name: p.name,
+      weightLogCount: p.weightLog?.length || 0,
+      heightLogCount: p.heightLog?.length || 0,
+      sampleWeightLog: p.weightLog?.slice(0, 2),
+      sampleHeightLog: p.heightLog?.slice(0, 2)
+    })));
+    
     return {
       id: dbLitter.id,
       name: dbLitter.name,
@@ -40,7 +50,17 @@ export class LitterService {
   }
 
   private transformPuppyFromDB(dbPuppy: any, weightLogs?: any[], heightLogs?: any[]): Puppy {
-    return {
+    const weightLogArray = weightLogs ? weightLogs.map(wl => ({
+      date: wl.date,
+      weight: parseFloat(wl.weight)
+    })) : [];
+    
+    const heightLogArray = heightLogs ? heightLogs.map(hl => ({
+      date: hl.date,
+      height: parseFloat(hl.height)
+    })) : [];
+    
+    const transformedPuppy = {
       id: dbPuppy.id,
       name: dbPuppy.name,
       gender: dbPuppy.gender,
@@ -61,15 +81,21 @@ export class LitterService {
       status: dbPuppy.status,
       buyer_name: dbPuppy.buyer_name,
       buyer_phone: dbPuppy.buyer_phone,
-      weightLog: weightLogs ? weightLogs.map(wl => ({
-        date: wl.date,
-        weight: parseFloat(wl.weight)
-      })) : [],
-      heightLog: heightLogs ? heightLogs.map(hl => ({
-        date: hl.date,
-        height: parseFloat(hl.height)
-      })) : []
+      weightLog: weightLogArray,
+      heightLog: heightLogArray
     };
+    
+    console.log(`transformPuppyFromDB - Puppy ${transformedPuppy.name}:`, {
+      id: transformedPuppy.id,
+      name: transformedPuppy.name,
+      weightLogCount: transformedPuppy.weightLog.length,
+      heightLogCount: transformedPuppy.heightLog.length,
+      weightLogs: transformedPuppy.weightLog,
+      heightLogs: transformedPuppy.heightLog,
+      imageUrl: transformedPuppy.imageUrl
+    });
+    
+    return transformedPuppy;
   }
 
   private transformPuppyToDB(puppy: Puppy | Omit<Puppy, 'id'>): any {
@@ -97,7 +123,6 @@ export class LitterService {
     };
   }
 
-  // Helper method to fetch weight logs for specific puppies
   private async fetchPuppyWeightLogs(puppyIds: string[]): Promise<Map<string, any[]>> {
     if (puppyIds.length === 0) return new Map();
     
@@ -113,6 +138,8 @@ export class LitterService {
         return new Map();
       }
 
+      console.log('Raw weight logs from database:', weightLogs);
+
       // Group logs by puppy_id
       const logsByPuppy = new Map<string, any[]>();
       weightLogs?.forEach(log => {
@@ -123,6 +150,7 @@ export class LitterService {
         logsByPuppy.get(puppyId)!.push(log);
       });
 
+      console.log('Grouped weight logs by puppy:', Object.fromEntries(logsByPuppy));
       return logsByPuppy;
     } catch (error) {
       console.error('Error fetching puppy weight logs:', error);
@@ -130,7 +158,6 @@ export class LitterService {
     }
   }
 
-  // Helper method to fetch height logs for specific puppies
   private async fetchPuppyHeightLogs(puppyIds: string[]): Promise<Map<string, any[]>> {
     if (puppyIds.length === 0) return new Map();
     
@@ -146,6 +173,8 @@ export class LitterService {
         return new Map();
       }
 
+      console.log('Raw height logs from database:', heightLogs);
+
       // Group logs by puppy_id
       const logsByPuppy = new Map<string, any[]>();
       heightLogs?.forEach(log => {
@@ -156,6 +185,7 @@ export class LitterService {
         logsByPuppy.get(puppyId)!.push(log);
       });
 
+      console.log('Grouped height logs by puppy:', Object.fromEntries(logsByPuppy));
       return logsByPuppy;
     } catch (error) {
       console.error('Error fetching puppy height logs:', error);
@@ -269,6 +299,7 @@ export class LitterService {
       }
 
       console.log(`Found ${puppiesData?.length || 0} puppies for litter ${litterData.name}`);
+      console.log('Raw puppies data:', puppiesData);
       
       // If no puppies, return early
       if (!puppiesData || puppiesData.length === 0) {
@@ -278,7 +309,7 @@ export class LitterService {
 
       // Extract puppy IDs for batch fetching logs
       const puppyIds = puppiesData.map(p => p.id);
-      console.log(`Fetching weight and height logs for ${puppyIds.length} puppies`);
+      console.log(`Fetching weight and height logs for ${puppyIds.length} puppies:`, puppyIds);
 
       // Fetch weight and height logs for all puppies
       const [weightLogsByPuppy, heightLogsByPuppy] = await Promise.all([
@@ -295,6 +326,8 @@ export class LitterService {
         const heightLogs = heightLogsByPuppy.get(puppy.id) || [];
         
         console.log(`Puppy ${puppy.name}: ${weightLogs.length} weight logs, ${heightLogs.length} height logs`);
+        console.log(`Weight logs for ${puppy.name}:`, weightLogs);
+        console.log(`Height logs for ${puppy.name}:`, heightLogs);
         
         return this.transformPuppyFromDB(puppy, weightLogs, heightLogs);
       });
@@ -303,10 +336,25 @@ export class LitterService {
         id: p.id, 
         name: p.name,
         weightLogCount: p.weightLog.length,
-        heightLogCount: p.heightLog.length
+        heightLogCount: p.heightLog.length,
+        weightLogs: p.weightLog,
+        heightLogs: p.heightLog
       })));
 
-      return this.transformLitterFromDB(litterData, transformedPuppies);
+      const finalLitter = this.transformLitterFromDB(litterData, transformedPuppies);
+      console.log('Final litter object:', {
+        id: finalLitter.id,
+        name: finalLitter.name,
+        puppiesCount: finalLitter.puppies.length,
+        puppies: finalLitter.puppies.map(p => ({
+          id: p.id,
+          name: p.name,
+          weightLogCount: p.weightLog?.length || 0,
+          heightLogCount: p.heightLog?.length || 0
+        }))
+      });
+
+      return finalLitter;
     } catch (error) {
       console.error('Error fetching litter details:', error);
       return null;
