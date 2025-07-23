@@ -129,67 +129,6 @@ const PuppyMeasurementsChart: React.FC<PuppyMeasurementsChartProps> = ({ puppy }
         </div>
       )}
 
-      {hasWeightData && hasHeightData && (
-        <div>
-          <h4 className="text-lg font-semibold mb-4">Combined Growth Chart</h4>
-          <ResponsiveContainer width="100%" height={350}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis 
-                dataKey="displayDate" 
-                tick={{ fontSize: 12 }}
-                tickLine={{ stroke: '#888' }}
-              />
-              <YAxis 
-                yAxisId="weight"
-                tick={{ fontSize: 12 }}
-                tickLine={{ stroke: '#888' }}
-                label={{ value: 'Weight (kg)', angle: -90, position: 'insideLeft' }}
-              />
-              <YAxis 
-                yAxisId="height"
-                orientation="right"
-                tick={{ fontSize: 12 }}
-                tickLine={{ stroke: '#888' }}
-                label={{ value: 'Height (cm)', angle: 90, position: 'insideRight' }}
-              />
-              <Tooltip 
-                labelStyle={{ color: '#374151' }}
-                contentStyle={{ 
-                  backgroundColor: 'white', 
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '8px'
-                }}
-                formatter={(value: any, name: string) => [
-                  `${value} ${name === 'weight' ? 'kg' : 'cm'}`, 
-                  name === 'weight' ? 'Weight' : 'Height'
-                ]}
-              />
-              <Legend />
-              <Line 
-                yAxisId="weight"
-                type="monotone" 
-                dataKey="weight" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth={3}
-                name="Weight"
-                dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 5 }}
-                activeDot={{ r: 7, fill: 'hsl(var(--primary))' }}
-              />
-              <Line 
-                yAxisId="height"
-                type="monotone" 
-                dataKey="height" 
-                stroke="hsl(var(--accent))" 
-                strokeWidth={3}
-                name="Height"
-                dot={{ fill: 'hsl(var(--accent))', strokeWidth: 2, r: 5 }}
-                activeDot={{ r: 7, fill: 'hsl(var(--accent))' }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
     </div>
   );
 };
