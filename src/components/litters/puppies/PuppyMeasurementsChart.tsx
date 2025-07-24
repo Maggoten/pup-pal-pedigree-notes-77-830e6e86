@@ -8,33 +8,31 @@ interface PuppyMeasurementsChartProps {
 }
 
 const PuppyMeasurementsChart: React.FC<PuppyMeasurementsChartProps> = ({ puppy }) => {
-  const chartData = useMemo(() => {
+  const { weightChartData, heightChartData } = useMemo(() => {
     const weightData = puppy.weightLog || [];
     const heightData = puppy.heightLog || [];
 
-    // Combine weight and height data by date
-    const dataMap = new Map();
+    // Create separate datasets for weight and height starting from their first measurement
+    const createChartData = (data: any[], dataKey: string) => {
+      if (data.length === 0) return [];
+      
+      const dataMap = new Map();
+      data.forEach(entry => {
+        const dateKey = format(parseISO(entry.date), 'yyyy-MM-dd');
+        dataMap.set(dateKey, { 
+          date: dateKey, 
+          displayDate: format(parseISO(entry.date), 'MMM d'),
+          [dataKey]: entry[dataKey]
+        });
+      });
+      
+      return Array.from(dataMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+    };
 
-    // Add weight data
-    weightData.forEach(entry => {
-      const dateKey = format(parseISO(entry.date), 'yyyy-MM-dd');
-      if (!dataMap.has(dateKey)) {
-        dataMap.set(dateKey, { date: dateKey, displayDate: format(parseISO(entry.date), 'MMM d') });
-      }
-      dataMap.get(dateKey).weight = entry.weight;
-    });
-
-    // Add height data
-    heightData.forEach(entry => {
-      const dateKey = format(parseISO(entry.date), 'yyyy-MM-dd');
-      if (!dataMap.has(dateKey)) {
-        dataMap.set(dateKey, { date: dateKey, displayDate: format(parseISO(entry.date), 'MMM d') });
-      }
-      dataMap.get(dateKey).height = entry.height;
-    });
-
-    // Convert to array and sort by date
-    return Array.from(dataMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+    return {
+      weightChartData: createChartData(weightData, 'weight'),
+      heightChartData: createChartData(heightData, 'height')
+    };
   }, [puppy.weightLog, puppy.heightLog]);
 
   const hasWeightData = puppy.weightLog && puppy.weightLog.length > 0;
@@ -57,7 +55,7 @@ const PuppyMeasurementsChart: React.FC<PuppyMeasurementsChartProps> = ({ puppy }
         <div>
           <h4 className="text-lg font-semibold mb-4">Weight Progress</h4>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData}>
+            <LineChart data={weightChartData}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis 
                 dataKey="displayDate" 
@@ -95,7 +93,7 @@ const PuppyMeasurementsChart: React.FC<PuppyMeasurementsChartProps> = ({ puppy }
         <div>
           <h4 className="text-lg font-semibold mb-4">Height Progress</h4>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData}>
+            <LineChart data={heightChartData}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis 
                 dataKey="displayDate" 
