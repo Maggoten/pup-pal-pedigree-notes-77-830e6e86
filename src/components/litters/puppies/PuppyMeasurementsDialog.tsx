@@ -73,7 +73,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     setNote('');
   }, [puppy.id, puppy.weightLog, puppy.heightLog, puppy.notes, puppy.currentWeight, puppy.name]);
 
-  const handleAddWeight = useCallback(() => {
+  const handleAddWeight = useCallback(async () => {
     if (!weight || isNaN(parseFloat(weight))) {
       toast({
         title: "Invalid Weight",
@@ -122,18 +122,30 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     });
 
     setLocalPuppy(updatedPuppy);
-    onUpdate(updatedPuppy);
-    setWeight('');
     
-    setTimeout(() => { isUpdating.current = false; }, 100);
-    
-    toast({
-      title: "Weight Recorded",
-      description: `${puppy.name}'s weight has been recorded and current weight updated.`
-    });
+    try {
+      await onUpdate(updatedPuppy);
+      setWeight('');
+      
+      toast({
+        title: "Weight Recorded",
+        description: `${puppy.name}'s weight has been recorded and current weight updated.`
+      });
+    } catch (error) {
+      console.error('Failed to save weight:', error);
+      toast({
+        title: "Save Failed",
+        description: `Failed to save weight: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive"
+      });
+      // Revert local state on error
+      setLocalPuppy(puppy);
+    } finally {
+      setTimeout(() => { isUpdating.current = false; }, 100);
+    }
   }, [weight, selectedDate, selectedTime, localPuppy, puppy.name, onUpdate]);
 
-  const handleAddHeight = useCallback(() => {
+  const handleAddHeight = useCallback(async () => {
     if (!height || isNaN(parseFloat(height))) {
       toast({
         title: "Invalid Height",
@@ -170,15 +182,27 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     };
 
     setLocalPuppy(updatedPuppy);
-    onUpdate(updatedPuppy);
-    setHeight('');
     
-    setTimeout(() => { isUpdating.current = false; }, 100);
-    
-    toast({
-      title: "Height Recorded",
-      description: `${puppy.name}'s height has been recorded.`
-    });
+    try {
+      await onUpdate(updatedPuppy);
+      setHeight('');
+      
+      toast({
+        title: "Height Recorded",
+        description: `${puppy.name}'s height has been recorded.`
+      });
+    } catch (error) {
+      console.error('Failed to save height:', error);
+      toast({
+        title: "Save Failed",
+        description: `Failed to save height: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive"
+      });
+      // Revert local state on error
+      setLocalPuppy(puppy);
+    } finally {
+      setTimeout(() => { isUpdating.current = false; }, 100);
+    }
   }, [height, selectedDate, selectedTime, localPuppy, puppy.name, onUpdate]);
 
   const handleAddNote = useCallback(() => {

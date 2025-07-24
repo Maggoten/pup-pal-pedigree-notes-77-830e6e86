@@ -351,54 +351,112 @@ export class LitterService {
     try {
       console.log(`Saving ${weightLogs.length} weight logs for puppy ${puppyId}`);
       
+      // Phase 1: Validate input data
+      if (!Array.isArray(weightLogs)) {
+        console.error('Invalid weight logs data: not an array', weightLogs);
+        throw new Error('Weight logs must be an array');
+      }
+
+      // Validate each log entry
+      const validatedLogs = weightLogs.filter(log => {
+        if (!log.date || !log.weight) {
+          console.warn('Skipping invalid log entry:', log);
+          return false;
+        }
+        
+        const date = new Date(log.date);
+        if (isNaN(date.getTime())) {
+          console.warn('Skipping log with invalid date:', log);
+          return false;
+        }
+        
+        const weight = parseFloat(log.weight);
+        if (isNaN(weight) || weight <= 0) {
+          console.warn('Skipping log with invalid weight:', log);
+          return false;
+        }
+        
+        return true;
+      });
+
+      console.log(`Validated ${validatedLogs.length} out of ${weightLogs.length} weight logs`);
+      
       // Deduplicate weight logs before saving
-      const deduplicatedLogs = weightLogs.filter((log, index, arr) => 
+      const deduplicatedLogs = validatedLogs.filter((log, index, arr) => 
         arr.findIndex(l => l.date === log.date && l.weight === log.weight) === index
       );
       
-      if (deduplicatedLogs.length !== weightLogs.length) {
-        console.log(`Removed ${weightLogs.length - deduplicatedLogs.length} duplicate weight logs`);
-      }
-      
-      // First, delete all existing weight logs for this puppy
-      const { error: deleteError } = await supabase
-        .from('puppy_weight_logs')
-        .delete()
-        .eq('puppy_id', puppyId);
-
-      if (deleteError) {
-        console.error('Error deleting existing weight logs:', deleteError);
-        return false;
+      if (deduplicatedLogs.length !== validatedLogs.length) {
+        console.log(`Removed ${validatedLogs.length - deduplicatedLogs.length} duplicate weight logs`);
       }
 
-      // Then insert all current weight logs with conflict handling
+      // Phase 2: Use upsert pattern instead of delete-all-insert
       if (deduplicatedLogs.length > 0) {
-        const logsToInsert = deduplicatedLogs.map(log => ({
-          puppy_id: puppyId,
-          weight: log.weight,
-          date: log.date
-        }));
+        const logsToUpsert = deduplicatedLogs.map(log => {
+          const date = new Date(log.date);
+          console.log(`Processing weight log: date=${log.date}, parsed=${date.toISOString()}, weight=${log.weight}`);
+          
+          return {
+            puppy_id: puppyId,
+            weight: parseFloat(log.weight),
+            date: date.toISOString()
+          };
+        });
 
-        const { error: insertError } = await supabase
+        console.log(`Upserting ${logsToUpsert.length} weight logs:`, logsToUpsert);
+
+        // Use upsert with conflict resolution
+        const { error: upsertError, data } = await supabase
           .from('puppy_weight_logs')
-          .insert(logsToInsert);
+          .upsert(logsToUpsert, { 
+            onConflict: 'puppy_id,date,weight',
+            ignoreDuplicates: true 
+          })
+          .select();
 
-        if (insertError) {
-          console.error('Error inserting weight logs:', insertError);
-          // Handle unique constraint violations gracefully
-          if (insertError.code === '23505') {
-            console.warn('Duplicate weight log detected during insert, skipping...');
-            return true;
-          }
-          return false;
+        if (upsertError) {
+          console.error('Error upserting weight logs:', {
+            error: upsertError,
+            code: upsertError.code,
+            message: upsertError.message,
+            details: upsertError.details,
+            hint: upsertError.hint,
+            logsToUpsert
+          });
+          throw new Error(`Failed to save weight logs: ${upsertError.message}`);
         }
+
+        console.log(`Successfully upserted ${data?.length || logsToUpsert.length} weight logs for puppy ${puppyId}`);
       }
 
-      console.log(`Successfully saved ${deduplicatedLogs.length} weight logs for puppy ${puppyId}`);
+      // Phase 3: Validate the save was successful
+      const { data: savedLogs, error: validateError } = await supabase
+        .from('puppy_weight_logs')
+        .select('*')
+        .eq('puppy_id', puppyId)
+        .order('date', { ascending: false });
+
+      if (validateError) {
+        console.error('Error validating saved weight logs:', validateError);
+        throw new Error(`Failed to validate saved weight logs: ${validateError.message}`);
+      }
+
+      console.log(`Validation: Found ${savedLogs?.length || 0} weight logs in database for puppy ${puppyId}`);
+      
+      if (deduplicatedLogs.length > 0 && (!savedLogs || savedLogs.length === 0)) {
+        console.error('Data validation failed: No weight logs found after save operation');
+        throw new Error('Weight logs were not saved correctly');
+      }
+
       return true;
     } catch (error) {
-      console.error('Error saving puppy weight logs:', error);
-      return false;
+      console.error('Error saving puppy weight logs:', {
+        error,
+        puppyId,
+        weightLogsCount: weightLogs?.length,
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      throw error; // Re-throw to let caller handle
     }
   }
 
@@ -406,54 +464,112 @@ export class LitterService {
     try {
       console.log(`Saving ${heightLogs.length} height logs for puppy ${puppyId}`);
       
+      // Phase 1: Validate input data
+      if (!Array.isArray(heightLogs)) {
+        console.error('Invalid height logs data: not an array', heightLogs);
+        throw new Error('Height logs must be an array');
+      }
+
+      // Validate each log entry
+      const validatedLogs = heightLogs.filter(log => {
+        if (!log.date || !log.height) {
+          console.warn('Skipping invalid height log entry:', log);
+          return false;
+        }
+        
+        const date = new Date(log.date);
+        if (isNaN(date.getTime())) {
+          console.warn('Skipping height log with invalid date:', log);
+          return false;
+        }
+        
+        const height = parseFloat(log.height);
+        if (isNaN(height) || height <= 0) {
+          console.warn('Skipping height log with invalid height:', log);
+          return false;
+        }
+        
+        return true;
+      });
+
+      console.log(`Validated ${validatedLogs.length} out of ${heightLogs.length} height logs`);
+      
       // Deduplicate height logs before saving
-      const deduplicatedLogs = heightLogs.filter((log, index, arr) => 
+      const deduplicatedLogs = validatedLogs.filter((log, index, arr) => 
         arr.findIndex(l => l.date === log.date && l.height === log.height) === index
       );
       
-      if (deduplicatedLogs.length !== heightLogs.length) {
-        console.log(`Removed ${heightLogs.length - deduplicatedLogs.length} duplicate height logs`);
-      }
-      
-      // First, delete all existing height logs for this puppy
-      const { error: deleteError } = await supabase
-        .from('puppy_height_logs')
-        .delete()
-        .eq('puppy_id', puppyId);
-
-      if (deleteError) {
-        console.error('Error deleting existing height logs:', deleteError);
-        return false;
+      if (deduplicatedLogs.length !== validatedLogs.length) {
+        console.log(`Removed ${validatedLogs.length - deduplicatedLogs.length} duplicate height logs`);
       }
 
-      // Then insert all current height logs with conflict handling
+      // Phase 2: Use upsert pattern instead of delete-all-insert
       if (deduplicatedLogs.length > 0) {
-        const logsToInsert = deduplicatedLogs.map(log => ({
-          puppy_id: puppyId,
-          height: log.height,
-          date: log.date
-        }));
+        const logsToUpsert = deduplicatedLogs.map(log => {
+          const date = new Date(log.date);
+          console.log(`Processing height log: date=${log.date}, parsed=${date.toISOString()}, height=${log.height}`);
+          
+          return {
+            puppy_id: puppyId,
+            height: parseFloat(log.height),
+            date: date.toISOString()
+          };
+        });
 
-        const { error: insertError } = await supabase
+        console.log(`Upserting ${logsToUpsert.length} height logs:`, logsToUpsert);
+
+        // Use upsert with conflict resolution
+        const { error: upsertError, data } = await supabase
           .from('puppy_height_logs')
-          .insert(logsToInsert);
+          .upsert(logsToUpsert, { 
+            onConflict: 'puppy_id,date,height',
+            ignoreDuplicates: true 
+          })
+          .select();
 
-        if (insertError) {
-          console.error('Error inserting height logs:', insertError);
-          // Handle unique constraint violations gracefully
-          if (insertError.code === '23505') {
-            console.warn('Duplicate height log detected during insert, skipping...');
-            return true;
-          }
-          return false;
+        if (upsertError) {
+          console.error('Error upserting height logs:', {
+            error: upsertError,
+            code: upsertError.code,
+            message: upsertError.message,
+            details: upsertError.details,
+            hint: upsertError.hint,
+            logsToUpsert
+          });
+          throw new Error(`Failed to save height logs: ${upsertError.message}`);
         }
+
+        console.log(`Successfully upserted ${data?.length || logsToUpsert.length} height logs for puppy ${puppyId}`);
       }
 
-      console.log(`Successfully saved ${deduplicatedLogs.length} height logs for puppy ${puppyId}`);
+      // Phase 3: Validate the save was successful
+      const { data: savedLogs, error: validateError } = await supabase
+        .from('puppy_height_logs')
+        .select('*')
+        .eq('puppy_id', puppyId)
+        .order('date', { ascending: false });
+
+      if (validateError) {
+        console.error('Error validating saved height logs:', validateError);
+        throw new Error(`Failed to validate saved height logs: ${validateError.message}`);
+      }
+
+      console.log(`Validation: Found ${savedLogs?.length || 0} height logs in database for puppy ${puppyId}`);
+      
+      if (deduplicatedLogs.length > 0 && (!savedLogs || savedLogs.length === 0)) {
+        console.error('Data validation failed: No height logs found after save operation');
+        throw new Error('Height logs were not saved correctly');
+      }
+
       return true;
     } catch (error) {
-      console.error('Error saving puppy height logs:', error);
-      return false;
+      console.error('Error saving puppy height logs:', {
+        error,
+        puppyId,
+        heightLogsCount: heightLogs?.length,
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      throw error; // Re-throw to let caller handle
     }
   }
 
@@ -761,19 +877,25 @@ export class LitterService {
         }
       }
 
-      // Save weight logs to the puppy_weight_logs table
+      // Save weight logs to the puppy_weight_logs table with enhanced error handling
       if (puppy.weightLog) {
-        const weightLogsSuccess = await this.savePuppyWeightLogs(puppy.id, puppy.weightLog);
-        if (!weightLogsSuccess) {
-          console.error('Failed to save puppy weight logs, but basic puppy info was updated');
+        try {
+          await this.savePuppyWeightLogs(puppy.id, puppy.weightLog);
+          console.log('Successfully saved puppy weight logs');
+        } catch (error) {
+          console.error('Failed to save puppy weight logs:', error);
+          throw new Error(`Failed to save weight logs: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
 
-      // Save height logs to the puppy_height_logs table
+      // Save height logs to the puppy_height_logs table with enhanced error handling
       if (puppy.heightLog) {
-        const heightLogsSuccess = await this.savePuppyHeightLogs(puppy.id, puppy.heightLog);
-        if (!heightLogsSuccess) {
-          console.error('Failed to save puppy height logs, but basic puppy info was updated');
+        try {
+          await this.savePuppyHeightLogs(puppy.id, puppy.heightLog);
+          console.log('Successfully saved puppy height logs');
+        } catch (error) {
+          console.error('Failed to save puppy height logs:', error);
+          throw new Error(`Failed to save height logs: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
 
