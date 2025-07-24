@@ -5,7 +5,6 @@ import { Label } from '@/components/ui/label';
 import { UseFormReturn } from 'react-hook-form';
 import HeatDateList from './HeatDateList';
 import HeatIntervalField from './HeatIntervalField';
-import SterilizationDateField from './SterilizationDateField';
 import { useTranslation } from 'react-i18next';
 
 interface HeatRecordsFieldProps {
@@ -102,8 +101,6 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
         
         <HeatIntervalField form={form} disabled={disabled} />
       </div>
-      
-      <SterilizationDateField form={form} disabled={disabled} />
     </div>
   );
 };
