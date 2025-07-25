@@ -116,6 +116,7 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
             compact={false} // Use full size calendar now
             onSyncCalendar={handleSyncCalendar}
             isSyncing={isSyncing}
+            onEventUpdate={refreshEvents}
           />
         )}
       </div>

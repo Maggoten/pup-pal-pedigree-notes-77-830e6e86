@@ -291,6 +291,7 @@ export class ReminderCalendarSyncService {
         dog_id: heat.dogId,
         dog_name: heat.dogName,
         notes: this.t('events.heat.description', { dogName: heat.dogName }),
+        status: 'predicted',
         user_id: userId
       };
 

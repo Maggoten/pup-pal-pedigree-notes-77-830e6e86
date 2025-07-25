@@ -23,18 +23,20 @@ interface CalendarContentProps {
   compact?: boolean;
   onSyncCalendar?: () => void;
   isSyncing?: boolean;
+  onEventUpdate?: () => void;
 }
 
-const CalendarContent: React.FC<CalendarContentProps> = ({
-  dogs,
-  getEventsForDate,
-  getEventColor,
-  onDeleteEvent,
-  onAddEvent,
-  onEditEvent,
-  compact = false,
-  onSyncCalendar,
-  isSyncing = false
+const CalendarContent: React.FC<CalendarContentProps> = ({ 
+  dogs, 
+  getEventsForDate, 
+  getEventColor, 
+  onDeleteEvent, 
+  onAddEvent, 
+  onEditEvent, 
+  compact = false, 
+  onSyncCalendar, 
+  isSyncing = false,
+  onEventUpdate
 }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -167,6 +169,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
                 setIsEditDialogOpen(false);
                 setSelectedEvent(null);
               }}
+              onEventUpdate={onEventUpdate}
             />
           )}
         </DialogContent>
