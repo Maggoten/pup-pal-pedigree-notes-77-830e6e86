@@ -67,9 +67,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
               const displayEvents = events.slice(0, maxEvents);
               const hiddenEventsCount = events.length - maxEvents;
               
-              // Check for special fertility/ovulation events
+              // Check for special fertility/ovulation/heat events
               const hasOvulation = events.some(event => event.type === 'ovulation-predicted');
               const hasFertility = events.some(event => event.type === 'fertility-window');
+              const hasHeat = events.some(event => event.type === 'heat' || event.type === 'heat-active');
               
               return (
                 <ContextMenu key={day.toISOString()}>
@@ -82,6 +83,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                           ? 'bg-purple-100/90 border-purple-300/70 shadow-purple-200/30 shadow-lg' 
                           : hasFertility 
                           ? 'bg-violet-50/90 border-violet-200/70 shadow-violet-100/20 shadow-md'
+                          : hasHeat
+                          ? 'bg-rose-50/90 border-rose-200/70 shadow-rose-100/20 shadow-sm'
                           : isToday 
                           ? 'bg-warmgreen-50/80 border-warmgreen-200' 
                           : 'bg-warmbeige-50/70 border-warmbeige-100'
@@ -91,7 +94,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     >
                       <div className={`
                         text-xs py-1 px-2 flex justify-between items-center
-                        ${hasOvulation ? 'font-bold text-purple-800' : hasFertility ? 'font-semibold text-violet-700' : isToday ? 'font-bold text-primary' : ''}
+                        ${hasOvulation ? 'font-bold text-purple-800' : hasFertility ? 'font-semibold text-violet-700' : hasHeat ? 'font-semibold text-rose-700' : isToday ? 'font-bold text-primary' : ''}
                       `}>
                         <span>
                           {format(day, 'd')}
@@ -102,6 +105,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                           )}
                           {hasFertility && !hasOvulation && (
                             <div className="w-1.5 h-1.5 bg-violet-400 rounded-full shadow-sm"></div>
+                          )}
+                          {hasHeat && !hasOvulation && !hasFertility && (
+                            <div className="w-1.5 h-1.5 bg-rose-400 rounded-full shadow-sm"></div>
                           )}
                           <span className="text-[10px] text-muted-foreground">
                             {format(day, 'EEE')}
