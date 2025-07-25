@@ -82,7 +82,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                         ${hasOvulation 
                           ? 'bg-purple-100/90 border-purple-300/70 shadow-purple-200/30 shadow-lg' 
                           : hasFertility 
-                          ? 'bg-violet-50/90 border-violet-200/70 shadow-violet-100/20 shadow-md'
+                          ? 'bg-purple-100/90 border-purple-300/70 shadow-purple-200/30 shadow-lg'
                           : hasHeat
                           ? 'bg-rose-50/90 border-rose-200/70 shadow-rose-100/20 shadow-sm'
                           : isToday 
@@ -94,7 +94,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     >
                       <div className={`
                         text-xs py-1 px-2 flex justify-between items-center
-                        ${hasOvulation ? 'font-bold text-purple-800' : hasFertility ? 'font-semibold text-violet-700' : hasHeat ? 'font-semibold text-rose-700' : isToday ? 'font-bold text-primary' : ''}
+                        ${hasOvulation ? 'font-bold text-purple-800' : hasFertility ? 'font-bold text-purple-800' : hasHeat ? 'font-semibold text-rose-700' : isToday ? 'font-bold text-primary' : ''}
                       `}>
                         <span>
                           {format(day, 'd')}
