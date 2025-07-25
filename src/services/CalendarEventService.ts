@@ -8,8 +8,8 @@ import { toast } from '@/components/ui/use-toast';
 const eventTypeColors = {
   'heat': 'bg-rose-200 text-rose-800 border-rose-300',
   'heat-active': 'bg-rose-300 text-rose-900 border-rose-400', // Active heat phase
-  'ovulation-predicted': 'bg-amber-200 text-amber-900 border-amber-300', // Predicted ovulation
-  'fertility-window': 'bg-yellow-200 text-yellow-900 border-yellow-300', // Optimal breeding days
+  'ovulation-predicted': 'bg-purple-200 text-purple-900 border-purple-400 shadow-purple-200/50 shadow-lg', // Predicted ovulation
+  'fertility-window': 'bg-violet-150 text-violet-900 border-violet-350 shadow-violet-200/40 shadow-md', // Optimal breeding days
   'mating': 'bg-violet-100 text-violet-800 border-violet-200',
   'due-date': 'bg-amber-100 text-amber-800 border-amber-200',
   'vaccination': 'bg-warmgreen-100 text-warmgreen-800 border-warmgreen-200',

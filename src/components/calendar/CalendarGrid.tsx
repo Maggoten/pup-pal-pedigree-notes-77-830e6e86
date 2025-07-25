@@ -67,6 +67,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
               const displayEvents = events.slice(0, maxEvents);
               const hiddenEventsCount = events.length - maxEvents;
               
+              // Check for special fertility/ovulation events
+              const hasOvulation = events.some(event => event.type === 'ovulation-predicted');
+              const hasFertility = events.some(event => event.type === 'fertility-window');
+              
               return (
                 <ContextMenu key={day.toISOString()}>
                   <ContextMenuTrigger>
@@ -74,7 +78,11 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                       className={`
                         rounded-lg border h-full ${compact ? 'min-h-[80px]' : 'min-h-[100px]'}
                         flex flex-col transition-colors duration-200
-                        ${isToday 
+                        ${hasOvulation 
+                          ? 'bg-purple-100/90 border-purple-300/70 shadow-purple-200/30 shadow-lg' 
+                          : hasFertility 
+                          ? 'bg-violet-50/90 border-violet-200/70 shadow-violet-100/20 shadow-md'
+                          : isToday 
                           ? 'bg-warmgreen-50/80 border-warmgreen-200' 
                           : 'bg-warmbeige-50/70 border-warmbeige-100'
                         }
@@ -83,14 +91,22 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     >
                       <div className={`
                         text-xs py-1 px-2 flex justify-between items-center
-                        ${isToday ? 'font-bold text-primary' : ''}
+                        ${hasOvulation ? 'font-bold text-purple-800' : hasFertility ? 'font-semibold text-violet-700' : isToday ? 'font-bold text-primary' : ''}
                       `}>
                         <span>
                           {format(day, 'd')}
                         </span>
-                        <span className="text-[10px] text-muted-foreground">
-                          {format(day, 'EEE')}
-                        </span>
+                        <div className="flex items-center gap-1">
+                          {hasOvulation && (
+                            <div className="w-2 h-2 bg-purple-500 rounded-full shadow-sm"></div>
+                          )}
+                          {hasFertility && !hasOvulation && (
+                            <div className="w-1.5 h-1.5 bg-violet-400 rounded-full shadow-sm"></div>
+                          )}
+                          <span className="text-[10px] text-muted-foreground">
+                            {format(day, 'EEE')}
+                          </span>
+                        </div>
                       </div>
                       
                       <div className="flex-1 p-1 space-y-1 overflow-y-auto scrollbar-thin">
