@@ -38,7 +38,6 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
   // Enhanced check for login-related pages
   const isLoginRelatedPage = location.pathname === '/login' || 
-                            location.pathname === '/reset-password' || 
                             location.pathname === '/registration-success';
   
   // Track if there are active uploads to prevent premature redirects
@@ -214,7 +213,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Only redirect if auth is ready and user is logged in and on login page
+  // Only redirect if auth is ready and user is logged in and on login page (but not reset password)
   if (isAuthReady && isLoggedIn && isLoginRelatedPage) {
     console.log('[AuthGuard] User already logged in, redirecting from login-related page');
     return <Navigate to="/" replace />;
