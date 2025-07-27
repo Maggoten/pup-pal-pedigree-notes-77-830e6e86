@@ -6,7 +6,7 @@
   "pages": {
     "myLitters": {
       "title": "Mina Kullar",
-      "description": "Visa och hantera alla dina registrerade kullar, spåra födslar och få tillgång till detaljerad kullinfo"
+      "description": "Visa och hantera dina kullar, följ upp vikt, hälsa och få tillgång till detaljerad kullinfo"
     },
     "plannedLitters": {
       "title": "Planerade Kullar & Parning",
@@ -14,7 +14,7 @@
     }
   },
   "actions": {
-    "addPlannedLitter": "Lägg till Planerad Kull",
+    "addPlannedLitter": "Lägg till en Planerad Kull",
     "addFirstPlannedLitter": "Lägg till Din Första Planerade Kull",
     "addMatingDate": "Lägg till Parningsdatum",
     "editMatingDate": "Redigera Parningsdatum",
@@ -34,8 +34,8 @@
     "daysRemaining": "Dagar Kvar",
     "puppies": "Valpar",
     "males": "Hanar",
-    "females": "Honor",
-    "totalPuppies": "Totalt Valpar",
+    "females": "Tikar",
+    "totalPuppies": "Antal Valpar",
     "archived": "Arkiverad",
     "active": "Aktiv",
     "completed": "Avslutad"
@@ -56,14 +56,14 @@
       "description": "Börja planera dina framtida kullar genom att skapa din första avelskombination"
     },
     "myLitters": {
-      "title": "Inga Kullar Ännu",
-      "description": "Dina registrerade kullar kommer att visas här när du börjar spåra födslar"
+      "title": "Inga kullar ännu",
+      "description": "Dina registrerade kullar kommer att visas här när du börjar följa upp dina kullar"
     }
   },
   "mating": {
     "section": {
       "title": "Löpcykler & Parning",
-      "description": "Spåra löpcykler och senaste parningsaktiviteter"
+      "description": "Spåra löpcykler och parningar"
     },
     "upcomingHeats": {
       "title": "Kommande Löpcykler",
