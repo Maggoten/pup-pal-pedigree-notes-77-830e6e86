@@ -60,31 +60,30 @@ const ResetPassword: React.FC = () => {
     const verifyRecoveryToken = async () => {
       try {
         // Check for recovery parameters in URL
-        const accessToken = searchParams.get('access_token');
-        const refreshToken = searchParams.get('refresh_token');
+        const tokenHash = searchParams.get('token_hash');
         const type = searchParams.get('type');
 
-        console.log('Recovery parameters:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
+        console.log('Recovery parameters:', { tokenHash: !!tokenHash, type });
 
-        if (type === 'recovery' && accessToken && refreshToken) {
-          console.log('Valid recovery parameters found, setting session');
+        if (type === 'recovery' && tokenHash) {
+          console.log('Valid recovery parameters found, verifying OTP');
           
-          // Set the session using the tokens from the URL
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken
+          // Verify the OTP token - this automatically logs in the user
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: 'recovery'
           });
 
           if (error) {
-            console.error('Error setting recovery session:', error);
+            console.error('Error verifying recovery token:', error);
             setRecoveryError('Invalid or expired recovery link. Please request a new password reset.');
             setIsValidRecovery(false);
           } else if (data.session) {
-            console.log('Recovery session established successfully');
+            console.log('Recovery token verified successfully, user logged in');
             setIsValidRecovery(true);
             setRecoveryError(null);
           } else {
-            console.error('No session created from recovery tokens');
+            console.error('No session created from recovery token');
             setRecoveryError('Unable to establish recovery session. Please try again.');
             setIsValidRecovery(false);
           }
