@@ -17,7 +17,7 @@
     },
     "description": {
       "add": "Lägg till en ny hund i ditt avelsprogram.",
-      "edit": "Uppdatera din hunds information."
+      "edit": "Uppdatera information."
     },
     "fields": {
       "name": {
@@ -49,7 +49,7 @@
       "dateOfBirth": {
         "label": "Födelsedatum",
         "placeholder": "Välj ett datum",
-        "description": "Ange din hunds födelsedatum"
+        "description": "Ange födelsedatum"
       },
       "registrationNumber": {
         "label": "Registreringsnummer",
@@ -62,11 +62,11 @@
         "description": "Hälsoproblem, temperament eller särskilda vårdinstruktioner"
       },
       "photo": {
-        "label": "Hundfoto"
+        "label": "Foto"
       },
       "pickADate": "Välj ett datum",
       "optional": "Valfritt",
-      "optionalFemaleOnly": "Valfritt - Endast för tikar"
+      "optionalFemaleOnly": "Valfritt"
     },
     "health": {
       "title": "Hälsoinformation",
@@ -83,7 +83,7 @@
       "sterilization": {
         "label": "Steriliseringsdatum",
         "placeholder": "Välj ett datum",
-        "description": "Valfritt - Endast för tikar"
+        "description": "Valfritt"
       }
     },
     "breeding": {
@@ -170,8 +170,8 @@
     },
     "descriptions": {
       "all": "Alla hundar i ditt avels program",
-      "male": "Hanar i ditt avels program",
-      "female": "Tikar i ditt avels program"
+      "male": "Hanar i ditt avelsprogram",
+      "female": "Tikar i ditt avelsprogram"
     },
     "empty": {
       "noDogs": "Inga hundar hittades.",
@@ -191,7 +191,7 @@
     "birthday": {
       "title": "{{dogName}}s födelsedag",
       "reminder": "Förbered {{dogName}}s födelsedag",
-      "description": "Födelsedagsberöm för {{dogName}}",
+      "description": "Födelsedagsfirande för {{dogName}}",
       "reminderDescription": "Påminnelse att förbereda {{dogName}}s födelsedag om 1 vecka",
       "upcoming": "{{dogName}} fyller {{age}} år om {{days}} dagar",
       "today": "{{dogName}} fyller {{age}} år idag!",
@@ -206,9 +206,9 @@
       "overdue": "Vaccination försenad med {{days}} dagar"
     },
     "heat": {
-      "title": "{{dogName}}s löptid",
-      "reminder": "Kommande löptid för {{dogName}}",
-      "description": "Förväntad löptid för {{dogName}}",
+      "title": "{{dogName}}s löp",
+      "reminder": "Kommande löp för {{dogName}}",
+      "description": "Förväntat löp för {{dogName}}",
       "reminderDescription": "Påminnelse om {{dogName}}s kommande löptid om 30 dagar",
       "approaching": "{{dogName}}s löptid närmar sig",
       "expected": "Förväntad löptid om {{days}} dagar",
@@ -232,8 +232,8 @@
     "error": "Fel vid laddning av kullar: {{error}}",
     "empty": {
       "title": "{{dogName}} har inte varit involverad i några kullar än.",
-      "sireLine": "När denna hund blir far till en kull kommer den att visas här.",
-      "damLine": "När denna hund får en kull kommer den att visas här."
+      "sireLine": "När {{dogName}} får en kull kommer den att visas här.",
+      "damLine": "När {{dogName}} får en kull kommer den att visas här."
     },
     "item": {
       "born": "Född: {{date}}",
@@ -257,7 +257,7 @@
       "delete": "Misslyckades att ta bort hund. Försök igen.",
       "load": "Misslyckades att ladda hundar",
       "generic": "Ett fel uppstod",
-      "cannotDelete": "Kan Inte Ta Bort Hund",
+      "cannotDelete": "Kan inte ta bort hund",
       "hasDependencies": "Denna hund kan inte tas bort eftersom den har associerade poster (kullar, dräktigheter, etc.)"
     },
     "loading": {
