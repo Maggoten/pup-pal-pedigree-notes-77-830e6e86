@@ -39,7 +39,7 @@ enabled = true
 
 [auth]
 enabled = true
-site_url = "http://localhost:3000"
+site_url = "https://www.breedingjourney.com"
 
 [auth.email]
 enable_confirmations = false
