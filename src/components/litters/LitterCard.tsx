@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Dog, Archive, Users, ChevronRight } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Litter } from '@/types/breeding';
+import { useTranslation } from 'react-i18next';
 
 interface LitterCardProps {
   litter: Litter;
@@ -23,6 +24,8 @@ const LitterCard: React.FC<LitterCardProps> = ({
   isSelected = false,
   damImageUrl 
 }) => {
+  const { t } = useTranslation('litters');
+  
   // Parse ISO date string to Date object
   const birthDate = parseISO(litter.dateOfBirth);
   
@@ -72,7 +75,7 @@ const LitterCard: React.FC<LitterCardProps> = ({
                   : 'bg-green-100 text-green-700 hover:bg-green-200'
               }`}
             >
-              {litter.archived ? 'Archived' : 'Active'}
+              {litter.archived ? t('display.archived') : t('display.active')}
             </Badge>
             
             {/* Expand Arrow */}
@@ -85,14 +88,14 @@ const LitterCard: React.FC<LitterCardProps> = ({
         <div className="space-y-3 text-sm">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5 text-primary opacity-70" />
-            <span>Born: {format(birthDate, 'MMM d, yyyy')}</span>
+            <span>{t('litter.labels.bornLabel', { date: format(birthDate, 'MMM d, yyyy') })}</span>
           </div>
           
           {puppyCount > 0 && (
             <div className="flex items-center gap-1.5">
               <Users className="h-3.5 w-3.5 text-primary opacity-70" />
               <div className="flex gap-2">
-                <span>{puppyCount} total</span>
+                <span>{t('litter.labels.totalCount', { count: puppyCount })}</span>
                 <span className="text-blue-500 font-medium">{maleCount} ♂</span>
                 <span className="text-pink-500 font-medium">{femaleCount} ♀</span>
               </div>
@@ -101,7 +104,7 @@ const LitterCard: React.FC<LitterCardProps> = ({
 
           {litter.archived && (
             <div className="text-xs text-muted-foreground">
-              Archived on {format(new Date(litter.dateOfBirth), 'MMM d, yyyy')}
+              {t('litter.labels.archivedOn', { date: format(new Date(litter.dateOfBirth), 'MMM d, yyyy') })}
             </div>
           )}
         </div>

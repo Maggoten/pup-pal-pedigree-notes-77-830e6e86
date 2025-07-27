@@ -130,5 +130,148 @@
     "saving": "Saving...",
     "deleting": "Deleting...",
     "archiving": "Archiving..."
+  },
+  "puppies": {
+    "titles": {
+      "addPuppy": "Add New Puppy",
+      "editPuppy": "Edit Puppy",
+      "puppyProfile": "Puppy Profile",
+      "litterInformation": "Litter Information",
+      "puppyDetails": "Puppy Details",
+      "weightTracking": "Weight Tracking",
+      "heightTracking": "Height Tracking",
+      "notes": "Notes"
+    },
+    "labels": {
+      "name": "Name",
+      "registeredName": "Registered Name", 
+      "registrationNumber": "Registration Number",
+      "gender": "Gender",
+      "breed": "Breed",
+      "color": "Color",
+      "birthWeight": "Birth Weight (kg)",
+      "currentWeight": "Current Weight (kg)",
+      "dateOfBirth": "Date of Birth",
+      "timeOfBirth": "Time of Birth",
+      "status": "Status",
+      "buyerName": "Buyer Name",
+      "buyerPhone": "Buyer Phone",
+      "collarId": "Collar ID",
+      "microchip": "Microchip",
+      "totalPuppies": "Total Puppies",
+      "litterAge": "Litter Age",
+      "weeks": "weeks",
+      "male": "Male",
+      "female": "Female",
+      "weight": "Weight",
+      "height": "Height"
+    },
+    "placeholders": {
+      "puppyName": "Puppy name",
+      "puppyColor": "Puppy color",
+      "registeredName": "Optional registered name",
+      "registrationNumber": "Optional registration number", 
+      "collarId": "Collar identifier",
+      "microchipNumber": "Microchip number",
+      "buyerName": "Buyer's name",
+      "buyerPhone": "Buyer's phone number",
+      "enterWeight": "Enter weight",
+      "enterHeight": "Enter height",
+      "addNote": "Add a new note about this puppy...",
+      "enterNote": "Enter a note about this puppy",
+      "selectStatus": "Select status",
+      "selectPuppy": "Select puppy",
+      "weightPlaceholder": "0.00"
+    },
+    "statuses": {
+      "available": "Available",
+      "reserved": "Reserved", 
+      "sold": "Sold"
+    },
+    "actions": {
+      "addPuppy": "Add Puppy",
+      "editPuppy": "Edit Puppy",
+      "deletePuppy": "Delete Puppy",
+      "viewProfile": "View Profile",
+      "addMeasurements": "Add measurements",
+      "logWeight": "Log Weight",
+      "logHeight": "Log Height",
+      "addNote": "Add Note",
+      "deleteNote": "Delete Note",
+      "adding": "Adding...",
+      "saving": "Saving...",
+      "deleting": "Deleting..."
+    },
+    "descriptions": {
+      "addPuppy": "Add a new puppy to your litter.",
+      "motherBreed": "Mother's breed: {{breed}}"
+    },
+    "confirmations": {
+      "deletePuppy": "Are you sure you want to delete this puppy? This action cannot be undone.",
+      "deleteWeight": "Delete Weight Measurement",
+      "deleteHeight": "Delete Height Measurement",
+      "deleteNote": "Delete Note"
+    },
+    "charts": {
+      "weightChart": "Weight Chart",
+      "heightChart": "Height Chart", 
+      "units": {
+        "kg": "kg",
+        "cm": "cm"
+      }
+    }
+  },
+  "litter": {
+    "titles": {
+      "addLitter": "Add New Litter",
+      "editLitter": "Edit Litter",
+      "litterDetails": "Litter Details"
+    },
+    "labels": {
+      "litterName": "Litter Name",
+      "sireName": "Sire Name",
+      "damName": "Dam Name",
+      "parents": "Parents",
+      "bornLabel": "Born: {{date}}",
+      "totalCount": "{{count}} total",
+      "archivedOn": "Archived on {{date}}",
+      "ageWeeks": "{{weeks}} weeks old"
+    },
+    "placeholders": {
+      "litterName": "Enter litter name",
+      "searchLitters": "Search litters...",
+      "searchByName": "Search by litter name...",
+      "searchByNameSireDam": "Search by name, sire or dam..."
+    },
+    "actions": {
+      "edit": "Edit",
+      "archive": "Archive",
+      "unarchive": "Unarchive", 
+      "delete": "Delete",
+      "viewDetails": "View Details",
+      "addLitter": "Add Litter"
+    },
+    "confirmations": {
+      "deleteLitter": "Are you sure you want to delete {{name}}? This action cannot be undone.",
+      "archiveLitter": "Archive litter",
+      "unarchiveLitter": "Unarchive litter"
+    }
+  },
+  "external": {
+    "labels": {
+      "sireName": "Sire Name",
+      "sireBreed": "Sire Breed", 
+      "registrationNumber": "Registration Number"
+    },
+    "placeholders": {
+      "enterSireName": "Enter sire's name",
+      "enterSireBreed": "Enter sire breed",
+      "enterRegistrationNumber": "Enter registration number"
+    }
+  },
+  "search": {
+    "noResults": "No litters found",
+    "tryAdjusting": "Try adjusting your search or filters",
+    "clearFilters": "Clear Filters"
   }
 }

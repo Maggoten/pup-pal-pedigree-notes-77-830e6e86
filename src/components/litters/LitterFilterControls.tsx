@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import YearFilterDropdown from './YearFilterDropdown';
+import { useTranslation } from 'react-i18next';
 
 interface LitterFilterControlsProps {
   onAddLitterClick: () => void;
@@ -24,6 +25,8 @@ const LitterFilterControls: React.FC<LitterFilterControlsProps> = ({
   onYearChange,
   availableYears
 }) => {
+  const { t } = useTranslation('litters');
+  
   // Handle search input changes
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSearchChange(e.target.value);
@@ -36,7 +39,7 @@ const LitterFilterControls: React.FC<LitterFilterControlsProps> = ({
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
           <Input
             type="search"
-            placeholder="Search by name, sire or dam..."
+            placeholder={t('litter.placeholders.searchByNameSireDam')}
             className="pl-9 bg-white dark:bg-gray-800"
             value={searchQuery}
             onChange={handleSearchChange}
@@ -55,7 +58,7 @@ const LitterFilterControls: React.FC<LitterFilterControlsProps> = ({
         className="whitespace-nowrap flex items-center gap-2"
       >
         <PlusCircle className="h-4 w-4" />
-        Add Litter
+        {t('litter.actions.addLitter')}
       </Button>
     </div>
   );

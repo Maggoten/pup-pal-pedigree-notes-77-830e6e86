@@ -130,5 +130,148 @@
     "saving": "Sparar...",
     "deleting": "Tar bort...",
     "archiving": "Arkiverar..."
+  },
+  "puppies": {
+    "titles": {
+      "addPuppy": "Lägg till Ny Valp",
+      "editPuppy": "Redigera Valp",
+      "puppyProfile": "Valpens Profil",
+      "litterInformation": "Kullinformation",
+      "puppyDetails": "Valpens Detaljer",
+      "weightTracking": "Viktspårning",
+      "heightTracking": "Höjdspårning",
+      "notes": "Anteckningar"
+    },
+    "labels": {
+      "name": "Namn",
+      "registeredName": "Registrerat Namn", 
+      "registrationNumber": "Registreringsnummer",
+      "gender": "Kön",
+      "breed": "Ras",
+      "color": "Färg",
+      "birthWeight": "Födelsevikt (kg)",
+      "currentWeight": "Nuvarande Vikt (kg)",
+      "dateOfBirth": "Födelsedatum",
+      "timeOfBirth": "Födelsetid",
+      "status": "Status",
+      "buyerName": "Köparens Namn",
+      "buyerPhone": "Köparens Telefon",
+      "collarId": "Halsband ID",
+      "microchip": "Mikrochip",
+      "totalPuppies": "Antal Valpar",
+      "litterAge": "Kullens Ålder",
+      "weeks": "veckor",
+      "male": "Hane",
+      "female": "Tik",
+      "weight": "Vikt",
+      "height": "Höjd"
+    },
+    "placeholders": {
+      "puppyName": "Valpens namn",
+      "puppyColor": "Valpens färg",
+      "registeredName": "Valfritt registrerat namn",
+      "registrationNumber": "Valfritt registreringsnummer", 
+      "collarId": "Halsbandsidentifierare",
+      "microchipNumber": "Mikrochipnummer",
+      "buyerName": "Köparens namn",
+      "buyerPhone": "Köparens telefonnummer",
+      "enterWeight": "Ange vikt",
+      "enterHeight": "Ange höjd",
+      "addNote": "Lägg till en ny anteckning om denna valp...",
+      "enterNote": "Skriv en anteckning om denna valp",
+      "selectStatus": "Välj status",
+      "selectPuppy": "Välj valp",
+      "weightPlaceholder": "0,00"
+    },
+    "statuses": {
+      "available": "Tillgänglig",
+      "reserved": "Reserverad", 
+      "sold": "Såld"
+    },
+    "actions": {
+      "addPuppy": "Lägg till Valp",
+      "editPuppy": "Redigera Valp",
+      "deletePuppy": "Ta bort Valp",
+      "viewProfile": "Visa Profil",
+      "addMeasurements": "Lägg till mätningar",
+      "logWeight": "Logga Vikt",
+      "logHeight": "Logga Höjd",
+      "addNote": "Lägg till Anteckning",
+      "deleteNote": "Ta bort Anteckning",
+      "adding": "Lägger till...",
+      "saving": "Sparar...",
+      "deleting": "Tar bort..."
+    },
+    "descriptions": {
+      "addPuppy": "Lägg till en ny valp till din kull.",
+      "motherBreed": "Moderns ras: {{breed}}"
+    },
+    "confirmations": {
+      "deletePuppy": "Är du säker på att du vill ta bort denna valp? Denna åtgärd kan inte ångras.",
+      "deleteWeight": "Ta bort Viktmätning",
+      "deleteHeight": "Ta bort Höjdmätning",
+      "deleteNote": "Ta bort Anteckning"
+    },
+    "charts": {
+      "weightChart": "Viktdiagram",
+      "heightChart": "Höjddiagram", 
+      "units": {
+        "kg": "kg",
+        "cm": "cm"
+      }
+    }
+  },
+  "litter": {
+    "titles": {
+      "addLitter": "Lägg till Ny Kull",
+      "editLitter": "Redigera Kull",
+      "litterDetails": "Kulldetaljer"
+    },
+    "labels": {
+      "litterName": "Kullnamn",
+      "sireName": "Hanhundens Namn",
+      "damName": "Tikens Namn",
+      "parents": "Föräldrar",
+      "bornLabel": "Född: {{date}}",
+      "totalCount": "{{count}} totalt",
+      "archivedOn": "Arkiverad den {{date}}",
+      "ageWeeks": "{{weeks}} veckor gammal"
+    },
+    "placeholders": {
+      "litterName": "Ange kullnamn",
+      "searchLitters": "Sök kullar...",
+      "searchByName": "Sök efter kullnamn...",
+      "searchByNameSireDam": "Sök efter namn, hanhund eller tik..."
+    },
+    "actions": {
+      "edit": "Redigera",
+      "archive": "Arkivera",
+      "unarchive": "Aktivera", 
+      "delete": "Ta bort",
+      "viewDetails": "Visa Detaljer",
+      "addLitter": "Lägg till Kull"
+    },
+    "confirmations": {
+      "deleteLitter": "Är du säker på att du vill ta bort {{name}}? Denna åtgärd kan inte ångras.",
+      "archiveLitter": "Arkivera kull",
+      "unarchiveLitter": "Aktivera kull"
+    }
+  },
+  "external": {
+    "labels": {
+      "sireName": "Hanhundens Namn",
+      "sireBreed": "Hanhundens Ras", 
+      "registrationNumber": "Registreringsnummer"
+    },
+    "placeholders": {
+      "enterSireName": "Ange hanhundens namn",
+      "enterSireBreed": "Ange hanhundens ras",
+      "enterRegistrationNumber": "Ange registreringsnummer"
+    }
+  },
+  "search": {
+    "noResults": "Inga kullar hittades",
+    "tryAdjusting": "Försök justera din sökning eller filter",
+    "clearFilters": "Rensa Filter"
   }
 }

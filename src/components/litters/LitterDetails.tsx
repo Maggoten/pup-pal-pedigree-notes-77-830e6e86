@@ -8,6 +8,7 @@ import { Litter, Puppy } from '@/types/breeding';
 import LitterEditDialog from './LitterEditDialog';
 import PuppyList from './PuppyList';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslation } from 'react-i18next';
 
 interface LitterDetailsProps {
   litter: Litter;
@@ -28,6 +29,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
   onDeleteLitter,
   onArchiveLitter
 }) => {
+  const { t } = useTranslation('litters');
   const [showEditLitterDialog, setShowEditLitterDialog] = useState(false);
   const isMobile = useIsMobile();
   
@@ -51,7 +53,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
   };
   
   const handleDeleteLitter = () => {
-    if (confirm(`Are you sure you want to delete ${litter.name}? This action cannot be undone.`)) {
+    if (confirm(t('litter.confirmations.deleteLitter', { name: litter.name }))) {
       onDeleteLitter(litter.id);
     }
   };
@@ -64,12 +66,12 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
             <CardTitle className="text-2xl font-bold flex items-center gap-2">
               {litter.name}
               {litter.archived && (
-                <Badge variant="secondary" className="ml-2">Archived</Badge>
+                <Badge variant="secondary" className="ml-2">{t('display.archived')}</Badge>
               )}
             </CardTitle>
             <CardDescription className="mt-1">
-              Born: {birthDate} • Sire: {litter.sireName} • Dam: {litter.damName}
-              {breeds !== 'Unknown' && ` • Breed: ${breeds}`}
+              {t('litter.labels.bornLabel', { date: birthDate })} • {t('external.labels.sireName')}: {litter.sireName} • {litter.damName}
+              {breeds !== 'Unknown' && ` • ${t('puppies.labels.breed')}: ${breeds}`}
             </CardDescription>
           </div>
           
@@ -83,7 +85,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
                   className={`flex items-center gap-1.5 bg-warmbeige-50 hover:bg-warmbeige-100 ${isMobile ? 'w-full justify-center py-3' : ''}`}
                 >
                   <Edit className="h-4 w-4" />
-                  <span>Edit</span>
+                  <span>{t('litter.actions.edit')}</span>
                 </Button>
               </DialogTrigger>
               {showEditLitterDialog && (
@@ -105,7 +107,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
               onClick={handleArchiveToggle}
             >
               <Archive className="h-4 w-4" />
-              <span>{litter.archived ? "Unarchive" : "Archive"}</span>
+              <span>{litter.archived ? t('litter.actions.unarchive') : t('litter.actions.archive')}</span>
             </Button>
             
             <Button 
@@ -115,7 +117,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
               onClick={handleDeleteLitter}
             >
               <Trash2 className="h-4 w-4" />
-              <span>Delete</span>
+              <span>{t('litter.actions.delete')}</span>
             </Button>
           </div>
         </div>
@@ -123,7 +125,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
       
       <CardContent>
         <div className="space-y-4">
-          <h3 className="text-lg font-medium">Litter Information</h3>
+          <h3 className="text-lg font-medium">{t('puppies.titles.litterInformation')}</h3>
           
           <Card className="bg-warmbeige-50 shadow-sm border border-warmbeige-100 rounded-xl">
             <CardContent className="p-4">
@@ -131,7 +133,7 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
                 <div className="flex items-center justify-between py-2 border-b border-warmbeige-200">
                   <div className="flex items-center gap-2">
                     <PawPrint className="h-5 w-5 text-primary" />
-                    <span className="font-medium">Total Puppies</span>
+                    <span className="font-medium">{t('puppies.labels.totalPuppies')}</span>
                   </div>
                   <div className="text-xl font-bold">{puppyCount}</div>
                 </div>
@@ -139,9 +141,9 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
                 <div className="flex items-center justify-between py-2 border-b border-warmbeige-200">
                   <div className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-primary" />
-                    <span className="font-medium">Litter Age</span>
+                    <span className="font-medium">{t('puppies.labels.litterAge')}</span>
                   </div>
-                  <div className="text-xl font-bold">{litterAge} weeks</div>
+                  <div className="text-xl font-bold">{litterAge} {t('puppies.labels.weeks')}</div>
                 </div>
                 
                 <div className="flex items-center justify-between py-2">
@@ -150,10 +152,10 @@ const LitterDetails: React.FC<LitterDetailsProps> = ({
                       <XCircle className="h-5 w-5 text-muted-foreground" /> : 
                       <CheckCircle className="h-5 w-5 text-warmgreen-600" />
                     }
-                    <span className="font-medium">Status</span>
+                    <span className="font-medium">{t('puppies.labels.status')}</span>
                   </div>
                   <div className={`text-xl font-bold ${!litter.archived ? 'text-warmgreen-600' : ''}`}>
-                    {litter.archived ? "Archived" : "Active"}
+                    {litter.archived ? t('display.archived') : t('display.active')}
                   </div>
                 </div>
               </div>

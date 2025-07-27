@@ -10,6 +10,7 @@ import BreedDropdown from '@/components/dogs/breed-selector/BreedDropdown';
 import { Puppy } from '@/types/breeding';
 import PuppyGenderSelector from './puppies/PuppyGenderSelector';
 import PuppyImageUploader from './puppies/PuppyImageUploader';
+import { useTranslation } from 'react-i18next';
 
 interface AddPuppyDialogProps {
   onClose: () => void;
@@ -26,6 +27,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
   litterDob,
   damBreed = ''
 }) => {
+  const { t } = useTranslation('litters');
   const defaultDob = new Date(litterDob);
   const [name, setName] = useState<string>('');
   const [gender, setGender] = useState<'male' | 'female'>('male');
@@ -98,14 +100,14 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
       console.log("Adding new puppy:", newPuppy);
       await onAddPuppy(newPuppy);
       toast({
-        title: "Puppy Added",
+        title: t('toasts.success.litterAdded'),
         description: `${name} has been added to the litter successfully.`,
       });
       onClose();
     } catch (error) {
       console.error("Error adding puppy:", error);
       toast({
-        title: "Error Adding Puppy",
+        title: t('toasts.error.failedToAddLitter'),
         description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive"
       });
@@ -118,9 +120,9 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
     <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto bg-greige-100 border-greige-300">
       <form onSubmit={handleSubmit}>
         <DialogHeader>
-          <DialogTitle>Add New Puppy</DialogTitle>
+          <DialogTitle>{t('puppies.titles.addPuppy')}</DialogTitle>
           <DialogDescription>
-            Add a new puppy to your litter.
+            {t('puppies.descriptions.addPuppy')}
           </DialogDescription>
         </DialogHeader>
 
@@ -135,12 +137,12 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
           </div>
           
           <div>
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t('puppies.labels.name')}</Label>
             <Input 
               id="name" 
               value={name} 
               onChange={(e) => setName(e.target.value)} 
-              placeholder="Puppy name"
+              placeholder={t('puppies.placeholders.puppyName')}
               className="bg-white border-greige-300"
               required
             />
@@ -149,7 +151,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
           <PuppyGenderSelector gender={gender} onGenderChange={handleGenderChange} />
 
           <div>
-            <Label htmlFor="breed">Breed</Label>
+            <Label htmlFor="breed">{t('puppies.labels.breed')}</Label>
             <BreedDropdown 
               value={breed} 
               onChange={setBreed}
@@ -157,37 +159,37 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
             />
             {damBreed && breed !== damBreed && (
               <p className="text-xs text-muted-foreground mt-1">
-                Mother's breed: {damBreed}
+                {t('puppies.descriptions.motherBreed', { breed: damBreed })}
               </p>
             )}
           </div>
 
           <div>
-            <Label htmlFor="color">Color</Label>
+            <Label htmlFor="color">{t('puppies.labels.color')}</Label>
             <Input 
               id="color" 
               value={color} 
               onChange={(e) => setColor(e.target.value)} 
-              placeholder="Puppy color"
+              placeholder={t('puppies.placeholders.puppyColor')}
               className="bg-white border-greige-300"
             />
           </div>
 
           <div>
-            <Label htmlFor="birthWeight">Birth Weight (kg)</Label>
+            <Label htmlFor="birthWeight">{t('puppies.labels.birthWeight')}</Label>
             <Input 
               id="birthWeight" 
               value={birthWeight} 
               onChange={(e) => setBirthWeight(e.target.value)} 
               type="number" 
               step="0.01" 
-              placeholder="0.00"
+              placeholder={t('puppies.placeholders.weightPlaceholder')}
               className="bg-white border-greige-300"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="dateOfBirth">Date of Birth</Label>
+            <Label htmlFor="dateOfBirth">{t('puppies.labels.dateOfBirth')}</Label>
             <DatePicker 
               date={dateOfBirth} 
               setDate={setDateOfBirth}
@@ -196,7 +198,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="timeOfBirth">Time of Birth</Label>
+            <Label htmlFor="timeOfBirth">{t('puppies.labels.timeOfBirth')}</Label>
             <Input 
               id="timeOfBirth" 
               value={timeOfBirth} 
@@ -209,10 +211,10 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
 
         <DialogFooter className="mt-6">
           <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
-            Cancel
+            {t('actions.cancel')}
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Adding..." : "Add Puppy"}
+            {isSubmitting ? t('puppies.actions.adding') : t('puppies.actions.addPuppy')}
           </Button>
         </DialogFooter>
       </form>
