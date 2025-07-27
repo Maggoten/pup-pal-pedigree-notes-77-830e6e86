@@ -44,7 +44,7 @@
     "plannedLitter": {
       "title": "Lägg till Planerad Kull",
       "damLabel": "Tik",
-      "sireLabel": "Hanhund",
+      "sireLabel": "Hane",
       "damPlaceholder": "Välj tik",
       "sirePlaceholder": "Välj hanhund",
       "description": "Välj avelspar för din planerade kull"
@@ -77,7 +77,7 @@
     },
     "tips": {
       "title": "Parningstips",
-      "optimalTiming": "Optimal parningsperiod är vanligtvis dag 10-14 i löpcykeln",
+      "optimalTiming": "Optimal parningsperiod är vanligtvis mellan dag 10-14 i löpcykeln",
       "multipleMatings": "Två parningar med 24–48 timmars mellanrum ökar ofta chansen för dräktighet",
       "monitoring": "Övervaka tikens beteende och fysiska förändringar under löp"
     }
@@ -101,7 +101,7 @@
   },
   "validation": {
     "damRequired": "Tik krävs",
-    "sireRequired": "Hanhund krävs",
+    "sireRequired": "Hane krävs",
     "dateRequired": "Datum krävs",
     "invalidDate": "Vänligen ange ett giltigt datum"
   },
@@ -133,13 +133,13 @@
   },
   "puppies": {
     "titles": {
-      "addPuppy": "Lägg till Ny Valp",
+      "addPuppy": "Lägg till ny Valp",
       "editPuppy": "Redigera Valp",
       "puppyProfile": "Valpens Profil",
       "litterInformation": "Kullinformation",
       "puppyDetails": "Valpens Detaljer",
-      "weightTracking": "Viktspårning",
-      "heightTracking": "Höjdspårning",
+      "weightTracking": "Viktuppföljning",
+      "heightTracking": "Höjduppföljning",
       "notes": "Anteckningar"
     },
     "labels": {
