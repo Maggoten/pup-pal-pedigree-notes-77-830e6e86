@@ -232,8 +232,8 @@
     "error": "Fel vid laddning av kullar: {{error}}",
     "empty": {
       "title": "{{dogName}} har inte varit involverad i några kullar än.",
-      "sireLine": "När {{dogName}} får en kull kommer den att visas här.",
-      "damLine": "När {{dogName}} får en kull kommer den att visas här."
+      "sireLine": "När den här hunden får en kull kommer den att visas här.",
+      "damLine": "När den här hunden får en kull kommer den att visas här."
     },
     "item": {
       "born": "Född: {{date}}",
