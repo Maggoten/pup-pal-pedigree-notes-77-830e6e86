@@ -83,7 +83,7 @@
       "sterilization": {
         "label": "Sterilization Date",
         "placeholder": "Pick a date",
-        "description": "Optional - For female dogs only"
+        "description": "Optional"
       }
     },
     "breeding": {
@@ -232,8 +232,8 @@
     "error": "Error loading litters: {{error}}",
     "empty": {
       "title": "{{dogName}} hasn't been involved in any litters yet.",
-      "sireLine": "When this dog sires a litter, it will appear here.",
-      "damLine": "When this dog has a litter, it will appear here."
+      "sireLine": "When {{dogName}} sires a litter, it will appear here.",
+      "damLine": "When {{dogName}} has a litter, it will appear here."
     },
     "item": {
       "born": "Born: {{date}}",
