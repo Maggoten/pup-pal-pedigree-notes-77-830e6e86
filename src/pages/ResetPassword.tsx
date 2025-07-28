@@ -55,53 +55,33 @@ const ResetPassword: React.FC = () => {
   const newPassword = watch('newPassword', '');
   const passwordStrength = validatePasswordStrength(newPassword);
 
-  // Handle password recovery token verification
+  // Handle password recovery using Supabase's automatic token detection
   useEffect(() => {
-    const verifyRecoveryToken = async () => {
-      try {
-        // Check for recovery parameters in URL (handle both token_hash and access_token)
-        const tokenHash = searchParams.get('token_hash') || searchParams.get('access_token');
-        const type = searchParams.get('type');
-
-        console.log('Recovery parameters:', { tokenHash: !!tokenHash, type });
-
-        if (type === 'recovery' && tokenHash) {
-          console.log('Valid recovery parameters found, verifying OTP');
-          
-          // Verify the OTP token - this automatically logs in the user
-          const { data, error } = await supabase.auth.verifyOtp({
-            token_hash: tokenHash,
-            type: 'recovery'
-          });
-
-          if (error) {
-            console.error('Error verifying recovery token:', error);
-            setRecoveryError('Invalid or expired recovery link. Please request a new password reset.');
-            setIsValidRecovery(false);
-          } else if (data.session) {
-            console.log('Recovery token verified successfully, user logged in');
-            setIsValidRecovery(true);
-            setRecoveryError(null);
-          } else {
-            console.error('No session created from recovery token');
-            setRecoveryError('Unable to establish recovery session. Please try again.');
-            setIsValidRecovery(false);
-          }
-        } else {
-          console.log('No valid recovery parameters found in URL');
-          setRecoveryError('This page can only be accessed through a valid password reset link.');
-          setIsValidRecovery(false);
-        }
-      } catch (error) {
-        console.error('Unexpected error during recovery verification:', error);
-        setRecoveryError('An error occurred while verifying the recovery link.');
-        setIsValidRecovery(false);
-      } finally {
+    let timeoutId: NodeJS.Timeout;
+    
+    // Check current session first to see if we're already in recovery mode
+    const checkInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        console.log('Found existing session, assuming recovery is valid');
+        setIsValidRecovery(true);
+        setRecoveryError(null);
         setIsCheckingRecovery(false);
+        return;
       }
+      
+      // If no session yet, wait briefly for Supabase to process URL token
+      // Supabase with detectSessionInUrl: true should handle this automatically
+      timeoutId = setTimeout(() => {
+        console.log('No recovery session established after timeout');
+        setRecoveryError('Invalid or expired recovery link. Please request a new password reset.');
+        setIsValidRecovery(false);
+        setIsCheckingRecovery(false);
+      }, 5000); // 5 second timeout
     };
 
-    verifyRecoveryToken();
+    checkInitialSession();
 
     // Listen for auth state changes during recovery
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -112,11 +92,27 @@ const ResetPassword: React.FC = () => {
         setIsValidRecovery(true);
         setRecoveryError(null);
         setIsCheckingRecovery(false);
+        if (timeoutId) clearTimeout(timeoutId);
+      } else if (event === 'SIGNED_IN' && session) {
+        // Also handle regular sign in events that might occur during recovery
+        console.log('Sign in event during recovery, checking URL for recovery params');
+        const hasRecoveryParams = searchParams.get('type') === 'recovery' || 
+                                 searchParams.has('token_hash') || 
+                                 searchParams.has('access_token');
+        
+        if (hasRecoveryParams) {
+          console.log('Recovery parameters found, treating as valid recovery');
+          setIsValidRecovery(true);
+          setRecoveryError(null);
+          setIsCheckingRecovery(false);
+          if (timeoutId) clearTimeout(timeoutId);
+        }
       }
     });
 
     return () => {
       subscription.unsubscribe();
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [searchParams]);
 
