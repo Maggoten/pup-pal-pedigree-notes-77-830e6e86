@@ -232,5 +232,12 @@
     "heatRecordRemoved": "The heat record has been removed from the dog's history.",
     "deleteHeatRecord": "Delete this heat record",
     "couldNotDelete": "Could not delete the heat record. Please try again."
+  },
+  "search": {
+    "placeholder": "Search by dog name..."
+  },
+  "recent": {
+    "matedOn": "Mated on",
+    "id": "ID"
   }
 }

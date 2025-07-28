@@ -3,12 +3,15 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { RecentMating } from '@/types/reminders';
+import { useTranslation } from 'react-i18next';
 
 interface RecentMatingCardProps {
   mating: RecentMating;
 }
 
 const RecentMatingCard: React.FC<RecentMatingCardProps> = ({ mating }) => {
+  const { t } = useTranslation('plannedLitters');
+  
   return (
     <Card className="bg-white hover:bg-warmbeige-50 transition-colors duration-200 cursor-pointer border-warmbeige-200">
       <CardHeader className="pb-2">
@@ -18,11 +21,11 @@ const RecentMatingCard: React.FC<RecentMatingCardProps> = ({ mating }) => {
       </CardHeader>
       <CardContent>
         <div className="text-xs text-gray-500">
-          Mated on {format(new Date(mating.date), 'MMM d, yyyy')}
+          {t('recent.matedOn')} {format(new Date(mating.date), 'MMM d, yyyy')}
         </div>
         <div className="mt-2 text-xs">
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-            ID: {mating.litterId.substring(0, 8)}
+            {t('recent.id')}: {mating.litterId.substring(0, 8)}
           </span>
         </div>
       </CardContent>

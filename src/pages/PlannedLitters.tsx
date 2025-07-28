@@ -2,12 +2,15 @@
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PlannedLittersContent from '@/components/planned-litters/components/PlannedLittersContent';
+import { useTranslation } from 'react-i18next';
 
 const PlannedLitters: React.FC = () => {
+  const { t } = useTranslation('plannedLitters');
+  
   return (
     <PageLayout 
-      title="Planned Litters & Mating" 
-      description="Plan your future litters, track heat cycles, and manage breeding activities"
+      title={t('pages.plannedLitters.title')} 
+      description={t('pages.plannedLitters.description')}
       className="bg-warmbeige-50/50 overflow-y-auto"
     >
       <PlannedLittersContent />

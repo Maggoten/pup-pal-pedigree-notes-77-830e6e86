@@ -232,5 +232,12 @@
     "heatRecordRemoved": "Löpposten har tagits bort från hundens historia.",
     "deleteHeatRecord": "Ta bort denna löppost",
     "couldNotDelete": "Kunde inte ta bort löpposten. Försök igen."
+  },
+  "search": {
+    "placeholder": "Sök efter hundens namn..."
+  },
+  "recent": {
+    "matedOn": "Parades",
+    "id": "ID"
   }
 }
