@@ -103,5 +103,35 @@
       "medium": "Medium",
       "low": "Low"
     }
+  },
+  "events": {
+    "heat": {
+      "approaching": "{{dogName}}'s Heat Approaching",
+      "expected": "Expected in {{days}} days"
+    },
+    "birthday": {
+      "title": "{{dogName}}'s Birthday",
+      "today": "{{dogName}} turns {{age}} today!",
+      "upcoming": "{{dogName}} turns {{age}} in {{days}} days",
+      "recent": "{{dogName}} turned {{age}} {{days}} days ago"
+    },
+    "vaccination": {
+      "title": "{{dogName}} Vaccination Due",
+      "upcoming": "Vaccination due in {{days}} days",
+      "overdue": "Vaccination overdue by {{days}} days"
+    }
+  },
+  "reminderTypes": {
+    "heatTracking": {
+      "title": "Track {{dogName}}'s Heat Cycle",
+      "suggestion": "Start tracking heat cycles to get accurate predictions"
+    }
+  },
+  "statusLabels": {
+    "due": "Due: ",
+    "dueSoon": "Due soon: ",
+    "overdue": "Overdue: ",
+    "upcoming": "Upcoming Heat",
+    "dueDate": "Due Date"
   }
 }

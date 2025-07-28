@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
+import { useTranslation } from 'react-i18next';
 
 interface ActivePregnanciesCardProps {
   pregnancies: ActivePregnancy[];
@@ -17,6 +18,7 @@ const ActivePregnanciesCard: React.FC<ActivePregnanciesCardProps> = ({
   onAddPregnancy
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation('home');
 
   const handlePregnancyClick = (pregnancyId: string) => {
     navigate(`/pregnancy/${pregnancyId}`);
@@ -49,7 +51,7 @@ const ActivePregnanciesCard: React.FC<ActivePregnanciesCardProps> = ({
                     {format(pregnancy.matingDate, 'PPP')}
                   </p>
                   <p className="flex items-center gap-2">
-                    <span className="font-medium">Due Date:</span> 
+                    <span className="font-medium">{t('statusLabels.dueDate')}:</span> 
                     {format(pregnancy.expectedDueDate, 'PPP')}
                   </p>
                   <div className="flex items-center justify-between mt-2">

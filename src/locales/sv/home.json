@@ -103,5 +103,35 @@
       "medium": "Medel",
       "low": "Låg"
     }
+  },
+  "events": {
+    "heat": {
+      "approaching": "{{dogName}}s Löp Närmar Sig",
+      "expected": "Förväntas om {{days}} dagar"
+    },
+    "birthday": {
+      "title": "{{dogName}}s Födelsedag",
+      "today": "{{dogName}} fyller {{age}} år idag!",
+      "upcoming": "{{dogName}} fyller {{age}} år om {{days}} dagar",
+      "recent": "{{dogName}} fyllde {{age}} år för {{days}} dagar sedan"
+    },
+    "vaccination": {
+      "title": "{{dogName}} Vaccination Förfallen",
+      "upcoming": "Vaccination förfaller om {{days}} dagar",
+      "overdue": "Vaccination försenad med {{days}} dagar"
+    }
+  },
+  "reminderTypes": {
+    "heatTracking": {
+      "title": "Spåra {{dogName}}s Löpcykel",
+      "suggestion": "Börja spåra löpcykler för att få exakta förutsägelser"
+    }
+  },
+  "statusLabels": {
+    "due": "Förfaller: ",
+    "dueSoon": "Förfaller snart: ",
+    "overdue": "Försenad: ",
+    "upcoming": "Kommande Löp",
+    "dueDate": "Förfallodatum"
   }
 }

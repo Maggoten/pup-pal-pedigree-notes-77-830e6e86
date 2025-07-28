@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Heart, PlusCircle, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export interface ActivePregnancy {
   id: string;
@@ -27,6 +28,7 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
   isLoading = false
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation('home');
 
   const handleViewPregnancyDetails = (pregnancyId: string) => {
     navigate(`/pregnancy/${pregnancyId}`);
@@ -84,7 +86,7 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
                     <p>{format(pregnancy.matingDate, 'PP')}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Due Date:</p>
+                    <p className="text-muted-foreground">{t('statusLabels.dueDate')}:</p>
                     <p>{format(pregnancy.expectedDueDate, 'PP')}</p>
                   </div>
                 </div>

@@ -11,7 +11,7 @@ const REMINDER_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
 
 // Helper method to get translation with fallback
 const t = (key: string, options?: any): string => {
-  return i18n.t(key, { ...options, ns: 'dogs' }) as string;
+  return i18n.t(key, { ...options, ns: 'home' }) as string;
 };
 
 // Generate deterministic UUID based on dog ID, type, and date
@@ -39,8 +39,8 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
         // Suggest starting heat tracking
         reminders.push({
           id: generateSystemReminderId(dog.id, 'heat-tracking', today),
-          title: t('reminders.heatTracking.title', { dogName: dog.name }),
-          description: t('reminders.heatTracking.suggestion'),
+          title: t('reminderTypes.heatTracking.title', { dogName: dog.name }),
+          description: t('reminderTypes.heatTracking.suggestion'),
           icon: createPawPrintIcon("pink-500"),
           dueDate: today,
           priority: 'medium',
@@ -139,8 +139,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
           description = t('events.birthday.upcoming', { dogName: dog.name, age, days: daysUntilBirthday });
         } else {
           const daysAgo = Math.abs(daysUntilBirthday);
-          const plural = daysAgo !== 1 ? 's' : '';
-          description = t('events.birthday.past', { dogName: dog.name, age, days: daysAgo, plural });
+          description = t('events.birthday.recent', { dogName: dog.name, age, days: daysAgo });
         }
         
         reminders.push({

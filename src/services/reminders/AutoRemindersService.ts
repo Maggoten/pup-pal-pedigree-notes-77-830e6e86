@@ -5,6 +5,17 @@ import { Reminder } from '@/types/reminders';
 import { differenceInDays, addYears, isAfter, isBefore, parseISO } from 'date-fns';
 import { createCalendarClockIcon, createPawPrintIcon } from '@/utils/iconUtils';
 import { v5 as uuidv5 } from 'uuid';
+// Helper function to get translation with fallback
+const t = (key: string, options?: any): string => {
+  try {
+    // Use the global i18n instance from react-i18next if available
+    const i18nModule = require('react-i18next');
+    return i18nModule.i18next.t(key, { ...options, ns: 'home' }) as string;
+  } catch {
+    // Fallback for when i18n is not available
+    return key;
+  }
+};
 
 // Namespace UUID for deterministic reminder IDs (prevents collisions)
 const REMINDER_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
@@ -38,8 +49,8 @@ export const generatePlannedHeatReminders = (plannedLitters: PlannedLitter[]): R
     
     reminders.push({
       id: generateSystemReminderId(litter.femaleId, 'planned-heat', heatDate),
-      title: `Upcoming Heat for ${litter.femaleName}`,
-      description: `Heat expected in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`,
+      title: t('events.heat.approaching', { dogName: litter.femaleName }),
+      description: t('events.heat.expected', { days: daysUntil }),
       dueDate: heatDate,
       priority: 'high',
       type: 'heat',

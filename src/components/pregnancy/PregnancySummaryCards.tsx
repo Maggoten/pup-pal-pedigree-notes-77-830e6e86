@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, PawPrint, Baby, Heart } from 'lucide-react';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 interface PregnancySummaryCardsProps {
   matingDate: Date;
@@ -15,6 +16,7 @@ const PregnancySummaryCards: React.FC<PregnancySummaryCardsProps> = ({
   expectedDueDate,
   daysLeft,
 }) => {
+  const { t } = useTranslation('home');
   return (
     <Card className="mb-6 bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 border border-warmbeige-200 shadow-md overflow-hidden relative">
       {/* Decorative background elements */}
@@ -39,7 +41,7 @@ const PregnancySummaryCards: React.FC<PregnancySummaryCardsProps> = ({
             <div className="bg-warmbeige-100 p-3 rounded-full mb-3">
               <Calendar className="h-7 w-7 text-warmgreen-700" />
             </div>
-            <h3 className="font-medium text-lg">Due Date</h3>
+            <h3 className="font-medium text-lg">{t('statusLabels.dueDate')}</h3>
             <p className="mt-1 text-warmbeige-800">{format(expectedDueDate, 'PPP')}</p>
           </div>
           

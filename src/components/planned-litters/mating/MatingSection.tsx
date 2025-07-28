@@ -6,6 +6,7 @@ import UpcomingHeatCard from './UpcomingHeatCard';
 import { RecentMating } from '@/types/reminders';
 import RecentMatingsCard from './RecentMatingsCard';
 import MatingTipsCard from './MatingTipsCard';
+import { useTranslation } from 'react-i18next';
 
 interface MatingSectionProps {
   upcomingHeats: UpcomingHeat[];
@@ -14,6 +15,8 @@ interface MatingSectionProps {
 }
 
 const MatingSection: React.FC<MatingSectionProps> = ({ upcomingHeats, recentMatings, onHeatDeleted }) => {
+  const { t } = useTranslation('home');
+
   return (
     <section className="mt-6">
       <h2 className="text-xl font-semibold mb-4">Mating Management</h2>
@@ -30,7 +33,7 @@ const MatingSection: React.FC<MatingSectionProps> = ({ upcomingHeats, recentMati
           ) : (
             <Card className="bg-white border-warmbeige-200">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold">Upcoming Heats</CardTitle>
+                <CardTitle className="text-lg font-semibold">{t('statusLabels.upcoming')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-500">No upcoming heats detected.</p>

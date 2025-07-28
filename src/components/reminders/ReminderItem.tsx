@@ -3,6 +3,7 @@ import React, { useState, memo } from 'react';
 import { format, isBefore, addDays } from 'date-fns';
 import { Check, X, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface ReminderItemProps {
   id: string;
@@ -32,6 +33,7 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
   onDelete,
   compact = false
 }) => {
+  const { t } = useTranslation('home');
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Determine if overdue (due date is before now and not completed)
@@ -151,7 +153,7 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
               isDueSoon ? "text-amber-600 font-medium" : ""
             )}
           >
-            {isOverdue ? "Overdue: " : isDueSoon ? "Due soon: " : "Due: "}
+            {isOverdue ? t('statusLabels.overdue') : isDueSoon ? t('statusLabels.dueSoon') : t('statusLabels.due')}
             {formattedDate}
           </div>
         </div>
