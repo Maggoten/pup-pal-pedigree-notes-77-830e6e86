@@ -14,6 +14,8 @@ import enDogs from './locales/en/dogs.json';
 import svDogs from './locales/sv/dogs.json';
 import enLitters from './locales/en/litters.json';
 import svLitters from './locales/sv/litters.json';
+import enPlannedLitters from './locales/en/plannedLitters.json';
+import svPlannedLitters from './locales/sv/plannedLitters.json';
 import enPregnancy from './locales/en/pregnancy.json';
 import svPregnancy from './locales/sv/pregnancy.json';
 import enSettings from './locales/en/settings.json';
@@ -28,6 +30,7 @@ const resources = {
     home: enHome,
     dogs: enDogs,
     litters: enLitters,
+    plannedLitters: enPlannedLitters,
     pregnancy: enPregnancy,
     settings: enSettings,
     navigation: enNavigation
@@ -38,6 +41,7 @@ const resources = {
     home: svHome,
     dogs: svDogs,
     litters: svLitters,
+    plannedLitters: svPlannedLitters,
     pregnancy: svPregnancy,
     settings: svSettings,
     navigation: svNavigation
@@ -52,7 +56,7 @@ i18n
     fallbackLng: 'en',
     debug: false,
     
-    ns: ['common', 'auth', 'home', 'dogs', 'litters', 'pregnancy', 'settings', 'navigation'],
+    ns: ['common', 'auth', 'home', 'dogs', 'litters', 'plannedLitters', 'pregnancy', 'settings', 'navigation'],
     defaultNS: 'common',
     
     interpolation: {

@@ -1,0 +1,112 @@
+{
+  "navigation": {
+    "plannedLitters": "Planerade Kullar"
+  },
+  "pages": {
+    "plannedLitters": {
+      "title": "Planerade Kullar & Parning",
+      "description": "Planera dina framtida kullar, spåra löpcykler och hantera avelaktiviteter"
+    }
+  },
+  "actions": {
+    "addPlannedLitter": "Lägg till en Planerad Kull",
+    "addFirstPlannedLitter": "Lägg till Din Första Planerade Kull",
+    "addMatingDate": "Lägg till Parningsdatum",
+    "editMatingDate": "Redigera Parningsdatum",
+    "deleteMatingDate": "Ta bort Parningsdatum",
+    "deleteLitter": "Ta bort Kull",
+    "save": "Spara",
+    "cancel": "Avbryt"
+  },
+  "display": {
+    "expectedHeatDate": "Förväntat Löpdatum",
+    "matingDate": "Parningsdatum",
+    "expectedDueDate": "Förväntat Födelsedatum",
+    "daysRemaining": "Dagar Kvar",
+    "externalSire": "Extern Hanhund",
+    "plannedLitterLabel": "{{damName}} × {{sireName}}"
+  },
+  "forms": {
+    "plannedLitter": {
+      "title": "Lägg till Planerad Kull",
+      "damLabel": "Tik",
+      "sireLabel": "Hane",
+      "damPlaceholder": "Välj tik",
+      "sirePlaceholder": "Välj hanhund",
+      "description": "Välj avelspar för din planerade kull",
+      "externalSireToggle": "Extern Hanhund",
+      "externalSireDescription": "Välj om hanhunden inte är en av dina hundar",
+      "externalSireName": "Extern Hanhunds Namn",
+      "externalSireBreed": "Extern Hanhunds Ras",
+      "registrationNumber": "Registreringsnummer",
+      "expectedHeatDate": "Förväntat Löpdatum",
+      "expectedHeatDateDescription": "När förväntar du dig nästa löpcykel?",
+      "notes": "Anteckningar",
+      "notesPlaceholder": "Lägg till ytterligare anteckningar här"
+    }
+  },
+  "empty": {
+    "plannedLitters": {
+      "title": "Inga Planerade Kullar",
+      "description": "Börja planera dina framtida kullar genom att skapa din första avelskombination"
+    }
+  },
+  "mating": {
+    "section": {
+      "title": "Löpcykler & Parning",
+      "description": "Spåra löpcykler och parningar"
+    },
+    "upcomingHeats": {
+      "title": "Kommande Löpcykler",
+      "description": "Tikar som närmar sig sin nästa löpcykel",
+      "daysUntil": "{{days}} dagar till löp"
+    },
+    "recentMatings": {
+      "title": "Senaste Parningar",
+      "description": "Avelaktiviteter under de senaste 30 dagarna",
+      "daysAgo": "{{days}} dagar sedan"
+    },
+    "tips": {
+      "title": "Parningstips",
+      "optimalTiming": "Optimal parningsperiod är vanligtvis mellan dag 10-14 i löpcykeln",
+      "multipleMatings": "Två parningar med 24–48 timmars mellanrum ökar ofta chansen för dräktighet",
+      "monitoring": "Övervaka tikens beteende och fysiska förändringar under löp"
+    }
+  },
+  "validation": {
+    "damRequired": "Tik krävs",
+    "sireRequired": "Hane krävs",
+    "externalSireNameRequired": "Vänligen välj en hanhund eller ange extern hanhundsinformation",
+    "dateRequired": "Datum krävs",
+    "invalidDate": "Vänligen ange ett giltigt datum"
+  },
+  "toasts": {
+    "success": {
+      "litterAdded": "Planerad kull tillagd",
+      "matingDateAdded": "Parningsdatum tillagt",
+      "matingDateUpdated": "Parningsdatum uppdaterat",
+      "matingDateDeleted": "Parningsdatum borttaget",
+      "litterDeleted": "Kull borttagen"
+    },
+    "error": {
+      "failedToAddLitter": "Misslyckades med att lägga till planerad kull",
+      "failedToAddMatingDate": "Misslyckades med att lägga till parningsdatum",
+      "failedToUpdateMatingDate": "Misslyckades med att uppdatera parningsdatum",
+      "failedToDeleteMatingDate": "Misslyckades med att ta bort parningsdatum",
+      "failedToDeleteLitter": "Misslyckades med att ta bort kull",
+      "failedToLoad": "Misslyckades med att ladda planerade kullar"
+    }
+  },
+  "loading": {
+    "litters": "Laddar planerade kullar...",
+    "saving": "Sparar...",
+    "deleting": "Tar bort..."
+  },
+  "preBreeding": {
+    "checklist": {
+      "title": "Föravel Checklista",
+      "progress": "{{completed}} av {{total}} slutförda",
+      "allComplete": "Alla checklistpunkter slutförda! Redo för avel."
+    }
+  }
+}

@@ -4,12 +4,15 @@ import { FormField, FormItem, FormLabel, FormDescription, FormControl } from '@/
 import { Switch } from '@/components/ui/switch';
 import { UseFormReturn } from 'react-hook-form';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
+import { useTranslation } from 'react-i18next';
 
 interface ExternalSireToggleProps {
   form: UseFormReturn<PlannedLitterFormValues>;
 }
 
 const ExternalSireToggle: React.FC<ExternalSireToggleProps> = ({ form }) => {
+  const { t } = useTranslation('plannedLitters');
+  
   return (
     <FormField
       control={form.control}
@@ -17,9 +20,9 @@ const ExternalSireToggle: React.FC<ExternalSireToggleProps> = ({ form }) => {
       render={({ field }) => (
         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-white border-greige-300">
           <div className="space-y-0.5">
-            <FormLabel>External Sire</FormLabel>
+            <FormLabel>{t('forms.plannedLitter.externalSireToggle')}</FormLabel>
             <FormDescription>
-              Select if the sire is not one of your dogs
+              {t('forms.plannedLitter.externalSireDescription')}
             </FormDescription>
           </div>
           <FormControl>

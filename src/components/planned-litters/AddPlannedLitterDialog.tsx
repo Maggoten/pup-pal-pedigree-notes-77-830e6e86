@@ -7,6 +7,7 @@ import { Dog } from '@/context/DogsContext';
 import { plannedLitterFormSchema, PlannedLitterFormValues } from '@/services/PlannedLitterService';
 import PlannedLitterForm from './form/PlannedLitterForm';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface AddPlannedLitterDialogProps {
   males: Dog[];
@@ -19,6 +20,7 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
   females,
   onSubmit
 }) => {
+  const { t } = useTranslation('plannedLitters');
   const { toast } = useToast();
   const form = useForm<PlannedLitterFormValues>({
     resolver: zodResolver(plannedLitterFormSchema),
@@ -44,13 +46,13 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
       
       toast({
         title: "Success",
-        description: "Planned litter has been added successfully.",
+        description: t('toasts.success.litterAdded'),
       });
     } catch (error) {
       console.error('Error submitting planned litter:', error);
       toast({
         title: "Error",
-        description: "Failed to add planned litter. Please try again.",
+        description: t('toasts.error.failedToAddLitter'),
         variant: "destructive"
       });
     }
@@ -59,7 +61,7 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
   return (
     <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto bg-greige-100 border-greige-300">
       <DialogHeader>
-        <DialogTitle>Add Planned Litter</DialogTitle>
+        <DialogTitle>{t('forms.plannedLitter.title')}</DialogTitle>
         <DialogDescription>
           Plan a future breeding between dogs
         </DialogDescription>

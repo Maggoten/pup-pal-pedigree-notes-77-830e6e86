@@ -1,0 +1,112 @@
+{
+  "navigation": {
+    "plannedLitters": "Planned Litters"
+  },
+  "pages": {
+    "plannedLitters": {
+      "title": "Planned Litters & Mating",
+      "description": "Plan your future litters, track heat cycles, and manage breeding activities"
+    }
+  },
+  "actions": {
+    "addPlannedLitter": "Add Planned Litter",
+    "addFirstPlannedLitter": "Add Your First Planned Litter",
+    "addMatingDate": "Add Mating Date",
+    "editMatingDate": "Edit Mating Date",
+    "deleteMatingDate": "Delete Mating Date",
+    "deleteLitter": "Delete Litter",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "display": {
+    "expectedHeatDate": "Expected Heat Date",
+    "matingDate": "Mating Date",
+    "expectedDueDate": "Expected Due Date",
+    "daysRemaining": "Days Remaining",
+    "externalSire": "External Sire",
+    "plannedLitterLabel": "{{damName}} × {{sireName}}"
+  },
+  "forms": {
+    "plannedLitter": {
+      "title": "Add Planned Litter",
+      "damLabel": "Dam (Female)",
+      "sireLabel": "Sire (Male)",
+      "damPlaceholder": "Select female dog",
+      "sirePlaceholder": "Select male dog",
+      "description": "Select the breeding pair for your planned litter",
+      "externalSireToggle": "External Sire",
+      "externalSireDescription": "Select if the sire is not one of your dogs",
+      "externalSireName": "External Sire Name",
+      "externalSireBreed": "External Sire Breed",
+      "registrationNumber": "Registration Number",
+      "expectedHeatDate": "Expected Heat Date",
+      "expectedHeatDateDescription": "When do you expect the next heat cycle?",
+      "notes": "Notes",
+      "notesPlaceholder": "Add any additional notes here"
+    }
+  },
+  "empty": {
+    "plannedLitters": {
+      "title": "No Planned Litters",
+      "description": "Start planning your future litters by creating your first breeding combination"
+    }
+  },
+  "mating": {
+    "section": {
+      "title": "Heat Cycles & Mating",
+      "description": "Track heat cycles and recent mating activities"
+    },
+    "upcomingHeats": {
+      "title": "Upcoming Heat Cycles",
+      "description": "Females approaching their next heat cycle",
+      "daysUntil": "{{days}} days until heat"
+    },
+    "recentMatings": {
+      "title": "Recent Matings",
+      "description": "Breeding activities in the last 30 days",
+      "daysAgo": "{{days}} days ago"
+    },
+    "tips": {
+      "title": "Mating Tips",
+      "optimalTiming": "Optimal breeding window is typically days 10-14 of the heat cycle",
+      "multipleMatings": "Two matings 24–48 hours apart often increase the chance of pregnancy",
+      "monitoring": "Monitor the female's behavior and physical changes during heat"
+    }
+  },
+  "validation": {
+    "damRequired": "Dam (female dog) is required",
+    "sireRequired": "Sire (male dog) is required",
+    "externalSireNameRequired": "Please select a male dog or provide external male information",
+    "dateRequired": "Date is required",
+    "invalidDate": "Please enter a valid date"
+  },
+  "toasts": {
+    "success": {
+      "litterAdded": "Planned litter added successfully",
+      "matingDateAdded": "Mating date added successfully",
+      "matingDateUpdated": "Mating date updated successfully",
+      "matingDateDeleted": "Mating date deleted successfully",
+      "litterDeleted": "Litter deleted successfully"
+    },
+    "error": {
+      "failedToAddLitter": "Failed to add planned litter",
+      "failedToAddMatingDate": "Failed to add mating date",
+      "failedToUpdateMatingDate": "Failed to update mating date",
+      "failedToDeleteMatingDate": "Failed to delete mating date",
+      "failedToDeleteLitter": "Failed to delete litter",
+      "failedToLoad": "Failed to load planned litters"
+    }
+  },
+  "loading": {
+    "litters": "Loading planned litters...",
+    "saving": "Saving...",
+    "deleting": "Deleting..."
+  },
+  "preBreeding": {
+    "checklist": {
+      "title": "Pre-Breeding Checklist",
+      "progress": "{{completed}} of {{total}} completed",
+      "allComplete": "All checklist items completed! Ready for breeding."
+    }
+  }
+}

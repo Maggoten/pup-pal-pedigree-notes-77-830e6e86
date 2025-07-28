@@ -5,12 +5,15 @@ import { Input } from '@/components/ui/input';
 import BreedDropdown from '@/components/dogs/breed-selector/BreedDropdown';
 import { UseFormReturn } from 'react-hook-form';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
+import { useTranslation } from 'react-i18next';
 
 interface ExternalSireFieldsProps {
   form: UseFormReturn<PlannedLitterFormValues>;
 }
 
 const ExternalSireFields: React.FC<ExternalSireFieldsProps> = ({ form }) => {
+  const { t } = useTranslation('plannedLitters');
+  
   return (
     <>
       <FormField
@@ -18,7 +21,7 @@ const ExternalSireFields: React.FC<ExternalSireFieldsProps> = ({ form }) => {
         name="externalMaleName"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>External Sire Name</FormLabel>
+            <FormLabel>{t('forms.plannedLitter.externalSireName')}</FormLabel>
             <FormControl>
               <Input {...field} placeholder="Enter dog name" className="bg-white border-greige-300" />
             </FormControl>
@@ -32,7 +35,7 @@ const ExternalSireFields: React.FC<ExternalSireFieldsProps> = ({ form }) => {
         name="externalMaleRegistration"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Registration Number</FormLabel>
+            <FormLabel>{t('forms.plannedLitter.registrationNumber')}</FormLabel>
             <FormControl>
               <Input {...field} placeholder="Enter registration number" className="bg-white border-greige-300" />
             </FormControl>
@@ -46,7 +49,7 @@ const ExternalSireFields: React.FC<ExternalSireFieldsProps> = ({ form }) => {
         name="externalMaleBreed"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>External Sire Breed</FormLabel>
+            <FormLabel>{t('forms.plannedLitter.externalSireBreed')}</FormLabel>
             <FormControl>
               <BreedDropdown 
                 value={field.value} 
