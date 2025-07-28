@@ -6,6 +6,7 @@ import { Dog } from '@/context/DogsContext';
 import { UseFormReturn } from 'react-hook-form';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
 import { useNextHeatDate } from '@/hooks/useNextHeatDate';
+import { useTranslation } from 'react-i18next';
 
 interface DamSelectorProps {
   form: UseFormReturn<PlannedLitterFormValues>;
@@ -13,6 +14,7 @@ interface DamSelectorProps {
 }
 
 const DamSelector: React.FC<DamSelectorProps> = ({ form, females }) => {
+  const { t } = useTranslation('plannedLitters');
   const { calculateNextHeatDate } = useNextHeatDate();
 
   // When female dog selection changes, try to pre-fill the expected heat date
@@ -38,14 +40,14 @@ const DamSelector: React.FC<DamSelectorProps> = ({ form, females }) => {
       name="femaleId"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Dam (Female)</FormLabel>
+          <FormLabel>{t('labels.damFemale')}</FormLabel>
           <Select 
             onValueChange={handleDamChange}
             defaultValue={field.value}
           >
             <FormControl>
               <SelectTrigger className="bg-white border-greige-300">
-                <SelectValue placeholder="Select female dog" />
+                <SelectValue placeholder={t('placeholders.selectFemale')} />
               </SelectTrigger>
             </FormControl>
             <SelectContent className="bg-white">

@@ -23,7 +23,7 @@ const ExternalSireFields: React.FC<ExternalSireFieldsProps> = ({ form }) => {
           <FormItem>
             <FormLabel>{t('forms.plannedLitter.externalSireName')}</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="Enter dog name" className="bg-white border-greige-300" />
+              <Input {...field} placeholder={t('placeholders.enterDogName')} className="bg-white border-greige-300" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -37,7 +37,7 @@ const ExternalSireFields: React.FC<ExternalSireFieldsProps> = ({ form }) => {
           <FormItem>
             <FormLabel>{t('forms.plannedLitter.registrationNumber')}</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="Enter registration number" className="bg-white border-greige-300" />
+              <Input {...field} placeholder={t('placeholders.enterRegistrationNumber')} className="bg-white border-greige-300" />
             </FormControl>
             <FormMessage />
           </FormItem>

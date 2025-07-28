@@ -8,6 +8,7 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { PlannedLitter } from '@/types/breeding';
 import { parseISO } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useTranslation } from 'react-i18next';
 
 interface PlannedLitterDetailsDialogProps {
   litter: PlannedLitter;
@@ -22,6 +23,7 @@ const PlannedLitterDetailsDialog: React.FC<PlannedLitterDetailsDialogProps> = ({
   onDeleteMatingDate,
   onEditMatingDate
 }) => {
+  const { t } = useTranslation('plannedLitters');
   const [editingDateIndex, setEditingDateIndex] = useState<number | null>(null);
   
   const handleEditMatingDate = (date: Date | undefined) => {
@@ -39,7 +41,7 @@ const PlannedLitterDetailsDialog: React.FC<PlannedLitterDetailsDialogProps> = ({
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Litter Details</DialogTitle>
+        <DialogTitle>{t('dialogs.litterDetails.title')}</DialogTitle>
         <DialogDescription>
           {litter.maleName} × {litter.femaleName}
         </DialogDescription>
@@ -47,24 +49,24 @@ const PlannedLitterDetailsDialog: React.FC<PlannedLitterDetailsDialogProps> = ({
       
       <div className="grid gap-4">
         <div>
-          <h3 className="text-sm font-medium text-muted-foreground">Expected Heat</h3>
+          <h3 className="text-sm font-medium text-muted-foreground">{t('dialogs.litterDetails.expectedHeat')}</h3>
           <p>{new Date(litter.expectedHeatDate).toLocaleDateString()}</p>
         </div>
         
         {litter.externalMale && litter.externalMaleBreed && (
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground">External Sire Breed</h3>
+            <h3 className="text-sm font-medium text-muted-foreground">{t('dialogs.litterDetails.externalSireBreed')}</h3>
             <p>{litter.externalMaleBreed}</p>
           </div>
         )}
         
         <div>
-          <h3 className="text-sm font-medium text-muted-foreground">Notes</h3>
-          <p>{litter.notes || 'No notes'}</p>
+          <h3 className="text-sm font-medium text-muted-foreground">{t('dialogs.litterDetails.notes')}</h3>
+          <p>{litter.notes || t('dialogs.litterDetails.noNotes')}</p>
         </div>
         
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground">Mating Dates</h3>
+          <h3 className="text-sm font-medium text-muted-foreground">{t('dialogs.litterDetails.matingDates')}</h3>
           
           {formattedMatingDates.length > 0 ? (
             <ul className="space-y-1">
@@ -104,9 +106,9 @@ const PlannedLitterDetailsDialog: React.FC<PlannedLitterDetailsDialogProps> = ({
                             <PenLine className="h-3.5 w-3.5" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Edit date</p>
-                        </TooltipContent>
+                         <TooltipContent>
+                           <p>{t('buttons.editDate')}</p>
+                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                     
@@ -122,9 +124,9 @@ const PlannedLitterDetailsDialog: React.FC<PlannedLitterDetailsDialogProps> = ({
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Delete date</p>
-                        </TooltipContent>
+                         <TooltipContent>
+                           <p>{t('buttons.deleteDate')}</p>
+                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   </div>
@@ -132,17 +134,17 @@ const PlannedLitterDetailsDialog: React.FC<PlannedLitterDetailsDialogProps> = ({
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-muted-foreground">No mating dates recorded</p>
+            <p className="text-sm text-muted-foreground">{t('dialogs.litterDetails.noMatingDates')}</p>
           )}
           
           <div className="mt-4">
-            <h4 className="text-sm font-medium">Add Mating Date:</h4>
+            <h4 className="text-sm font-medium">{t('dialogs.litterDetails.addMatingDate')}</h4>
             <div className="mt-2">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full">
                     <Calendar className="mr-2 h-4 w-4" />
-                    <span>Select Date</span>
+                    <span>{t('dialogs.litterDetails.selectDate')}</span>
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">

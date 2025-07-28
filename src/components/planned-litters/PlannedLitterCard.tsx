@@ -11,6 +11,7 @@ import { PlannedLitter } from '@/types/breeding';
 import PlannedLitterDetailsDialog from './PlannedLitterDetailsDialog';
 import PreBreedingChecklist from './PreBreedingChecklist';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useTranslation } from 'react-i18next';
 
 interface PlannedLitterCardProps {
   litter: PlannedLitter;
@@ -31,6 +32,7 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
   calendarOpen,
   onCalendarOpenChange
 }) => {
+  const { t } = useTranslation('plannedLitters');
   const [showChecklist, setShowChecklist] = useState(false);
   const [editingDateIndex, setEditingDateIndex] = useState<number | null>(null);
   
@@ -60,11 +62,11 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
         <CardTitle>{litter.maleName} × {litter.femaleName}</CardTitle>
         <CardDescription className="flex items-center gap-1">
           <Calendar className="h-4 w-4" />
-          Expected heat: {new Date(litter.expectedHeatDate).toLocaleDateString()}
+          {t('labels.expectedHeat')}: {new Date(litter.expectedHeatDate).toLocaleDateString()}
         </CardDescription>
         {litter.externalMale && (
           <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-            External Sire
+            {t('labels.externalSire')}
           </span>
         )}
       </CardHeader>
@@ -73,7 +75,7 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
         
         {formattedMatingDates.length > 0 && (
           <div className="mt-4">
-            <h4 className="text-sm font-medium">Mating Dates:</h4>
+            <h4 className="text-sm font-medium">{t('dialogs.litterDetails.matingDates')}:</h4>
             <ul className="mt-1 space-y-1">
               {formattedMatingDates.map((date, index) => (
                 <li key={index} className="flex items-center justify-between py-1 text-sm">
@@ -111,9 +113,9 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
                             <PenLine className="h-3.5 w-3.5" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Edit date</p>
-                        </TooltipContent>
+                         <TooltipContent>
+                           <p>{t('buttons.editDate')}</p>
+                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                     
@@ -129,9 +131,9 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Delete date</p>
-                        </TooltipContent>
+                         <TooltipContent>
+                           <p>{t('buttons.deleteDate')}</p>
+                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   </div>
@@ -150,7 +152,7 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
                 className="w-full"
               >
                 <Calendar className="mr-2 h-4 w-4" />
-                Add Mating Date
+                {t('buttons.addMatingDate')}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -169,13 +171,13 @@ const PlannedLitterCard: React.FC<PlannedLitterCardProps> = ({
             onClick={() => setShowChecklist(true)}
           >
             <ClipboardCheck className="mr-2 h-4 w-4" />
-            Breeding Checklist
+            {t('buttons.breedingChecklist')}
           </Button>
           
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" className="w-full">
-                View Details
+                {t('buttons.viewDetails')}
               </Button>
             </DialogTrigger>
             <PlannedLitterDetailsDialog 

@@ -15,11 +15,11 @@ interface MatingSectionProps {
 }
 
 const MatingSection: React.FC<MatingSectionProps> = ({ upcomingHeats, recentMatings, onHeatDeleted }) => {
-  const { t } = useTranslation('home');
+  const { t } = useTranslation('plannedLitters');
 
   return (
     <section className="mt-6">
-      <h2 className="text-xl font-semibold mb-4">Mating Management</h2>
+      <h2 className="text-xl font-semibold mb-4">{t('matingSection.title')}</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Upcoming Heats Card */}
@@ -33,10 +33,10 @@ const MatingSection: React.FC<MatingSectionProps> = ({ upcomingHeats, recentMati
           ) : (
             <Card className="bg-white border-warmbeige-200">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold">{t('statusLabels.upcoming')}</CardTitle>
+                <CardTitle className="text-lg font-semibold">{t('matingSection.upcomingHeats')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-500">No upcoming heats detected.</p>
+                <p className="text-sm text-gray-500">{t('matingSection.noUpcomingHeats')}</p>
               </CardContent>
             </Card>
           )}

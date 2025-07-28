@@ -109,7 +109,128 @@
     "checklist": {
       "title": "Pre-Breeding Checklist",
       "progress": "{{completed}} of {{total}} completed",
-      "allComplete": "All checklist items completed! Ready for breeding."
+      "allComplete": "All checklist items completed! Ready for breeding.",
+      "breedingPreparationChecklist": "Breeding Preparation Checklist",
+      "completeTasks": "Complete these tasks before breeding {{femaleName}} with {{maleName}}",
+      "overallProgress": "Overall Progress",
+      "allPreparationsComplete": "All preparations complete!",
+      "readyToProceed": "You're ready to proceed with the breeding.",
+      "loadingChecklist": "Loading checklist..."
     }
+  },
+  "matingSection": {
+    "title": "Mating Management",
+    "upcomingHeats": "Upcoming Heats",
+    "noUpcomingHeats": "No upcoming heats detected."
+  },
+  "matingTips": {
+    "title": "Mating Tips for Breeders",
+    "description": "From preparation to the perfect timing – a step-by-step guide for successful breeding",
+    "healthRequirements": {
+      "title": "Health requirements & breed-specific testing",
+      "content": "Before mating, make sure both dogs fulfill the health requirements for your breed.",
+      "checklist": "Checklist:",
+      "items": [
+        "Check what health tests are required or recommended by your national kennel club or breed club (e.g. hip x-ray, eye exams, DNA tests)",
+        "Ensure the dogs are healthy, of appropriate age, and in good condition",
+        "Vaccinations should be up to date",
+        "Avoid mating dogs with known heritable health problems"
+      ]
+    },
+    "reviewPedigrees": {
+      "title": "Review pedigrees & plan the match",
+      "content": "Choose a combination that supports your breed's goals and long-term health.",
+      "consider": "Consider:",
+      "items": [
+        "Inbreeding coefficient (COI)",
+        "Temperament, type and structure",
+        "Known health history"
+      ],
+      "tip": "Consult your breed club or a mentor if you're unsure."
+    },
+    "waitForHeat": {
+      "title": "Wait for standing heat",
+      "content": "The female is ready to mate when she enters standing heat. Look for:",
+      "items": [
+        "A soft, swollen vulva",
+        "Lighter-colored discharge (straw or pale pink)",
+        "She stands still and moves her tail to the side when approached by the male"
+      ],
+      "tip": "This often occurs around day 10–14 of the heat cycle – but it varies!"
+    },
+    "progesteroneTesting": {
+      "title": "Use progesterone testing",
+      "content": "A progesterone test at the vet can help pinpoint ovulation and find the best day to mate.",
+      "usefulFor": "Especially useful for:",
+      "items": [
+        "Timing natural matings more precisely",
+        "Planning travel or artificial insemination",
+        "Bitches with irregular heat cycles"
+      ]
+    },
+    "twoMatings": {
+      "title": "Consider two matings",
+      "content": "Two matings 24–48 hours apart often increase the chance of pregnancy.",
+      "items": [
+        "Sperm can live for several days",
+        "Helps ensure that mating overlaps with ovulation"
+      ]
+    },
+    "calmEnvironment": {
+      "title": "Keep the environment calm",
+      "content": "Stress can disrupt the mating process.",
+      "tips": "Tips:",
+      "items": [
+        "Use a calm, familiar setting",
+        "Let the dogs meet beforehand if possible",
+        "Keep people and distractions to a minimum"
+      ]
+    },
+    "bonusTips": {
+      "title": "Bonus Tips for a Planned Litter",
+      "items": [
+        "Track heat cycles regularly (use a journal or app)",
+        "Book your vet in advance if using testing or insemination",
+        "Prepare stud dog's documents in advance (pedigree, health records)",
+        "Read the relevant breeding rules from your kennel club"
+      ]
+    }
+  },
+  "dialogs": {
+    "litterDetails": {
+      "title": "Litter Details",
+      "expectedHeat": "Expected Heat",
+      "externalSireBreed": "External Sire Breed",
+      "notes": "Notes",
+      "noNotes": "No notes",
+      "matingDates": "Mating Dates",
+      "noMatingDates": "No mating dates recorded",
+      "addMatingDate": "Add Mating Date:",
+      "selectDate": "Select Date"
+    }
+  },
+  "buttons": {
+    "addMatingDate": "Add Mating Date",
+    "breedingChecklist": "Breeding Checklist",
+    "viewDetails": "View Details",
+    "editDate": "Edit date",
+    "deleteDate": "Delete date"
+  },
+  "placeholders": {
+    "enterDogName": "Enter dog name",
+    "enterRegistrationNumber": "Enter registration number",
+    "selectFemale": "Select female dog"
+  },
+  "labels": {
+    "expectedHeat": "Expected heat",
+    "externalSire": "External Sire",
+    "nextHeat": "Next Heat",
+    "damFemale": "Dam (Female)"
+  },
+  "upcomingHeat": {
+    "heatRecordDeleted": "Heat record deleted",
+    "heatRecordRemoved": "The heat record has been removed from the dog's history.",
+    "deleteHeatRecord": "Delete this heat record",
+    "couldNotDelete": "Could not delete the heat record. Please try again."
   }
 }

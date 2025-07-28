@@ -9,6 +9,7 @@ import { HeatService } from '@/services/HeatService';
 import { toast } from '@/components/ui/use-toast';
 import { ReminderCalendarSyncService } from '@/services/ReminderCalendarSyncService';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from 'react-i18next';
 
 interface UpcomingHeatCardProps {
   heat: UpcomingHeat;
@@ -16,6 +17,7 @@ interface UpcomingHeatCardProps {
 }
 
 const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onHeatDeleted }) => {
+  const { t } = useTranslation('plannedLitters');
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   const daysAway = formatDistance(heat.date, new Date(), { addSuffix: true });
@@ -27,8 +29,8 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onHeatDeleted
       
       if (await HeatService.deleteHeatEntry(heat.dogId, heat.heatIndex)) {
         toast({
-          title: "Heat record deleted",
-          description: "The heat record has been removed from the dog's history."
+          title: t('upcomingHeat.heatRecordDeleted'),
+          description: t('upcomingHeat.heatRecordRemoved')
         });
         
         // Also delete any corresponding calendar events
@@ -59,8 +61,8 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onHeatDeleted
         }
       } else {
         toast({
-          title: "Error",
-          description: "Could not delete the heat record. Please try again.",
+          title: t('toasts.error.title'),
+          description: t('upcomingHeat.couldNotDelete'),
           variant: "destructive"
         });
       }
@@ -75,7 +77,7 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onHeatDeleted
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-sm">
-              {heat.dogName}'s Next Heat
+              {heat.dogName}'s {t('labels.nextHeat')}
             </h3>
             <div className="flex items-center gap-1 mt-1">
               <CalendarDays className="h-3 w-3 text-rose-400" />
@@ -94,7 +96,7 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onHeatDeleted
             onClick={handleDelete}
             disabled={isDeleting}
             className="h-6 w-6"
-            title="Delete this heat record"
+            title={t('upcomingHeat.deleteHeatRecord')}
           >
             <X className="h-4 w-4 text-muted-foreground" />
           </Button>
