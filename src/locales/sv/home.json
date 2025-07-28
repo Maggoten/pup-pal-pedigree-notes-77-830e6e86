@@ -116,9 +116,9 @@
       "recent": "{{dogName}} fyllde {{age}} år för {{days}} dagar sedan"
     },
     "vaccination": {
-      "title": "{{dogName}} Vaccination Förfallen",
-      "upcoming": "Vaccination förfaller om {{days}} dagar",
-      "overdue": "Vaccination försenad med {{days}} dagar"
+      "title": "{{dogName}} Vaccination löper ut",
+      "upcoming": "Vaccination löper ut om {{days}} dagar",
+      "overdue": " Ny vaccination försenad med {{days}} dagar"
     }
   },
   "reminderTypes": {
