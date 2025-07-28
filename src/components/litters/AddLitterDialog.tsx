@@ -3,6 +3,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Litter, PlannedLitter } from '@/types/breeding';
 import AddLitterDialogContent from './dialog/AddLitterDialogContent';
+import { useTranslation } from 'react-i18next';
 
 interface AddLitterDialogProps {
   open: boolean;
@@ -17,6 +18,8 @@ const AddLitterDialog: React.FC<AddLitterDialogProps> = ({
   onAddLitter,
   plannedLitters = []
 }) => {
+  const { t } = useTranslation('litters');
+  
   const handleClose = () => {
     onOpenChange(false);
   };
@@ -25,7 +28,7 @@ const AddLitterDialog: React.FC<AddLitterDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>Add New Litter</DialogTitle>
+          <DialogTitle>{t('actions.addNewLitter')}</DialogTitle>
         </DialogHeader>
         <AddLitterDialogContent 
           onClose={handleClose}

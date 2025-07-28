@@ -11,6 +11,7 @@ import { CalendarIcon, Trash2, Archive, SquareCheck } from 'lucide-react';
 import { Litter } from '@/types/breeding';
 import { format } from 'date-fns';
 import { parseISODate } from '@/utils/dateUtils';
+import { useTranslation } from 'react-i18next';
 
 interface LitterEditDialogProps {
   litter: Litter;
@@ -29,6 +30,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
   onDelete,
   onArchive
 }) => {
+  const { t } = useTranslation('litters');
   const [litterName, setLitterName] = useState(litter.name);
   const [sireName, setSireName] = useState(litter.sireName);
   const [damName, setDamName] = useState(litter.damName);
@@ -63,16 +65,16 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
   return (
     <DialogContent className="sm:max-w-[600px] beige-gradient border-greige-300">
       <DialogHeader>
-        <DialogTitle>Edit Litter Details</DialogTitle>
+        <DialogTitle>{t('litter.titles.editLitter')}</DialogTitle>
         <DialogDescription>
-          Update information for {litter.name}
+          {t('litter.edit.description', { litterName: litter.name })}
         </DialogDescription>
       </DialogHeader>
       
       <form onSubmit={handleSubmit}>
         <div className="grid gap-5 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Litter Name</Label>
+            <Label htmlFor="name">{t('litter.labels.litterName')}</Label>
             <Input
               id="name"
               value={litterName}
@@ -83,7 +85,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="sire">Sire Name</Label>
+            <Label htmlFor="sire">{t('litter.labels.sireName')}</Label>
             <Input
               id="sire"
               value={sireName}
@@ -94,7 +96,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="dam">Dam Name</Label>
+            <Label htmlFor="dam">{t('litter.labels.damName')}</Label>
             <Input
               id="dam"
               value={damName}
@@ -105,7 +107,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="dob">Date of Birth</Label>
+            <Label htmlFor="dob">{t('litter.labels.dateOfBirth')}</Label>
             <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -145,12 +147,12 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
                 {litter.archived ? (
                   <>
                     <SquareCheck className="h-4 w-4" />
-                    Unarchive Litter
+                    {t('litter.edit.unarchiveButton')}
                   </>
                 ) : (
                   <>
                     <Archive className="h-4 w-4" />
-                    Archive Litter
+                    {t('litter.edit.archiveButton')}
                   </>
                 )}
               </Button>
@@ -160,7 +162,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
           <div className="mt-4">
             <Alert variant="destructive" className="bg-destructive/10 border-destructive/30">
               <AlertDescription className="flex items-center justify-between">
-                <span>Delete this litter and all its puppies?</span>
+                <span>{t('litter.confirmations.deleteConfirmation')}</span>
                 <Button 
                   type="button" 
                   variant="destructive" 
@@ -169,7 +171,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
                   className="flex items-center gap-2"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Delete
+                  {t('actions.delete')}
                 </Button>
               </AlertDescription>
             </Alert>
@@ -178,9 +180,9 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
         
         <DialogFooter>
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            {t('actions.cancel')}
           </Button>
-          <Button type="submit">Save Changes</Button>
+          <Button type="submit">{t('litter.edit.saveChanges')}</Button>
         </DialogFooter>
       </form>
     </DialogContent>

@@ -45,13 +45,13 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
       form.reset();
       
       toast({
-        title: "Success",
+        title: t('toasts.success.title'),
         description: t('toasts.success.litterAdded'),
       });
     } catch (error) {
       console.error('Error submitting planned litter:', error);
       toast({
-        title: "Error",
+        title: t('toasts.error.title'),
         description: t('toasts.error.failedToAddLitter'),
         variant: "destructive"
       });
@@ -63,7 +63,7 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
       <DialogHeader>
         <DialogTitle>{t('forms.plannedLitter.title')}</DialogTitle>
         <DialogDescription>
-          Plan a future breeding between dogs
+          {t('forms.plannedLitter.description')}
         </DialogDescription>
       </DialogHeader>
       

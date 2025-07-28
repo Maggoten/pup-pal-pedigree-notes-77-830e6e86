@@ -16,7 +16,8 @@
     "deleteMatingDate": "Delete Mating Date",
     "deleteLitter": "Delete Litter",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "addLitter": "Add Litter"
   },
   "display": {
     "expectedHeatDate": "Expected Heat Date",
@@ -33,7 +34,7 @@
       "sireLabel": "Sire (Male)",
       "damPlaceholder": "Select female dog",
       "sirePlaceholder": "Select male dog",
-      "description": "Select the breeding pair for your planned litter",
+      "description": "Plan a future breeding between dogs",
       "externalSireToggle": "External Sire",
       "externalSireDescription": "Select if the sire is not one of your dogs",
       "externalSireName": "External Sire Name",
@@ -82,6 +83,7 @@
   },
   "toasts": {
     "success": {
+      "title": "Success",
       "litterAdded": "Planned litter added successfully",
       "matingDateAdded": "Mating date added successfully",
       "matingDateUpdated": "Mating date updated successfully",
@@ -89,6 +91,7 @@
       "litterDeleted": "Litter deleted successfully"
     },
     "error": {
+      "title": "Error",
       "failedToAddLitter": "Failed to add planned litter",
       "failedToAddMatingDate": "Failed to add mating date",
       "failedToUpdateMatingDate": "Failed to update mating date",

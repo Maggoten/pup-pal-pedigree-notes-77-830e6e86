@@ -12,8 +12,15 @@
     "viewDetails": "Visa Detaljer",
     "archiveLitter": "Arkivera Kull",
     "unarchiveLitter": "Aktivera Kull",
+    "addNewLitter": "Lägg till Ny Kull",
+    "addFirstLitter": "Lägg till Din Första Kull",
     "save": "Spara",
-    "cancel": "Avbryt"
+    "cancel": "Avbryt",
+    "edit": "Redigera",
+    "delete": "Ta bort",
+    "archive": "Arkivera",
+    "unarchive": "Avarkivera Kull",
+    "addLitter": "Lägg till Kull"
   },
   "display": {
     "litterLabel": "{{damName}} × {{sireName}}",
@@ -160,13 +167,14 @@
   "litter": {
     "titles": {
       "addLitter": "Lägg till Ny Kull",
-      "editLitter": "Redigera Kull",
+      "editLitter": "Redigera Kulldetaljer",
       "litterDetails": "Kulldetaljer"
     },
     "labels": {
       "litterName": "Kullnamn",
       "sireName": "Hanhundens Namn",
       "damName": "Tikens Namn",
+      "dateOfBirth": "Födelsedatum",
       "parents": "Föräldrar",
       "bornLabel": "Född: {{date}}",
       "totalCount": "{{count}} totalt",
@@ -189,8 +197,15 @@
     },
     "confirmations": {
       "deleteLitter": "Är du säker på att du vill ta bort {{name}}? Denna åtgärd kan inte ångras.",
+      "deleteConfirmation": "Ta bort denna kull och alla dess valpar?",
       "archiveLitter": "Arkivera kull",
       "unarchiveLitter": "Aktivera kull"
+    },
+    "edit": {
+      "description": "Uppdatera information för {{litterName}}",
+      "archiveButton": "Arkivera Kull",
+      "unarchiveButton": "Avarkivera Kull",
+      "saveChanges": "Spara Ändringar"
     }
   },
   "external": {

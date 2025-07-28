@@ -12,6 +12,7 @@ import InternalSireSelector from './InternalSireSelector';
 import ExternalSireFields from './ExternalSireFields';
 import HeatDatePicker from './HeatDatePicker';
 import NotesField from './NotesField';
+import { useTranslation } from 'react-i18next';
 
 interface PlannedLitterFormProps {
   form: UseFormReturn<PlannedLitterFormValues>;
@@ -26,6 +27,7 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
   females,
   onSubmit
 }) => {
+  const { t } = useTranslation('plannedLitters');
   const isExternalMale = form.watch("externalMale");
   
   const handleSubmit = (values: PlannedLitterFormValues) => {
@@ -72,7 +74,7 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
         <NotesField form={form} />
         
         <DialogFooter className="mt-6">
-          <Button type="submit">Add Litter</Button>
+          <Button type="submit">{t('actions.addLitter')}</Button>
         </DialogFooter>
       </form>
     </Form>

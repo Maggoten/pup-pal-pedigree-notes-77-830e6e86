@@ -12,8 +12,15 @@
     "viewDetails": "View Details",
     "archiveLitter": "Archive Litter",
     "unarchiveLitter": "Unarchive Litter",
+    "addNewLitter": "Add New Litter",
+    "addFirstLitter": "Add Your First Litter",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "archive": "Archive",
+    "unarchive": "Unarchive Litter",
+    "addLitter": "Add Litter"
   },
   "display": {
     "litterLabel": "{{damName}} × {{sireName}}",
@@ -160,13 +167,14 @@
   "litter": {
     "titles": {
       "addLitter": "Add New Litter",
-      "editLitter": "Edit Litter",
+      "editLitter": "Edit Litter Details",
       "litterDetails": "Litter Details"
     },
     "labels": {
       "litterName": "Litter Name",
       "sireName": "Sire Name",
       "damName": "Dam Name",
+      "dateOfBirth": "Date of Birth",
       "parents": "Parents",
       "bornLabel": "Born: {{date}}",
       "totalCount": "{{count}} total",
@@ -189,8 +197,15 @@
     },
     "confirmations": {
       "deleteLitter": "Are you sure you want to delete {{name}}? This action cannot be undone.",
+      "deleteConfirmation": "Delete this litter and all its puppies?",
       "archiveLitter": "Archive litter",
       "unarchiveLitter": "Unarchive litter"
+    },
+    "edit": {
+      "description": "Update information for {{litterName}}",
+      "archiveButton": "Archive Litter",
+      "unarchiveButton": "Unarchive Litter",
+      "saveChanges": "Save Changes"
     }
   },
   "external": {

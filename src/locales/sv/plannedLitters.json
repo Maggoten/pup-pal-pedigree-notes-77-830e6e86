@@ -16,7 +16,8 @@
     "deleteMatingDate": "Ta bort Parningsdatum",
     "deleteLitter": "Ta bort Kull",
     "save": "Spara",
-    "cancel": "Avbryt"
+    "cancel": "Avbryt",
+    "addLitter": "Lägg till Kull"
   },
   "display": {
     "expectedHeatDate": "Förväntat Löpdatum",
@@ -33,7 +34,7 @@
       "sireLabel": "Hane",
       "damPlaceholder": "Välj tik",
       "sirePlaceholder": "Välj hanhund",
-      "description": "Välj avelspar för din planerade kull",
+      "description": "Planera en framtida parning mellan hundar",
       "externalSireToggle": "Extern Hanhund",
       "externalSireDescription": "Välj om hanhunden inte är en av dina hundar",
       "externalSireName": "Extern Hanhunds Namn",
@@ -82,6 +83,7 @@
   },
   "toasts": {
     "success": {
+      "title": "Framgång",
       "litterAdded": "Planerad kull tillagd",
       "matingDateAdded": "Parningsdatum tillagt",
       "matingDateUpdated": "Parningsdatum uppdaterat",
@@ -89,6 +91,7 @@
       "litterDeleted": "Kull borttagen"
     },
     "error": {
+      "title": "Fel",
       "failedToAddLitter": "Misslyckades med att lägga till planerad kull",
       "failedToAddMatingDate": "Misslyckades med att lägga till parningsdatum",
       "failedToUpdateMatingDate": "Misslyckades med att uppdatera parningsdatum",

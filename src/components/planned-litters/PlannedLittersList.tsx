@@ -9,6 +9,7 @@ import AddPlannedLitterDialog from '@/components/planned-litters/AddPlannedLitte
 import EmptyPlannedLitters from '@/components/planned-litters/EmptyPlannedLitters';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
 import { Dog } from '@/context/DogsContext';
+import { useTranslation } from 'react-i18next';
 
 interface PlannedLittersListProps {
   plannedLitters: PlannedLitter[];
@@ -31,6 +32,7 @@ const PlannedLittersList: React.FC<PlannedLittersListProps> = ({
   onDeleteMatingDate,
   onDeleteLitter
 }) => {
+  const { t } = useTranslation('plannedLitters');
   const [openDialog, setOpenDialog] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState<{ [litterId: string]: boolean }>({});
 
@@ -41,7 +43,7 @@ const PlannedLittersList: React.FC<PlannedLittersListProps> = ({
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2 whitespace-nowrap">
               <PlusCircle className="h-4 w-4" />
-              Add Planned Litter
+              {t('actions.addPlannedLitter')}
             </Button>
           </DialogTrigger>
           <AddPlannedLitterDialog 
