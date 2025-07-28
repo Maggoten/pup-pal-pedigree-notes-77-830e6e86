@@ -36,9 +36,10 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const isMobile = platform.mobile || platform.safari;
   const lastToastTimeRef = useRef<number>(0);
 
-  // Enhanced check for login-related pages
+  // Enhanced check for login-related pages and public auth routes
   const isLoginRelatedPage = location.pathname === '/login' || 
-                            location.pathname === '/registration-success';
+                            location.pathname === '/registration-success' ||
+                            location.pathname === '/reset-password';
   
   // Track if there are active uploads to prevent premature redirects
   const [hasActiveUploads, setHasActiveUploads] = useState(false);

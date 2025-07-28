@@ -59,8 +59,8 @@ const ResetPassword: React.FC = () => {
   useEffect(() => {
     const verifyRecoveryToken = async () => {
       try {
-        // Check for recovery parameters in URL
-        const tokenHash = searchParams.get('token_hash');
+        // Check for recovery parameters in URL (handle both token_hash and access_token)
+        const tokenHash = searchParams.get('token_hash') || searchParams.get('access_token');
         const type = searchParams.get('type');
 
         console.log('Recovery parameters:', { tokenHash: !!tokenHash, type });
