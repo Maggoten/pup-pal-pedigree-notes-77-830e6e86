@@ -36,10 +36,12 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const isMobile = platform.mobile || platform.safari;
   const lastToastTimeRef = useRef<number>(0);
 
-  // Enhanced check for login-related pages and public auth routes
+  // Enhanced check for login-related pages (excluding reset-password which is handled separately)
   const isLoginRelatedPage = location.pathname === '/login' || 
-                            location.pathname === '/registration-success' ||
-                            location.pathname === '/reset-password';
+                            location.pathname === '/registration-success';
+  
+  // Special handling for reset password page - allow always
+  const isResetPasswordPage = location.pathname === '/reset-password';
   
   // Track if there are active uploads to prevent premature redirects
   const [hasActiveUploads, setHasActiveUploads] = useState(false);
@@ -125,6 +127,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         (isAuthReady || authTimeout) && 
         !isLoggedIn && 
         !isLoginRelatedPage && // Enhanced login page detection
+        !isResetPasswordPage && // Never show toast on reset password page
         !isLoggingOut &&
         delayComplete;
       
@@ -205,6 +208,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const shouldRedirectToLogin = (isAuthReady || authCheckFailed) && 
                               !isLoggedIn && 
                               !isLoginRelatedPage &&
+                              !isResetPasswordPage && // Never redirect from reset password page
                               !hasActiveUploads &&
                               !(isMobile && isOffline) &&
                               !isLoggingOut;
@@ -214,8 +218,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Only redirect if auth is ready and user is logged in and on login page (but not reset password)
-  if (isAuthReady && isLoggedIn && isLoginRelatedPage) {
+  // Only redirect from login pages if user is logged in (but never redirect from reset password)
+  if (isAuthReady && isLoggedIn && isLoginRelatedPage && !isResetPasswordPage) {
     console.log('[AuthGuard] User already logged in, redirecting from login-related page');
     return <Navigate to="/" replace />;
   }
