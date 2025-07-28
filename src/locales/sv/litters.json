@@ -151,8 +151,8 @@
     },
     "confirmations": {
       "deletePuppy": "Är du säker på att du vill ta bort denna valp? Denna åtgärd kan inte ångras.",
-      "deleteWeight": "Ta bort Viktmätning",
-      "deleteHeight": "Ta bort Höjdmätning",
+      "deleteWeight": "Ta bort Vikt",
+      "deleteHeight": "Ta bort Höjd",
       "deleteNote": "Ta bort Anteckning"
     },
     "charts": {
