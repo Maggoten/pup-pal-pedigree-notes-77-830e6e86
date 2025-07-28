@@ -4,8 +4,8 @@
   },
   "pages": {
     "plannedLitters": {
-      "title": "Planerade Parningar & Kullar",
-      "description": "Planera dina framtida kullar, spåra löpcykler och hantera aktiviteter"
+      "title": "Planerade Kullar",
+      "description": "Planera dina framtida parningar, kullar och spåra löpcykler"
     }
   },
   "actions": {
@@ -22,9 +22,9 @@
   "display": {
     "expectedHeatDate": "Förväntat Löpdatum",
     "matingDate": "Parningsdatum",
-    "expectedDueDate": "Förväntat Födelsedatum",
+    "expectedDueDate": "Förväntad Födsel",
     "daysRemaining": "Dagar Kvar",
-    "externalSire": "Extern Hanhund",
+    "externalSire": "Extern Hane",
     "plannedLitterLabel": "{{damName}} × {{sireName}}"
   },
   "forms": {
@@ -34,9 +34,9 @@
       "sireLabel": "Hane",
       "damPlaceholder": "Välj tik",
       "sirePlaceholder": "Välj hane",
-      "description": "Planera en framtida parning mellan hundar",
-      "externalSireToggle": "Extern Hanhund",
-      "externalSireDescription": "Välj om hanhunden inte är en av dina hundar",
+      "description": "Planera en framtida parning",
+      "externalSireToggle": "Extern Hane",
+      "externalSireDescription": "Välj om hanen inte är en av dina hundar",
       "externalSireName": "Extern Hanhunds Namn",
       "externalSireBreed": "Extern Hanhunds Ras",
       "registrationNumber": "Registreringsnummer",
@@ -64,7 +64,7 @@
     },
     "recentMatings": {
       "title": "Senaste Parningar",
-      "description": "Avelaktiviteter under de senaste 30 dagarna",
+      "description": "Aktiviteter under de senaste 30 dagarna",
       "daysAgo": "{{days}} dagar sedan"
     },
     "tips": {
@@ -124,17 +124,17 @@
     "noUpcomingHeats": "Inga kommande löp detekterade."
   },
   "matingTips": {
-    "title": "Parningstips för Uppfödare",
-    "description": "Från förberedelse till perfekt timing – en steg-för-steg guide för framgångsrik avel",
+    "title": "Parningstips",
+    "description": "En steg-för-steg guide för framgångsrik avel",
     "healthRequirements": {
       "title": "Hälsokrav & rasspecifika tester",
       "content": "Innan parning, se till att båda hundarna uppfyller hälsokraven för din ras.",
       "checklist": "Checklista:",
       "items": [
-        "Kontrollera vilka hälsotester som krävs eller rekommenderas av din nationella kennelklubb eller rasklubb (t.ex. höftröntgen, ögonundersökningar, DNA-tester)",
-        "Se till att hundarna är friska, av lämplig ålder och i gott skick",
+        "Kontrollera vilka hälsotester som krävs eller rekommenderas av din kennelklubb eller rasklubb (t.ex. höftröntgen, ögonundersökningar, DNA-tester)",
+        "Se till att hundarna är friska, i lämplig ålder och i god hälsa",
         "Vaccinationer bör vara uppdaterade",
-        "Undvik parning av hundar med kända ärftliga hälsoproblem"
+        "Undvik parning av hundar med kända hälsoproblem"
       ]
     },
     "reviewPedigrees": {
@@ -149,8 +149,8 @@
       "tip": "Rådfråga din rasklubb eller en mentor om du är osäker."
     },
     "waitForHeat": {
-      "title": "Vänta på stålöp",
-      "content": "Tiken är redo att paras när hon går in i stålöp. Leta efter:",
+      "title": "Vänta på höglöp",
+      "content": "Tiken är redo att paras när hon går in i höglöp. Tecken på höglöp:",
       "items": [
         "En mjuk, svullen vulva",
         "Ljusare flytning (halm- eller ljusrosa färgad)",
@@ -163,8 +163,8 @@
       "content": "Ett progesterontest hos veterinären kan hjälpa till att fastställa ägglossning och hitta den bästa dagen att para.",
       "usefulFor": "Särskilt användbart för:",
       "items": [
-        "Tidsinställning av naturliga parningar mer exakt",
-        "Planering av resor eller konstgjord befruktning",
+        "Planering av rätt parningsdag för en lyckad parning",
+        "Planering av resor eller insiminering",
         "Tikar med oregelbundna löpcykler"
       ]
     },
@@ -190,9 +190,9 @@
       "title": "Bonustips för en Planerad Kull",
       "items": [
         "Spåra löpcykler regelbundet (använd en dagbok eller app)",
-        "Boka din veterinär i förväg om du använder testning eller insemination",
-        "Förbered avelshundens dokument i förväg (stamtavla, hälsoregister)",
-        "Läs relevanta avelregler från din kennelklubb"
+        "Boka din veterinär i förväg om du vill utföra hälsotester eller insemination",
+        "Förbered hundens dokument i förväg (stamtavla, hälsoregister)",
+        "Läs relevanta avelsstrategier från din kennelklubb"
       ]
     }
   },
@@ -211,7 +211,7 @@
   },
   "buttons": {
     "addMatingDate": "Lägg till Parningsdatum",
-    "breedingChecklist": "Avelchecklista",
+    "breedingChecklist": "Avelschecklista",
     "viewDetails": "Visa Detaljer",
     "editDate": "Redigera datum",
     "deleteDate": "Ta bort datum"
@@ -228,10 +228,10 @@
     "damFemale": "Tik"
   },
   "upcomingHeat": {
-    "heatRecordDeleted": "Löppost borttagen",
-    "heatRecordRemoved": "Löpposten har tagits bort från hundens historia.",
-    "deleteHeatRecord": "Ta bort denna löppost",
-    "couldNotDelete": "Kunde inte ta bort löpposten. Försök igen."
+    "heatRecordDeleted": "Löpdatum borttaget",
+    "heatRecordRemoved": "Löpet har tagits bort från hundens historia.",
+    "deleteHeatRecord": "Ta bort detta löp",
+    "couldNotDelete": "Kunde inte ta bort löp. Försök igen."
   },
   "search": {
     "placeholder": "Sök efter hundens namn..."
