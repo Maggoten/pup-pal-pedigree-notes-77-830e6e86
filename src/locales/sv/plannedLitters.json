@@ -4,8 +4,8 @@
   },
   "pages": {
     "plannedLitters": {
-      "title": "Planerade Kullar & Parning",
-      "description": "Planera dina framtida kullar, spåra löpcykler och hantera avelaktiviteter"
+      "title": "Planerade Parningar & Kullar",
+      "description": "Planera dina framtida kullar, spåra löpcykler och hantera aktiviteter"
     }
   },
   "actions": {
@@ -33,7 +33,7 @@
       "damLabel": "Tik",
       "sireLabel": "Hane",
       "damPlaceholder": "Välj tik",
-      "sirePlaceholder": "Välj hanhund",
+      "sirePlaceholder": "Välj hane",
       "description": "Planera en framtida parning mellan hundar",
       "externalSireToggle": "Extern Hanhund",
       "externalSireDescription": "Välj om hanhunden inte är en av dina hundar",
@@ -107,9 +107,9 @@
   },
   "preBreeding": {
     "checklist": {
-      "title": "Föravel Checklista",
+      "title": "Checklista",
       "progress": "{{completed}} av {{total}} slutförda",
-      "allComplete": "Alla checklistpunkter slutförda! Redo för avel."
+      "allComplete": "Alla punkter slutförda!"
     }
   }
 }
