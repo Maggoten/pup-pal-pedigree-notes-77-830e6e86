@@ -25,10 +25,10 @@ interface ActivePregnanciesListProps {
 const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({ 
   pregnancies, 
   onAddPregnancy,
-  isLoading = false
+  isLoading = false 
 }) => {
+  const { t } = useTranslation('pregnancy');
   const navigate = useNavigate();
-  const { t } = useTranslation('home');
 
   const handleViewPregnancyDetails = (pregnancyId: string) => {
     navigate(`/pregnancy/${pregnancyId}`);
@@ -51,13 +51,13 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2">
             <Heart className="h-5 w-5 text-primary" />
-            Active Pregnancies
+            {t('tabs.active')}
           </span>
           <Button variant="ghost" size="icon" onClick={onAddPregnancy}>
             <PlusCircle className="h-5 w-5" />
           </Button>
         </CardTitle>
-        <CardDescription>Manage your current pregnancies</CardDescription>
+        <CardDescription>{t('actions.managePregnancy')}</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -77,16 +77,16 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
                     {pregnancy.femaleName} × {pregnancy.maleName}
                   </h3>
                   <span className="bg-primary/20 text-primary text-sm font-medium rounded-full px-2 py-0.5">
-                    {pregnancy.daysLeft} days left
+                    {pregnancy.daysLeft} {t('display.daysLeft')}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
                   <div>
-                    <p className="text-muted-foreground">Mating Date:</p>
+                    <p className="text-muted-foreground">{t('display.matingDate')}:</p>
                     <p>{format(pregnancy.matingDate, 'PP')}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">{t('statusLabels.dueDate')}:</p>
+                    <p className="text-muted-foreground">{t('display.expectedDueDate')}:</p>
                     <p>{format(pregnancy.expectedDueDate, 'PP')}</p>
                   </div>
                 </div>
@@ -95,10 +95,10 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
           </div>
         ) : (
           <div className="text-center py-6">
-            <p className="text-muted-foreground mb-3">No active pregnancies found</p>
+            <p className="text-muted-foreground mb-3">{t('empty.activePregnancies.description')}</p>
             <Button onClick={onAddPregnancy}>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Add Pregnancy
+              {t('actions.addPregnancy')}
             </Button>
           </div>
         )}

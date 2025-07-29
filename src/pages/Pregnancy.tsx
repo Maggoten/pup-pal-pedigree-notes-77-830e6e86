@@ -11,6 +11,7 @@ import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/providers/AuthProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTranslation } from 'react-i18next';
 
 import ActivePregnanciesList from '@/components/pregnancy/ActivePregnanciesList';
 import CompletedPregnanciesList from '@/components/pregnancy/CompletedPregnanciesList';
@@ -21,6 +22,7 @@ import AddPregnancyDialog from '@/components/pregnancy/AddPregnancyDialog';
 import { PregnancyDetails } from '@/services/PregnancyService';
 
 const Pregnancy: React.FC = () => {
+  const { t } = useTranslation('pregnancy');
   const navigate = useNavigate();
   const { pregnancyId } = useParams();
   const { dogs } = useDogs();
@@ -81,8 +83,8 @@ const Pregnancy: React.FC = () => {
         console.error("Error fetching pregnancies:", error);
         setHasError(true);
         toast({
-          title: "Error loading pregnancies",
-          description: "There was a problem loading active pregnancies."
+          title: t('toasts.error.failedToLoad'),
+          description: t('toasts.error.failedToLoad')
         });
       } finally {
         setIsLoading(false);
@@ -108,17 +110,17 @@ const Pregnancy: React.FC = () => {
 
   return (
     <PageLayout 
-      title="Pregnancy" 
-      description="Track your pregnant bitches and fetal development"
+      title={t('pages.pregnancy.title')} 
+      description={t('pages.pregnancy.description')}
       icon={<Heart className="h-6 w-6" />}
       className="overflow-y-auto"
     >
       {hasError && (
         <Alert variant="destructive" className="mb-6">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>{t('toasts.error.failedToLoad')}</AlertTitle>
           <AlertDescription>
-            There was a problem loading your pregnancies. Please try again later.
+            {t('toasts.error.failedToLoad')}
           </AlertDescription>
         </Alert>
       )}
@@ -126,7 +128,7 @@ const Pregnancy: React.FC = () => {
       {isLoading ? (
         <div className="flex justify-center items-center h-40">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2 text-lg">Loading pregnancy details...</span>
+          <span className="ml-2 text-lg">{t('loading.pregnancies')}</span>
         </div>
       ) : (
         <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm overflow-y-visible">
@@ -135,11 +137,11 @@ const Pregnancy: React.FC = () => {
               <TabsList className="grid w-full grid-cols-2 mb-4">
                 <TabsTrigger value="active" className="flex items-center gap-2">
                   <Heart className="h-4 w-4" />
-                  Active Pregnancies ({activePregnancies.length})
+                  {t('tabs.active')} ({activePregnancies.length})
                 </TabsTrigger>
                 <TabsTrigger value="completed" className="flex items-center gap-2">
                   <Baby className="h-4 w-4" />
-                  Completed ({completedPregnancies.length})
+                  {t('tabs.completed')} ({completedPregnancies.length})
                 </TabsTrigger>
               </TabsList>
             </div>
