@@ -4,8 +4,8 @@
   },
   "pages": {
     "plannedLitters": {
-      "title": "Planerade Kullar & Parning",
-      "description": "Planera dina framtida kullar, spåra löpcykler och hantera avelsaktiviteter"
+      "title": "Planerade Kullar & Parningar",
+      "description": "Planera dina framtida kullar, spåra löpcykler och följ upp aktiviteter"
     }
   },
   "actions": {
@@ -119,7 +119,7 @@
     }
   },
   "matingSection": {
-    "title": "Parningshantering",
+    "title": "Parningsplanering",
     "upcomingHeats": "Kommande Löp",
     "noUpcomingHeats": "Inga kommande löp detekterade."
   },
