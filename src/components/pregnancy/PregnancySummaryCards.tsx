@@ -16,7 +16,7 @@ const PregnancySummaryCards: React.FC<PregnancySummaryCardsProps> = ({
   expectedDueDate,
   daysLeft,
 }) => {
-  const { t } = useTranslation('home');
+  const { t } = useTranslation('pregnancy');
   return (
     <Card className="mb-6 bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 border border-warmbeige-200 shadow-md overflow-hidden relative">
       {/* Decorative background elements */}
@@ -33,7 +33,7 @@ const PregnancySummaryCards: React.FC<PregnancySummaryCardsProps> = ({
             <div className="bg-warmbeige-100 p-3 rounded-full mb-3">
               <Heart className="h-7 w-7 text-warmgreen-700" />
             </div>
-            <h3 className="font-medium text-lg">Mating Date</h3>
+            <h3 className="font-medium text-lg">{t('display.matingDate')}</h3>
             <p className="mt-1 text-warmbeige-800">{format(matingDate, 'PPP')}</p>
           </div>
           
@@ -41,7 +41,7 @@ const PregnancySummaryCards: React.FC<PregnancySummaryCardsProps> = ({
             <div className="bg-warmbeige-100 p-3 rounded-full mb-3">
               <Calendar className="h-7 w-7 text-warmgreen-700" />
             </div>
-            <h3 className="font-medium text-lg">{t('statusLabels.dueDate')}</h3>
+            <h3 className="font-medium text-lg">{t('display.dueDate')}</h3>
             <p className="mt-1 text-warmbeige-800">{format(expectedDueDate, 'PPP')}</p>
           </div>
           
@@ -49,8 +49,8 @@ const PregnancySummaryCards: React.FC<PregnancySummaryCardsProps> = ({
             <div className="bg-warmbeige-100 p-3 rounded-full mb-3">
               <PawPrint className="h-7 w-7 text-warmgreen-700" />
             </div>
-            <h3 className="font-medium text-lg">Days Remaining</h3>
-            <p className="mt-1 text-warmbeige-800">{daysLeft} days</p>
+            <h3 className="font-medium text-lg">{t('display.daysRemaining')}</h3>
+            <p className="mt-1 text-warmbeige-800">{daysLeft} {t('display.daysLeft')}</p>
             <div className="w-full bg-warmbeige-100 h-2.5 rounded-full mt-3 overflow-hidden">
               <div 
                 className="bg-warmgreen-600 h-full rounded-full transition-all duration-500"
@@ -58,7 +58,7 @@ const PregnancySummaryCards: React.FC<PregnancySummaryCardsProps> = ({
               ></div>
             </div>
             <p className="text-xs text-warmbeige-600 mt-1 w-full text-center">
-              {Math.floor((63-daysLeft)/63*100)}% complete
+              {t('display.progressComplete', { percent: Math.floor((63-daysLeft)/63*100) })}
             </p>
           </div>
         </div>

@@ -145,13 +145,18 @@
   "forms": {
     "addPregnancy": {
       "title": "Lägg till Ny Dräktighet",
-      "femaleLabel": "Tik",
-      "maleLabel": "Hanhund",
+      "femaleLabel": "Tik (Moder)",
+      "maleLabel": "Hanhund (Fader)",
       "matingDateLabel": "Parningsdatum",
-      "expectedDueDateLabel": "Förväntat Födelsedatum",
+      "expectedDueDateLabel": "Förväntat Födelsedatum (63 dagar från parning)",
       "femalePlaceholder": "Välj tik",
       "malePlaceholder": "Välj hanhund",
-      "description": "Registrera en ny dräktighet för spårning"
+      "description": "Skapa en ny dräktighetspost för en hund som redan har parat sig.",
+      "externalMaleToggle": "Extern hanhund",
+      "externalMaleNameLabel": "Extern hanhunds namn",
+      "externalMaleNamePlaceholder": "Ange extern hanhunds namn",
+      "noFemaleDogs": "Inga tikar hittades",
+      "noMaleDogs": "Inga hanhundar hittades"
     },
     "managePregnancy": {
       "title": "Hantera Dräktighet",
@@ -159,6 +164,14 @@
       "deletePregnancy": "Ta bort Dräktighet",
       "confirmDelete": "Är du säker på att du vill ta bort denna dräktighet?",
       "confirmComplete": "Markera denna dräktighet som avslutad?"
+    },
+    "completedPregnancies": {
+      "reactivate": "Återaktivera",
+      "reactivating": "Återaktiverar...",
+      "reactivatedToast": "{{femaleName}}s dräktighet har återaktiverats och flyttats till aktiva dräktigheter.",
+      "reactivationFailedToast": "Det uppstod ett problem med att återaktivera dräktigheten.",
+      "unexpectedErrorToast": "Ett oväntat fel uppstod vid återaktivering av dräktigheten.",
+      "inactiveDescription": "Denna dräktighet har slutförts och är inte längre aktiv. Du kan återaktivera den om det behövs."
     }
   },
   "empty": {
@@ -186,7 +199,14 @@
     "matingDateRequired": "Parningsdatum krävs",
     "dueDateRequired": "Födelsedatum krävs",
     "temperatureRequired": "Temperatur krävs",
+    "temperatureRequiredDescription": "Ange ett temperaturvärde.",
+    "invalidTemperature": "Ogiltig temperatur",
+    "invalidTemperatureDescription": "Ange ett giltigt temperaturvärde.",
     "temperatureRange": "Temperatur måste vara mellan 35°C och 42°C",
+    "titleRequired": "Titel krävs",
+    "titleRequiredDescription": "Ange en titel för observationen.",
+    "descriptionRequired": "Beskrivning krävs",
+    "descriptionRequiredDescription": "Ange en beskrivning av vad du observerade.",
     "symptomRequired": "Observationsbeskrivning krävs",
     "dateRequired": "Datum krävs",
     "timeRequired": "Tid krävs",
@@ -196,6 +216,7 @@
   "toasts": {
     "success": {
       "pregnancyAdded": "Dräktighet tillagd",
+      "pregnancyAddedDescription": "Dräktigheten har lagts till framgångsrikt",
       "pregnancyUpdated": "Dräktighet uppdaterad",
       "pregnancyDeleted": "Dräktighet borttagen",
       "pregnancyCompleted": "Dräktighet markerad som avslutad",
@@ -205,7 +226,12 @@
       "symptomDeleted": "Anteckning borttagen"
     },
     "error": {
-      "failedToAddPregnancy": "Misslyckades med att lägga till dräktighet",
+      "failedToAddPregnancy": "Fel",
+      "failedToAddPregnancyDescription": "Det uppstod ett problem med att lägga till dräktigheten",
+      "missingInformation": "Saknar information",
+      "selectFemaleDog": "Välj en tik",
+      "selectMaleDog": "Välj en hanhund",
+      "enterExternalMaleName": "Ange ett namn för den externa hanhunden",
       "failedToUpdatePregnancy": "Misslyckades med att uppdatera dräktighet",
       "failedToDeletePregnancy": "Misslyckades med att ta bort dräktighet",
       "failedToCompletePregnancy": "Misslyckades med att avsluta dräktighet",

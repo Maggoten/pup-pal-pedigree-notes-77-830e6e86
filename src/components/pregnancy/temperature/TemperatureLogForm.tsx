@@ -7,12 +7,14 @@ import { toast } from '@/components/ui/use-toast';
 import { Plus } from 'lucide-react';
 import { TemperatureRecord } from '../temperature/types';
 import DatePicker from '@/components/common/DatePicker';
+import { useTranslation } from 'react-i18next';
 
 interface TemperatureLogFormProps {
   onAddTemperature: (record: Omit<TemperatureRecord, 'id'>) => void;
 }
 
 const TemperatureLogForm: React.FC<TemperatureLogFormProps> = ({ onAddTemperature }) => {
+  const { t } = useTranslation('pregnancy');
   const [date, setDate] = useState<Date>(new Date());
   const [temperature, setTemperature] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
@@ -20,8 +22,8 @@ const TemperatureLogForm: React.FC<TemperatureLogFormProps> = ({ onAddTemperatur
   const handleSubmit = () => {
     if (!temperature) {
       toast({
-        title: "Temperature required",
-        description: "Please enter a temperature value.",
+        title: t('validation.temperatureRequired'),
+        description: t('validation.temperatureRequiredDescription'),
         variant: "destructive"
       });
       return;
@@ -30,8 +32,8 @@ const TemperatureLogForm: React.FC<TemperatureLogFormProps> = ({ onAddTemperatur
     const tempFloat = parseFloat(temperature);
     if (isNaN(tempFloat)) {
       toast({
-        title: "Invalid temperature",
-        description: "Please enter a valid temperature value.",
+        title: t('validation.invalidTemperature'),
+        description: t('validation.invalidTemperatureDescription'),
         variant: "destructive"
       });
       return;
@@ -53,7 +55,7 @@ const TemperatureLogForm: React.FC<TemperatureLogFormProps> = ({ onAddTemperatur
     <div className="grid gap-4 py-4 border rounded-lg p-4 bg-greige-50">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="date">Date</Label>
+          <Label htmlFor="date">{t('temperature.form.dateLabel')}</Label>
           <DatePicker 
             date={date} 
             setDate={setDate} 
@@ -62,25 +64,25 @@ const TemperatureLogForm: React.FC<TemperatureLogFormProps> = ({ onAddTemperatur
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="temperature">Temperature (°C)</Label>
+          <Label htmlFor="temperature">{t('temperature.form.temperatureLabel')}</Label>
           <Input
             id="temperature"
             type="number"
             step="0.1"
             value={temperature}
             onChange={(e) => setTemperature(e.target.value)}
-            placeholder="e.g. 38.5"
+            placeholder={t('temperature.form.temperaturePlaceholder')}
           />
         </div>
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="notes">Notes (optional)</Label>
+        <Label htmlFor="notes">{t('temperature.form.notesLabel')}</Label>
         <Input
           id="notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Any additional observations..."
+          placeholder={t('temperature.form.notesPlaceholder')}
         />
       </div>
       
@@ -88,7 +90,7 @@ const TemperatureLogForm: React.FC<TemperatureLogFormProps> = ({ onAddTemperatur
         onClick={handleSubmit} 
         className="w-full md:w-auto justify-center bg-sage-600 hover:bg-sage-700 text-white"
       >
-        <Plus className="mr-2 h-4 w-4" /> Add Temperature
+        <Plus className="mr-2 h-4 w-4" /> {t('actions.addTemperature')}
       </Button>
     </div>
   );

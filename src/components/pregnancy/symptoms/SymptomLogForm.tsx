@@ -8,12 +8,14 @@ import { toast } from '@/components/ui/use-toast';
 import { Plus } from 'lucide-react';
 import { SymptomRecord } from './types';
 import DatePicker from '@/components/common/DatePicker';
+import { useTranslation } from 'react-i18next';
 
 interface SymptomLogFormProps {
   onAddSymptom: (record: Omit<SymptomRecord, 'id'>) => void;
 }
 
 const SymptomLogForm: React.FC<SymptomLogFormProps> = ({ onAddSymptom }) => {
+  const { t } = useTranslation('pregnancy');
   const [date, setDate] = useState<Date>(new Date());
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
@@ -21,8 +23,8 @@ const SymptomLogForm: React.FC<SymptomLogFormProps> = ({ onAddSymptom }) => {
   const handleSubmit = () => {
     if (!title) {
       toast({
-        title: "Title required",
-        description: "Please enter a title for the observation.",
+        title: t('validation.titleRequired'),
+        description: t('validation.titleRequiredDescription'),
         variant: "destructive"
       });
       return;
@@ -30,8 +32,8 @@ const SymptomLogForm: React.FC<SymptomLogFormProps> = ({ onAddSymptom }) => {
     
     if (!description) {
       toast({
-        title: "Description required",
-        description: "Please enter a description of what you observed.",
+        title: t('validation.descriptionRequired'),
+        description: t('validation.descriptionRequiredDescription'),
         variant: "destructive"
       });
       return;
@@ -53,7 +55,7 @@ const SymptomLogForm: React.FC<SymptomLogFormProps> = ({ onAddSymptom }) => {
     <div className="grid gap-4 py-4 border rounded-lg p-4 bg-greige-50">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="date">Date</Label>
+          <Label htmlFor="date">{t('symptoms.form.dateLabel')}</Label>
           <DatePicker 
             date={date} 
             setDate={setDate} 
@@ -62,23 +64,23 @@ const SymptomLogForm: React.FC<SymptomLogFormProps> = ({ onAddSymptom }) => {
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">{t('symptoms.form.symptomLabel')}</Label>
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Nesting behavior, Appetite change"
+            placeholder={t('symptoms.form.symptomPlaceholder')}
           />
         </div>
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">{t('symptoms.form.symptomLabel')}</Label>
         <Textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Detailed description of the observation..."
+          placeholder={t('symptoms.form.symptomPlaceholder')}
           rows={3}
         />
       </div>
@@ -87,7 +89,7 @@ const SymptomLogForm: React.FC<SymptomLogFormProps> = ({ onAddSymptom }) => {
         onClick={handleSubmit} 
         className="w-full md:w-auto justify-center bg-sage-600 hover:bg-sage-700 text-white"
       >
-        <Plus className="mr-2 h-4 w-4" /> Add Observation
+        <Plus className="mr-2 h-4 w-4" /> {t('actions.addSymptom')}
       </Button>
     </div>
   );

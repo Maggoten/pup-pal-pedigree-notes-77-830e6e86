@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { addDays } from 'date-fns';
 import { createPregnancy } from '@/services/PregnancyService';
+import { useTranslation } from 'react-i18next';
 
 interface AddPregnancyDialogProps {
   onClose: () => void;
@@ -27,6 +28,7 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
   open,
   onOpenChange
 }) => {
+  const { t } = useTranslation('pregnancy');
   const { dogs } = useDogs();
   const [loading, setLoading] = useState(false);
   const [femaleDogId, setFemaleDogId] = useState<string>('');
@@ -47,8 +49,8 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
     
     if (!femaleDogId) {
       toast({
-        title: "Missing information",
-        description: "Please select a female dog",
+        title: t('toasts.error.missingInformation'),
+        description: t('toasts.error.selectFemaleDog'),
         variant: "destructive"
       });
       return;
@@ -56,8 +58,8 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
     
     if (!useExternalMale && !maleDogId) {
       toast({
-        title: "Missing information",
-        description: "Please select a male dog",
+        title: t('toasts.error.missingInformation'),
+        description: t('toasts.error.selectMaleDog'),
         variant: "destructive"
       });
       return;
@@ -65,8 +67,8 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
     
     if (useExternalMale && !externalMaleName) {
       toast({
-        title: "Missing information",
-        description: "Please enter a name for the external male",
+        title: t('toasts.error.missingInformation'),
+        description: t('toasts.error.enterExternalMaleName'),
         variant: "destructive"
       });
       return;
@@ -84,16 +86,16 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
       });
       
       toast({
-        title: "Pregnancy added",
-        description: "The pregnancy has been successfully added",
+        title: t('toasts.success.pregnancyAdded'),
+        description: t('toasts.success.pregnancyAddedDescription'),
       });
       
       onClose();
     } catch (error) {
       console.error('Error adding pregnancy:', error);
       toast({
-        title: "Error",
-        description: "There was a problem adding the pregnancy",
+        title: t('toasts.error.failedToAddPregnancy'),
+        description: t('toasts.error.failedToAddPregnancyDescription'),
         variant: "destructive"
       });
     } finally {
@@ -106,19 +108,19 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Add New Pregnancy</DialogTitle>
+            <DialogTitle>{t('forms.addPregnancy.title')}</DialogTitle>
             <DialogDescription>
-              Create a new pregnancy record for a dog that has already been mated.
+              {t('forms.addPregnancy.description')}
             </DialogDescription>
           </DialogHeader>
           
           <div className="grid gap-4 py-4">
             {/* Female Dog Selection */}
             <div className="grid gap-2">
-              <Label htmlFor="female-dog">Female Dog (Dam)</Label>
+              <Label htmlFor="female-dog">{t('forms.addPregnancy.femaleLabel')}</Label>
               <Select value={femaleDogId} onValueChange={setFemaleDogId}>
                 <SelectTrigger id="female-dog" className="bg-white">
-                  <SelectValue placeholder="Select female dog" />
+                  <SelectValue placeholder={t('forms.addPregnancy.femalePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {femaleDogs.length > 0 ? (
@@ -129,7 +131,7 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
                     ))
                   ) : (
                     <SelectItem value="no-dogs" disabled>
-                      No female dogs found
+                      {t('forms.addPregnancy.noFemaleDogs')}
                     </SelectItem>
                   )}
                 </SelectContent>
@@ -143,16 +145,16 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
                 checked={useExternalMale} 
                 onCheckedChange={setUseExternalMale} 
               />
-              <Label htmlFor="external-male">External Male Dog</Label>
+              <Label htmlFor="external-male">{t('forms.addPregnancy.externalMaleToggle')}</Label>
             </div>
             
             {/* Male Dog Selection (if not external) */}
             {!useExternalMale && (
               <div className="grid gap-2">
-                <Label htmlFor="male-dog">Male Dog (Sire)</Label>
+                <Label htmlFor="male-dog">{t('forms.addPregnancy.maleLabel')}</Label>
                 <Select value={maleDogId} onValueChange={setMaleDogId}>
                   <SelectTrigger id="male-dog" className="bg-white">
-                    <SelectValue placeholder="Select male dog" />
+                    <SelectValue placeholder={t('forms.addPregnancy.malePlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {maleDogs.length > 0 ? (
@@ -163,7 +165,7 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
                       ))
                     ) : (
                       <SelectItem value="no-dogs" disabled>
-                        No male dogs found
+                        {t('forms.addPregnancy.noMaleDogs')}
                       </SelectItem>
                     )}
                   </SelectContent>
@@ -174,12 +176,12 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
             {/* External Male Name (if external) */}
             {useExternalMale && (
               <div className="grid gap-2">
-                <Label htmlFor="external-male-name">External Male Name</Label>
+                <Label htmlFor="external-male-name">{t('forms.addPregnancy.externalMaleNameLabel')}</Label>
                 <Input 
                   id="external-male-name" 
                   value={externalMaleName} 
                   onChange={(e) => setExternalMaleName(e.target.value)} 
-                  placeholder="Enter external male name"
+                  placeholder={t('forms.addPregnancy.externalMaleNamePlaceholder')}
                   className="bg-white"
                 />
               </div>
@@ -187,13 +189,13 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
             
             {/* Mating Date */}
             <div className="grid gap-2">
-              <Label>Mating Date</Label>
+              <Label>{t('forms.addPregnancy.matingDateLabel')}</Label>
               <DatePicker date={matingDate} setDate={setMatingDate} />
             </div>
             
             {/* Expected Due Date (Read-only) */}
             <div className="grid gap-2">
-              <Label>Expected Due Date (63 days from mating)</Label>
+              <Label>{t('forms.addPregnancy.expectedDueDateLabel')}</Label>
               <div className="p-2 border rounded-md bg-muted/20">
                 {expectedDueDate.toLocaleDateString()}
               </div>
@@ -202,16 +204,16 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
           
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-              Cancel
+              {t('actions.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adding...
+                  {t('loading.saving')}
                 </>
               ) : (
-                "Add Pregnancy"
+                t('actions.addPregnancy')
               )}
             </Button>
           </DialogFooter>

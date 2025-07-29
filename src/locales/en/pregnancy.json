@@ -145,13 +145,18 @@
   "forms": {
     "addPregnancy": {
       "title": "Add New Pregnancy",
-      "femaleLabel": "Female Dog",
-      "maleLabel": "Male Dog",
+      "femaleLabel": "Female Dog (Dam)",
+      "maleLabel": "Male Dog (Sire)",
       "matingDateLabel": "Mating Date",
-      "expectedDueDateLabel": "Expected Due Date",
+      "expectedDueDateLabel": "Expected Due Date (63 days from mating)",
       "femalePlaceholder": "Select female dog",
       "malePlaceholder": "Select male dog",
-      "description": "Record a new pregnancy for tracking"
+      "description": "Create a new pregnancy record for a dog that has already been mated.",
+      "externalMaleToggle": "External Male Dog",
+      "externalMaleNameLabel": "External Male Name",
+      "externalMaleNamePlaceholder": "Enter external male name",
+      "noFemaleDogs": "No female dogs found",
+      "noMaleDogs": "No male dogs found"
     },
     "managePregnancy": {
       "title": "Manage Pregnancy",
@@ -159,6 +164,14 @@
       "deletePregnancy": "Delete Pregnancy",
       "confirmDelete": "Are you sure you want to delete this pregnancy?",
       "confirmComplete": "Mark this pregnancy as completed?"
+    },
+    "completedPregnancies": {
+      "reactivate": "Reactivate",
+      "reactivating": "Reactivating...",
+      "reactivatedToast": "{{femaleName}}'s pregnancy has been reactivated and moved to active pregnancies.",
+      "reactivationFailedToast": "There was a problem reactivating the pregnancy.",
+      "unexpectedErrorToast": "An unexpected error occurred while reactivating the pregnancy.",
+      "inactiveDescription": "This pregnancy was completed and is no longer active. You can reactivate it if needed."
     }
   },
   "empty": {
@@ -185,8 +198,15 @@
     "maleRequired": "Male dog is required", 
     "matingDateRequired": "Mating date is required",
     "dueDateRequired": "Due date is required",
-    "temperatureRequired": "Temperature is required",
+    "temperatureRequired": "Temperature required",
+    "temperatureRequiredDescription": "Please enter a temperature value.",
+    "invalidTemperature": "Invalid temperature",
+    "invalidTemperatureDescription": "Please enter a valid temperature value.",
     "temperatureRange": "Temperature must be between 35°C and 42°C",
+    "titleRequired": "Title required",
+    "titleRequiredDescription": "Please enter a title for the observation.",
+    "descriptionRequired": "Description required",
+    "descriptionRequiredDescription": "Please enter a description of what you observed.",
     "symptomRequired": "Observation description is required",
     "dateRequired": "Date is required",
     "timeRequired": "Time is required",
@@ -195,7 +215,8 @@
   },
   "toasts": {
     "success": {
-      "pregnancyAdded": "Pregnancy added successfully",
+      "pregnancyAdded": "Pregnancy added",
+      "pregnancyAddedDescription": "The pregnancy has been successfully added",
       "pregnancyUpdated": "Pregnancy updated successfully",
       "pregnancyDeleted": "Pregnancy deleted successfully",
       "pregnancyCompleted": "Pregnancy marked as completed",
@@ -205,7 +226,12 @@
       "symptomDeleted": "Note deleted successfully"
     },
     "error": {
-      "failedToAddPregnancy": "Failed to add pregnancy",
+      "failedToAddPregnancy": "Error",
+      "failedToAddPregnancyDescription": "There was a problem adding the pregnancy",
+      "missingInformation": "Missing information",
+      "selectFemaleDog": "Please select a female dog",
+      "selectMaleDog": "Please select a male dog",
+      "enterExternalMaleName": "Please enter a name for the external male",
       "failedToUpdatePregnancy": "Failed to update pregnancy",
       "failedToDeletePregnancy": "Failed to delete pregnancy",
       "failedToCompletePregnancy": "Failed to complete pregnancy",

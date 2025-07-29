@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { ActivePregnancy } from './ActivePregnanciesList';
 import { reactivatePregnancy } from '@/services/PregnancyService';
+import { useTranslation } from 'react-i18next';
 
 interface CompletedPregnanciesListProps {
   pregnancies: ActivePregnancy[];
@@ -19,6 +20,7 @@ const CompletedPregnanciesList: React.FC<CompletedPregnanciesListProps> = ({
   isLoading,
   onRefresh
 }) => {
+  const { t } = useTranslation('pregnancy');
   const [reactivatingIds, setReactivatingIds] = React.useState<Set<string>>(new Set());
 
   const handleReactivate = async (pregnancyId: string, femaleName: string) => {
@@ -28,22 +30,22 @@ const CompletedPregnanciesList: React.FC<CompletedPregnanciesListProps> = ({
       const success = await reactivatePregnancy(pregnancyId);
       if (success) {
         toast({
-          title: "Pregnancy Reactivated",
-          description: `${femaleName}'s pregnancy has been reactivated and moved to active pregnancies.`,
+          title: t('toasts.success.pregnancyUpdated'),
+          description: t('forms.completedPregnancies.reactivatedToast', { femaleName }),
         });
         onRefresh();
       } else {
         toast({
-          title: "Reactivation Failed",
-          description: "There was a problem reactivating the pregnancy.",
+          title: t('toasts.error.failedToUpdatePregnancy'),
+          description: t('forms.completedPregnancies.reactivationFailedToast'),
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error("Error reactivating pregnancy:", error);
       toast({
-        title: "Reactivation Failed",
-        description: "An unexpected error occurred while reactivating the pregnancy.",
+        title: t('toasts.error.failedToUpdatePregnancy'),
+        description: t('forms.completedPregnancies.unexpectedErrorToast'),
         variant: "destructive"
       });
     } finally {
@@ -85,9 +87,9 @@ const CompletedPregnanciesList: React.FC<CompletedPregnanciesListProps> = ({
               <Calendar className="h-8 w-8 text-muted-foreground" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-foreground">No Completed Pregnancies</h3>
+              <h3 className="text-lg font-semibold text-foreground">{t('empty.completedPregnancies.title')}</h3>
               <p className="text-muted-foreground">
-                You don't have any completed pregnancies yet.
+                {t('empty.completedPregnancies.description')}
               </p>
             </div>
           </div>
@@ -108,7 +110,7 @@ const CompletedPregnanciesList: React.FC<CompletedPregnanciesListProps> = ({
                 </CardTitle>
                 <CardDescription className="flex items-center gap-2">
                   <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                    Completed
+                    {t('status.completed')}
                   </Badge>
                 </CardDescription>
               </div>
@@ -120,7 +122,7 @@ const CompletedPregnanciesList: React.FC<CompletedPregnanciesListProps> = ({
                 className="flex items-center gap-2"
               >
                 <RotateCcw className="h-4 w-4" />
-                {reactivatingIds.has(pregnancy.id) ? "Reactivating..." : "Reactivate"}
+                {reactivatingIds.has(pregnancy.id) ? t('forms.completedPregnancies.reactivating') : t('forms.completedPregnancies.reactivate')}
               </Button>
             </div>
           </CardHeader>
@@ -129,17 +131,17 @@ const CompletedPregnanciesList: React.FC<CompletedPregnanciesListProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar className="h-4 w-4" />
-                <span>Mating Date: {format(pregnancy.matingDate, 'MMM dd, yyyy')}</span>
+                <span>{t('display.matingDate')}: {format(pregnancy.matingDate, 'MMM dd, yyyy')}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="h-4 w-4" />
-                <span>Expected Due: {format(pregnancy.expectedDueDate, 'MMM dd, yyyy')}</span>
+                <span>{t('display.expectedDueDate')}: {format(pregnancy.expectedDueDate, 'MMM dd, yyyy')}</span>
               </div>
             </div>
 
             <div className="pt-2 border-t border-border">
               <p className="text-sm text-muted-foreground">
-                This pregnancy was completed and is no longer active. You can reactivate it if needed.
+                {t('forms.completedPregnancies.inactiveDescription')}
               </p>
             </div>
           </CardContent>
