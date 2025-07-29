@@ -249,6 +249,65 @@
     "symptoms": "Loading notes...",
     "saving": "Saving...",
     "deleting": "Deleting...",
-    "completing": "Completing..."
+    "completing": "Completing...",
+    "pregnancyDetails": "Loading pregnancy details..."
+  },
+  "pages": {
+    "details": {
+      "title": "Pregnancy Details",
+      "loadingDescription": "Loading pregnancy details...",
+      "notFound": {
+        "title": "Pregnancy Not Found",
+        "description": "The requested pregnancy could not be found",
+        "message": "The pregnancy you are looking for doesn't exist or has been archived."
+      }
+    }
+  },
+  "tabs": {
+    "sectionTitle": "Pregnancy Management",
+    "journey": "Journey",
+    "temperature": "Temperature", 
+    "notes": "Notes"
+  },
+  "journey": {
+    "title": "{{femaleName}}'s Pregnancy Journey",
+    "description": "Track development and symptoms week by week",
+    "alert": {
+      "signIn": "Sign in to save your checklist data across devices"
+    },
+    "weekSelector": {
+      "week": "Week"
+    },
+    "checklist": {
+      "title": "Week {{weekNumber}} Symptoms",
+      "noSymptoms": "No symptoms to track for this week"
+    },
+    "development": {
+      "progressLabel": "Development progress",
+      "keyPointsTitle": "Key Development Points:"
+    }
+  },
+  "management": {
+    "dialog": {
+      "title": "Manage Pregnancy",
+      "description": "What would you like to do with {{femaleName}}'s pregnancy?",
+      "actions": {
+        "complete": "Complete Pregnancy",
+        "delete": "Delete Pregnancy",
+        "cancel": "Cancel"
+      },
+      "complete": {
+        "title": "Complete Pregnancy",
+        "description": "Are you sure you want to mark this pregnancy as completed?\n\nCompleted pregnancies will be removed from your active pregnancies list, but can be retrieved later if needed. This will also free up the female dog for a new pregnancy.",
+        "processing": "Completing...",
+        "confirm": "Complete Pregnancy"
+      },
+      "delete": {
+        "title": "Delete Pregnancy",
+        "description": "Are you sure you want to delete this pregnancy? This action cannot be undone and all pregnancy data including temperature logs and symptom records will be permanently removed.",
+        "processing": "Deleting...",
+        "confirm": "Delete Permanently"
+      }
+    }
   }
 }

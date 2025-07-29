@@ -11,6 +11,7 @@ import {
 import { PawPrint, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslation } from 'react-i18next';
 
 interface WeekSelectorProps {
   currentWeek: number;
@@ -23,6 +24,7 @@ const WeekSelector: React.FC<WeekSelectorProps> = ({
   totalWeeks,
   onSelectWeek
 }) => {
+  const { t } = useTranslation('pregnancy');
   const weeks = Array.from({ length: totalWeeks }, (_, i) => i + 1);
   const isMobile = useIsMobile();
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -69,7 +71,7 @@ const WeekSelector: React.FC<WeekSelectorProps> = ({
                       "text-xs font-medium",
                       currentWeek === week ? "text-primary" : "text-muted-foreground"
                     )}>
-                      Week {week}
+                      {t('journey.weekSelector.week')} {week}
                     </span>
                   </Button>
                 </div>

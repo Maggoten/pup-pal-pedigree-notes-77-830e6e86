@@ -9,6 +9,7 @@ import JourneyProgress from './JourneyProgress';
 import { PawPrint, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 interface PregnancyJourneyProps {
   pregnancyId: string;
@@ -23,6 +24,7 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
   matingDate,
   expectedDueDate
 }) => {
+  const { t } = useTranslation('pregnancy');
   const { user } = useAuth();
   const {
     currentWeek,
@@ -56,10 +58,10 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
         
         <CardTitle className="flex items-center gap-2 text-greige-800 relative z-10">
           <PawPrint className="h-5 w-5 text-greige-700" />
-          {femaleName}'s Pregnancy Journey
+          {t('journey.title', { femaleName })}
         </CardTitle>
         <CardDescription className="relative z-10 text-greige-600">
-          Track development and symptoms week by week
+          {t('journey.description')}
         </CardDescription>
         
         <JourneyProgress 
@@ -75,7 +77,7 @@ const PregnancyJourney: React.FC<PregnancyJourneyProps> = ({
           <Alert className="mb-4 bg-amber-50 border-amber-200 text-amber-800">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Sign in to save your checklist data across devices
+              {t('journey.alert.signIn')}
             </AlertDescription>
           </Alert>
         )}

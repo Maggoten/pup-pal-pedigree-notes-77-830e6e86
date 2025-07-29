@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Archive, Trash } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { completePregnancy, deletePregnancy } from '@/services/PregnancyService';
+import { useTranslation } from 'react-i18next';
 
 interface ManagePregnancyDialogProps {
   pregnancyId: string;
@@ -39,6 +40,7 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
   onOpenChange,
   onClose,
 }) => {
+  const { t } = useTranslation('pregnancy');
   const navigate = useNavigate();
   const [isCompleteConfirmOpen, setIsCompleteConfirmOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -50,23 +52,23 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
       const success = await completePregnancy(pregnancyId);
       if (success) {
         toast({
-          title: "Pregnancy Completed",
-          description: `${femaleName}'s pregnancy has been marked as completed successfully.`,
+          title: t('toasts.success.pregnancyCompleted'),
+          description: t('toasts.success.pregnancyUpdated'),
         });
         onClose();
         navigate('/pregnancy');
       } else {
         toast({
-          title: "Complete Failed",
-          description: "There was a problem completing the pregnancy.",
+          title: t('toasts.error.failedToCompletePregnancy'),
+          description: t('toasts.error.failedToCompletePregnancy'),
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error("Error completing pregnancy:", error);
       toast({
-        title: "Complete Failed",
-        description: "An unexpected error occurred while completing the pregnancy.",
+        title: t('toasts.error.failedToCompletePregnancy'),
+        description: t('toasts.error.failedToCompletePregnancy'),
         variant: "destructive"
       });
     } finally {
@@ -81,23 +83,23 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
       const success = await deletePregnancy(pregnancyId);
       if (success) {
         toast({
-          title: "Pregnancy Deleted",
-          description: `${femaleName}'s pregnancy has been permanently deleted.`,
+          title: t('toasts.success.pregnancyDeleted'),
+          description: t('toasts.success.pregnancyDeleted'),
         });
         onClose();
         navigate('/pregnancy');
       } else {
         toast({
-          title: "Delete Failed",
-          description: "There was a problem deleting the pregnancy.",
+          title: t('toasts.error.failedToDeletePregnancy'),
+          description: t('toasts.error.failedToDeletePregnancy'),
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error("Error deleting pregnancy:", error);
       toast({
-        title: "Delete Failed",
-        description: "An unexpected error occurred while deleting the pregnancy.",
+        title: t('toasts.error.failedToDeletePregnancy'),
+        description: t('toasts.error.failedToDeletePregnancy'),
         variant: "destructive"
       });
     } finally {
@@ -111,9 +113,9 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Manage Pregnancy</DialogTitle>
+            <DialogTitle>{t('management.dialog.title')}</DialogTitle>
             <DialogDescription>
-              What would you like to do with {femaleName}'s pregnancy?
+              {t('management.dialog.description', { femaleName })}
             </DialogDescription>
           </DialogHeader>
 
@@ -125,7 +127,7 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
               disabled={isProcessing}
             >
               <Archive className="h-4 w-4" />
-              Complete Pregnancy
+              {t('management.dialog.actions.complete')}
             </Button>
             <Button 
               variant="destructive" 
@@ -134,13 +136,13 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
               disabled={isProcessing}
             >
               <Trash className="h-4 w-4" />
-              Delete Pregnancy
+              {t('management.dialog.actions.delete')}
             </Button>
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={onClose} disabled={isProcessing}>
-              Cancel
+              {t('management.dialog.actions.cancel')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -149,23 +151,19 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
       <AlertDialog open={isCompleteConfirmOpen} onOpenChange={setIsCompleteConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Complete Pregnancy</AlertDialogTitle>
+            <AlertDialogTitle>{t('management.dialog.complete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to mark this pregnancy as completed? 
-              <br /><br />
-              Completed pregnancies will be removed from your active pregnancies list, 
-              but can be retrieved later if needed. This will also free up the female dog 
-              for a new pregnancy.
+              {t('management.dialog.complete.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isProcessing}>{t('management.dialog.actions.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleComplete}
               disabled={isProcessing}
               className="bg-primary hover:bg-primary-hover"
             >
-              {isProcessing ? "Completing..." : "Complete Pregnancy"}
+              {isProcessing ? t('management.dialog.complete.processing') : t('management.dialog.complete.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -174,21 +172,19 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
       <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Pregnancy</AlertDialogTitle>
+            <AlertDialogTitle>{t('management.dialog.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this pregnancy? This action cannot be undone
-              and all pregnancy data including temperature logs and symptom records will be 
-              permanently removed.
+              {t('management.dialog.delete.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isProcessing}>{t('management.dialog.actions.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDelete}
               disabled={isProcessing}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isProcessing ? "Deleting..." : "Delete Permanently"}
+              {isProcessing ? t('management.dialog.delete.processing') : t('management.dialog.delete.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

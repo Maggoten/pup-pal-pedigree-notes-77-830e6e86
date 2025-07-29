@@ -5,6 +5,7 @@ import { ChecklistItem as ChecklistItemType } from '@/types/checklist';
 import { ClipboardList, Loader2 } from 'lucide-react';
 import ChecklistItem from '@/components/checklist/ChecklistItem';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 interface WeeklyChecklistProps {
   checklistItems: ChecklistItemType[];
@@ -19,6 +20,7 @@ const WeeklyChecklist: React.FC<WeeklyChecklistProps> = ({
   weekNumber,
   isLoading = false
 }) => {
+  const { t } = useTranslation('pregnancy');
   const { user } = useAuth();
   
   console.log(`📋 WeeklyChecklist rendered for week ${weekNumber}:`, { 
@@ -34,12 +36,12 @@ const WeeklyChecklist: React.FC<WeeklyChecklistProps> = ({
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <ClipboardList className="h-5 w-5 text-primary" />
-            Week {weekNumber} Symptoms
+            {t('journey.checklist.title', { weekNumber })}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-32 text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin mr-2" />
-          Loading symptoms...
+          {t('loading.symptoms')}
         </CardContent>
       </Card>
     );
@@ -52,11 +54,11 @@ const WeeklyChecklist: React.FC<WeeklyChecklistProps> = ({
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <ClipboardList className="h-5 w-5 text-primary" />
-            Week {weekNumber} Symptoms
+            {t('journey.checklist.title', { weekNumber })}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-32 text-muted-foreground">
-          No symptoms to track for this week
+          {t('journey.checklist.noSymptoms')}
         </CardContent>
       </Card>
     );
@@ -68,7 +70,7 @@ const WeeklyChecklist: React.FC<WeeklyChecklistProps> = ({
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
           <ClipboardList className="h-5 w-5 text-primary" />
-          Week {weekNumber} Symptoms
+          {t('journey.checklist.title', { weekNumber })}
         </CardTitle>
       </CardHeader>
       <CardContent>

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
 import { Loader2, Heart, Plus, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePregnancyDetails } from '@/hooks/usePregnancyDetails';
 import { getAllPregnancies } from '@/services/PregnancyService';
 import PregnancyTabs from '@/components/pregnancy/PregnancyTabs';
@@ -16,6 +17,7 @@ import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const PregnancyDetails = () => {
+  const { t } = useTranslation('pregnancy');
   const { id } = useParams<{ id: string }>();
   const { pregnancy, loading } = usePregnancyDetails(id);
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
@@ -78,13 +80,13 @@ const PregnancyDetails = () => {
   if (loading || loadingPregnancies) {
     return (
       <PageLayout 
-        title="Pregnancy Details" 
-        description="Loading pregnancy details..."
+        title={t('pages.details.title')} 
+        description={t('pages.details.loadingDescription')}
         icon={<Heart className="h-6 w-6" />}
       >
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2 text-lg">Loading pregnancy details...</span>
+          <span className="ml-2 text-lg">{t('loading.pregnancyDetails')}</span>
         </div>
       </PageLayout>
     );
@@ -93,13 +95,13 @@ const PregnancyDetails = () => {
   if (!pregnancy) {
     return (
       <PageLayout 
-        title="Pregnancy Not Found" 
-        description="The requested pregnancy could not be found"
+        title={t('pages.details.notFound.title')} 
+        description={t('pages.details.notFound.description')}
         icon={<Heart className="h-6 w-6" />}
       >
         <div className="text-center py-12">
-          <h3 className="text-xl font-medium text-greige-700">Pregnancy Not Found</h3>
-          <p className="text-greige-500 mt-2">The pregnancy you are looking for doesn't exist or has been archived.</p>
+          <h3 className="text-xl font-medium text-greige-700">{t('pages.details.notFound.title')}</h3>
+          <p className="text-greige-500 mt-2">{t('pages.details.notFound.message')}</p>
         </div>
       </PageLayout>
     );
@@ -120,7 +122,7 @@ const PregnancyDetails = () => {
           className="flex items-center gap-2 w-full justify-center py-3"
         >
           <Plus className="h-4 w-4" />
-          Add Pregnancy
+          {t('actions.addPregnancy')}
         </Button>
         
         {/* 2. Manage Pregnancy button (secondary action) */}
@@ -130,7 +132,7 @@ const PregnancyDetails = () => {
           className="flex items-center gap-2 w-full justify-center py-3"
         >
           <Settings className="h-4 w-4" />
-          Manage Pregnancy
+          {t('actions.managePregnancy')}
         </Button>
         
         {/* 3. Pregnancy selection dropdown */}

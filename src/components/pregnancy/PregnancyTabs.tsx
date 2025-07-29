@@ -6,6 +6,7 @@ import TemperatureLog from '@/components/pregnancy/TemperatureLog';
 import SymptomsLog from '@/components/pregnancy/SymptomsLog';
 import PregnancyJourney from '@/components/pregnancy/journey/PregnancyJourney';
 import { Separator } from '@/components/ui/separator';
+import { useTranslation } from 'react-i18next';
 
 interface PregnancyTabsProps {
   pregnancyId: string;
@@ -20,12 +21,13 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
   matingDate, 
   expectedDueDate 
 }) => {
+  const { t } = useTranslation('pregnancy');
   console.log("📋 PregnancyTabs rendered with pregnancyId:", pregnancyId);
   
   return (
     <div className="space-y-4">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-warmgreen-700 mb-2">Pregnancy Management</h2>
+        <h2 className="text-xl font-semibold text-warmgreen-700 mb-2">{t('tabs.sectionTitle')}</h2>
         <Separator className="bg-warmbeige-200" />
       </div>
       
@@ -35,19 +37,19 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
             value="journey" 
             className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-warmgreen-700 data-[state=active]:shadow-sm"
           >
-            <ClipboardList className="h-4 w-4" /> Journey
+            <ClipboardList className="h-4 w-4" /> {t('tabs.journey')}
           </TabsTrigger>
           <TabsTrigger 
             value="temperature" 
             className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-warmgreen-700 data-[state=active]:shadow-sm"
           >
-            <Thermometer className="h-4 w-4" /> Temperature
+            <Thermometer className="h-4 w-4" /> {t('tabs.temperature')}
           </TabsTrigger>
           <TabsTrigger 
             value="symptoms" 
             className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-warmgreen-700 data-[state=active]:shadow-sm"
           >
-            <MessageSquare className="h-4 w-4" /> Notes
+            <MessageSquare className="h-4 w-4" /> {t('tabs.notes')}
           </TabsTrigger>
         </TabsList>
         

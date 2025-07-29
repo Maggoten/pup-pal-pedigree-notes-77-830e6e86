@@ -249,6 +249,65 @@
     "symptoms": "Laddar anteckningar...",
     "saving": "Sparar...",
     "deleting": "Tar bort...",
-    "completing": "Avslutar..."
+    "completing": "Avslutar...",
+    "pregnancyDetails": "Laddar dräktighetsdetaljer..."
+  },
+  "pages": {
+    "details": {
+      "title": "Dräktighetsdetaljer",
+      "loadingDescription": "Laddar dräktighetsdetaljer...",
+      "notFound": {
+        "title": "Dräktighet Hittades Inte",
+        "description": "Den begärda dräktigheten kunde inte hittas",
+        "message": "Dräktigheten du letar efter finns inte eller har arkiverats."
+      }
+    }
+  },
+  "tabs": {
+    "sectionTitle": "Dräktighetshantering",
+    "journey": "Utveckling",
+    "temperature": "Temperatur",
+    "notes": "Anteckningar"
+  },
+  "journey": {
+    "title": "{{femaleName}}s Dräktighetsresa",
+    "description": "Följ utveckling och symptom vecka för vecka",
+    "alert": {
+      "signIn": "Logga in för att spara dina checklistdata på alla enheter"
+    },
+    "weekSelector": {
+      "week": "Vecka"
+    },
+    "checklist": {
+      "title": "Vecka {{weekNumber}} Symptom",
+      "noSymptoms": "Inga symptom att spåra för denna vecka"
+    },
+    "development": {
+      "progressLabel": "Utvecklingsframsteg",
+      "keyPointsTitle": "Viktiga Utvecklingspunkter:"
+    }
+  },
+  "management": {
+    "dialog": {
+      "title": "Hantera Dräktighet",
+      "description": "Vad vill du göra med {{femaleName}}s dräktighet?",
+      "actions": {
+        "complete": "Slutför Dräktighet",
+        "delete": "Ta Bort Dräktighet",
+        "cancel": "Avbryt"
+      },
+      "complete": {
+        "title": "Slutför Dräktighet",
+        "description": "Är du säker på att du vill markera denna dräktighet som slutförd?\n\nSlutförda dräktigheter kommer att tas bort från din lista över aktiva dräktigheter, men kan hämtas senare om det behövs. Detta kommer också att frigöra tiken för en ny dräktighet.",
+        "processing": "Slutför...",
+        "confirm": "Slutför Dräktighet"
+      },
+      "delete": {
+        "title": "Ta Bort Dräktighet",
+        "description": "Är du säker på att du vill ta bort denna dräktighet? Denna åtgärd kan inte ångras och all dräktighetsdata inklusive temperaturloggar och symptomuppgifter kommer att tas bort permanent.",
+        "processing": "Tar bort...",
+        "confirm": "Ta Bort Permanent"
+      }
+    }
   }
 }
