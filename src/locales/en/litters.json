@@ -99,6 +99,9 @@
       "notes": "Notes"
     },
     "labels": {
+      "age": "Age",
+      "unknown": "Unknown",
+      "profile": "Profile",
       "name": "Name",
       "registeredName": "Registered Name", 
       "registrationNumber": "Registration Number",
@@ -146,7 +149,6 @@
     },
     "actions": {
       "addPuppy": "Add Puppy",
-      "addPuppy": "Add Puppy",
       "editPuppy": "Edit Puppy",
       "deletePuppy": "Delete Puppy",
       "viewProfile": "View Profile",
@@ -176,6 +178,26 @@
     "display": {
       "puppiesCount": "Puppies ({{count}})",
       "puppiesTitle": "Puppies"
+    },
+    "time": {
+      "week": "week",
+      "weeks": "weeks", 
+      "day": "day",
+      "days": "days",
+      "weekShort": "w",
+      "dayShort": "d"
+    },
+    "table": {
+      "date": "Date",
+      "weightKg": "Weight (kg)", 
+      "heightCm": "Height (cm)"
+    },
+    "messages": {
+      "noWeightRecords": "No weight records yet.",
+      "noHeightRecords": "No height records yet.",
+      "noNotesYet": "No notes yet.",
+      "viewAndManage": "View and manage information for {{name}}.",
+      "deleteConfirmation": "Do you want to delete \"{{name}}\"?"
     },
     "charts": {
       "weightChart": "Weight Chart",

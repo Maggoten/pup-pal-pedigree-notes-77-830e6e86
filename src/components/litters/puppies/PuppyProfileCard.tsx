@@ -8,6 +8,7 @@ import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Scale, Ruler, BarChart2 } from 'lucide-react';
 import { Puppy } from '@/types/breeding';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslation } from 'react-i18next';
 
 interface PuppyProfileCardProps {
   puppy: Puppy;
@@ -32,6 +33,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { t } = useTranslation('litters');
   
   // Get latest weight measurement
   const getLatestWeight = () => {
@@ -39,9 +41,9 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
       const sortedWeights = [...puppy.weightLog].sort((a, b) => 
         new Date(b.date).getTime() - new Date(a.date).getTime()
       );
-      return `${sortedWeights[0].weight} kg`;
+      return `${sortedWeights[0].weight} ${t('puppies.charts.units.kg')}`;
     }
-    return puppy.currentWeight ? `${puppy.currentWeight} kg` : '-';
+    return puppy.currentWeight ? `${puppy.currentWeight} ${t('puppies.charts.units.kg')}` : '-';
   };
 
   // Get latest height measurement
@@ -50,14 +52,14 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
       const sortedHeights = [...puppy.heightLog].sort((a, b) => 
         new Date(b.date).getTime() - new Date(a.date).getTime()
       );
-      return `${sortedHeights[0].height} cm`;
+      return `${sortedHeights[0].height} ${t('puppies.charts.units.cm')}`;
     }
-    return '- cm';
+    return `- ${t('puppies.charts.units.cm')}`;
   };
 
   // Get puppy age
   const getPuppyAge = () => {
-    if (!puppy.birthDateTime) return 'Unknown';
+    if (!puppy.birthDateTime) return t('puppies.labels.unknown');
     
     const birthDate = parseISO(puppy.birthDateTime);
     const today = new Date();
@@ -65,9 +67,9 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
     const days = differenceInDays(today, birthDate);
     
     if (weeks >= 1) {
-      return `${weeks} week${weeks > 1 ? 's' : ''}`;
+      return `${weeks} ${weeks > 1 ? t('puppies.time.weeks') : t('puppies.time.week')}`;
     } else {
-      return `${days} day${days > 1 ? 's' : ''}`;
+      return `${days} ${days > 1 ? t('puppies.time.days') : t('puppies.time.day')}`;
     }
   };
 
@@ -76,11 +78,11 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
     const status = puppy.status || 'Available';
     switch (status) {
       case 'Reserved':
-        return <Badge variant="warning" className="text-xs px-3 py-0.5">Reserved</Badge>;
+        return <Badge variant="warning" className="text-xs px-3 py-0.5">{t('puppies.statuses.reserved')}</Badge>;
       case 'Sold':
-        return <Badge variant="success" className="text-xs px-3 py-0.5">Sold</Badge>;
+        return <Badge variant="success" className="text-xs px-3 py-0.5">{t('puppies.statuses.sold')}</Badge>;
       default:
-        return <Badge variant="info" className="text-xs px-3 py-0.5">Available</Badge>;
+        return <Badge variant="info" className="text-xs px-3 py-0.5">{t('puppies.statuses.available')}</Badge>;
     }
   };
 
@@ -139,7 +141,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
           {/* Age and Status Badge Row */}
           <div className="flex justify-between items-center">
             <div className="text-sm">
-              <span className="text-muted-foreground">Age: </span>
+              <span className="text-muted-foreground">{t('puppies.labels.age')}: </span>
               <span className="font-medium">
                 {getPuppyAge()}
               </span>
@@ -152,7 +154,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             <div className="text-center bg-greige-50 rounded-lg p-3">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Scale className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Weight</span>
+                <span className="text-sm font-medium">{t('puppies.labels.weight')}</span>
               </div>
               <p className="text-lg font-semibold">{getLatestWeight()}</p>
             </div>
@@ -160,7 +162,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             <div className="text-center bg-greige-50 rounded-lg p-3">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Ruler className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Height</span>
+                <span className="text-sm font-medium">{t('puppies.labels.height')}</span>
               </div>
               <p className="text-lg font-semibold">{getLatestHeight()}</p>
             </div>
@@ -177,7 +179,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             onClick={handleRecordMeasurement}
           >
             <BarChart2 className={`h-4 w-4 ${isMobile ? '' : 'mr-1'}`} />
-            {!isMobile && "Record Data"}
+            {!isMobile && t('puppies.actions.recordData')}
           </Button>
           <Button 
             variant="outline" 
@@ -185,7 +187,7 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
             className="flex-1"
             onClick={handleViewProfile}
           >
-            {isMobile ? "Profile" : "View Profile"}
+            {isMobile ? t('puppies.labels.profile') : t('puppies.actions.viewProfile')}
           </Button>
         </div>
       </CardFooter>

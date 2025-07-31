@@ -99,6 +99,9 @@
       "notes": "Anteckningar"
     },
     "labels": {
+      "age": "Ålder",
+      "unknown": "Okänd",
+      "profile": "Profil",
       "name": "Namn",
       "registeredName": "Registrerat Namn", 
       "registrationNumber": "Registreringsnummer",
@@ -146,7 +149,6 @@
     },
     "actions": {
       "addPuppy": "Lägg till valp",
-      "addPuppy": "Lägg till Valp",
       "editPuppy": "Redigera Valp",
       "deletePuppy": "Ta bort Valp",
       "viewProfile": "Visa Profil",
@@ -176,6 +178,26 @@
     "display": {
       "puppiesCount": "Valpar ({{count}})",
       "puppiesTitle": "Valpar"
+    },
+    "time": {
+      "week": "vecka",
+      "weeks": "veckor",
+      "day": "dag", 
+      "days": "dagar",
+      "weekShort": "v",
+      "dayShort": "d"
+    },
+    "table": {
+      "date": "Datum",
+      "weightKg": "Vikt (kg)",
+      "heightCm": "Höjd (cm)"
+    },
+    "messages": {
+      "noWeightRecords": "Inga viktmätningar än.",
+      "noHeightRecords": "Inga höjdmätningar än.",
+      "noNotesYet": "Inga anteckningar än.",
+      "viewAndManage": "Visa och hantera information för {{name}}.",
+      "deleteConfirmation": "Vill du ta bort \"{{name}}\"?"
     },
     "charts": {
       "weightChart": "Viktdiagram",

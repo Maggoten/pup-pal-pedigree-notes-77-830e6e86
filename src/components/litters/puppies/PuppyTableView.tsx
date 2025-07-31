@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Puppy, PuppyWeightRecord, PuppyHeightRecord } from '@/types/breeding';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslation } from 'react-i18next';
 
 interface PuppyTableViewProps {
   puppies: Puppy[];
@@ -48,13 +49,14 @@ const PuppyTableRow = memo(({
   litterDob: string;
 }) => {
   const isMobile = useIsMobile();
+  const { t } = useTranslation('litters');
 
   const handleDeletePuppy = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm(`Do you want to delete "${puppy.name}"?`)) {
+    if (confirm(t('puppies.messages.deleteConfirmation', { name: puppy.name }))) {
       onDeletePuppy(puppy.id);
     }
-  }, [puppy, onDeletePuppy]);
+  }, [puppy, onDeletePuppy, t]);
 
   const handleEditClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -75,11 +77,11 @@ const PuppyTableRow = memo(({
     const status = puppy.status || 'Available';
     switch (status) {
       case 'Reserved':
-        return <Badge variant="outline" className="bg-rustbrown-100 text-xs">Reserved</Badge>;
+        return <Badge variant="outline" className="bg-rustbrown-100 text-xs">{t('puppies.statuses.reserved')}</Badge>;
       case 'Sold':
-        return <Badge variant="outline" className="bg-warmgreen-100 text-xs">Sold</Badge>;
+        return <Badge variant="outline" className="bg-warmgreen-100 text-xs">{t('puppies.statuses.sold')}</Badge>;
       default:
-        return <Badge variant="outline" className="text-xs">Available</Badge>;
+        return <Badge variant="outline" className="text-xs">{t('puppies.statuses.available')}</Badge>;
     }
   };
 
@@ -119,7 +121,7 @@ const PuppyTableRow = memo(({
       {!isMobile && <TableCell className="capitalize text-sm">{puppy.gender}</TableCell>}
       
       <TableCell className={`${isMobile ? 'text-xs' : 'text-sm'}`}>
-        {isMobile ? (puppy.color || 'N/A') : (puppy.color || 'Not specified')}
+        {puppy.color || t('puppies.labels.unknown')}
       </TableCell>
       
       <TableCell className={`${isMobile ? 'text-xs' : 'text-sm'}`}>
@@ -151,15 +153,15 @@ const PuppyTableRow = memo(({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleAddMeasurement}>
                 <BarChart2 className="h-4 w-4 mr-2" />
-                Add Data
+                {t('puppies.actions.recordData')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleEditClick}>
                 <Edit className="h-4 w-4 mr-2" />
-                View Profile
+                {t('puppies.actions.viewProfile')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleDeletePuppy} className="text-destructive">
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete
+                {t('puppies.actions.deletePuppy')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -213,6 +215,7 @@ const PuppyTableView: React.FC<PuppyTableViewProps> = ({
   litterDob
 }) => {
   const isMobile = useIsMobile();
+  const { t } = useTranslation('litters');
 
   const getLatestMeasurement = useCallback((puppy: Puppy, type: 'weight' | 'height') => {
     // For weight measurements, always prioritize the weight log
@@ -227,9 +230,9 @@ const PuppyTableView: React.FC<PuppyTableViewProps> = ({
       // Only use currentWeight as fallback if no weight log entries exist
       if (type === 'weight' && puppy.currentWeight) {
         console.log(`PuppyTableView: Using fallback currentWeight for ${puppy.name}: ${puppy.currentWeight} kg`);
-        return `${puppy.currentWeight} kg`;
+        return `${puppy.currentWeight} ${t('puppies.charts.units.kg')}`;
       }
-      return 'Not recorded';
+      return t('puppies.labels.unknown');
     }
 
     // Sort logs by date, most recent first
@@ -239,15 +242,15 @@ const PuppyTableView: React.FC<PuppyTableViewProps> = ({
     if (type === 'weight' && latestEntry) {
       if (isWeightRecord(latestEntry)) {
         console.log(`PuppyTableView: Using last weight log entry for ${puppy.name}: ${latestEntry.weight} kg from ${latestEntry.date}`);
-        return `${latestEntry.weight} kg`;
+        return `${latestEntry.weight} ${t('puppies.charts.units.kg')}`;
       }
     } else if (type === 'height' && latestEntry) {
       if (isHeightRecord(latestEntry)) {
-        return `${latestEntry.height} cm`;
+        return `${latestEntry.height} ${t('puppies.charts.units.cm')}`;
       }
     }
     
-    return 'Invalid record';
+    return t('puppies.labels.unknown');
   }, []);
 
   return (
@@ -255,18 +258,18 @@ const PuppyTableView: React.FC<PuppyTableViewProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className={isMobile ? 'text-xs p-2' : ''}>Name</TableHead>
-            {!isMobile && <TableHead className="text-xs">Sex</TableHead>}
-            <TableHead className={isMobile ? 'text-xs p-2' : ''}>Color</TableHead>
-            <TableHead className={isMobile ? 'text-xs p-2' : ''}>Birth</TableHead>
+            <TableHead className={isMobile ? 'text-xs p-2' : ''}>{t('puppies.labels.name')}</TableHead>
+            {!isMobile && <TableHead className="text-xs">{t('puppies.labels.gender')}</TableHead>}
+            <TableHead className={isMobile ? 'text-xs p-2' : ''}>{t('puppies.labels.color')}</TableHead>
+            <TableHead className={isMobile ? 'text-xs p-2' : ''}>{t('puppies.labels.dateOfBirth')}</TableHead>
             {!isMobile && (
               <>
-                <TableHead>Weight</TableHead>
-                <TableHead>Height</TableHead>
+                <TableHead>{t('puppies.labels.weight')}</TableHead>
+                <TableHead>{t('puppies.labels.height')}</TableHead>
               </>
             )}
-            <TableHead className={isMobile ? 'text-xs p-2' : ''}>Status</TableHead>
-            <TableHead className={`text-right ${isMobile ? 'text-xs p-2' : ''}`}>Actions</TableHead>
+            <TableHead className={isMobile ? 'text-xs p-2' : ''}>{t('puppies.labels.status')}</TableHead>
+            <TableHead className={`text-right ${isMobile ? 'text-xs p-2' : ''}`}>{t('actions.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

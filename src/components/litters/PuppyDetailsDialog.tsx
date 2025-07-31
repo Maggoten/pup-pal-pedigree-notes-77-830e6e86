@@ -8,6 +8,7 @@ import PuppyDetailsForm from './puppies/PuppyDetailsForm';
 import PuppyImageUploader from './puppies/PuppyImageUploader';
 import { Trash2, MessageSquarePlus } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,6 +26,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   onUpdatePuppy,
   onDeletePuppy
 }) => {
+  const { t } = useTranslation('litters');
   const [imageUrl, setImageUrl] = useState<string>(puppy.imageUrl || '');
   const [displayName, setDisplayName] = useState<string>(puppy.name);
   const [activeTab, setActiveTab] = useState<string>('details');
@@ -63,11 +65,11 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   }, [imageUrl, onUpdatePuppy, onClose]);
 
   const handleDelete = useCallback(() => {
-    if (confirm(`Do you want to delete "${displayName}"?`)) {
+    if (confirm(t('puppies.messages.deleteConfirmation', { name: displayName }))) {
       onDeletePuppy(puppy.id);
       if (onClose) onClose();
     }
-  }, [puppy.id, displayName, onDeletePuppy, onClose]);
+  }, [puppy.id, displayName, onDeletePuppy, onClose, t]);
 
   const handleAddNote = useCallback(() => {
     if (!newNote.trim()) return;
@@ -95,9 +97,9 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   return (
     <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto bg-white border-2 border-warmbeige-400" onInteractOutside={handleClose} onEscapeKeyDown={handleClose}>
       <DialogHeader>
-        <DialogTitle className="text-xl font-semibold text-warmgreen-800">Puppy Profile</DialogTitle>
+        <DialogTitle className="text-xl font-semibold text-warmgreen-800">{t('puppies.titles.puppyProfile')}</DialogTitle>
         <DialogDescription className="text-darkgray-700">
-          View and manage information for {displayName}.
+          {t('puppies.messages.viewAndManage', { name: displayName })}
         </DialogDescription>
       </DialogHeader>
 
@@ -120,19 +122,19 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
               value="details" 
               className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md rounded-md"
             >
-              Details
+              {t('puppies.titles.details')}
             </TabsTrigger>
             <TabsTrigger 
               value="growth" 
               className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md rounded-md"
             >
-              Growth
+              {t('puppies.titles.growth')}
             </TabsTrigger>
             <TabsTrigger 
               value="notes" 
               className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md rounded-md"
             >
-              Notes
+              {t('puppies.titles.notes')}
             </TabsTrigger>
           </TabsList>
           
@@ -145,14 +147,14 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
           
           <TabsContent value="growth" className="space-y-4">
             <div className="space-y-4">
-              <h3 className="font-medium text-warmgreen-800">Weight Log</h3>
+              <h3 className="font-medium text-warmgreen-800">{t('puppies.titles.weightLog')}</h3>
               {puppy.weightLog && puppy.weightLog.length > 0 ? (
                 <div className="border rounded-md overflow-hidden bg-white shadow">
                   <table className="w-full">
                     <thead className="bg-warmbeige-200">
                       <tr>
-                        <th className="py-2 px-4 text-left text-warmgreen-800">Date</th>
-                        <th className="py-2 px-4 text-left text-warmgreen-800">Weight (kg)</th>
+                        <th className="py-2 px-4 text-left text-warmgreen-800">{t('puppies.table.date')}</th>
+                        <th className="py-2 px-4 text-left text-warmgreen-800">{t('puppies.table.weightKg')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -161,24 +163,24 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
                         .map((log, idx) => (
                           <tr key={idx} className="border-t">
                             <td className="py-2 px-4">{format(new Date(log.date), 'MMM d, yyyy')}</td>
-                            <td className="py-2 px-4">{log.weight} kg</td>
+                            <td className="py-2 px-4">{log.weight} {t('puppies.charts.units.kg')}</td>
                           </tr>
                         ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <p className="text-muted-foreground bg-warmbeige-50 p-3 rounded-md">No weight records yet.</p>
+                <p className="text-muted-foreground bg-warmbeige-50 p-3 rounded-md">{t('puppies.messages.noWeightRecords')}</p>
               )}
 
-              <h3 className="font-medium text-warmgreen-800">Height Log</h3>
+              <h3 className="font-medium text-warmgreen-800">{t('puppies.titles.heightLog')}</h3>
               {puppy.heightLog && puppy.heightLog.length > 0 ? (
                 <div className="border rounded-md overflow-hidden bg-white shadow">
                   <table className="w-full">
                     <thead className="bg-warmbeige-200">
                       <tr>
-                        <th className="py-2 px-4 text-left text-warmgreen-800">Date</th>
-                        <th className="py-2 px-4 text-left text-warmgreen-800">Height (cm)</th>
+                        <th className="py-2 px-4 text-left text-warmgreen-800">{t('puppies.table.date')}</th>
+                        <th className="py-2 px-4 text-left text-warmgreen-800">{t('puppies.table.heightCm')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -187,25 +189,25 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
                         .map((log, idx) => (
                           <tr key={idx} className="border-t">
                             <td className="py-2 px-4">{format(new Date(log.date), 'MMM d, yyyy')}</td>
-                            <td className="py-2 px-4">{log.height} cm</td>
+                            <td className="py-2 px-4">{log.height} {t('puppies.charts.units.cm')}</td>
                           </tr>
                         ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <p className="text-muted-foreground bg-warmbeige-50 p-3 rounded-md">No height records yet.</p>
+                <p className="text-muted-foreground bg-warmbeige-50 p-3 rounded-md">{t('puppies.messages.noHeightRecords')}</p>
               )}
             </div>
           </TabsContent>
           
           <TabsContent value="notes" className="space-y-4">
             <div className="space-y-4">
-              <h3 className="font-medium text-warmgreen-800">Notes</h3>
+              <h3 className="font-medium text-warmgreen-800">{t('puppies.titles.notes')}</h3>
               
               <div className="flex space-x-2">
                 <Textarea 
-                  placeholder="Add a new note about this puppy..."
+                  placeholder={t('puppies.placeholders.note')}
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
                   className="flex-1 border-2 border-warmbeige-300 focus:border-warmgreen-600"
@@ -216,7 +218,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
                   className="self-end bg-warmgreen-600 hover:bg-warmgreen-700"
                 >
                   <MessageSquarePlus className="h-4 w-4 mr-2" />
-                  Add
+                  {t('puppies.actions.addNote')}
                 </Button>
               </div>
               
@@ -234,7 +236,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
                     ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground bg-warmbeige-50 p-3 rounded-md mt-2">No notes yet.</p>
+                <p className="text-muted-foreground bg-warmbeige-50 p-3 rounded-md mt-2">{t('puppies.messages.noNotesYet')}</p>
               )}
             </div>
           </TabsContent>
@@ -249,7 +251,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
           className="flex items-center"
         >
           <Trash2 className="h-4 w-4 mr-2" />
-          Delete Puppy
+          {t('puppies.actions.deletePuppy')}
         </Button>
         <div>
           {activeTab === 'details' && (
@@ -259,7 +261,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
                 form="puppy-form" 
                 className="bg-warmgreen-600 hover:bg-warmgreen-700"
               >
-                Save Changes
+                {t('puppies.actions.saveChanges')}
               </Button>
             </DialogClose>
           )}

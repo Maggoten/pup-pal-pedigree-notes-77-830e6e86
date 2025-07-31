@@ -6,6 +6,7 @@ import DatePicker from '@/components/common/DatePicker';
 import BreedDropdown from '@/components/dogs/breed-selector/BreedDropdown';
 import PuppyGenderSelector from './PuppyGenderSelector';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { DialogClose } from '@/components/ui/dialog';
 
@@ -15,6 +16,7 @@ interface PuppyDetailsFormProps {
 }
 
 const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) => {
+  const { t } = useTranslation('litters');
   // Basic details state
   const [name, setName] = useState(puppy.name);
   const [gender, setGender] = useState(puppy.gender);
@@ -128,34 +130,34 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
     <form id="puppy-form" onSubmit={handleFormSubmit}>
       <div className="space-y-4">
         <div>
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name">{t('puppies.labels.name')}</Label>
           <Input 
             id="name" 
             value={name} 
             onChange={(e) => setName(e.target.value)} 
-            placeholder="Puppy name"
+            placeholder={t('puppies.placeholders.name')}
             className="bg-white border-greige-300"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="registered_name">Registered Name</Label>
+            <Label htmlFor="registered_name">{t('puppies.labels.registeredName')}</Label>
             <Input 
               id="registered_name" 
               value={registeredName} 
               onChange={(e) => setRegisteredName(e.target.value)} 
-              placeholder="Optional registered name"
+              placeholder={t('puppies.placeholders.registeredName')}
               className="bg-white border-greige-300"
             />
           </div>
           <div>
-            <Label htmlFor="registration_number">Registration Number</Label>
+            <Label htmlFor="registration_number">{t('puppies.labels.registrationNumber')}</Label>
             <Input 
               id="registration_number" 
               value={registrationNumber} 
               onChange={(e) => setRegistrationNumber(e.target.value)} 
-              placeholder="Optional registration number"
+              placeholder={t('puppies.placeholders.registrationNumber')}
               className="bg-white border-greige-300"
             />
           </div>
@@ -164,7 +166,7 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
         <PuppyGenderSelector gender={gender} onGenderChange={setGender} />
 
         <div>
-          <Label htmlFor="breed">Breed</Label>
+          <Label htmlFor="breed">{t('puppies.labels.breed')}</Label>
           <BreedDropdown 
             value={breed} 
             onChange={setBreed}
@@ -173,54 +175,54 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
         </div>
 
         <div>
-          <Label htmlFor="color">Color</Label>
+          <Label htmlFor="color">{t('puppies.labels.color')}</Label>
           <Input 
             id="color" 
             value={color} 
             onChange={(e) => setColor(e.target.value)} 
-            placeholder="Puppy color"
+            placeholder={t('puppies.placeholders.color')}
             className="bg-white border-greige-300"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="collar">Collar ID</Label>
+            <Label htmlFor="collar">{t('puppies.labels.collar')}</Label>
             <Input 
               id="collar" 
               value={collar} 
               onChange={(e) => setCollar(e.target.value)} 
-              placeholder="Collar identifier"
+              placeholder={t('puppies.placeholders.collar')}
               className="bg-white border-greige-300"
             />
           </div>
           <div>
-            <Label htmlFor="microchip">Microchip</Label>
+            <Label htmlFor="microchip">{t('puppies.labels.microchip')}</Label>
             <Input 
               id="microchip" 
               value={microchip} 
               onChange={(e) => setMicrochip(e.target.value)} 
-              placeholder="Microchip number"
+              placeholder={t('puppies.placeholders.microchip')}
               className="bg-white border-greige-300"
             />
           </div>
         </div>
 
         <div>
-          <Label htmlFor="birthWeight">Birth Weight (kg)</Label>
+          <Label htmlFor="birthWeight">{t('puppies.labels.birthWeight')} ({t('puppies.charts.units.kg')})</Label>
           <Input 
             id="birthWeight" 
             value={birthWeight} 
             onChange={(e) => setBirthWeight(e.target.value)} 
             type="number" 
             step="0.01" 
-            placeholder="0.00"
+            placeholder={t('puppies.placeholders.birthWeight')}
             className="bg-white border-greige-300"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="dateOfBirth">Date of Birth</Label>
+          <Label htmlFor="dateOfBirth">{t('puppies.labels.dateOfBirth')}</Label>
           <DatePicker 
             date={dateOfBirth} 
             setDate={setDateOfBirth}
@@ -229,7 +231,7 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
         </div>
 
         <div>
-          <Label htmlFor="timeOfBirth">Time of Birth</Label>
+          <Label htmlFor="timeOfBirth">{t('puppies.labels.timeOfBirth')}</Label>
           <Input 
             id="timeOfBirth" 
             value={timeOfBirth} 
@@ -240,18 +242,18 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
         </div>
 
         <div className="space-y-2 pt-4 border-t">
-          <Label htmlFor="status">Status</Label>
+          <Label htmlFor="status">{t('puppies.labels.status')}</Label>
           <Select 
             value={status} 
             onValueChange={(value) => setStatus(value as 'Available' | 'Reserved' | 'Sold')}
           >
             <SelectTrigger className="bg-white border-greige-300">
-              <SelectValue placeholder="Select status" />
+              <SelectValue placeholder={t('puppies.placeholders.status')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Available">Available</SelectItem>
-              <SelectItem value="Reserved">Reserved</SelectItem>
-              <SelectItem value="Sold">Sold</SelectItem>
+              <SelectItem value="Available">{t('puppies.statuses.available')}</SelectItem>
+              <SelectItem value="Reserved">{t('puppies.statuses.reserved')}</SelectItem>
+              <SelectItem value="Sold">{t('puppies.statuses.sold')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -259,23 +261,23 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
         {(status === 'Reserved' || status === 'Sold') && (
           <div className="space-y-4 pt-2 animate-fade-in">
             <div>
-              <Label htmlFor="buyer_name">Buyer Name</Label>
+              <Label htmlFor="buyer_name">{t('puppies.labels.buyerName')}</Label>
               <Input 
                 id="buyer_name" 
                 value={buyerName} 
                 onChange={(e) => setBuyerName(e.target.value)} 
-                placeholder="Buyer's name"
+                placeholder={t('puppies.placeholders.buyerName')}
                 className="bg-white border-greige-300"
               />
             </div>
             
             <div>
-              <Label htmlFor="buyer_phone">Buyer Phone</Label>
+              <Label htmlFor="buyer_phone">{t('puppies.labels.buyerPhone')}</Label>
               <Input 
                 id="buyer_phone" 
                 value={buyerPhone} 
                 onChange={(e) => setBuyerPhone(e.target.value)} 
-                placeholder="Buyer's phone number"
+                placeholder={t('puppies.placeholders.buyerPhone')}
                 className="bg-white border-greige-300"
               />
             </div>
