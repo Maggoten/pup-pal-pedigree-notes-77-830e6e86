@@ -8,6 +8,8 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Edit, Archive, Trash2 } from 'lucide-react';
 import { Litter, Puppy } from '@/types/breeding';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslation } from 'react-i18next';
+import { formatDateWithLocale } from '@/utils/localizedDateFormat';
 import LitterEditDialog from './LitterEditDialog';
 
 interface SelectedLitterHeaderProps {
@@ -27,6 +29,7 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
 }) => {
   const [showEditLitterDialog, setShowEditLitterDialog] = useState(false);
   const isMobile = useIsMobile();
+  const { i18n } = useTranslation();
   const birthDate = parseISO(litter.dateOfBirth);
   const ageInWeeks = Math.floor((new Date().getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
   const isRecent = ageInWeeks < 12;
@@ -79,7 +82,7 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
             
             <div>
               <p className="text-muted-foreground">Date of Birth</p>
-              <p className="font-medium">{format(birthDate, 'MMMM d, yyyy')}</p>
+              <p className="font-medium">{formatDateWithLocale(birthDate, 'MMMM d, yyyy', i18n.language)}</p>
             </div>
             
             <div>

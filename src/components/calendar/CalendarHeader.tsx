@@ -6,6 +6,7 @@ import { CalendarIcon, ChevronLeft, ChevronRight, Plus, RefreshCcw } from 'lucid
 import { CardHeader, CardTitle } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslation } from 'react-i18next';
+import { formatDateWithLocale } from '@/utils/localizedDateFormat';
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -29,11 +30,11 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   isSyncing = false
 }) => {
   const isMobile = useIsMobile();
-  const { t } = useTranslation('home');
+  const { t, i18n } = useTranslation('home');
   
-  // Get current month name and year
-  const headerMonthYear = format(currentDate, 'MMMM yyyy');
-  const isCurrentMonth = format(new Date(), 'MMMM yyyy') === headerMonthYear;
+  // Get current month name and year with proper locale
+  const headerMonthYear = formatDateWithLocale(currentDate, 'MMMM yyyy', i18n.language);
+  const isCurrentMonth = formatDateWithLocale(new Date(), 'MMMM yyyy', i18n.language) === headerMonthYear;
   
   // Default handler for today button if not provided
   const handleTodayClick = () => {
