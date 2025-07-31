@@ -9,7 +9,7 @@
     },
     "pregnancyDetails": {
       "title": "Dräktighetsdetaljer",
-      "description": "Detaljerad dräktighetsspårning och hantering"
+      "description": "Detaljerad dräktighetsuppföljning och hantering"
     }
   },
   "tabs": {
@@ -53,7 +53,7 @@
   "temperature": {
     "log": {
       "title": "Temperaturlogg",
-      "description": "Spåra {{femaleName}}s kroppstemperatur",
+      "description": "Följ upp {{femaleName}}s kroppstemperatur",
       "addTitle": "Registrera Temperatur",
       "historyTitle": "Temperaturhistorik"
     },
@@ -79,12 +79,12 @@
       "historyTitle": "Dräktighetsanteckningar"
     },
     "checklist": {
-      "title": "Dräktighetssymptom Spårare",
+      "title": "Dräktighetssymptom",
       "description": "Markera symptom när du observerar dem under {{femaleName}}s dräktighet",
       "progressTitle": "Observerade Symptom",
-      "errorTitle": "Fel vid Laddning av Symptomspårare",
+      "errorTitle": "Fel vid Laddning av Symptom",
       "errorMessage": "Försök uppdatera sidan eller kontakta support om problemet kvarstår.",
-      "noData": "Kunde inte ladda symptomspårare. Försök igen."
+      "noData": "Kunde inte ladda symptom. Försök igen."
     },
     "form": {
       "symptomLabel": "Observation",
@@ -119,14 +119,14 @@
       "weekOf": "Vecka {{currentWeek}} av {{totalWeeks}}"
     },
     "alert": {
-      "signIn": "Logga in för att spara dina checklistdata på alla enheter"
+      "signIn": "Logga in för att spara din checklista på alla enheter"
     },
     "weekSelector": {
       "week": "Vecka"
     },
     "checklist": {
       "title": "Vecka {{weekNumber}} Symptom",
-      "noSymptoms": "Inga symptom att spåra för denna vecka"
+      "noSymptoms": "Inga symptom att följa upp denna vecka"
     },
     "development": {
       "progressLabel": "Utvecklingsframsteg",
@@ -138,7 +138,7 @@
           "Parning har skett",
           "Ägg befruktning inom 24-48 timmar",
           "Befruktade ägg börjar celldelning",
-          "Zygoterer reser till livmodern"
+          "De befruktade äggcellerna reser till livmodern"
         ]
       },
       "week2": {
@@ -148,57 +148,57 @@
           "Embryon fäster vid livmoderväggen",
           "Implantation börjar",
           "Placentabildning startar",
-          "Inga synliga tecken på dräktighet ännu"
+          "Normalt finns inga synliga tecken på dräktighet ännu"
         ]
       },
       "week3": {
-        "title": "Organbildning Börjar",
-        "description": "Grundläggande organsystem börjar bildas hos de utvecklande valparna.",
+        "title": "Organbildning inleds",
+        "description": "Grundläggande organsystem börjar bildas hos valparna.",
         "keyPoints": [
           "Organ börjar bildas i embryon",
-          "Något förstorade bröstvårtor kan märkas",
-          "Möjliga beteendeförändringar hos mamman",
-          "Embryon cirka 1cm långa"
+          "Tiken kan få något förstorade bröstvårtor",
+          "Möjliga beteendeförändringar hos tiken",
+          "Embryona är cirka 1cm långa"
         ]
       },
       "week4": {
-        "title": "Hjärtslagsutveckling",
+        "title": "Hjärtslag",
         "description": "Valparnas hjärtan börjar slå och kan upptäckas via ultraljud.",
         "keyPoints": [
           "Hjärtslag kan upptäckas via ultraljud",
           "Embryon växer till 1,5-2cm långa",
-          "Mamman kan uppleva morgonkräkningar",
+          "Tiken kan få morgonillamående och kräkningar",
           "Möjliga förändringar i matvanor"
         ]
       },
       "week5": {
-        "title": "Extremitetsutveckling",
+        "title": "Utveckling av extremiter",
         "description": "Extremiteter och ansiktsdrag börjar utvecklas mer distinkt.",
         "keyPoints": [
-          "Valpar cirka 3-4cm långa",
+          "Valparna är nu cirka 3-4cm långa",
           "Ögon, öron och extremiteter formas",
-          "Mammans buk börjar förstoras",
+          "Tikens buk börjar förstoras",
           "Ökad aptit hos mamman"
         ]
       },
       "week6": {
-        "title": "Snabb Tillväxtfas",
+        "title": "Tillväxtfas",
         "description": "Valparna går in i en period av snabb tillväxt och utveckling.",
         "keyPoints": [
           "Valparnas skelett börjar förkalka",
-          "Valpar cirka 6cm långa",
-          "Utveckling av klor och morrhår",
+          "Valparna är cirka 6cm långa",
+          "Utveckling av klor och morrhår sker denna vecka",
           "Valparna blir mer aktiva"
         ]
       },
       "week7": {
-        "title": "Pälsutveckling",
+        "title": "Fortsatt utveckling, päls och färg",
         "description": "Valparnas päls börjar utvecklas och anta sina karakteristiska färger.",
         "keyPoints": [
           "Valparna får päls som börjar växa",
-          "Mamman börjar visa beteende för bobygge",
-          "Mjölkproduktion startar",
-          "Valpar kan kännas röra sig i buken"
+          "Tiken börjar visa beteende för bobygge",
+          "Mjölkproduktionen hos tiken kan starta",
+          "Nu kan du känna att valpar rör sig i buken"
         ]
       },
       "week8": {
@@ -206,18 +206,18 @@
         "description": "Valparna är nästan fullt utvecklade och förbereder sig för födelse.",
         "keyPoints": [
           "Valparna är fullt utvecklade",
-          "Mammans temperatur bör övervakas",
-          "Mamman visar beteende för bobygge",
+          "åll koll på tikens temperatur",
+          "Tiken börjar bädda och antar beteende för bobygge",
           "Mjölkproduktionen ökar"
         ]
       },
       "week9": {
-        "title": "Förberedelser för Födelse",
-        "description": "Slutliga förberedelser för födelse. Förlossning kan börja när som helst nu.",
+        "title": "Förberedelser för Födsel",
+        "description": "Slutliga förberedelser för födsel. Förlossningen kan börja när som helst nu.",
         "keyPoints": [
           "Temperaturen sjunker under 37,8°C 24-48 timmar före förlossning",
-          "Sammandragningar börjar",
-          "Mamman kan bli rastlös",
+          "Sammandragningar kan börja",
+          "Tiken kan bli rastlös",
           "Valparna föds!"
         ]
       }
@@ -229,22 +229,22 @@
       "week1": {
         "item1": {
           "text": "Lätt aptitförändring",
-          "description": "Kan äta mindre eller bli något mer kräsen när hormonnivåerna börjar förändras."
+          "description": "Tiken kan ha sämre matlust och bli mer kräsen när hormonnivåerna börjar förändras."
         }
       },
       "week2": {
         "item1": {
           "text": "Lätt beteendeförändring",
-          "description": "Kan bli mer kärleksfull, klingig eller trött."
+          "description": "Kan bli mer kärleksfull, gosig eller trött."
         },
         "item2": {
-          "text": "Mild illamående (morgonkräkningar)",
+          "text": "Mildt illamående (morgonkräkningar)",
           "description": "Kan kräkas lätt eller verka illamående på grund av hormonförändringar."
         }
       },
       "week3": {
         "item1": {
-          "text": "Klar vaginal flytning",
+          "text": "Vaginal flytning",
           "description": "Liten mängd klar, luktfri flytning kan förekomma när embryon implanteras."
         }
       },
@@ -267,7 +267,7 @@
       "week6": {
         "item1": {
           "text": "Synlig magförstoring",
-          "description": "Buken börjar expandera synligt."
+          "description": "Det börjar synas att tikens buk expanderar."
         },
         "item2": {
           "text": "Möjlig fosterrörelse",
@@ -277,11 +277,11 @@
       "week7": {
         "item1": {
           "text": "Betydande bukförstoring",
-          "description": "Buken är tydligt utspänd; dräktigheten mycket synlig."
+          "description": "Tikens buken är nu tydligt utspänd; dräktigheten är synlig."
         },
         "item2": {
-          "text": "Böbeteende börjar",
-          "description": "Kan börja ordna sängkläder, gräva eller söka tysta områden."
+          "text": "Bobyggandebeteende startar",
+          "description": "Tiken börjar bädda iordning i sin plats, gräva eller söka efter lugna områden."
         }
       },
       "week8": {
@@ -320,7 +320,7 @@
         "title": "Vecka 3 – Implantation"
       },
       "week4": {
-        "title": "Vecka 4 – Fysiska Tecken Börjar"
+        "title": "Vecka 4 – Fysiska Tecken"
       },
       "week5": {
         "title": "Vecka 5 – Aptiten Återvänder"
@@ -329,13 +329,13 @@
         "title": "Vecka 6 – Synlig Tillväxt"
       },
       "week7": {
-        "title": "Vecka 7 – Förberedelse för Födelse"
+        "title": "Vecka 7 – Förberedelse för Födsel"
       },
       "week8": {
         "title": "Vecka 8 – Närmar sig Förlossning"
       },
       "week9": {
-        "title": "Vecka 9 – Förlossning & Valpning"
+        "title": "Vecka 9 – Valpning"
       }
     }
   },
