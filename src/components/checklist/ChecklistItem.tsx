@@ -3,6 +3,7 @@ import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ChecklistItem as ChecklistItemType } from '@/types/checklist';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface ChecklistItemProps {
   item: ChecklistItemType;
@@ -10,6 +11,8 @@ interface ChecklistItemProps {
 }
 
 const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onToggle }) => {
+  const { t } = useTranslation('pregnancy');
+  
   return (
     <div className="flex items-start gap-3 py-3 group">
       <Checkbox 
@@ -26,10 +29,10 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onToggle }) => {
             item.isCompleted && "line-through text-muted-foreground"
           )}
         >
-          {item.text}
+          {t(item.text, item.text)}
           {item.weekNumber && (
             <span className="ml-2 text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
-              Week {item.weekNumber}
+              {t('checklist.weekBadge', { weekNumber: item.weekNumber })}
             </span>
           )}
         </label>
@@ -38,7 +41,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onToggle }) => {
             "text-sm text-muted-foreground mt-1",
             item.isCompleted && "line-through opacity-70"
           )}>
-            {item.description}
+            {t(item.description, item.description)}
           </p>
         )}
       </div>

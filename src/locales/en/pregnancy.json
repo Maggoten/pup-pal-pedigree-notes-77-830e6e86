@@ -103,6 +103,11 @@
     "keyPoints": "Key Points",
     "checklist": "Week {{week}} Checklist",
     "noChecklist": "No checklist items for this week",
+    "progress": {
+      "currentWeek": "Current Week",
+      "week": "Week {{weekNumber}}",
+      "weekOf": "Week {{currentWeek}} of {{totalWeeks}}"
+    },
     "development": {
       "week1": {
         "title": "Fertilization & Early Development",
@@ -193,6 +198,93 @@
           "Mother may become restless",
           "Puppies are born!"
         ]
+      }
+    }
+  },
+  "checklist": {
+    "weekBadge": "Week {{weekNumber}}",
+    "items": {
+      "week1": {
+        "item1": {
+          "text": "Slight appetite change",
+          "description": "May eat less or become slightly pickier as hormone levels begin to shift."
+        }
+      },
+      "week2": {
+        "item1": {
+          "text": "Slight behavioral change",
+          "description": "May become more affectionate, clingy or tired."
+        },
+        "item2": {
+          "text": "Mild nausea (morning sickness)",
+          "description": "May vomit slightly or seem queasy due to hormonal changes."
+        }
+      },
+      "week3": {
+        "item1": {
+          "text": "Clear vaginal discharge",
+          "description": "Small amount of clear, non-smelly discharge can appear when embryos implant."
+        }
+      },
+      "week4": {
+        "item1": {
+          "text": "Enlarged nipples",
+          "description": "Nipples become larger, rounder and darker in color."
+        },
+        "item2": {
+          "text": "Noticeable weight gain",
+          "description": "Slight increase in body weight as pregnancy progresses."
+        }
+      },
+      "week5": {
+        "item1": {
+          "text": "Increased appetite",
+          "description": "Appetite increases as hormone levels stabilize and fetal growth accelerates."
+        }
+      },
+      "week6": {
+        "item1": {
+          "text": "Visible belly growth",
+          "description": "Abdomen begins to expand visibly."
+        },
+        "item2": {
+          "text": "Possible fetal movement",
+          "description": "Some may feel slight movement when gently palpating, but more common in Week 7–8."
+        }
+      },
+      "week7": {
+        "item1": {
+          "text": "Significant abdominal enlargement",
+          "description": "Belly is clearly distended; pregnancy very visible."
+        },
+        "item2": {
+          "text": "Nesting behavior begins",
+          "description": "May begin arranging bedding, digging or seeking quiet areas."
+        }
+      },
+      "week8": {
+        "item1": {
+          "text": "Increased vaginal discharge",
+          "description": "Clear discharge may increase slightly as the body prepares for labor."
+        }
+      },
+      "week9": {
+        "item1": {
+          "text": "Temperature drop",
+          "description": "Rectal temperature drops below 100°F (37.8°C) 12–24 hours before labor."
+        },
+        "item2": {
+          "text": "Restlessness and panting",
+          "description": "Difficulty settling, increased panting and pacing."
+        },
+        "item3": {
+          "text": "Refusing food",
+          "description": "Appetite may vanish shortly before labor starts."
+        },
+        "item4": {
+          "text": "Active labor begins",
+          "description": "Strong contractions followed by delivery of puppies."
+        }
       }
     }
   },

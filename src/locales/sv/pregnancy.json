@@ -103,6 +103,11 @@
     "keyPoints": "Viktiga Punkter",
     "checklist": "Vecka {{week}} Checklista",
     "noChecklist": "Inga checklistepunkter för denna vecka",
+    "progress": {
+      "currentWeek": "Aktuell vecka",
+      "week": "Vecka {{weekNumber}}",
+      "weekOf": "Vecka {{currentWeek}} av {{totalWeeks}}"
+    },
     "development": {
       "week1": {
         "title": "Befruktning & Tidig Utveckling",
@@ -193,6 +198,93 @@
           "Mamman kan bli rastlös",
           "Valparna föds!"
         ]
+      }
+    }
+  },
+  "checklist": {
+    "weekBadge": "Vecka {{weekNumber}}",
+    "items": {
+      "week1": {
+        "item1": {
+          "text": "Lätt aptitförändring",
+          "description": "Kan äta mindre eller bli något mer kräsen när hormonnivåerna börjar förändras."
+        }
+      },
+      "week2": {
+        "item1": {
+          "text": "Lätt beteendeförändring",
+          "description": "Kan bli mer kärleksfull, klingig eller trött."
+        },
+        "item2": {
+          "text": "Mild illamående (morgonkräkningar)",
+          "description": "Kan kräkas lätt eller verka illamående på grund av hormonförändringar."
+        }
+      },
+      "week3": {
+        "item1": {
+          "text": "Klar vaginal flytning",
+          "description": "Liten mängd klar, luktfri flytning kan förekomma när embryon implanteras."
+        }
+      },
+      "week4": {
+        "item1": {
+          "text": "Förstorade bröstvårtor",
+          "description": "Bröstvårtorna blir större, rundare och mörkare i färg."
+        },
+        "item2": {
+          "text": "Märkbar viktökning",
+          "description": "Lätt ökning av kroppsvikt när dräktigheten fortskrider."
+        }
+      },
+      "week5": {
+        "item1": {
+          "text": "Ökad aptit",
+          "description": "Aptiten ökar när hormonnivåerna stabiliseras och fosterutvecklingen accelererar."
+        }
+      },
+      "week6": {
+        "item1": {
+          "text": "Synlig magförstoring",
+          "description": "Buken börjar expandera synligt."
+        },
+        "item2": {
+          "text": "Möjlig fosterrörelse",
+          "description": "Vissa kan känna lätt rörelse vid försiktig palpering, men mer vanligt i vecka 7–8."
+        }
+      },
+      "week7": {
+        "item1": {
+          "text": "Betydande bukförstoring",
+          "description": "Buken är tydligt utspänd; dräktigheten mycket synlig."
+        },
+        "item2": {
+          "text": "Böbeteende börjar",
+          "description": "Kan börja ordna sängkläder, gräva eller söka tysta områden."
+        }
+      },
+      "week8": {
+        "item1": {
+          "text": "Ökad vaginal flytning",
+          "description": "Klar flytning kan öka något när kroppen förbereder sig för förlossning."
+        }
+      },
+      "week9": {
+        "item1": {
+          "text": "Temperaturfall",
+          "description": "Rektal temperatur sjunker under 37,8°C 12–24 timmar före förlossning."
+        },
+        "item2": {
+          "text": "Rastlöshet och flämtning",
+          "description": "Svårighet att lugna sig, ökad flämtning och vandrande."
+        },
+        "item3": {
+          "text": "Vägrar mat",
+          "description": "Aptiten kan försvinna strax innan förlossningen börjar."
+        },
+        "item4": {
+          "text": "Aktiv förlossning börjar",
+          "description": "Starka sammandragningar följt av förlossning av valpar."
+        }
       }
     }
   },
