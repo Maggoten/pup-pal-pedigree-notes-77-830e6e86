@@ -493,7 +493,7 @@
     }
   },
   "dropdown": {
-    "pregnancyName": "{{femaleName}}s Dräktighet",
+    "pregnancyName": "{{femaleName}}'s Dräktighet",
     "completedPregnancies": "Avslutade Dräktigheter",
     "viewAllCompleted": "Visa Alla Avslutade Dräktigheter"
   }
