@@ -193,7 +193,7 @@
       "totalCount": "{{count}} totalt",
       "archivedOn": "Arkiverad den {{date}}",
       "ageWeeks": "{{weeks}} veckor gammal",
-      "litterName": "{{damName}}s kull"
+      "litterName": "{{damName}}'s kull"
     },
     "placeholders": {
       "litterName": "Ange kullnamn",
