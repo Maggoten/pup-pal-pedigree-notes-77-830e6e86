@@ -26,7 +26,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
   onUpdatePuppy,
   onDeletePuppy
 }) => {
-  const { t } = useTranslation('litters');
+  const { t, ready } = useTranslation('litters');
   const [imageUrl, setImageUrl] = useState<string>(puppy.imageUrl || '');
   const [displayName, setDisplayName] = useState<string>(puppy.name);
   const [activeTab, setActiveTab] = useState<string>('details');

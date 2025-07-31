@@ -96,7 +96,12 @@
       "puppyDetails": "Valpens Detaljer",
       "weightTracking": "Viktuppföljning",
       "heightTracking": "Höjduppföljning",
-      "notes": "Anteckningar"
+      "notes": "Anteckningar",
+      "details": "Detaljer",
+      "growth": "Tillväxt",
+      "weightLog": "Viktlogg",
+      "heightLog": "Höjdlogg",
+      "saveChanges": "Spara Ändringar"
     },
     "labels": {
       "age": "Ålder",
@@ -116,6 +121,7 @@
       "buyerName": "Köparens Namn",
       "buyerPhone": "Köparens Telefon",
       "collarId": "Halsband ID",
+      "collar": "Halsband",
       "microchip": "Mikrochip",
       "totalPuppies": "Antal Valpar",
       "litterAge": "Kullens Ålder",
@@ -126,19 +132,20 @@
       "height": "Höjd"
     },
     "placeholders": {
-      "puppyName": "Valpens namn",
-      "puppyColor": "Valpens färg",
+      "name": "Valpens namn",
+      "color": "Valpens färg",
       "registeredName": "Valfritt registrerat namn",
       "registrationNumber": "Valfritt registreringsnummer", 
-      "collarId": "Halsbandsidentifierare",
-      "microchipNumber": "Mikrochipnummer",
+      "collar": "Halsbandsidentifierare",
+      "microchip": "Mikrochipnummer",
       "buyerName": "Köparens namn",
       "buyerPhone": "Köparens telefonnummer",
       "enterWeight": "Ange vikt",
       "enterHeight": "Ange höjd",
-      "addNote": "Lägg till en ny anteckning om denna valp...",
+      "birthWeight": "0,00",
+      "note": "Lägg till en ny anteckning om denna valp...",
       "enterNote": "Skriv en anteckning om denna valp",
-      "selectStatus": "Välj status",
+      "status": "Välj status",
       "selectPuppy": "Välj valp",
       "weightPlaceholder": "0,00"
     },

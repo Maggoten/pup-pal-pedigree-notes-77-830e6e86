@@ -16,7 +16,7 @@ interface PuppyDetailsFormProps {
 }
 
 const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) => {
-  const { t } = useTranslation('litters');
+  const { t, ready } = useTranslation('litters');
   // Basic details state
   const [name, setName] = useState(puppy.name);
   const [gender, setGender] = useState(puppy.gender);
