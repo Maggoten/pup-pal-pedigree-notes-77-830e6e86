@@ -454,7 +454,7 @@
   "pages": {
     "details": {
       "title": "Dräktighetsdetaljer",
-      "description": "Följ dräktighetsframsteg och utveckling",
+      "description": "Följ dräktigheten och dess utveckling",
       "loadingDescription": "Laddar dräktighetsdetaljer...",
       "notFound": {
         "title": "Dräktighet Hittades Inte",
