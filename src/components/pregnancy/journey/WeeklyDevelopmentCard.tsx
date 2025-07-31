@@ -31,17 +31,21 @@ const WeeklyDevelopmentCard: React.FC<WeeklyDevelopmentCardProps> = ({
   }
 
   const weekKey = `week${development.week}`;
+  
+  // Get translations with fallbacks
+  const title = t(`journey.development.${weekKey}.title`) || development.title;
+  const description = t(`journey.development.${weekKey}.description`) || development.description;
   const keyPoints = t(`journey.development.${weekKey}.keyPoints`, { returnObjects: true });
   
-  // Ensure keyPoints is an array
-  const keyPointsArray = Array.isArray(keyPoints) ? keyPoints : [];
+  // Ensure keyPoints is an array with fallback
+  const keyPointsArray = Array.isArray(keyPoints) ? keyPoints : development.keyPoints || [];
   
   return (
     <Card className="h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
           <PawPrint className="h-5 w-5 text-primary" />
-          {t(`journey.development.${weekKey}.title`)}
+          {title}
         </CardTitle>
         
         <div className="flex justify-between items-center mt-2 mb-1 text-sm">
@@ -54,7 +58,7 @@ const WeeklyDevelopmentCard: React.FC<WeeklyDevelopmentCardProps> = ({
       
       <CardContent>
         <p className="text-muted-foreground mb-4">
-          {t(`journey.development.${weekKey}.description`)}
+          {description}
         </p>
         
         <div className="space-y-2">
