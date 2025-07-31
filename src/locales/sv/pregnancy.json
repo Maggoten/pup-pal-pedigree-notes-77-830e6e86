@@ -272,6 +272,7 @@
   "journey": {
     "title": "{{femaleName}}s Dräktighet",
     "description": "Följ utveckling och symptom vecka för vecka",
+    "matingInfo": "Parad med {{maleName}} den {{matingDate}}",
     "alert": {
       "signIn": "Logga in för att spara dina checklistdata på alla enheter"
     },
