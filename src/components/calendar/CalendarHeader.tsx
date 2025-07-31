@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { format } from 'date-fns';
-import { sv, enUS } from 'date-fns/locale';
+import { sv } from 'date-fns/locale/sv';
+import { enUS } from 'date-fns/locale/en-US';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, ChevronLeft, ChevronRight, Plus, RefreshCcw } from 'lucide-react';
 import { CardHeader, CardTitle } from '@/components/ui/card';
