@@ -78,6 +78,14 @@
       "addTitle": "Lägg till Anteckning",
       "historyTitle": "Dräktighetsanteckningar"
     },
+    "checklist": {
+      "title": "Dräktighetssymptom Spårare",
+      "description": "Markera symptom när du observerar dem under {{femaleName}}s dräktighet",
+      "progressTitle": "Observerade Symptom",
+      "errorTitle": "Fel vid Laddning av Symptomspårare",
+      "errorMessage": "Försök uppdatera sidan eller kontakta support om problemet kvarstår.",
+      "noData": "Kunde inte ladda symptomspårare. Försök igen."
+    },
     "form": {
       "symptomLabel": "Observation",
       "symptomPlaceholder": "Beskriv vad du observerade...",
@@ -299,6 +307,35 @@
           "text": "Aktiv förlossning börjar",
           "description": "Starka sammandragningar följt av förlossning av valpar."
         }
+      }
+    },
+    "groups": {
+      "week1": {
+        "title": "Vecka 1 – Befruktning & Hormonell Förändring"
+      },
+      "week2": {
+        "title": "Vecka 2 – Tidiga Förändringar"
+      },
+      "week3": {
+        "title": "Vecka 3 – Implantation"
+      },
+      "week4": {
+        "title": "Vecka 4 – Fysiska Tecken Börjar"
+      },
+      "week5": {
+        "title": "Vecka 5 – Aptiten Återvänder"
+      },
+      "week6": {
+        "title": "Vecka 6 – Synlig Tillväxt"
+      },
+      "week7": {
+        "title": "Vecka 7 – Förberedelse för Födelse"
+      },
+      "week8": {
+        "title": "Vecka 8 – Närmar sig Förlossning"
+      },
+      "week9": {
+        "title": "Vecka 9 – Förlossning & Valpning"
       }
     }
   },

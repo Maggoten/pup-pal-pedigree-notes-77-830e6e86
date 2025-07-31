@@ -7,12 +7,12 @@ export const CURRENT_CHECKLIST_VERSION = 2;
 export const defaultPregnancyChecklist: ChecklistGroup[] = [
   {
     id: "week1",
-    title: "Week 1 – Conception & Hormonal Shift",
+    title: "checklist.groups.week1.title",
     items: [
       {
         id: "week1-1",
-        text: "Slight appetite change",
-        description: "May eat less or become slightly pickier as hormone levels begin to shift.",
+        text: "checklist.items.week1.item1.text",
+        description: "checklist.items.week1.item1.description",
         isCompleted: false,
         weekNumber: 1
       }
@@ -20,19 +20,19 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
   },
   {
     id: "week2",
-    title: "Week 2 – Early Changes",
+    title: "checklist.groups.week2.title",
     items: [
       {
         id: "week2-1",
-        text: "Slight behavioral change",
-        description: "May become more affectionate, clingy or tired.",
+        text: "checklist.items.week2.item1.text",
+        description: "checklist.items.week2.item1.description",
         isCompleted: false,
         weekNumber: 2
       },
       {
         id: "week2-2",
-        text: "Mild nausea (morning sickness)",
-        description: "May vomit slightly or seem queasy due to hormonal changes.",
+        text: "checklist.items.week2.item2.text",
+        description: "checklist.items.week2.item2.description",
         isCompleted: false,
         weekNumber: 2
       }
@@ -40,12 +40,12 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
   },
   {
     id: "week3",
-    title: "Week 3 – Implantation",
+    title: "checklist.groups.week3.title",
     items: [
       {
         id: "week3-1",
-        text: "Clear vaginal discharge",
-        description: "Small amount of clear, non-smelly discharge can appear when embryos implant.",
+        text: "checklist.items.week3.item1.text",
+        description: "checklist.items.week3.item1.description",
         isCompleted: false,
         weekNumber: 3
       }
@@ -53,19 +53,19 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
   },
   {
     id: "week4",
-    title: "Week 4 – Physical Signs Begin",
+    title: "checklist.groups.week4.title",
     items: [
       {
         id: "week4-1",
-        text: "Enlarged nipples",
-        description: "Nipples become larger, rounder and darker in color.",
+        text: "checklist.items.week4.item1.text",
+        description: "checklist.items.week4.item1.description",
         isCompleted: false,
         weekNumber: 4
       },
       {
         id: "week4-2",
-        text: "Noticeable weight gain",
-        description: "Slight increase in body weight as pregnancy progresses.",
+        text: "checklist.items.week4.item2.text",
+        description: "checklist.items.week4.item2.description",
         isCompleted: false,
         weekNumber: 4
       }
@@ -73,12 +73,12 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
   },
   {
     id: "week5",
-    title: "Week 5 – Appetite Returns",
+    title: "checklist.groups.week5.title",
     items: [
       {
         id: "week5-1",
-        text: "Increased appetite",
-        description: "Appetite increases as hormone levels stabilize and fetal growth accelerates.",
+        text: "checklist.items.week5.item1.text",
+        description: "checklist.items.week5.item1.description",
         isCompleted: false,
         weekNumber: 5
       }
@@ -86,19 +86,19 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
   },
   {
     id: "week6",
-    title: "Week 6 – Visible Growth",
+    title: "checklist.groups.week6.title",
     items: [
       {
         id: "week6-1",
-        text: "Visible belly growth",
-        description: "Abdomen begins to expand visibly.",
+        text: "checklist.items.week6.item1.text",
+        description: "checklist.items.week6.item1.description",
         isCompleted: false,
         weekNumber: 6
       },
       {
         id: "week6-2",
-        text: "Possible fetal movement",
-        description: "Some may feel slight movement when gently palpating, but more common in Week 7–8.",
+        text: "checklist.items.week6.item2.text",
+        description: "checklist.items.week6.item2.description",
         isCompleted: false,
         weekNumber: 6
       }
@@ -106,19 +106,19 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
   },
   {
     id: "week7",
-    title: "Week 7 – Preparing for Birth",
+    title: "checklist.groups.week7.title",
     items: [
       {
         id: "week7-1",
-        text: "Significant abdominal enlargement",
-        description: "Belly is clearly distended; pregnancy very visible.",
+        text: "checklist.items.week7.item1.text",
+        description: "checklist.items.week7.item1.description",
         isCompleted: false,
         weekNumber: 7
       },
       {
         id: "week7-2",
-        text: "Nesting behavior begins",
-        description: "May begin arranging bedding, digging or seeking quiet areas.",
+        text: "checklist.items.week7.item2.text",
+        description: "checklist.items.week7.item2.description",
         isCompleted: false,
         weekNumber: 7
       }
@@ -126,12 +126,12 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
   },
   {
     id: "week8",
-    title: "Week 8 – Approaching Labor",
+    title: "checklist.groups.week8.title",
     items: [
       {
         id: "week8-1",
-        text: "Increased vaginal discharge",
-        description: "Clear discharge may increase slightly as the body prepares for labor.",
+        text: "checklist.items.week8.item1.text",
+        description: "checklist.items.week8.item1.description",
         isCompleted: false,
         weekNumber: 8
       }
@@ -139,33 +139,33 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
   },
   {
     id: "week9",
-    title: "Week 9 – Pre-labor & Whelping",
+    title: "checklist.groups.week9.title",
     items: [
       {
         id: "week9-1",
-        text: "Temperature drop",
-        description: "Rectal temperature drops below 100°F (37.8°C) 12–24 hours before labor.",
+        text: "checklist.items.week9.item1.text",
+        description: "checklist.items.week9.item1.description",
         isCompleted: false,
         weekNumber: 9
       },
       {
         id: "week9-2",
-        text: "Restlessness and panting",
-        description: "Difficulty settling, increased panting and pacing.",
+        text: "checklist.items.week9.item2.text",
+        description: "checklist.items.week9.item2.description",
         isCompleted: false,
         weekNumber: 9
       },
       {
         id: "week9-3",
-        text: "Refusing food",
-        description: "Appetite may vanish shortly before labor starts.",
+        text: "checklist.items.week9.item3.text",
+        description: "checklist.items.week9.item3.description",
         isCompleted: false,
         weekNumber: 9
       },
       {
         id: "week9-4",
-        text: "Active labor begins",
-        description: "Strong contractions followed by delivery of puppies.",
+        text: "checklist.items.week9.item4.text",
+        description: "checklist.items.week9.item4.description",
         isCompleted: false,
         weekNumber: 9
       }

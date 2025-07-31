@@ -78,6 +78,14 @@
       "addTitle": "Add Note",
       "historyTitle": "Pregnancy Notes"
     },
+    "checklist": {
+      "title": "Pregnancy Symptoms Tracker",
+      "description": "Check off symptoms as you observe them in {{femaleName}}'s pregnancy",
+      "progressTitle": "Symptoms Observed",
+      "errorTitle": "Error Loading Symptoms Tracker",
+      "errorMessage": "Please try refreshing the page or contact support if the problem persists.",
+      "noData": "Unable to load symptom tracker. Please try again."
+    },
     "form": {
       "symptomLabel": "Observation",
       "symptomPlaceholder": "Describe what you observed...",
@@ -299,6 +307,35 @@
           "text": "Active labor begins",
           "description": "Strong contractions followed by delivery of puppies."
         }
+      }
+    },
+    "groups": {
+      "week1": {
+        "title": "Week 1 – Conception & Hormonal Shift"
+      },
+      "week2": {
+        "title": "Week 2 – Early Changes"
+      },
+      "week3": {
+        "title": "Week 3 – Implantation"
+      },
+      "week4": {
+        "title": "Week 4 – Physical Signs Begin"
+      },
+      "week5": {
+        "title": "Week 5 – Appetite Returns"
+      },
+      "week6": {
+        "title": "Week 6 – Visible Growth"
+      },
+      "week7": {
+        "title": "Week 7 – Preparing for Birth"
+      },
+      "week8": {
+        "title": "Week 8 – Approaching Labor"
+      },
+      "week9": {
+        "title": "Week 9 – Pre-labor & Whelping"
       }
     }
   },
