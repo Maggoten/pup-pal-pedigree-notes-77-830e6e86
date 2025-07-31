@@ -18,23 +18,33 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   children,
   className = ""
 }) => {
-  // Add useEffect to force scrollability on mount
+  // Add useEffect to force scrollability on mount and handle redirects
   useEffect(() => {
-    // Reset scroll position to top
-    window.scrollTo(0, 0);
+    // Use setTimeout to ensure scroll reset happens after any redirects
+    const resetScroll = () => {
+      window.scrollTo(0, 0);
+      
+      // Force scrollability on HTML and body elements
+      document.documentElement.style.overflowY = 'auto';
+      document.body.style.overflowY = 'auto';
+      
+      // Special handling for iOS Safari
+      document.documentElement.style.height = 'auto';
+      // Use type assertion for vendor-prefixed CSS property
+      (document.documentElement.style as any)['-webkit-overflow-scrolling'] = 'touch';
+      
+      // Prevent any potential scroll locks
+      document.body.style.position = 'relative';
+      document.body.style.minHeight = '100%';
+    };
+
+    // Reset immediately
+    resetScroll();
     
-    // Force scrollability on HTML and body elements
-    document.documentElement.style.overflowY = 'auto';
-    document.body.style.overflowY = 'auto';
+    // Also reset after a small delay to handle redirects
+    const timeoutId = setTimeout(resetScroll, 50);
     
-    // Special handling for iOS Safari
-    document.documentElement.style.height = 'auto';
-    // Use type assertion for vendor-prefixed CSS property
-    (document.documentElement.style as any)['-webkit-overflow-scrolling'] = 'touch';
-    
-    // Prevent any potential scroll locks
-    document.body.style.position = 'relative';
-    document.body.style.minHeight = '100%';
+    return () => clearTimeout(timeoutId);
   }, []);
 
   return (
