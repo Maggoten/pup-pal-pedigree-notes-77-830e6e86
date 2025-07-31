@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTranslation } from 'react-i18next';
 
 import { toast } from '@/components/ui/use-toast';
 import { useLitterFilter } from './LitterFilterProvider';
@@ -16,6 +17,7 @@ import SelectedLitterHeader from './SelectedLitterHeader';
 import { dogImageService } from '@/services/dogImageService';
 
 const MyLittersContent: React.FC = () => {
+  const { t } = useTranslation('litters');
   const [searchParams, setSearchParams] = useSearchParams();
   const { searchQuery, setSearchQuery, currentPage, setCurrentPage } = useLitterFilter();
   const {
@@ -95,15 +97,15 @@ const MyLittersContent: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span className="flex items-center gap-2">
-              My Litters
+              {t('pages.myLitters.title')}
             </span>
             <Button onClick={() => setShowAddLitterDialog(true)}>
               <PlusCircle className="h-4 w-4 mr-2" />
-              Add Litter
+              {t('actions.addLitter')}
             </Button>
           </CardTitle>
           <CardDescription>
-            Manage your litter records and track puppy development
+            {t('pages.myLitters.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

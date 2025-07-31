@@ -24,7 +24,9 @@
     "delete": "Delete",
     "archive": "Archive",
     "unarchive": "Unarchive Litter",
-    "addLitter": "Add Litter"
+    "addLitter": "Add Litter",
+    "refresh": "Refresh",
+    "tryAgain": "Try Again"
   },
   "display": {
     "litterLabel": "{{damName}} × {{sireName}}",
@@ -69,14 +71,17 @@
     },
     "error": {
       "failedToArchiveLitter": "Failed to archive litter",
-      "failedToLoad": "Failed to load litters"
+      "failedToLoad": "Failed to load litters",
+      "networkConnection": "Network connection problem. Please check your internet connection and try again."
     }
   },
   "loading": {
     "litters": "Loading litters...",
     "saving": "Saving...",
     "deleting": "Deleting...",
-    "archiving": "Archiving..."
+    "archiving": "Archiving...",
+    "preparing": "Preparing connection...",
+    "refreshing": "Refreshing..."
   },
   "puppies": {
     "titles": {

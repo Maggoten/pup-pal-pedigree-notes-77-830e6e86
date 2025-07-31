@@ -124,7 +124,7 @@ const MyLitters: React.FC = () => {
           <AlertCircle className="h-4 w-4 mr-2" />
           <AlertDescription className="flex items-center justify-between w-full">
             <span>{isNetworkError ? 
-              'Network connection problem. Please check your internet connection.' : 
+              t('toasts.error.networkConnection') : 
               errorMessage}
             </span>
             <Button 
@@ -133,7 +133,7 @@ const MyLitters: React.FC = () => {
               onClick={handleRetry}
               className="ml-2 bg-white"
             >
-              Try Again
+              {t('actions.tryAgain')}
             </Button>
           </AlertDescription>
         </Alert>
@@ -152,12 +152,12 @@ const MyLitters: React.FC = () => {
             {isRefreshing ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Refreshing...</span>
+                <span>{t('loading.refreshing')}</span>
               </>
             ) : (
               <>
                 <RefreshCcw className="h-4 w-4" />
-                <span>Refresh</span>
+                <span>{t('actions.refresh')}</span>
               </>
             )}
           </Button>
@@ -169,7 +169,7 @@ const MyLitters: React.FC = () => {
           <div className="flex flex-col items-center justify-center py-8">
             <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
             <p className="text-muted-foreground">
-              {!isAuthReady ? "Preparing connection..." : "Loading litter data..."}
+              {!isAuthReady ? t('loading.preparing') : t('loading.litters')}
             </p>
           </div>
         ) : (

@@ -29,7 +29,7 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
 }) => {
   const [showEditLitterDialog, setShowEditLitterDialog] = useState(false);
   const isMobile = useIsMobile();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation('litters');
   const birthDate = parseISO(litter.dateOfBirth);
   const ageInWeeks = Math.floor((new Date().getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
   const isRecent = ageInWeeks < 12;
@@ -81,7 +81,7 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
             </div>
             
             <div>
-              <p className="text-muted-foreground">Date of Birth</p>
+              <p className="text-muted-foreground">{t('display.dateOfBirth')}</p>
               <p className="font-medium">{formatDateWithLocale(birthDate, 'MMMM d, yyyy', i18n.language)}</p>
             </div>
             

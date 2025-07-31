@@ -24,7 +24,9 @@
     "delete": "Ta bort",
     "archive": "Arkivera",
     "unarchive": "Avarkivera Kull",
-    "addLitter": "Lägg till Kull"
+    "addLitter": "Lägg till Kull",
+    "refresh": "Uppdatera",
+    "tryAgain": "Försök igen"
   },
   "display": {
     "litterLabel": "{{damName}} × {{sireName}}",
@@ -69,14 +71,17 @@
     },
     "error": {
       "failedToArchiveLitter": "Misslyckades med att arkivera kull",
-      "failedToLoad": "Misslyckades med att ladda kullar"
+      "failedToLoad": "Misslyckades med att ladda kullar",
+      "networkConnection": "Problem med nätverksanslutningen. Kontrollera din internetanslutning och försök igen."
     }
   },
   "loading": {
     "litters": "Laddar kullar...",
     "saving": "Sparar...",
     "deleting": "Tar bort...",
-    "archiving": "Arkiverar..."
+    "archiving": "Arkiverar...",
+    "preparing": "Förbereder anslutning...",
+    "refreshing": "Uppdaterar..."
   },
   "puppies": {
     "titles": {
