@@ -255,6 +255,7 @@
   "pages": {
     "details": {
       "title": "Pregnancy Details",
+      "description": "Track pregnancy progress and development",
       "loadingDescription": "Loading pregnancy details...",
       "notFound": {
         "title": "Pregnancy Not Found",

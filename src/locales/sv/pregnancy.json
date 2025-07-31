@@ -255,6 +255,7 @@
   "pages": {
     "details": {
       "title": "Dräktighetsdetaljer",
+      "description": "Följ dräktighetsframsteg och utveckling",
       "loadingDescription": "Laddar dräktighetsdetaljer...",
       "notFound": {
         "title": "Dräktighet Hittades Inte",

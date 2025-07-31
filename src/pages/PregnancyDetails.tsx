@@ -109,8 +109,8 @@ const PregnancyDetails = () => {
 
   return (
     <PageLayout 
-      title={`${pregnancy.femaleName}'s Pregnancy`} 
-      description="Track pregnancy progress and development"
+      title={ready ? t('journey.title', { femaleName: pregnancy.femaleName }) : 'Loading...'} 
+      description={ready ? t('pages.details.description') : 'Loading...'}
       icon={<Heart className="h-6 w-6" />}
     >
       {/* Updated vertically stacked action section */}
