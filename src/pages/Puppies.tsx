@@ -5,9 +5,11 @@ import { usePuppyData } from '@/hooks/usePuppyData';
 import PuppiesHeader from '@/components/puppies/PuppiesHeader';
 import LitterTabs from '@/components/puppies/LitterTabs';
 import EmptyPuppiesState from '@/components/puppies/EmptyPuppiesState';
-import { PawPrint } from 'lucide-react';
+import { PawPrint, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Puppies: React.FC = () => {
+  const { t, ready } = useTranslation('litters');
   const {
     litters,
     selectedLitterId,
@@ -16,10 +18,24 @@ const Puppies: React.FC = () => {
     handleAddWeightLog
   } = usePuppyData();
 
+  if (!ready) {
+    return (
+      <PageLayout 
+        title="Loading..." 
+        description="Loading..."
+        icon={<PawPrint className="h-6 w-6" />}
+      >
+        <div className="flex justify-center items-center h-32">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout 
-      title="Puppies" 
-      description="Track your litters and individual puppies"
+      title={t('pages.puppies.title')} 
+      description={t('pages.puppies.description')}
       icon={<PawPrint className="h-6 w-6" />}
     >
       <div className="bg-background min-h-[calc(100vh-6rem)]">

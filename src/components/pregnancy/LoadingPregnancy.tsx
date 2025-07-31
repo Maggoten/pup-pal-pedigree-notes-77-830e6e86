@@ -2,12 +2,15 @@
 import React from 'react';
 import { PawPrint } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
+import { useTranslation } from 'react-i18next';
 
 const LoadingPregnancy: React.FC = () => {
+  const { t, ready } = useTranslation('pregnancy');
+
   return (
     <PageLayout
-      title="Loading Pregnancy Details"
-      description="Please wait..."
+      title={ready ? t('loading.title') : 'Loading...'}
+      description={ready ? t('loading.message') : 'Loading...'}
       icon={<PawPrint className="h-6 w-6" />}
     >
       <div className="flex justify-center items-center h-64">

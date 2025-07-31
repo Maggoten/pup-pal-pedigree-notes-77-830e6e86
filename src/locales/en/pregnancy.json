@@ -250,7 +250,9 @@
     "saving": "Saving...",
     "deleting": "Deleting...",
     "completing": "Completing...",
-    "pregnancyDetails": "Loading pregnancy details..."
+    "pregnancyDetails": "Loading pregnancy details...",
+    "title": "Loading Pregnancy Details",
+    "message": "Please wait..."
   },
   "pages": {
     "details": {

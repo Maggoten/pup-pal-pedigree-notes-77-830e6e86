@@ -250,7 +250,9 @@
     "saving": "Sparar...",
     "deleting": "Tar bort...",
     "completing": "Avslutar...",
-    "pregnancyDetails": "Laddar dräktighetsdetaljer..."
+    "pregnancyDetails": "Laddar dräktighetsdetaljer...",
+    "title": "Laddar Dräktighetsdetaljer",
+    "message": "Vänligen vänta..."
   },
   "pages": {
     "details": {

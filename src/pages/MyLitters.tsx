@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import useLitterQueries from '@/hooks/litters/queries/useLitterQueries';
 import { isMobileDevice } from '@/utils/fetchUtils';
+import { useTranslation } from 'react-i18next';
 
 const MyLittersLoading = () => (
   <div className="space-y-4 p-4">
@@ -21,6 +22,7 @@ const MyLittersLoading = () => (
 );
 
 const MyLitters: React.FC = () => {
+  const { t, ready } = useTranslation('litters');
   const [contentLoading, setContentLoading] = useState(true);
   const { isAuthReady } = useAuth();
   const { isError, error, refreshLitters } = useLitterQueries();
@@ -95,10 +97,25 @@ const MyLitters: React.FC = () => {
                         errorMessage.includes('Network error') ||
                         errorMessage.includes('timeout');
 
+  if (!ready) {
+    return (
+      <PageLayout 
+        title="Loading..." 
+        description="Loading..." 
+        icon={<PawPrint className="h-6 w-6" />}
+        className="bg-warmbeige-50/50 overflow-y-auto"
+      >
+        <div className="flex justify-center items-center h-32">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout 
-      title="My Litters" 
-      description="Manage your litter records and puppies" 
+      title={t('pages.myLitters.title')} 
+      description={t('pages.myLitters.description')} 
       icon={<PawPrint className="h-6 w-6" />}
       className="bg-warmbeige-50/50 overflow-y-auto"
     >

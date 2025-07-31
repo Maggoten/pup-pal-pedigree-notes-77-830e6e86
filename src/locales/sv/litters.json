@@ -6,6 +6,10 @@
     "myLitters": {
       "title": "Mina Kullar",
       "description": "Visa och hantera dina kullar, följ upp vikt, hälsa och få tillgång till detaljerad kullinfo"
+    },
+    "puppies": {
+      "title": "Valpar",
+      "description": "Följ dina kullar och enskilda valpar"
     }
   },
   "actions": {

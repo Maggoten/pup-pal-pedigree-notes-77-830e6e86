@@ -6,6 +6,10 @@
     "myLitters": {
       "title": "My Litters",
       "description": "View and manage all your recorded litters, track births, and access detailed litter information"
+    },
+    "puppies": {
+      "title": "Puppies",
+      "description": "Track your litters and individual puppies"
     }
   },
   "actions": {
