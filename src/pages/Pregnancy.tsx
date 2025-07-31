@@ -75,8 +75,6 @@ const Pregnancy: React.FC = () => {
         if (!targetPregnancyId && activeData.length > 0) {
           console.log("No ID in URL, redirecting to first pregnancy");
           navigate(`/pregnancy/${activeData[0].id}`, { replace: true });
-          // Reset scroll position after redirect
-          setTimeout(() => window.scrollTo(0, 0), 100);
           return;
         }
         

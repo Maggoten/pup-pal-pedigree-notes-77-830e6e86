@@ -29,15 +29,8 @@ const WeekSelector: React.FC<WeekSelectorProps> = ({
   const isMobile = useIsMobile();
   const carouselRef = useRef<HTMLDivElement>(null);
   
-  const isInitialMount = useRef(true);
-  
-  // Only scroll to current week when user actively changes weeks, not on initial mount
+  // Scroll to current week when component mounts or current week changes
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-    
     if (carouselRef.current) {
       // Find the current week element and scroll it into view
       const currentWeekElement = carouselRef.current.querySelector(`[data-week="${currentWeek}"]`);
@@ -45,7 +38,7 @@ const WeekSelector: React.FC<WeekSelectorProps> = ({
         currentWeekElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
     }
-  }, [currentWeek]);
+  }, [currentWeek, carouselRef]);
   
   return (
     <div className="w-full relative">

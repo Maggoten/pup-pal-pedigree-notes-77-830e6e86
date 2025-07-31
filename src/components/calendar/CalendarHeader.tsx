@@ -1,8 +1,6 @@
 
 import React from 'react';
 import { format } from 'date-fns';
-import { sv } from 'date-fns/locale/sv';
-import { enUS } from 'date-fns/locale/en-US';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, ChevronLeft, ChevronRight, Plus, RefreshCcw } from 'lucide-react';
 import { CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,16 +29,11 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   isSyncing = false
 }) => {
   const isMobile = useIsMobile();
-  const { t, i18n } = useTranslation('home');
+  const { t } = useTranslation('home');
   
-  // Get the appropriate locale for date-fns based on current language
-  const getLocale = () => {
-    return i18n.language === 'sv' ? sv : enUS;
-  };
-  
-  // Get current month name and year with proper locale
-  const headerMonthYear = format(currentDate, 'MMMM yyyy', { locale: getLocale() });
-  const isCurrentMonth = format(new Date(), 'MMMM yyyy', { locale: getLocale() }) === headerMonthYear;
+  // Get current month name and year
+  const headerMonthYear = format(currentDate, 'MMMM yyyy');
+  const isCurrentMonth = format(new Date(), 'MMMM yyyy') === headerMonthYear;
   
   // Default handler for today button if not provided
   const handleTodayClick = () => {
