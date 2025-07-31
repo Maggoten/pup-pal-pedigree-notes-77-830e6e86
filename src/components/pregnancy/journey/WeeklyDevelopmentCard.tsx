@@ -31,18 +31,14 @@ const WeeklyDevelopmentCard: React.FC<WeeklyDevelopmentCardProps> = ({
   }
 
   const weekKey = `week${development.week}`;
-  const weekData = t(`journey.development.${weekKey}`, { returnObjects: true }) as {
-    title: string;
-    description: string;
-    keyPoints: string[];
-  };
-
+  const keyPoints = t(`journey.development.${weekKey}.keyPoints`, { returnObjects: true }) as string[];
+  
   return (
     <Card className="h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
           <PawPrint className="h-5 w-5 text-primary" />
-          {weekData.title || development.title}
+          {t(`journey.development.${weekKey}.title`)}
         </CardTitle>
         
         <div className="flex justify-between items-center mt-2 mb-1 text-sm">
@@ -55,13 +51,13 @@ const WeeklyDevelopmentCard: React.FC<WeeklyDevelopmentCardProps> = ({
       
       <CardContent>
         <p className="text-muted-foreground mb-4">
-          {weekData.description || development.description}
+          {t(`journey.development.${weekKey}.description`)}
         </p>
         
         <div className="space-y-2">
           <h4 className="font-medium text-sm">{t('journey.development.keyPointsTitle')}</h4>
           <ul className="space-y-2">
-            {(weekData.keyPoints || development.keyPoints || []).map((point, index) => (
+            {(keyPoints || []).map((point, index) => (
               <li key={index} className="flex items-start gap-2 text-sm">
                 <span className="h-5 w-5 flex-shrink-0 flex items-center justify-center rounded-full bg-primary/10 text-primary">
                   {index + 1}
