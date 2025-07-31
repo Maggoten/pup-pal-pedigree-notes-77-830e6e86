@@ -491,5 +491,10 @@
         "confirm": "Ta Bort Permanent"
       }
     }
+  },
+  "dropdown": {
+    "pregnancyName": "{{femaleName}}s Dräktighet",
+    "completedPregnancies": "Avslutade Dräktigheter",
+    "viewAllCompleted": "Visa Alla Avslutade Dräktigheter"
   }
 }

@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Heart, Baby, MoreHorizontal, PawPrint } from 'lucide-react';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 interface PregnancyDropdownSelectorProps {
   activePregnancies: ActivePregnancy[];
@@ -33,6 +34,7 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
   onShowAllCompleted
 }) => {
   const navigate = useNavigate();
+  const { t, ready } = useTranslation('pregnancy');
   
   const allPregnancies = [...activePregnancies, ...completedPregnancies];
   
@@ -51,11 +53,13 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
   const isCurrentPregnancyCompleted = completedPregnancies.some(p => p.id === currentPregnancyId);
   
   const formatPregnancyDisplayName = (pregnancy: ActivePregnancy, isCompleted: boolean) => {
+    if (!ready) return pregnancy.femaleName;
+    
     if (isCompleted) {
       const monthYear = format(pregnancy.expectedDueDate, 'MMM yyyy');
-      return `${pregnancy.femaleName}'s Pregnancy (${monthYear})`;
+      return `${t('dropdown.pregnancyName', { femaleName: pregnancy.femaleName })} (${monthYear})`;
     }
-    return `${pregnancy.femaleName}'s Pregnancy`;
+    return t('dropdown.pregnancyName', { femaleName: pregnancy.femaleName });
   };
     
   const handlePregnancyChange = (pregnancyId: string) => {
@@ -87,7 +91,9 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
                     {formatPregnancyDisplayName(currentPregnancy, isCurrentPregnancyCompleted)}
                   </span>
                   {isCurrentPregnancyCompleted && (
-                    <Badge variant="secondary" className="text-xs">Completed</Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {ready ? t('status.completed') : 'Completed'}
+                    </Badge>
                   )}
                 </>
               )}
@@ -99,7 +105,7 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
             <SelectGroup>
               <SelectLabel className="flex items-center gap-2 text-primary">
                 <Heart className="h-4 w-4" />
-                Active Pregnancies
+                {ready ? t('metrics.activePregnancies') : 'Active Pregnancies'}
               </SelectLabel>
               {activePregnancies.map(pregnancy => (
                 <SelectItem 
@@ -124,7 +130,7 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
             <SelectGroup>
               <SelectLabel className="flex items-center gap-2 text-muted-foreground">
                 <PawPrint className="h-4 w-4" />
-                Completed Pregnancies
+                {ready ? t('dropdown.completedPregnancies') : 'Completed Pregnancies'}
               </SelectLabel>
               {completedPregnancies.map(pregnancy => (
                 <SelectItem 
@@ -147,7 +153,7 @@ const PregnancyDropdownSelector: React.FC<PregnancyDropdownSelectorProps> = ({
               <SelectItem value="view-all-completed" className="cursor-pointer justify-center">
                 <div className="flex items-center gap-2 text-primary">
                   <MoreHorizontal className="h-4 w-4" />
-                  View All Completed Pregnancies
+                  {ready ? t('dropdown.viewAllCompleted') : 'View All Completed Pregnancies'}
                 </div>
               </SelectItem>
             </>

@@ -491,5 +491,10 @@
         "confirm": "Delete Permanently"
       }
     }
+  },
+  "dropdown": {
+    "pregnancyName": "{{femaleName}}'s Pregnancy",
+    "completedPregnancies": "Completed Pregnancies", 
+    "viewAllCompleted": "View All Completed Pregnancies"
   }
 }
