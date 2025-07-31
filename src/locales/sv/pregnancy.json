@@ -32,21 +32,21 @@
   },
   "display": {
     "matingDate": "Parningsdatum",
-    "dueDate": "Födelsedatum",
-    "expectedDueDate": "Förväntat Födelsedatum",
+    "dueDate": "Förlossningsdatum",
+    "expectedDueDate": "Förväntat Förlossningsdatum",
     "daysLeft": "Dagar Kvar",
     "daysRemaining": "Dagar Kvar",
     "currentWeek": "Vecka {{week}}",
     "weekOf": "Vecka {{week}} av {{total}}",
     "progressComplete": "{{percent}}% klart",
     "femaleName": "Tik",
-    "maleName": "Hanhund",
+    "maleName": "Hane",
     "breedingPair": "{{femaleName}} × {{maleName}}"
   },
   "summary": {
     "cards": {
       "matingDate": "Parningsdatum",
-      "dueDate": "Födelsedatum",
+      "dueDate": "Förlossningsdatum",
       "daysRemaining": "Dagar Kvar"
     }
   },
@@ -146,17 +146,17 @@
     "addPregnancy": {
       "title": "Lägg till Ny Dräktighet",
       "femaleLabel": "Tik (Moder)",
-      "maleLabel": "Hanhund (Fader)",
+      "maleLabel": "Hane (Fader)",
       "matingDateLabel": "Parningsdatum",
-      "expectedDueDateLabel": "Förväntat Födelsedatum (63 dagar från parning)",
+      "expectedDueDateLabel": "Förväntat Förlossningsdatum (63 dagar från parning)",
       "femalePlaceholder": "Välj tik",
-      "malePlaceholder": "Välj hanhund",
-      "description": "Skapa en ny dräktighetspost för en hund som redan har parat sig.",
-      "externalMaleToggle": "Extern hanhund",
+      "malePlaceholder": "Välj hane",
+      "description": "Skapa en ny dräktighetspost för en hund som redan är parad.",
+      "externalMaleToggle": "Extern hane",
       "externalMaleNameLabel": "Extern hanhunds namn",
       "externalMaleNamePlaceholder": "Ange extern hanhunds namn",
       "noFemaleDogs": "Inga tikar hittades",
-      "noMaleDogs": "Inga hanhundar hittades"
+      "noMaleDogs": "Inga hanar hittades"
     },
     "managePregnancy": {
       "title": "Hantera Dräktighet",
@@ -197,7 +197,7 @@
     "femaleRequired": "Tik krävs",
     "maleRequired": "Hanhund krävs",
     "matingDateRequired": "Parningsdatum krävs",
-    "dueDateRequired": "Födelsedatum krävs",
+    "dueDateRequired": "Förlossningsdatum krävs",
     "temperatureRequired": "Temperatur krävs",
     "temperatureRequiredDescription": "Ange ett temperaturvärde.",
     "invalidTemperature": "Ogiltig temperatur",
@@ -216,7 +216,7 @@
   "toasts": {
     "success": {
       "pregnancyAdded": "Dräktighet tillagd",
-      "pregnancyAddedDescription": "Dräktigheten har lagts till framgångsrikt",
+      "pregnancyAddedDescription": "Dräktigheten har lagts till",
       "pregnancyUpdated": "Dräktighet uppdaterad",
       "pregnancyDeleted": "Dräktighet borttagen",
       "pregnancyCompleted": "Dräktighet markerad som avslutad",
@@ -230,7 +230,7 @@
       "failedToAddPregnancyDescription": "Det uppstod ett problem med att lägga till dräktigheten",
       "missingInformation": "Saknar information",
       "selectFemaleDog": "Välj en tik",
-      "selectMaleDog": "Välj en hanhund",
+      "selectMaleDog": "Välj en hane",
       "enterExternalMaleName": "Ange ett namn för den externa hanhunden",
       "failedToUpdatePregnancy": "Misslyckades med att uppdatera dräktighet",
       "failedToDeletePregnancy": "Misslyckades med att ta bort dräktighet",
@@ -270,7 +270,7 @@
     "notes": "Anteckningar"
   },
   "journey": {
-    "title": "{{femaleName}}s Dräktighetsresa",
+    "title": "{{femaleName}}s Dräktighet",
     "description": "Följ utveckling och symptom vecka för vecka",
     "alert": {
       "signIn": "Logga in för att spara dina checklistdata på alla enheter"
