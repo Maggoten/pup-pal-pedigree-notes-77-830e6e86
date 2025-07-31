@@ -15,7 +15,21 @@ const PregnancyHeader: React.FC<PregnancyHeaderProps> = ({
   maleName,
   matingDate,
 }) => {
-  const { t } = useTranslation('pregnancy');
+  const { t, ready } = useTranslation('pregnancy');
+
+  if (!ready) {
+    return (
+      <div className="flex items-center gap-3">
+        <div className="text-primary">
+          <PawPrint className="h-6 w-6" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Loading...</h1>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-3">

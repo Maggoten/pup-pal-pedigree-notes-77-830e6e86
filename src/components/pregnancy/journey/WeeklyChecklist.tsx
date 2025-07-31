@@ -20,17 +20,18 @@ const WeeklyChecklist: React.FC<WeeklyChecklistProps> = ({
   weekNumber,
   isLoading = false
 }) => {
-  const { t } = useTranslation('pregnancy');
+  const { t, ready } = useTranslation('pregnancy');
   const { user } = useAuth();
   
   console.log(`📋 WeeklyChecklist rendered for week ${weekNumber}:`, { 
     itemsCount: checklistItems?.length, 
     isLoading,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    ready
   });
 
-  // Loading state
-  if (isLoading) {
+  // Loading state or translations not ready
+  if (!ready || isLoading) {
     return (
       <Card className="h-full">
         <CardHeader>

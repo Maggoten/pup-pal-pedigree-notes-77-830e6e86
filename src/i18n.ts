@@ -54,13 +54,25 @@ i18n
   .init({
     resources,
     fallbackLng: 'en',
-    debug: false,
+    debug: process.env.NODE_ENV === 'development',
     
     ns: ['common', 'auth', 'home', 'dogs', 'litters', 'plannedLitters', 'pregnancy', 'settings', 'navigation'],
     defaultNS: 'common',
     
+    detection: {
+      order: ['localStorage', 'navigator', 'htmlTag'],
+      lookupLocalStorage: 'i18nextLng',
+      caches: ['localStorage'],
+    },
+    
     interpolation: {
       escapeValue: false,
+    },
+    
+    saveMissing: false,
+    load: 'languageOnly',
+    react: {
+      useSuspense: false,
     },
   });
 

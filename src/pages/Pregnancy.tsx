@@ -22,7 +22,7 @@ import AddPregnancyDialog from '@/components/pregnancy/AddPregnancyDialog';
 import { PregnancyDetails } from '@/services/PregnancyService';
 
 const Pregnancy: React.FC = () => {
-  const { t } = useTranslation('pregnancy');
+  const { t, ready } = useTranslation('pregnancy');
   const navigate = useNavigate();
   const { pregnancyId } = useParams();
   const { dogs } = useDogs();
@@ -107,6 +107,21 @@ const Pregnancy: React.FC = () => {
   const handleRefreshData = () => {
     setDataFetched(false);
   };
+
+  if (!ready) {
+    return (
+      <PageLayout 
+        title="Loading..." 
+        description="Loading translations..."
+        icon={<Heart className="h-6 w-6" />}
+        className="overflow-y-auto"
+      >
+        <div className="flex justify-center items-center h-40">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout 

@@ -17,7 +17,7 @@ import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const PregnancyDetails = () => {
-  const { t } = useTranslation('pregnancy');
+  const { t, ready } = useTranslation('pregnancy');
   const { id } = useParams<{ id: string }>();
   const { pregnancy, loading } = usePregnancyDetails(id);
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
@@ -77,7 +77,7 @@ const PregnancyDetails = () => {
     setAllCompletedDialogOpen(true);
   };
 
-  if (loading || loadingPregnancies) {
+  if (!ready || loading || loadingPregnancies) {
     return (
       <PageLayout 
         title={t('pages.details.title')} 

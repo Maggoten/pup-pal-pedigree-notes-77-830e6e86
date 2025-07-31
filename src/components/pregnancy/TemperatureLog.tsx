@@ -12,8 +12,24 @@ interface TemperatureLogProps {
 }
 
 const TemperatureLog: React.FC<TemperatureLogProps> = ({ pregnancyId, femaleName }) => {
-  const { t } = useTranslation('pregnancy');
+  const { t, ready } = useTranslation('pregnancy');
   const { temperatures, addTemperature, deleteTemperature } = useTemperatureLog(pregnancyId);
+  
+  if (!ready) {
+    return (
+      <Card className="bg-white border-sage-200">
+        <CardHeader className="border-b border-sage-100">
+          <CardTitle className="font-le-jour">Loading...</CardTitle>
+          <CardDescription>Loading...</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="flex justify-center items-center h-32">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
     <Card className="bg-white border-sage-200">

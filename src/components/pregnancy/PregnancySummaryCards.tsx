@@ -16,7 +16,28 @@ const PregnancySummaryCards: React.FC<PregnancySummaryCardsProps> = ({
   expectedDueDate,
   daysLeft,
 }) => {
-  const { t } = useTranslation('pregnancy');
+  const { t, ready } = useTranslation('pregnancy');
+  
+  if (!ready) {
+    return (
+      <Card className="mb-6 bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 border border-warmbeige-200 shadow-md">
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white border border-warmbeige-200 rounded-lg p-4 flex flex-col items-center">
+                <div className="bg-warmbeige-100 p-3 rounded-full mb-3">
+                  <div className="h-7 w-7 bg-warmbeige-200 rounded animate-pulse"></div>
+                </div>
+                <div className="h-4 w-20 bg-warmbeige-200 rounded animate-pulse mb-2"></div>
+                <div className="h-3 w-16 bg-warmbeige-200 rounded animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   return (
     <Card className="mb-6 bg-gradient-to-br from-warmbeige-50 to-warmbeige-100 border border-warmbeige-200 shadow-md overflow-hidden relative">
       {/* Decorative background elements */}

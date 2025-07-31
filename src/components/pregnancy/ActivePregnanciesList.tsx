@@ -27,7 +27,7 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
   onAddPregnancy,
   isLoading = false 
 }) => {
-  const { t } = useTranslation('pregnancy');
+  const { t, ready } = useTranslation('pregnancy');
   const navigate = useNavigate();
 
   const handleViewPregnancyDetails = (pregnancyId: string) => {
@@ -60,7 +60,7 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
         <CardDescription>{t('actions.managePregnancy')}</CardDescription>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {!ready || isLoading ? (
           <div className="flex justify-center items-center h-24">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
