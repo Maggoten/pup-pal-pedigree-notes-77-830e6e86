@@ -97,7 +97,7 @@
     }
   },
   "journey": {
-    "title": "{{femaleName}}s Dräktighet",
+    "title": "{{femaleName}}'s Dräktighet",
     "description": "Följ utveckling och symptom vecka för vecka",
     "matingInfo": "Parad med {{maleName}} den {{matingDate}}",
     "weeklyDevelopment": "Veckovis Utveckling",
