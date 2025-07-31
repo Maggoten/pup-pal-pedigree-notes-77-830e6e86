@@ -106,39 +106,93 @@
     "development": {
       "week1": {
         "title": "Fertilization & Early Development",
-        "description": "The eggs are fertilized and begin their journey to the uterus."
+        "description": "The eggs are fertilized and begin their journey to the uterus.",
+        "keyPoints": [
+          "Breeding has occurred",
+          "Eggs are fertilized within 24-48 hours",
+          "Fertilized eggs begin cell division",
+          "Zygotes travel to the uterus"
+        ]
       },
       "week2": {
         "title": "Implantation",
-        "description": "Embryos implant in the uterine wall and begin developing."
+        "description": "Embryos implant in the uterine wall and begin developing.",
+        "keyPoints": [
+          "Embryos attach to uterine wall",
+          "Implantation begins",
+          "Placenta formation starts",
+          "No visible signs of pregnancy yet"
+        ]
       },
       "week3": {
         "title": "Organ Formation Begins",
-        "description": "Basic organ systems start to form in the developing puppies."
+        "description": "Basic organ systems start to form in the developing puppies.",
+        "keyPoints": [
+          "Organs begin to form in embryos",
+          "Slightly enlarged nipples may be noticeable",
+          "Possible behavior changes in mother",
+          "Embryos approximately 1cm long"
+        ]
       },
       "week4": {
         "title": "Heartbeat Development",
-        "description": "Puppy hearts begin beating and can be detected via ultrasound."
+        "description": "Puppy hearts begin beating and can be detected via ultrasound.",
+        "keyPoints": [
+          "Heartbeats can be detected via ultrasound",
+          "Embryos grow to 1.5-2cm long",
+          "Mother may experience morning sickness",
+          "Possible changes in eating habits"
+        ]
       },
       "week5": {
         "title": "Limb Development",
-        "description": "Limbs and facial features begin to develop more distinctly."
+        "description": "Limbs and facial features begin to develop more distinctly.",
+        "keyPoints": [
+          "Puppies approximately 3-4cm long",
+          "Eyes, ears, and limbs forming",
+          "Mother's abdomen begins to enlarge",
+          "Increased appetite in mother"
+        ]
       },
       "week6": {
         "title": "Rapid Growth Phase",
-        "description": "Puppies enter a period of rapid growth and development."
+        "description": "Puppies enter a period of rapid growth and development.",
+        "keyPoints": [
+          "Puppies' skeletons start to calcify",
+          "Puppies approximately 6cm long",
+          "Development of claws and whiskers",
+          "Puppies becoming more active"
+        ]
       },
       "week7": {
         "title": "Coat Development",
-        "description": "Puppy coats begin to develop and take on their characteristic colors."
+        "description": "Puppy coats begin to develop and take on their characteristic colors.",
+        "keyPoints": [
+          "Puppies have fur starting to grow",
+          "Mother begins nesting behavior",
+          "Milk production starts",
+          "Puppies can be felt moving in abdomen"
+        ]
       },
       "week8": {
         "title": "Final Development",
-        "description": "Puppies are nearly fully developed and preparing for birth."
+        "description": "Puppies are nearly fully developed and preparing for birth.",
+        "keyPoints": [
+          "Puppies are fully developed",
+          "Mother's temperature should be monitored",
+          "Mother shows nesting behavior",
+          "Milk production increases"
+        ]
       },
       "week9": {
         "title": "Birth Preparation",
-        "description": "Final preparations for birth. Labor may begin any day now."
+        "description": "Final preparations for birth. Labor may begin any day now.",
+        "keyPoints": [
+          "Temperature drops below 100°F (37.8°C) 24-48 hours before labor",
+          "Contractions begin",
+          "Mother may become restless",
+          "Puppies are born!"
+        ]
       }
     }
   },

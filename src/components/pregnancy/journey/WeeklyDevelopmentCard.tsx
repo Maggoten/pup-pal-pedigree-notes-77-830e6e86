@@ -15,13 +15,34 @@ const WeeklyDevelopmentCard: React.FC<WeeklyDevelopmentCardProps> = ({
   development,
   weekProgress
 }) => {
-  const { t } = useTranslation('pregnancy');
+  const { t, ready } = useTranslation('pregnancy');
+  
+  if (!ready) {
+    return (
+      <Card className="h-full">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <PawPrint className="h-5 w-5 text-primary" />
+            Loading...
+          </CardTitle>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  const weekKey = `week${development.week}`;
+  const weekData = t(`journey.development.${weekKey}`, { returnObjects: true }) as {
+    title: string;
+    description: string;
+    keyPoints: string[];
+  };
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
           <PawPrint className="h-5 w-5 text-primary" />
-          {development.title}
+          {weekData.title || development.title}
         </CardTitle>
         
         <div className="flex justify-between items-center mt-2 mb-1 text-sm">
@@ -31,15 +52,16 @@ const WeeklyDevelopmentCard: React.FC<WeeklyDevelopmentCardProps> = ({
         <Progress value={weekProgress} className="h-1.5" />
       </CardHeader>
       
+      
       <CardContent>
         <p className="text-muted-foreground mb-4">
-          {development.description}
+          {weekData.description || development.description}
         </p>
         
         <div className="space-y-2">
           <h4 className="font-medium text-sm">{t('journey.development.keyPointsTitle')}</h4>
           <ul className="space-y-2">
-            {development.keyPoints.map((point, index) => (
+            {(weekData.keyPoints || development.keyPoints || []).map((point, index) => (
               <li key={index} className="flex items-start gap-2 text-sm">
                 <span className="h-5 w-5 flex-shrink-0 flex items-center justify-center rounded-full bg-primary/10 text-primary">
                   {index + 1}

@@ -106,39 +106,93 @@
     "development": {
       "week1": {
         "title": "Befruktning & Tidig Utveckling",
-        "description": "Äggen befruktats och börjar sin resa till livmodern."
+        "description": "Äggen befruktats och börjar sin resa till livmodern.",
+        "keyPoints": [
+          "Parning har skett",
+          "Ägg befruktning inom 24-48 timmar",
+          "Befruktade ägg börjar celldelning",
+          "Zygoterer reser till livmodern"
+        ]
       },
       "week2": {
         "title": "Implantation",
-        "description": "Embryon implanteras i livmoderväggen och börjar utvecklas."
+        "description": "Embryon implanteras i livmoderväggen och börjar utvecklas.",
+        "keyPoints": [
+          "Embryon fäster vid livmoderväggen",
+          "Implantation börjar",
+          "Placentabildning startar",
+          "Inga synliga tecken på dräktighet ännu"
+        ]
       },
       "week3": {
         "title": "Organbildning Börjar",
-        "description": "Grundläggande organsystem börjar bildas hos de utvecklande valparna."
+        "description": "Grundläggande organsystem börjar bildas hos de utvecklande valparna.",
+        "keyPoints": [
+          "Organ börjar bildas i embryon",
+          "Något förstorade bröstvårtor kan märkas",
+          "Möjliga beteendeförändringar hos mamman",
+          "Embryon cirka 1cm långa"
+        ]
       },
       "week4": {
         "title": "Hjärtslagsutveckling",
-        "description": "Valparnas hjärtan börjar slå och kan upptäckas via ultraljud."
+        "description": "Valparnas hjärtan börjar slå och kan upptäckas via ultraljud.",
+        "keyPoints": [
+          "Hjärtslag kan upptäckas via ultraljud",
+          "Embryon växer till 1,5-2cm långa",
+          "Mamman kan uppleva morgonkräkningar",
+          "Möjliga förändringar i matvanor"
+        ]
       },
       "week5": {
         "title": "Extremitetsutveckling",
-        "description": "Extremiteter och ansiktsdrag börjar utvecklas mer distinkt."
+        "description": "Extremiteter och ansiktsdrag börjar utvecklas mer distinkt.",
+        "keyPoints": [
+          "Valpar cirka 3-4cm långa",
+          "Ögon, öron och extremiteter formas",
+          "Mammans buk börjar förstoras",
+          "Ökad aptit hos mamman"
+        ]
       },
       "week6": {
         "title": "Snabb Tillväxtfas",
-        "description": "Valparna går in i en period av snabb tillväxt och utveckling."
+        "description": "Valparna går in i en period av snabb tillväxt och utveckling.",
+        "keyPoints": [
+          "Valparnas skelett börjar förkalka",
+          "Valpar cirka 6cm långa",
+          "Utveckling av klor och morrhår",
+          "Valparna blir mer aktiva"
+        ]
       },
       "week7": {
         "title": "Pälsutveckling",
-        "description": "Valparnas päls börjar utvecklas och anta sina karakteristiska färger."
+        "description": "Valparnas päls börjar utvecklas och anta sina karakteristiska färger.",
+        "keyPoints": [
+          "Valparna får päls som börjar växa",
+          "Mamman börjar visa beteende för bobygge",
+          "Mjölkproduktion startar",
+          "Valpar kan kännas röra sig i buken"
+        ]
       },
       "week8": {
         "title": "Slutlig Utveckling",
-        "description": "Valparna är nästan fullt utvecklade och förbereder sig för födelse."
+        "description": "Valparna är nästan fullt utvecklade och förbereder sig för födelse.",
+        "keyPoints": [
+          "Valparna är fullt utvecklade",
+          "Mammans temperatur bör övervakas",
+          "Mamman visar beteende för bobygge",
+          "Mjölkproduktionen ökar"
+        ]
       },
       "week9": {
         "title": "Förberedelser för Födelse",
-        "description": "Slutliga förberedelser för födelse. Förlossning kan börja när som helst nu."
+        "description": "Slutliga förberedelser för födelse. Förlossning kan börja när som helst nu.",
+        "keyPoints": [
+          "Temperaturen sjunker under 37,8°C 24-48 timmar före förlossning",
+          "Sammandragningar börjar",
+          "Mamman kan bli rastlös",
+          "Valparna föds!"
+        ]
       }
     }
   },
