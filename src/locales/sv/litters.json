@@ -222,6 +222,13 @@
       "saveChanges": "Spara Ändringar"
     }
   },
+  "tabs": {
+    "puppies": "Valpar",
+    "development": "Checklista",
+    "developmentShort": "Uppgifter",
+    "charts": "Tillväxtdiagram",
+    "chartsShort": "Diagram"
+  },
   "external": {
     "labels": {
       "sireName": "Hanhundens Namn",

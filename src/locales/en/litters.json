@@ -222,6 +222,13 @@
       "saveChanges": "Save Changes"
     }
   },
+  "tabs": {
+    "puppies": "Puppies",
+    "development": "Checklist",
+    "developmentShort": "Tasks",
+    "charts": "Growth Charts",
+    "chartsShort": "Charts"
+  },
   "external": {
     "labels": {
       "sireName": "Sire Name",

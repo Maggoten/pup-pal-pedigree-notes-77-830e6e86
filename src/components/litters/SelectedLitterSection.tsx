@@ -5,6 +5,7 @@ import { differenceInWeeks, parseISO } from 'date-fns';
 import { useDogsQueries } from '@/hooks/dogs/useDogsQueries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // Static imports instead of lazy loading
 import PuppiesTabContent from './tabs/PuppiesTabContent';
@@ -43,6 +44,7 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
   onArchiveLitter,
   isLoadingDetails
 }) => {
+  const { t } = useTranslation('litters');
   const [selectedPuppy, setSelectedPuppy] = useState<Puppy | null>(null);
   const [activeTab, setActiveTab] = useState('puppies');
   const { data: dogs } = useDogsQueries().useDogs();
@@ -109,15 +111,15 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
         >
           <TabsList className="grid grid-cols-3 mb-6 w-full h-12 bg-muted p-1 gap-1">
             <TabsTrigger value="puppies" className="font-sourcesans font-bold text-primary data-[state=active]:text-primary">
-              Puppies
+              {t('tabs.puppies')}
             </TabsTrigger>
             <TabsTrigger value="development" className="font-sourcesans font-bold text-primary data-[state=active]:text-primary">
-              <span className="hidden sm:inline">Checklist</span>
-              <span className="sm:hidden">Tasks</span>
+              <span className="hidden sm:inline">{t('tabs.development')}</span>
+              <span className="sm:hidden">{t('tabs.developmentShort')}</span>
             </TabsTrigger>
             <TabsTrigger value="charts" className="font-sourcesans font-bold text-primary data-[state=active]:text-primary">
-              <span className="hidden sm:inline">Growth Charts</span>
-              <span className="sm:hidden">Charts</span>
+              <span className="hidden sm:inline">{t('tabs.charts')}</span>
+              <span className="sm:hidden">{t('tabs.chartsShort')}</span>
             </TabsTrigger>
           </TabsList>
 
