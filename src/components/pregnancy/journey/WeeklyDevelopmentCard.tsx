@@ -31,7 +31,10 @@ const WeeklyDevelopmentCard: React.FC<WeeklyDevelopmentCardProps> = ({
   }
 
   const weekKey = `week${development.week}`;
-  const keyPoints = t(`journey.development.${weekKey}.keyPoints`, { returnObjects: true }) as string[];
+  const keyPoints = t(`journey.development.${weekKey}.keyPoints`, { returnObjects: true });
+  
+  // Ensure keyPoints is an array
+  const keyPointsArray = Array.isArray(keyPoints) ? keyPoints : [];
   
   return (
     <Card className="h-full">
@@ -57,7 +60,7 @@ const WeeklyDevelopmentCard: React.FC<WeeklyDevelopmentCardProps> = ({
         <div className="space-y-2">
           <h4 className="font-medium text-sm">{t('journey.development.keyPointsTitle')}</h4>
           <ul className="space-y-2">
-            {(keyPoints || []).map((point, index) => (
+            {keyPointsArray.map((point, index) => (
               <li key={index} className="flex items-start gap-2 text-sm">
                 <span className="h-5 w-5 flex-shrink-0 flex items-center justify-center rounded-full bg-primary/10 text-primary">
                   {index + 1}
