@@ -97,7 +97,9 @@
     }
   },
   "journey": {
-    "title": "Pregnancy Journey",
+    "title": "{{femaleName}}'s Pregnancy",
+    "description": "Track development and symptoms week by week",
+    "matingInfo": "Mated with {{maleName}} on {{matingDate}}",
     "weeklyDevelopment": "Weekly Development",
     "currentPhase": "Current Phase",
     "keyPoints": "Key Points",
@@ -108,7 +110,19 @@
       "week": "Week {{weekNumber}}",
       "weekOf": "Week {{currentWeek}} of {{totalWeeks}}"
     },
+    "alert": {
+      "signIn": "Sign in to save your checklist data across devices"
+    },
+    "weekSelector": {
+      "week": "Week"
+    },
+    "checklist": {
+      "title": "Week {{weekNumber}} Symptoms",
+      "noSymptoms": "No symptoms to track for this week"
+    },
     "development": {
+      "progressLabel": "Development progress",
+      "keyPointsTitle": "Key Development Points:",
       "week1": {
         "title": "Fertilization & Early Development",
         "description": "The eggs are fertilized and begin their journey to the uterus.",
@@ -417,25 +431,6 @@
     "journey": "Journey",
     "temperature": "Temperature", 
     "notes": "Notes"
-  },
-  "journey": {
-    "title": "{{femaleName}}'s Pregnancy",
-    "description": "Track development and symptoms week by week",
-    "matingInfo": "Mated with {{maleName}} on {{matingDate}}",
-    "alert": {
-      "signIn": "Sign in to save your checklist data across devices"
-    },
-    "weekSelector": {
-      "week": "Week"
-    },
-    "checklist": {
-      "title": "Week {{weekNumber}} Symptoms",
-      "noSymptoms": "No symptoms to track for this week"
-    },
-    "development": {
-      "progressLabel": "Development progress",
-      "keyPointsTitle": "Key Development Points:"
-    }
   },
   "management": {
     "dialog": {

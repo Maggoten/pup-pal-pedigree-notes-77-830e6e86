@@ -97,7 +97,9 @@
     }
   },
   "journey": {
-    "title": "Dräktighetsutveckling",
+    "title": "{{femaleName}}s Dräktighet",
+    "description": "Följ utveckling och symptom vecka för vecka",
+    "matingInfo": "Parad med {{maleName}} den {{matingDate}}",
     "weeklyDevelopment": "Veckovis Utveckling",
     "currentPhase": "Aktuell Fas",
     "keyPoints": "Viktiga Punkter",
@@ -108,7 +110,19 @@
       "week": "Vecka {{weekNumber}}",
       "weekOf": "Vecka {{currentWeek}} av {{totalWeeks}}"
     },
+    "alert": {
+      "signIn": "Logga in för att spara dina checklistdata på alla enheter"
+    },
+    "weekSelector": {
+      "week": "Vecka"
+    },
+    "checklist": {
+      "title": "Vecka {{weekNumber}} Symptom",
+      "noSymptoms": "Inga symptom att spåra för denna vecka"
+    },
     "development": {
+      "progressLabel": "Utvecklingsframsteg",
+      "keyPointsTitle": "Viktiga Utvecklingspunkter:",
       "week1": {
         "title": "Befruktning & Tidig Utveckling",
         "description": "Äggen befruktats och börjar sin resa till livmodern.",
@@ -417,25 +431,6 @@
     "journey": "Utveckling",
     "temperature": "Temperatur",
     "notes": "Anteckningar"
-  },
-  "journey": {
-    "title": "{{femaleName}}s Dräktighet",
-    "description": "Följ utveckling och symptom vecka för vecka",
-    "matingInfo": "Parad med {{maleName}} den {{matingDate}}",
-    "alert": {
-      "signIn": "Logga in för att spara dina checklistdata på alla enheter"
-    },
-    "weekSelector": {
-      "week": "Vecka"
-    },
-    "checklist": {
-      "title": "Vecka {{weekNumber}} Symptom",
-      "noSymptoms": "Inga symptom att spåra för denna vecka"
-    },
-    "development": {
-      "progressLabel": "Utvecklingsframsteg",
-      "keyPointsTitle": "Viktiga Utvecklingspunkter:"
-    }
   },
   "management": {
     "dialog": {
