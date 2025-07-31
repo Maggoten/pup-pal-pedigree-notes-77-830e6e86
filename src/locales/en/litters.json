@@ -37,7 +37,11 @@
     "totalPuppies": "Total Puppies",
     "archived": "Archived",
     "active": "Active",
-    "completed": "Completed"
+    "completed": "Completed",
+    "parents": "Parents",
+    "age": "Age",
+    "weeksOld": "weeks old",
+    "total": "total"
   },
   "empty": {
     "myLitters": {
@@ -46,7 +50,7 @@
     }
   },
   "filters": {
-    "all": "All Litters",
+    "all": "All",
     "active": "Active",
     "archived": "Archived",
     "viewMode": "View Mode",

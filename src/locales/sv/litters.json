@@ -37,7 +37,11 @@
     "totalPuppies": "Antal Valpar",
     "archived": "Arkiverad",
     "active": "Aktiv",
-    "completed": "Avslutad"
+    "completed": "Avslutad",
+    "parents": "Föräldrar",
+    "age": "Ålder",
+    "weeksOld": "veckor gammal",
+    "total": "totalt"
   },
   "empty": {
     "myLitters": {
@@ -46,7 +50,7 @@
     }
   },
   "filters": {
-    "all": "Alla Kullar",
+    "all": "Alla",
     "active": "Aktiva",
     "archived": "Arkiverade",
     "viewMode": "Visningsläge",

@@ -43,7 +43,7 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
   };
   
   const handleDeleteLitter = () => {
-    if (confirm(`Are you sure you want to delete ${litter.name}? This action cannot be undone.`)) {
+    if (confirm(t('litter.confirmations.deleteLitter', { name: litter.name }))) {
       onDeleteLitter(litter.id);
     }
   };
@@ -66,17 +66,17 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
             <h1 className="text-2xl font-bold text-warmgreen-800">{litter.name}</h1>
             <div className="flex gap-2">
               {isRecent && !litter.archived && (
-                <Badge variant="active" className="px-3 py-1">Active</Badge>
+                <Badge variant="active" className="px-3 py-1">{t('filters.active')}</Badge>
               )}
               {litter.archived && (
-                <Badge variant="archived" className="px-3 py-1">Archived</Badge>
+                <Badge variant="archived" className="px-3 py-1">{t('filters.archived')}</Badge>
               )}
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
             <div>
-              <p className="text-muted-foreground">Parents</p>
+              <p className="text-muted-foreground">{t('display.parents')}</p>
               <p className="font-medium">{litter.damName} × {litter.sireName}</p>
             </div>
             
@@ -86,15 +86,15 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
             </div>
             
             <div>
-              <p className="text-muted-foreground">Age</p>
-              <p className="font-medium">{ageInWeeks} weeks old</p>
+              <p className="text-muted-foreground">{t('display.age')}</p>
+              <p className="font-medium">{ageInWeeks} {t('display.weeksOld')}</p>
             </div>
             
             {puppyCount > 0 && (
               <div>
-                <p className="text-muted-foreground">Puppies</p>
+                <p className="text-muted-foreground">{t('display.puppies')}</p>
                 <p className="font-medium">
-                  {puppyCount} total 
+                  {puppyCount} {t('display.total')} 
                   <span className="text-blue-500 ml-2">{maleCount} ♂</span>
                   <span className="text-pink-500 ml-2">{femaleCount} ♀</span>
                 </p>
@@ -112,7 +112,7 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
                   title="Edit litter"
                 >
                   <Edit className="h-4 w-4" />
-                  {!isMobile && <span>Edit</span>}
+                  {!isMobile && <span>{t('actions.edit')}</span>}
                 </Button>
               </DialogTrigger>
               {showEditLitterDialog && (
@@ -135,7 +135,7 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
               title={litter.archived ? "Unarchive litter" : "Archive litter"}
             >
               <Archive className="h-4 w-4" />
-              {!isMobile && <span>{litter.archived ? "Unarchive" : "Archive"}</span>}
+              {!isMobile && <span>{litter.archived ? t('actions.unarchive') : t('actions.archive')}</span>}
             </Button>
             
             <Button 
@@ -146,7 +146,7 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
               title="Delete litter"
             >
               <Trash2 className="h-4 w-4" />
-              {!isMobile && <span>Delete</span>}
+              {!isMobile && <span>{t('actions.delete')}</span>}
             </Button>
           </div>
         </div>

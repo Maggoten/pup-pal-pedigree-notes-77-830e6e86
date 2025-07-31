@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { useLitterFilter } from './LitterFilterProvider';
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from 'react-i18next';
 
 interface LitterFilterBarProps {
   activeCount: number;
@@ -17,6 +18,7 @@ const LitterFilterBar: React.FC<LitterFilterBarProps> = ({
   archivedCount,
   totalCount
 }) => {
+  const { t } = useTranslation('litters');
   const { 
     searchQuery, 
     setSearchQuery, 
@@ -31,9 +33,9 @@ const LitterFilterBar: React.FC<LitterFilterBarProps> = ({
   };
 
   const filterButtons = [
-    { key: 'all', label: 'All', count: totalCount },
-    { key: 'active', label: 'Active', count: activeCount },
-    { key: 'archived', label: 'Archived', count: archivedCount },
+    { key: 'all', label: t('filters.all'), count: totalCount },
+    { key: 'active', label: t('filters.active'), count: activeCount },
+    { key: 'archived', label: t('filters.archived'), count: archivedCount },
   ] as const;
 
   return (
@@ -63,7 +65,7 @@ const LitterFilterBar: React.FC<LitterFilterBarProps> = ({
       <div className="relative flex-1 max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search litters..."
+          placeholder={t('litter.placeholders.searchLitters')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"
