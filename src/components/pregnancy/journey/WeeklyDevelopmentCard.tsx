@@ -32,13 +32,19 @@ const WeeklyDevelopmentCard: React.FC<WeeklyDevelopmentCardProps> = ({
 
   const weekKey = `week${development.week}`;
   
-  // Get translations with fallbacks
-  const title = t(`journey.development.${weekKey}.title`) || development.title;
-  const description = t(`journey.development.${weekKey}.description`) || development.description;
+  // Get translations with fallbacks - check if translation exists by comparing with key
+  const titleTranslation = t(`journey.development.${weekKey}.title`);
+  const title = titleTranslation === `journey.development.${weekKey}.title` ? development.title : titleTranslation;
+  
+  const descriptionTranslation = t(`journey.development.${weekKey}.description`);
+  const description = descriptionTranslation === `journey.development.${weekKey}.description` ? development.description : descriptionTranslation;
+  
   const keyPoints = t(`journey.development.${weekKey}.keyPoints`, { returnObjects: true });
   
   // Ensure keyPoints is an array with fallback
-  const keyPointsArray = Array.isArray(keyPoints) ? keyPoints : development.keyPoints || [];
+  const keyPointsArray = Array.isArray(keyPoints) && keyPoints[0] !== `journey.development.${weekKey}.keyPoints.0` 
+    ? keyPoints 
+    : development.keyPoints || [];
   
   return (
     <Card className="h-full">
