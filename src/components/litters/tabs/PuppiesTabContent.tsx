@@ -14,6 +14,7 @@ import PuppyProfileCard from '../puppies/PuppyProfileCard';
 import PuppyTableView from '../puppies/PuppyTableView';
 import ViewToggle from '../ViewToggle';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslation } from 'react-i18next';
 
 interface PuppiesTabContentProps {
   puppies: Puppy[];
@@ -40,6 +41,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   litterAge,
   litter,
 }) => {
+  const { t } = useTranslation('litters');
   const [measurementDialogOpen, setMeasurementDialogOpen] = useState(false);
   const [addPuppyDialogOpen, setAddPuppyDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
@@ -124,7 +126,10 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
           <div className="flex items-center gap-2">
             <PawPrint className="h-5 w-5 text-primary" />
             <CardTitle className={`font-semibold ${isMobile ? 'text-base' : 'text-lg'}`}>
-              Puppies {localPuppies && localPuppies.length > 0 && `(${localPuppies.length})`}
+              {localPuppies && localPuppies.length > 0 
+                ? t('puppies.display.puppiesCount', { count: localPuppies.length })
+                : t('puppies.display.puppiesTitle')
+              }
             </CardTitle>
           </div>
           
@@ -140,7 +145,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
                   onClick={() => setAddPuppyDialogOpen(true)}
                 >
                   <PlusCircle className="h-4 w-4" />
-                  <span className={isMobile ? 'text-sm' : ''}>Add Puppy</span>
+                  <span className={isMobile ? 'text-sm' : ''}>{t('puppies.actions.addPuppy')}</span>
                 </Button>
               </DialogTrigger>
               <AddPuppyDialog 
@@ -197,9 +202,9 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
             <div className={`bg-warmbeige-100 rounded-full flex items-center justify-center mx-auto ${isMobile ? 'w-16 h-16' : 'w-20 h-20'}`}>
               <PawPrint className={`text-warmbeige-400 ${isMobile ? 'h-8 w-8' : 'h-10 w-10'}`} />
             </div>
-            <h3 className={`font-medium ${isMobile ? 'text-base' : 'text-lg'}`}>No Puppies Added Yet</h3>
+            <h3 className={`font-medium ${isMobile ? 'text-base' : 'text-lg'}`}>{t('puppies.empty.title')}</h3>
             <p className={`text-muted-foreground max-w-md mx-auto ${isMobile ? 'text-sm px-4' : ''}`}>
-              Add your puppies to track their growth, development milestones, and keep detailed records.
+              {t('puppies.empty.description')}
             </p>
           </div>
         )}

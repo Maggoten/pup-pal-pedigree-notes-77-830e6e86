@@ -145,6 +145,7 @@
       "sold": "Såld"
     },
     "actions": {
+      "addPuppy": "Lägg till valp",
       "addPuppy": "Lägg till Valp",
       "editPuppy": "Redigera Valp",
       "deletePuppy": "Ta bort Valp",
@@ -167,6 +168,14 @@
       "deleteWeight": "Ta bort Vikt",
       "deleteHeight": "Ta bort Höjd",
       "deleteNote": "Ta bort Anteckning"
+    },
+    "empty": {
+      "title": "Inga valpar tillagda än",
+      "description": "Lägg till dina valpar för att spåra deras tillväxt, utvecklingsmilstolpar och hålla detaljerade register."
+    },
+    "display": {
+      "puppiesCount": "Valpar ({{count}})",
+      "puppiesTitle": "Valpar"
     },
     "charts": {
       "weightChart": "Viktdiagram",

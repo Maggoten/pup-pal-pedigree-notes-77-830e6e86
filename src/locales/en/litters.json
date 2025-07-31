@@ -146,6 +146,7 @@
     },
     "actions": {
       "addPuppy": "Add Puppy",
+      "addPuppy": "Add Puppy",
       "editPuppy": "Edit Puppy",
       "deletePuppy": "Delete Puppy",
       "viewProfile": "View Profile",
@@ -167,6 +168,14 @@
       "deleteWeight": "Delete Weight Measurement",
       "deleteHeight": "Delete Height Measurement",
       "deleteNote": "Delete Note"
+    },
+    "empty": {
+      "title": "No Puppies Added Yet",
+      "description": "Add your puppies to track their growth, development milestones, and keep detailed records."
+    },
+    "display": {
+      "puppiesCount": "Puppies ({{count}})",
+      "puppiesTitle": "Puppies"
     },
     "charts": {
       "weightChart": "Weight Chart",
