@@ -10,6 +10,16 @@
     "pregnancyDetails": {
       "title": "Pregnancy Details",
       "description": "Detailed pregnancy tracking and management"
+    },
+    "details": {
+      "title": "Pregnancy Details",
+      "description": "Track pregnancy progress and development",
+      "loadingDescription": "Loading pregnancy details...",
+      "notFound": {
+        "title": "Pregnancy Not Found",
+        "description": "The requested pregnancy could not be found",
+        "message": "The pregnancy you are looking for doesn't exist or has been archived."
+      }
     }
   },
   "tabs": {
@@ -450,18 +460,6 @@
     "pregnancyDetails": "Loading pregnancy details...",
     "title": "Loading Pregnancy Details",
     "message": "Please wait..."
-  },
-  "pages": {
-    "details": {
-      "title": "Pregnancy Details",
-      "description": "Track pregnancy progress and development",
-      "loadingDescription": "Loading pregnancy details...",
-      "notFound": {
-        "title": "Pregnancy Not Found",
-        "description": "The requested pregnancy could not be found",
-        "message": "The pregnancy you are looking for doesn't exist or has been archived."
-      }
-    }
   },
   "tabs": {
     "sectionTitle": "Pregnancy Management",

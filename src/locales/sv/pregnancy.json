@@ -10,6 +10,16 @@
     "pregnancyDetails": {
       "title": "Dräktighetsdetaljer",
       "description": "Detaljerad dräktighetsuppföljning och hantering"
+    },
+    "details": {
+      "title": "Dräktighetsdetaljer",
+      "description": "Följ dräktigheten och dess utveckling",
+      "loadingDescription": "Laddar dräktighetsdetaljer...",
+      "notFound": {
+        "title": "Dräktighet Hittades Inte",
+        "description": "Den begärda dräktigheten kunde inte hittas",
+        "message": "Dräktigheten du letar efter finns inte eller har arkiverats."
+      }
     }
   },
   "tabs": {
@@ -450,18 +460,6 @@
     "pregnancyDetails": "Laddar dräktighetsdetaljer...",
     "title": "Laddar Dräktighetsdetaljer",
     "message": "Vänligen vänta..."
-  },
-  "pages": {
-    "details": {
-      "title": "Dräktighetsdetaljer",
-      "description": "Följ dräktigheten och dess utveckling",
-      "loadingDescription": "Laddar dräktighetsdetaljer...",
-      "notFound": {
-        "title": "Dräktighet Hittades Inte",
-        "description": "Den begärda dräktigheten kunde inte hittas",
-        "message": "Dräktigheten du letar efter finns inte eller har arkiverats."
-      }
-    }
   },
   "tabs": {
     "sectionTitle": "Dräktighetshantering",
