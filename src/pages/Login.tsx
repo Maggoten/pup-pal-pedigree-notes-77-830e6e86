@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertTriangle, ArrowRight, ArrowLeft, Mail } from 'lucide-react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import BillingPlanModal from '@/components/auth/BillingPlanModal';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const Login: React.FC = () => {
   const { login, register, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showCancellationMessage, setShowCancellationMessage] = useState(false);
+  const [showBillingPlanModal, setShowBillingPlanModal] = useState(false);
   
   // Forgot password state
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -82,74 +84,8 @@ const Login: React.FC = () => {
       const success = await register(registerData);
       
       if (success) {
-        console.log('Login page: Registration successful, creating Stripe checkout');
-        
-        // Create Stripe checkout session for payment collection
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            console.log('Login page: Creating Stripe checkout session');
-            const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
-              headers: {
-                Authorization: `Bearer ${session.access_token}`,
-              },
-            });
-            
-            if (checkoutError) {
-              console.error('Login page: Stripe checkout creation failed:', checkoutError);
-              
-              // Provide specific error messages based on the error type
-              let errorTitle = "Payment setup failed";
-              let errorDescription = "There was an issue setting up payment. Please try again.";
-              
-              if (checkoutError.message?.includes('STRIPE_SECRET_KEY')) {
-                errorTitle = "Configuration Error";
-                errorDescription = "Payment system is not properly configured. Please contact support.";
-              } else if (checkoutError.message?.includes('STRIPE_PRICE_ID')) {
-                errorTitle = "Configuration Error";
-                errorDescription = "Payment pricing is not configured. Please contact support.";
-              } else if (checkoutError.message?.includes('Authentication error')) {
-                errorTitle = "Authentication Error";
-                errorDescription = "Please log out and try registering again.";
-              }
-              
-              toast({
-                title: errorTitle,
-                description: errorDescription,
-                variant: "destructive",
-              });
-            } else if (checkoutData?.checkout_url) {
-              console.log('Login page: Redirecting to Stripe checkout');
-              // Redirect to Stripe checkout
-              window.location.href = checkoutData.checkout_url;
-              return; // Don't continue with local navigation
-            } else {
-              console.error('Login page: No checkout URL received');
-              toast({
-                title: "Payment setup failed",
-                description: "No payment URL was generated. Please try again.",
-                variant: "destructive",
-              });
-            }
-          } else {
-            console.error('Login page: No session found for Stripe checkout');
-            toast({
-              title: "Session Error",
-              description: "Please log out and try registering again.",
-              variant: "destructive",
-            });
-          }
-        } catch (stripeError) {
-          console.error('Login page: Stripe checkout creation failed:', stripeError);
-          toast({
-            title: "Payment setup failed",
-            description: "An unexpected error occurred during payment setup. Please try again.",
-            variant: "destructive",
-          });
-        }
-        
-        // Fallback: navigate to home if checkout fails
-        navigate('/');
+        console.log('Login page: Registration successful, showing billing plan selection');
+        setShowBillingPlanModal(true);
       } else {
         console.log('Login page: Registration failed');
       }
@@ -166,28 +102,61 @@ const Login: React.FC = () => {
 
   const handleCompletePaymentSetup = async () => {
     setShowCancellationMessage(false);
+    setShowBillingPlanModal(true);
+  };
+
+  const handleBillingPlanSelection = async (billingInterval: 'monthly' | 'yearly') => {
+    setShowBillingPlanModal(false);
     setIsLoading(true);
     
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
+        console.log('Creating Stripe checkout with billing interval:', billingInterval);
         const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: {
+            billingInterval
           },
         });
         
         if (checkoutError) {
-          console.error('Continue registration: Stripe checkout creation failed:', checkoutError);
+          console.error('Stripe checkout creation failed:', checkoutError);
+          
+          // Provide specific error messages based on the error type
+          let errorTitle = "Payment setup failed";
+          let errorDescription = "There was an issue setting up payment. Please try again.";
+          
+          if (checkoutError.message?.includes('STRIPE_SECRET_KEY')) {
+            errorTitle = "Configuration Error";
+            errorDescription = "Payment system is not properly configured. Please contact support.";
+          } else if (checkoutError.message?.includes('STRIPE_PRICE_ID')) {
+            errorTitle = "Configuration Error";
+            errorDescription = "Payment pricing is not configured. Please contact support.";
+          } else if (checkoutError.message?.includes('Authentication error')) {
+            errorTitle = "Authentication Error";
+            errorDescription = "Please log out and try registering again.";
+          }
+          
           toast({
-            title: "Payment setup failed",
-            description: "There was an issue setting up payment. Please try again.",
+            title: errorTitle,
+            description: errorDescription,
             variant: "destructive",
           });
         } else if (checkoutData?.checkout_url) {
-          console.log('Continue registration: Redirecting to Stripe checkout');
+          console.log('Redirecting to Stripe checkout');
           window.location.href = checkoutData.checkout_url;
           return;
+        } else {
+          console.error('No checkout URL received');
+          toast({
+            title: "Payment setup failed",
+            description: "No payment URL was generated. Please try again.",
+            variant: "destructive",
+          });
         }
       } else {
         toast({
@@ -197,7 +166,7 @@ const Login: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Continue registration: Error:', error);
+      console.error('Error creating checkout:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
@@ -277,6 +246,15 @@ const Login: React.FC = () => {
       <div className="absolute top-4 right-4 z-10">
         <LanguageSwitcher />
       </div>
+      
+      {/* Billing Plan Selection Modal */}
+      {showBillingPlanModal && (
+        <BillingPlanModal
+          onSelectPlan={handleBillingPlanSelection}
+          isLoading={effectiveLoading}
+        />
+      )}
+      
       {showCancellationMessage && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <Card className="w-full max-w-md shadow-lg bg-white border-warmbeige-200">
