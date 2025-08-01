@@ -76,7 +76,7 @@ const AuthTabs: React.FC<AuthTabsProps> = ({
                 >
                   <div className="text-center">
                     <div className="font-semibold text-brown-800">Yearly</div>
-                    <div className="text-sm text-brown-600">€35/year</div>
+                    <div className="text-sm text-brown-600">€27/year</div>
                     <div className="text-xs text-warmgreen-600 mt-1">Save 17% + 30-day trial</div>
                   </div>
                 </button>
