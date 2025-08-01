@@ -2,6 +2,9 @@
   "navigation": {
     "pregnancies": "Pregnancies"
   },
+  "metrics": {
+    "activePregnancies": "Active Pregnancies"
+  },
   "pages": {
     "pregnancy": {
       "title": "Pregnancy Management",
