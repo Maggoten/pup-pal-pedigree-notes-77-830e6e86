@@ -86,16 +86,30 @@ serve(async (req) => {
 
     // Create Stripe Checkout session for subscription with trial
     const origin = req.headers.get("origin") || "http://localhost:3000";
+    
+    // Prepare line items with both monthly and yearly options
+    const lineItems = [
+      {
+        price: priceId, // Monthly plan
+        quantity: 1,
+      }
+    ];
+    
+    // Add yearly option if available
+    const yearlyPriceId = Deno.env.get("STRIPE_YEARLY_PRICE_ID");
+    if (yearlyPriceId) {
+      lineItems.push({
+        price: yearlyPriceId,
+        quantity: 1,
+      });
+      logStep("Added yearly pricing option", { yearlyPriceId: `${yearlyPriceId.substring(0, 12)}...` });
+    }
+    
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
       payment_method_types: ["card"],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
       subscription_data: {
         trial_period_days: 30,
         metadata: {
