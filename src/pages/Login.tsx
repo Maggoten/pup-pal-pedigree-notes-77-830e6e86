@@ -78,8 +78,9 @@ const Login: React.FC = () => {
         lastName: values.lastName,
       };
       
-      console.log('Login page: Attempting registration');
+      console.log('🚀 Login page: Starting registration process');
       const success = await register(registerData);
+      console.log('✅ Login page: Registration result:', success);
       
       if (success) {
         console.log('Login page: Registration successful, creating Stripe checkout');
