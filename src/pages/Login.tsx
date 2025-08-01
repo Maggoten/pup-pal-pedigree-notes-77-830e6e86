@@ -109,75 +109,107 @@ const Login: React.FC = () => {
     setSelectedBillingInterval(billingInterval);
     setIsLoading(true);
     
+    // Helper function to check session with retry
+    const getValidSession = async (maxRetries = 3, delay = 1500) => {
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        console.log(`Login page: Checking session validity (attempt ${attempt}/${maxRetries})`);
+        
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error(`Login page: Session error on attempt ${attempt}:`, error);
+          if (attempt === maxRetries) throw error;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        
+        if (session?.access_token) {
+          console.log(`Login page: Valid session found on attempt ${attempt}`);
+          return session;
+        }
+        
+        console.warn(`Login page: No session found on attempt ${attempt}, retrying...`);
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+      
+      throw new Error('No valid session found after retries');
+    };
+    
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        console.log('Login page: Creating Stripe checkout session with billing interval:', billingInterval);
-        const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: {
-            billingInterval
-          }
+      console.log('Login page: Starting Stripe checkout with billing interval:', billingInterval);
+      
+      // Wait for valid session with retry mechanism
+      const session = await getValidSession();
+      
+      console.log('Login page: Making edge function call with session token');
+      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: {
+          billingInterval
+        }
+      });
+      
+      if (checkoutError) {
+        console.error('Login page: Stripe checkout creation failed:', checkoutError);
+        
+        // Provide specific error messages based on the error type
+        let errorTitle = "Payment setup failed";
+        let errorDescription = "There was an issue setting up payment. Please try again.";
+        
+        if (checkoutError.message?.includes('STRIPE_SECRET_KEY')) {
+          errorTitle = "Configuration Error";
+          errorDescription = "Payment system is not properly configured. Please contact support.";
+        } else if (checkoutError.message?.includes('STRIPE_PRICE_ID')) {
+          errorTitle = "Configuration Error";
+          errorDescription = "Payment pricing is not configured. Please contact support.";
+        } else if (checkoutError.message?.includes('Authentication error')) {
+          errorTitle = "Authentication Error";
+          errorDescription = "Session expired. Please try again.";
+        }
+        
+        toast({
+          title: errorTitle,
+          description: errorDescription,
+          variant: "destructive",
         });
         
-        if (checkoutError) {
-          console.error('Login page: Stripe checkout creation failed:', checkoutError);
-          
-          // Provide specific error messages based on the error type
-          let errorTitle = "Payment setup failed";
-          let errorDescription = "There was an issue setting up payment. Please try again.";
-          
-          if (checkoutError.message?.includes('STRIPE_SECRET_KEY')) {
-            errorTitle = "Configuration Error";
-            errorDescription = "Payment system is not properly configured. Please contact support.";
-          } else if (checkoutError.message?.includes('STRIPE_PRICE_ID')) {
-            errorTitle = "Configuration Error";
-            errorDescription = "Payment pricing is not configured. Please contact support.";
-          } else if (checkoutError.message?.includes('Authentication error')) {
-            errorTitle = "Authentication Error";
-            errorDescription = "Please log out and try registering again.";
-          }
-          
-          toast({
-            title: errorTitle,
-            description: errorDescription,
-            variant: "destructive",
-          });
-          
-          // Go back to pricing selection on error
-          setShowPricingSelection(true);
-        } else if (checkoutData?.checkout_url) {
-          console.log('Login page: Redirecting to Stripe checkout');
-          // Redirect to Stripe checkout
-          window.location.href = checkoutData.checkout_url;
-          return; // Don't continue with local navigation
-        } else {
-          console.error('Login page: No checkout URL received');
-          toast({
-            title: "Payment setup failed",
-            description: "No payment URL was generated. Please try again.",
-            variant: "destructive",
-          });
-          setShowPricingSelection(true);
-        }
+        // Go back to pricing selection on error
+        setShowPricingSelection(true);
+      } else if (checkoutData?.checkout_url) {
+        console.log('Login page: Successfully received checkout URL, redirecting to Stripe');
+        // Redirect to Stripe checkout
+        window.location.href = checkoutData.checkout_url;
+        return; // Don't continue with local navigation
       } else {
-        console.error('Login page: No session found for Stripe checkout');
+        console.error('Login page: No checkout URL received from edge function');
         toast({
-          title: "Session Error",
-          description: "Please log out and try registering again.",
+          title: "Payment setup failed",
+          description: "No payment URL was generated. Please try again.",
           variant: "destructive",
         });
         setShowPricingSelection(true);
       }
-    } catch (stripeError) {
-      console.error('Login page: Stripe checkout creation failed:', stripeError);
-      toast({
-        title: "Payment setup failed",
-        description: "An unexpected error occurred during payment setup. Please try again.",
-        variant: "destructive",
-      });
+    } catch (sessionError) {
+      console.error('Login page: Session or checkout error:', sessionError);
+      
+      if (sessionError.message?.includes('No valid session')) {
+        toast({
+          title: "Session Error",
+          description: "Authentication session not ready. Please try again in a moment.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Payment setup failed",
+          description: "An unexpected error occurred during payment setup. Please try again.",
+          variant: "destructive",
+        });
+      }
+      
       setShowPricingSelection(true);
     } finally {
       setIsLoading(false);
