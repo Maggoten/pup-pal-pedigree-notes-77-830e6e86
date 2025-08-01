@@ -84,26 +84,30 @@ serve(async (req) => {
       logStep("Created new customer", { customerId });
     }
 
+    // Get the selected plan from request body
+    const { selectedPlan } = await req.json().catch(() => ({ selectedPlan: 'monthly' }));
+    
     // Create Stripe Checkout session for subscription with trial
     const origin = req.headers.get("origin") || "http://localhost:3000";
     
-    // Prepare line items with both monthly and yearly options
+    // Determine which price to use based on selection
+    let selectedPriceId = priceId; // Default to monthly
+    const yearlyPriceId = Deno.env.get("STRIPE_YEARLY_PRICE_ID");
+    
+    if (selectedPlan === 'yearly' && yearlyPriceId) {
+      selectedPriceId = yearlyPriceId;
+      logStep("Using yearly pricing", { yearlyPriceId: `${yearlyPriceId.substring(0, 12)}...` });
+    } else {
+      logStep("Using monthly pricing", { monthlyPriceId: `${priceId.substring(0, 12)}...` });
+    }
+    
+    // Prepare line items with only the selected plan
     const lineItems = [
       {
-        price: priceId, // Monthly plan
+        price: selectedPriceId,
         quantity: 1,
       }
     ];
-    
-    // Add yearly option if available
-    const yearlyPriceId = Deno.env.get("STRIPE_YEARLY_PRICE_ID");
-    if (yearlyPriceId) {
-      lineItems.push({
-        price: yearlyPriceId,
-        quantity: 1,
-      });
-      logStep("Added yearly pricing option", { yearlyPriceId: `${yearlyPriceId.substring(0, 12)}...` });
-    }
     
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
