@@ -4,7 +4,7 @@
   },
   "pages": {
     "pregnancy": {
-      "title": "Dräktighetshantering",
+      "title": "Dräktigheter",
       "description": "Spåra aktiva och avslutade dräktigheter, övervaka utveckling och hantera avelregister"
     },
     "pregnancyDetails": {
