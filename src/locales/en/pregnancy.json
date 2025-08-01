@@ -23,11 +23,13 @@
     }
   },
   "tabs": {
+    "active": "Active",
+    "completed": "Completed",
     "journey": "Journey",
     "temperature": "Temperature", 
     "symptoms": "Notes",
-    "active": "Active",
-    "completed": "Completed"
+    "notes": "Notes",
+    "sectionTitle": "Pregnancy Management"
   },
   "actions": {
     "addPregnancy": "Add Pregnancy",
@@ -460,12 +462,6 @@
     "pregnancyDetails": "Loading pregnancy details...",
     "title": "Loading Pregnancy Details",
     "message": "Please wait..."
-  },
-  "tabs": {
-    "sectionTitle": "Pregnancy Management",
-    "journey": "Journey",
-    "temperature": "Temperature", 
-    "notes": "Notes"
   },
   "management": {
     "dialog": {

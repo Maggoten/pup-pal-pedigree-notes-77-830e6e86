@@ -23,11 +23,13 @@
     }
   },
   "tabs": {
+    "active": "Aktiva",
+    "completed": "Avslutade",
     "journey": "Utveckling",
     "temperature": "Temperatur",
     "symptoms": "Anteckningar",
-    "active": "Aktiva",
-    "completed": "Avslutade"
+    "notes": "Anteckningar",
+    "sectionTitle": "Dräktighetshantering"
   },
   "actions": {
     "addPregnancy": "Lägg till Dräktighet",
@@ -460,12 +462,6 @@
     "pregnancyDetails": "Laddar dräktighetsdetaljer...",
     "title": "Laddar Dräktighetsdetaljer",
     "message": "Vänligen vänta..."
-  },
-  "tabs": {
-    "sectionTitle": "Dräktighetshantering",
-    "journey": "Utveckling",
-    "temperature": "Temperatur",
-    "notes": "Anteckningar"
   },
   "management": {
     "dialog": {
