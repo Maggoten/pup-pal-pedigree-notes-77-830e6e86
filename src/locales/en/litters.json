@@ -149,6 +149,31 @@
       "selectPuppy": "Select puppy",
       "weightPlaceholder": "0.00"
     },
+    "pricing": {
+      "title": "Choose Your Plan",
+      "subtitle": "Start your 30-day free trial with either plan",
+      "monthly": {
+        "title": "Monthly",
+        "description": "Perfect for getting started"
+      },
+      "yearly": {
+        "title": "Yearly",
+        "description": "Best value for serious breeders",
+        "savings": "Save 36%"
+      },
+      "features": {
+        "trial": "30-day free trial",
+        "unlimited": "Unlimited dogs & litters",
+        "support": "Premium support",
+        "yearlyBonus": "Priority feature updates"
+      },
+      "trialInfo": {
+        "title": "Free Trial Details:",
+        "description": "Start your 30-day free trial immediately. No charges until the trial ends. Cancel anytime during the trial period."
+      },
+      "continue": "Continue with {{plan}} Plan",
+      "loading": "Processing..."
+    },
     "statuses": {
       "available": "Available",
       "reserved": "Reserved", 

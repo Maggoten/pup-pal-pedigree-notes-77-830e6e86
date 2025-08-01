@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertTriangle, ArrowRight, ArrowLeft, Mail } from 'lucide-react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import PricingSelection, { BillingInterval } from '@/components/auth/PricingSelection';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +21,10 @@ const Login: React.FC = () => {
   const { login, register, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showCancellationMessage, setShowCancellationMessage] = useState(false);
+  
+  // Pricing selection state
+  const [showPricingSelection, setShowPricingSelection] = useState(false);
+  const [selectedBillingInterval, setSelectedBillingInterval] = useState<BillingInterval>('monthly');
   
   // Forgot password state
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -82,74 +87,10 @@ const Login: React.FC = () => {
       const success = await register(registerData);
       
       if (success) {
-        console.log('Login page: Registration successful, creating Stripe checkout');
+        console.log('Login page: Registration successful, showing pricing selection');
         
-        // Create Stripe checkout session for payment collection
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            console.log('Login page: Creating Stripe checkout session');
-            const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
-              headers: {
-                Authorization: `Bearer ${session.access_token}`,
-              },
-            });
-            
-            if (checkoutError) {
-              console.error('Login page: Stripe checkout creation failed:', checkoutError);
-              
-              // Provide specific error messages based on the error type
-              let errorTitle = "Payment setup failed";
-              let errorDescription = "There was an issue setting up payment. Please try again.";
-              
-              if (checkoutError.message?.includes('STRIPE_SECRET_KEY')) {
-                errorTitle = "Configuration Error";
-                errorDescription = "Payment system is not properly configured. Please contact support.";
-              } else if (checkoutError.message?.includes('STRIPE_PRICE_ID')) {
-                errorTitle = "Configuration Error";
-                errorDescription = "Payment pricing is not configured. Please contact support.";
-              } else if (checkoutError.message?.includes('Authentication error')) {
-                errorTitle = "Authentication Error";
-                errorDescription = "Please log out and try registering again.";
-              }
-              
-              toast({
-                title: errorTitle,
-                description: errorDescription,
-                variant: "destructive",
-              });
-            } else if (checkoutData?.checkout_url) {
-              console.log('Login page: Redirecting to Stripe checkout');
-              // Redirect to Stripe checkout
-              window.location.href = checkoutData.checkout_url;
-              return; // Don't continue with local navigation
-            } else {
-              console.error('Login page: No checkout URL received');
-              toast({
-                title: "Payment setup failed",
-                description: "No payment URL was generated. Please try again.",
-                variant: "destructive",
-              });
-            }
-          } else {
-            console.error('Login page: No session found for Stripe checkout');
-            toast({
-              title: "Session Error",
-              description: "Please log out and try registering again.",
-              variant: "destructive",
-            });
-          }
-        } catch (stripeError) {
-          console.error('Login page: Stripe checkout creation failed:', stripeError);
-          toast({
-            title: "Payment setup failed",
-            description: "An unexpected error occurred during payment setup. Please try again.",
-            variant: "destructive",
-          });
-        }
-        
-        // Fallback: navigate to home if checkout fails
-        navigate('/');
+        // Show pricing selection instead of immediately creating checkout
+        setShowPricingSelection(true);
       } else {
         console.log('Login page: Registration failed');
       }
@@ -164,48 +105,88 @@ const Login: React.FC = () => {
     setShowCancellationMessage(false);
   };
 
-  const handleCompletePaymentSetup = async () => {
-    setShowCancellationMessage(false);
+  const handlePricingSelection = async (billingInterval: BillingInterval) => {
+    setSelectedBillingInterval(billingInterval);
     setIsLoading(true);
     
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
+        console.log('Login page: Creating Stripe checkout session with billing interval:', billingInterval);
         const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
           },
+          body: {
+            billingInterval
+          }
         });
         
         if (checkoutError) {
-          console.error('Continue registration: Stripe checkout creation failed:', checkoutError);
+          console.error('Login page: Stripe checkout creation failed:', checkoutError);
+          
+          // Provide specific error messages based on the error type
+          let errorTitle = "Payment setup failed";
+          let errorDescription = "There was an issue setting up payment. Please try again.";
+          
+          if (checkoutError.message?.includes('STRIPE_SECRET_KEY')) {
+            errorTitle = "Configuration Error";
+            errorDescription = "Payment system is not properly configured. Please contact support.";
+          } else if (checkoutError.message?.includes('STRIPE_PRICE_ID')) {
+            errorTitle = "Configuration Error";
+            errorDescription = "Payment pricing is not configured. Please contact support.";
+          } else if (checkoutError.message?.includes('Authentication error')) {
+            errorTitle = "Authentication Error";
+            errorDescription = "Please log out and try registering again.";
+          }
+          
           toast({
-            title: "Payment setup failed",
-            description: "There was an issue setting up payment. Please try again.",
+            title: errorTitle,
+            description: errorDescription,
             variant: "destructive",
           });
+          
+          // Go back to pricing selection on error
+          setShowPricingSelection(true);
         } else if (checkoutData?.checkout_url) {
-          console.log('Continue registration: Redirecting to Stripe checkout');
+          console.log('Login page: Redirecting to Stripe checkout');
+          // Redirect to Stripe checkout
           window.location.href = checkoutData.checkout_url;
-          return;
+          return; // Don't continue with local navigation
+        } else {
+          console.error('Login page: No checkout URL received');
+          toast({
+            title: "Payment setup failed",
+            description: "No payment URL was generated. Please try again.",
+            variant: "destructive",
+          });
+          setShowPricingSelection(true);
         }
       } else {
+        console.error('Login page: No session found for Stripe checkout');
         toast({
-          title: "Session expired",
-          description: "Please log in again to complete your payment setup.",
+          title: "Session Error",
+          description: "Please log out and try registering again.",
           variant: "destructive",
         });
+        setShowPricingSelection(true);
       }
-    } catch (error) {
-      console.error('Continue registration: Error:', error);
+    } catch (stripeError) {
+      console.error('Login page: Stripe checkout creation failed:', stripeError);
       toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: "Payment setup failed",
+        description: "An unexpected error occurred during payment setup. Please try again.",
         variant: "destructive",
       });
+      setShowPricingSelection(true);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCompletePaymentSetup = async () => {
+    setShowCancellationMessage(false);
+    setShowPricingSelection(true);
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -321,8 +302,17 @@ const Login: React.FC = () => {
           </Card>
         </div>
       )}
+
+      {showPricingSelection && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <PricingSelection 
+            onSelectPlan={handlePricingSelection}
+            isLoading={effectiveLoading}
+          />
+        </div>
+      )}
       
-      {!showForgotPassword ? (
+      {!showForgotPassword && !showPricingSelection ? (
         <div className="w-full max-w-md">
           <AuthTabs 
             onLogin={handleLogin}

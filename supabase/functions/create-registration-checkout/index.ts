@@ -20,13 +20,34 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    // Parse request body to get billing interval
+    const body = await req.text();
+    let billingInterval = 'monthly'; // default
+    
+    if (body) {
+      try {
+        const parsedBody = JSON.parse(body);
+        billingInterval = parsedBody.billingInterval || 'monthly';
+      } catch (e) {
+        logStep("Could not parse request body, using default monthly billing");
+      }
+    }
+    
+    logStep("Billing interval", { billingInterval });
+
     // Check environment variables with detailed logging
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    const priceId = Deno.env.get("STRIPE_PRICE_ID");
+    const monthlyPriceId = Deno.env.get("STRIPE_PRICE_ID");
+    const yearlyPriceId = Deno.env.get("STRIPE_YEARLY_PRICE_ID");
+    
+    // Determine which price ID to use
+    const priceId = billingInterval === 'yearly' ? yearlyPriceId : monthlyPriceId;
     
     logStep("Environment check", { 
       hasStripeKey: !!stripeKey, 
-      hasPriceId: !!priceId,
+      hasMonthlyPriceId: !!monthlyPriceId,
+      hasYearlyPriceId: !!yearlyPriceId,
+      billingInterval,
       priceIdValue: priceId ? `${priceId.substring(0, 8)}...` : 'undefined'
     });
     
@@ -34,12 +55,23 @@ serve(async (req) => {
       logStep("ERROR: STRIPE_SECRET_KEY is missing");
       throw new Error("STRIPE_SECRET_KEY is not configured in Supabase secrets");
     }
-    if (!priceId) {
+    if (!monthlyPriceId) {
       logStep("ERROR: STRIPE_PRICE_ID is missing");
       throw new Error("STRIPE_PRICE_ID is not configured in Supabase secrets");
     }
+    if (billingInterval === 'yearly' && !yearlyPriceId) {
+      logStep("ERROR: STRIPE_YEARLY_PRICE_ID is missing");
+      throw new Error("STRIPE_YEARLY_PRICE_ID is not configured in Supabase secrets");
+    }
+    if (!priceId) {
+      logStep("ERROR: No price ID available for billing interval");
+      throw new Error(`No price ID configured for ${billingInterval} billing`);
+    }
     
-    logStep("Stripe credentials verified", { priceId: `${priceId.substring(0, 12)}...` });
+    logStep("Stripe credentials verified", { 
+      billingInterval,
+      priceId: `${priceId.substring(0, 12)}...` 
+    });
 
     // Initialize Supabase with service role key
     const supabaseClient = createClient(
