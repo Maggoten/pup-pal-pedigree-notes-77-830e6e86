@@ -14,7 +14,6 @@ import { Label } from '@/components/ui/label';
 import { AlertTriangle, ArrowRight, ArrowLeft, Mail } from 'lucide-react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import PricingSelection, { BillingInterval } from '@/components/auth/PricingSelection';
-import PricingSelectionWithRetry from '@/components/auth/PricingSelectionWithRetry';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -26,8 +25,6 @@ const Login: React.FC = () => {
   // Pricing selection state
   const [showPricingSelection, setShowPricingSelection] = useState(false);
   const [selectedBillingInterval, setSelectedBillingInterval] = useState<BillingInterval>('monthly');
-  const [paymentRetryCount, setPaymentRetryCount] = useState(0);
-  const [lastPaymentError, setLastPaymentError] = useState<string>('');
   
   // Forgot password state
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -112,125 +109,60 @@ const Login: React.FC = () => {
   const handlePricingSelection = async (billingInterval: BillingInterval) => {
     setSelectedBillingInterval(billingInterval);
     setIsLoading(true);
-    setPaymentRetryCount(prev => prev + 1);
     
-    console.log('Login page: Starting payment setup attempt', {
-      billingInterval,
-      attemptNumber: paymentRetryCount + 1
-    });
-    
-    // Enhanced session validation with more aggressive retry logic
-    const getValidSession = async (maxRetries = 5, delay = 2000) => {
-      for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        console.log(`Login page: Checking session validity (attempt ${attempt}/${maxRetries})`);
-        
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error(`Login page: Session error on attempt ${attempt}:`, error);
-          if (attempt === maxRetries) throw error;
-          await new Promise(resolve => setTimeout(resolve, delay));
-          continue;
-        }
-        
-        if (session?.access_token && session?.user?.id) {
-          console.log(`Login page: Valid session found on attempt ${attempt}`, {
-            userId: session.user.id,
-            tokenLength: session.access_token.length
-          });
-          return session;
-        }
-        
-        console.warn(`Login page: Incomplete session on attempt ${attempt}:`, {
-          hasSession: !!session,
-          hasToken: !!session?.access_token,
-          hasUser: !!session?.user?.id
-        });
-        
-        if (attempt < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, delay));
-        }
-      }
-      
-      throw new Error('No valid session found after retries');
-    };
+    console.log('🔥 STARTING PAYMENT SETUP:', { billingInterval });
     
     try {
-      console.log('Login page: Starting Stripe checkout with billing interval:', billingInterval);
+      // Get current session - simple approach
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      // Wait for valid session with retry mechanism
-      const session = await getValidSession();
+      console.log('🔥 SESSION CHECK:', { 
+        hasSession: !!session, 
+        hasToken: !!session?.access_token,
+        hasUser: !!session?.user?.id,
+        sessionError 
+      });
       
-      console.log('Login page: Making edge function call with session token');
+      if (sessionError || !session?.access_token) {
+        throw new Error('Authentication required. Please refresh and try again.');
+      }
+      
+      console.log('🔥 CALLING EDGE FUNCTION...');
+      
+      // Simple direct call to edge function
       const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: {
-          billingInterval
-        }
+        body: { billingInterval }
       });
       
-      if (checkoutError) {
-        console.error('Login page: Stripe checkout creation failed:', checkoutError);
-        
-        // Provide specific error messages based on the error type
-        let errorTitle = "Payment setup failed";
-        let errorDescription = "There was an issue setting up payment. Please try again.";
-        
-        if (checkoutError.message?.includes('STRIPE_SECRET_KEY')) {
-          errorTitle = "Configuration Error";
-          errorDescription = "Payment system is not properly configured. Please contact support.";
-        } else if (checkoutError.message?.includes('STRIPE_PRICE_ID')) {
-          errorTitle = "Configuration Error";
-          errorDescription = "Payment pricing is not configured. Please contact support.";
-        } else if (checkoutError.message?.includes('Authentication error')) {
-          errorTitle = "Authentication Error";
-          errorDescription = "Session expired. Please try again.";
-        }
-        
-        setLastPaymentError(errorDescription);
-        
-        toast({
-          title: errorTitle,
-          description: errorDescription,
-          variant: "destructive",
-        });
-        
-        // Keep modal open on error - don't allow bypassing payment
-        return; // Stay in pricing selection
-      } else if (checkoutData?.checkout_url) {
-        console.log('Login page: Successfully received checkout URL, redirecting to Stripe');
-        
-        // Hide pricing modal immediately to prevent duplicate clicks
-        setShowPricingSelection(false);
-        
-        // Redirect to Stripe checkout in same window for better UX
-        window.location.href = checkoutData.checkout_url;
-        return; // Don't continue with local navigation
-      } else {
-        console.error('Login page: No checkout URL received from edge function');
-        const errorMsg = "No payment URL was generated. Please try again.";
-        setLastPaymentError(errorMsg);
-        
-        toast({
-          title: "Payment setup failed",
-          description: errorMsg,
-          variant: "destructive",
-        });
-        // Keep modal open for retry
-        return;
-      }
-    } catch (sessionError) {
-      console.error('Login page: Session or checkout error:', sessionError);
+      console.log('🔥 EDGE FUNCTION RESPONSE:', { checkoutData, checkoutError });
       
+      if (checkoutError) {
+        console.error('🔥 CHECKOUT ERROR:', checkoutError);
+        throw new Error(checkoutError.message || 'Payment setup failed');
+      }
+      
+      if (!checkoutData?.url) {
+        console.error('🔥 NO CHECKOUT URL:', checkoutData);
+        throw new Error('No checkout URL received');
+      }
+      
+      console.log('🔥 REDIRECTING TO STRIPE:', checkoutData.url);
+      
+      // Redirect to Stripe checkout
+      window.location.href = checkoutData.url;
+      
+    } catch (error) {
+      console.error('Login page: Payment setup error:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       let errorMsg = "An unexpected error occurred during payment setup. Please try again.";
       
-      if (sessionError.message?.includes('No valid session')) {
+      if (errorMessage.includes('Authentication required')) {
         errorMsg = "Authentication session not ready. Please try again in a moment.";
       }
-      
-      setLastPaymentError(errorMsg);
       
       toast({
         title: "Session Error",
@@ -365,11 +297,9 @@ const Login: React.FC = () => {
 
       {showPricingSelection && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <PricingSelectionWithRetry 
+          <PricingSelection 
             onSelectPlan={handlePricingSelection}
             isLoading={effectiveLoading}
-            showRetry={paymentRetryCount > 1}
-            lastError={lastPaymentError}
           />
         </div>
       )}
