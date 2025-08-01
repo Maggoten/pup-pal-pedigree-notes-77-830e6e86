@@ -149,31 +149,6 @@
       "selectPuppy": "Välj valp",
       "weightPlaceholder": "0,00"
     },
-    "pricing": {
-      "title": "Välj Din Plan",
-      "subtitle": "Starta din 30-dagars gratis provperiod med valfri plan",
-      "monthly": {
-        "title": "Månadsvis",
-        "description": "Perfekt för att komma igång"
-      },
-      "yearly": {
-        "title": "Årligen",
-        "description": "Bästa värdet för seriösa uppfödare",
-        "savings": "Spara 36%"
-      },
-      "features": {
-        "trial": "30-dagars gratis provperiod",
-        "unlimited": "Obegränsade hundar och kullar",
-        "support": "Premiumsupport",
-        "yearlyBonus": "Prioriterade funktionsuppdateringar"
-      },
-      "trialInfo": {
-        "title": "Information om gratis provperiod:",
-        "description": "Starta din 30-dagars gratis provperiod omedelbart. Inga avgifter förrän provperioden slutar. Avbryt när som helst under provperioden."
-      },
-      "continue": "Fortsätt med {{plan}} Plan",
-      "loading": "Bearbetar..."
-    },
     "statuses": {
       "available": "Tillgänglig",
       "reserved": "Reserverad", 

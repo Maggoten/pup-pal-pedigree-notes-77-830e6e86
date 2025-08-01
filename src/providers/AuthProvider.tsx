@@ -76,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const [trialEndDate, setTrialEndDate] = useState<string | null>(null);
   const [hasPaid, setHasPaid] = useState(false);
   const [friend, setFriend] = useState(false);
-  const [hasAccess, setHasAccess] = useState<boolean | null>(false); // Start with false - block access by default until verified
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null); // null = not checked yet, false = no access, true = has access
   const [accessCheckComplete, setAccessCheckComplete] = useState(false);
   const [isAccessChecking, setIsAccessChecking] = useState(false);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
@@ -121,7 +121,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
           // CRITICAL: If no session, mark access check as complete to prevent modal flash
           setAccessCheckComplete(true);
           setSubscriptionLoading(false);
-          setHasAccess(null); // null for no session state (different from blocked state)
+          setHasAccess(null); // Explicitly null for no session state
         }
       } catch (error) {
         console.error("Failed to get initial session:", error);
@@ -144,11 +144,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         setSession(session || null);
         setIsLoggedIn(!!session);
         
-        // Check subscription when user signs in - CRITICAL: Block access by default until verified
+        // Check subscription when user signs in
         if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
-          // IMMEDIATELY block access until subscription is verified
-          setHasAccess(false);
-          setAccessCheckComplete(false);
           setTimeout(() => {
             // Use setTimeout to avoid calling Supabase within auth state change callback
             checkSubscription();

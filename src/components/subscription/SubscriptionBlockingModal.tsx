@@ -86,15 +86,36 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
         return;
       }
 
-      // If no stripe_customer_id, redirect to login page for plan selection
+      // If no stripe_customer_id, use registration checkout for payment collection
       if (!profile?.stripe_customer_id) {
         if (import.meta.env.DEV) {
-          console.log('[SubscriptionBlockingModal] No stripe_customer_id found, redirecting to login for plan selection');
+          console.log('[SubscriptionBlockingModal] No stripe_customer_id found, redirecting to registration checkout');
         }
         
-        // Redirect to login page to complete registration and select plan
-        window.location.href = '/login';
-        return;
+        const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
+
+        if (checkoutError) {
+          if (import.meta.env.DEV) {
+            console.error('[SubscriptionBlockingModal] Error creating registration checkout:', checkoutError);
+          }
+          toast.error('Unable to start trial setup. Please try again.');
+          return;
+        }
+
+        if (checkoutData?.checkout_url) {
+          if (import.meta.env.DEV) {
+            console.log('[SubscriptionBlockingModal] Redirecting to Stripe checkout for trial setup');
+          }
+          window.location.href = checkoutData.checkout_url;
+          return;
+        } else {
+          toast.error('No checkout URL received');
+          return;
+        }
       }
 
       // User has stripe_customer_id, open customer portal for subscription management
