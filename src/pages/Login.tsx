@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { AlertTriangle, ArrowRight, ArrowLeft, Mail } from 'lucide-react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import PricingSelection, { BillingInterval } from '@/components/auth/PricingSelection';
+import PricingSelectionWithRetry from '@/components/auth/PricingSelectionWithRetry';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -25,6 +26,8 @@ const Login: React.FC = () => {
   // Pricing selection state
   const [showPricingSelection, setShowPricingSelection] = useState(false);
   const [selectedBillingInterval, setSelectedBillingInterval] = useState<BillingInterval>('monthly');
+  const [paymentRetryCount, setPaymentRetryCount] = useState(0);
+  const [lastPaymentError, setLastPaymentError] = useState<string>('');
   
   // Forgot password state
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -89,8 +92,9 @@ const Login: React.FC = () => {
       if (success) {
         console.log('Login page: Registration successful, showing pricing selection');
         
-        // Show pricing selection instead of immediately creating checkout
+        // CRITICAL: Show pricing selection and prevent navigation until payment is complete
         setShowPricingSelection(true);
+        // Don't allow users to navigate away from this flow
       } else {
         console.log('Login page: Registration failed');
       }
@@ -108,9 +112,15 @@ const Login: React.FC = () => {
   const handlePricingSelection = async (billingInterval: BillingInterval) => {
     setSelectedBillingInterval(billingInterval);
     setIsLoading(true);
+    setPaymentRetryCount(prev => prev + 1);
     
-    // Helper function to check session with retry
-    const getValidSession = async (maxRetries = 3, delay = 1500) => {
+    console.log('Login page: Starting payment setup attempt', {
+      billingInterval,
+      attemptNumber: paymentRetryCount + 1
+    });
+    
+    // Enhanced session validation with more aggressive retry logic
+    const getValidSession = async (maxRetries = 5, delay = 2000) => {
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         console.log(`Login page: Checking session validity (attempt ${attempt}/${maxRetries})`);
         
@@ -123,12 +133,20 @@ const Login: React.FC = () => {
           continue;
         }
         
-        if (session?.access_token) {
-          console.log(`Login page: Valid session found on attempt ${attempt}`);
+        if (session?.access_token && session?.user?.id) {
+          console.log(`Login page: Valid session found on attempt ${attempt}`, {
+            userId: session.user.id,
+            tokenLength: session.access_token.length
+          });
           return session;
         }
         
-        console.warn(`Login page: No session found on attempt ${attempt}, retrying...`);
+        console.warn(`Login page: Incomplete session on attempt ${attempt}:`, {
+          hasSession: !!session,
+          hasToken: !!session?.access_token,
+          hasUser: !!session?.user?.id
+        });
+        
         if (attempt < maxRetries) {
           await new Promise(resolve => setTimeout(resolve, delay));
         }
@@ -171,46 +189,56 @@ const Login: React.FC = () => {
           errorDescription = "Session expired. Please try again.";
         }
         
+        setLastPaymentError(errorDescription);
+        
         toast({
           title: errorTitle,
           description: errorDescription,
           variant: "destructive",
         });
         
-        // Go back to pricing selection on error
-        setShowPricingSelection(true);
+        // Keep modal open on error - don't allow bypassing payment
+        return; // Stay in pricing selection
       } else if (checkoutData?.checkout_url) {
         console.log('Login page: Successfully received checkout URL, redirecting to Stripe');
-        // Redirect to Stripe checkout
+        
+        // Hide pricing modal immediately to prevent duplicate clicks
+        setShowPricingSelection(false);
+        
+        // Redirect to Stripe checkout in same window for better UX
         window.location.href = checkoutData.checkout_url;
         return; // Don't continue with local navigation
       } else {
         console.error('Login page: No checkout URL received from edge function');
+        const errorMsg = "No payment URL was generated. Please try again.";
+        setLastPaymentError(errorMsg);
+        
         toast({
           title: "Payment setup failed",
-          description: "No payment URL was generated. Please try again.",
+          description: errorMsg,
           variant: "destructive",
         });
-        setShowPricingSelection(true);
+        // Keep modal open for retry
+        return;
       }
     } catch (sessionError) {
       console.error('Login page: Session or checkout error:', sessionError);
       
+      let errorMsg = "An unexpected error occurred during payment setup. Please try again.";
+      
       if (sessionError.message?.includes('No valid session')) {
-        toast({
-          title: "Session Error",
-          description: "Authentication session not ready. Please try again in a moment.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Payment setup failed",
-          description: "An unexpected error occurred during payment setup. Please try again.",
-          variant: "destructive",
-        });
+        errorMsg = "Authentication session not ready. Please try again in a moment.";
       }
       
-      setShowPricingSelection(true);
+      setLastPaymentError(errorMsg);
+      
+      toast({
+        title: "Session Error",
+        description: errorMsg,
+        variant: "destructive",
+      });
+      
+      // Keep pricing modal open for retry on any error
     } finally {
       setIsLoading(false);
     }
@@ -337,9 +365,11 @@ const Login: React.FC = () => {
 
       {showPricingSelection && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <PricingSelection 
+          <PricingSelectionWithRetry 
             onSelectPlan={handlePricingSelection}
             isLoading={effectiveLoading}
+            showRetry={paymentRetryCount > 1}
+            lastError={lastPaymentError}
           />
         </div>
       )}
