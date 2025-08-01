@@ -360,54 +360,12 @@ const Login: React.FC = () => {
       
       {!showForgotPassword ? (
         <div className="w-full max-w-md space-y-6">
-          {/* Plan Selection */}
-          <Card className="bg-white border-warmbeige-200">
-            <CardHeader className="text-center">
-              <CardTitle className="text-xl font-bold text-brown-800 font-playfair">
-                Choose Your Plan
-              </CardTitle>
-              <CardDescription className="text-brown-600">
-                Select your subscription plan
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => setSelectedPlan('monthly')}
-                  className={`p-4 rounded-lg border-2 transition-all ${
-                    selectedPlan === 'monthly' 
-                      ? 'border-warmgreen-400 bg-warmgreen-50' 
-                      : 'border-warmbeige-200 hover:border-warmgreen-300'
-                  }`}
-                >
-                  <div className="text-center">
-                    <div className="font-semibold text-brown-800">Monthly</div>
-                    <div className="text-sm text-brown-600">$9.99/month</div>
-                    <div className="text-xs text-warmgreen-600 mt-2">30-day free trial</div>
-                  </div>
-                </button>
-                <button
-                  onClick={() => setSelectedPlan('yearly')}
-                  className={`p-4 rounded-lg border-2 transition-all ${
-                    selectedPlan === 'yearly' 
-                      ? 'border-warmgreen-400 bg-warmgreen-50' 
-                      : 'border-warmbeige-200 hover:border-warmgreen-300'
-                  }`}
-                >
-                  <div className="text-center">
-                    <div className="font-semibold text-brown-800">Yearly</div>
-                    <div className="text-sm text-brown-600">$99.99/year</div>
-                    <div className="text-xs text-warmgreen-600 mt-2">Save 17% + 30-day trial</div>
-                  </div>
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-
           <AuthTabs 
             onLogin={handleLogin}
             onRegister={handleRegistration}
             isLoading={effectiveLoading}
+            selectedPlan={selectedPlan}
+            onPlanChange={setSelectedPlan}
           />
           
           {/* Forgot Password Link */}

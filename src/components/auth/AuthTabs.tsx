@@ -11,12 +11,16 @@ interface AuthTabsProps {
   onLogin: (values: LoginFormValues) => void;
   onRegister: (values: RegistrationFormValues) => void;
   isLoading: boolean;
+  selectedPlan: 'monthly' | 'yearly';
+  onPlanChange: (plan: 'monthly' | 'yearly') => void;
 }
 
 const AuthTabs: React.FC<AuthTabsProps> = ({
   onLogin,
   onRegister,
-  isLoading
+  isLoading,
+  selectedPlan,
+  onPlanChange
 }) => {
   const { t } = useTranslation('auth');
 
@@ -43,7 +47,42 @@ const AuthTabs: React.FC<AuthTabsProps> = ({
             <LoginForm onSubmit={onLogin} isLoading={isLoading} />
           </TabsContent>
           
-          <TabsContent value="register">
+          <TabsContent value="register" className="space-y-4">
+            {/* Plan Selection */}
+            <div className="bg-warmbeige-50 rounded-lg border p-4">
+              <h3 className="text-lg font-semibold mb-3 text-brown-800">Choose Your Plan</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => onPlanChange('monthly')}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    selectedPlan === 'monthly' 
+                      ? 'border-warmgreen-400 bg-warmgreen-50' 
+                      : 'border-warmbeige-200 hover:border-warmgreen-300'
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="font-semibold text-brown-800">Monthly</div>
+                    <div className="text-sm text-brown-600">$9.99/month</div>
+                    <div className="text-xs text-warmgreen-600 mt-1">30-day free trial</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => onPlanChange('yearly')}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    selectedPlan === 'yearly' 
+                      ? 'border-warmgreen-400 bg-warmgreen-50' 
+                      : 'border-warmbeige-200 hover:border-warmgreen-300'
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="font-semibold text-brown-800">Yearly</div>
+                    <div className="text-sm text-brown-600">$99.99/year</div>
+                    <div className="text-xs text-warmgreen-600 mt-1">Save 17% + 30-day trial</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+            
             <RegistrationForm onSubmit={onRegister} isLoading={isLoading} />
           </TabsContent>
         </Tabs>
