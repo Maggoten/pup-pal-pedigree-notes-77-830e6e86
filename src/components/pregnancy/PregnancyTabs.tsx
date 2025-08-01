@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Thermometer, MessageSquare, ClipboardList } from 'lucide-react';
+import { Thermometer, MessageSquare, ClipboardList, Loader2 } from 'lucide-react';
 import TemperatureLog from '@/components/pregnancy/TemperatureLog';
 import SymptomsLog from '@/components/pregnancy/SymptomsLog';
 import PregnancyJourney from '@/components/pregnancy/journey/PregnancyJourney';
@@ -21,8 +21,17 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
   matingDate, 
   expectedDueDate 
 }) => {
-  const { t } = useTranslation('pregnancy');
+  const { t, ready } = useTranslation('pregnancy');
   console.log("📋 PregnancyTabs rendered with pregnancyId:", pregnancyId);
+
+  // Don't render until translations are ready
+  if (!ready) {
+    return (
+      <div className="flex justify-center items-center h-24">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-4">

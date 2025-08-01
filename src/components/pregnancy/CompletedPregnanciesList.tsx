@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, RotateCcw } from 'lucide-react';
+import { Calendar, Clock, RotateCcw, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { ActivePregnancy } from './ActivePregnanciesList';
@@ -20,8 +20,21 @@ const CompletedPregnanciesList: React.FC<CompletedPregnanciesListProps> = ({
   isLoading,
   onRefresh
 }) => {
-  const { t } = useTranslation('pregnancy');
+  const { t, ready } = useTranslation('pregnancy');
   const [reactivatingIds, setReactivatingIds] = React.useState<Set<string>>(new Set());
+
+  // Don't render until translations are ready
+  if (!ready) {
+    return (
+      <Card className="text-center py-12">
+        <CardContent>
+          <div className="flex justify-center items-center h-24">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleReactivate = async (pregnancyId: string, femaleName: string) => {
     setReactivatingIds(prev => new Set(prev).add(pregnancyId));

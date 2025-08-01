@@ -30,6 +30,19 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
   const { t, ready } = useTranslation('pregnancy');
   const navigate = useNavigate();
 
+  // Don't render until translations are ready
+  if (!ready) {
+    return (
+      <Card className="h-full">
+        <CardHeader>
+          <div className="flex justify-center items-center h-24">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   const handleViewPregnancyDetails = (pregnancyId: string) => {
     navigate(`/pregnancy/${pregnancyId}`);
   };
@@ -60,7 +73,7 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
         <CardDescription>{t('actions.managePregnancy')}</CardDescription>
       </CardHeader>
       <CardContent>
-        {!ready || isLoading ? (
+        {isLoading ? (
           <div className="flex justify-center items-center h-24">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
