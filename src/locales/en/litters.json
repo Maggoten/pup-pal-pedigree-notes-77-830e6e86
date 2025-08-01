@@ -96,12 +96,7 @@
       "puppyDetails": "Puppy Details",
       "weightTracking": "Weight Tracking",
       "heightTracking": "Height Tracking",
-      "notes": "Notes",
-      "details": "Details",
-      "growth": "Growth",
-      "weightLog": "Weight Log",
-      "heightLog": "Height Log",
-      "saveChanges": "Save Changes"
+      "notes": "Notes"
     },
     "labels": {
       "age": "Age",
@@ -121,7 +116,6 @@
       "buyerName": "Buyer Name",
       "buyerPhone": "Buyer Phone",
       "collarId": "Collar ID",
-      "collar": "Collar",
       "microchip": "Microchip",
       "totalPuppies": "Total Puppies",
       "litterAge": "Litter Age",
@@ -132,20 +126,19 @@
       "height": "Height"
     },
     "placeholders": {
-      "name": "Puppy name",
-      "color": "Puppy color",
+      "puppyName": "Puppy name",
+      "puppyColor": "Puppy color",
       "registeredName": "Optional registered name",
       "registrationNumber": "Optional registration number", 
-      "collar": "Collar identifier",
-      "microchip": "Microchip number",
+      "collarId": "Collar identifier",
+      "microchipNumber": "Microchip number",
       "buyerName": "Buyer's name",
       "buyerPhone": "Buyer's phone number",
       "enterWeight": "Enter weight",
       "enterHeight": "Enter height",
-      "birthWeight": "0.00",
-      "note": "Add a new note about this puppy...",
+      "addNote": "Add a new note about this puppy...",
       "enterNote": "Enter a note about this puppy",
-      "status": "Select status",
+      "selectStatus": "Select status",
       "selectPuppy": "Select puppy",
       "weightPlaceholder": "0.00"
     },

@@ -20,49 +20,23 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    // Parse request body for billing interval
-    let billingInterval = 'monthly'; // Default to monthly for backward compatibility
-    try {
-      if (req.headers.get("content-type")?.includes("application/json")) {
-        const body = await req.json();
-        billingInterval = body.billingInterval || 'monthly';
-        logStep("Billing interval from request", { billingInterval });
-      }
-    } catch (parseError) {
-      logStep("No request body or parse error, using default monthly", { parseError });
-    }
-
     // Check environment variables with detailed logging
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    const monthlyPriceId = Deno.env.get("STRIPE_PRICE_ID");
-    const yearlyPriceId = Deno.env.get("STRIPE_YEARLY_PRICE_ID");
-    
-    // Select the appropriate price ID based on billing interval
-    const priceId = billingInterval === 'yearly' ? yearlyPriceId : monthlyPriceId;
+    const priceId = Deno.env.get("STRIPE_PRICE_ID");
     
     logStep("Environment check", { 
       hasStripeKey: !!stripeKey, 
-      hasMonthlyPriceId: !!monthlyPriceId,
-      hasYearlyPriceId: !!yearlyPriceId,
-      billingInterval,
-      selectedPriceId: priceId ? `${priceId.substring(0, 8)}...` : 'undefined'
+      hasPriceId: !!priceId,
+      priceIdValue: priceId ? `${priceId.substring(0, 8)}...` : 'undefined'
     });
     
     if (!stripeKey) {
       logStep("ERROR: STRIPE_SECRET_KEY is missing");
       throw new Error("STRIPE_SECRET_KEY is not configured in Supabase secrets");
     }
-    if (!monthlyPriceId) {
+    if (!priceId) {
       logStep("ERROR: STRIPE_PRICE_ID is missing");
       throw new Error("STRIPE_PRICE_ID is not configured in Supabase secrets");
-    }
-    if (billingInterval === 'yearly' && !yearlyPriceId) {
-      logStep("ERROR: STRIPE_YEARLY_PRICE_ID is missing");
-      throw new Error("STRIPE_YEARLY_PRICE_ID is not configured in Supabase secrets");
-    }
-    if (!priceId) {
-      logStep("ERROR: No valid price ID found");
-      throw new Error("No valid price ID found for the selected billing interval");
     }
     
     logStep("Stripe credentials verified", { priceId: `${priceId.substring(0, 12)}...` });
