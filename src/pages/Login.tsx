@@ -87,17 +87,45 @@ const Login: React.FC = () => {
         
         // Create Stripe checkout session for payment collection
         try {
+          console.log('🔍 Login page: Getting session for Stripe checkout...');
+          const startTime = Date.now();
           const { data: { session } } = await supabase.auth.getSession();
+          
           if (session) {
-            console.log('Login page: Creating Stripe checkout session');
+            console.log('✅ Login page: Session found:', {
+              userId: session.user?.id,
+              email: session.user?.email,
+              tokenLength: session.access_token?.length,
+              tokenStart: session.access_token?.substring(0, 20) + '...',
+              expiresAt: session.expires_at
+            });
+            
+            console.log('🚀 Login page: Invoking create-registration-checkout function...');
+            const invokeStartTime = Date.now();
+            
             const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
               headers: {
                 Authorization: `Bearer ${session.access_token}`,
               },
             });
             
+            const invokeEndTime = Date.now();
+            console.log(`⏱️ Login page: Function invoke took ${invokeEndTime - invokeStartTime}ms`);
+            console.log('📦 Login page: Function response:', {
+              data: checkoutData,
+              error: checkoutError,
+              hasData: !!checkoutData,
+              hasError: !!checkoutError
+            });
+            
             if (checkoutError) {
-              console.error('Login page: Stripe checkout creation failed:', checkoutError);
+              console.error('❌ Login page: Stripe checkout creation failed:', {
+                error: checkoutError,
+                message: checkoutError.message,
+                details: checkoutError.details,
+                hint: checkoutError.hint,
+                code: checkoutError.code
+              });
               
               // Provide specific error messages based on the error type
               let errorTitle = "Payment setup failed";
