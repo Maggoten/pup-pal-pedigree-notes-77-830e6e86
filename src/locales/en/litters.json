@@ -432,6 +432,10 @@
       "weight": "Weight",
       "height": "Height"
     },
+    "select": {
+      "allPuppies": "All Puppies",
+      "selectPuppy": "Select puppy"
+    },
     "empty": {
       "noSelection": {
         "title": "Select a Puppy",

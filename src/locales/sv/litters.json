@@ -432,6 +432,10 @@
       "weight": "Vikt",
       "height": "Höjd"
     },
+    "select": {
+      "allPuppies": "Alla valpar",
+      "selectPuppy": "Välj valp"
+    },
     "empty": {
       "noSelection": {
         "title": "Välj en Valp",
