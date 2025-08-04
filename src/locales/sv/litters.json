@@ -13,10 +13,10 @@
     }
   },
   "actions": {
-    "viewDetails": "Visa Detaljer",
+    "viewDetails": "Detaljer",
     "archiveLitter": "Arkivera Kull",
     "unarchiveLitter": "Aktivera Kull",
-    "addNewLitter": "Lägg till Ny Kull",
+    "addNewLitter": "Ny Kull",
     "addFirstLitter": "Lägg till Din Första Kull",
     "addFirstPlannedLitter": "Lägg till Din Första Planerade Kull",
     "save": "Spara",
@@ -92,24 +92,24 @@
     "titles": {
       "addPuppy": "Lägg till ny Valp",
       "editPuppy": "Redigera Valp",
-      "puppyProfile": "Valpens Profil",
+      "puppyProfile": "Valpprofil",
       "litterInformation": "Kullinformation",
-      "puppyDetails": "Valpens Detaljer",
+      "puppyDetails": "Detaljer",
       "weightTracking": "Viktuppföljning",
       "heightTracking": "Höjduppföljning",
       "notes": "Anteckningar",
       "editPuppyInformation": "Redigera Valpinformation",
       "measurementsAndNotes": "Mätningar och anteckningar för {{name}}",
-      "physicalDetails": "Fysiska Detaljer",
+      "physicalDetails": "Detaljer",
       "registration": "Registrering",
       "growthCharts": "Tillväxtdiagram",
-      "notesAndRecords": "Anteckningar & Register",
+      "notesAndRecords": "Anteckningar",
       "weightProgress": "Viktkurva",
       "heightProgress": "Höjdkurva",
       "buyerInformation": "Köparinformation",
       "profilePicture": "Profilbild",
       "basicInformation": "Grundläggande Information",
-      "physicalMeasurements": "Fysiska Mätningar",
+      "physicalMeasurements": "Viktinformation",
       "identification": "Identifiering",
       "statusAndOwnership": "Status & Ägarskap"
     },
@@ -144,16 +144,16 @@
       "female": "Tik",
       "weight": "Vikt",
       "height": "Höjd",
-      "notSet": "Inte angett",
-      "notRecorded": "Inte registrerat",
-      "birthDateNotSet": "Födelsedatum inte angett",
+      "notSet": "Ej angett",
+      "notRecorded": "Ej registrerat",
+      "birthDateNotSet": "Födelsedatum ej angett",
       "informationNotAvailable": "Information inte tillgänglig"
     },
     "placeholders": {
       "puppyName": "Valpens namn",
       "puppyColor": "Valpens färg",
-      "registeredName": "Valfritt registrerat namn",
-      "registrationNumber": "Valfritt registreringsnummer", 
+      "registeredName": "Registrerat namn",
+      "registrationNumber": "Registreringsnummer", 
       "collarId": "Halsbandsidentifierare",
       "microchipNumber": "Mikrochipnummer",
       "buyerName": "Köparens namn",
@@ -224,9 +224,9 @@
       "heightCm": "Höjd (cm)"
     },
     "messages": {
-      "noWeightRecords": "Inga viktmätningar än.",
-      "noHeightRecords": "Inga höjdmätningar än.",
-      "noNotesYet": "Inga anteckningar än.",
+      "noWeightRecords": "Inga viktregisteringar utförda.",
+      "noHeightRecords": "Ingen mankhöjd registerad.",
+      "noNotesYet": "Inga anteckningar registerade.",
       "viewAndManage": "Visa och hantera information för {{name}}.",
       "deleteConfirmation": "Vill du ta bort \"{{name}}\"?"
     },
@@ -241,13 +241,13 @@
   },
   "litter": {
     "titles": {
-      "addLitter": "Lägg till Ny Kull",
-      "editLitter": "Redigera Kulldetaljer",
+      "addLitter": "Ny Kull",
+      "editLitter": "Redigera Kull",
       "litterDetails": "Kulldetaljer"
     },
     "labels": {
       "litterName": "Kullnamn",
-      "sireName": "Hanhundens Namn",
+      "sireName": "Hanens Namn",
       "damName": "Tikens Namn",
       "dateOfBirth": "Födelsedatum",
       "parents": "Föräldrar",
@@ -310,7 +310,7 @@
     "clearFilters": "Rensa Filter"
   },
   "checklist": {
-    "title": "Valpens Utvecklingschecklista",
+    "title": "Checklista",
     "completed": "slutförd",
     "completedBadge": "{{completed}}/{{total}} slutförda",
     "currentAge": "Nuvarande ålder",
@@ -340,49 +340,49 @@
       "health": {
         "firstDeworming": {
           "title": "Första Avmaskningen",
-          "description": "Ge valparna första avmaskningsbehandlingen"
+          "description": "Ge valparna första avmaskningen"
         },
         "secondDeworming": {
           "title": "Andra Avmaskningen",
-          "description": "Ge valparna andra avmaskningsbehandlingen"
+          "description": "Ge valparna andra avmaskningen"
         },
         "thirdDeworming": {
           "title": "Tredje Avmaskningen",
-          "description": "Ge valparna tredje avmaskningsbehandlingen"
+          "description": "Ge valparna tredje avmaskningen"
         },
         "finalDeworming": {
           "title": "Sista Avmaskningen",
-          "description": "Ge sista avmaskningsbehandlingen innan valparna lämnar"
+          "description": "Ge sista avmaskningen innan valparna flyttar"
         },
         "vetVisit": {
           "title": "Veterinärbesök",
-          "description": "Boka veterinärtid för hälsokontroll och vaccinationer"
+          "description": "Boka veterinärtid för besiktning, chipmärkning och vaccinationer"
         },
         "firstVaccination": {
           "title": "Första Vaccinationen",
-          "description": "Valparna bör få sin första vaccination"
+          "description": "Valparna bör få sin första vaccination innan flytten till sitt nya hem"
         },
         "secondVaccination": {
           "title": "Andra Vaccinationen",
-          "description": "Planera för andra vaccinationen (efter att valparna lämnat)"
+          "description": "Meddela valpköpare om kommande vaccination (efter att valparna flyttat)"
         }
       },
       "development": {
         "startWeaning": {
           "title": "Börja Avvänjning",
-          "description": "Börja introducera valpmat blandat med vatten"
+          "description": "Börja introducera valpmat"
         },
         "continueWeaning": {
           "title": "Fortsätt Avvänjning",
-          "description": "Minska gradvis beroendet av moderns mjölk"
+          "description": "Minska gradvis beroendet av att dia tikens mjölk"
         },
         "completeWeaning": {
           "title": "Slutför Avvänjning",
-          "description": "Valparna bör mestadels äta fast föda"
+          "description": "Valparna ska nu mestadels äta fast föda"
         },
         "beginSocialization": {
           "title": "Börja Socialisering",
-          "description": "Börja introducera valparna för olika ljud och försiktig hantering"
+          "description": "Börja introducera valparna för olika ljud, miljöer och hantering"
         },
         "increaseSocialization": {
           "title": "Öka Socialiseringen",
@@ -390,17 +390,17 @@
         },
         "temperamentTesting": {
           "title": "Temperamentstestning",
-          "description": "Bedöm valparnas temperament för att hjälpa med placering"
+          "description": "Bedöm valparnas temperament för att hjälpa med placering till rätt hem"
         }
       },
       "admin": {
         "microchipPuppies": {
           "title": "Mikrochippa Valparna",
-          "description": "Ordna så att valparna mikrochippas innan de går till nya hem"
+          "description": "Ordna så att valparna mikrochippas innan de flyttar till nya hem"
         },
         "professionalPhotos": {
-          "title": "Professionella Foton",
-          "description": "Ta professionella foton av valparna för adoptionsprofiler"
+          "title": "Foton",
+          "description": "Ta foton av valparna för att skicka med valpköparna"
         },
         "registerLitter": {
           "title": "Registrera Kullen",
@@ -408,11 +408,11 @@
         },
         "preparePuppyPacks": {
           "title": "Förbered Valppaket",
-          "description": "Sammanställ dokumentation, vårdanvisningar och förnödenheter för nya ägare"
+          "description": "Sammanställ dokumentation, vårdanvisningar och förnödenheter till den nya ägaren"
         },
         "prepareContracts": {
           "title": "Förbered Kontrakt",
-          "description": "Slutför adoptionskontrakt för nya valpägare"
+          "description": "Förbered köpeavtal inför försäljning"
         }
       }
     },
