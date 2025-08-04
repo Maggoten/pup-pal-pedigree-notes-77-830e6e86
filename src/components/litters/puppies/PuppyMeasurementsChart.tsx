@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { format, parseISO } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import { Puppy } from '@/types/breeding';
 
 interface PuppyMeasurementsChartProps {
@@ -8,6 +9,7 @@ interface PuppyMeasurementsChartProps {
 }
 
 const PuppyMeasurementsChart: React.FC<PuppyMeasurementsChartProps> = ({ puppy }) => {
+  const { t } = useTranslation('litters');
   const { weightChartData, heightChartData } = useMemo(() => {
     const weightData = puppy.weightLog || [];
     const heightData = puppy.heightLog || [];
@@ -53,7 +55,7 @@ const PuppyMeasurementsChart: React.FC<PuppyMeasurementsChartProps> = ({ puppy }
     <div className="space-y-6">
       {hasWeightData && (
         <div>
-          <h4 className="text-lg font-semibold mb-4">Weight Progress</h4>
+          <h4 className="text-lg font-semibold mb-4">{t('puppies.titles.weightProgress')}</h4>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={weightChartData}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -91,7 +93,7 @@ const PuppyMeasurementsChart: React.FC<PuppyMeasurementsChartProps> = ({ puppy }
 
       {hasHeightData && (
         <div>
-          <h4 className="text-lg font-semibold mb-4">Height Progress</h4>
+          <h4 className="text-lg font-semibold mb-4">{t('puppies.titles.heightProgress')}</h4>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={heightChartData}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
