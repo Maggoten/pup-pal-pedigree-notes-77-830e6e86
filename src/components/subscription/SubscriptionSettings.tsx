@@ -11,6 +11,11 @@ import { format } from 'date-fns';
 
 const SubscriptionSettings: React.FC = () => {
   const { checkSubscription } = useAuth();
+  
+  // Refresh subscription status when component mounts to ensure accuracy
+  React.useEffect(() => {
+    checkSubscription();
+  }, [checkSubscription]);
   const {
     hasAccess,
     subscriptionStatus,
