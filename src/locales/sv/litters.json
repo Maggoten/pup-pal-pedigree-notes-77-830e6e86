@@ -8,7 +8,7 @@
       "description": "Visa och hantera dina kullar, följ upp vikt, hälsa och få tillgång till detaljerad kullinfo"
     },
     "puppies": {
-      "title": "Valpar",
+      "title": "Valpar", 
       "description": "Följ dina kullar och enskilda valpar"
     }
   },
@@ -123,7 +123,7 @@
       "gender": "Kön",
       "breed": "Ras",
       "color": "Färg",
-      "markings": "Markeringar",
+      "markings": "Teckning",
       "birthWeight": "Födelsevikt (kg)",
       "currentWeight": "Nuvarande Vikt (kg)",
       "dateOfBirth": "Födelsedatum",
