@@ -9,6 +9,7 @@ import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Puppy } from '@/types/breeding';
 import { usePuppyQueries } from '@/hooks/usePuppyQueries';
 import { toast } from '@/components/ui/use-toast';
+import { useTranslation } from 'react-i18next';
 import EditPuppyDialog from '@/components/litters/puppies/EditPuppyDialog';
 import PuppyMeasurementsChart from '@/components/litters/puppies/PuppyMeasurementsChart';
 import PuppyMeasurementsDialog from '@/components/litters/puppies/PuppyMeasurementsDialog';
@@ -17,6 +18,7 @@ import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirm
 const PuppyProfile: React.FC = () => {
   const { litterId, puppyId } = useParams<{ litterId: string; puppyId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation('litters');
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showMeasurementsDialog, setShowMeasurementsDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -169,11 +171,11 @@ const PuppyProfile: React.FC = () => {
     const status = puppy.status || 'Available';
     switch (status) {
       case 'Reserved':
-        return <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">Reserved</Badge>;
+        return <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">{t('puppies.statuses.reserved')}</Badge>;
       case 'Sold':
-        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">Sold</Badge>;
+        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">{t('puppies.statuses.sold')}</Badge>;
       default:
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">Available</Badge>;
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">{t('puppies.statuses.available')}</Badge>;
     }
   };
 
@@ -184,7 +186,7 @@ const PuppyProfile: React.FC = () => {
       );
       return `${sortedWeights[0].weight} kg`;
     }
-    return puppy.currentWeight ? `${puppy.currentWeight} kg` : 'Not recorded';
+    return puppy.currentWeight ? `${puppy.currentWeight} kg` : t('puppies.labels.notRecorded');
   };
 
   const getLatestHeight = (puppy: Puppy) => {
@@ -194,7 +196,7 @@ const PuppyProfile: React.FC = () => {
       );
       return `${sortedHeights[0].height} cm`;
     }
-    return 'Not recorded';
+    return t('puppies.labels.notRecorded');
   };
 
   const getPuppyAge = (puppy: Puppy) => {
@@ -224,7 +226,7 @@ const PuppyProfile: React.FC = () => {
       <div className="flex items-center justify-between gap-4 mb-6">
         <Button variant="outline" size="sm" onClick={handleBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Litters
+          {t('puppies.actions.backToLitters')}
         </Button>
         <Button 
           variant="outline" 
@@ -233,7 +235,7 @@ const PuppyProfile: React.FC = () => {
           disabled={isRefreshing}
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          Refresh
+          {t('actions.refresh')}
         </Button>
       </div>
 
@@ -279,7 +281,7 @@ const PuppyProfile: React.FC = () => {
                   <span>
                     {selectedPuppy.birthDateTime 
                       ? format(parseISO(selectedPuppy.birthDateTime), 'MMM d, yyyy')
-                      : 'Birth date not set'
+                      : t('puppies.labels.birthDateNotSet')
                     }
                   </span>
                 </div>
@@ -307,60 +309,60 @@ const PuppyProfile: React.FC = () => {
               {/* Physical and Registration Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Physical Details</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Birth Weight:</span>
-                      <span className="text-sm">{selectedPuppy.birthWeight ? `${selectedPuppy.birthWeight} kg` : 'Not recorded'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Current Weight:</span>
-                      <span className="text-sm">{getLatestWeight(selectedPuppy)}</span>
-                    </div>
-                  </div>
-                </div>
+                  <h3 className="text-lg font-semibold mb-3">{t('puppies.titles.physicalDetails')}</h3>
+                   <div className="space-y-2">
+                     <div className="flex justify-between">
+                       <span className="text-sm text-muted-foreground">{t('puppies.labels.birthWeight')}:</span>
+                       <span className="text-sm">{selectedPuppy.birthWeight ? `${selectedPuppy.birthWeight} kg` : t('puppies.labels.notRecorded')}</span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="text-sm text-muted-foreground">{t('puppies.labels.currentWeight')}:</span>
+                       <span className="text-sm">{getLatestWeight(selectedPuppy)}</span>
+                     </div>
+                   </div>
+                 </div>
 
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Registration</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Microchip:</span>
-                      <span className="text-sm">{selectedPuppy.microchip || 'Not set'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Collar:</span>
-                      <span className="text-sm">{selectedPuppy.collar || 'Not set'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Breed:</span>
-                      <span className="text-sm">{selectedPuppy.breed}</span>
-                    </div>
-                  </div>
-                </div>
+                 <div>
+                   <h3 className="text-lg font-semibold mb-3">{t('puppies.titles.registration')}</h3>
+                   <div className="space-y-2">
+                     <div className="flex justify-between">
+                       <span className="text-sm text-muted-foreground">{t('puppies.labels.microchip')}:</span>
+                       <span className="text-sm">{selectedPuppy.microchip || t('puppies.labels.notSet')}</span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="text-sm text-muted-foreground">{t('puppies.labels.collar')}:</span>
+                       <span className="text-sm">{selectedPuppy.collar || t('puppies.labels.notSet')}</span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="text-sm text-muted-foreground">{t('puppies.labels.breed')}:</span>
+                       <span className="text-sm">{selectedPuppy.breed}</span>
+                     </div>
+                   </div>
+                 </div>
               </div>
 
               {/* Buyer Information */}
               {(selectedPuppy.status === 'Reserved' || selectedPuppy.status === 'Sold') && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Buyer Information</h3>
-                  <p className="text-sm">{selectedPuppy.newOwner || 'Information not available'}</p>
-                </div>
+                 <div>
+                   <h3 className="text-lg font-semibold mb-3">{t('puppies.titles.buyerInformation')}</h3>
+                   <p className="text-sm">{selectedPuppy.newOwner || t('puppies.labels.informationNotAvailable')}</p>
+                 </div>
               )}
             </div>
           </div>
 
           {/* Growth Chart */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">Growth Charts</h3>
-            <PuppyMeasurementsChart puppy={selectedPuppy} />
-          </div>
+           <div className="mb-8">
+             <h3 className="text-lg font-semibold mb-4">{t('puppies.titles.growthCharts')}</h3>
+             <PuppyMeasurementsChart puppy={selectedPuppy} />
+           </div>
 
           {/* Notes Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Notes & Records
-            </h3>
+             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+               <FileText className="h-5 w-5" />
+               {t('puppies.titles.notesAndRecords')}
+             </h3>
             {selectedPuppy.notes && selectedPuppy.notes.length > 0 ? (
               <div className="space-y-4">
                 {selectedPuppy.notes
@@ -375,7 +377,7 @@ const PuppyProfile: React.FC = () => {
                   ))}
               </div>
             ) : (
-              <p className="text-muted-foreground">No notes recorded yet.</p>
+              <p className="text-muted-foreground">{t('puppies.messages.noNotesYet')}</p>
             )}
           </div>
         </CardContent>
@@ -385,12 +387,12 @@ const PuppyProfile: React.FC = () => {
             variant="destructive" 
             onClick={() => setShowDeleteDialog(true)}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
+             <Trash2 className="h-4 w-4 mr-2" />
+             {t('actions.delete')}
           </Button>
           <Button onClick={() => setShowEditDialog(true)}>
-            <Edit className="h-4 w-4 mr-2" />
-            Edit
+             <Edit className="h-4 w-4 mr-2" />
+             {t('actions.edit')}
           </Button>
         </CardFooter>
       </Card>

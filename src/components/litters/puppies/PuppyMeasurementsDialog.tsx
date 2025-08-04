@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
+import { useTranslation } from 'react-i18next';
 import { Puppy } from '@/types/breeding';
 import { updatePuppyInDb } from '@/services/puppyService';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,6 +26,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
   onClose, 
   onUpdate 
 }) => {
+  const { t } = useTranslation('litters');
   const [activeTab, setActiveTab] = useState('weight');
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');
@@ -425,9 +427,9 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
   return (
     <DialogContent className="sm:max-w-[600px]" onInteractOutside={onClose}>
       <DialogHeader>
-        <DialogTitle>Measurements and notes for {puppy.name}</DialogTitle>
+        <DialogTitle>{t('puppies.titles.measurementsAndNotes', { name: puppy.name })}</DialogTitle>
         <DialogDescription>
-          Add weight, height, or notes for tracking puppy development.
+          {t('puppies.descriptions.measurementsDialog')}
         </DialogDescription>
       </DialogHeader>
 
@@ -440,9 +442,9 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
         <TabsList className="grid grid-cols-3">
-          <TabsTrigger value="weight">Weight</TabsTrigger>
-          <TabsTrigger value="height">Height</TabsTrigger>
-          <TabsTrigger value="notes">Notes</TabsTrigger>
+          <TabsTrigger value="weight">{t('puppies.labels.weight')}</TabsTrigger>
+          <TabsTrigger value="height">{t('puppies.labels.height')}</TabsTrigger>
+          <TabsTrigger value="notes">{t('puppies.titles.notes')}</TabsTrigger>
         </TabsList>
         <TabsContent value="weight">
           <PuppyWeightTab
@@ -480,7 +482,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       </Tabs>
 
       <DialogFooter className="mt-4 gap-2">
-        <Button variant="outline" onClick={onClose}>Close</Button>
+        <Button variant="outline" onClick={onClose}>{t('puppies.actions.close')}</Button>
       </DialogFooter>
     </DialogContent>
   );

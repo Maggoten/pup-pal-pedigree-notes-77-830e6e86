@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import PuppyImageUploader from './PuppyImageUploader';
 
 interface EditPuppyDialogProps {
@@ -22,6 +23,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
   onOpenChange,
   onUpdatePuppy
 }) => {
+  const { t } = useTranslation('litters');
   const [formData, setFormData] = useState({
     name: puppy.name || '',
     gender: puppy.gender || 'male',
@@ -63,13 +65,13 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Puppy Information</DialogTitle>
+          <DialogTitle>{t('puppies.titles.editPuppyInformation')}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Profile Picture */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Profile Picture</h3>
+            <h3 className="text-lg font-semibold">{t('puppies.titles.profilePicture')}</h3>
             <div className="flex justify-center">
               <PuppyImageUploader
                 puppyName={formData.name}
@@ -82,11 +84,11 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
 
           {/* Basic Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Basic Information</h3>
+            <h3 className="text-lg font-semibold">{t('puppies.titles.basicInformation')}</h3>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
+                <Label htmlFor="name">{t('puppies.labels.name')} *</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -96,14 +98,14 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="gender">Gender *</Label>
+                <Label htmlFor="gender">{t('puppies.labels.gender')} *</Label>
                 <Select value={formData.gender} onValueChange={(value: 'male' | 'female') => setFormData({ ...formData, gender: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="male">{t('puppies.labels.male')}</SelectItem>
+                    <SelectItem value="female">{t('puppies.labels.female')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -111,7 +113,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="color">Color</Label>
+                <Label htmlFor="color">{t('puppies.labels.color')}</Label>
                 <Input
                   id="color"
                   value={formData.color}
@@ -120,7 +122,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="markings">Markings</Label>
+                <Label htmlFor="markings">{t('puppies.labels.markings')}</Label>
                 <Input
                   id="markings"
                   value={formData.markings}
@@ -130,7 +132,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="birthDateTime">Birth Date & Time</Label>
+              <Label htmlFor="birthDateTime">{t('puppies.labels.birthDateTime')}</Label>
               <Input
                 id="birthDateTime"
                 type="datetime-local"
@@ -142,11 +144,11 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
 
           {/* Physical Measurements */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Physical Measurements</h3>
+            <h3 className="text-lg font-semibold">{t('puppies.titles.physicalMeasurements')}</h3>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="birthWeight">Birth Weight (kg)</Label>
+                <Label htmlFor="birthWeight">{t('puppies.labels.birthWeight')}</Label>
                 <Input
                   id="birthWeight"
                   type="number"
@@ -157,7 +159,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="currentWeight">Current Weight (kg)</Label>
+                <Label htmlFor="currentWeight">{t('puppies.labels.currentWeight')}</Label>
                 <Input
                   id="currentWeight"
                   type="number"
@@ -171,11 +173,11 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
 
           {/* Identification */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Identification</h3>
+            <h3 className="text-lg font-semibold">{t('puppies.titles.identification')}</h3>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="microchip">Microchip Number</Label>
+                <Label htmlFor="microchip">{t('puppies.labels.microchipNumber')}</Label>
                 <Input
                   id="microchip"
                   value={formData.microchip}
@@ -184,7 +186,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="collar">Collar</Label>
+                <Label htmlFor="collar">{t('puppies.labels.collar')}</Label>
                 <Input
                   id="collar"
                   value={formData.collar}
@@ -196,30 +198,30 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
 
           {/* Status & Owner */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Status & Ownership</h3>
+            <h3 className="text-lg font-semibold">{t('puppies.titles.statusAndOwnership')}</h3>
             
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">{t('puppies.labels.status')}</Label>
               <Select value={formData.status} onValueChange={(value: 'Available' | 'Reserved' | 'Sold') => setFormData({ ...formData, status: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Available">Available</SelectItem>
-                  <SelectItem value="Reserved">Reserved</SelectItem>
-                  <SelectItem value="Sold">Sold</SelectItem>
+                  <SelectItem value="Available">{t('puppies.statuses.available')}</SelectItem>
+                  <SelectItem value="Reserved">{t('puppies.statuses.reserved')}</SelectItem>
+                  <SelectItem value="Sold">{t('puppies.statuses.sold')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {(formData.status === 'Reserved' || formData.status === 'Sold') && (
               <div className="space-y-2">
-                <Label htmlFor="newOwner">New Owner Information</Label>
+                <Label htmlFor="newOwner">{t('puppies.labels.newOwnerInformation')}</Label>
                 <Textarea
                   id="newOwner"
                   value={formData.newOwner}
                   onChange={(e) => setFormData({ ...formData, newOwner: e.target.value })}
-                  placeholder="Enter owner name, contact information, etc."
+                  placeholder={t('puppies.placeholders.enterOwnerInfo')}
                   rows={3}
                 />
               </div>
@@ -229,10 +231,10 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 pt-6">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('actions.cancel')}
             </Button>
             <Button type="submit">
-              Save Changes
+              {t('puppies.actions.saveChanges')}
             </Button>
           </div>
         </form>

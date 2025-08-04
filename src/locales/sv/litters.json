@@ -97,7 +97,19 @@
       "puppyDetails": "Valpens Detaljer",
       "weightTracking": "Viktuppföljning",
       "heightTracking": "Höjduppföljning",
-      "notes": "Anteckningar"
+      "notes": "Anteckningar",
+      "editPuppyInformation": "Redigera Valpinformation",
+      "measurementsAndNotes": "Mätningar och anteckningar för {{name}}",
+      "physicalDetails": "Fysiska Detaljer",
+      "registration": "Registrering",
+      "growthCharts": "Tillväxtdiagram",
+      "notesAndRecords": "Anteckningar & Register",
+      "buyerInformation": "Köparinformation",
+      "profilePicture": "Profilbild",
+      "basicInformation": "Grundläggande Information",
+      "physicalMeasurements": "Fysiska Mätningar",
+      "identification": "Identifiering",
+      "statusAndOwnership": "Status & Ägarskap"
     },
     "labels": {
       "age": "Ålder",
@@ -109,22 +121,31 @@
       "gender": "Kön",
       "breed": "Ras",
       "color": "Färg",
+      "markings": "Markeringar",
       "birthWeight": "Födelsevikt (kg)",
       "currentWeight": "Nuvarande Vikt (kg)",
       "dateOfBirth": "Födelsedatum",
       "timeOfBirth": "Födelsetid",
+      "birthDateTime": "Födseldatum & Tid",
       "status": "Status",
       "buyerName": "Köparens Namn",
       "buyerPhone": "Köparens Telefon",
       "collarId": "Halsband ID",
+      "collar": "Halsband",
       "microchip": "Mikrochip",
+      "microchipNumber": "Mikrochipnummer",
+      "newOwnerInformation": "Ny Ägarinformation",
       "totalPuppies": "Antal Valpar",
       "litterAge": "Kullens Ålder",
       "weeks": "veckor",
       "male": "Hane",
       "female": "Tik",
       "weight": "Vikt",
-      "height": "Höjd"
+      "height": "Höjd",
+      "notSet": "Inte angett",
+      "notRecorded": "Inte registrerat",
+      "birthDateNotSet": "Födelsedatum inte angett",
+      "informationNotAvailable": "Information inte tillgänglig"
     },
     "placeholders": {
       "puppyName": "Valpens namn",
@@ -141,7 +162,8 @@
       "enterNote": "Skriv en anteckning om denna valp",
       "selectStatus": "Välj status",
       "selectPuppy": "Välj valp",
-      "weightPlaceholder": "0,00"
+      "weightPlaceholder": "0,00",
+      "enterOwnerInfo": "Ange ägarens namn, kontaktinformation, etc."
     },
     "statuses": {
       "available": "Tillgänglig",
@@ -161,11 +183,16 @@
       "deleteNote": "Ta bort Anteckning",
       "adding": "Lägger till...",
       "saving": "Sparar...",
-      "deleting": "Tar bort..."
+      "deleting": "Tar bort...",
+      "add": "Lägg till",
+      "close": "Stäng",
+      "saveChanges": "Spara Ändringar",
+      "backToLitters": "Tillbaka till Kullar"
     },
     "descriptions": {
       "addPuppy": "Lägg till en ny valp till din kull.",
-      "motherBreed": "Moderns ras: {{breed}}"
+      "motherBreed": "Moderns ras: {{breed}}",
+      "measurementsDialog": "Lägg till vikt, höjd eller anteckningar för att spåra valpens utveckling."
     },
     "confirmations": {
       "deletePuppy": "Är du säker på att du vill ta bort denna valp? Denna åtgärd kan inte ångras.",

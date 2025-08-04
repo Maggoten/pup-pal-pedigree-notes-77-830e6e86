@@ -97,7 +97,19 @@
       "puppyDetails": "Puppy Details",
       "weightTracking": "Weight Tracking",
       "heightTracking": "Height Tracking",
-      "notes": "Notes"
+      "notes": "Notes",
+      "editPuppyInformation": "Edit Puppy Information",
+      "measurementsAndNotes": "Measurements and notes for {{name}}",
+      "physicalDetails": "Physical Details",
+      "registration": "Registration",
+      "growthCharts": "Growth Charts",
+      "notesAndRecords": "Notes & Records",
+      "buyerInformation": "Buyer Information",
+      "profilePicture": "Profile Picture",
+      "basicInformation": "Basic Information",
+      "physicalMeasurements": "Physical Measurements",
+      "identification": "Identification",
+      "statusAndOwnership": "Status & Ownership"
     },
     "labels": {
       "age": "Age",
@@ -109,22 +121,31 @@
       "gender": "Gender",
       "breed": "Breed",
       "color": "Color",
+      "markings": "Markings",
       "birthWeight": "Birth Weight (kg)",
       "currentWeight": "Current Weight (kg)",
       "dateOfBirth": "Date of Birth",
       "timeOfBirth": "Time of Birth",
+      "birthDateTime": "Birth Date & Time",
       "status": "Status",
       "buyerName": "Buyer Name",
       "buyerPhone": "Buyer Phone",
       "collarId": "Collar ID",
+      "collar": "Collar",
       "microchip": "Microchip",
+      "microchipNumber": "Microchip Number",
+      "newOwnerInformation": "New Owner Information",
       "totalPuppies": "Total Puppies",
       "litterAge": "Litter Age",
       "weeks": "weeks",
       "male": "Male",
       "female": "Female",
       "weight": "Weight",
-      "height": "Height"
+      "height": "Height",
+      "notSet": "Not set",
+      "notRecorded": "Not recorded",
+      "birthDateNotSet": "Birth date not set",
+      "informationNotAvailable": "Information not available"
     },
     "placeholders": {
       "puppyName": "Puppy name",
@@ -141,7 +162,8 @@
       "enterNote": "Enter a note about this puppy",
       "selectStatus": "Select status",
       "selectPuppy": "Select puppy",
-      "weightPlaceholder": "0.00"
+      "weightPlaceholder": "0.00",
+      "enterOwnerInfo": "Enter owner name, contact information, etc."
     },
     "statuses": {
       "available": "Available",
@@ -161,11 +183,16 @@
       "deleteNote": "Delete Note",
       "adding": "Adding...",
       "saving": "Saving...",
-      "deleting": "Deleting..."
+      "deleting": "Deleting...",
+      "add": "Add",
+      "close": "Close",
+      "saveChanges": "Save Changes",
+      "backToLitters": "Back to Litters"
     },
     "descriptions": {
       "addPuppy": "Add a new puppy to your litter.",
-      "motherBreed": "Mother's breed: {{breed}}"
+      "motherBreed": "Mother's breed: {{breed}}",
+      "measurementsDialog": "Add weight, height, or notes for tracking puppy development."
     },
     "confirmations": {
       "deletePuppy": "Are you sure you want to delete this puppy? This action cannot be undone.",
