@@ -6,6 +6,7 @@ import { Puppy } from '@/types/breeding';
 import PuppyGrowthChart from '../PuppyGrowthChart';
 import LogTypeToggle from '../charts/LogTypeToggle';
 import PuppySelect from '../charts/PuppySelect';
+import { useTranslation } from 'react-i18next';
 
 interface GrowthChartsTabContentProps {
   selectedPuppy: Puppy | null;
@@ -19,6 +20,7 @@ const GrowthChartsTabContent: React.FC<GrowthChartsTabContentProps> = ({
   onSelectPuppy
 }) => {
   const [logType, setLogType] = useState<'weight' | 'height'>('weight');
+  const { t } = useTranslation('litters');
   
   // Debug logging for growth charts
   useEffect(() => {
@@ -52,7 +54,7 @@ const GrowthChartsTabContent: React.FC<GrowthChartsTabContentProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ChartBar className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg font-semibold">Growth Charts</CardTitle>
+            <CardTitle className="text-lg font-semibold">{t('tabs.growthCharts')}</CardTitle>
           </div>
           
           <div className="flex items-center gap-4">

@@ -289,7 +289,8 @@
     "development": "Checklista",
     "developmentShort": "Uppgifter",
     "charts": "Tillväxtdiagram",
-    "chartsShort": "Diagram"
+    "chartsShort": "Diagram",
+    "growthCharts": "Tillväxtdiagram"
   },
   "external": {
     "labels": {
