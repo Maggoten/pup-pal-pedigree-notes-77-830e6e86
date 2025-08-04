@@ -122,13 +122,13 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
               value="details" 
               className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md rounded-md"
             >
-              {t('puppies.titles.details')}
+              {t('puppies.titles.puppyDetails')}
             </TabsTrigger>
             <TabsTrigger 
               value="growth" 
               className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md rounded-md"
             >
-              {t('puppies.titles.growth')}
+              {t('puppies.titles.growthCharts')}
             </TabsTrigger>
             <TabsTrigger 
               value="notes" 
