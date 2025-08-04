@@ -273,7 +273,7 @@ const PuppyProfile: React.FC = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="flex items-center gap-2">
                   <Circle className={`h-5 w-5 ${selectedPuppy.gender === 'male' ? 'text-blue-500 fill-blue-500' : 'text-pink-500 fill-pink-500'}`} />
-                  <span className="font-medium capitalize">{selectedPuppy.gender}</span>
+                  <span className="font-medium">{selectedPuppy.gender === 'male' ? t('puppies.labels.male') : t('puppies.labels.female')}</span>
                 </div>
                 
                 <div className="flex items-center gap-2">
