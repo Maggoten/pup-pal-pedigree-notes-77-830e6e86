@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
-import { Heart, AlertCircle, Loader2, Baby } from 'lucide-react';
+import { Heart, AlertCircle, Loader2, PawPrint } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDogs } from '@/context/DogsContext';
@@ -155,7 +155,7 @@ const Pregnancy: React.FC = () => {
                   {t('tabs.active')} ({activePregnancies.length})
                 </TabsTrigger>
                 <TabsTrigger value="completed" className="flex items-center gap-2">
-                  <Baby className="h-4 w-4" />
+                  <PawPrint className="h-4 w-4" />
                   {t('tabs.completed')} ({completedPregnancies.length})
                 </TabsTrigger>
               </TabsList>
