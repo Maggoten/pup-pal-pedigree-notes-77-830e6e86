@@ -18,44 +18,64 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
     buttonText: 'Activate Subscription'
   });
 
-  // Update modal message based on subscription status
+  // Update modal message based on subscription status and customer profile
   useEffect(() => {
     if (!isOpen) return;
 
-    if (import.meta.env.DEV) {
-      console.log('[SubscriptionBlockingModal] Current subscription status:', { 
-        subscriptionStatus, 
-        trialEndDate 
-      });
-    }
+    const updateModalMessage = async () => {
+      if (import.meta.env.DEV) {
+        console.log('[SubscriptionBlockingModal] Current subscription status:', { 
+          subscriptionStatus, 
+          trialEndDate 
+        });
+      }
 
-    if (subscriptionStatus === 'canceled') {
-      setModalMessage({
-        title: 'Subscription Cancelled',
-        description: 'Your subscription was cancelled and your trial period has ended. To continue using Breeding Journey, please reactivate your subscription.',
-        buttonText: 'Reactivate Subscription'
-      });
-    } else if (subscriptionStatus === 'past_due') {
-      setModalMessage({
-        title: 'Payment Required',
-        description: 'Your payment is past due. Please update your payment method to continue using Breeding Journey.',
-        buttonText: 'Update Payment'
-      });
-    } else if (subscriptionStatus === 'inactive' || !subscriptionStatus) {
-      setModalMessage({
-        title: 'Complete Your Registration',
-        description: 'To access Breeding Journey, please complete your payment setup and start your 30-day free trial.',
-        buttonText: 'Start Free Trial'
-      });
-    } else {
-      // Default message for trial ended
-      setModalMessage({
-        title: 'Your free trial has ended',
-        description: 'To continue using Breeding Journey, please activate your subscription.',
-        buttonText: 'Activate Subscription'
-      });
-    }
-  }, [isOpen, subscriptionStatus, trialEndDate]);
+      // Check if user has existing Stripe customer ID to determine button text
+      let hasStripeCustomer = false;
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('stripe_customer_id')
+          .eq('id', user?.id)
+          .single();
+        
+        hasStripeCustomer = !!profile?.stripe_customer_id;
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.log('[SubscriptionBlockingModal] Could not fetch profile, assuming new user');
+        }
+      }
+
+      if (subscriptionStatus === 'canceled') {
+        setModalMessage({
+          title: 'Subscription Cancelled',
+          description: 'Your subscription was cancelled and your trial period has ended. To continue using Breeding Journey, please reactivate your subscription.',
+          buttonText: 'Manage Subscription'
+        });
+      } else if (subscriptionStatus === 'past_due') {
+        setModalMessage({
+          title: 'Payment Required',
+          description: 'Your payment is past due. Please update your payment method to continue using Breeding Journey.',
+          buttonText: 'Manage Subscription'
+        });
+      } else if (subscriptionStatus === 'inactive' || !subscriptionStatus) {
+        setModalMessage({
+          title: 'Complete Your Registration',
+          description: 'To access Breeding Journey, please complete your payment setup and start your 30-day free trial.',
+          buttonText: hasStripeCustomer ? 'Manage Subscription' : 'Start Free Trial'
+        });
+      } else {
+        // Default message for trial ended
+        setModalMessage({
+          title: 'Your free trial has ended',
+          description: 'To continue using Breeding Journey, please activate your subscription.',
+          buttonText: 'Manage Subscription'
+        });
+      }
+    };
+
+    updateModalMessage();
+  }, [isOpen, subscriptionStatus, trialEndDate, user?.id]);
 
   const handleActivateSubscription = async () => {
     setIsLoading(true);
@@ -108,9 +128,10 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
 
         if (checkoutData?.checkout_url) {
           if (import.meta.env.DEV) {
-            console.log('[SubscriptionBlockingModal] Redirecting to Stripe checkout for trial setup');
+            console.log('[SubscriptionBlockingModal] Opening Stripe checkout for trial setup');
           }
-          window.location.href = checkoutData.checkout_url;
+          window.open(checkoutData.checkout_url, '_blank');
+          toast.success('Please complete your registration in the opened tab');
           return;
         } else {
           toast.error('No checkout URL received');
