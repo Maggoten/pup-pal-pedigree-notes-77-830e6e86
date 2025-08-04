@@ -6,19 +6,21 @@ import { UsePlannedLitterMutations } from './types';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 export const usePlannedLitterMutations = (
   refreshLitters: () => Promise<void>
 ): UsePlannedLitterMutations => {
   const { isAuthReady, session } = useAuth();
+  const { t } = useTranslation('plannedLitters');
   
   const verifyAuth = async () => {
     // Check if auth is ready
     if (!isAuthReady) {
       console.log('[PlannedLitters] Auth not ready yet, delaying operation');
       toast({
-        title: "Please wait",
-        description: "Preparing your account. Please try again in a moment.",
+        title: t('toasts.error.title'),
+        description: t('toasts.error.pleaseWait'),
       });
       return false;
     }
@@ -29,8 +31,8 @@ export const usePlannedLitterMutations = (
       if (!sessionData.session) {
         console.error('[PlannedLitters] No active session found');
         toast({
-          title: "Authentication required",
-          description: "You need to be logged in to perform this action",
+          title: t('toasts.error.title'),
+          description: t('toasts.error.authenticationRequired'),
           variant: "destructive"
         });
         return false;
@@ -48,16 +50,16 @@ export const usePlannedLitterMutations = (
       const newLitter = await plannedLittersService.createPlannedLitter(values);
       if (newLitter) {
         toast({
-          title: "Planned Litter Added",
-          description: `${newLitter.maleName || values.externalMaleName || 'Male'} × ${newLitter.femaleName} planned breeding added successfully.`
+          title: t('toasts.success.plannedLitterAdded'),
+          description: `${newLitter.maleName || values.externalMaleName || 'Male'} × ${newLitter.femaleName} ${t('toasts.success.litterAdded')}.`
         });
         await refreshLitters();
       }
     } catch (error) {
       console.error('Error adding planned litter:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        title: t('toasts.error.title'),
+        description: error instanceof Error ? error.message : t('toasts.error.failedToAddLitter'),
         variant: "destructive"
       });
     }
@@ -73,14 +75,14 @@ export const usePlannedLitterMutations = (
       await refreshLitters();
       
       toast({
-        title: "Mating Date Added",
-        description: `Mating date ${format(date, 'PPP')} added successfully. A pregnancy has been created.`
+        title: t('toasts.success.matingDateAdded'),
+        description: t('toasts.success.matingDateCreated')
       });
     } catch (error) {
       console.error('Error adding mating date:', error);
       toast({
-        title: "Error",
-        description: "Failed to add mating date",
+        title: t('toasts.error.title'),
+        description: t('toasts.error.failedToAddMatingDate'),
         variant: "destructive"
       });
     }
@@ -96,14 +98,14 @@ export const usePlannedLitterMutations = (
       await refreshLitters();
       
       toast({
-        title: "Mating Date Updated",
-        description: `Mating date updated to ${format(newDate, 'PPP')} successfully.`
+        title: t('toasts.success.matingDateUpdated'),
+        description: t('toasts.success.matingDateUpdatedSuccess')
       });
     } catch (error) {
       console.error('Error updating mating date:', error);
       toast({
-        title: "Error",
-        description: "Failed to update mating date",
+        title: t('toasts.error.title'),
+        description: t('toasts.error.failedToUpdateMatingDate'),
         variant: "destructive"
       });
     }
@@ -119,14 +121,14 @@ export const usePlannedLitterMutations = (
       await refreshLitters();
       
       toast({
-        title: "Mating Date Deleted",
-        description: "The mating date has been removed successfully."
+        title: t('toasts.success.matingDateDeleted'),
+        description: t('toasts.success.matingDateDeletedSuccess')
       });
     } catch (error) {
       console.error('Error deleting mating date:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete mating date",
+        title: t('toasts.error.title'),
+        description: t('toasts.error.failedToDeleteMatingDate'),
         variant: "destructive"
       });
     }
@@ -148,14 +150,14 @@ export const usePlannedLitterMutations = (
       await refreshLitters();
       
       toast({
-        title: "Planned Litter Deleted",
-        description: "The planned litter has been removed successfully."
+        title: t('toasts.success.litterDeleted'),
+        description: t('toasts.success.plannedLitterDeleted')
       });
     } catch (error) {
       console.error('Error deleting litter:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete planned litter",
+        title: t('toasts.error.title'),
+        description: t('toasts.error.failedToDeletePlannedLitter'),
         variant: "destructive"
       });
     }

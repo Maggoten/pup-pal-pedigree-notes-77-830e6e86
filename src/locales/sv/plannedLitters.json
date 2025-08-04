@@ -88,7 +88,12 @@
       "matingDateAdded": "Parningsdatum tillagt",
       "matingDateUpdated": "Parningsdatum uppdaterat",
       "matingDateDeleted": "Parningsdatum borttaget",
-      "litterDeleted": "Kull borttagen"
+      "litterDeleted": "Kull borttagen",
+      "plannedLitterAdded": "Planerad Kull Tillagd",
+      "matingDateCreated": "Parningsdatum tillagt framgångsrikt. En dräktighet har skapats.",
+      "matingDateUpdatedSuccess": "Parningsdatum uppdaterat framgångsrikt.",
+      "matingDateDeletedSuccess": "Parningsdatumet har tagits bort framgångsrikt.",
+      "plannedLitterDeleted": "Den planerade kullen har tagits bort framgångsrikt."
     },
     "error": {
       "title": "Fel",
@@ -97,7 +102,10 @@
       "failedToUpdateMatingDate": "Misslyckades med att uppdatera parningsdatum",
       "failedToDeleteMatingDate": "Misslyckades med att ta bort parningsdatum",
       "failedToDeleteLitter": "Misslyckades med att ta bort kull",
-      "failedToLoad": "Misslyckades med att ladda planerade kullar"
+      "failedToLoad": "Misslyckades med att ladda planerade kullar",
+      "failedToDeletePlannedLitter": "Misslyckades med att ta bort planerad kull",
+      "authenticationRequired": "Du måste vara inloggad för att utföra denna åtgärd",
+      "pleaseWait": "Förbereder ditt konto. Försök igen om ett ögonblick."
     }
   },
   "loading": {

@@ -88,7 +88,12 @@
       "matingDateAdded": "Mating date added successfully",
       "matingDateUpdated": "Mating date updated successfully",
       "matingDateDeleted": "Mating date deleted successfully",
-      "litterDeleted": "Litter deleted successfully"
+      "litterDeleted": "Litter deleted successfully",
+      "plannedLitterAdded": "Planned Litter Added",
+      "matingDateCreated": "Mating date added successfully. A pregnancy has been created.",
+      "matingDateUpdatedSuccess": "Mating date updated successfully.",
+      "matingDateDeletedSuccess": "The mating date has been removed successfully.",
+      "plannedLitterDeleted": "The planned litter has been removed successfully."
     },
     "error": {
       "title": "Error",
@@ -97,7 +102,10 @@
       "failedToUpdateMatingDate": "Failed to update mating date",
       "failedToDeleteMatingDate": "Failed to delete mating date",
       "failedToDeleteLitter": "Failed to delete litter",
-      "failedToLoad": "Failed to load planned litters"
+      "failedToLoad": "Failed to load planned litters",
+      "failedToDeletePlannedLitter": "Failed to delete planned litter",
+      "authenticationRequired": "You need to be logged in to perform this action",
+      "pleaseWait": "Preparing your account. Please try again in a moment."
     }
   },
   "loading": {

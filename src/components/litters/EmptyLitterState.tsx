@@ -28,7 +28,7 @@ const EmptyLitterState: React.FC<EmptyLitterStateProps> = ({ onAddLitter }) => {
             size="lg"
             className="bg-primary hover:bg-primary/90 relative z-10"
           >
-            {t('actions.addFirstPlannedLitter')}
+            {t('actions.addFirstLitter')}
           </Button>
           {/* Decorative paw prints */}
           <div className="absolute -top-6 -left-8 opacity-10">
