@@ -134,8 +134,6 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
           </div>
           
           <div className={`flex items-center gap-2 ${isMobile ? 'w-full justify-between' : ''}`}>
-            {!isMobile && <ViewToggle view={view} onViewChange={setView} />}
-            
             <Dialog open={addPuppyDialogOpen} onOpenChange={setAddPuppyDialogOpen}>
               <DialogTrigger asChild>
                 <Button 
@@ -157,7 +155,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
               />
             </Dialog>
 
-            {isMobile && <ViewToggle view={view} onViewChange={setView} />}
+            <ViewToggle view={view} onViewChange={setView} />
           </div>
         </div>
       </CardHeader>
