@@ -428,6 +428,10 @@
     }
   },
   "charts": {
+    "toggle": {
+      "weight": "Weight",
+      "height": "Height"
+    },
     "empty": {
       "noSelection": {
         "title": "Select a Puppy",

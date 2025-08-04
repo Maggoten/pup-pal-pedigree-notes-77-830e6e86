@@ -428,6 +428,10 @@
     }
   },
   "charts": {
+    "toggle": {
+      "weight": "Vikt",
+      "height": "Höjd"
+    },
     "empty": {
       "noSelection": {
         "title": "Välj en Valp",
