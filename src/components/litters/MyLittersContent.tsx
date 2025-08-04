@@ -105,9 +105,6 @@ const MyLittersContent: React.FC = () => {
               {t('actions.addLitter')}
             </Button>
           </CardTitle>
-          <CardDescription>
-            {t('pages.myLitters.description')}
-          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Filter Bar */}
