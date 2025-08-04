@@ -307,5 +307,123 @@
     "noResults": "No litters found",
     "tryAdjusting": "Try adjusting your search or filters",
     "clearFilters": "Clear Filters"
+  },
+  "checklist": {
+    "title": "Puppy Development Checklist",
+    "completed": "completed",
+    "completedBadge": "{{completed}}/{{total}} completed",
+    "currentAge": "Current age",
+    "progressComplete": "% complete",
+    "units": {
+      "days": "days",
+      "weeks": "weeks",
+      "week": "Week"
+    },
+    "empty": {
+      "title": "No tasks found in this category for the current puppy age.",
+      "description": "Tasks will appear when puppies reach appropriate age."
+    },
+    "timeline": {
+      "birth": "Birth (0-1 weeks)",
+      "neonatal": "Neonatal Period (1-2 weeks)",
+      "transition": "Transition Period (2-4 weeks)",
+      "socialization": "Socialization Period (4-12 weeks)",
+      "juvenile": "Juvenile Period (12+ weeks)"
+    },
+    "categories": {
+      "health": "Health",
+      "development": "Development",
+      "admin": "Administration"
+    },
+    "items": {
+      "health": {
+        "firstDeworming": {
+          "title": "First Deworming",
+          "description": "Administer first deworming treatment to puppies"
+        },
+        "secondDeworming": {
+          "title": "Second Deworming",
+          "description": "Administer second deworming treatment to puppies"
+        },
+        "thirdDeworming": {
+          "title": "Third Deworming",
+          "description": "Administer third deworming treatment to puppies"
+        },
+        "finalDeworming": {
+          "title": "Final Deworming",
+          "description": "Administer final deworming treatment before puppies leave"
+        },
+        "vetVisit": {
+          "title": "Vet Visit",
+          "description": "Schedule vet appointment for health check and vaccinations"
+        },
+        "firstVaccination": {
+          "title": "First Vaccination",
+          "description": "Puppies should receive their first vaccination"
+        },
+        "secondVaccination": {
+          "title": "Second Vaccination",
+          "description": "Plan for second vaccination (after puppies leave)"
+        }
+      },
+      "development": {
+        "startWeaning": {
+          "title": "Start Weaning",
+          "description": "Begin introducing puppy food mixed with water"
+        },
+        "continueWeaning": {
+          "title": "Continue Weaning",
+          "description": "Gradually reduce mother's milk dependency"
+        },
+        "completeWeaning": {
+          "title": "Complete Weaning",
+          "description": "Puppies should be mostly eating solid food"
+        },
+        "beginSocialization": {
+          "title": "Begin Socialization",
+          "description": "Start introducing puppies to different sounds and gentle handling"
+        },
+        "increaseSocialization": {
+          "title": "Increase Socialization",
+          "description": "Expose puppies to more people, sounds, and experiences"
+        },
+        "temperamentTesting": {
+          "title": "Temperament Testing",
+          "description": "Assess puppy temperaments to help with placement"
+        }
+      },
+      "admin": {
+        "microchipPuppies": {
+          "title": "Microchip Puppies",
+          "description": "Arrange for puppies to be microchipped before they go to new homes"
+        },
+        "professionalPhotos": {
+          "title": "Professional Photos",
+          "description": "Take professional photos of puppies for adoption profiles"
+        },
+        "registerLitter": {
+          "title": "Register Litter",
+          "description": "Submit registration paperwork for the litter"
+        },
+        "preparePuppyPacks": {
+          "title": "Prepare Puppy Packs",
+          "description": "Compile documentation, care instructions and supplies for new owners"
+        },
+        "prepareContracts": {
+          "title": "Prepare Contracts",
+          "description": "Finalize adoption contracts for new puppy owners"
+        }
+      }
+    },
+    "toasts": {
+      "success": {
+        "itemCompleted": "Task marked as completed",
+        "itemUncompleted": "Task marked as incomplete"
+      },
+      "error": {
+        "failedToUpdate": "Failed to update task status",
+        "loadingFailed": "Failed to load checklist"
+      }
+    }
   }
 }

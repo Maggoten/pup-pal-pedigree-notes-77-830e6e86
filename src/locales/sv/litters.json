@@ -307,5 +307,123 @@
     "noResults": "Inga kullar hittades",
     "tryAdjusting": "Försök justera din sökning eller filter",
     "clearFilters": "Rensa Filter"
+  },
+  "checklist": {
+    "title": "Valpens Utvecklingschecklista",
+    "completed": "slutförd",
+    "completedBadge": "{{completed}}/{{total}} slutförda",
+    "currentAge": "Nuvarande ålder",
+    "progressComplete": "% slutfört",
+    "units": {
+      "days": "dagar",
+      "weeks": "veckor",
+      "week": "Vecka"
+    },
+    "empty": {
+      "title": "Inga uppgifter hittades i denna kategori för valpens nuvarande ålder.",
+      "description": "Uppgifter kommer att visas när valparna når lämplig ålder."
+    },
+    "timeline": {
+      "birth": "Födelse (0-1 veckor)",
+      "neonatal": "Neonatal period (1-2 veckor)",
+      "transition": "Övergångsperiod (2-4 veckor)",
+      "socialization": "Socialiseringsperiod (4-12 veckor)",
+      "juvenile": "Ungdomsperiod (12+ veckor)"
+    },
+    "categories": {
+      "health": "Hälsa",
+      "development": "Utveckling",
+      "admin": "Administration"
+    },
+    "items": {
+      "health": {
+        "firstDeworming": {
+          "title": "Första Avmaskningen",
+          "description": "Ge valparna första avmaskningsbehandlingen"
+        },
+        "secondDeworming": {
+          "title": "Andra Avmaskningen",
+          "description": "Ge valparna andra avmaskningsbehandlingen"
+        },
+        "thirdDeworming": {
+          "title": "Tredje Avmaskningen",
+          "description": "Ge valparna tredje avmaskningsbehandlingen"
+        },
+        "finalDeworming": {
+          "title": "Sista Avmaskningen",
+          "description": "Ge sista avmaskningsbehandlingen innan valparna lämnar"
+        },
+        "vetVisit": {
+          "title": "Veterinärbesök",
+          "description": "Boka veterinärtid för hälsokontroll och vaccinationer"
+        },
+        "firstVaccination": {
+          "title": "Första Vaccinationen",
+          "description": "Valparna bör få sin första vaccination"
+        },
+        "secondVaccination": {
+          "title": "Andra Vaccinationen",
+          "description": "Planera för andra vaccinationen (efter att valparna lämnat)"
+        }
+      },
+      "development": {
+        "startWeaning": {
+          "title": "Börja Avvänjning",
+          "description": "Börja introducera valpmat blandat med vatten"
+        },
+        "continueWeaning": {
+          "title": "Fortsätt Avvänjning",
+          "description": "Minska gradvis beroendet av moderns mjölk"
+        },
+        "completeWeaning": {
+          "title": "Slutför Avvänjning",
+          "description": "Valparna bör mestadels äta fast föda"
+        },
+        "beginSocialization": {
+          "title": "Börja Socialisering",
+          "description": "Börja introducera valparna för olika ljud och försiktig hantering"
+        },
+        "increaseSocialization": {
+          "title": "Öka Socialiseringen",
+          "description": "Exponera valparna för fler människor, ljud och upplevelser"
+        },
+        "temperamentTesting": {
+          "title": "Temperamentstestning",
+          "description": "Bedöm valparnas temperament för att hjälpa med placering"
+        }
+      },
+      "admin": {
+        "microchipPuppies": {
+          "title": "Mikrochippa Valparna",
+          "description": "Ordna så att valparna mikrochippas innan de går till nya hem"
+        },
+        "professionalPhotos": {
+          "title": "Professionella Foton",
+          "description": "Ta professionella foton av valparna för adoptionsprofiler"
+        },
+        "registerLitter": {
+          "title": "Registrera Kullen",
+          "description": "Skicka in registreringspapper för kullen"
+        },
+        "preparePuppyPacks": {
+          "title": "Förbered Valppaket",
+          "description": "Sammanställ dokumentation, vårdanvisningar och förnödenheter för nya ägare"
+        },
+        "prepareContracts": {
+          "title": "Förbered Kontrakt",
+          "description": "Slutför adoptionskontrakt för nya valpägare"
+        }
+      }
+    },
+    "toasts": {
+      "success": {
+        "itemCompleted": "Uppgift markerad som slutförd",
+        "itemUncompleted": "Uppgift markerad som ofullständig"
+      },
+      "error": {
+        "failedToUpdate": "Misslyckades med att uppdatera uppgiftstatus",
+        "loadingFailed": "Misslyckades med att ladda checklista"
+      }
+    }
   }
 }

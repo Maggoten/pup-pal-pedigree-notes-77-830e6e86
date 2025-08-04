@@ -3,6 +3,7 @@ import React from 'react';
 import { Milestone } from 'lucide-react';
 import { ChecklistItem as ChecklistItemType } from './types';
 import ChecklistItem from './ChecklistItem';
+import { useTranslation } from 'react-i18next';
 
 interface TimelineGroupProps {
   name: string;
@@ -38,6 +39,7 @@ interface TimelineViewProps {
 }
 
 const TimelineView: React.FC<TimelineViewProps> = ({ itemsByTimeline, onToggle }) => {
+  const { t } = useTranslation('litters');
   return (
     <div className="space-y-8">
       {itemsByTimeline
@@ -53,7 +55,7 @@ const TimelineView: React.FC<TimelineViewProps> = ({ itemsByTimeline, onToggle }
       
       {itemsByTimeline.every(segment => segment.items.length === 0) && (
         <div className="text-center py-6 text-muted-foreground">
-          <p>No tasks found in this category for the current puppy age.</p>
+          <p>{t('checklist.empty.title')}</p>
         </div>
       )}
     </div>

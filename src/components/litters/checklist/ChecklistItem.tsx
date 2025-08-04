@@ -3,6 +3,7 @@ import React from 'react';
 import { CheckCircle, Circle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ChecklistItem as ChecklistItemType } from './types';
+import { useTranslation } from 'react-i18next';
 
 interface ChecklistItemProps {
   item: ChecklistItemType;
@@ -15,6 +16,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({
   onToggle,
   showWeekBadge = false
 }) => {
+  const { t } = useTranslation('litters');
   return (
     <div 
       className="flex items-start gap-3 p-3 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
@@ -29,7 +31,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({
         {showWeekBadge ? (
           <div className="flex justify-between">
             <div className="font-medium">{item.title}</div>
-            <Badge variant="outline" className="text-xs">Week {item.weekNumber}</Badge>
+            <Badge variant="outline" className="text-xs">{t('checklist.units.week')} {item.weekNumber}</Badge>
           </div>
         ) : (
           <div className="font-medium">{item.title}</div>

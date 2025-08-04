@@ -1,10 +1,11 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { differenceInDays, differenceInWeeks, parseISO } from 'date-fns';
 import { Litter } from '@/types/breeding';
 import { ChecklistItem, timelineSegments } from './types';
 import { generateChecklist, saveChecklistItemStatus } from './checklistService';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
+import { translateChecklistItems, getTimelineSegmentTranslations } from './getTranslatedChecklistData';
 
 export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, completed: boolean) => void) => {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -12,6 +13,7 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation('litters');
   
   // Load checklist when litter changes
   useEffect(() => {
@@ -19,12 +21,13 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
       setIsLoading(true);
       try {
         const items = await generateChecklist(litter);
-        setChecklist(items);
+        const translatedItems = translateChecklistItems(items, t);
+        setChecklist(translatedItems);
       } catch (error) {
         console.error('Error loading checklist:', error);
         toast({
-          title: "Error loading checklist",
-          description: "Failed to load checklist items. Please try again.",
+          title: t('checklist.toasts.error.loadingFailed'),
+          description: t('checklist.toasts.error.loadingFailed'),
           variant: "destructive"
         });
       } finally {
@@ -33,7 +36,7 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
     };
     
     loadChecklist();
-  }, [litter, toast]);
+  }, [litter, toast, t]);
   
   const birthDate = parseISO(litter.dateOfBirth);
   const today = new Date();
@@ -63,21 +66,21 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
         
         if (success) {
           toast({
-            title: "Checklist updated",
-            description: `Task ${newStatus ? 'completed' : 'unchecked'} successfully.`,
+            title: t(newStatus ? 'checklist.toasts.success.itemCompleted' : 'checklist.toasts.success.itemUncompleted'),
+            description: t(newStatus ? 'checklist.toasts.success.itemCompleted' : 'checklist.toasts.success.itemUncompleted'),
           });
         } else {
           toast({
-            title: "Save failed",
-            description: "Failed to save to server, but saved locally.",
+            title: t('checklist.toasts.error.failedToUpdate'),
+            description: t('checklist.toasts.error.failedToUpdate'),
             variant: "destructive"
           });
         }
       } catch (error) {
         console.error('Error saving checklist item:', error);
         toast({
-          title: "Error saving",
-          description: "Failed to save checklist item. Please try again.",
+          title: t('checklist.toasts.error.failedToUpdate'),
+          description: t('checklist.toasts.error.failedToUpdate'),
           variant: "destructive"
         });
       } finally {
@@ -87,7 +90,7 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
       // Call the parent handler
       onToggleItem(itemId, newStatus);
     }
-  }, [checklist, litter.id, onToggleItem, toast]);
+  }, [checklist, litter.id, onToggleItem, toast, t]);
   
   // Filter items based on active category and current puppy age
   const getFilteredItems = useCallback((compact: boolean = false) => {
@@ -106,11 +109,13 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
   
   // Group items by timeline segment (week ranges)
   const getItemsByTimeline = useCallback((filteredItems: ChecklistItem[]) => {
+    const translations = getTimelineSegmentTranslations(t);
     return timelineSegments.map(segment => ({
       ...segment,
+      name: translations[segment.name] || segment.name,
       items: filteredItems.filter(item => item.age >= segment.min && item.age <= segment.max)
     }));
-  }, []);
+  }, [t]);
   
   return {
     activeCategory,
