@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { LineChart, PawPrint, LineChartIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface EmptyChartStateProps {
   type: 'no-selection' | 'no-data';
@@ -9,6 +10,7 @@ interface EmptyChartStateProps {
 }
 
 const EmptyChartState: React.FC<EmptyChartStateProps> = ({ type, logType, puppyName }) => {
+  const { t } = useTranslation('litters');
   return (
     <div className="text-center py-12 px-6 border-2 border-dashed border-muted-foreground/20 rounded-lg bg-card/50">
       <div className="relative mx-auto w-20 h-20 mb-6">
@@ -27,14 +29,14 @@ const EmptyChartState: React.FC<EmptyChartStateProps> = ({ type, logType, puppyN
       </div>
       
       <h3 className="text-xl font-medium mb-2">
-        {type === 'no-selection' ? 'Select a Puppy' : 'No Data Available'}
+        {type === 'no-selection' ? t('charts.empty.noSelection.title') : t('charts.empty.noData.title')}
       </h3>
       <p className="text-muted-foreground max-w-md mx-auto">
         {type === 'no-selection' 
-          ? 'Select a puppy to view detailed growth charts and development tracking' 
+          ? t('charts.empty.noSelection.description')
           : puppyName
-            ? `No ${logType} measurements have been recorded for ${puppyName} yet`
-            : `No ${logType} data available for any puppies in this litter`}
+            ? t('charts.empty.noData.description.forPuppy', { logType, puppyName })
+            : t('charts.empty.noData.description.forLitter', { logType })}
       </p>
       
       {/* Decorative chart lines */}

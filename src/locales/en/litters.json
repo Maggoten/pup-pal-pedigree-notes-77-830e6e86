@@ -426,5 +426,20 @@
         "loadingFailed": "Failed to load checklist"
       }
     }
+  },
+  "charts": {
+    "empty": {
+      "noSelection": {
+        "title": "Select a Puppy",
+        "description": "Select a puppy to view detailed growth charts and development tracking"
+      },
+      "noData": {
+        "title": "No Data Available",
+        "description": {
+          "forPuppy": "No {{logType}} measurements have been recorded for {{puppyName}} yet",
+          "forLitter": "No {{logType}} data available for any puppies in this litter"
+        }
+      }
+    }
   }
 }

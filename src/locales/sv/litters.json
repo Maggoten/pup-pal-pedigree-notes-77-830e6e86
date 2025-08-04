@@ -426,5 +426,20 @@
         "loadingFailed": "Misslyckades med att ladda checklista"
       }
     }
+  },
+  "charts": {
+    "empty": {
+      "noSelection": {
+        "title": "Välj en Valp",
+        "description": "Välj en valp för att visa detaljerade tillväxtdiagram och utvecklingsuppföljning"
+      },
+      "noData": {
+        "title": "Ingen Data Tillgänglig",
+        "description": {
+          "forPuppy": "Inga {{logType}}-mätningar har registrerats för {{puppyName}} än",
+          "forLitter": "Ingen {{logType}}-data tillgänglig för några valpar i denna kull"
+        }
+      }
+    }
   }
 }
