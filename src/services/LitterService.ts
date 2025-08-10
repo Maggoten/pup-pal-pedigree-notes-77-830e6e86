@@ -1111,7 +1111,85 @@ export class LitterService {
 
   // Additional methods for backwards compatibility
   async getDogLitters(dogId: string): Promise<Litter[]> {
-    return [];
+    try {
+      console.log('Getting litters for dog:', dogId);
+      
+      // Query litters where dog is either sire or dam
+      const { data: litterData, error } = await supabase
+        .from('litters')
+        .select('*')
+        .or(`sire_id.eq.${dogId},dam_id.eq.${dogId}`)
+        .order('date_of_birth', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching dog litters:', error);
+        throw error;
+      }
+
+      if (!litterData || litterData.length === 0) {
+        console.log('No litters found for dog:', dogId);
+        return [];
+      }
+
+      console.log('Found litters for dog:', litterData.length);
+
+      // Get all litter IDs to fetch related data
+      const litterIds = litterData.map(litter => litter.id);
+
+      // Fetch puppies for all litters
+      const { data: puppiesData, error: puppiesError } = await supabase
+        .from('puppies')
+        .select('*')
+        .in('litter_id', litterIds)
+        .order('name');
+
+      if (puppiesError) {
+        console.error('Error fetching puppies:', puppiesError);
+        throw puppiesError;
+      }
+
+      // Group puppies by litter ID
+      const puppiesByLitter = new Map<string, any[]>();
+      (puppiesData || []).forEach(puppy => {
+        if (!puppiesByLitter.has(puppy.litter_id)) {
+          puppiesByLitter.set(puppy.litter_id, []);
+        }
+        puppiesByLitter.get(puppy.litter_id)!.push(puppy);
+      });
+
+      // Get all puppy IDs for fetching logs and notes
+      const puppyIds = (puppiesData || []).map(puppy => puppy.id);
+
+      // Fetch related data for puppies
+      const [weightLogsMap, heightLogsMap, notesMap] = await Promise.all([
+        this.fetchPuppyWeightLogs(puppyIds),
+        this.fetchPuppyHeightLogs(puppyIds),
+        this.fetchPuppyNotes(puppyIds)
+      ]);
+
+      // Transform litters and puppies
+      const litters: Litter[] = litterData.map(dbLitter => {
+        const litterPuppies = puppiesByLitter.get(dbLitter.id) || [];
+        
+        // Transform puppies with their logs and notes
+        const transformedPuppies = litterPuppies.map(dbPuppy => {
+          const weightLogs = weightLogsMap.get(dbPuppy.id) || [];
+          const heightLogs = heightLogsMap.get(dbPuppy.id) || [];
+          const notes = notesMap.get(dbPuppy.id) || [];
+          
+          return this.transformPuppyFromDB(dbPuppy, weightLogs, heightLogs, notes);
+        });
+
+        return this.transformLitterFromDB(dbLitter, transformedPuppies);
+      });
+
+      console.log('Transformed litters:', litters.length);
+      return litters;
+
+    } catch (error) {
+      console.error('Error in getDogLitters:', error);
+      throw error;
+    }
   }
 
   async loadLitters(userId: string): Promise<Litter[]> {
