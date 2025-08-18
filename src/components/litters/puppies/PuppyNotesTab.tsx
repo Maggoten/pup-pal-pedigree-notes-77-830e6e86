@@ -98,7 +98,7 @@ const PuppyNotesTab: React.FC<PuppyNotesTabProps> = ({
                     <div className="text-xs text-muted-foreground mb-1">
                       {format(new Date(note.date), "PPP p")}
                     </div>
-                    <p className="text-sm pr-8">{note.content}</p>
+                    <p className="text-sm pr-8 whitespace-pre-wrap">{note.content}</p>
                   </div>
                   <Button
                     variant="ghost"

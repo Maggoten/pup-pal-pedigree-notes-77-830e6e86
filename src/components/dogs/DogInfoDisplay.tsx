@@ -105,7 +105,7 @@ const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({ dog }) => {
         {dog.notes && (
           <div>
             <h3 className="text-sm font-medium text-muted-foreground">{t('display.fields.notes')}</h3>
-            <p>{dog.notes}</p>
+            <p className="whitespace-pre-wrap">{dog.notes}</p>
           </div>
         )}
       </div>

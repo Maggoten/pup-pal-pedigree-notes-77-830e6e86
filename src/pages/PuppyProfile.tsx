@@ -372,7 +372,7 @@ const PuppyProfile: React.FC = () => {
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(note.date), 'MMM d, yyyy - h:mm a')}
                       </p>
-                      <p>{note.content}</p>
+                      <p className="whitespace-pre-wrap">{note.content}</p>
                     </div>
                   ))}
               </div>

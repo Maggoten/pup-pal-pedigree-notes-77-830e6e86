@@ -231,7 +231,7 @@ const PuppyDetailsDialog: React.FC<PuppyDetailsDialogProps> = ({
                         <div className="text-sm text-muted-foreground mb-1">
                           {format(new Date(note.date), 'MMM d, yyyy - h:mm a')}
                         </div>
-                        <p>{note.content}</p>
+                        <p className="whitespace-pre-wrap">{note.content}</p>
                       </div>
                     ))}
                 </div>
