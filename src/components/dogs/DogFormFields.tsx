@@ -42,11 +42,13 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({ form, disabled }) => {
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <BasicInfoFields form={form} disabled={disabled} />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:col-span-1">
+      <div className="space-y-6">
         <BirthInfoFields form={form} disabled={disabled} />
         <RegistrationFields form={form} disabled={disabled} />
       </div>
-      <HealthFields form={form} disabled={disabled} />
+      <div className="md:col-span-2">
+        <HealthFields form={form} disabled={disabled} />
+      </div>
       <NotesField form={form} disabled={disabled} />
     </div>
   );
