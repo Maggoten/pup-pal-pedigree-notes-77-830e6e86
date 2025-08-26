@@ -204,13 +204,14 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form, disabled }) => 
             control={form.control}
             name="registrationNumber"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col">
                 <FormLabel>{t('form.fields.registrationNumber.label')}</FormLabel>
                 <FormControl>
                   <Input 
                     placeholder={t('form.fields.registrationNumber.placeholder')} 
                     {...field} 
                     disabled={disabled} 
+                    className="pl-3 text-left font-normal bg-white border-input shadow-sm"
                   />
                 </FormControl>
                 <FormDescription className="text-xs">
