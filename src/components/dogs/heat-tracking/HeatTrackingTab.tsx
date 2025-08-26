@@ -7,8 +7,7 @@ import { Dog } from '@/types/dogs';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { HeatService } from '@/services/HeatService';
-import StartHeatCycleDialog from './StartHeatCycleDialog';
-import AddPreviousHeatDialog from './AddPreviousHeatDialog';
+import CreateHeatCycleDialog from './CreateHeatCycleDialog';
 import HeatCycleCard from './HeatCycleCard';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -22,8 +21,7 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
   const { t } = useTranslation('dogs');
   const heatHistory = dog.heatHistory || [];
   const [heatCycles, setHeatCycles] = useState<HeatCycle[]>([]);
-  const [showStartDialog, setShowStartDialog] = useState(false);
-  const [showAddPreviousDialog, setShowAddPreviousDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -161,19 +159,12 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
                 }
               </CardDescription>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button 
-                size="sm" 
-                variant="outline" 
-                className="flex items-center gap-2" 
-                onClick={() => setShowAddPreviousDialog(true)}
+                onClick={() => setShowCreateDialog(true)}
+                className="w-full sm:w-auto touch-manipulation"
               >
-                <Calendar className="h-4 w-4" />
-                {t('heatTracking.addPreviousHeat.title')}
-              </Button>
-              <Button size="sm" className="flex items-center gap-2" onClick={() => setShowStartDialog(true)}>
-                <Plus className="h-4 w-4" />
-                {t('heatTracking.cycles.startNew')}
+                {t('heatTracking.cycles.newHeat')}
               </Button>
             </div>
           </div>
@@ -256,16 +247,9 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
       </Card>
 
 
-      <StartHeatCycleDialog
-        open={showStartDialog}
-        onOpenChange={setShowStartDialog}
-        dog={dog}
-        onSuccess={handleStartCycleSuccess}
-      />
-      
-      <AddPreviousHeatDialog
-        open={showAddPreviousDialog}
-        onOpenChange={setShowAddPreviousDialog}
+      <CreateHeatCycleDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
         dog={dog}
         onSuccess={handleStartCycleSuccess}
       />

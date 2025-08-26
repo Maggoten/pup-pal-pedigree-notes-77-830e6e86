@@ -281,7 +281,7 @@
     },
     "cycles": {
       "title": "Heat Cycles",
-      "startNew": "Start New Heat",
+      "newHeat": "New Heat",
       "empty": {
         "title": "No heat cycles recorded",
         "description": "Start tracking by adding the first heat cycle"
@@ -306,13 +306,20 @@
       "title": "Previous Heat Records"
     },
     "dialog": {
-      "title": "Start New Heat Cycle",
-      "description": "Record the start of {{dogName}}'s heat cycle",
+      "title": "New Heat Cycle",
+      "description": "Record a heat cycle for {{dogName}}",
       "startDate": "Heat Start Date",
       "selectDate": "Select start date",
       "notes": "Notes (Optional)",
       "notesPlaceholder": "Any initial observations or notes...",
-      "startCycle": "Start Heat Cycle",
+      "type": {
+        "label": "Cycle Type",
+        "active": "Active Heat",
+        "activeDescription": "Currently happening heat cycle",
+        "previous": "Previous Heat", 
+        "previousDescription": "Add historical heat cycle"
+      },
+      "startCycle": "Create Heat Cycle",
       "validation": {
         "dateRequired": "Please select a start date",
         "futureDate": "Start date cannot be in the future"

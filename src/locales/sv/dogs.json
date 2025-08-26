@@ -281,7 +281,7 @@
     },
     "cycles": {
       "title": "Löpcykler",
-      "startNew": "Starta Nytt Löp",
+      "newHeat": "Nytt Löp",
       "empty": {
         "title": "Inga löpcykler registrerade",
         "description": "Börja spåra genom att lägga till en löpcykel"
@@ -306,13 +306,20 @@
       "title": "Tidigare Löpregister"
     },
     "dialog": {
-      "title": "Starta Ny Löpcykel",
-      "description": "Registrera början av {{dogName}}s löpcykel",
+      "title": "Nytt Löp",
+      "description": "Registrera en löpcykel för {{dogName}}",
       "startDate": "Löpets Startdatum",
       "selectDate": "Välj startdatum",
       "notes": "Anteckningar (Valfritt)",
       "notesPlaceholder": "Observationer eller anteckningar...",
-      "startCycle": "Starta Löpcykel",
+      "type": {
+        "label": "Cykeltyp",
+        "active": "Aktivt Löp",
+        "activeDescription": "Pågående löpcykel",
+        "previous": "Tidigare Löp",
+        "previousDescription": "Lägg till historisk löpcykel"
+      },
+      "startCycle": "Skapa Löpcykel",
       "validation": {
         "dateRequired": "Välj ett startdatum",
         "futureDate": "Startdatum kan inte vara i framtiden"
