@@ -136,6 +136,40 @@ export class HeatService {
   }
 
   /**
+   * Deletes a heat cycle and all associated logs
+   */
+  static async deleteHeatCycle(cycleId: string): Promise<boolean> {
+    try {
+      // First delete all heat logs for this cycle
+      const { error: logsError } = await supabase
+        .from('heat_logs')
+        .delete()
+        .eq('heat_cycle_id', cycleId);
+
+      if (logsError) {
+        console.error('Error deleting heat logs:', logsError);
+        return false;
+      }
+
+      // Then delete the heat cycle
+      const { error } = await supabase
+        .from('heat_cycles')
+        .delete()
+        .eq('id', cycleId);
+
+      if (error) {
+        console.error('Error deleting heat cycle:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting heat cycle:', error);
+      return false;
+    }
+  }
+
+  /**
    * Creates a new heat log entry
    */
   static async createHeatLog(

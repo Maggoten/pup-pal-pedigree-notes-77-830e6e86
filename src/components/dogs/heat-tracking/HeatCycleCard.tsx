@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Thermometer, Plus, Eye, Calendar, Clock } from 'lucide-react';
+import { Thermometer, Plus, Eye, Calendar, Clock, Trash2 } from 'lucide-react';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { HeatService } from '@/services/HeatService';
 import HeatLoggingDialog from './HeatLoggingDialog';
+import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
+import { toast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
@@ -21,7 +23,9 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
   const { t } = useTranslation('dogs');
   const [heatLogs, setHeatLogs] = useState<HeatLog[]>([]);
   const [showLoggingDialog, setShowLoggingDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const isActive = !heatCycle.end_date;
   const startDate = parseISO(heatCycle.start_date);
@@ -48,6 +52,32 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
   const handleLoggingSuccess = () => {
     loadHeatLogs();
     onUpdate();
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const success = await HeatService.deleteHeatCycle(heatCycle.id);
+      if (success) {
+        toast({
+          title: t('heatTracking.deleteSuccess.title'),
+          description: t('heatTracking.deleteSuccess.description'),
+        });
+        onUpdate();
+        setShowDeleteDialog(false);
+      } else {
+        throw new Error('Failed to delete heat cycle');
+      }
+    } catch (error) {
+      console.error('Error deleting heat cycle:', error);
+      toast({
+        title: t('heatTracking.deleteError.title'),
+        description: t('heatTracking.deleteError.description'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const getPhaseColor = (phase: string) => {
@@ -78,12 +108,22 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                 </Badge>
               )}
             </div>
-            {isActive && (
-              <Button size="sm" onClick={() => setShowLoggingDialog(true)}>
-                <Plus className="h-4 w-4 mr-1" />
-                {t('heatTracking.logging.addEntry')}
+            <div className="flex items-center gap-2">
+              {isActive && (
+                <Button size="sm" onClick={() => setShowLoggingDialog(true)}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  {t('heatTracking.logging.addEntry')}
+                </Button>
+              )}
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => setShowDeleteDialog(true)}
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4" />
               </Button>
-            )}
+            </div>
           </div>
           <CardDescription className="flex items-center gap-4">
             <span className="flex items-center gap-1">
@@ -168,6 +208,15 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
         onOpenChange={setShowLoggingDialog}
         heatCycle={heatCycle}
         onSuccess={handleLoggingSuccess}
+      />
+
+      <DeleteConfirmationDialog 
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDelete}
+        title={t('heatTracking.deleteDialog.title')}
+        description={t('heatTracking.deleteDialog.description')}
+        itemDetails={`${t('heatTracking.cycles.title')} - ${format(startDate, 'yyyy-MM-dd')}`}
       />
     </>
   );

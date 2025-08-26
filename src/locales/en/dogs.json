@@ -360,6 +360,18 @@
       "metestrus": "Metestrus",
       "anestrus": "Anestrus"
     },
+    "deleteDialog": {
+      "title": "Delete Heat Cycle",
+      "description": "Are you sure you want to delete this heat cycle? This will also delete all associated log entries. This action cannot be undone."
+    },
+    "deleteSuccess": {
+      "title": "Heat Cycle Deleted",
+      "description": "The heat cycle and all associated data have been successfully deleted."
+    },
+    "deleteError": {
+      "title": "Delete Failed",
+      "description": "Failed to delete the heat cycle. Please try again."
+    },
     "comingSoon": {
       "title": "Coming Soon",
       "features": {

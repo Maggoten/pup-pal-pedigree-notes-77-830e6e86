@@ -360,6 +360,18 @@
       "metestrus": "Metöstrus",
       "anestrus": "Anöstrus"
     },
+    "deleteDialog": {
+      "title": "Ta bort löpcykel",
+      "description": "Är du säker på att du vill ta bort denna löpcykel? Detta kommer även ta bort alla associerade loggposter. Denna åtgärd kan inte ångras."
+    },
+    "deleteSuccess": {
+      "title": "Löpcykel borttagen",
+      "description": "Löpcykeln och all associerad data har tagits bort framgångsrikt."
+    },
+    "deleteError": {
+      "title": "Borttagning misslyckades",
+      "description": "Kunde inte ta bort löpcykeln. Vänligen försök igen."
+    },
     "comingSoon": {
       "title": "Kommer Snart",
       "features": {
