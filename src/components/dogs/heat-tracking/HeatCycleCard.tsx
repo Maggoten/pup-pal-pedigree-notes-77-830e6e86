@@ -124,15 +124,14 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                     <span className="hidden sm:inline">{t('heatTracking.logging.addEntry')}</span>
                     <span className="sm:hidden">{t('heatTracking.logging.addEntry')}</span>
                 </Button>
-                <Button 
-                  variant="outline"
-                  className="flex-1 sm:flex-none touch-manipulation"
-                  onClick={() => setShowEndDialog(true)}
-                >
-                  <StopCircle className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">End Cycle</span>
-                  <span className="sm:hidden">End</span>
-                </Button>
+                  <Button 
+                    variant="outline"
+                    className="flex-1 sm:flex-none touch-manipulation"
+                    onClick={() => setShowEndDialog(true)}
+                  >
+                    <StopCircle className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">{t('heatTracking.cycles.endCycle')}</span>
+                  </Button>
               </div>
             )}
           </div>

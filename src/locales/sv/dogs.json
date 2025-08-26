@@ -298,7 +298,9 @@
       "noLogs": "Inga temperaturloggar än",
       "startLogging": "Lägg till din första temperaturavläsning",
       "viewAllLogs": "Visa alla {{count}} loggar",
-      "deleteButton": "Ta bort Löpcykel"
+      "deleteButton": "Ta bort Löpcykel",
+      "endCycle": "Avsluta Löp",
+      "endCycleShort": "Avsluta"
     },
     "newSystem": {
       "title": "Detaljerad Löpspårning"

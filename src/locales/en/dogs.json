@@ -298,7 +298,9 @@
       "noLogs": "No temperature logs yet",
       "startLogging": "Add your first temperature reading",
       "viewAllLogs": "View all {{count}} logs",
-      "deleteButton": "Delete Heat Cycle"
+      "deleteButton": "Delete Heat Cycle",
+      "endCycle": "End Cycle",
+      "endCycleShort": "End"
     },
     "newSystem": {
       "title": "Detailed Heat Tracking"
