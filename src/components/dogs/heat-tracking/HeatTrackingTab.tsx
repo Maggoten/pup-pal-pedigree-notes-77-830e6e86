@@ -148,10 +148,10 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                {t('heatTracking.cycles.title')}
-              </CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              {dog.name}'s {t('heatTracking.cycles.title')}
+            </CardTitle>
               <CardDescription>
                 {heatHistory.length === 1 
                   ? t('heatTracking.description', { count: heatHistory.length })
