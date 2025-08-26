@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, User, Calendar } from 'lucide-react';
 import { Dog } from '@/types/dogs';
 import { useDogs } from '@/context/DogsContext';
 import { DogFormValues } from './DogFormFields';
@@ -9,6 +10,7 @@ import DeleteDogDialog from './delete-dialog/DeleteDogDialog';
 import DogDetailsCard from './details/DogDetailsCard';
 import DogActions from './actions/DogActions';
 import DogLittersSection from './litters/DogLittersSection';
+import HeatTrackingTab from './heat-tracking/HeatTrackingTab';
 import { checkDogDependencies } from '@/utils/dogDependencyCheck';
 
 interface DogDetailsProps {
@@ -191,19 +193,42 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         Back to list
       </Button>
       
-      <DogDetailsCard
-        dog={dog}
-        isEditing={isEditing}
-        isSaving={isSaving}
-        loading={loading}
-        lastError={lastError}
-        onSave={handleSave}
-        onCancelEdit={() => setIsEditing(false)}
-        onDelete={() => setShowDeleteDialog(true)}
-        onEdit={() => setIsEditing(true)}
-      />
-      
-      <DogLittersSection dog={dog} />
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className={`grid w-full ${dog.gender === 'female' ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            Overview
+          </TabsTrigger>
+          {dog.gender === 'female' && (
+            <TabsTrigger value="heat-tracking" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Heat Tracking
+            </TabsTrigger>
+          )}
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6 mt-6">
+          <DogDetailsCard
+            dog={dog}
+            isEditing={isEditing}
+            isSaving={isSaving}
+            loading={loading}
+            lastError={lastError}
+            onSave={handleSave}
+            onCancelEdit={() => setIsEditing(false)}
+            onDelete={() => setShowDeleteDialog(true)}
+            onEdit={() => setIsEditing(true)}
+          />
+          
+          <DogLittersSection dog={dog} />
+        </TabsContent>
+
+        {dog.gender === 'female' && (
+          <TabsContent value="heat-tracking" className="mt-6">
+            <HeatTrackingTab dog={dog} />
+          </TabsContent>
+        )}
+      </Tabs>
       
       <DeleteDogDialog
         dogName={dog.name}
