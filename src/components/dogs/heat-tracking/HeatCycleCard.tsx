@@ -125,12 +125,13 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                     <span className="sm:hidden">{t('heatTracking.logging.addEntry')}</span>
                 </Button>
                   <Button 
-                    variant="outline"
-                    className="flex-1 sm:flex-none touch-manipulation"
-                    onClick={() => setShowEndDialog(true)}
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-destructive touch-manipulation"
+                    onClick={() => setShowDeleteDialog(true)}
+                    disabled={isDeleting}
                   >
-                    <StopCircle className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">{t('heatTracking.cycles.endCycle')}</span>
+                    <Trash2 className="h-4 w-4" />
                   </Button>
               </div>
             )}
@@ -215,18 +216,16 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
             </div>
           )}
 
-          {/* Delete button at bottom for active cycles */}
+          {/* End cycle button at bottom for active cycles */}
           {isActive && (
             <div className="flex justify-center pt-4 border-t">
               <Button 
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-destructive touch-manipulation"
-                onClick={() => setShowDeleteDialog(true)}
-                disabled={isDeleting}
+                variant="outline"
+                className="touch-manipulation"
+                onClick={() => setShowEndDialog(true)}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
-                {t('heatTracking.cycles.deleteButton')}
+                <StopCircle className="h-4 w-4 mr-2" />
+                {t('heatTracking.cycles.endCycle')}
               </Button>
             </div>
           )}
