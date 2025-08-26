@@ -172,6 +172,89 @@ export type Database = {
         }
         Relationships: []
       }
+      heat_cycles: {
+        Row: {
+          created_at: string
+          cycle_length: number | null
+          dog_id: string
+          end_date: string | null
+          id: string
+          notes: string | null
+          start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_length?: number | null
+          dog_id: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          start_date: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cycle_length?: number | null
+          dog_id?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      heat_logs: {
+        Row: {
+          created_at: string
+          date: string
+          heat_cycle_id: string
+          id: string
+          notes: string | null
+          observations: string | null
+          phase: string | null
+          temperature: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          heat_cycle_id: string
+          id?: string
+          notes?: string | null
+          observations?: string | null
+          phase?: string | null
+          temperature?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          heat_cycle_id?: string
+          id?: string
+          notes?: string | null
+          observations?: string | null
+          phase?: string | null
+          temperature?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "heat_logs_heat_cycle_id_fkey"
+            columns: ["heat_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "heat_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       litters: {
         Row: {
           archived: boolean | null
