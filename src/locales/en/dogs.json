@@ -259,6 +259,7 @@
   },
   "tabs": {
     "overview": "Overview",
+    "heat": "Heat",
     "heatTracking": "Heat Tracking"
   },
   "heatTracking": {
