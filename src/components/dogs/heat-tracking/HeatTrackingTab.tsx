@@ -5,12 +5,14 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Plus, TrendingUp } from 'lucide-react';
 import { Dog } from '@/types/dogs';
 import { format, parseISO, differenceInDays } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 interface HeatTrackingTabProps {
   dog: Dog;
 }
 
 const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
+  const { t } = useTranslation('dogs');
   const heatHistory = dog.heatHistory || [];
   
   // Calculate basic analytics
@@ -66,15 +68,15 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Average Cycle
+              {t('heatTracking.analytics.averageCycle')}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="text-2xl font-bold">
-              {averageCycle ? `${averageCycle} days` : 'N/A'}
+              {averageCycle ? `${averageCycle} ${t('display.fields.days')}` : t('heatTracking.analytics.unknown', 'N/A')}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {heatHistory.length < 2 ? 'Need 2+ cycles' : 'Based on history'}
+              {heatHistory.length < 2 ? t('heatTracking.analytics.needTwoCycles') : t('heatTracking.analytics.basedOnHistory')}
             </p>
           </CardContent>
         </Card>
@@ -82,15 +84,15 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Last Heat
+              {t('heatTracking.analytics.lastHeat')}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="text-2xl font-bold">
-              {daysSinceLastHeat !== null ? `${daysSinceLastHeat} days ago` : 'Never'}
+              {daysSinceLastHeat !== null ? t('heatTracking.analytics.daysAgo', { days: daysSinceLastHeat }) : t('heatTracking.analytics.never')}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {lastHeat ? format(parseISO(lastHeat), 'MMM dd, yyyy') : 'No records'}
+              {lastHeat ? format(parseISO(lastHeat), 'MMM dd, yyyy') : t('heatTracking.analytics.noRecords')}
             </p>
           </CardContent>
         </Card>
@@ -98,15 +100,15 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Next Predicted
+              {t('heatTracking.analytics.nextPredicted')}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="text-2xl font-bold">
-              {nextHeat ? format(nextHeat, 'MMM dd') : 'Unknown'}
+              {nextHeat ? format(nextHeat, 'MMM dd') : t('heatTracking.analytics.unknown')}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {nextHeat ? `${differenceInDays(nextHeat, new Date())} days` : 'No data'}
+              {nextHeat ? t('heatTracking.analytics.days', { days: differenceInDays(nextHeat, new Date()) }) : t('heatTracking.analytics.noData')}
             </p>
           </CardContent>
         </Card>
@@ -119,15 +121,18 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Heat Cycles
+                {t('heatTracking.cycles.title')}
               </CardTitle>
               <CardDescription>
-                {heatHistory.length} cycle{heatHistory.length !== 1 ? 's' : ''} recorded
+                {heatHistory.length === 1 
+                  ? t('heatTracking.description', { count: heatHistory.length })
+                  : t('heatTracking.descriptionPlural', { count: heatHistory.length })
+                }
               </CardDescription>
             </div>
             <Button size="sm" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              Start New Heat
+              {t('heatTracking.cycles.startNew')}
             </Button>
           </div>
         </CardHeader>
@@ -135,8 +140,8 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
           {heatHistory.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium mb-2">No heat cycles recorded</p>
-              <p className="text-sm">Start tracking by adding the first heat cycle</p>
+              <p className="text-lg font-medium mb-2">{t('heatTracking.cycles.empty.title')}</p>
+              <p className="text-sm">{t('heatTracking.cycles.empty.description')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -159,19 +164,19 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
                             {format(heatDate, 'MMMM dd, yyyy')}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {differenceInDays(new Date(), heatDate)} days ago
+                            {t('heatTracking.analytics.daysAgo', { days: differenceInDays(new Date(), heatDate) })}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         {isRecent && (
                           <Badge variant="secondary" className="text-xs">
-                            Recent
+                            {t('heatTracking.cycles.badges.recent')}
                           </Badge>
                         )}
                         {index === 0 && (
                           <Badge variant="default" className="text-xs">
-                            Latest
+                            {t('heatTracking.cycles.badges.latest')}
                           </Badge>
                         )}
                       </div>
@@ -188,14 +193,14 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-muted-foreground">
             <TrendingUp className="h-5 w-5" />
-            Coming Soon
+            {t('heatTracking.comingSoon.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-sm text-muted-foreground space-y-2">
-            <p>• Detailed heat cycle logging (temperature, symptoms, notes)</p>
-            <p>• Temperature charts and breeding windows</p>
-            <p>• Enhanced predictions and cycle analysis</p>
+            <p>• {t('heatTracking.comingSoon.features.detailedLogging')}</p>
+            <p>• {t('heatTracking.comingSoon.features.temperatureCharts')}</p>
+            <p>• {t('heatTracking.comingSoon.features.enhancedPredictions')}</p>
           </div>
         </CardContent>
       </Card>

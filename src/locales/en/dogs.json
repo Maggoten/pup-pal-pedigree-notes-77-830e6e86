@@ -257,6 +257,48 @@
       "dam": "dam"
     }
   },
+  "tabs": {
+    "overview": "Overview",
+    "heatTracking": "Heat Tracking"
+  },
+  "heatTracking": {
+    "title": "Heat Cycles",
+    "description": "{{count}} cycle recorded",
+    "descriptionPlural": "{{count}} cycles recorded",
+    "analytics": {
+      "averageCycle": "Average Cycle",
+      "lastHeat": "Last Heat",
+      "nextPredicted": "Next Predicted",
+      "basedOnHistory": "Based on history",
+      "needTwoCycles": "Need 2+ cycles",
+      "daysAgo": "{{days}} days ago",
+      "never": "Never",
+      "noRecords": "No records",
+      "unknown": "Unknown",
+      "noData": "No data",
+      "days": "{{days}} days"
+    },
+    "cycles": {
+      "title": "Heat Cycles",
+      "startNew": "Start New Heat",
+      "empty": {
+        "title": "No heat cycles recorded",
+        "description": "Start tracking by adding the first heat cycle"
+      },
+      "badges": {
+        "recent": "Recent",
+        "latest": "Latest"
+      }
+    },
+    "comingSoon": {
+      "title": "Coming Soon",
+      "features": {
+        "detailedLogging": "Detailed heat cycle logging (temperature, symptoms, notes)",
+        "temperatureCharts": "Temperature charts and breeding windows",
+        "enhancedPredictions": "Enhanced predictions and cycle analysis"
+      }
+    }
+  },
   "toast": {
     "success": {
       "added": "{{dogName}} has been added to your dogs",

@@ -257,6 +257,48 @@
       "dam": "mor"
     }
   },
+  "tabs": {
+    "overview": "Översikt",
+    "heatTracking": "Löpspårning"
+  },
+  "heatTracking": {
+    "title": "Löpcykler",
+    "description": "{{count}} cykel registrerad",
+    "descriptionPlural": "{{count}} cykler registrerade",
+    "analytics": {
+      "averageCycle": "Genomsnittlig Cykel",
+      "lastHeat": "Senaste Löp",
+      "nextPredicted": "Nästa Förutsagda",
+      "basedOnHistory": "Baserat på historik",
+      "needTwoCycles": "Behöver 2+ cykler",
+      "daysAgo": "{{days}} dagar sedan",
+      "never": "Aldrig",
+      "noRecords": "Inga register",
+      "unknown": "Okänt",
+      "noData": "Ingen data",
+      "days": "{{days}} dagar"
+    },
+    "cycles": {
+      "title": "Löpcykler",
+      "startNew": "Starta Nytt Löp",
+      "empty": {
+        "title": "Inga löpcykler registrerade",
+        "description": "Börja spåra genom att lägga till den första löpcykeln"
+      },
+      "badges": {
+        "recent": "Nylig",
+        "latest": "Senaste"
+      }
+    },
+    "comingSoon": {
+      "title": "Kommer Snart",
+      "features": {
+        "detailedLogging": "Detaljerad löpcykelregistrering (temperatur, symtom, anteckningar)",
+        "temperatureCharts": "Temperaturdiagram och avelsfönster",
+        "enhancedPredictions": "Förbättrade förutsägelser och cykelanalys"
+      }
+    }
+  },
   "toast": {
     "success": {
       "added": "{{dogName}} har lagts till i dina hundar",

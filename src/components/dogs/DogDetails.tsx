@@ -12,6 +12,7 @@ import DogActions from './actions/DogActions';
 import DogLittersSection from './litters/DogLittersSection';
 import HeatTrackingTab from './heat-tracking/HeatTrackingTab';
 import { checkDogDependencies } from '@/utils/dogDependencyCheck';
+import { useTranslation } from 'react-i18next';
 
 interface DogDetailsProps {
   dog: Dog;
@@ -19,6 +20,7 @@ interface DogDetailsProps {
 
 const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
   const { setActiveDog, updateDog, removeDog, loading } = useDogs();
+  const { t } = useTranslation('dogs');
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -197,12 +199,12 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         <TabsList className={`grid w-full ${dog.gender === 'female' ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <User className="h-4 w-4" />
-            Overview
+            {t('tabs.overview')}
           </TabsTrigger>
           {dog.gender === 'female' && (
             <TabsTrigger value="heat-tracking" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Heat Tracking
+              {t('tabs.heatTracking')}
             </TabsTrigger>
           )}
         </TabsList>
