@@ -111,16 +111,6 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                   {t('heatTracking.cycles.badges.active')}
                 </Badge>
               )}
-              {/* Delete button moved here for better UX */}
-              <Button 
-                variant="ghost"
-                size="icon"
-                className="ml-auto sm:ml-2 h-8 w-8 touch-manipulation text-muted-foreground hover:text-destructive"
-                onClick={() => setShowDeleteDialog(true)}
-                disabled={isDeleting}
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
             </div>
             
             {/* Action buttons - separated from delete for safety */}
@@ -222,6 +212,22 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
               >
                 <Eye className="h-4 w-4 mr-2" />
                 {t('heatTracking.cycles.viewAllLogs', { count: heatLogs.length })}
+              </Button>
+            </div>
+          )}
+
+          {/* Delete button at bottom for active cycles */}
+          {isActive && (
+            <div className="flex justify-center pt-4 border-t">
+              <Button 
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-destructive touch-manipulation"
+                onClick={() => setShowDeleteDialog(true)}
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Heat Cycle
               </Button>
             </div>
           )}
