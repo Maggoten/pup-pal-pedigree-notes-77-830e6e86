@@ -56,6 +56,10 @@
         "placeholder": "AKC123456",
         "description": "Optional registration or license number"
       },
+      "registeredName": {
+        "label": "Registered Name",
+        "placeholder": "Optional registered name"
+      },
       "notes": {
         "label": "Notes",
         "placeholder": "Any additional information...",

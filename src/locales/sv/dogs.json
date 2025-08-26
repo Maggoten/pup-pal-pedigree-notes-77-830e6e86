@@ -56,6 +56,10 @@
         "placeholder": "SKK123456",
         "description": "Valfritt registrerings- eller licensnummer"
       },
+      "registeredName": {
+        "label": "Registrerat Namn",
+        "placeholder": "Registrerat namn"
+      },
       "notes": {
         "label": "Anteckningar",
         "placeholder": "Ytterligare information...",

@@ -13,7 +13,6 @@ interface RegistrationFieldsProps {
 
 const RegistrationFields: React.FC<RegistrationFieldsProps> = ({ form, disabled }) => {
   const { t } = useTranslation('dogs');
-  const { t: tLitters } = useTranslation('litters');
   
   return (
     <div className="space-y-4">
@@ -22,10 +21,10 @@ const RegistrationFields: React.FC<RegistrationFieldsProps> = ({ form, disabled 
         name="registeredName"
         render={({ field }) => (
           <FormItem className="flex flex-col">
-            <FormLabel>{tLitters('labels.registeredName')}</FormLabel>
+            <FormLabel>{t('form.fields.registeredName.label')}</FormLabel>
             <FormControl>
               <Input 
-                placeholder={tLitters('placeholders.registeredName')} 
+                placeholder={t('form.fields.registeredName.placeholder')} 
                 {...field} 
                 disabled={disabled} 
                 className="h-10"
