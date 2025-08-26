@@ -16,7 +16,7 @@
       "birthInfo": "Födelseinformation",
       "registration": "Registreringsuppgifter",
       "healthRecords": "Hälsouppgifter",
-      "additionalNotes": "Ytterligare Anteckningar"
+      "notes": "Anteckningar"
     },
     "title": {
       "add": "Lägg till Ny Hund",

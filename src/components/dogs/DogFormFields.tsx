@@ -4,10 +4,8 @@ import { UseFormReturn } from "react-hook-form";
 import { Dog } from '@/context/DogsContext';
 import { Gender } from '@/types/dogs';
 import BasicInfoFields from './form-fields/BasicInfoFields';
-import RegistrationFields from './form-fields/RegistrationFields';
 import HealthFields from './form-fields/HealthFields';
 import NotesField from './form-fields/NotesField';
-import BirthInfoFields from './form-fields/BirthInfoFields';
 import { useTranslation } from 'react-i18next';
 
 export const dogFormSchema = z.object({
@@ -41,17 +39,13 @@ interface DogFormFieldsProps {
 const DogFormFields: React.FC<DogFormFieldsProps> = ({ form, disabled }) => {
   return (
     <div className="space-y-8">
-      {/* Two column layout for desktop, single column for mobile */}
-      <div className="grid gap-8 lg:grid-cols-2">
-        <BasicInfoFields form={form} disabled={disabled} />
-        <div className="space-y-6">
-          <BirthInfoFields form={form} disabled={disabled} />
-          <RegistrationFields form={form} disabled={disabled} />
-        </div>
-      </div>
+      {/* Full width basic information */}
+      <BasicInfoFields form={form} disabled={disabled} />
       
-      {/* Full width sections */}
+      {/* Health information */}
       <HealthFields form={form} disabled={disabled} />
+      
+      {/* Notes at the bottom */}
       <NotesField form={form} disabled={disabled} />
     </div>
   );

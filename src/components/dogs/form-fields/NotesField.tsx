@@ -17,7 +17,7 @@ const NotesField: React.FC<NotesFieldProps> = ({ form, disabled }) => {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">
-        {t('form.sections.additionalNotes')}
+        {t('form.sections.notes')}
       </h3>
       <FormField
         control={form.control}

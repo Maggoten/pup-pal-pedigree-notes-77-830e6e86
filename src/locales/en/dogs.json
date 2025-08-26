@@ -16,7 +16,7 @@
       "birthInfo": "Birth Information", 
       "registration": "Registration Details",
       "healthRecords": "Health Records",
-      "additionalNotes": "Additional Notes"
+      "notes": "Notes"
     },
     "title": {
       "add": "Add New Dog",
