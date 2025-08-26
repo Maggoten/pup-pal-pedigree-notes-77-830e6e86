@@ -44,9 +44,6 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({ form, disabled }) => {
       
       {/* Health information */}
       <HealthFields form={form} disabled={disabled} />
-      
-      {/* Notes at the bottom */}
-      <NotesField form={form} disabled={disabled} />
     </div>
   );
 };

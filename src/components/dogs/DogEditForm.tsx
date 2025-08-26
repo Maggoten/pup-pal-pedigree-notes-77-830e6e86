@@ -7,6 +7,7 @@ import { Dog } from '@/context/DogsContext';
 import DogFormFields, { dogFormSchema, DogFormValues } from './DogFormFields';
 import DogImageField from './DogImageField';
 import HeatRecordsField from './heat-records/HeatRecordsField';
+import NotesField from './form-fields/NotesField';
 import { useTranslation } from 'react-i18next';
 
 interface DogEditFormProps {
@@ -81,6 +82,9 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isLoad
                 <HeatRecordsField form={form} disabled={isLoading} />
               </div>
             )}
+            
+            {/* Notes section moved after heat cycle information */}
+            <NotesField form={form} disabled={isLoading} />
           </div>
         </div>
       </form>
