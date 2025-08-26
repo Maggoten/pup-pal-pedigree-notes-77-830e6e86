@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, User, Heart } from 'lucide-react';
+import { ArrowLeft, PawPrint, Heart } from 'lucide-react';
 import { Dog } from '@/types/dogs';
 import { useDogs } from '@/context/DogsContext';
 import { DogFormValues } from './DogFormFields';
@@ -199,7 +199,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className={`grid w-full ${dog.gender === 'female' ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <TabsTrigger value="overview" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
+            <PawPrint className="h-4 w-4" />
             {t('tabs.overview')}
           </TabsTrigger>
           {dog.gender === 'female' && (
