@@ -232,7 +232,7 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-            {t('common.cancel')}
+            {t('form.actions.cancel')}
           </Button>
           <Button onClick={handleSubmit} disabled={!date || isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
