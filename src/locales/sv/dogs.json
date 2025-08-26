@@ -10,6 +10,14 @@
     "viewProfile": "Visa Profil"
   },
   "form": {
+    "sections": {
+      "basicInfo": "Grundläggande Information",
+      "physicalDetails": "Fysiska Detaljer", 
+      "birthInfo": "Födelseinformation",
+      "registration": "Registreringsuppgifter",
+      "healthRecords": "Hälsouppgifter",
+      "additionalNotes": "Ytterligare Anteckningar"
+    },
     "title": {
       "add": "Lägg till Ny Hund",
       "edit": "Redigera",

@@ -10,6 +10,14 @@
     "viewProfile": "View Profile"
   },
   "form": {
+    "sections": {
+      "basicInfo": "Basic Information",
+      "physicalDetails": "Physical Details",
+      "birthInfo": "Birth Information", 
+      "registration": "Registration Details",
+      "healthRecords": "Health Records",
+      "additionalNotes": "Additional Notes"
+    },
     "title": {
       "add": "Add New Dog",
       "edit": "Edit Dog",
