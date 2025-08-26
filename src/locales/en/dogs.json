@@ -372,6 +372,32 @@
       "title": "Delete Failed",
       "description": "Failed to delete the heat cycle. Please try again."
     },
+    "addPreviousHeat": {
+      "title": "Add Previous Heat",
+      "description": "Add a previous heat cycle to your dog's history",
+      "startDate": "Heat Start Date",
+      "notes": "Notes (optional)",
+      "placeholders": {
+        "notes": "Additional information about this heat cycle..."
+      },
+      "validation": {
+        "dateRequired": "Start date is required",
+        "dateInFuture": "Heat date cannot be in the future",
+        "duplicateDate": "A heat cycle already exists for this date"
+      },
+      "buttons": {
+        "add": "Add Heat Cycle",
+        "cancel": "Cancel"
+      },
+      "success": {
+        "title": "Previous Heat Added",
+        "description": "The heat cycle has been added to your dog's history"
+      },
+      "error": {
+        "title": "Failed to Add Heat",
+        "description": "Could not add the previous heat cycle. Please try again."
+      }
+    },
     "comingSoon": {
       "title": "Coming Soon",
       "features": {

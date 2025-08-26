@@ -370,7 +370,33 @@
     },
     "deleteError": {
       "title": "Borttagning misslyckades",
-      "description": "Kunde inte ta bort löpcykeln. Vänligen försök igen."
+      "description": "Kunde inte ta bort löpcykeln. Försök igen."
+    },
+    "addPreviousHeat": {
+      "title": "Lägg till tidigare löp",
+      "description": "Lägg till en tidigare löpcykel i din hunds historik",
+      "startDate": "Löpstart datum",
+      "notes": "Anteckningar (valfritt)",
+      "placeholders": {
+        "notes": "Ytterligare information om denna löpcykel..."
+      },
+      "validation": {
+        "dateRequired": "Startdatum krävs",
+        "dateInFuture": "Löpdatum kan inte vara i framtiden",
+        "duplicateDate": "En löpcykel finns redan för detta datum"
+      },
+      "buttons": {
+        "add": "Lägg till löpcykel",
+        "cancel": "Avbryt"
+      },
+      "success": {
+        "title": "Tidigare löp tillagd",
+        "description": "Löpcykeln har lagts till i din hunds historik"
+      },
+      "error": {
+        "title": "Misslyckades att lägga till löp",
+        "description": "Kunde inte lägga till den tidigare löpcykeln. Försök igen."
+      }
     },
     "comingSoon": {
       "title": "Kommer Snart",

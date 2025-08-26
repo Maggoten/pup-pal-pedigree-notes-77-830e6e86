@@ -8,6 +8,7 @@ import { format, parseISO, differenceInDays } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { HeatService } from '@/services/HeatService';
 import StartHeatCycleDialog from './StartHeatCycleDialog';
+import AddPreviousHeatDialog from './AddPreviousHeatDialog';
 import HeatCycleCard from './HeatCycleCard';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -22,6 +23,7 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
   const heatHistory = dog.heatHistory || [];
   const [heatCycles, setHeatCycles] = useState<HeatCycle[]>([]);
   const [showStartDialog, setShowStartDialog] = useState(false);
+  const [showAddPreviousDialog, setShowAddPreviousDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -159,10 +161,21 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
                 }
               </CardDescription>
             </div>
-            <Button size="sm" className="flex items-center gap-2" onClick={() => setShowStartDialog(true)}>
-              <Plus className="h-4 w-4" />
-              {t('heatTracking.cycles.startNew')}
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="flex items-center gap-2" 
+                onClick={() => setShowAddPreviousDialog(true)}
+              >
+                <Calendar className="h-4 w-4" />
+                {t('heatTracking.addPreviousHeat.title')}
+              </Button>
+              <Button size="sm" className="flex items-center gap-2" onClick={() => setShowStartDialog(true)}>
+                <Plus className="h-4 w-4" />
+                {t('heatTracking.cycles.startNew')}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -246,6 +259,13 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
       <StartHeatCycleDialog
         open={showStartDialog}
         onOpenChange={setShowStartDialog}
+        dog={dog}
+        onSuccess={handleStartCycleSuccess}
+      />
+      
+      <AddPreviousHeatDialog
+        open={showAddPreviousDialog}
+        onOpenChange={setShowAddPreviousDialog}
         dog={dog}
         onSuccess={handleStartCycleSuccess}
       />
