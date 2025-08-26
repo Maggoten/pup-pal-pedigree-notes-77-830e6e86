@@ -11,7 +11,7 @@ interface DogInfoDisplayProps {
 }
 
 const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({ dog }) => {
-  const { t } = useTranslation('dogs');
+  const { t } = useTranslation(['dogs', 'litters']);
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr]">
@@ -55,6 +55,13 @@ const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({ dog }) => {
             <h3 className="text-sm font-medium text-muted-foreground">{t('display.fields.color')}</h3>
             <p>{dog.color}</p>
           </div>
+          
+          {dog.registeredName && (
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground">{t('litters:labels.registeredName')}</h3>
+              <p>{dog.registeredName}</p>
+            </div>
+          )}
           
           <div>
             <h3 className="text-sm font-medium text-muted-foreground">{t('display.fields.registrationNumber')}</h3>

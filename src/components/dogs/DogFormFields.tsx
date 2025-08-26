@@ -17,6 +17,7 @@ export const dogFormSchema = z.object({
   gender: z.enum(["male", "female"] as const),
   color: z.string().optional(),
   registrationNumber: z.string().optional(),
+  registeredName: z.string().optional(),
   dewormingDate: z.instanceof(Date).optional().nullable(),
   vaccinationDate: z.instanceof(Date).optional().nullable(),
   sterilizationDate: z.instanceof(Date).optional().nullable(),

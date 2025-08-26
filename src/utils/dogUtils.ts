@@ -115,6 +115,7 @@ export const enrichDog = (dog: any): Dog => {
       dateOfBirth: dog.birthdate ? dog.birthdate.split('T')[0] : '',
       image: dog.image_url || '',
       registrationNumber: dog.registration_number || '',
+      registeredName: dog.registered_name || '',
       sterilizationDate: dog.sterilization_date ? dog.sterilization_date.split('T')[0] : undefined,
 
       // Processed fields
@@ -182,6 +183,11 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   if ('registrationNumber' in dog && dog.registrationNumber !== undefined) {
     dbDog.registration_number = dog.registrationNumber;
     console.log('[Dogs Debug] Mapped registrationNumber to registration_number:', dog.registrationNumber);
+  }
+  
+  if ('registeredName' in dog && dog.registeredName !== undefined) {
+    dbDog.registered_name = dog.registeredName;
+    console.log('[Dogs Debug] Mapped registeredName to registered_name:', dog.registeredName);
   }
   
   if ('image' in dog && dog.image !== undefined) {
@@ -284,7 +290,7 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
   const directFields: (keyof Dog & keyof DbDog)[] = [
     'id', 'owner_id', 'name', 'breed', 'gender', 
     'color', 'chip_number', 'notes', 'created_at', 'updated_at',
-    'breedingHistory', 'heatInterval'
+    'breedingHistory', 'heatInterval', 'registered_name'
   ];
   
   directFields.forEach(field => {

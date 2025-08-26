@@ -12,30 +12,51 @@ interface RegistrationFieldsProps {
 }
 
 const RegistrationFields: React.FC<RegistrationFieldsProps> = ({ form, disabled }) => {
-  const { t } = useTranslation('dogs');
+  const { t } = useTranslation(['dogs', 'litters']);
   
   return (
-    <FormField
-      control={form.control}
-      name="registrationNumber"
-      render={({ field }) => (
-        <FormItem className="flex flex-col">
-          <FormLabel>{t('form.fields.registrationNumber.label')}</FormLabel>
-          <FormControl>
-            <Input 
-              placeholder={t('form.fields.registrationNumber.placeholder')} 
-              {...field} 
-              disabled={disabled} 
-              className="h-10"
-            />
-          </FormControl>
-          <FormDescription className="text-xs">
-            {t('form.fields.registrationNumber.description')}
-          </FormDescription>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+    <div className="space-y-4">
+      <FormField
+        control={form.control}
+        name="registeredName"
+        render={({ field }) => (
+          <FormItem className="flex flex-col">
+            <FormLabel>{t('litters:labels.registeredName')}</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder={t('litters:placeholders.registeredName')} 
+                {...field} 
+                disabled={disabled} 
+                className="h-10"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
+        name="registrationNumber"
+        render={({ field }) => (
+          <FormItem className="flex flex-col">
+            <FormLabel>{t('form.fields.registrationNumber.label')}</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder={t('form.fields.registrationNumber.placeholder')} 
+                {...field} 
+                disabled={disabled} 
+                className="h-10"
+              />
+            </FormControl>
+            <FormDescription className="text-xs">
+              {t('form.fields.registrationNumber.description')}
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
   );
 };
 

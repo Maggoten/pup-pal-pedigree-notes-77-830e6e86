@@ -45,6 +45,8 @@ export interface Dog {
   // Registration info
   registration_number?: string;  // Supabase field
   registrationNumber: string;    // Alias for UI components
+  registered_name?: string;      // Supabase field
+  registeredName?: string;       // Alias for UI components
   chip_number?: string;
   
   // Image handling

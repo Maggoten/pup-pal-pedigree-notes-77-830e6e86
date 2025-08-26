@@ -66,7 +66,11 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
       </CardHeader>
       <CardContent className="p-4 flex-grow">
         <h3 className="font-semibold text-lg mb-1">{dog.name}</h3>
-        <p className="text-sm text-muted-foreground mb-2">{dog.breed}</p>
+        {dog.registeredName ? (
+          <p className="text-sm text-muted-foreground mb-2">{dog.registeredName}</p>
+        ) : (
+          <p className="text-sm text-muted-foreground mb-2">{dog.breed}</p>
+        )}
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Calendar className="h-3 w-3" />
           <span>{t('display.age')}: {calculateAge(dog.dateOfBirth)}</span>
