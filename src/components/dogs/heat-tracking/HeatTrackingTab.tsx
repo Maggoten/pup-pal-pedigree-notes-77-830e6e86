@@ -242,22 +242,6 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
         </CardContent>
       </Card>
 
-      {/* Coming Soon Card */}
-      <Card className="border-dashed">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-muted-foreground">
-            <TrendingUp className="h-5 w-5" />
-            {t('heatTracking.comingSoon.title')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-muted-foreground space-y-2">
-            <p>• {t('heatTracking.comingSoon.features.detailedLogging')}</p>
-            <p>• {t('heatTracking.comingSoon.features.temperatureCharts')}</p>
-            <p>• {t('heatTracking.comingSoon.features.enhancedPredictions')}</p>
-          </div>
-        </CardContent>
-      </Card>
 
       <StartHeatCycleDialog
         open={showStartDialog}
