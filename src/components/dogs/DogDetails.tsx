@@ -42,6 +42,9 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
       if (values.registrationNumber !== dog.registrationNumber) {
         updates.registrationNumber = values.registrationNumber;
       }
+      if (values.registeredName !== dog.registeredName) {
+        updates.registeredName = values.registeredName;
+      }
       if (values.image !== dog.image) updates.image = values.image;
       
       // Update the date of birth if changed
