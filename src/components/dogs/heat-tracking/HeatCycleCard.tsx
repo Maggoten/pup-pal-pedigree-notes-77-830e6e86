@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Thermometer, Plus, Eye, Calendar, Clock, Trash2 } from 'lucide-react';
+import { Thermometer, Plus, Eye, Calendar, Clock, Trash2, StopCircle } from 'lucide-react';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { HeatService } from '@/services/HeatService';
 import HeatLoggingDialog from './HeatLoggingDialog';
+import HeatLogsDialog from './HeatLogsDialog';
+import EndHeatCycleDialog from './EndHeatCycleDialog';
 import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
 import { toast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
@@ -23,6 +25,8 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
   const { t } = useTranslation('dogs');
   const [heatLogs, setHeatLogs] = useState<HeatLog[]>([]);
   const [showLoggingDialog, setShowLoggingDialog] = useState(false);
+  const [showLogsDialog, setShowLogsDialog] = useState(false);
+  const [showEndDialog, setShowEndDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -110,10 +114,20 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
             </div>
             <div className="flex items-center gap-2">
               {isActive && (
-                <Button size="sm" onClick={() => setShowLoggingDialog(true)}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  {t('heatTracking.logging.addEntry')}
-                </Button>
+                <>
+                  <Button size="sm" onClick={() => setShowLoggingDialog(true)}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    {t('heatTracking.logging.addEntry')}
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => setShowEndDialog(true)}
+                  >
+                    <StopCircle className="h-4 w-4 mr-1" />
+                    End Cycle
+                  </Button>
+                </>
               )}
               <Button 
                 size="sm" 
@@ -194,7 +208,12 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
 
           {heatLogs.length > 1 && (
             <div className="flex justify-center">
-              <Button variant="ghost" size="sm" className="text-xs">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs"
+                onClick={() => setShowLogsDialog(true)}
+              >
                 <Eye className="h-3 w-3 mr-1" />
                 {t('heatTracking.cycles.viewAllLogs', { count: heatLogs.length })}
               </Button>
@@ -208,6 +227,20 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
         onOpenChange={setShowLoggingDialog}
         heatCycle={heatCycle}
         onSuccess={handleLoggingSuccess}
+      />
+
+      <HeatLogsDialog
+        open={showLogsDialog}
+        onOpenChange={setShowLogsDialog}
+        heatCycle={heatCycle}
+        onUpdate={onUpdate}
+      />
+
+      <EndHeatCycleDialog
+        open={showEndDialog}
+        onOpenChange={setShowEndDialog}
+        heatCycle={heatCycle}
+        onSuccess={onUpdate}
       />
 
       <DeleteConfirmationDialog 
