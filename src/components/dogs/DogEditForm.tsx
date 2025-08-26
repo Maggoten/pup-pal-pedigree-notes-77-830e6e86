@@ -48,6 +48,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isLoad
       gender: dog.gender,
       color: dog.color,
       registrationNumber: dog.registrationNumber || '',
+      registeredName: dog.registeredName || '',
       dewormingDate: dog.dewormingDate ? new Date(dog.dewormingDate) : undefined,
       vaccinationDate: dog.vaccinationDate ? new Date(dog.vaccinationDate) : undefined,
       sterilizationDate: dog.sterilizationDate ? new Date(dog.sterilizationDate) : undefined,
