@@ -16,18 +16,20 @@ const RegistrationFields: React.FC<RegistrationFieldsProps> = ({ form, disabled 
   
   return (
     <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">
+        {t('form.sections.registration')}
+      </h3>
       <FormField
         control={form.control}
         name="registrationNumber"
         render={({ field }) => (
-          <FormItem className="flex flex-col">
+          <FormItem>
             <FormLabel>{t('form.fields.registrationNumber.label')}</FormLabel>
             <FormControl>
               <Input 
                 placeholder={t('form.fields.registrationNumber.placeholder')} 
                 {...field} 
                 disabled={disabled} 
-                className="h-10"
               />
             </FormControl>
             <FormDescription className="text-xs">

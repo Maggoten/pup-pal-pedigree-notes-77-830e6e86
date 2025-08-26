@@ -15,27 +15,32 @@ const NotesField: React.FC<NotesFieldProps> = ({ form, disabled }) => {
   const { t } = useTranslation('dogs');
   
   return (
-    <FormField
-      control={form.control}
-      name="notes"
-      render={({ field }) => (
-        <FormItem className="col-span-2">
-          <FormLabel>{t('form.fields.notes.label')}</FormLabel>
-          <FormControl>
-            <Textarea
-              placeholder={t('form.fields.notes.placeholder')}
-              className="resize-none"
-              {...field}
-              disabled={disabled}
-            />
-          </FormControl>
-          <FormDescription>
-            {t('form.fields.notes.description')}
-          </FormDescription>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">
+        {t('form.sections.additionalNotes')}
+      </h3>
+      <FormField
+        control={form.control}
+        name="notes"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t('form.fields.notes.label')}</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder={t('form.fields.notes.placeholder')}
+                className="resize-none"
+                {...field}
+                disabled={disabled}
+              />
+            </FormControl>
+            <FormDescription>
+              {t('form.fields.notes.description')}
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
   );
 };
 

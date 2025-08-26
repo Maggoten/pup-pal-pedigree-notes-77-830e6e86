@@ -23,98 +23,113 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form, disabled }) => 
   const { t } = useTranslation('dogs');
   
   return (
-    <>
-      <FormField
-        control={form.control}
-        name="name"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>{t('form.fields.name.label')}</FormLabel>
-            <FormControl>
-              <Input placeholder={t('form.fields.name.placeholder')} {...field} disabled={disabled} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        control={form.control}
-        name="registeredName"
-        render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel>{t('form.fields.registeredName.label')}</FormLabel>
-            <FormControl>
-              <Input 
-                placeholder={t('form.fields.registeredName.placeholder')} 
-                {...field} 
-                disabled={disabled} 
-                className="h-10"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        control={form.control}
-        name="breed"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>{t('form.fields.breed.label')}</FormLabel>
-            <FormControl>
-              <BreedDropdown
-                value={field.value}
-                onChange={field.onChange}
-                disabled={disabled}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        control={form.control}
-        name="gender"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>{t('form.fields.gender.label')}</FormLabel>
-            <Select 
-              onValueChange={field.onChange} 
-              defaultValue={field.value}
-              disabled={disabled}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('form.fields.gender.placeholder')} />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="male">{t('form.fields.gender.male')}</SelectItem>
-                <SelectItem value="female">{t('form.fields.gender.female')}</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        control={form.control}
-        name="color"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>{t('form.fields.color.label')}</FormLabel>
-            <FormControl>
-              <Input placeholder={t('form.fields.color.placeholder')} {...field} disabled={disabled} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </>
+    <div className="space-y-6">
+      {/* Basic Information Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">
+          {t('form.sections.basicInfo')}
+        </h3>
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('form.fields.name.label')}</FormLabel>
+                <FormControl>
+                  <Input placeholder={t('form.fields.name.placeholder')} {...field} disabled={disabled} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="registeredName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('form.fields.registeredName.label')}</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder={t('form.fields.registeredName.placeholder')} 
+                    {...field} 
+                    disabled={disabled} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="breed"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('form.fields.breed.label')}</FormLabel>
+                <FormControl>
+                  <BreedDropdown
+                    value={field.value}
+                    onChange={field.onChange}
+                    disabled={disabled}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+
+      {/* Physical Details Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">
+          {t('form.sections.physicalDetails')}
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="gender"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('form.fields.gender.label')}</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                  disabled={disabled}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('form.fields.gender.placeholder')} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="male">{t('form.fields.gender.male')}</SelectItem>
+                    <SelectItem value="female">{t('form.fields.gender.female')}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="color"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('form.fields.color.label')}</FormLabel>
+                <FormControl>
+                  <Input placeholder={t('form.fields.color.placeholder')} {...field} disabled={disabled} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 

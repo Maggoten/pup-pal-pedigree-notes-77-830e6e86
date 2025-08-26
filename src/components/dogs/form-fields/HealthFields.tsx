@@ -21,175 +21,174 @@ const HealthFields: React.FC<HealthFieldsProps> = ({ form, disabled }) => {
   const { t } = useTranslation('dogs');
   
   return (
-    <>
-      <FormField
-        control={form.control}
-        name="dewormingDate"
-        render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel>{t('form.health.deworming.label')}</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "pl-3 text-left font-normal bg-white border-input shadow-sm",
-                      !field.value && "text-muted-foreground"
-                    )}
-                    disabled={disabled}
-                  >
-                    {field.value ? (
-                      // Handle both string dates and Date objects
-                      typeof field.value === 'string'
-                        ? format(parseISODate(field.value) || new Date(), "PPP")
-                        : format(field.value, "PPP")
-                    ) : (
-                      <span>{t('form.fields.pickADate')}</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-white" align="start">
-                <Calendar
-                  mode="single"
-                  selected={typeof field.value === 'string' 
-                    ? parseISODate(field.value) || undefined 
-                    : field.value}
-                  onSelect={(date) => {
-                    if (date) {
-                      // Set time to noon to avoid timezone issues
-                      date.setHours(12, 0, 0, 0);
-                      field.onChange(date);
-                    } else {
-                      field.onChange(null);
-                    }
-                  }}
-                  disabled={(date) => date > new Date() || !!disabled}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-            <FormDescription>{t('form.fields.optional')}</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        control={form.control}
-        name="vaccinationDate"
-        render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel>{t('form.health.vaccination.label')}</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "pl-3 text-left font-normal bg-white border-input shadow-sm",
-                      !field.value && "text-muted-foreground"
-                    )}
-                    disabled={disabled}
-                  >
-                    {field.value ? (
-                      // Handle both string dates and Date objects
-                      typeof field.value === 'string'
-                        ? format(parseISODate(field.value) || new Date(), "PPP")
-                        : format(field.value, "PPP")
-                    ) : (
-                      <span>{t('form.fields.pickADate')}</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-white" align="start">
-                <Calendar
-                  mode="single"
-                  selected={typeof field.value === 'string' 
-                    ? parseISODate(field.value) || undefined 
-                    : field.value}
-                  onSelect={(date) => {
-                    if (date) {
-                      // Set time to noon to avoid timezone issues
-                      date.setHours(12, 0, 0, 0);
-                      field.onChange(date);
-                    } else {
-                      field.onChange(null);
-                    }
-                  }}
-                  disabled={(date) => date > new Date() || !!disabled}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-            <FormDescription>{t('form.fields.optional')}</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        control={form.control}
-        name="sterilizationDate"
-        render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel>{t('form.health.sterilization.label')}</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "pl-3 text-left font-normal bg-white border-input shadow-sm",
-                      !field.value && "text-muted-foreground"
-                    )}
-                    disabled={disabled}
-                  >
-                    {field.value ? (
-                      // Handle both string dates and Date objects
-                      typeof field.value === 'string'
-                        ? format(parseISODate(field.value) || new Date(), "PPP")
-                        : format(field.value, "PPP")
-                    ) : (
-                      <span>{t('form.fields.pickADate')}</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-white" align="start">
-                <Calendar
-                  mode="single"
-                  selected={typeof field.value === 'string' 
-                    ? parseISODate(field.value) || undefined 
-                    : field.value}
-                  onSelect={(date) => {
-                    if (date) {
-                      // Set time to noon to avoid timezone issues
-                      date.setHours(12, 0, 0, 0);
-                      field.onChange(date);
-                    } else {
-                      field.onChange(null);
-                    }
-                  }}
-                  disabled={(date) => date > new Date() || !!disabled}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-            <FormDescription>{t('form.fields.optionalFemaleOnly')}</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">
+        {t('form.sections.healthRecords')}
+      </h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <FormField
+          control={form.control}
+          name="dewormingDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>{t('form.health.deworming.label')}</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "pl-3 text-left font-normal bg-white border-input shadow-sm",
+                        !field.value && "text-muted-foreground"
+                      )}
+                      disabled={disabled}
+                    >
+                      {field.value ? (
+                        typeof field.value === 'string'
+                          ? format(parseISODate(field.value) || new Date(), "PPP")
+                          : format(field.value, "PPP")
+                      ) : (
+                        <span>{t('form.fields.pickADate')}</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-white" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={typeof field.value === 'string' 
+                      ? parseISODate(field.value) || undefined 
+                      : field.value}
+                    onSelect={(date) => {
+                      if (date) {
+                        date.setHours(12, 0, 0, 0);
+                        field.onChange(date);
+                      } else {
+                        field.onChange(null);
+                      }
+                    }}
+                    disabled={(date) => date > new Date() || !!disabled}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormDescription>{t('form.fields.optional')}</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="vaccinationDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>{t('form.health.vaccination.label')}</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "pl-3 text-left font-normal bg-white border-input shadow-sm",
+                        !field.value && "text-muted-foreground"
+                      )}
+                      disabled={disabled}
+                    >
+                      {field.value ? (
+                        typeof field.value === 'string'
+                          ? format(parseISODate(field.value) || new Date(), "PPP")
+                          : format(field.value, "PPP")
+                      ) : (
+                        <span>{t('form.fields.pickADate')}</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-white" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={typeof field.value === 'string' 
+                      ? parseISODate(field.value) || undefined 
+                      : field.value}
+                    onSelect={(date) => {
+                      if (date) {
+                        date.setHours(12, 0, 0, 0);
+                        field.onChange(date);
+                      } else {
+                        field.onChange(null);
+                      }
+                    }}
+                    disabled={(date) => date > new Date() || !!disabled}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormDescription>{t('form.fields.optional')}</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="sterilizationDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>{t('form.health.sterilization.label')}</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "pl-3 text-left font-normal bg-white border-input shadow-sm",
+                        !field.value && "text-muted-foreground"
+                      )}
+                      disabled={disabled}
+                    >
+                      {field.value ? (
+                        typeof field.value === 'string'
+                          ? format(parseISODate(field.value) || new Date(), "PPP")
+                          : format(field.value, "PPP")
+                      ) : (
+                        <span>{t('form.fields.pickADate')}</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-white" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={typeof field.value === 'string' 
+                      ? parseISODate(field.value) || undefined 
+                      : field.value}
+                    onSelect={(date) => {
+                      if (date) {
+                        date.setHours(12, 0, 0, 0);
+                        field.onChange(date);
+                      } else {
+                        field.onChange(null);
+                      }
+                    }}
+                    disabled={(date) => date > new Date() || !!disabled}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormDescription>{t('form.fields.optionalFemaleOnly')}</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
   );
 };
 

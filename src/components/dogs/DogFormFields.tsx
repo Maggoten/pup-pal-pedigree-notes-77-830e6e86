@@ -40,15 +40,18 @@ interface DogFormFieldsProps {
 
 const DogFormFields: React.FC<DogFormFieldsProps> = ({ form, disabled }) => {
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      <BasicInfoFields form={form} disabled={disabled} />
-      <div className="space-y-6">
-        <BirthInfoFields form={form} disabled={disabled} />
-        <RegistrationFields form={form} disabled={disabled} />
+    <div className="space-y-8">
+      {/* Two column layout for desktop, single column for mobile */}
+      <div className="grid gap-8 lg:grid-cols-2">
+        <BasicInfoFields form={form} disabled={disabled} />
+        <div className="space-y-6">
+          <BirthInfoFields form={form} disabled={disabled} />
+          <RegistrationFields form={form} disabled={disabled} />
+        </div>
       </div>
-      <div className="md:col-span-2">
-        <HealthFields form={form} disabled={disabled} />
-      </div>
+      
+      {/* Full width sections */}
+      <HealthFields form={form} disabled={disabled} />
       <NotesField form={form} disabled={disabled} />
     </div>
   );
