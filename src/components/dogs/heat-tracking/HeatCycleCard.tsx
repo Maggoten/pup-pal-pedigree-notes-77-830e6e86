@@ -120,9 +120,9 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                   className="flex-1 sm:flex-none touch-manipulation"
                   onClick={() => setShowLoggingDialog(true)}
                 >
-                  <Plus className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">{t('heatTracking.logging.addEntry')}</span>
-                  <span className="sm:hidden">Add Entry</span>
+                    <Plus className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">{t('heatTracking.logging.addEntry')}</span>
+                    <span className="sm:hidden">{t('heatTracking.logging.addEntry')}</span>
                 </Button>
                 <Button 
                   variant="outline"
