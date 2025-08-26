@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { FormField, FormItem, FormControl, FormMessage } from '@/components/ui/form';
 import ImageUploader from '@/components/ImageUploader';
 import { UseFormReturn } from 'react-hook-form';
 import { DogFormValues } from './DogFormFields';
@@ -18,7 +18,6 @@ const DogImageField: React.FC<DogImageFieldProps> = ({ form, handleImageChange, 
       name="image"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Dog Photo</FormLabel>
           <FormControl>
             <div className="max-w-[200px] w-full">
               <ImageUploader 
