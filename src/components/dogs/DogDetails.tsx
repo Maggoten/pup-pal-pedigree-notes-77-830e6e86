@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, User, Calendar } from 'lucide-react';
+import { ArrowLeft, User, PawPrint } from 'lucide-react';
 import { Dog } from '@/types/dogs';
 import { useDogs } from '@/context/DogsContext';
 import { DogFormValues } from './DogFormFields';
@@ -203,8 +204,8 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
           </TabsTrigger>
           {dog.gender === 'female' && (
             <TabsTrigger value="heat-tracking" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              {t('tabs.heatTracking')}
+              <PawPrint className="h-4 w-4" />
+              {t('tabs.heat')}
             </TabsTrigger>
           )}
         </TabsList>
