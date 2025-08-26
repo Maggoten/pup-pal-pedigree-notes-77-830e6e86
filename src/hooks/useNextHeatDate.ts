@@ -1,18 +1,20 @@
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Dog } from '@/types/dogs';
 import { parseISO, addDays, isAfter } from 'date-fns';
+import { HeatService } from '@/services/HeatService';
 
 /**
  * Hook to calculate the next expected heat date for a female dog
+ * Uses unified heat data from both heat_cycles and heatHistory
  */
 export const useNextHeatDate = () => {
   /**
-   * Calculate the next expected heat date for a female dog
+   * Calculate the next expected heat date using legacy heat history
    * @param dog The female dog
    * @returns The next expected heat date or null if it can't be calculated
    */
-  const calculateNextHeatDate = useCallback((dog: Dog | null): Date | null => {
+  const calculateNextHeatDateLegacy = useCallback((dog: Dog | null): Date | null => {
     if (!dog || dog.gender !== 'female' || !dog.heatHistory?.length) {
       return null;
     }
@@ -40,6 +42,38 @@ export const useNextHeatDate = () => {
     
     return nextHeatDate;
   }, []);
+
+  /**
+   * Calculate the next expected heat date using unified data
+   * @param dogId The dog's ID
+   * @param heatInterval The dog's heat interval (defaults to 180 days)
+   * @returns The next expected heat date or null if it can't be calculated
+   */
+  const calculateNextHeatDateUnified = useCallback(async (dogId: string, heatInterval?: number): Promise<Date | null> => {
+    try {
+      const latestDate = await HeatService.getLatestHeatDate(dogId);
+      if (!latestDate) return null;
+
+      const today = new Date();
+      const intervalDays = heatInterval || 180;
+      
+      // Calculate next heat cycle
+      let nextHeatDate = addDays(latestDate, intervalDays);
+      
+      // If the next heat date is in the past, calculate the next one after today
+      while (!isAfter(nextHeatDate, today)) {
+        nextHeatDate = addDays(nextHeatDate, intervalDays);
+      }
+      
+      return nextHeatDate;
+    } catch (error) {
+      console.error('Error calculating unified next heat date:', error);
+      return null;
+    }
+  }, []);
   
-  return { calculateNextHeatDate };
+  return { 
+    calculateNextHeatDate: calculateNextHeatDateLegacy,
+    calculateNextHeatDateUnified 
+  };
 };
