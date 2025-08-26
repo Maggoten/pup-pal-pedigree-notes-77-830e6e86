@@ -260,7 +260,7 @@
   "tabs": {
     "overview": "Översikt",
     "heat": "Löp",
-    "heatTracking": "Löpspårning"
+    "heatTracking": "Uppföljning löp"
   },
   "heatTracking": {
     "title": "Löpcykler",
@@ -269,12 +269,12 @@
     "analytics": {
       "averageCycle": "Genomsnittlig Cykel",
       "lastHeat": "Senaste Löp",
-      "nextPredicted": "Nästa Förutsagda",
+      "nextPredicted": "Nästa beräknade löp",
       "basedOnHistory": "Baserat på historik",
       "needTwoCycles": "Behöver 2+ cykler",
       "daysAgo": "{{days}} dagar sedan",
       "never": "Aldrig",
-      "noRecords": "Inga register",
+      "noRecords": "Inga registrerade",
       "unknown": "Okänt",
       "noData": "Ingen data",
       "days": "{{days}} dagar"
@@ -284,7 +284,7 @@
       "startNew": "Starta Nytt Löp",
       "empty": {
         "title": "Inga löpcykler registrerade",
-        "description": "Börja spåra genom att lägga till den första löpcykeln"
+        "description": "Börja spåra genom att lägga till en löpcykel"
       },
       "badges": {
         "recent": "Nylig",
@@ -311,7 +311,7 @@
       "startDate": "Löpets Startdatum",
       "selectDate": "Välj startdatum",
       "notes": "Anteckningar (Valfritt)",
-      "notesPlaceholder": "Några första observationer eller anteckningar...",
+      "notesPlaceholder": "Observationer eller anteckningar...",
       "startCycle": "Starta Löpcykel",
       "validation": {
         "dateRequired": "Välj ett startdatum",
@@ -319,7 +319,7 @@
       },
       "success": {
         "created": "Löpcykel startad",
-        "createdDescription": "Löpcykel har registrerats framgångsrikt"
+        "createdDescription": "Löpcykel har registrerats"
       },
       "error": {
         "failed": "Misslyckades med att starta löpcykel",
@@ -327,7 +327,7 @@
       }
     },
     "logging": {
-      "title": "Lägg till Löploggpost",
+      "title": "Lägg till Löppost",
       "description": "Registrera dagliga observationer och temperatur",
       "date": "Datum",
       "selectDate": "Välj datum",
@@ -366,7 +366,7 @@
     },
     "deleteSuccess": {
       "title": "Löpcykel borttagen",
-      "description": "Löpcykeln och all associerad data har tagits bort framgångsrikt."
+      "description": "Löpcykeln och all associerad data har tagits bort."
     },
     "deleteError": {
       "title": "Borttagning misslyckades",
