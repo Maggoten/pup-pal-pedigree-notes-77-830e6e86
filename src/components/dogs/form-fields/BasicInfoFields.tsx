@@ -40,6 +40,25 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form, disabled }) => 
       
       <FormField
         control={form.control}
+        name="registeredName"
+        render={({ field }) => (
+          <FormItem className="flex flex-col">
+            <FormLabel>{t('form.fields.registeredName.label')}</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder={t('form.fields.registeredName.placeholder')} 
+                {...field} 
+                disabled={disabled} 
+                className="h-10"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
         name="breed"
         render={({ field }) => (
           <FormItem>
