@@ -1,0 +1,176 @@
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Thermometer, Plus, Eye, Calendar, Clock } from 'lucide-react';
+import { format, differenceInDays, parseISO } from 'date-fns';
+import { useTranslation } from 'react-i18next';
+import { HeatService } from '@/services/HeatService';
+import HeatLoggingDialog from './HeatLoggingDialog';
+import type { Database } from '@/integrations/supabase/types';
+
+type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
+type HeatLog = Database['public']['Tables']['heat_logs']['Row'];
+
+interface HeatCycleCardProps {
+  heatCycle: HeatCycle;
+  onUpdate: () => void;
+}
+
+const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) => {
+  const { t } = useTranslation('dogs');
+  const [heatLogs, setHeatLogs] = useState<HeatLog[]>([]);
+  const [showLoggingDialog, setShowLoggingDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const isActive = !heatCycle.end_date;
+  const startDate = parseISO(heatCycle.start_date);
+  const endDate = heatCycle.end_date ? parseISO(heatCycle.end_date) : null;
+  const daysFromStart = differenceInDays(new Date(), startDate);
+  const cycleDuration = endDate ? differenceInDays(endDate, startDate) : daysFromStart;
+
+  useEffect(() => {
+    loadHeatLogs();
+  }, [heatCycle.id]);
+
+  const loadHeatLogs = async () => {
+    setIsLoading(true);
+    try {
+      const logs = await HeatService.getHeatLogs(heatCycle.id);
+      setHeatLogs(logs);
+    } catch (error) {
+      console.error('Error loading heat logs:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoggingSuccess = () => {
+    loadHeatLogs();
+    onUpdate();
+  };
+
+  const getPhaseColor = (phase: string) => {
+    switch (phase) {
+      case 'proestrus': return 'bg-pink-100 text-pink-800';
+      case 'estrus': return 'bg-red-100 text-red-800';
+      case 'metestrus': return 'bg-orange-100 text-orange-800';
+      case 'anestrus': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const latestLog = heatLogs[0];
+
+  return (
+    <>
+      <Card className={`${isActive ? 'border-primary' : 'border-muted'}`}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <CardTitle className="text-lg">
+                {format(startDate, 'MMMM dd, yyyy')}
+              </CardTitle>
+              {isActive && (
+                <Badge variant="default" className="ml-2">
+                  {t('heatTracking.cycles.badges.active')}
+                </Badge>
+              )}
+            </div>
+            {isActive && (
+              <Button size="sm" onClick={() => setShowLoggingDialog(true)}>
+                <Plus className="h-4 w-4 mr-1" />
+                {t('heatTracking.logging.addEntry')}
+              </Button>
+            )}
+          </div>
+          <CardDescription className="flex items-center gap-4">
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {isActive 
+                ? t('heatTracking.cycles.daysSinceStart', { days: daysFromStart })
+                : t('heatTracking.cycles.duration', { days: cycleDuration })
+              }
+            </span>
+            {heatLogs.length > 0 && (
+              <span className="flex items-center gap-1">
+                <Thermometer className="h-3 w-3" />
+                {t('heatTracking.cycles.logEntries', { count: heatLogs.length })}
+              </span>
+            )}
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="space-y-4">
+          {heatCycle.notes && (
+            <div className="text-sm text-muted-foreground bg-muted p-2 rounded-md">
+              {heatCycle.notes}
+            </div>
+          )}
+
+          {latestLog && (
+            <div className="border rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium text-sm">{t('heatTracking.cycles.latestEntry')}</h4>
+                <span className="text-xs text-muted-foreground">
+                  {format(parseISO(latestLog.date), 'MMM dd')}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {latestLog.temperature && (
+                  <div className="flex items-center gap-1">
+                    <Thermometer className="h-3 w-3" />
+                    <span>{latestLog.temperature}°C</span>
+                  </div>
+                )}
+                {latestLog.phase && (
+                  <div>
+                    <Badge variant="secondary" className={`text-xs ${getPhaseColor(latestLog.phase)}`}>
+                      {t(`heatTracking.phases.${latestLog.phase}`)}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+              
+              {latestLog.observations && (
+                <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                  {latestLog.observations}
+                </p>
+              )}
+            </div>
+          )}
+
+          {heatLogs.length === 0 && !isLoading && (
+            <div className="text-center py-4 text-muted-foreground">
+              <Thermometer className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">{t('heatTracking.cycles.noLogs')}</p>
+              {isActive && (
+                <p className="text-xs mt-1">{t('heatTracking.cycles.startLogging')}</p>
+              )}
+            </div>
+          )}
+
+          {heatLogs.length > 1 && (
+            <div className="flex justify-center">
+              <Button variant="ghost" size="sm" className="text-xs">
+                <Eye className="h-3 w-3 mr-1" />
+                {t('heatTracking.cycles.viewAllLogs', { count: heatLogs.length })}
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <HeatLoggingDialog
+        open={showLoggingDialog}
+        onOpenChange={setShowLoggingDialog}
+        heatCycle={heatCycle}
+        onSuccess={handleLoggingSuccess}
+      />
+    </>
+  );
+};
+
+export default HeatCycleCard;

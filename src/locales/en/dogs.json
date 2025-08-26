@@ -288,15 +288,84 @@
       },
       "badges": {
         "recent": "Recent",
-        "latest": "Latest"
+        "latest": "Latest",
+        "active": "Active"
+      },
+      "daysSinceStart": "Day {{days}} of cycle",
+      "duration": "{{days}} day cycle",
+      "logEntries": "{{count}} log entries",
+      "latestEntry": "Latest Entry",
+      "noLogs": "No temperature logs yet",
+      "startLogging": "Add your first temperature reading",
+      "viewAllLogs": "View all {{count}} logs"
+    },
+    "newSystem": {
+      "title": "Detailed Heat Tracking"
+    },
+    "legacySystem": {
+      "title": "Previous Heat Records"
+    },
+    "dialog": {
+      "title": "Start New Heat Cycle",
+      "description": "Record the start of {{dogName}}'s heat cycle",
+      "startDate": "Heat Start Date",
+      "selectDate": "Select start date",
+      "notes": "Notes (Optional)",
+      "notesPlaceholder": "Any initial observations or notes...",
+      "startCycle": "Start Heat Cycle",
+      "validation": {
+        "dateRequired": "Please select a start date",
+        "futureDate": "Start date cannot be in the future"
+      },
+      "success": {
+        "created": "Heat cycle started",
+        "createdDescription": "Heat cycle has been recorded successfully"
+      },
+      "error": {
+        "failed": "Failed to start heat cycle",
+        "failedDescription": "Please try again or contact support"
       }
+    },
+    "logging": {
+      "title": "Add Heat Log Entry",
+      "description": "Record daily observations and temperature",
+      "date": "Date",
+      "selectDate": "Select date",
+      "temperature": "Temperature",
+      "phase": "Heat Phase",
+      "selectPhase": "Select phase",
+      "observations": "Observations",
+      "observationsPlaceholder": "Behavior, physical changes, discharge, etc.",
+      "notes": "Additional Notes",
+      "notesPlaceholder": "Any additional notes...",
+      "addEntry": "Add Entry",
+      "validation": {
+        "dateRequired": "Please select a date",
+        "futureDate": "Date cannot be in the future",
+        "beforeCycleStart": "Date cannot be before heat cycle start",
+        "invalidTemperature": "Temperature must be between 35°C and 45°C"
+      },
+      "success": {
+        "added": "Log entry added",
+        "addedDescription": "Heat log entry has been recorded successfully"
+      },
+      "error": {
+        "failed": "Failed to add log entry",
+        "failedDescription": "Please try again or contact support"
+      }
+    },
+    "phases": {
+      "proestrus": "Proestrus",
+      "estrus": "Estrus",
+      "metestrus": "Metestrus",
+      "anestrus": "Anestrus"
     },
     "comingSoon": {
       "title": "Coming Soon",
       "features": {
-        "detailedLogging": "Detailed heat cycle logging (temperature, symptoms, notes)",
-        "temperatureCharts": "Temperature charts and breeding windows",
-        "enhancedPredictions": "Enhanced predictions and cycle analysis"
+        "detailedLogging": "Enhanced analytics and charts",
+        "temperatureCharts": "Temperature trend analysis",
+        "enhancedPredictions": "AI-powered heat predictions"
       }
     }
   },

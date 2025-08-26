@@ -288,15 +288,84 @@
       },
       "badges": {
         "recent": "Nylig",
-        "latest": "Senaste"
+        "latest": "Senaste",
+        "active": "Aktiv"
+      },
+      "daysSinceStart": "Dag {{days}} av cykel",
+      "duration": "{{days}} dagars cykel",
+      "logEntries": "{{count}} loggposter",
+      "latestEntry": "Senaste Post",
+      "noLogs": "Inga temperaturloggar än",
+      "startLogging": "Lägg till din första temperaturavläsning",
+      "viewAllLogs": "Visa alla {{count}} loggar"
+    },
+    "newSystem": {
+      "title": "Detaljerad Löpspårning"
+    },
+    "legacySystem": {
+      "title": "Tidigare Löpregister"
+    },
+    "dialog": {
+      "title": "Starta Ny Löpcykel",
+      "description": "Registrera början av {{dogName}}s löpcykel",
+      "startDate": "Löpets Startdatum",
+      "selectDate": "Välj startdatum",
+      "notes": "Anteckningar (Valfritt)",
+      "notesPlaceholder": "Några första observationer eller anteckningar...",
+      "startCycle": "Starta Löpcykel",
+      "validation": {
+        "dateRequired": "Välj ett startdatum",
+        "futureDate": "Startdatum kan inte vara i framtiden"
+      },
+      "success": {
+        "created": "Löpcykel startad",
+        "createdDescription": "Löpcykel har registrerats framgångsrikt"
+      },
+      "error": {
+        "failed": "Misslyckades med att starta löpcykel",
+        "failedDescription": "Försök igen eller kontakta support"
       }
+    },
+    "logging": {
+      "title": "Lägg till Löploggpost",
+      "description": "Registrera dagliga observationer och temperatur",
+      "date": "Datum",
+      "selectDate": "Välj datum",
+      "temperature": "Temperatur",
+      "phase": "Löpfas",
+      "selectPhase": "Välj fas",
+      "observations": "Observationer",
+      "observationsPlaceholder": "Beteende, fysiska förändringar, flytningar, etc.",
+      "notes": "Ytterligare Anteckningar",
+      "notesPlaceholder": "Några ytterligare anteckningar...",
+      "addEntry": "Lägg till Post",
+      "validation": {
+        "dateRequired": "Välj ett datum",
+        "futureDate": "Datum kan inte vara i framtiden",
+        "beforeCycleStart": "Datum kan inte vara före löpcykelns start",
+        "invalidTemperature": "Temperatur måste vara mellan 35°C och 45°C"
+      },
+      "success": {
+        "added": "Loggpost tillagd",
+        "addedDescription": "Löploggpost har registrerats framgångsrikt"
+      },
+      "error": {
+        "failed": "Misslyckades med att lägga till loggpost",
+        "failedDescription": "Försök igen eller kontakta support"
+      }
+    },
+    "phases": {
+      "proestrus": "Proöstrus",
+      "estrus": "Östrus",
+      "metestrus": "Metöstrus",
+      "anestrus": "Anöstrus"
     },
     "comingSoon": {
       "title": "Kommer Snart",
       "features": {
-        "detailedLogging": "Detaljerad löpcykelregistrering (temperatur, symtom, anteckningar)",
-        "temperatureCharts": "Temperaturdiagram och avelsfönster",
-        "enhancedPredictions": "Förbättrade förutsägelser och cykelanalys"
+        "detailedLogging": "Förbättrad analys och diagram",
+        "temperatureCharts": "Temperaturtrend-analys",
+        "enhancedPredictions": "AI-drivna löpförutsägelser"
       }
     }
   },

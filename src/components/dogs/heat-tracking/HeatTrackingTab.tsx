@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Plus, TrendingUp } from 'lucide-react';
+import { Calendar, Plus, TrendingUp, Thermometer } from 'lucide-react';
 import { Dog } from '@/types/dogs';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import { HeatService } from '@/services/HeatService';
+import StartHeatCycleDialog from './StartHeatCycleDialog';
+import HeatCycleCard from './HeatCycleCard';
+import type { Database } from '@/integrations/supabase/types';
+
+type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 
 interface HeatTrackingTabProps {
   dog: Dog;
@@ -14,6 +20,29 @@ interface HeatTrackingTabProps {
 const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
   const { t } = useTranslation('dogs');
   const heatHistory = dog.heatHistory || [];
+  const [heatCycles, setHeatCycles] = useState<HeatCycle[]>([]);
+  const [showStartDialog, setShowStartDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadHeatCycles();
+  }, [dog.id]);
+
+  const loadHeatCycles = async () => {
+    setIsLoading(true);
+    try {
+      const cycles = await HeatService.getHeatCycles(dog.id);
+      setHeatCycles(cycles);
+    } catch (error) {
+      console.error('Error loading heat cycles:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStartCycleSuccess = () => {
+    loadHeatCycles();
+  };
   
   // Calculate basic analytics
   const getAverageCycleLength = () => {
@@ -130,20 +159,45 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
                 }
               </CardDescription>
             </div>
-            <Button size="sm" className="flex items-center gap-2">
+            <Button size="sm" className="flex items-center gap-2" onClick={() => setShowStartDialog(true)}>
               <Plus className="h-4 w-4" />
               {t('heatTracking.cycles.startNew')}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
-          {heatHistory.length === 0 ? (
+          {/* New Heat Cycles Section */}
+          {heatCycles.length > 0 && (
+            <div className="space-y-4 mb-6">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Thermometer className="h-4 w-4" />
+                {t('heatTracking.newSystem.title')}
+              </div>
+              <div className="space-y-3">
+                {heatCycles.map((cycle) => (
+                  <HeatCycleCard key={cycle.id} heatCycle={cycle} onUpdate={loadHeatCycles} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Legacy Heat History Section */}
+          {heatHistory.length > 0 && heatCycles.length > 0 && (
+            <div className="border-t pt-4 mb-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
+                <Calendar className="h-4 w-4" />
+                {t('heatTracking.legacySystem.title')}
+              </div>
+            </div>
+          )}
+
+          {(heatHistory.length === 0 && heatCycles.length === 0) ? (
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">{t('heatTracking.cycles.empty.title')}</p>
               <p className="text-sm">{t('heatTracking.cycles.empty.description')}</p>
             </div>
-          ) : (
+          ) : heatHistory.length > 0 ? (
             <div className="space-y-3">
               {heatHistory
                 .filter(heat => heat.date)
@@ -184,7 +238,7 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
                   );
                 })}
             </div>
-          )}
+          ) : null}
         </CardContent>
       </Card>
 
@@ -204,6 +258,13 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
           </div>
         </CardContent>
       </Card>
+
+      <StartHeatCycleDialog
+        open={showStartDialog}
+        onOpenChange={setShowStartDialog}
+        dog={dog}
+        onSuccess={handleStartCycleSuccess}
+      />
     </div>
   );
 };
