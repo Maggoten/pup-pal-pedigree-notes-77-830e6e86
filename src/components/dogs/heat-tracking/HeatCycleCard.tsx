@@ -111,41 +111,40 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                   {t('heatTracking.cycles.badges.active')}
                 </Badge>
               )}
-            </div>
-            
-            {/* Mobile-friendly button layout */}
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              {isActive && (
-                <div className="flex gap-2">
-                  <Button 
-                    className="flex-1 sm:flex-none touch-manipulation"
-                    onClick={() => setShowLoggingDialog(true)}
-                  >
-                    <Plus className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">{t('heatTracking.logging.addEntry')}</span>
-                    <span className="sm:hidden">Add Entry</span>
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="flex-1 sm:flex-none touch-manipulation"
-                    onClick={() => setShowEndDialog(true)}
-                  >
-                    <StopCircle className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">End Cycle</span>
-                    <span className="sm:hidden">End</span>
-                  </Button>
-                </div>
-              )}
+              {/* Delete button moved here for better UX */}
               <Button 
-                variant="outline"
+                variant="ghost"
                 size="icon"
-                className="self-end sm:self-auto touch-manipulation"
+                className="ml-auto sm:ml-2 h-8 w-8 touch-manipulation text-muted-foreground hover:text-destructive"
                 onClick={() => setShowDeleteDialog(true)}
                 disabled={isDeleting}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3 w-3" />
               </Button>
             </div>
+            
+            {/* Action buttons - separated from delete for safety */}
+            {isActive && (
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button 
+                  className="flex-1 sm:flex-none touch-manipulation"
+                  onClick={() => setShowLoggingDialog(true)}
+                >
+                  <Plus className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">{t('heatTracking.logging.addEntry')}</span>
+                  <span className="sm:hidden">Add Entry</span>
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="flex-1 sm:flex-none touch-manipulation"
+                  onClick={() => setShowEndDialog(true)}
+                >
+                  <StopCircle className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">End Cycle</span>
+                  <span className="sm:hidden">End</span>
+                </Button>
+              </div>
+            )}
           </div>
           <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm">
             <span className="flex items-center gap-1">
