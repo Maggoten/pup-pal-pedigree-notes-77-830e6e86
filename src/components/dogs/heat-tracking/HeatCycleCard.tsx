@@ -98,40 +98,48 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
 
   return (
     <>
-      <Card className={`${isActive ? 'border-primary' : 'border-muted'}`}>
+      <Card className={`${isActive ? 'border-primary shadow-sm' : 'border-muted'} transition-shadow hover:shadow-md`}>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-2 flex-wrap">
               <Calendar className="h-4 w-4" />
-              <CardTitle className="text-lg">
+              <CardTitle className="text-base sm:text-lg">
                 {format(startDate, 'MMMM dd, yyyy')}
               </CardTitle>
               {isActive && (
-                <Badge variant="default" className="ml-2">
+                <Badge variant="default" className="text-xs">
                   {t('heatTracking.cycles.badges.active')}
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            
+            {/* Mobile-friendly button layout */}
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               {isActive && (
-                <>
-                  <Button size="sm" onClick={() => setShowLoggingDialog(true)}>
-                    <Plus className="h-4 w-4 mr-1" />
-                    {t('heatTracking.logging.addEntry')}
+                <div className="flex gap-2">
+                  <Button 
+                    className="flex-1 sm:flex-none touch-manipulation"
+                    onClick={() => setShowLoggingDialog(true)}
+                  >
+                    <Plus className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">{t('heatTracking.logging.addEntry')}</span>
+                    <span className="sm:hidden">Add Entry</span>
                   </Button>
                   <Button 
-                    size="sm" 
                     variant="outline"
+                    className="flex-1 sm:flex-none touch-manipulation"
                     onClick={() => setShowEndDialog(true)}
                   >
-                    <StopCircle className="h-4 w-4 mr-1" />
-                    End Cycle
+                    <StopCircle className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">End Cycle</span>
+                    <span className="sm:hidden">End</span>
                   </Button>
-                </>
+                </div>
               )}
               <Button 
-                size="sm" 
                 variant="outline"
+                size="icon"
+                className="self-end sm:self-auto touch-manipulation"
                 onClick={() => setShowDeleteDialog(true)}
                 disabled={isDeleting}
               >
@@ -139,7 +147,7 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
               </Button>
             </div>
           </div>
-          <CardDescription className="flex items-center gap-4">
+          <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm">
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {isActive 
@@ -164,23 +172,23 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
           )}
 
           {latestLog && (
-            <div className="border rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
+            <div className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
                 <h4 className="font-medium text-sm">{t('heatTracking.cycles.latestEntry')}</h4>
                 <span className="text-xs text-muted-foreground">
                   {format(parseISO(latestLog.date), 'MMM dd')}
                 </span>
               </div>
               
-              <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3 text-sm">
                 {latestLog.temperature && (
-                  <div className="flex items-center gap-1">
-                    <Thermometer className="h-3 w-3" />
-                    <span>{latestLog.temperature}°C</span>
+                  <div className="flex items-center gap-2">
+                    <Thermometer className="h-4 w-4" />
+                    <span className="font-medium">{latestLog.temperature}°C</span>
                   </div>
                 )}
                 {latestLog.phase && (
-                  <div>
+                  <div className="flex items-center">
                     <Badge variant="secondary" className={`text-xs ${getPhaseColor(latestLog.phase)}`}>
                       {t(`heatTracking.phases.${latestLog.phase}`)}
                     </Badge>
@@ -189,7 +197,7 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
               </div>
               
               {latestLog.observations && (
-                <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                <p className="text-sm text-muted-foreground mt-3 p-2 bg-muted/50 rounded line-clamp-2">
                   {latestLog.observations}
                 </p>
               )}
@@ -197,24 +205,23 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
           )}
 
           {heatLogs.length === 0 && !isLoading && (
-            <div className="text-center py-4 text-muted-foreground">
-              <Thermometer className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">{t('heatTracking.cycles.noLogs')}</p>
+            <div className="text-center py-6 text-muted-foreground">
+              <Thermometer className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p className="text-sm font-medium">{t('heatTracking.cycles.noLogs')}</p>
               {isActive && (
-                <p className="text-xs mt-1">{t('heatTracking.cycles.startLogging')}</p>
+                <p className="text-xs mt-2 text-muted-foreground/80">{t('heatTracking.cycles.startLogging')}</p>
               )}
             </div>
           )}
 
           {heatLogs.length > 1 && (
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-2">
               <Button 
                 variant="ghost" 
-                size="sm" 
-                className="text-xs"
+                className="text-sm touch-manipulation"
                 onClick={() => setShowLogsDialog(true)}
               >
-                <Eye className="h-3 w-3 mr-1" />
+                <Eye className="h-4 w-4 mr-2" />
                 {t('heatTracking.cycles.viewAllLogs', { count: heatLogs.length })}
               </Button>
             </div>
