@@ -281,7 +281,7 @@
     },
     "cycles": {
       "title": "Löpcykler",
-      "newHeat": "Nytt Löp",
+      "newHeat": "+ Nytt Löp",
       "empty": {
         "title": "Inga löpcykler registrerade",
         "description": "Börja spåra genom att lägga till en löpcykel"
