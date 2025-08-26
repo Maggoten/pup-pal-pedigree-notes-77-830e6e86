@@ -227,7 +227,7 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                 disabled={isDeleting}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete Heat Cycle
+                {t('heatTracking.cycles.deleteButton')}
               </Button>
             </div>
           )}
