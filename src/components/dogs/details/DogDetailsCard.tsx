@@ -6,6 +6,7 @@ import DogInfoDisplay from '../DogInfoDisplay';
 import DogEditForm from '../DogEditForm';
 import { DogFormValues } from '../DogFormFields';
 import DogActions from '../actions/DogActions';
+import { useTranslation } from 'react-i18next';
 
 interface DogDetailsCardProps {
   dog: Dog;
@@ -30,6 +31,8 @@ const DogDetailsCard: React.FC<DogDetailsCardProps> = ({
   onDelete,
   onEdit,
 }) => {
+  const { t } = useTranslation('dogs');
+  
   const handleFormSave = () => {
     // Trigger form submission
     const form = document.querySelector('form');
@@ -43,10 +46,10 @@ const DogDetailsCard: React.FC<DogDetailsCardProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <DogIcon className="h-5 w-5" />
-          {isEditing ? 'Edit Dog' : dog.name}
+          {isEditing ? t('form.title.edit') : dog.name}
         </CardTitle>
         <CardDescription>
-          {isEditing ? 'Update dog information' : `${dog.breed} • ${dog.gender === 'male' ? 'Male' : 'Female'}`}
+          {isEditing ? t('form.description.edit') : `${dog.breed} • ${dog.gender === 'male' ? 'Male' : 'Female'}`}
         </CardDescription>
       </CardHeader>
       
