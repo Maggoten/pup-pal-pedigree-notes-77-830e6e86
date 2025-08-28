@@ -376,12 +376,15 @@ export class ReminderCalendarSyncService {
    * @returns A boolean indicating whether the operation was successful
    */
   static async syncDueDateEvents(): Promise<boolean> {
+    const startTime = Date.now();
+    console.log('[ReminderCalendarSyncService] Starting syncDueDateEvents...');
+    
     try {
       // Get current user ID
       const { data: authData, error: authError } = await supabase.auth.getUser();
       
       if (authError || !authData.user) {
-        console.error('Error getting user for due date calendar events:', authError);
+        console.error('[ReminderCalendarSyncService] Error getting user for due date calendar events:', authError);
         return false;
       }
       
@@ -391,7 +394,7 @@ export class ReminderCalendarSyncService {
       const activePregnancies = await getActivePregnancies();
       
       if (!activePregnancies || activePregnancies.length === 0) {
-        console.log('No active pregnancies found for due date events');
+        console.log('[ReminderCalendarSyncService] No active pregnancies found for due date events');
         return true;
       }
 
@@ -403,7 +406,7 @@ export class ReminderCalendarSyncService {
         .eq('type', 'due-date');
 
       if (cleanupError) {
-        console.error('Error cleaning up existing due-date events:', cleanupError);
+        console.error('[ReminderCalendarSyncService] Error cleaning up existing due-date events:', cleanupError);
         return false;
       }
 
@@ -428,7 +431,7 @@ export class ReminderCalendarSyncService {
           .insert(eventData);
 
         if (insertError) {
-          console.error('Error creating due date calendar event:', insertError);
+          console.error('[ReminderCalendarSyncService] Error creating due date calendar event:', insertError);
           return false;
         }
       }
