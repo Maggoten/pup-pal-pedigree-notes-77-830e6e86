@@ -5,6 +5,7 @@ import { UpcomingHeat } from '@/types/reminders';
 import { addDays, format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { CalendarEvent } from '@/types/calendar';
+import { getActivePregnancies } from '@/services/PregnancyService';
 import i18n from '@/i18n';
 
 /**
@@ -360,9 +361,79 @@ export class ReminderCalendarSyncService {
         }
       }
       
+      // Sync due date events for active pregnancies
+      await this.syncDueDateEvents();
+      
       return true;
     } catch (error) {
       console.error('Error in bulkSyncCalendarEvents:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Creates calendar events for due dates from active pregnancies with cleanup
+   * @returns A boolean indicating whether the operation was successful
+   */
+  static async syncDueDateEvents(): Promise<boolean> {
+    try {
+      // Get current user ID
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !authData.user) {
+        console.error('Error getting user for due date calendar events:', authError);
+        return false;
+      }
+      
+      const userId = authData.user.id;
+
+      // Get active pregnancies
+      const activePregnancies = await getActivePregnancies();
+      
+      if (!activePregnancies || activePregnancies.length === 0) {
+        console.log('No active pregnancies found for due date events');
+        return true;
+      }
+
+      // Clean up existing due-date events to prevent duplicates
+      const { error: cleanupError } = await supabase
+        .from('calendar_events')
+        .delete()
+        .eq('user_id', userId)
+        .eq('type', 'due-date');
+
+      if (cleanupError) {
+        console.error('Error cleaning up existing due-date events:', cleanupError);
+        return false;
+      }
+
+      // Create due date events for each active pregnancy
+      for (const pregnancy of activePregnancies) {
+        const eventData = {
+          title: `Förlossning - ${pregnancy.femaleName}`,
+          date: pregnancy.expectedDueDate instanceof Date ? 
+            pregnancy.expectedDueDate.toISOString() : 
+            new Date(pregnancy.expectedDueDate).toISOString(),
+          type: 'due-date',
+          dog_name: pregnancy.femaleName,
+          notes: `Förväntad förlossningsdag för ${pregnancy.femaleName} (parad med ${pregnancy.maleName})`,
+          user_id: userId
+        };
+
+        const { error: insertError } = await supabase
+          .from('calendar_events')
+          .insert(eventData);
+
+        if (insertError) {
+          console.error('Error creating due date calendar event:', insertError);
+          return false;
+        }
+      }
+
+      console.log(`Successfully synced ${activePregnancies.length} due date events`);
+      return true;
+    } catch (error) {
+      console.error('Unexpected error in syncDueDateEvents:', error);
       return false;
     }
   }

@@ -11,7 +11,7 @@ const eventTypeColors = {
   'ovulation-predicted': 'bg-purple-200 text-purple-900 border-purple-400 shadow-purple-200/50 shadow-lg', // Predicted ovulation
   'fertility-window': 'bg-violet-150 text-violet-900 border-violet-350 shadow-violet-200/40 shadow-md', // Optimal breeding days
   'mating': 'bg-violet-100 text-violet-800 border-violet-200',
-  'due-date': 'bg-amber-100 text-amber-800 border-amber-200',
+  'due-date': 'bg-warmgreen-100 text-warmgreen-800 border-warmgreen-200',
   'vaccination': 'bg-warmgreen-100 text-warmgreen-800 border-warmgreen-200',
   'deworming': 'bg-teal-100 text-teal-800 border-teal-200',
   'birthday': 'bg-blue-100 text-blue-800 border-blue-200',
