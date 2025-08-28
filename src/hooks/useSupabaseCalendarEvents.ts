@@ -31,14 +31,8 @@ const useSupabaseCalendarEvents = () => {
     try {
       console.log('[Calendar] Fetching calendar events from Supabase');
       
-      // Auto-sync due date events when calendar loads
-      try {
-        await ReminderCalendarSyncService.syncDueDateEvents();
-        console.log('[Calendar] Due date events synced on calendar load');
-      } catch (syncError) {
-        console.error('[Calendar] Error auto-syncing due date events:', syncError);
-        // Don't block calendar loading if sync fails
-      }
+      // Note: Due date events are synced via manual "Sync Calendar" button or bulk sync
+      // to prevent duplicates from multiple automatic sync calls
       
       const fetchedEvents = await fetchCalendarEvents();
       console.log(`[Calendar] Fetched ${fetchedEvents.length} events from Supabase`);
