@@ -24,6 +24,7 @@ export type Database = {
           heat_phase: string | null
           id: string
           notes: string | null
+          pregnancy_id: string | null
           status: string | null
           time: string | null
           title: string
@@ -40,6 +41,7 @@ export type Database = {
           heat_phase?: string | null
           id?: string
           notes?: string | null
+          pregnancy_id?: string | null
           status?: string | null
           time?: string | null
           title: string
@@ -56,6 +58,7 @@ export type Database = {
           heat_phase?: string | null
           id?: string
           notes?: string | null
+          pregnancy_id?: string | null
           status?: string | null
           time?: string | null
           title?: string
@@ -63,7 +66,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_pregnancy_id_fkey"
+            columns: ["pregnancy_id"]
+            isOneToOne: false
+            referencedRelation: "pregnancies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       development_checklist_items: {
         Row: {

@@ -372,6 +372,33 @@ export class ReminderCalendarSyncService {
   }
 
   /**
+   * Clean up calendar events for a specific pregnancy
+   * @param pregnancyId The ID of the pregnancy for which to clean up events
+   * @returns A boolean indicating whether the operation was successful
+   */
+  static async cleanupCalendarEventsForPregnancy(pregnancyId: string): Promise<boolean> {
+    try {
+      console.log(`[ReminderCalendarSyncService] Cleaning up calendar events for pregnancy ID: ${pregnancyId}`);
+      
+      const { error } = await supabase
+        .from('calendar_events')
+        .delete()
+        .eq('pregnancy_id', pregnancyId);
+
+      if (error) {
+        console.error('[ReminderCalendarSyncService] Error cleaning up calendar events for pregnancy:', error);
+        return false;
+      }
+
+      console.log(`[ReminderCalendarSyncService] Successfully cleaned up calendar events for pregnancy ID ${pregnancyId}`);
+      return true;
+    } catch (error) {
+      console.error('[ReminderCalendarSyncService] Unexpected error in cleanupCalendarEventsForPregnancy:', error);
+      return false;
+    }
+  }
+
+  /**
    * Creates calendar events for due dates from active pregnancies with cleanup
    * @returns A boolean indicating whether the operation was successful
    */
@@ -419,6 +446,7 @@ export class ReminderCalendarSyncService {
             new Date(pregnancy.expectedDueDate).toISOString(),
           type: 'due-date',
           dog_name: pregnancy.femaleName,
+          pregnancy_id: pregnancy.id, // Link calendar event to pregnancy
           notes: this.t('events.dueDate.description', { 
             femaleName: pregnancy.femaleName, 
             maleName: pregnancy.maleName 

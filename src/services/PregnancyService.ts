@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { parseISO, addDays, differenceInDays } from 'date-fns';
+import { ReminderCalendarSyncService } from './ReminderCalendarSyncService';
 
 export interface PregnancyDetails {
   id: string;
@@ -51,6 +52,16 @@ export const createPregnancy = async (params: CreatePregnancyParams): Promise<st
     }
     
     console.log("Successfully created pregnancy:", pregnancy);
+    
+    // Automatically sync due date events for the new pregnancy
+    try {
+      await ReminderCalendarSyncService.syncDueDateEvents();
+      console.log("Successfully synced due date events for new pregnancy");
+    } catch (syncError) {
+      console.error("Error syncing due date events for new pregnancy:", syncError);
+      // Don't throw error here - pregnancy creation was successful
+    }
+    
     return pregnancy.id;
     
   } catch (err) {
@@ -421,6 +432,15 @@ export const deletePregnancy = async (pregnancyId: string): Promise<boolean> => 
     }
 
     console.log(`Deleting pregnancy with ID: ${pregnancyId}`);
+    
+    // Clean up related calendar events before deleting the pregnancy
+    try {
+      await ReminderCalendarSyncService.cleanupCalendarEventsForPregnancy(pregnancyId);
+      console.log("Successfully cleaned up calendar events for pregnancy");
+    } catch (cleanupError) {
+      console.error("Error cleaning up calendar events for pregnancy:", cleanupError);
+      // Continue with deletion even if cleanup fails
+    }
     
     const { error } = await supabase
       .from('pregnancies')
