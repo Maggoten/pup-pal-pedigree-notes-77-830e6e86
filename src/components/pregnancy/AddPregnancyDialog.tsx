@@ -86,14 +86,8 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
         expectedDueDate
       });
       
-      // Automatically sync due date events after creating pregnancy
-      try {
-        await ReminderCalendarSyncService.syncDueDateEvents();
-        console.log('Due date calendar event created successfully');
-      } catch (syncError) {
-        console.error('Error syncing due date event:', syncError);
-        // Don't block the pregnancy creation if calendar sync fails
-      }
+      // Calendar events will be automatically synced by useSupabaseCalendarEvents
+      console.log('Pregnancy created successfully, calendar will auto-sync');
       
       toast({
         title: t('toasts.success.pregnancyAdded'),

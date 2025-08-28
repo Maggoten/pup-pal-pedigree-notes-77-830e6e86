@@ -433,10 +433,12 @@ export class ReminderCalendarSyncService {
         }
       }
 
-      console.log(`Successfully synced ${activePregnancies.length} due date events`);
+      const elapsed = Date.now() - startTime;
+      console.log(`[ReminderCalendarSyncService] Successfully synced ${activePregnancies.length} due date events in ${elapsed}ms`);
       return true;
     } catch (error) {
-      console.error('Unexpected error in syncDueDateEvents:', error);
+      const elapsed = Date.now() - startTime;
+      console.error(`[ReminderCalendarSyncService] Unexpected error in syncDueDateEvents after ${elapsed}ms:`, error);
       return false;
     }
   }
