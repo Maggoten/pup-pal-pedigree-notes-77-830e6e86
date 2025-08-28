@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { addDays } from 'date-fns';
 import { createPregnancy } from '@/services/PregnancyService';
+import { ReminderCalendarSyncService } from '@/services/ReminderCalendarSyncService';
 import { useTranslation } from 'react-i18next';
 
 interface AddPregnancyDialogProps {
@@ -84,6 +85,15 @@ const AddPregnancyDialog: React.FC<AddPregnancyDialogProps> = ({
         matingDate,
         expectedDueDate
       });
+      
+      // Automatically sync due date events after creating pregnancy
+      try {
+        await ReminderCalendarSyncService.syncDueDateEvents();
+        console.log('Due date calendar event created successfully');
+      } catch (syncError) {
+        console.error('Error syncing due date event:', syncError);
+        // Don't block the pregnancy creation if calendar sync fails
+      }
       
       toast({
         title: t('toasts.success.pregnancyAdded'),
