@@ -226,6 +226,10 @@
       "expected": "Expected heat cycle in {{days}} days",
       "expectedSingle": "Heat expected in {{days}} day",
       "expectedPlural": "Heat expected in {{days}} days"
+    },
+    "dueDate": {
+      "title": "Due Date - {{femaleName}}",
+      "description": "Expected delivery date for {{femaleName}} (mated with {{maleName}})"
     }
   },
   "reminders": {

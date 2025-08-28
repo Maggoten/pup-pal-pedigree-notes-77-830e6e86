@@ -410,13 +410,16 @@ export class ReminderCalendarSyncService {
       // Create due date events for each active pregnancy
       for (const pregnancy of activePregnancies) {
         const eventData = {
-          title: `Förlossning - ${pregnancy.femaleName}`,
+          title: this.t('events.dueDate.title', { femaleName: pregnancy.femaleName }),
           date: pregnancy.expectedDueDate instanceof Date ? 
             pregnancy.expectedDueDate.toISOString() : 
             new Date(pregnancy.expectedDueDate).toISOString(),
           type: 'due-date',
           dog_name: pregnancy.femaleName,
-          notes: `Förväntad förlossningsdag för ${pregnancy.femaleName} (parad med ${pregnancy.maleName})`,
+          notes: this.t('events.dueDate.description', { 
+            femaleName: pregnancy.femaleName, 
+            maleName: pregnancy.maleName 
+          }),
           user_id: userId
         };
 

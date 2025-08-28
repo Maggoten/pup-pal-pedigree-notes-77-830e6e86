@@ -226,6 +226,10 @@
       "expected": "Förväntad löptid om {{days}} dagar",
       "expectedSingle": "Löptid förväntad om {{days}} dag",
       "expectedPlural": "Löptid förväntad om {{days}} dagar"
+    },
+    "dueDate": {
+      "title": "Förlossning - {{femaleName}}",
+      "description": "Förväntad förlossningsdag för {{femaleName}} (parad med {{maleName}})"
     }
   },
   "reminders": {
