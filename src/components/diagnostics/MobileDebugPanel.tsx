@@ -59,12 +59,35 @@ const useSafeDogs = () => {
   }
 };
 
+// Safe hook wrapper for breeding reminders to handle context not being ready
+const useSafeBreedingReminders = () => {
+  const { isAuthReady, isLoggedIn } = useAuth();
+  
+  try {
+    if (!isAuthReady || !isLoggedIn) {
+      return {
+        reminders: [],
+        isLoading: false,
+        refreshReminderData: async () => {}
+      };
+    }
+    return useBreedingReminders();
+  } catch (error) {
+    console.warn('[MobileDebugPanel] BreedingReminders context not ready:', error);
+    return {
+      reminders: [],
+      isLoading: false,
+      refreshReminderData: async () => {}
+    };
+  }
+};
+
 const MobileDebugPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const { user, session, isAuthReady } = useAuth();
   const { dogs, loading: dogsLoading, refreshDogs } = useSafeDogs();
-  const { reminders, isLoading: remindersLoading, refreshReminderData } = useBreedingReminders();
+  const { reminders, isLoading: remindersLoading, refreshReminderData } = useSafeBreedingReminders();
   const [deviceInfo, setDeviceInfo] = useState('');
   const [networkType, setNetworkType] = useState('');
   const [refreshing, setRefreshing] = useState(false);
