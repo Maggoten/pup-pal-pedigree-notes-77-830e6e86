@@ -89,63 +89,55 @@ const initialState: DebugState = {
   compatibilityIssues: []
 };
 
-// Safe data hooks that always return values
+// Safe data hooks that always return values - hooks must be called unconditionally
 const useSafeDogsData = () => {
   const { isAuthReady, isLoggedIn } = useAuth();
   
-  // Always call the hook, but handle the case where context isn't ready
-  let dogsData = { 
-    dogs: [] as any[], 
-    loading: false, 
-    refreshDogs: async () => { return []; } 
-  };
+  // Always call the hook - this is safe now that we're inside DogsProvider
+  const contextData = useDogs();
   
-  try {
-    if (isAuthReady && isLoggedIn) {
-      const contextData = useDogs();
-      dogsData = {
-        dogs: contextData.dogs || [],
-        loading: contextData.loading || false,
-        refreshDogs: async () => { 
-          await contextData.refreshDogs?.(); 
-          return contextData.dogs || [];
-        }
-      };
-    }
-  } catch (error) {
-    console.warn('[MobileDebugPanel] Dogs context not ready:', error);
+  // Return safe defaults if not ready
+  if (!isAuthReady || !isLoggedIn) {
+    return { 
+      dogs: [] as any[], 
+      loading: false, 
+      refreshDogs: async () => { return []; } 
+    };
   }
   
-  return dogsData;
+  return {
+    dogs: contextData.dogs || [],
+    loading: contextData.loading || false,
+    refreshDogs: async () => { 
+      await contextData.refreshDogs?.(); 
+      return contextData.dogs || [];
+    }
+  };
 };
 
 const useSafeRemindersData = () => {
   const { isAuthReady, isLoggedIn } = useAuth();
   
-  // Always call the hook, but handle the case where context isn't ready
-  let remindersData = { 
-    reminders: [] as any[], 
-    isLoading: false, 
-    refreshReminderData: async () => { return Promise.resolve(); } 
-  };
+  // Always call the hook to follow rules of hooks
+  const contextData = useBreedingReminders();
   
-  try {
-    if (isAuthReady && isLoggedIn) {
-      const contextData = useBreedingReminders();
-      remindersData = {
-        reminders: contextData.reminders || [],
-        isLoading: contextData.isLoading || false,
-        refreshReminderData: async () => { 
-          await contextData.refreshReminderData?.();
-          return Promise.resolve();
-        }
-      };
-    }
-  } catch (error) {
-    console.warn('[MobileDebugPanel] BreedingReminders context not ready:', error);
+  // Return safe defaults if not ready
+  if (!isAuthReady || !isLoggedIn) {
+    return { 
+      reminders: [] as any[], 
+      isLoading: false, 
+      refreshReminderData: async () => { return Promise.resolve(); } 
+    };
   }
   
-  return remindersData;
+  return {
+    reminders: contextData.reminders || [],
+    isLoading: contextData.isLoading || false,
+    refreshReminderData: async () => { 
+      await contextData.refreshReminderData?.();
+      return Promise.resolve();
+    }
+  };
 };
 
 const MobileDebugPanel: React.FC = () => {
@@ -219,7 +211,8 @@ const MobileDebugPanel: React.FC = () => {
     }
   }, [isAuthReady, refreshDogs, refreshReminderData, user, dogs.length, queryClient]);
   
-  if (!state.isVisible) return null;
+  // Don't render if not visible or if auth is not ready (prevents context errors during login)
+  if (!state.isVisible || !isAuthReady) return null;
   
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
