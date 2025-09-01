@@ -394,8 +394,8 @@ const SubscriptionSettings: React.FC = () => {
 
           {/* Cancelled Subscription Info */}
           {subscriptionStatus === 'active_until_period_end' && (
-            <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
-              <p className="text-sm text-orange-800">
+            <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-sm text-green-800">
                 <strong>Subscription Cancelled:</strong> Your access continues until your current billing period ends. You can reactivate anytime before then.
               </p>
             </div>
