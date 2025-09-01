@@ -231,7 +231,7 @@ const SubscriptionSettings: React.FC = () => {
       return <Badge className="bg-purple-100 text-purple-800">Friend Access</Badge>;
     }
     if (subscriptionStatus === 'active_until_period_end') {
-      return <Badge className="bg-orange-100 text-orange-800">Cancelled - Expires Soon</Badge>;
+      return <Badge className="bg-red-100 text-red-800">Cancelled - Expires Soon</Badge>;
     }
     if (hasPaid) {
       return <Badge className="bg-green-100 text-green-800">Active Subscription</Badge>;
