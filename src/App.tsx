@@ -159,10 +159,12 @@ const App = () => {
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
-                  
-                  {/* Add the debug panel - only shown in development on mobile */}
-                  <MobileDebugPanel />
                 </DogsProvider>
+                
+                {/* Debug panel - moved outside DogsProvider to prevent remounting */}
+                <ErrorBoundary fallback={<div />}>
+                  <MobileDebugPanel />
+                </ErrorBoundary>
               </ProtectedApp>
             </AuthGuard>
             </BrowserRouter>
