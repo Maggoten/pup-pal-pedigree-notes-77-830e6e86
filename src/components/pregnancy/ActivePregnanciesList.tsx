@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,6 @@ import { Heart, PlusCircle, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-
 export interface ActivePregnancy {
   id: string;
   maleName: string;
@@ -15,34 +13,32 @@ export interface ActivePregnancy {
   expectedDueDate: Date;
   daysLeft: number;
 }
-
 interface ActivePregnanciesListProps {
   pregnancies: ActivePregnancy[];
   onAddPregnancy: () => void;
   isLoading?: boolean;
 }
-
-const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({ 
-  pregnancies, 
+const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
+  pregnancies,
   onAddPregnancy,
-  isLoading = false 
+  isLoading = false
 }) => {
-  const { t, ready } = useTranslation('pregnancy');
+  const {
+    t,
+    ready
+  } = useTranslation('pregnancy');
   const navigate = useNavigate();
 
   // Don't render until translations are ready
   if (!ready) {
-    return (
-      <Card className="h-full">
+    return <Card className="h-full">
         <CardHeader>
           <div className="flex justify-center items-center h-24">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         </CardHeader>
-      </Card>
-    );
+      </Card>;
   }
-
   const handleViewPregnancyDetails = (pregnancyId: string) => {
     navigate(`/pregnancy/${pregnancyId}`);
   };
@@ -57,9 +53,7 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
       expectedDueDate: pregnancies[0].expectedDueDate
     });
   }
-
-  return (
-    <Card className="h-full">
+  return <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2">
@@ -70,21 +64,13 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
             <PlusCircle className="h-5 w-5" />
           </Button>
         </CardTitle>
-        <CardDescription>{t('actions.managePregnancy')}</CardDescription>
+        
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <div className="flex justify-center items-center h-24">
+        {isLoading ? <div className="flex justify-center items-center h-24">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : pregnancies.length > 0 ? (
-          <div className="space-y-4">
-            {pregnancies.map((pregnancy) => (
-              <div 
-                key={pregnancy.id} 
-                className="border rounded-lg p-4 hover:bg-accent cursor-pointer transition-colors"
-                onClick={() => handleViewPregnancyDetails(pregnancy.id)}
-              >
+          </div> : pregnancies.length > 0 ? <div className="space-y-4">
+            {pregnancies.map(pregnancy => <div key={pregnancy.id} className="border rounded-lg p-4 hover:bg-accent cursor-pointer transition-colors" onClick={() => handleViewPregnancyDetails(pregnancy.id)}>
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium text-lg">
                     {pregnancy.femaleName} × {pregnancy.maleName}
@@ -103,21 +89,15 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
                     <p>{format(pregnancy.expectedDueDate, 'PP')}</p>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-6">
+              </div>)}
+          </div> : <div className="text-center py-6">
             <p className="text-muted-foreground mb-3">{t('empty.activePregnancies.description')}</p>
             <Button onClick={onAddPregnancy}>
               <PlusCircle className="mr-2 h-4 w-4" />
               {t('actions.addPregnancy')}
             </Button>
-          </div>
-        )}
+          </div>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default ActivePregnanciesList;
