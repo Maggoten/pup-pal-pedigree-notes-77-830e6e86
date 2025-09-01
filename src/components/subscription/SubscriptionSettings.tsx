@@ -351,11 +351,11 @@ const SubscriptionSettings: React.FC = () => {
 
             {/* Reactivate Button (for cancelled subscriptions) */}
             {showReactivateButton && (
-              <Button 
-                onClick={handleReactivateSubscription}
-                disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
+                <Button 
+                  onClick={handleReactivateSubscription}
+                  disabled={isLoading}
+                  className="w-full bg-warmgreen-600 hover:bg-warmgreen-700 text-white"
+                >
                 {isLoading ? "Opening..." : "Reactivate Subscription"}
               </Button>
             )}
