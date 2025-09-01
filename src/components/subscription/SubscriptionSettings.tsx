@@ -321,7 +321,7 @@ const SubscriptionSettings: React.FC = () => {
               <div className="space-y-2">
                 <p className="text-sm font-medium">Important Dates</p>
                 {getSubscriptionDates().map((dateInfo) => (
-                  <div key={dateInfo.label} className="flex justify-between text-sm">
+                  <div key={dateInfo.label} className="flex items-center gap-2 text-sm">
                     <span className="text-muted-foreground">{dateInfo.label}:</span>
                     <span className={
                       dateInfo.type === 'trial' ? 'text-blue-600' : 
