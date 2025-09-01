@@ -1,8 +1,11 @@
 
 import React from 'react';
 import { Bell, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const EmptyReminders: React.FC = () => {
+  const { t } = useTranslation('home');
+  
   return (
     <div className="text-center py-8 px-4 bg-primary/5 rounded-lg border border-dashed border-primary/30">
       <div className="relative mx-auto w-14 h-14 mb-4">
@@ -15,9 +18,9 @@ const EmptyReminders: React.FC = () => {
         </div>
       </div>
       
-      <h3 className="text-xl font-medium mb-2">All Caught Up!</h3>
+      <h3 className="text-xl font-medium mb-2">{t('reminders.empty.title')}</h3>
       <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-4">
-        You have no pending reminders. Add more breeding data to generate new reminders.
+        {t('reminders.empty.description')}
       </p>
       
       {/* Decorative dots */}

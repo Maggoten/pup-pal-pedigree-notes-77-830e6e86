@@ -32,7 +32,11 @@
     "noRemindersDesc": "All tasks completed - great job!",
     "loading": "Loading reminders...",
     "error": "There was a problem loading your reminders. Please try again later.",
-    "viewAll": "View All Reminders"
+    "viewAll": "View All Reminders",
+    "empty": {
+      "title": "All Caught Up!",
+      "description": "You have no pending reminders. Add more breeding data to generate new reminders."
+    }
   },
   "calendar": {
     "loading": "Loading calendar...",

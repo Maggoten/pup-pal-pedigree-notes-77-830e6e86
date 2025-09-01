@@ -32,7 +32,11 @@
     "noRemindersDesc": "Alla uppgifter slutförda - bra jobbat!",
     "loading": "Laddar påminnelser...",
     "error": "Det uppstod ett problem med att ladda dina påminnelser. Vänligen försök igen senare.",
-    "viewAll": "Visa Alla Påminnelser"
+    "viewAll": "Visa Alla Påminnelser",
+    "empty": {
+      "title": "Allt klart!",
+      "description": "Du har inga väntande påminnelser. Lägg till mer avelsdata för att generera nya påminnelser."
+    }
   },
   "calendar": {
     "loading": "Laddar kalender...",
