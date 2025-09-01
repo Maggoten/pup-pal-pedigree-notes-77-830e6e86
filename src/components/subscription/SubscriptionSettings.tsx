@@ -339,24 +339,13 @@ const SubscriptionSettings: React.FC = () => {
           {/* Action Buttons */}
           <div className="space-y-3">
             {/* Manage Subscription Button */}
-            {(hasPaid || isTrialActive || isExpired) && !friend && (
+            {(hasPaid || isTrialActive || isExpired || isCancelled) && !friend && (
               <Button 
                 onClick={handleManageSubscription}
                 disabled={isLoading}
                 className="w-full bg-warmgreen-600 hover:bg-warmgreen-700 text-white"
               >
                 {isLoading ? "Opening..." : (isExpired ? 'Activate Subscription' : 'Manage Subscription')}
-              </Button>
-            )}
-
-            {/* Reactivate Button (for cancelled subscriptions) */}
-            {showReactivateButton && (
-                <Button 
-                  onClick={handleReactivateSubscription}
-                  disabled={isLoading}
-                  className="w-full bg-warmgreen-600 hover:bg-warmgreen-700 text-white"
-                >
-                {isLoading ? "Opening..." : "Reactivate Subscription"}
               </Button>
             )}
 
