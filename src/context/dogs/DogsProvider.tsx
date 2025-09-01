@@ -61,14 +61,20 @@ export const DogsProvider: React.FC<DogsProviderProps> = ({ children }) => {
     }
   };
 
-  // Only attempt to fetch dogs when auth is ready and user is logged in
+  // Add a small delay before initializing dogs to ensure auth is fully stabilized
   useEffect(() => {
     if (shouldInitializeDogs && !dogLoadingAttempted) {
-      console.log('[DogsProvider] Auth ready, initializing dogs data');
-      setDogLoadingAttempted(true);
-      fetchDogs().catch(err => {
-        console.error('Initial dogs fetch failed:', err);
-      });
+      console.log('[DogsProvider] Auth ready, initializing dogs data with slight delay');
+      
+      // Small delay to ensure auth state is fully stabilized
+      const initTimer = setTimeout(() => {
+        setDogLoadingAttempted(true);
+        fetchDogs().catch(err => {
+          console.error('Initial dogs fetch failed:', err);
+        });
+      }, 100); // Minimal delay to prevent race conditions
+      
+      return () => clearTimeout(initTimer);
     }
   }, [shouldInitializeDogs, dogLoadingAttempted, fetchDogs]);
 

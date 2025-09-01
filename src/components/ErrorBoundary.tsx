@@ -1,9 +1,12 @@
-
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ReactNode } from 'react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: any) => void;
 }
 
 interface State {
@@ -21,30 +24,40 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+  componentDidCatch(error: Error, errorInfo: any) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
   }
 
-  render(): ReactNode {
+  handleReset = () => {
+    this.setState({ hasError: false, error: undefined });
+  };
+
+  render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;
       }
-      
+
       return (
-        <div className="flex min-h-screen items-center justify-center p-4 text-center">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-            <h2 className="mb-4 text-xl font-bold text-red-600">Something went wrong</h2>
-            <div className="mb-4 rounded bg-red-50 p-3 text-left">
-              <p className="text-sm text-red-800">{this.state.error?.message || 'An unknown error occurred'}</p>
-            </div>
-            <button
-              onClick={() => window.location.reload()}
-              className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+        <div className="p-4 max-w-md mx-auto">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Something went wrong</AlertTitle>
+            <AlertDescription className="mt-2">
+              {this.state.error?.message || 'An unexpected error occurred'}
+            </AlertDescription>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={this.handleReset}
+              className="mt-3"
             >
-              Reload Page
-            </button>
-          </div>
+              Try again
+            </Button>
+          </Alert>
         </div>
       );
     }

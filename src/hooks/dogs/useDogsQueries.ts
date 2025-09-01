@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Dog } from '@/types/dogs';
 import { useToast } from '@/components/ui/use-toast';
 import { fetchDogs } from '@/services/dogs';
@@ -11,7 +11,6 @@ import { fetchWithRetry, isMobileDevice } from '@/utils/fetchUtils';
 export const useDogsQueries = (): UseDogsQueries => {
   const { user, isLoading: authLoading, isAuthReady } = useAuth();
   const userId = user?.id;
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isMobile = isMobileDevice();
@@ -46,7 +45,6 @@ export const useDogsQueries = (): UseDogsQueries => {
       
       try {
         console.log('Fetching dogs from service for user:', userId);
-        // Remove the userId parameter as it's not expected in the fetchDogs function
         const data = await fetchDogs();
         console.log(`Retrieved ${data.length} dogs for user ${userId}`);
         return data;
@@ -54,64 +52,25 @@ export const useDogsQueries = (): UseDogsQueries => {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
         console.error('Error fetching dogs:', errorMessage);
         throw err;
-      } finally {
-        setIsInitialLoad(false);
       }
     },
-    enabled: !!userId && isAuthReady, // Only run query when userId is available AND auth is done loading
-    staleTime: isMobile ? 30 * 1000 : 60 * 1000, // Consider data fresh for 30s on mobile, 1 min on desktop
-    gcTime: 5 * 60 * 1000, // Keep unused data in cache for 5 minutes
-    retry: isMobile ? 3 : 2, // More retries on mobile
+    enabled: !!userId && isAuthReady,
+    staleTime: isMobile ? 30 * 1000 : 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    retry: isMobile ? 3 : 2,
     retryDelay: attempt => {
-      // Use different backoff strategies for mobile vs desktop
-      const baseDelay = isMobile ? 800 : 1000; // Start with a shorter delay on mobile
-      return Math.min(baseDelay * Math.pow(1.8, attempt), 30000); // Exponential backoff
+      const baseDelay = isMobile ? 800 : 1000;
+      return Math.min(baseDelay * Math.pow(1.8, attempt), 30000);
     },
+    refetchOnWindowFocus: true, // Use React Query's built-in refetch on focus
   });
 
-  // Add detailed logging about query status
+  // Simplified logging about query status
   useEffect(() => {
     console.log('Dogs query status:', status, 'fetchStatus:', fetchStatus, 'isLoading:', isLoading);
     console.log('Auth loading:', authLoading, 'Auth ready:', isAuthReady, 'Query is enabled:', !!userId && isAuthReady);
-    
-    // Special handling for mobile when no dogs are found but should be
-    if (isAuthReady && !authLoading && userId && dogs.length === 0 && !isLoading && !error && !isInitialLoad && isMobile) {
-      console.log('Mobile: No dogs found after auth ready, might need to retry');
-      
-      // Add a timeout to retry once more on mobile after a short delay
-      // This helps in cases where auth appears ready but session isn't fully stabilized
-      const mobileRetryTimer = setTimeout(() => {
-        console.log('Mobile: Executing extra fetch retry after delay');
-        refetch().catch(err => {
-          console.warn('Mobile extra retry failed:', err);
-        });
-      }, 1500);
-      
-      return () => clearTimeout(mobileRetryTimer);
-    }
-  }, [status, fetchStatus, isLoading, userId, authLoading, isAuthReady, dogs.length, error, isInitialLoad, isMobile, refetch]);
+  }, [status, fetchStatus, isLoading, userId, authLoading, isAuthReady]);
 
-  // Add visibility change listener to handle page resume/wake
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && userId && isAuthReady) {
-        console.log('Page became visible, checking if dogs data needs refresh');
-        
-        // Longer delay for mobile devices to ensure stability after resuming
-        const delay = isMobile ? 800 : 500;
-        
-        // Small delay to allow auth to fully stabilize
-        setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
-        }, delay);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [userId, isAuthReady, queryClient, isMobile]);
 
   // Improved refresh function with optional skipCache parameter and retry logic
   const refreshDogs = useCallback(async (skipCache = false) => {
@@ -169,51 +128,12 @@ export const useDogsQueries = (): UseDogsQueries => {
     }
   }, [refetch, queryClient, userId, toast, isAuthReady, isMobile]);
 
-  // Add a timeout for the initial load to prevent infinite loading
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    
-    if (userId && isInitialLoad && isAuthReady) {
-      console.log('Initial load - fetching dogs');
-      refetch();
-      
-      // Set a timeout to stop the initial loading state after 10 seconds (longer on mobile)
-      const timeout = isMobile ? 15000 : 10000; // 15 seconds for mobile, 10 for desktop
-      
-      timeoutId = setTimeout(() => {
-        if (isInitialLoad) {
-          console.log(`Initial load timeout reached (${isMobile ? 'mobile' : 'desktop'}), resetting loading state`);
-          setIsInitialLoad(false);
-          
-          // If no data was loaded, show an error toast
-          if (dogs.length === 0 && !error) {
-            toast({
-              title: "Loading timeout",
-              description: isMobile ? 
-                "Could not load dogs on mobile connection. Please check your connection and try again." :
-                "Could not load dogs in a reasonable time. Please try again.",
-              variant: "destructive",
-              action: {
-                label: "Retry",
-                onClick: () => refreshDogs(true),
-                className: "bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
-              }
-            });
-          }
-        }
-      }, timeout);
-    }
-    
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [userId, refetch, isInitialLoad, dogs.length, error, toast, refreshDogs, isAuthReady, isMobile]);
 
   return {
     dogs,
-    isLoading: isLoading || isInitialLoad || authLoading || !isAuthReady,
+    isLoading: isLoading || authLoading || !isAuthReady,
     error: error ? (error instanceof Error ? error.message : 'Unknown error') : null,
     fetchDogs: refreshDogs,
-    useDogs: () => ({ data: dogs, isLoading: isLoading || isInitialLoad || authLoading || !isAuthReady, error })
+    useDogs: () => ({ data: dogs, isLoading: isLoading || authLoading || !isAuthReady, error })
   };
 };
