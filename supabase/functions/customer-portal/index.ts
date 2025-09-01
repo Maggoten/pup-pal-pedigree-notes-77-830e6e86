@@ -44,23 +44,58 @@ serve(async (req) => {
     // Get user profile to find Stripe customer ID
     const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
-      .select('stripe_customer_id')
+      .select('stripe_customer_id, email, first_name, last_name')
       .eq('id', user.id)
       .single();
 
-    if (profileError || !profile?.stripe_customer_id) {
-      throw new Error("No Stripe customer found for this user");
+    if (profileError) {
+      logStep("Profile query error", { error: profileError, userId: user.id });
+      throw new Error(`Unable to retrieve user profile: ${profileError.message}`);
+    }
+
+    if (!profile) {
+      logStep("No profile found", { userId: user.id, email: user.email });
+      throw new Error("User profile not found. Please contact support.");
+    }
+
+    if (!profile.stripe_customer_id) {
+      logStep("No Stripe customer ID found", { 
+        userId: user.id, 
+        email: user.email,
+        profileEmail: profile.email 
+      });
+      throw new Error("No subscription found. Please activate a subscription first by visiting the subscription page.");
     }
 
     logStep("Found Stripe customer", { customerId: profile.stripe_customer_id });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+    
+    // Validate that the Stripe customer still exists
+    try {
+      const customer = await stripe.customers.retrieve(profile.stripe_customer_id);
+      if (customer.deleted) {
+        logStep("Stripe customer was deleted", { customerId: profile.stripe_customer_id });
+        throw new Error("Your subscription account is no longer active. Please contact support.");
+      }
+      logStep("Validated Stripe customer", { 
+        customerId: profile.stripe_customer_id,
+        customerEmail: customer.email 
+      });
+    } catch (stripeError) {
+      logStep("Stripe customer validation failed", { 
+        customerId: profile.stripe_customer_id,
+        error: stripeError 
+      });
+      throw new Error("Unable to access your subscription account. Please contact support.");
+    }
+
     const origin = req.headers.get("origin") || "http://localhost:3000";
 
     // Create customer portal session
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,
-      return_url: `${origin}/`,
+      return_url: `${origin}/settings`,
     });
 
     logStep("Created customer portal session", { 
@@ -77,8 +112,31 @@ serve(async (req) => {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR in customer-portal", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    const errorCode = error instanceof Error && 'code' in error ? error.code : 'UNKNOWN_ERROR';
+    
+    logStep("ERROR in customer-portal", { 
+      message: errorMessage, 
+      code: errorCode,
+      stack: error instanceof Error ? error.stack : undefined 
+    });
+    
+    // Provide user-friendly error messages
+    let userFriendlyMessage = errorMessage;
+    if (errorMessage.includes('Authentication error')) {
+      userFriendlyMessage = "Authentication failed. Please sign out and sign in again.";
+    } else if (errorMessage.includes('No subscription found') || errorMessage.includes('No Stripe customer found')) {
+      userFriendlyMessage = "No subscription found. Please activate a subscription first.";
+    } else if (errorMessage.includes('subscription account is no longer active')) {
+      userFriendlyMessage = "Your subscription account needs to be restored. Please contact support.";
+    } else if (!errorMessage.includes('Please')) {
+      userFriendlyMessage = `Subscription management is temporarily unavailable: ${errorMessage}`;
+    }
+    
+    return new Response(JSON.stringify({ 
+      error: userFriendlyMessage,
+      code: errorCode,
+      timestamp: new Date().toISOString()
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
