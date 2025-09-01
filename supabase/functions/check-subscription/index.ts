@@ -127,7 +127,17 @@ serve(async (req) => {
       if (subscription.status === 'active') {
         hasAccess = true;
         hasPaid = !subscription.trial_end || trialEndTime < now;
-        logStep("Active subscription - granting access", { hasPaid });
+        
+        // Check if subscription is cancelled but still active until period end
+        if (subscription.cancel_at_period_end) {
+          subscriptionStatus = 'active_until_period_end';
+          logStep("Active subscription cancelled at period end - granting access until end", { 
+            hasPaid,
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString()
+          });
+        } else {
+          logStep("Active subscription - granting access", { hasPaid });
+        }
       } else if (subscription.status === 'trialing') {
         hasAccess = true;
         hasPaid = false;
@@ -192,12 +202,22 @@ serve(async (req) => {
       trialEndDate
     });
 
+    // Add current period end date for active subscriptions
+    let currentPeriodEnd = null;
+    if (subscriptions.data.length > 0) {
+      const subscription = subscriptions.data[0];
+      if (subscription.current_period_end) {
+        currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+      }
+    }
+
     return new Response(JSON.stringify({
       has_access: hasAccess,
       subscription_status: subscriptionStatus,
       is_friend: profile.friend, // FIXED: Return actual friend status from profile
       has_paid: hasPaid,
-      trial_end_date: trialEndDate
+      trial_end_date: trialEndDate,
+      current_period_end: currentPeriodEnd
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

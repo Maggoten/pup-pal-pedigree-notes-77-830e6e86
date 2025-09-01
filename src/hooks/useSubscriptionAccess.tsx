@@ -5,6 +5,7 @@ export interface SubscriptionAccessInfo {
   hasAccess: boolean;
   subscriptionStatus: string | null;
   trialEndDate: string | null;
+  currentPeriodEnd: string | null;
   hasPaid: boolean;
   friend: boolean;
   daysRemaining: number | null;
@@ -17,6 +18,7 @@ export const useSubscriptionAccess = (): SubscriptionAccessInfo => {
     hasAccess,
     subscriptionStatus,
     trialEndDate,
+    currentPeriodEnd,
     hasPaid,
     friend,
     checkSubscription
@@ -52,13 +54,14 @@ export const useSubscriptionAccess = (): SubscriptionAccessInfo => {
       hasAccess, // Use AuthProvider's hasAccess value directly
       subscriptionStatus,
       trialEndDate,
+      currentPeriodEnd,
       hasPaid,
       friend,
       daysRemaining,
       isTrialActive,
       isExpired
     };
-  }, [hasAccess, subscriptionStatus, trialEndDate, hasPaid, friend]);
+  }, [hasAccess, subscriptionStatus, trialEndDate, currentPeriodEnd, hasPaid, friend]);
 
   return subscriptionInfo;
 };

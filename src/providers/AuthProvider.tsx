@@ -33,6 +33,7 @@ interface AuthContextType {
   isAccessChecking: boolean;
   subscriptionStatus: string | null;
   trialEndDate: string | null;
+  currentPeriodEnd: string | null;
   hasPaid: boolean;
   friend: boolean;
   subscriptionLoading: boolean;
@@ -74,6 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   // Subscription state
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   const [trialEndDate, setTrialEndDate] = useState<string | null>(null);
+  const [currentPeriodEnd, setCurrentPeriodEnd] = useState<string | null>(null);
   const [hasPaid, setHasPaid] = useState(false);
   const [friend, setFriend] = useState(false);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null); // null = not checked yet, false = no access, true = has access
@@ -156,6 +158,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         if (event === 'SIGNED_OUT') {
           setSubscriptionStatus(null);
           setTrialEndDate(null);
+          setCurrentPeriodEnd(null);
           setHasPaid(false);
           setFriend(false);
           setHasAccess(null); // null instead of false to prevent modal flash
@@ -543,6 +546,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         
         setSubscriptionStatus(data.subscription_status);
         setTrialEndDate(data.trial_end_date);
+        setCurrentPeriodEnd(data.current_period_end);
         setHasPaid(data.has_paid);
         setFriend(data.is_friend);
         
@@ -623,6 +627,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     isAccessChecking,
     subscriptionStatus,
     trialEndDate,
+    currentPeriodEnd,
     hasPaid,
     friend,
     subscriptionLoading,

@@ -25,7 +25,8 @@ const SubscriptionSettings: React.FC = () => {
     daysRemaining,
     isTrialActive,
     isExpired,
-    trialEndDate
+    trialEndDate,
+    currentPeriodEnd
   } = useSubscriptionAccess();
   
   const [isLoading, setIsLoading] = useState(false);
@@ -229,6 +230,9 @@ const SubscriptionSettings: React.FC = () => {
     if (friend) {
       return <Badge className="bg-purple-100 text-purple-800">Friend Access</Badge>;
     }
+    if (subscriptionStatus === 'active_until_period_end') {
+      return <Badge className="bg-orange-100 text-orange-800">Cancelled - Expires Soon</Badge>;
+    }
     if (hasPaid) {
       return <Badge className="bg-green-100 text-green-800">Active Subscription</Badge>;
     }
@@ -244,6 +248,9 @@ const SubscriptionSettings: React.FC = () => {
   const getStatusDescription = () => {
     if (friend) {
       return 'You have special friend access to Breeding Journey.';
+    }
+    if (subscriptionStatus === 'active_until_period_end') {
+      return 'Your subscription is cancelled and will end at the current billing period. You can reactivate it anytime.';
     }
     if (subscriptionStatus === 'canceled' && hasPaid) {
       return 'Your subscription is cancelled and will end at the current billing period.';
@@ -272,13 +279,19 @@ const SubscriptionSettings: React.FC = () => {
       });
     }
     
-    // Note: We would need to add billing period dates from Stripe data
-    // This would require enhancing the check-subscription function to return more detailed info
+    // Show period end date for cancelled subscriptions
+    if (subscriptionStatus === 'active_until_period_end' && currentPeriodEnd) {
+      dates.push({
+        label: 'Subscription End Date',
+        date: new Date(currentPeriodEnd),
+        type: 'cancelled'
+      });
+    }
     
     return dates;
   };
 
-  const isCancelled = subscriptionStatus === 'canceled';
+  const isCancelled = subscriptionStatus === 'canceled' || subscriptionStatus === 'active_until_period_end';
   const showCancelButton = hasPaid && !isCancelled && !friend;
   const showReactivateButton = isCancelled && !friend;
 
@@ -310,7 +323,11 @@ const SubscriptionSettings: React.FC = () => {
                 {getSubscriptionDates().map((dateInfo) => (
                   <div key={dateInfo.label} className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{dateInfo.label}:</span>
-                    <span className={dateInfo.type === 'trial' ? 'text-blue-600' : 'text-foreground'}>
+                    <span className={
+                      dateInfo.type === 'trial' ? 'text-blue-600' : 
+                      dateInfo.type === 'cancelled' ? 'text-orange-600 font-medium' : 
+                      'text-foreground'
+                    }>
                       {format(dateInfo.date, 'MMM dd, yyyy')}
                     </span>
                   </div>
@@ -387,7 +404,15 @@ const SubscriptionSettings: React.FC = () => {
           )}
 
           {/* Cancelled Subscription Info */}
-          {isCancelled && hasPaid && (
+          {subscriptionStatus === 'active_until_period_end' && (
+            <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
+              <p className="text-sm text-orange-800">
+                <strong>Subscription Cancelled:</strong> Your access continues until your current billing period ends. You can reactivate anytime before then.
+              </p>
+            </div>
+          )}
+          
+          {isCancelled && subscriptionStatus === 'canceled' && (
             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
               <p className="text-sm text-yellow-800">
                 Your subscription is cancelled but remains active until the end of your current billing period. You can reactivate it anytime.
