@@ -37,6 +37,7 @@ interface AuthContextType {
   hasPaid: boolean;
   friend: boolean;
   subscriptionLoading: boolean;
+  stripeCustomerId: string | null;
   signIn: (email: string) => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -82,6 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const [accessCheckComplete, setAccessCheckComplete] = useState(false);
   const [isAccessChecking, setIsAccessChecking] = useState(false);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
+  const [stripeCustomerId, setStripeCustomerId] = useState<string | null>(null);
 
   // Helper function to map Supabase user to our User type
   const mapSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
@@ -549,6 +551,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         setCurrentPeriodEnd(data.current_period_end);
         setHasPaid(data.has_paid);
         setFriend(data.is_friend);
+        setStripeCustomerId(data.stripe_customer_id);
         
         const access = calculateSequentialAccess(data.has_paid, data.is_friend, data.subscription_status, data.trial_end_date);
         setHasAccess(access);
@@ -631,6 +634,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     hasPaid,
     friend,
     subscriptionLoading,
+    stripeCustomerId,
     signIn,
     login,
     logout,
