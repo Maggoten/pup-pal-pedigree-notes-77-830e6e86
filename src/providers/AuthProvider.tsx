@@ -259,68 +259,148 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  // Enhanced logout method with state management (NO navigation)
+  // Enhanced logout method with robust error handling and session cleanup
   const logout = async (): Promise<void> => {
     setIsLoggingOut(true);
     
+    let supabaseError = null;
+    
     try {
-      const { error } = await supabase.auth.signOut();
-      
-      // Only show error if it's not a missing session error
-      if (error && !error.message?.includes('session_not_found') && !error.message?.includes('Session not found')) {
-        console.error("Sign out error:", error);
-        toast.error("Failed to sign out properly");
-        return;
-      }
-      
-      // Navigation will be handled by AuthGuard when it detects auth state change
+      // Add timeout for signOut (3 seconds)
+      const signOutPromise = supabase.auth.signOut();
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Sign out timeout')), 3000);
+      });
+
+      const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any;
+      supabaseError = error;
       
     } catch (error: any) {
       console.error("Sign out error:", error);
-      if (!error.message?.includes('session_not_found') && !error.message?.includes('Session not found')) {
+      supabaseError = error;
+    }
+    
+    // Enhanced error whitelist - these are expected/acceptable errors
+    const acceptableErrors = [
+      'session_not_found',
+      'Session not found',
+      'session_expired',
+      'invalid_session',
+      'Sign out timeout',
+      'fetch',
+      'network'
+    ];
+    
+    const isAcceptableError = supabaseError && acceptableErrors.some(
+      errorType => supabaseError.message?.toLowerCase().includes(errorType.toLowerCase())
+    );
+    
+    // Log all errors for debugging but only show critical ones to user
+    if (supabaseError) {
+      console.warn(`[Auth] Sign out error (${isAcceptableError ? 'acceptable' : 'critical'}):`, supabaseError);
+      
+      // Only show error toast for unexpected/critical errors
+      if (!isAcceptableError) {
         toast.error("An error occurred during sign out");
       }
-    } finally {
-      // Always reset logout state, even on error
-      setIsLoggingOut(false);
-      
-      // Add timeout fallback to ensure state is reset
-      setTimeout(() => {
-        setIsLoggingOut(false);
-      }, 2000);
     }
+    
+    // FORCE session cleanup regardless of Supabase errors
+    try {
+      // Clear auth storage manually as fallback
+      localStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+      
+      // Reset all auth states
+      setUser(null);
+      setSupabaseUser(null);
+      setSession(null);
+      setHasAccess(null);
+      setAccessCheckComplete(false);
+      setIsAccessChecking(false);
+      
+    } catch (cleanupError) {
+      console.error("Error during forced cleanup:", cleanupError);
+    }
+    
+    // Always reset logout state
+    setIsLoggingOut(false);
+    
+    // Add timeout fallback to ensure state is reset
+    setTimeout(() => {
+      setIsLoggingOut(false);
+    }, 2000);
   };
 
-  // Enhanced signOut method with state management (NO navigation)
+  // Enhanced signOut method with robust error handling and session cleanup
   const signOut = async () => {
     setIsLoggingOut(true);
     
+    let supabaseError = null;
+    
     try {
-      const { error } = await supabase.auth.signOut();
-      
-      // Only show error if it's not a missing session error
-      if (error && !error.message?.includes('session_not_found') && !error.message?.includes('Session not found')) {
-        console.error("Sign out error:", error);
-        toast.error("Failed to sign out properly");
-        return;
-      }
-      
-      // Navigation will be handled by AuthGuard when it detects auth state change
+      // Add timeout for signOut (3 seconds)
+      const signOutPromise = supabase.auth.signOut();
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Sign out timeout')), 3000);
+      });
+
+      const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any;
+      supabaseError = error;
       
     } catch (error: any) {
       console.error("Sign out error:", error);
-      if (!error.message?.includes('session_not_found') && !error.message?.includes('Session not found')) {
+      supabaseError = error;
+    }
+    
+    // Enhanced error whitelist - these are expected/acceptable errors
+    const acceptableErrors = [
+      'session_not_found',
+      'Session not found',
+      'session_expired',
+      'invalid_session',
+      'Sign out timeout',
+      'fetch',
+      'network'
+    ];
+    
+    const isAcceptableError = supabaseError && acceptableErrors.some(
+      errorType => supabaseError.message?.toLowerCase().includes(errorType.toLowerCase())
+    );
+    
+    // Log all errors for debugging but only show critical ones to user
+    if (supabaseError) {
+      console.warn(`[Auth] Sign out error (${isAcceptableError ? 'acceptable' : 'critical'}):`, supabaseError);
+      
+      // Only show error toast for unexpected/critical errors
+      if (!isAcceptableError) {
         toast.error("An error occurred during sign out");
       }
-    } finally {
-      // Always reset logout state, even on error
-      setIsLoggingOut(false);
-      
-      // Add timeout fallback to ensure state is reset
-      setTimeout(() => {
-        setIsLoggingOut(false);
-      }, 2000);
     }
+    
+    // FORCE session cleanup regardless of Supabase errors
+    try {
+      // Clear auth storage manually as fallback
+      localStorage.removeItem('sb-yqcgqriecxtppuvcguyj-auth-token');
+      
+      // Reset all auth states
+      setUser(null);
+      setSupabaseUser(null);
+      setSession(null);
+      setHasAccess(null);
+      setAccessCheckComplete(false);
+      setIsAccessChecking(false);
+      
+    } catch (cleanupError) {
+      console.error("Error during forced cleanup:", cleanupError);
+    }
+    
+    // Always reset logout state
+    setIsLoggingOut(false);
+    
+    // Add timeout fallback to ensure state is reset
+    setTimeout(() => {
+      setIsLoggingOut(false);
+    }, 2000);
   };
 
   // New method for account deletion
