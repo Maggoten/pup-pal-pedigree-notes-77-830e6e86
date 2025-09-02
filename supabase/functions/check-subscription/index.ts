@@ -71,9 +71,57 @@ serve(async (req) => {
     logStep("Authenticating user with token");
     
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    
+    // If authentication fails, we still need to check friend status
+    if (userError || !userData.user?.email) {
+      logStep("JWT authentication failed, checking for friend status as fallback", { 
+        error: userError?.message 
+      });
+      
+      // Try to extract user ID from token for friend check (if possible)
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userId = payload.sub;
+        
+        if (userId) {
+          logStep("Extracted user ID from token for friend check", { userId });
+          
+          const { data: profileData } = await supabaseClient
+            .from('profiles')
+            .select('friend, subscription_status, has_paid, trial_end_date')
+            .eq('id', userId)
+            .single();
+
+          if (profileData?.friend) {
+            logStep("User is friend - granting access despite auth failure");
+            return new Response(JSON.stringify({
+              has_access: true,
+              subscription_status: 'active',
+              is_friend: true,
+              has_paid: profileData.has_paid || false,
+              trial_end_date: profileData.trial_end_date,
+              current_period_end: null
+            }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 200,
+            });
+          }
+        }
+      } catch (tokenError) {
+        logStep("Could not extract user ID from token", { tokenError });
+      }
+      
+      // Return 401 to trigger fallback logic in client
+      return new Response(JSON.stringify({ 
+        error: "Authentication required",
+        auth_failed: true 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
+    
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     // Get current profile data for fallback

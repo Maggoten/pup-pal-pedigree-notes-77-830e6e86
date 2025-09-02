@@ -590,18 +590,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         setTimeout(() => reject(new Error('Edge function timeout')), 3000);
       });
 
-      const { data, error } = await Promise.race([
-        edgeFunctionPromise,
-        timeoutPromise
-      ]) as any;
+      let edgeResponse;
+      try {
+        edgeResponse = await Promise.race([
+          edgeFunctionPromise,
+          timeoutPromise
+        ]) as any;
+      } catch (raceError) {
+        edgeResponse = { error: raceError };
+      }
 
-      if (error) {
-        console.error(`[Auth] ${timestamp} - Edge function error:`, error);
+      const { data, error } = edgeResponse;
+
+      if (error || (!data && edgeResponse.error)) {
+        const errorMsg = error?.message || edgeResponse.error?.message || 'Unknown error';
+        console.error(`[Auth] ${timestamp} - Edge function error:`, errorMsg);
         
         // IMMEDIATE FALLBACK: Check friend status directly from database
         if (user?.id) {
           if (import.meta.env.DEV) {
-            console.log(`[Auth] ${timestamp} - Using fallback: querying profiles table directly`);
+            console.log(`[Auth] ${timestamp} - Using fallback: querying profiles table directly for friend access`);
           }
           
           const { data: profileData, error: profileError } = await supabase
@@ -624,6 +632,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
               profileData.trial_end_date
             );
             setHasAccess(accessResult);
+            
+            if (import.meta.env.DEV) {
+              console.log(`[Auth] ${timestamp} - Fallback access result:`, {
+                hasAccess: accessResult,
+                friend: profileData.friend,
+                hasPaid: profileData.has_paid,
+                subscriptionStatus: profileData.subscription_status
+              });
+            }
+          } else if (profileError) {
+            console.error(`[Auth] ${timestamp} - Profile query error in fallback:`, profileError);
           }
         }
         return;
