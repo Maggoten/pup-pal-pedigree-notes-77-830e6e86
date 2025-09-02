@@ -18,15 +18,14 @@ interface ModalMessage {
 const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ isOpen }) => {
   const { logout, user, subscriptionStatus, trialEndDate, stripeCustomerId } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [isContentReady, setIsContentReady] = useState(false);
 
-  // Pre-calculate modal message based on subscription status and Stripe customer ID
+  // Pre-calculate modal message based on subscription status and trial end date
   const modalMessage: ModalMessage = useMemo(() => {
     if (import.meta.env.DEV) {
       console.log('[SubscriptionBlockingModal] Computing modal message:', { 
         subscriptionStatus, 
         trialEndDate,
-        hasStripeCustomer: !!stripeCustomerId
+        hasTrialEndDate: !!trialEndDate
       });
     }
 
@@ -46,7 +45,7 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
       return {
         title: 'Complete Your Registration',
         description: 'To access Breeding Journey, please complete your payment setup and start your 30-day free trial.',
-        buttonText: stripeCustomerId ? 'Manage Subscription' : 'Start Free Trial'
+        buttonText: trialEndDate ? 'Manage Subscription' : 'Start Free Trial'
       };
     } else {
       // Default message for trial ended
@@ -56,22 +55,9 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
         buttonText: 'Manage Subscription'
       };
     }
-  }, [subscriptionStatus, trialEndDate, stripeCustomerId]);
+  }, [subscriptionStatus, trialEndDate]);
 
-  // Add content stabilization - wait a brief moment for any final updates
-  useEffect(() => {
-    if (!isOpen) {
-      setIsContentReady(false);
-      return;
-    }
-
-    // Small delay to ensure content is stable before showing
-    const timer = setTimeout(() => {
-      setIsContentReady(true);
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [isOpen, modalMessage]);
+  // Remove content delay - show immediately when modal opens
 
   const handleActivateSubscription = async () => {
     setIsLoading(true);
@@ -164,45 +150,37 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-md [&>button]:hidden">
-        {isContentReady ? (
-          <>
-            <DialogHeader className="text-center">
-              <DialogTitle className="text-xl font-semibold text-brown-800">
-                {modalMessage.title}
-              </DialogTitle>
-            </DialogHeader>
+        <DialogHeader className="text-center">
+          <DialogTitle className="text-xl font-semibold text-brown-800">
+            {modalMessage.title}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="text-center py-6">
+          <p className="text-brown-600 mb-6">
+            {modalMessage.description}
+          </p>
+          
+          <div className="space-y-3">
+            <Button 
+              onClick={handleActivateSubscription}
+              className="w-full bg-warmgreen-600 hover:bg-warmgreen-700 text-white"
+              size="lg"
+              disabled={isLoading}
+            >
+              {isLoading ? "Opening..." : modalMessage.buttonText}
+            </Button>
             
-            <div className="text-center py-6">
-              <p className="text-brown-600 mb-6">
-                {modalMessage.description}
-              </p>
-              
-              <div className="space-y-3">
-                <Button 
-                  onClick={handleActivateSubscription}
-                  className="w-full bg-warmgreen-600 hover:bg-warmgreen-700 text-white"
-                  size="lg"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Opening..." : modalMessage.buttonText}
-                </Button>
-                
-                <Button 
-                  onClick={handleSignOut}
-                  variant="outline"
-                  className="w-full border-warmbeige-300 text-brown-700 hover:bg-warmbeige-100"
-                  size="lg"
-                >
-                  Sign out
-                </Button>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-warmgreen-600 border-t-transparent"></div>
+            <Button 
+              onClick={handleSignOut}
+              variant="outline"
+              className="w-full border-warmbeige-300 text-brown-700 hover:bg-warmbeige-100"
+              size="lg"
+            >
+              Sign out
+            </Button>
           </div>
-        )}
+        </div>
       </DialogContent>
     </Dialog>
   );

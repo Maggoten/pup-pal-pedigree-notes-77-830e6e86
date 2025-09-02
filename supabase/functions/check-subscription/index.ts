@@ -7,9 +7,41 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Helper logging function for enhanced debugging
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
+};
+
+// Timeout wrapper for Stripe API calls
+const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
+  });
+  
+  return Promise.race([promise, timeoutPromise]);
+};
+
+// Retry wrapper for Stripe API calls
+const withRetry = async <T>(operation: () => Promise<T>, maxRetries: number = 2): Promise<T> => {
+  let lastError: Error;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error as Error;
+      logStep(`Attempt ${attempt} failed`, { error: lastError.message });
+      
+      if (attempt < maxRetries) {
+        // Exponential backoff: 1s, 2s, 4s...
+        const delay = Math.pow(2, attempt - 1) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  
+  throw lastError!;
 };
 
 serve(async (req) => {
@@ -22,6 +54,7 @@ serve(async (req) => {
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+    logStep("Stripe key verified");
 
     // Initialize Supabase with service role key
     const supabaseClient = createClient(
@@ -32,56 +65,41 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
+    logStep("Authorization header found");
 
     const token = authHeader.replace("Bearer ", "");
+    logStep("Authenticating user with token");
+    
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
-    
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    // Get user profile - ALWAYS check friend status first
-    const { data: profile, error: profileError } = await supabaseClient
+    // Get current profile data for fallback
+    const { data: profileData } = await supabaseClient
       .from('profiles')
-      .select('*')
+      .select('stripe_customer_id, subscription_status, has_paid, trial_end_date, friend')
       .eq('id', user.id)
       .single();
 
-    if (profileError || !profile) {
-      throw new Error("User profile not found");
-    }
-
-    logStep("Retrieved user profile", { 
-      hasStripeCustomer: !!profile.stripe_customer_id,
-      currentStatus: profile.subscription_status,
-      isFriend: profile.friend
+    logStep("Profile data retrieved", { 
+      hasStripeCustomer: !!profileData?.stripe_customer_id,
+      subscriptionStatus: profileData?.subscription_status,
+      hasPaid: profileData?.has_paid,
+      friend: profileData?.friend
     });
 
-    // CRITICAL: If user is marked as friend, they have access regardless of Stripe
-    if (profile.friend) {
-      logStep("User is marked as friend - granting full access");
+    // If user is marked as friend, grant immediate access
+    if (profileData?.friend) {
+      logStep("User is marked as friend, granting access");
       return new Response(JSON.stringify({
         has_access: true,
-        subscription_status: 'friend',
+        subscription_status: 'active',
         is_friend: true,
-        has_paid: profile.has_paid || false,
-        trial_end_date: profile.trial_end_date
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    }
-
-    // If no Stripe customer ID, user doesn't have subscription
-    if (!profile.stripe_customer_id) {
-      logStep("No Stripe customer found - user not subscribed");
-      return new Response(JSON.stringify({
-        has_access: false,
-        subscription_status: 'inactive',
-        is_friend: false,
-        has_paid: false,
-        trial_end_date: null
+        has_paid: profileData.has_paid || false,
+        trial_end_date: profileData.trial_end_date,
+        current_period_end: null
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -89,134 +107,160 @@ serve(async (req) => {
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+    
+    // Use fallback data if Stripe API fails
+    let hasActiveSub = false;
+    let subscriptionTier = null;
+    let subscriptionEnd = null;
+    let currentPeriodEnd = null;
+    let hasPaid = profileData?.has_paid || false;
+    let customerId = profileData?.stripe_customer_id || null;
 
-    // Get active subscriptions for the customer (including cancelled ones)
-    const subscriptions = await stripe.subscriptions.list({
-      customer: profile.stripe_customer_id,
-      status: 'all',
-      limit: 10,
-    });
-
-    let hasAccess = false;
-    let subscriptionStatus = 'inactive';
-    let hasPaid = profile.has_paid;
-    let trialEndDate = profile.trial_end_date;
-
-    if (subscriptions.data.length > 0) {
-      // Get the most recent subscription
-      const subscription = subscriptions.data[0];
-      logStep("Found subscription", { 
-        subscriptionId: subscription.id,
-        status: subscription.status,
-        trialEnd: subscription.trial_end,
-        currentPeriodEnd: subscription.current_period_end
+    try {
+      // Get customer with timeout and retry
+      const customers = await withRetry(async () => {
+        return withTimeout(
+          stripe.customers.list({ email: user.email, limit: 1 }),
+          10000 // 10 second timeout
+        );
       });
-
-      subscriptionStatus = subscription.status;
       
-      // Update trial end date if available
-      if (subscription.trial_end) {
-        trialEndDate = new Date(subscription.trial_end * 1000).toISOString();
-      }
-
-      const now = Date.now();
-      const trialEndTime = subscription.trial_end ? subscription.trial_end * 1000 : 0;
-      const isTrialActive = trialEndTime > now;
-
-      // Determine access based on subscription status and trial period
-      if (subscription.status === 'active') {
-        hasAccess = true;
-        hasPaid = !subscription.trial_end || trialEndTime < now;
+      if (customers.data.length === 0) {
+        logStep("No customer found, updating unsubscribed state");
+        await supabaseClient.from("profiles").upsert({
+          id: user.id,
+          email: user.email,
+          stripe_customer_id: null,
+          subscription_status: 'inactive',
+          has_paid: false,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'id' });
         
-        // Check if subscription is cancelled but still active until period end
-        if (subscription.cancel_at_period_end) {
-          subscriptionStatus = 'active_until_period_end';
-          logStep("Active subscription cancelled at period end - granting access until end", { 
-            hasPaid,
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString()
-          });
-        } else {
-          logStep("Active subscription - granting access", { hasPaid });
-        }
-      } else if (subscription.status === 'trialing') {
-        hasAccess = true;
-        hasPaid = false;
-        subscriptionStatus = 'trial';
-        logStep("Trialing subscription - granting trial access");
-      } else if (subscription.status === 'canceled' && isTrialActive) {
-        // CRITICAL: Cancelled subscription but trial is still active
-        hasAccess = true;
-        hasPaid = false;
-        subscriptionStatus = 'canceled_trial';
-        logStep("Cancelled subscription with active trial - granting trial access", {
-          trialEndTime: new Date(trialEndTime).toISOString(),
-          remainingTrialDays: Math.ceil((trialEndTime - now) / (1000 * 60 * 60 * 24))
+        return new Response(JSON.stringify({ 
+          has_access: false,
+          subscription_status: 'inactive',
+          is_friend: false,
+          has_paid: false,
+          trial_end_date: profileData?.trial_end_date,
+          current_period_end: null
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
         });
-      } else if (subscription.status === 'canceled' && !isTrialActive) {
-        // Cancelled subscription and trial has ended
-        hasAccess = false;
-        subscriptionStatus = 'canceled';
-        logStep("Cancelled subscription with expired trial - no access");
-      } else if (subscription.status === 'past_due') {
-        // Past due subscriptions - check if trial is still active
-        if (isTrialActive) {
-          hasAccess = true;
-          hasPaid = false;
-          subscriptionStatus = 'trial';
-          logStep("Past due subscription with active trial - granting trial access");
-        } else {
-          hasAccess = false;
-          subscriptionStatus = 'past_due';
-          logStep("Past due subscription - no access");
-        }
-      } else {
-        // Other statuses (incomplete, incomplete_expired, unpaid)
-        hasAccess = false;
-        logStep("Subscription in non-active status", { status: subscription.status });
       }
 
-      // Update profile with latest info
-      await supabaseClient
-        .from('profiles')
-        .update({
-          subscription_status: subscriptionStatus,
-          has_paid: hasPaid,
-          trial_end_date: trialEndDate,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
+      customerId = customers.data[0].id;
+      logStep("Found Stripe customer", { customerId });
 
-      logStep("Updated profile with latest subscription info", { 
-        subscriptionStatus, 
-        hasAccess, 
-        hasPaid,
-        trialEndDate 
+      // Get subscriptions with timeout and retry
+      const subscriptions = await withRetry(async () => {
+        return withTimeout(
+          stripe.subscriptions.list({
+            customer: customerId!,
+            limit: 10,
+          }),
+          10000 // 10 second timeout
+        );
       });
+
+      // Process subscription data
+      const activeSubscriptions = subscriptions.data.filter(sub => 
+        ['active', 'trialing', 'past_due'].includes(sub.status)
+      );
+      
+      if (activeSubscriptions.length > 0) {
+        const subscription = activeSubscriptions[0];
+        hasActiveSub = subscription.status === 'active' || subscription.status === 'trialing';
+        currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+        
+        if (subscription.status === 'trialing') {
+          subscriptionEnd = new Date(subscription.trial_end! * 1000).toISOString();
+        } else {
+          subscriptionEnd = currentPeriodEnd;
+        }
+        
+        // Determine subscription tier from price
+        const priceId = subscription.items.data[0].price.id;
+        const price = await withRetry(async () => {
+          return withTimeout(stripe.prices.retrieve(priceId), 5000);
+        });
+        
+        const amount = price.unit_amount || 0;
+        if (amount <= 999) {
+          subscriptionTier = "Basic";
+        } else if (amount <= 1999) {
+          subscriptionTier = "Premium";
+        } else {
+          subscriptionTier = "Enterprise";
+        }
+        
+        hasPaid = subscription.status === 'active' || subscription.status === 'past_due';
+        logStep("Active subscription found", { 
+          subscriptionId: subscription.id, 
+          status: subscription.status,
+          endDate: subscriptionEnd,
+          subscriptionTier 
+        });
+      } else {
+        // Check if user had any previous subscriptions (has paid before)
+        const allSubscriptions = subscriptions.data;
+        hasPaid = allSubscriptions.some(sub => 
+          ['active', 'canceled', 'past_due', 'unpaid'].includes(sub.status)
+        );
+        logStep("No active subscription found", { hadPreviousSubscriptions: hasPaid });
+      }
+
+    } catch (stripeError) {
+      logStep("Stripe API error, using fallback data", { 
+        error: stripeError instanceof Error ? stripeError.message : String(stripeError),
+        fallbackData: {
+          customerId,
+          subscriptionStatus: profileData?.subscription_status,
+          hasPaid: profileData?.has_paid
+        }
+      });
+      
+      // Use cached data from profile
+      hasActiveSub = ['active', 'trialing'].includes(profileData?.subscription_status || '');
+      hasPaid = profileData?.has_paid || false;
+      subscriptionEnd = profileData?.trial_end_date;
     }
 
-    logStep("Final response", {
+    // Determine subscription status
+    let subscriptionStatus = 'inactive';
+    if (hasActiveSub) {
+      subscriptionStatus = 'active';
+    } else if (hasPaid) {
+      subscriptionStatus = 'canceled';
+    }
+
+    // Calculate access
+    const hasAccess = hasActiveSub || profileData?.friend || false;
+
+    // Update profile with latest data
+    await supabaseClient.from("profiles").upsert({
+      id: user.id,
+      email: user.email,
+      stripe_customer_id: customerId,
+      subscription_status: subscriptionStatus,
+      has_paid: hasPaid,
+      trial_end_date: subscriptionEnd,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'id' });
+
+    logStep("Updated database with subscription info", { 
       hasAccess,
       subscriptionStatus,
-      isFriend: profile.friend,
-      hasPaid,
-      trialEndDate
+      subscriptionTier,
+      hasPaid 
     });
-
-    // Add current period end date for active subscriptions
-    let currentPeriodEnd = null;
-    if (subscriptions.data.length > 0) {
-      const subscription = subscriptions.data[0];
-      if (subscription.current_period_end) {
-        currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      }
-    }
-
+    
     return new Response(JSON.stringify({
       has_access: hasAccess,
       subscription_status: subscriptionStatus,
-      is_friend: profile.friend, // FIXED: Return actual friend status from profile
+      is_friend: profileData?.friend || false,
       has_paid: hasPaid,
-      trial_end_date: trialEndDate,
+      trial_end_date: subscriptionEnd,
       current_period_end: currentPeriodEnd
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

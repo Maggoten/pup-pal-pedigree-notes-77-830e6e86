@@ -45,7 +45,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<boolean>;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
-  checkSubscription: () => Promise<void>;
+  checkSubscription: (forceRefresh?: boolean) => Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  // Subscription state
+  // Subscription state with smart caching
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   const [trialEndDate, setTrialEndDate] = useState<string | null>(null);
   const [currentPeriodEnd, setCurrentPeriodEnd] = useState<string | null>(null);
@@ -84,6 +84,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const [isAccessChecking, setIsAccessChecking] = useState(false);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [stripeCustomerId, setStripeCustomerId] = useState<string | null>(null);
+
+  // Smart caching for subscription checks
+  const [lastSubscriptionCheck, setLastSubscriptionCheck] = useState<number>(0);
+  const SUBSCRIPTION_CACHE_TIME = 30000; // 30 seconds cache
 
   // Helper function to map Supabase user to our User type
   const mapSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
@@ -117,10 +121,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
           if (import.meta.env.DEV) {
             console.log('[Auth] User already logged in on app load - forcing subscription check');
           }
-          setTimeout(() => {
-            // Use setTimeout to avoid calling during auth initialization
-            checkSubscription();
-          }, 500);
+          // Immediate check without setTimeout for faster UX
+          checkSubscription();
         } else {
           // CRITICAL: If no session, mark access check as complete to prevent modal flash
           setAccessCheckComplete(true);
@@ -148,12 +150,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         setSession(session || null);
         setIsLoggedIn(!!session);
         
-        // Check subscription when user signs in
+        // Check subscription when user signs in - immediate check
         if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
-          setTimeout(() => {
-            // Use setTimeout to avoid calling Supabase within auth state change callback
-            checkSubscription();
-          }, 100);
+          // Immediate check for faster modal display
+          checkSubscription(true); // Force refresh
         }
         
         // Clear subscription state when user signs out
@@ -466,8 +466,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     return false;
   };
 
-  // Check subscription status with enhanced debugging and fallback
-  const checkSubscription = async (): Promise<void> => {
+  // Check subscription status with smart caching and enhanced performance  
+  const checkSubscription = async (forceRefresh = false): Promise<void> => {
+    const now = Date.now();
+    
+    // Use cached data if recent and not forcing refresh
+    if (!forceRefresh && (now - lastSubscriptionCheck) < SUBSCRIPTION_CACHE_TIME) {
+      if (import.meta.env.DEV) {
+        console.log('[Auth] Using cached subscription data');
+      }
+      return;
+    }
+
     if (!session) {
       if (import.meta.env.DEV) {
         console.log('[Auth] No session available for subscription check');
@@ -500,42 +510,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             console.log(`[Auth] ${timestamp} - Using fallback: querying profiles table directly`);
           }
           
-          const { data: profile, error: profileError } = await supabase
+          const { data: profileData, error: profileError } = await supabase
             .from('profiles')
-            .select('friend, has_paid, subscription_status, trial_end_date')
+            .select('friend, subscription_status, has_paid, trial_end_date, stripe_customer_id')
             .eq('id', user.id)
             .single();
-          
-          if (profileError) {
-            console.error(`[Auth] ${timestamp} - Fallback query failed:`, profileError);
-            return;
-          }
-          
-          if (profile) {
-            if (import.meta.env.DEV) {
-              console.log(`[Auth] ${timestamp} - Fallback profile data:`, profile);
-            }
+
+          if (!profileError && profileData) {
+            setFriend(profileData.friend || false);
+            setSubscriptionStatus(profileData.subscription_status);
+            setHasPaid(profileData.has_paid || false);
+            setTrialEndDate(profileData.trial_end_date);
+            setStripeCustomerId(profileData.stripe_customer_id);
             
-            // Apply friend status immediately if found
-            if (profile.friend) {
-              if (import.meta.env.DEV) {
-                console.log(`[Auth] ${timestamp} - FALLBACK: Friend status found, granting immediate access`);
-              }
-              setFriend(true);
-              setHasAccess(true);
-              setSubscriptionStatus('friend');
-              setHasPaid(profile.has_paid || false);
-              setTrialEndDate(profile.trial_end_date);
-              return;
-            }
-            
-            // Apply other subscription data
-            setFriend(false);
-            setHasPaid(profile.has_paid || false);
-            setSubscriptionStatus(profile.subscription_status || 'inactive');
-            setTrialEndDate(profile.trial_end_date);
-            const access = calculateSequentialAccess(profile.has_paid || false, false, profile.subscription_status || 'inactive', profile.trial_end_date);
-            setHasAccess(access);
+            const accessResult = calculateSequentialAccess(
+              profileData.has_paid || false,
+              profileData.friend || false,
+              profileData.subscription_status,
+              profileData.trial_end_date
+            );
+            setHasAccess(accessResult);
           }
         }
         return;
@@ -543,22 +537,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
       if (data) {
         if (import.meta.env.DEV) {
-          console.log(`[Auth] ${timestamp} - Edge function success:`, data);
+          console.log(`[Auth] ${timestamp} - Edge function response:`, data);
         }
-        
+
         setSubscriptionStatus(data.subscription_status);
         setTrialEndDate(data.trial_end_date);
         setCurrentPeriodEnd(data.current_period_end);
-        setHasPaid(data.has_paid);
-        setFriend(data.is_friend);
-        setStripeCustomerId(data.stripe_customer_id);
+        setHasPaid(data.has_paid || false);
+        setFriend(data.is_friend || false);
         
-        const access = calculateSequentialAccess(data.has_paid, data.is_friend, data.subscription_status, data.trial_end_date);
-        setHasAccess(access);
+        // Get stripe_customer_id from profile if not in response
+        if (user?.id && !stripeCustomerId) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('stripe_customer_id')
+            .eq('id', user.id)
+            .single();
+          
+          if (profileData) {
+            setStripeCustomerId(profileData.stripe_customer_id);
+          }
+        }
+
+        const accessResult = calculateSequentialAccess(
+          data.has_paid || false,
+          data.is_friend || false,
+          data.subscription_status,
+          data.trial_end_date
+        );
+        
+        setHasAccess(accessResult);
+        setLastSubscriptionCheck(now);
         
         if (import.meta.env.DEV) {
-          console.log(`[Auth] ${timestamp} - Final access state:`, {
-            hasAccess: access,
+          console.log(`[Auth] ${timestamp} - Sequential access result:`, {
+            hasAccess: accessResult,
             friend: data.is_friend,
             hasPaid: data.has_paid,
             subscriptionStatus: data.subscription_status,
@@ -567,32 +580,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         }
       }
     } catch (error) {
-      console.error(`[Auth] ${timestamp} - Unexpected error:`, error);
-      
-      // Emergency fallback for unexpected errors
-      if (user?.id) {
-        try {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('friend')
-            .eq('id', user.id)
-            .single();
-          
-          if (profile?.friend) {
-            if (import.meta.env.DEV) {
-              console.log(`[Auth] ${timestamp} - Emergency fallback: Friend access granted`);
-            }
-            setFriend(true);
-            setHasAccess(true);
-          }
-        } catch (fallbackError) {
-          console.error(`[Auth] ${timestamp} - Emergency fallback failed:`, fallbackError);
-        }
-      }
+      console.error(`[Auth] ${timestamp} - Error during subscription check:`, error);
+      // Don't throw - use fallback data if available
     } finally {
-      setSubscriptionLoading(false);
-      setAccessCheckComplete(true);
       setIsAccessChecking(false);
+      setAccessCheckComplete(true);
+      setSubscriptionLoading(false);
+      
+      if (import.meta.env.DEV) {
+        console.log(`[Auth] ${timestamp} - Subscription check completed`);
+      }
     }
   };
 
