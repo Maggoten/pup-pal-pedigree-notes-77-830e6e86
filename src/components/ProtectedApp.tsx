@@ -9,14 +9,8 @@ interface ProtectedAppProps {
 const ProtectedApp: React.FC<ProtectedAppProps> = ({ children }) => {
   const { isLoggedIn, isAuthReady, hasAccess, accessCheckComplete, isAccessChecking, checkSubscription, subscriptionLoading } = useAuth();
 
-  // Show blocking modal only if:
-  // 1. Auth is ready
-  // 2. User is logged in 
-  // 3. Access check is complete (prevents premature modal display)
-  // 4. NOT currently checking access (prevents modal flash during check)
-  // 5. User explicitly doesn't have access (hasAccess === false, not just falsy/null)
-  // 6. Subscription check is not loading
-  const shouldShowBlockingModal = isAuthReady && isLoggedIn && accessCheckComplete && !isAccessChecking && hasAccess === false && !subscriptionLoading;
+  // Simplified modal display logic - core requirements only
+  const shouldShowBlockingModal = isAuthReady && isLoggedIn && hasAccess === false;
 
   // Show loading state when access is being checked
   const shouldShowLoadingState = isLoggedIn && isAccessChecking && !accessCheckComplete;

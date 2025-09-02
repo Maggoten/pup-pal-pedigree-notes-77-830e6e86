@@ -152,6 +152,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         
         // Check subscription when user signs in - immediate check
         if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+          // PREVENT RACE CONDITION: Set hasAccess to false immediately on login
+          setHasAccess(false);
+          setAccessCheckComplete(false);
+          setIsAccessChecking(true);
           // Immediate check for faster modal display
           checkSubscription(true); // Force refresh
         }
@@ -495,11 +499,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         console.log(`[Auth] ${timestamp} - Starting subscription check for user:`, user?.id);
       }
 
-      const { data, error } = await supabase.functions.invoke('check-subscription', {
+      // Add timeout for edge function with fallback (3 seconds)
+      const edgeFunctionPromise = supabase.functions.invoke('check-subscription', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
       });
+
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Edge function timeout')), 3000);
+      });
+
+      const { data, error } = await Promise.race([
+        edgeFunctionPromise,
+        timeoutPromise
+      ]) as any;
 
       if (error) {
         console.error(`[Auth] ${timestamp} - Edge function error:`, error);
