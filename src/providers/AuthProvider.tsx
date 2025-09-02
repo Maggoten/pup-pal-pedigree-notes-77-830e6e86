@@ -152,8 +152,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         
         // Check subscription when user signs in - immediate check
         if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
-          // PREVENT RACE CONDITION: Set hasAccess to false immediately on login
-          setHasAccess(false);
+          // Keep hasAccess as null during check to prevent modal flash
+          setHasAccess(null);
           setAccessCheckComplete(false);
           setIsAccessChecking(true);
           // Immediate check for faster modal display

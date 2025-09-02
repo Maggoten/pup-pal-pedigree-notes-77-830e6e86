@@ -9,11 +9,11 @@ interface ProtectedAppProps {
 const ProtectedApp: React.FC<ProtectedAppProps> = ({ children }) => {
   const { isLoggedIn, isAuthReady, hasAccess, accessCheckComplete, isAccessChecking, checkSubscription, subscriptionLoading } = useAuth();
 
-  // Simplified modal display logic - core requirements only
-  const shouldShowBlockingModal = isAuthReady && isLoggedIn && hasAccess === false;
+  // Improved modal logic - don't show modal while still checking access
+  const shouldShowBlockingModal = isAuthReady && isLoggedIn && hasAccess === false && accessCheckComplete;
 
-  // Show loading state when access is being checked
-  const shouldShowLoadingState = isLoggedIn && isAccessChecking && !accessCheckComplete;
+  // Show loading state when access is being checked OR when auth is ready but access check not complete
+  const shouldShowLoadingState = isLoggedIn && (isAccessChecking || (isAuthReady && !accessCheckComplete));
 
   // Development debugging for modal logic
   if (import.meta.env.DEV) {
