@@ -554,11 +554,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const checkSubscription = async (forceRefresh = false): Promise<void> => {
     const now = Date.now();
     
-    // Use cached data if recent and not forcing refresh
+    // Use cached data if recent and not forcing refresh (optimized for returning users)
     if (!forceRefresh && (now - lastSubscriptionCheck) < SUBSCRIPTION_CACHE_TIME) {
       if (import.meta.env.DEV) {
-        console.log('[Auth] Using cached subscription data');
+        console.log('[Auth] Using cached subscription data - immediate access granted');
       }
+      // Ensure states are properly set for cached access
+      setAccessCheckComplete(true);
+      setIsAccessChecking(false);
+      setSubscriptionLoading(false);
       return;
     }
 
@@ -566,12 +570,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       if (import.meta.env.DEV) {
         console.log('[Auth] No session available for subscription check');
       }
+      // Properly handle no session state
+      setAccessCheckComplete(true);
+      setIsAccessChecking(false);
+      setSubscriptionLoading(false);
       return;
     }
     
     // Set access checking state immediately when starting the check
     setIsAccessChecking(true);
     setSubscriptionLoading(true);
+    setAccessCheckComplete(false); // Explicitly set to false
     const timestamp = new Date().toISOString();
     
     try {
@@ -579,7 +588,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         console.log(`[Auth] ${timestamp} - Starting subscription check for user:`, user?.id);
       }
 
-      // Add timeout for edge function with fallback (3 seconds)
+      // Enhanced timeout for edge function with fallback (5 seconds for better mobile support)
       const edgeFunctionPromise = supabase.functions.invoke('check-subscription', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -587,7 +596,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       });
 
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Edge function timeout')), 3000);
+        setTimeout(() => reject(new Error('Edge function timeout - fallback to direct database check')), 5000);
       });
 
       let edgeResponse;
@@ -597,6 +606,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
           timeoutPromise
         ]) as any;
       } catch (raceError) {
+        console.warn(`[Auth] ${timestamp} - Edge function failed, using fallback:`, raceError);
         edgeResponse = { error: raceError };
       }
 
@@ -696,12 +706,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       console.error(`[Auth] ${timestamp} - Error during subscription check:`, error);
       // Don't throw - use fallback data if available
     } finally {
+      // Enhanced state cleanup with explicit logging
       setIsAccessChecking(false);
       setAccessCheckComplete(true);
       setSubscriptionLoading(false);
       
       if (import.meta.env.DEV) {
-        console.log(`[Auth] ${timestamp} - Subscription check completed`);
+        console.log(`[Auth] ${timestamp} - Subscription check completed with final state:`, {
+          hasAccess,
+          friend,
+          hasPaid,
+          subscriptionStatus,
+          accessCheckComplete: true,
+          isAccessChecking: false
+        });
       }
     }
   };
