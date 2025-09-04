@@ -2,6 +2,9 @@
 import React, { ReactNode, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import WelcomeHeader from '@/components/WelcomeHeader';
+import SEOHead from '@/components/seo/SEOHead';
+import GlobalStructuredData from '@/components/seo/GlobalStructuredData';
+import { SEOData } from '@/utils/seo';
 
 interface PageLayoutProps {
   title: string;
@@ -9,6 +12,8 @@ interface PageLayoutProps {
   icon?: ReactNode;
   children: ReactNode;
   className?: string;
+  seoKey?: string;
+  seoData?: Partial<SEOData>;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
@@ -16,7 +21,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   description, 
   icon, 
   children,
-  className = ""
+  className = "",
+  seoKey,
+  seoData
 }) => {
   // Add useEffect to force scrollability on mount
   useEffect(() => {
@@ -39,6 +46,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
 
   return (
     <div className={`min-h-screen flex flex-col bg-background overflow-y-auto ${className}`}>
+      <SEOHead seoKey={seoKey} customSEO={seoData} />
+      {seoKey === 'home' && <GlobalStructuredData />}
       <Navbar />
       <WelcomeHeader />
       
