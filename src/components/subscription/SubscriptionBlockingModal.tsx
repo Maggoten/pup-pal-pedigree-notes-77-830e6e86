@@ -16,8 +16,27 @@ interface ModalMessage {
 }
 
 const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ isOpen }) => {
-  const { logout, user, subscriptionStatus, trialEndDate, stripeCustomerId } = useAuth();
+  const { logout, user, subscriptionStatus, trialEndDate, stripeCustomerId, checkSubscription } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [customerData, setCustomerData] = useState<any>(null);
+
+  // Helper function to check if customer has default payment method
+  const hasDefaultPaymentMethod = (customer: any) => {
+    return customer?.invoice_settings?.default_payment_method || customer?.default_source;
+  };
+
+  // Handle success callbacks from setup mode
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const setupSuccess = urlParams.get('setup');
+    
+    if (setupSuccess === 'success') {
+      toast.success('Payment method added successfully!');
+      checkSubscription?.();
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [checkSubscription]);
 
   // Pre-calculate modal message based on subscription status and trial end date
   const modalMessage: ModalMessage = useMemo(() => {
@@ -64,7 +83,10 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
     
     try {
       if (import.meta.env.DEV) {
-        console.log('[SubscriptionBlockingModal] Starting activation process for status:', subscriptionStatus);
+        console.log('[SubscriptionBlockingModal] Starting activation process:', { 
+          subscriptionStatus, 
+          hasStripeCustomerId: !!stripeCustomerId 
+        });
       }
 
       const { data: { session } } = await supabase.auth.getSession();
@@ -73,17 +95,10 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
         return;
       }
 
-      // Determine routing based on both stripeCustomerId AND subscription status
-      const shouldUseCheckout = !stripeCustomerId || 
-        (stripeCustomerId && (!subscriptionStatus || subscriptionStatus === 'inactive'));
-      
-      if (shouldUseCheckout) {
+      // 1. If no stripeCustomerId -> open Checkout (mode: 'subscription')
+      if (!stripeCustomerId) {
         if (import.meta.env.DEV) {
-          console.log('[SubscriptionBlockingModal] Routing to checkout:', { 
-            hasStripeCustomerId: !!stripeCustomerId,
-            subscriptionStatus,
-            reason: !stripeCustomerId ? 'No Stripe customer' : 'No active subscription'
-          });
+          console.log('[SubscriptionBlockingModal] No Stripe customer, routing to subscription checkout');
         }
         
         const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
@@ -93,17 +108,11 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
         });
 
         if (checkoutError) {
-          if (import.meta.env.DEV) {
-            console.error('[SubscriptionBlockingModal] Error creating registration checkout:', checkoutError);
-          }
           toast.error('Unable to start trial setup. Please try again.');
           return;
         }
 
         if (checkoutData?.checkout_url) {
-          if (import.meta.env.DEV) {
-            console.log('[SubscriptionBlockingModal] Opening Stripe checkout for trial setup');
-          }
           window.open(checkoutData.checkout_url, '_blank');
           toast.success('Please complete your registration in the opened tab');
           return;
@@ -113,33 +122,72 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
         }
       }
 
-      // User has stripeCustomerId and active/manageable subscription, open customer portal
-      if (import.meta.env.DEV) {
-        console.log('[SubscriptionBlockingModal] Opening customer portal for existing customer');
+      // 2. If status in ['active','trialing'] -> check payment method and route accordingly
+      if (subscriptionStatus === 'active' || subscriptionStatus === 'trialing') {
+        if (import.meta.env.DEV) {
+          console.log('[SubscriptionBlockingModal] Active/trialing customer, checking payment method');
+        }
+
+        const { data, error } = await supabase.functions.invoke('customer-portal', {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: {
+            checkPaymentMethod: true,
+            returnUrl: `${window.location.origin}/settings`
+          }
+        });
+
+        if (error) {
+          if (import.meta.env.DEV) {
+            console.error('[SubscriptionBlockingModal] Customer portal error:', error);
+          }
+          toast.error('Failed to open subscription management');
+          return;
+        }
+
+        if (data?.url) {
+          if (import.meta.env.DEV) {
+            console.log('[SubscriptionBlockingModal] Opening portal URL:', data.url);
+          }
+          window.open(data.url, '_blank');
+          
+          if (data.flowType === 'setup_mode') {
+            toast.success('Please add your payment method in the opened tab');
+          } else if (data.flowType === 'payment_method_update') {
+            toast.success('Please update your payment method in the opened tab');
+          } else {
+            toast.success('Opening subscription management');
+          }
+        } else {
+          toast.error('No portal URL received');
+        }
+        return;
       }
 
-      const { data, error } = await supabase.functions.invoke('customer-portal', {
+      // 3. Else (has customer but no active subscription) -> open Checkout (mode: 'subscription')
+      if (import.meta.env.DEV) {
+        console.log('[SubscriptionBlockingModal] Existing customer without active subscription, routing to subscription checkout');
+      }
+      
+      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
       });
 
-      if (error) {
-        if (import.meta.env.DEV) {
-          console.error('[SubscriptionBlockingModal] Customer portal error:', error);
-        }
-        toast.error('Failed to open subscription management');
+      if (checkoutError) {
+        toast.error('Unable to start subscription setup. Please try again.');
         return;
       }
 
-      if (data?.url) {
-        if (import.meta.env.DEV) {
-          console.log('[SubscriptionBlockingModal] Opening portal URL:', data.url);
-        }
-        window.open(data.url, '_blank');
+      if (checkoutData?.checkout_url) {
+        window.open(checkoutData.checkout_url, '_blank');
+        toast.success('Please complete your subscription in the opened tab');
       } else {
-        toast.error('No portal URL received');
+        toast.error('No checkout URL received');
       }
+
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error('[SubscriptionBlockingModal] Unexpected error:', error);

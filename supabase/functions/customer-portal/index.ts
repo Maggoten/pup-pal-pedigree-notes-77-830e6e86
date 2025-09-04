@@ -23,6 +23,19 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
+    // Parse request body for additional parameters
+    let requestBody: any = {};
+    try {
+      const body = await req.text();
+      if (body) {
+        requestBody = JSON.parse(body);
+      }
+    } catch (e) {
+      // Body is optional, continue with empty object
+    }
+
+    const { checkPaymentMethod, returnUrl } = requestBody;
+
     // Initialize Supabase with service role key
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -71,9 +84,10 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     
-    // Validate that the Stripe customer still exists
+    // Validate that the Stripe customer still exists and get full customer data
+    let customer;
     try {
-      const customer = await stripe.customers.retrieve(profile.stripe_customer_id);
+      customer = await stripe.customers.retrieve(profile.stripe_customer_id);
       if (customer.deleted) {
         logStep("Stripe customer was deleted", { customerId: profile.stripe_customer_id });
         throw new Error("Your subscription account is no longer active. Please contact support.");
@@ -91,20 +105,104 @@ serve(async (req) => {
     }
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
+    const finalReturnUrl = returnUrl || `${origin}/settings`;
 
-    // Create customer portal session
+    // Check if we need to handle payment method routing for trialing customers
+    if (checkPaymentMethod) {
+      const hasDefaultPaymentMethod = customer.invoice_settings?.default_payment_method || customer.default_source;
+      
+      logStep("Checking payment method for smart routing", { 
+        customerId: profile.stripe_customer_id,
+        hasDefaultPaymentMethod: !!hasDefaultPaymentMethod,
+        defaultPaymentMethod: customer.invoice_settings?.default_payment_method,
+        defaultSource: customer.default_source
+      });
+
+      // Get current subscription to check status
+      const subscriptions = await stripe.subscriptions.list({
+        customer: profile.stripe_customer_id,
+        status: 'all',
+        limit: 1
+      });
+
+      const currentSub = subscriptions.data[0];
+      const isTrialingOrActive = currentSub?.status === 'trialing' || currentSub?.status === 'active';
+
+      logStep("Subscription check for routing", {
+        hasSubscription: !!currentSub,
+        subscriptionStatus: currentSub?.status,
+        isTrialingOrActive
+      });
+
+      // If trialing/active but no default payment method, use special routing
+      if (isTrialingOrActive && !hasDefaultPaymentMethod) {
+        logStep("Trialing/active customer without payment method, trying payment method update flow");
+        
+        try {
+          // Try payment method update flow first
+          const portalSession = await stripe.billingPortal.sessions.create({
+            customer: profile.stripe_customer_id,
+            flow_data: {
+              type: 'payment_method_update'
+            },
+            return_url: `${finalReturnUrl}?payment=updated`,
+          });
+
+          logStep("Created payment method update portal session", { 
+            sessionId: portalSession.id,
+            flowType: 'payment_method_update'
+          });
+
+          return new Response(JSON.stringify({ 
+            url: portalSession.url,
+            flowType: 'payment_method_update'
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+
+        } catch (flowError) {
+          logStep("Payment method update flow failed, falling back to setup mode", { error: flowError });
+          
+          // Fallback to setup mode checkout
+          const setupSession = await stripe.checkout.sessions.create({
+            mode: 'setup',
+            customer: profile.stripe_customer_id,
+            payment_method_types: ['card'],
+            success_url: `${finalReturnUrl}?setup=success`,
+            cancel_url: `${finalReturnUrl}?setup=cancel`
+          });
+
+          logStep("Created setup mode checkout session", { 
+            sessionId: setupSession.id,
+            flowType: 'setup_mode'
+          });
+
+          return new Response(JSON.stringify({ 
+            url: setupSession.url,
+            flowType: 'setup_mode'
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        }
+      }
+    }
+
+    // Standard customer portal session
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,
-      return_url: `${origin}/settings`,
+      return_url: finalReturnUrl,
     });
 
-    logStep("Created customer portal session", { 
-      sessionId: portalSession.id, 
-      url: portalSession.url 
+    logStep("Created standard customer portal session", { 
+      sessionId: portalSession.id,
+      flowType: 'standard_portal'
     });
 
     return new Response(JSON.stringify({ 
-      url: portalSession.url 
+      url: portalSession.url,
+      flowType: 'standard_portal'
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
