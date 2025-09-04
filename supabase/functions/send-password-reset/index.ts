@@ -18,6 +18,151 @@ interface ValidateTokenRequest {
   newPassword: string;
 }
 
+interface EmailTemplates {
+  sv: {
+    subject: string;
+    heading: string;
+    body: string;
+    buttonText: string;
+    securityNotice: string;
+    footer: string;
+  };
+  en: {
+    subject: string;
+    heading: string;
+    body: string;
+    buttonText: string;
+    securityNotice: string;
+    footer: string;
+  };
+}
+
+const emailTemplates: EmailTemplates = {
+  sv: {
+    subject: 'Återställ ditt lösenord - Breeding Journey',
+    heading: 'Återställ ditt lösenord',
+    body: 'Vi fick en begäran att återställa lösenordet för ditt Breeding Journey-konto. Klicka på knappen nedan för att skapa ett nytt lösenord.',
+    buttonText: 'Återställ lösenord',
+    securityNotice: 'Om du inte begärde denna återställning kan du ignorera detta e-postmeddelande. Din kontosäkerhet påverkas inte.',
+    footer: 'Med vänliga hälsningar,<br>Breeding Journey-teamet'
+  },
+  en: {
+    subject: 'Reset your password - Breeding Journey',
+    heading: 'Reset your password',
+    body: 'We received a request to reset the password for your Breeding Journey account. Click the button below to create a new password.',
+    buttonText: 'Reset Password',
+    securityNotice: 'If you didn\'t request this reset, you can safely ignore this email. Your account security is not affected.',
+    footer: 'Best regards,<br>The Breeding Journey Team'
+  }
+}
+
+function generateEmailTemplate(resetUrl: string, language: 'sv' | 'en' = 'sv'): { subject: string; html: string } {
+  const template = emailTemplates[language];
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${template.subject}</title>
+        <style>
+          body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f8f9fa;
+          }
+          .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 40px 20px; 
+          }
+          .email-card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 40px; 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+            text-align: center;
+          }
+          .logo { 
+            margin-bottom: 30px; 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #2563eb; 
+          }
+          h1 { 
+            color: #1f2937; 
+            margin-bottom: 20px; 
+            font-size: 28px; 
+          }
+          .body-text { 
+            color: #6b7280; 
+            margin-bottom: 30px; 
+            font-size: 16px; 
+          }
+          .reset-button { 
+            display: inline-block; 
+            background: linear-gradient(135deg, #2563eb, #3b82f6); 
+            color: white; 
+            text-decoration: none; 
+            padding: 16px 32px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            margin: 20px 0; 
+            font-size: 16px;
+            transition: all 0.3s ease;
+          }
+          .reset-button:hover { 
+            background: linear-gradient(135deg, #1d4ed8, #2563eb); 
+            transform: translateY(-2px);
+          }
+          .security-notice { 
+            background-color: #f3f4f6; 
+            border-left: 4px solid #10b981; 
+            padding: 15px; 
+            margin: 30px 0; 
+            border-radius: 0 8px 8px 0; 
+            font-size: 14px; 
+            color: #374151; 
+          }
+          .footer { 
+            color: #9ca3af; 
+            font-size: 14px; 
+            margin-top: 30px; 
+            border-top: 1px solid #e5e7eb; 
+            padding-top: 20px; 
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="email-card">
+            <div class="logo">Breeding Journey</div>
+            <h1>${template.heading}</h1>
+            <p class="body-text">${template.body}</p>
+            
+            <a href="${resetUrl}" class="reset-button">${template.buttonText}</a>
+            
+            <div class="security-notice">
+              <strong>🔒 Säkerhetsmeddelande / Security Notice:</strong><br>
+              ${template.securityNotice}
+            </div>
+            
+            <div class="footer">
+              ${template.footer}
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return { subject: template.subject, html };
+}
+
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -104,10 +249,10 @@ const handler = async (req: Request): Promise<Response> => {
       const { email }: PasswordResetRequest = requestBody;
       console.log('Sending password reset for email:', email);
 
-      // Check if user exists in profiles table
+      // Check if user exists in profiles table and get language preference
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('id, email')
+        .select('id, email, language')
         .eq('email', email)
         .single();
       
@@ -140,57 +285,34 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error('Kunde inte skapa återställningstoken');
       }
 
-      // Create reset URL - use the request origin
-      const url = new URL(req.url);
-      const resetUrl = `${url.origin}/reset-password?token=${resetToken}`;
+      // Create reset URL - get the app origin from referrer header or default to lovable app
+      let appOrigin = 'https://your-app-url.lovable.app'; // Default fallback
+      
+      // Try to get the origin from the Referer header (when called from the frontend)
+      const refererHeader = req.headers.get('referer');
+      if (refererHeader) {
+        try {
+          const refererUrl = new URL(refererHeader);
+          appOrigin = refererUrl.origin;
+        } catch (e) {
+          console.log('Could not parse referer header:', refererHeader);
+        }
+      }
+      
+      const resetUrl = `${appOrigin}/reset-password?token=${resetToken}`;
+      
+      // Get user's language preference, default to Swedish
+      const userLanguage = (profileData.language as 'sv' | 'en') || 'sv';
+      
+      // Generate email template in user's preferred language
+      const { subject, html } = generateEmailTemplate(resetUrl, userLanguage);
 
       // Send email with Resend
       const emailResponse = await resend.emails.send({
         from: "Breeding Journey <noreply@breedingjourney.com>",
         to: [email],
-        subject: "Återställ ditt lösenord - Breeding Journey",
-        html: `
-          <div style="max-width: 600px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-            <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 2rem; text-align: center; border-radius: 8px 8px 0 0;">
-              <h1 style="color: white; margin: 0; font-size: 1.5rem;">Breeding Journey</h1>
-            </div>
-            
-            <div style="background: white; padding: 2rem; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-              <h2 style="color: #1f2937; margin-bottom: 1rem;">Återställ ditt lösenord</h2>
-              
-              <p style="color: #4b5563; line-height: 1.6; margin-bottom: 1.5rem;">
-                Vi har mottagit en begäran om att återställa lösenordet för ditt konto. 
-                Klicka på knappen nedan för att skapa ett nytt lösenord.
-              </p>
-              
-              <div style="text-align: center; margin: 2rem 0;">
-                <a href="${resetUrl}" 
-                   style="display: inline-block; background: #10b981; color: white; padding: 12px 24px; 
-                          text-decoration: none; border-radius: 6px; font-weight: 500;">
-                  Återställ lösenord
-                </a>
-              </div>
-              
-              <p style="color: #6b7280; font-size: 0.875rem; line-height: 1.5;">
-                Om du inte kan klicka på knappen, kopiera och klistra in följande länk i din webbläsare:<br>
-                <a href="${resetUrl}" style="color: #10b981; word-break: break-all;">${resetUrl}</a>
-              </p>
-              
-              <div style="background: #f9fafb; padding: 1rem; border-radius: 6px; margin-top: 1.5rem;">
-                <p style="color: #6b7280; font-size: 0.875rem; margin: 0;">
-                  <strong>Viktig information:</strong><br>
-                  • Denna länk är giltig i 1 timme<br>
-                  • Om du inte begärde denna återställning kan du ignorera detta mejl<br>
-                  • Ditt nuvarande lösenord förblir oförändrat tills du skapar ett nytt
-                </p>
-              </div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 1rem; color: #9ca3af; font-size: 0.75rem;">
-              © 2024 Breeding Journey. Alla rättigheter förbehållna.
-            </div>
-          </div>
-        `,
+        subject: subject,
+        html: html,
       });
 
       console.log("Password reset email sent successfully:", emailResponse);

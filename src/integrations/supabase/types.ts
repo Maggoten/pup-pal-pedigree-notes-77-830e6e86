@@ -621,6 +621,7 @@ export type Database = {
           has_paid: boolean | null
           id: string
           kennel_name: string | null
+          language: string | null
           last_name: string | null
           phone: string | null
           stripe_customer_id: string | null
@@ -638,6 +639,7 @@ export type Database = {
           has_paid?: boolean | null
           id: string
           kennel_name?: string | null
+          language?: string | null
           last_name?: string | null
           phone?: string | null
           stripe_customer_id?: string | null
@@ -655,6 +657,7 @@ export type Database = {
           has_paid?: boolean | null
           id?: string
           kennel_name?: string | null
+          language?: string | null
           last_name?: string | null
           phone?: string | null
           stripe_customer_id?: string | null
