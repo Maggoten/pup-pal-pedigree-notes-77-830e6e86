@@ -91,10 +91,12 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // Add a delay before showing authentication errors
   // This helps prevent flash of auth errors during initialization
   useEffect(() => {
+    // Use shorter delay for development to improve preview performance
+    const delay = import.meta.env.DEV ? 300 : 1200;
     const timer = setTimeout(() => {
       setDelayComplete(true);
       console.log('[AuthGuard] Initial delay complete, can show auth errors now');
-    }, 1200); // Slightly increased from 1000ms to help with race conditions
+    }, delay);
     
     return () => clearTimeout(timer);
   }, []);

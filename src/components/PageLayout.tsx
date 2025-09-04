@@ -1,10 +1,12 @@
 
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode, useEffect, lazy, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import WelcomeHeader from '@/components/WelcomeHeader';
-import SEOHead from '@/components/seo/SEOHead';
-import GlobalStructuredData from '@/components/seo/GlobalStructuredData';
+import OptimizedSEOHead from '@/components/seo/OptimizedSEOHead';
 import { SEOData } from '@/utils/seo';
+
+// Lazy load GlobalStructuredData for better performance
+const GlobalStructuredData = lazy(() => import('@/components/seo/GlobalStructuredData'));
 
 interface PageLayoutProps {
   title: string;
@@ -44,10 +46,17 @@ const PageLayout: React.FC<PageLayoutProps> = ({
     document.body.style.minHeight = '100%';
   }, []);
 
+  // Only load structured data in production or for homepage in development
+  const shouldLoadStructuredData = seoKey === 'home' && (!import.meta.env.DEV || import.meta.env.PROD);
+
   return (
     <div className={`min-h-screen flex flex-col bg-background overflow-y-auto ${className}`}>
-      <SEOHead seoKey={seoKey} customSEO={seoData} />
-      {seoKey === 'home' && <GlobalStructuredData />}
+      <OptimizedSEOHead seoKey={seoKey} customSEO={seoData} />
+      {shouldLoadStructuredData && (
+        <Suspense fallback={null}>
+          <GlobalStructuredData />
+        </Suspense>
+      )}
       <Navbar />
       <WelcomeHeader />
       
