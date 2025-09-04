@@ -249,8 +249,8 @@ const Login: React.FC = () => {
     
     if (!forgotPasswordEmail) {
       toast({
-        title: "Email required",
-        description: "Please enter your email address",
+        title: "Email krävs",
+        description: "Vänligen ange din emailadress",
         variant: "destructive",
       });
       return;
@@ -260,8 +260,8 @@ const Login: React.FC = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(forgotPasswordEmail)) {
       toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address",
+        title: "Ogiltig email",
+        description: "Vänligen ange en giltig emailadress",
         variant: "destructive",
       });
       return;
@@ -270,34 +270,42 @@ const Login: React.FC = () => {
     setIsForgotPasswordLoading(true);
     
     try {
-      const redirectUrl = `${window.location.origin}/reset-password`;
+      console.log('Sending password reset via Resend for:', forgotPasswordEmail);
       
-      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
-        redirectTo: redirectUrl,
+      const { data, error } = await supabase.functions.invoke('send-password-reset', {
+        body: { email: forgotPasswordEmail }
       });
 
       if (error) {
         console.error('Password reset error:', error);
         toast({
-          title: "Reset failed",
-          description: "Unable to send reset email. Please try again.",
+          title: "Återställning misslyckades",
+          description: "Kunde inte skicka återställningsmejl. Försök igen.",
           variant: "destructive",
         });
-      } else {
+      } else if (data?.success) {
+        console.log('Password reset email sent successfully via Resend');
         toast({
-          title: "Reset email sent",
-          description: "If your email is registered, you'll receive a password reset link shortly.",
+          title: "Återställningsmejl skickat",
+          description: data.message || "Om emailadressen finns i vårt system har ett återställningsmejl skickats.",
         });
         
         // Reset form and hide forgot password section
         setForgotPasswordEmail('');
         setShowForgotPassword(false);
+      } else {
+        console.error('Unexpected response from password reset function:', data);
+        toast({
+          title: "Fel",
+          description: "Ett oväntat fel uppstod. Försök igen.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Unexpected error during password reset:', error);
       toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: "Fel",
+        description: "Ett oväntat fel uppstod. Försök igen.",
         variant: "destructive",
       });
     } finally {

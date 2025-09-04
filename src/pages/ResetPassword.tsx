@@ -55,101 +55,77 @@ const ResetPassword: React.FC = () => {
   const newPassword = watch('newPassword', '');
   const passwordStrength = validatePasswordStrength(newPassword);
 
-  // Handle password recovery using Supabase's automatic token detection
+  // Handle password recovery using our custom token system
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    
-    // Check current session first to see if we're already in recovery mode
-    const checkInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    const checkToken = async () => {
+      const token = searchParams.get('token');
       
-      if (session) {
-        console.log('Found existing session, assuming recovery is valid');
-        setIsValidRecovery(true);
-        setRecoveryError(null);
+      if (!token) {
+        console.log('No token found in URL');
+        setRecoveryError('Ingen giltig återställningstoken hittades i länken.');
+        setIsValidRecovery(false);
         setIsCheckingRecovery(false);
         return;
       }
-      
-      // If no session yet, wait briefly for Supabase to process URL token
-      // Supabase with detectSessionInUrl: true should handle this automatically
-      timeoutId = setTimeout(() => {
-        console.log('No recovery session established after timeout');
-        setRecoveryError('Invalid or expired recovery link. Please request a new password reset.');
-        setIsValidRecovery(false);
-        setIsCheckingRecovery(false);
-      }, 5000); // 5 second timeout
+
+      console.log('Token found in URL, validating...');
+      setIsValidRecovery(true);
+      setRecoveryError(null);
+      setIsCheckingRecovery(false);
     };
 
-    checkInitialSession();
-
-    // Listen for auth state changes during recovery
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change during recovery:', event, !!session);
-      
-      if (event === 'PASSWORD_RECOVERY' && session) {
-        console.log('Password recovery event with session detected');
-        setIsValidRecovery(true);
-        setRecoveryError(null);
-        setIsCheckingRecovery(false);
-        if (timeoutId) clearTimeout(timeoutId);
-      } else if (event === 'SIGNED_IN' && session) {
-        // Also handle regular sign in events that might occur during recovery
-        console.log('Sign in event during recovery, checking URL for recovery params');
-        const hasRecoveryParams = searchParams.get('type') === 'recovery' || 
-                                 searchParams.has('token_hash') || 
-                                 searchParams.has('access_token');
-        
-        if (hasRecoveryParams) {
-          console.log('Recovery parameters found, treating as valid recovery');
-          setIsValidRecovery(true);
-          setRecoveryError(null);
-          setIsCheckingRecovery(false);
-          if (timeoutId) clearTimeout(timeoutId);
-        }
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-      if (timeoutId) clearTimeout(timeoutId);
-    };
+    checkToken();
   }, [searchParams]);
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     if (!isValidRecovery) {
-      toast.error('Invalid recovery session. Please request a new password reset.');
+      toast.error('Ogiltig återställningssession. Begär en ny lösenordsåterställning.');
+      return;
+    }
+
+    const token = searchParams.get('token');
+    if (!token) {
+      toast.error('Ingen återställningstoken hittades.');
       return;
     }
 
     setIsLoading(true);
     try {
-      console.log('Attempting to update password');
+      console.log('Attempting to validate token and update password');
       
-      const { error } = await supabase.auth.updateUser({
-        password: data.newPassword
+      const { data: response, error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          token: token,
+          newPassword: data.newPassword
+        }
       });
 
       if (error) {
-        console.error('Password update error:', error);
-        
-        if (error.message.includes('session_not_found') || error.message.includes('Session not found')) {
-          toast.error('Your recovery session has expired. Please request a new password reset.');
-          setTimeout(() => navigate('/login'), 2000);
-        } else {
-          toast.error('Failed to update password. Please try again.');
-        }
+        console.error('Password reset validation error:', error);
+        toast.error('Ett fel uppstod vid lösenordsåterställning. Försök igen.');
         return;
       }
 
-      console.log('Password updated successfully');
-      toast.success('Password updated successfully! You are now logged in.');
-      
-      // Clear the URL parameters and redirect
-      navigate('/', { replace: true });
+      if (response?.success) {
+        console.log('Password updated successfully');
+        toast.success(response.message || 'Lösenordet har uppdaterats framgångsrikt!');
+        
+        // Clear the URL parameters and redirect to login
+        setTimeout(() => {
+          navigate('/login', { replace: true });
+        }, 1500);
+      } else {
+        console.error('Password reset failed:', response?.error);
+        const errorMessage = response?.error || 'Kunde inte uppdatera lösenordet';
+        toast.error(errorMessage);
+        
+        if (errorMessage.includes('Ogiltig eller utgången')) {
+          setTimeout(() => navigate('/login'), 2000);
+        }
+      }
     } catch (error) {
       console.error('Unexpected error during password update:', error);
-      toast.error('An unexpected error occurred while updating your password');
+      toast.error('Ett oväntat fel uppstod vid lösenordsuppdatering');
     } finally {
       setIsLoading(false);
     }
