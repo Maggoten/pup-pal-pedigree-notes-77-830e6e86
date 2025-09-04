@@ -7,8 +7,16 @@ interface OptimizedSEOHeadProps {
 }
 
 const OptimizedSEOHead = ({ seoKey, customSEO }: OptimizedSEOHeadProps) => {
-  // Skip heavy SEO processing in development for faster loading
-  if (import.meta.env.DEV && seoKey !== 'home') {
+  // Detect if we're in Lovable preview environment
+  const isLovablePreview = window.location.hostname.includes('lovable.app') || 
+                          window.parent !== window ||
+                          import.meta.env.DEV;
+
+  // Skip auth pages entirely - they don't need SEO
+  const isAuthPage = ['login', 'register', 'reset-password', 'auth'].includes(seoKey || '');
+  
+  if (isAuthPage || (isLovablePreview && seoKey !== 'home')) {
+    // Minimal SEO for auth pages and Lovable preview
     const basicSEO = {
       title: customSEO?.title || 'Breeding Journey',
       description: customSEO?.description || 'Dog breeding management software',

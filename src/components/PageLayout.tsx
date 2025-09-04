@@ -46,8 +46,16 @@ const PageLayout: React.FC<PageLayoutProps> = ({
     document.body.style.minHeight = '100%';
   }, []);
 
-  // Only load structured data in production or for homepage in development
-  const shouldLoadStructuredData = seoKey === 'home' && (!import.meta.env.DEV || import.meta.env.PROD);
+  // Detect Lovable environment and skip heavy SEO loading
+  const isLovablePreview = typeof window !== 'undefined' && 
+    (window.location.hostname.includes('lovable.app') || window.parent !== window);
+  
+  // Skip auth pages and Lovable preview for structured data
+  const isAuthPage = ['login', 'register', 'reset-password', 'auth'].includes(seoKey || '');
+  const shouldLoadStructuredData = seoKey === 'home' && 
+    !isAuthPage && 
+    !isLovablePreview && 
+    import.meta.env.PROD;
 
   return (
     <div className={`min-h-screen flex flex-col bg-background overflow-y-auto ${className}`}>

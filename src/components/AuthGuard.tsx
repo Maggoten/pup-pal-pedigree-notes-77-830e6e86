@@ -91,8 +91,11 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // Add a delay before showing authentication errors
   // This helps prevent flash of auth errors during initialization
   useEffect(() => {
-    // Use shorter delay for development to improve preview performance
-    const delay = import.meta.env.DEV ? 300 : 1200;
+    // Detect Lovable preview and use minimal delay for better editing experience
+    const isLovablePreview = typeof window !== 'undefined' && 
+      (window.location.hostname.includes('lovable.app') || window.parent !== window);
+    
+    const delay = isLovablePreview ? 100 : (import.meta.env.DEV ? 300 : 1200);
     const timer = setTimeout(() => {
       setDelayComplete(true);
       console.log('[AuthGuard] Initial delay complete, can show auth errors now');
