@@ -164,13 +164,7 @@ serve(async (req) => {
     let hasPaid = profileData?.has_paid || false;
     let customerId = profileData?.stripe_customer_id || null;
 
-    // Variables to track selected subscription details
-    let selectedSubscription = null;
-    let selectedSubscriptionStatus = null;
-    
     try {
-      logStep("Attempting to retrieve Stripe customer and subscription data");
-
       // Get customer with timeout and retry
       const customers = await withRetry(async () => {
         return withTimeout(
@@ -217,43 +211,24 @@ serve(async (req) => {
         );
       });
 
-      // Process subscription data - sort by most recent first and prioritize relevant statuses
-      const relevantSubscriptions = subscriptions.data
-        .filter(sub => ['active', 'trialing', 'past_due'].includes(sub.status))
-        .sort((a, b) => {
-          // Sort by updated timestamp, then by created, then by status priority
-          const aUpdated = a.updated || a.created;
-          const bUpdated = b.updated || b.created;
-          if (aUpdated !== bUpdated) return bUpdated - aUpdated;
-          
-          // Prioritize active > trialing > past_due
-          const statusPriority = { active: 3, trialing: 2, past_due: 1 };
-          return (statusPriority[b.status] || 0) - (statusPriority[a.status] || 0);
-        });
+      // Process subscription data
+      const activeSubscriptions = subscriptions.data.filter(sub => 
+        ['active', 'trialing', 'past_due'].includes(sub.status)
+      );
       
-      if (relevantSubscriptions.length > 0) {
-        selectedSubscription = relevantSubscriptions[0];
-        selectedSubscriptionStatus = selectedSubscription.status;
+      if (activeSubscriptions.length > 0) {
+        const subscription = activeSubscriptions[0];
+        hasActiveSub = subscription.status === 'active' || subscription.status === 'trialing';
+        currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
         
-        logStep("Selected subscription", { 
-          customerId, 
-          chosenSubId: selectedSubscription.id, 
-          status: selectedSubscription.status,
-          totalSubs: subscriptions.data.length,
-          relevantSubs: relevantSubscriptions.length
-        });
-        
-        hasActiveSub = selectedSubscription.status === 'active' || selectedSubscription.status === 'trialing';
-        currentPeriodEnd = new Date(selectedSubscription.current_period_end * 1000).toISOString();
-        
-        if (selectedSubscription.status === 'trialing') {
-          subscriptionEnd = new Date(selectedSubscription.trial_end! * 1000).toISOString();
+        if (subscription.status === 'trialing') {
+          subscriptionEnd = new Date(subscription.trial_end! * 1000).toISOString();
         } else {
           subscriptionEnd = currentPeriodEnd;
         }
         
         // Determine subscription tier from price
-        const priceId = selectedSubscription.items.data[0].price.id;
+        const priceId = subscription.items.data[0].price.id;
         const price = await withRetry(async () => {
           return withTimeout(stripe.prices.retrieve(priceId), 5000);
         });
@@ -267,10 +242,10 @@ serve(async (req) => {
           subscriptionTier = "Enterprise";
         }
         
-        hasPaid = selectedSubscription.status === 'active' || selectedSubscription.status === 'past_due';
+        hasPaid = subscription.status === 'active' || subscription.status === 'past_due';
         logStep("Active subscription found", { 
-          subscriptionId: selectedSubscription.id, 
-          status: selectedSubscription.status,
+          subscriptionId: subscription.id, 
+          status: subscription.status,
           endDate: subscriptionEnd,
           subscriptionTier 
         });
@@ -299,28 +274,16 @@ serve(async (req) => {
       subscriptionEnd = profileData?.trial_end_date;
     }
 
-    // Determine subscription status - preserve original Stripe status when possible
+    // Determine subscription status
     let subscriptionStatus = 'inactive';
-    if (hasActiveSub && selectedSubscriptionStatus) {
-      // Preserve the original Stripe status instead of mapping to 'active'
-      subscriptionStatus = selectedSubscriptionStatus;
+    if (hasActiveSub) {
+      subscriptionStatus = 'active';
     } else if (hasPaid) {
       subscriptionStatus = 'canceled';
     }
 
-    // Calculate access - include trialing in access decision
+    // Calculate access
     const hasAccess = hasActiveSub || profileData?.friend || false;
-    
-    // Enhanced logging for debugging access decisions
-    logStep("Access decision", {
-      customerId,
-      chosenSubId: selectedSubscription?.id || null,
-      status: subscriptionStatus,
-      decidedAccess: hasAccess,
-      hasActiveSub,
-      isFriend: profileData?.friend || false,
-      hasPaid
-    });
 
     // Update profile with latest data
     await supabaseClient.from("profiles").upsert({
