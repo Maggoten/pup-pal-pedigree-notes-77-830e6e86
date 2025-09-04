@@ -524,21 +524,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       return true;
     }
 
-    // Step 2: Check if user's free trial is active
-    if (status === 'trial' && endDate) {
+    // Step 2: Check if user's free trial is active (handle both 'trial' and 'trialing')
+    if ((status === 'trial' || status === 'trialing') && endDate) {
       const isTrialActive = new Date(endDate) > new Date();
       if (isTrialActive) {
         if (import.meta.env.DEV) {
-          console.log(`[Auth] ${timestamp} - STEP 2: Active trial found - granting access`);
+          console.log(`[Auth] ${timestamp} - STEP 2: Active trial found (${status}) - granting access`);
         }
         return true;
       }
     }
 
-    // Step 3: Check if user has an active paying membership
-    if (paid) {
+    // Step 3: Check if user has an active subscription or paid membership
+    if (status === 'active' || paid) {
       if (import.meta.env.DEV) {
-        console.log(`[Auth] ${timestamp} - STEP 3: Paid membership found - granting access`);
+        console.log(`[Auth] ${timestamp} - STEP 3: Active subscription or paid membership found - granting access`);
       }
       return true;
     }
@@ -553,6 +553,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   // Check subscription status with smart caching and enhanced performance  
   const checkSubscription = async (forceRefresh = false): Promise<void> => {
     const now = Date.now();
+    
+    // Cache busting: invalidate cache when forceRefresh is true (e.g., after Stripe redirects)
+    if (forceRefresh) {
+      setLastSubscriptionCheck(0);
+      if (import.meta.env.DEV) {
+        console.log('[Auth] Force refresh requested - cache invalidated');
+      }
+    }
     
     // Use cached data if recent and not forcing refresh (optimized for returning users)
     if (!forceRefresh && (now - lastSubscriptionCheck) < SUBSCRIPTION_CACHE_TIME) {
@@ -589,10 +597,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       }
 
       // Enhanced timeout for edge function with fallback (5 seconds for better mobile support)
+      // Add cache busting parameter when force refresh is requested
       const edgeFunctionPromise = supabase.functions.invoke('check-subscription', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
+        body: forceRefresh ? { cache_bust: now } : undefined
       });
 
       const timeoutPromise = new Promise((_, reject) => {

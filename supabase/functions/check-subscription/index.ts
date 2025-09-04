@@ -163,6 +163,7 @@ serve(async (req) => {
     let currentPeriodEnd = null;
     let hasPaid = profileData?.has_paid || false;
     let customerId = profileData?.stripe_customer_id || null;
+    let subscriptions = null; // Declare at proper scope
 
     try {
       // Get customer with timeout and retry
@@ -201,7 +202,7 @@ serve(async (req) => {
       logStep("Found Stripe customer", { customerId });
 
       // Get subscriptions with timeout and retry
-      const subscriptions = await withRetry(async () => {
+      subscriptions = await withRetry(async () => {
         return withTimeout(
           stripe.subscriptions.list({
             customer: customerId!,
@@ -211,10 +212,38 @@ serve(async (req) => {
         );
       });
 
-      // Process subscription data
+      // Process subscription data with improved selection logic
       const activeSubscriptions = subscriptions.data.filter(sub => 
         ['active', 'trialing', 'past_due'].includes(sub.status)
       );
+      
+      // Sort by updated/created date descending and prioritize active/trialing over past_due
+      activeSubscriptions.sort((a, b) => {
+        // First priority: status order (active/trialing > past_due)
+        const statusPriority = (status: string) => {
+          if (status === 'active') return 3;
+          if (status === 'trialing') return 2;
+          if (status === 'past_due') return 1;
+          return 0;
+        };
+        
+        const priorityDiff = statusPriority(b.status) - statusPriority(a.status);
+        if (priorityDiff !== 0) return priorityDiff;
+        
+        // Second priority: most recently updated/created
+        return (b.updated || b.created) - (a.updated || a.created);
+      });
+      
+      logStep("Sorted subscriptions by priority", { 
+        totalFound: subscriptions.data.length,
+        activeCount: activeSubscriptions.length,
+        topSubscription: activeSubscriptions[0] ? {
+          id: activeSubscriptions[0].id,
+          status: activeSubscriptions[0].status,
+          updated: activeSubscriptions[0].updated,
+          created: activeSubscriptions[0].created
+        } : null
+      });
       
       if (activeSubscriptions.length > 0) {
         const subscription = activeSubscriptions[0];
@@ -243,11 +272,13 @@ serve(async (req) => {
         }
         
         hasPaid = subscription.status === 'active' || subscription.status === 'past_due';
-        logStep("Active subscription found", { 
-          subscriptionId: subscription.id, 
+        logStep("Selected subscription found", { 
+          chosenSubId: subscription.id,
           status: subscription.status,
           endDate: subscriptionEnd,
-          subscriptionTier 
+          subscriptionTier,
+          hasActiveSub,
+          hasPaid
         });
       } else {
         // Check if user had any previous subscriptions (has paid before)
@@ -274,10 +305,20 @@ serve(async (req) => {
       subscriptionEnd = profileData?.trial_end_date;
     }
 
-    // Determine subscription status
+    // Determine subscription status (preserve original Stripe status when applicable)
     let subscriptionStatus = 'inactive';
-    if (hasActiveSub) {
-      subscriptionStatus = 'active';
+    let selectedSubscription = null;
+    
+    // Only try to find selected subscription if we have subscriptions data
+    if (hasActiveSub && subscriptions) {
+      selectedSubscription = subscriptions.data.find(sub => 
+        ['active', 'trialing', 'past_due'].includes(sub.status)
+      );
+      // Preserve 'trialing' status instead of mapping to 'active'
+      subscriptionStatus = selectedSubscription?.status || 'active';
+    } else if (hasActiveSub) {
+      // Fallback case when using profile data
+      subscriptionStatus = profileData?.subscription_status || 'active';
     } else if (hasPaid) {
       subscriptionStatus = 'canceled';
     }
@@ -296,11 +337,16 @@ serve(async (req) => {
       updated_at: new Date().toISOString(),
     }, { onConflict: 'id' });
 
-    logStep("Updated database with subscription info", { 
-      hasAccess,
-      subscriptionStatus,
+    // Enhanced detailed logging for debugging access decisions
+    logStep("Final access decision", { 
+      customerId,
+      chosenSubId: selectedSubscription?.id || 'none',
+      status: subscriptionStatus,
+      decidedAccess: hasAccess,
+      hasActiveSub,
       subscriptionTier,
-      hasPaid 
+      hasPaid,
+      isFriend: profileData?.friend || false
     });
     
     return new Response(JSON.stringify({
