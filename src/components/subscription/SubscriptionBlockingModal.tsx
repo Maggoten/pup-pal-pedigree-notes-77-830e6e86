@@ -73,10 +73,17 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
         return;
       }
 
-      // Use pre-calculated stripeCustomerId instead of fetching
-      if (!stripeCustomerId) {
+      // Determine routing based on both stripeCustomerId AND subscription status
+      const shouldUseCheckout = !stripeCustomerId || 
+        (stripeCustomerId && (!subscriptionStatus || subscriptionStatus === 'inactive'));
+      
+      if (shouldUseCheckout) {
         if (import.meta.env.DEV) {
-          console.log('[SubscriptionBlockingModal] No stripeCustomerId found, redirecting to registration checkout');
+          console.log('[SubscriptionBlockingModal] Routing to checkout:', { 
+            hasStripeCustomerId: !!stripeCustomerId,
+            subscriptionStatus,
+            reason: !stripeCustomerId ? 'No Stripe customer' : 'No active subscription'
+          });
         }
         
         const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-registration-checkout', {
@@ -106,7 +113,7 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
         }
       }
 
-      // User has stripeCustomerId, open customer portal for subscription management
+      // User has stripeCustomerId and active/manageable subscription, open customer portal
       if (import.meta.env.DEV) {
         console.log('[SubscriptionBlockingModal] Opening customer portal for existing customer');
       }
