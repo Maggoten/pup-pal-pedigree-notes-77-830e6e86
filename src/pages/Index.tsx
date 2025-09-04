@@ -44,7 +44,6 @@ const Index = () => {
     <DashboardLayout 
       user={user}
       activePregnancies={activePregnancies}
-      seoKey="home"
     />
   );
 };

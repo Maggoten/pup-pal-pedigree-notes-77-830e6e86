@@ -1,12 +1,7 @@
 
-import React, { ReactNode, useEffect, lazy, Suspense } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import WelcomeHeader from '@/components/WelcomeHeader';
-import OptimizedSEOHead from '@/components/seo/OptimizedSEOHead';
-import { SEOData } from '@/utils/seo';
-
-// Lazy load GlobalStructuredData for better performance
-const GlobalStructuredData = lazy(() => import('@/components/seo/GlobalStructuredData'));
 
 interface PageLayoutProps {
   title: string;
@@ -14,8 +9,6 @@ interface PageLayoutProps {
   icon?: ReactNode;
   children: ReactNode;
   className?: string;
-  seoKey?: string;
-  seoData?: Partial<SEOData>;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
@@ -23,9 +16,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   description, 
   icon, 
   children,
-  className = "",
-  seoKey,
-  seoData
+  className = ""
 }) => {
   // Add useEffect to force scrollability on mount
   useEffect(() => {
@@ -46,25 +37,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
     document.body.style.minHeight = '100%';
   }, []);
 
-  // Detect Lovable environment and skip heavy SEO loading
-  const isLovablePreview = typeof window !== 'undefined' && 
-    (window.location.hostname.includes('lovable.app') || window.parent !== window);
-  
-  // Skip auth pages and Lovable preview for structured data
-  const isAuthPage = ['login', 'register', 'reset-password', 'auth'].includes(seoKey || '');
-  const shouldLoadStructuredData = seoKey === 'home' && 
-    !isAuthPage && 
-    !isLovablePreview && 
-    import.meta.env.PROD;
-
   return (
     <div className={`min-h-screen flex flex-col bg-background overflow-y-auto ${className}`}>
-      <OptimizedSEOHead seoKey={seoKey} customSEO={seoData} />
-      {shouldLoadStructuredData && (
-        <Suspense fallback={null}>
-          <GlobalStructuredData />
-        </Suspense>
-      )}
       <Navbar />
       <WelcomeHeader />
       

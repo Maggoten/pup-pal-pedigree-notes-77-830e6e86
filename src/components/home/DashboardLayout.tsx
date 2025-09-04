@@ -14,15 +14,11 @@ import { toast } from '@/components/ui/use-toast';
 interface DashboardLayoutProps {
   user: User | null;
   activePregnancies?: ActivePregnancy[];
-  seoKey?: string;
-  seoData?: any;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
   user, 
-  activePregnancies: initialActivePregnancies = [],
-  seoKey,
-  seoData
+  activePregnancies: initialActivePregnancies = []
 }) => {
   // State for active pregnancies
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>(initialActivePregnancies);
@@ -94,8 +90,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     <PageLayout 
       title="" 
       description=""
-      seoKey={seoKey}
-      seoData={seoData}
     >
       <div className="space-y-6">
         <DashboardHero 

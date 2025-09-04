@@ -1,43 +1,20 @@
 {
-  "name": "Breeding Journey - Professional Dog Breeding Management",
-  "short_name": "Breeding Journey",
-  "description": "A breeder's best friend – plan litters, track pregnancies and litters with ease.",
+  "name": "Breeding Journey",
+  "short_name": "Breeding",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#efebe7",
-  "theme_color": "#efebe7",
-  "orientation": "portrait-primary",
-  "scope": "/",
-  "categories": ["productivity", "lifestyle", "utilities"],
-  "lang": "en",
+  "theme_color": "##efebe7",
   "icons": [
     {
       "src": "/touch-icon.png",
       "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "/touch-icon-android.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Add New Dog",
-      "short_name": "New Dog",
-      "description": "Add a new dog to your breeding program",
-      "url": "/my-dogs?action=add",
-      "icons": [{ "src": "/touch-icon.png", "sizes": "180x180" }]
-    },
-    {
-      "name": "Pregnancy Tracker",
-      "short_name": "Pregnancy",
-      "description": "Track ongoing pregnancies",
-      "url": "/pregnancies",
-      "icons": [{ "src": "/touch-icon.png", "sizes": "180x180" }]
+      "type": "image/png"
     }
   ]
 }

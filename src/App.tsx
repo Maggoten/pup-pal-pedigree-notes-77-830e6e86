@@ -2,7 +2,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigationType } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -130,11 +129,10 @@ const App = () => {
   
   return (
     <ErrorBoundary>
-      <HelmetProvider>
-        <QueryClientProvider client={queryClient}>
-          <I18nProvider>
-            <AuthProvider>
-              <TooltipProvider>
+      <QueryClientProvider client={queryClient}>
+        <I18nProvider>
+          <AuthProvider>
+            <TooltipProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -169,11 +167,10 @@ const App = () => {
               </ProtectedApp>
             </AuthGuard>
             </BrowserRouter>
-              </TooltipProvider>
-            </AuthProvider>
-          </I18nProvider>
-        </QueryClientProvider>
-      </HelmetProvider>
+            </TooltipProvider>
+          </AuthProvider>
+        </I18nProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 };
