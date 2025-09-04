@@ -18,46 +18,13 @@ interface ValidateTokenRequest {
   newPassword: string;
 }
 
-interface EmailTemplates {
-  sv: {
-    subject: string;
-    heading: string;
-    body: string;
-    buttonText: string;
-    securityNotice: string;
-    footer: string;
-  };
-  en: {
-    subject: string;
-    heading: string;
-    body: string;
-    buttonText: string;
-    securityNotice: string;
-    footer: string;
-  };
-}
-
-const emailTemplates: EmailTemplates = {
-  sv: {
-    subject: 'Återställ ditt lösenord - Breeding Journey',
-    heading: 'Återställ ditt lösenord',
-    body: 'Vi fick en begäran att återställa lösenordet för ditt Breeding Journey-konto. Klicka på knappen nedan för att skapa ett nytt lösenord.',
-    buttonText: 'Återställ lösenord',
-    securityNotice: 'Om du inte begärde denna återställning kan du ignorera detta e-postmeddelande. Din kontosäkerhet påverkas inte.',
-    footer: 'Med vänliga hälsningar,<br>Breeding Journey-teamet'
-  },
-  en: {
-    subject: 'Reset your password - Breeding Journey',
-    heading: 'Reset your password',
-    body: 'We received a request to reset the password for your Breeding Journey account. Click the button below to create a new password.',
-    buttonText: 'Reset Password',
-    securityNotice: 'If you didn\'t request this reset, you can safely ignore this email. Your account security is not affected.',
-    footer: 'Best regards,<br>The Breeding Journey Team'
-  }
-}
-
-function generateEmailTemplate(resetUrl: string, language: 'sv' | 'en' = 'sv'): { subject: string; html: string } {
-  const template = emailTemplates[language];
+function generateEmailTemplate(resetUrl: string): { subject: string; html: string } {
+  const subject = 'Reset your password - Breeding Journey';
+  const heading = 'Reset your password';
+  const body = 'We received a request to reset the password for your Breeding Journey account. Click the button below to create a new password.';
+  const buttonText = 'Reset Password';
+  const securityNotice = 'If you didn\'t request this reset, you can safely ignore this email. Your account security is not affected.';
+  const footer = 'Best regards,<br>The Breeding Journey Team';
   
   const html = `
     <!DOCTYPE html>
@@ -65,15 +32,15 @@ function generateEmailTemplate(resetUrl: string, language: 'sv' | 'en' = 'sv'): 
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${template.subject}</title>
+        <title>${subject}</title>
         <style>
           body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
             line-height: 1.6; 
-            color: #333; 
+            color: hsl(28, 12%, 23%); 
             margin: 0; 
             padding: 0; 
-            background-color: #f8f9fa;
+            background-color: hsl(30, 15%, 94%);
           }
           .container { 
             max-width: 600px; 
@@ -82,58 +49,65 @@ function generateEmailTemplate(resetUrl: string, language: 'sv' | 'en' = 'sv'): 
           }
           .email-card { 
             background: white; 
-            border-radius: 12px; 
-            padding: 40px; 
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+            border-radius: 16px; 
+            padding: 48px; 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); 
             text-align: center;
           }
           .logo { 
-            margin-bottom: 30px; 
-            font-size: 24px; 
+            margin-bottom: 32px; 
+            font-size: 28px; 
             font-weight: bold; 
-            color: #2563eb; 
+            color: hsl(118, 45%, 21%);
+            font-family: 'Playfair Display', serif;
           }
           h1 { 
-            color: #1f2937; 
-            margin-bottom: 20px; 
-            font-size: 28px; 
+            color: hsl(28, 12%, 23%); 
+            margin-bottom: 24px; 
+            font-size: 32px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
           }
           .body-text { 
-            color: #6b7280; 
-            margin-bottom: 30px; 
-            font-size: 16px; 
+            color: hsl(28, 12%, 36%); 
+            margin-bottom: 32px; 
+            font-size: 16px;
+            line-height: 1.7;
           }
           .reset-button { 
             display: inline-block; 
-            background: linear-gradient(135deg, #2563eb, #3b82f6); 
+            background: hsl(118, 45%, 21%); 
             color: white; 
             text-decoration: none; 
-            padding: 16px 32px; 
-            border-radius: 8px; 
+            padding: 18px 36px; 
+            border-radius: 12px; 
             font-weight: 600; 
-            margin: 20px 0; 
+            margin: 24px 0; 
             font-size: 16px;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 12px hsla(118, 45%, 21%, 0.3);
           }
           .reset-button:hover { 
-            background: linear-gradient(135deg, #1d4ed8, #2563eb); 
+            background: hsl(118, 45%, 25%); 
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px hsla(118, 45%, 21%, 0.4);
           }
           .security-notice { 
-            background-color: #f3f4f6; 
-            border-left: 4px solid #10b981; 
-            padding: 15px; 
-            margin: 30px 0; 
-            border-radius: 0 8px 8px 0; 
+            background-color: hsl(33, 15%, 91%); 
+            border-left: 4px solid hsl(18, 48%, 44%); 
+            padding: 20px; 
+            margin: 32px 0; 
+            border-radius: 0 12px 12px 0; 
             font-size: 14px; 
-            color: #374151; 
+            color: hsl(28, 12%, 23%);
+            text-align: left;
           }
           .footer { 
-            color: #9ca3af; 
+            color: hsl(28, 12%, 50%); 
             font-size: 14px; 
-            margin-top: 30px; 
-            border-top: 1px solid #e5e7eb; 
-            padding-top: 20px; 
+            margin-top: 32px; 
+            border-top: 1px solid hsl(33, 15%, 86%); 
+            padding-top: 24px; 
           }
         </style>
       </head>
@@ -141,18 +115,18 @@ function generateEmailTemplate(resetUrl: string, language: 'sv' | 'en' = 'sv'): 
         <div class="container">
           <div class="email-card">
             <div class="logo">Breeding Journey</div>
-            <h1>${template.heading}</h1>
-            <p class="body-text">${template.body}</p>
+            <h1>${heading}</h1>
+            <p class="body-text">${body}</p>
             
-            <a href="${resetUrl}" class="reset-button">${template.buttonText}</a>
+            <a href="${resetUrl}" class="reset-button">${buttonText}</a>
             
             <div class="security-notice">
-              <strong>🔒 Säkerhetsmeddelande / Security Notice:</strong><br>
-              ${template.securityNotice}
+              <strong>🔒 Security Notice:</strong><br>
+              ${securityNotice}
             </div>
             
             <div class="footer">
-              ${template.footer}
+              ${footer}
             </div>
           </div>
         </div>
@@ -160,7 +134,7 @@ function generateEmailTemplate(resetUrl: string, language: 'sv' | 'en' = 'sv'): 
     </html>
   `;
 
-  return { subject: template.subject, html };
+  return { subject, html };
 }
 
 const supabase = createClient(
@@ -204,7 +178,7 @@ const handler = async (req: Request): Promise<Response> => {
         console.log('Invalid or expired token:', token);
         return new Response(JSON.stringify({ 
           success: false, 
-          error: 'Ogiltig eller utgången återställningslänk' 
+          error: 'Invalid or expired reset link' 
         }), {
           status: 400,
           headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -221,7 +195,7 @@ const handler = async (req: Request): Promise<Response> => {
         console.error('Error updating password:', updateError);
         return new Response(JSON.stringify({ 
           success: false, 
-          error: 'Kunde inte uppdatera lösenordet' 
+          error: 'Could not update password' 
         }), {
           status: 500,
           headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -238,7 +212,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       return new Response(JSON.stringify({ 
         success: true, 
-        message: 'Lösenordet har uppdaterats framgångsrikt' 
+        message: 'Password has been updated successfully' 
       }), {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -249,17 +223,17 @@ const handler = async (req: Request): Promise<Response> => {
       const { email }: PasswordResetRequest = requestBody;
       console.log('Sending password reset for email:', email);
 
-      // Check if user exists in profiles table and get language preference
+      // Check if user exists in profiles table
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('id, email, language')
+        .select('id, email')
         .eq('email', email)
         .single();
       
       if (profileError || !profileData) {
         console.log('User not found for email:', email);
         // Return success even if user doesn't exist (security best practice)
-        return new Response(JSON.stringify({ success: true, message: 'Om emailadressen finns i vårt system har ett återställningsmejl skickats.' }), {
+        return new Response(JSON.stringify({ success: true, message: 'If the email address exists in our system, a password reset email has been sent.' }), {
           status: 200,
           headers: { "Content-Type": "application/json", ...corsHeaders },
         });
@@ -282,11 +256,11 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (tokenError) {
         console.error('Error saving reset token:', tokenError);
-        throw new Error('Kunde inte skapa återställningstoken');
+        throw new Error('Could not create reset token');
       }
 
-      // Create reset URL - get the app origin from referrer header or default to lovable app
-      let appOrigin = 'https://your-app-url.lovable.app'; // Default fallback
+      // Create reset URL - get the app origin from referrer header or default to breedingjourney.com
+      let appOrigin = 'https://breedingjourney.com'; // Default fallback
       
       // Try to get the origin from the Referer header (when called from the frontend)
       const refererHeader = req.headers.get('referer');
@@ -301,11 +275,8 @@ const handler = async (req: Request): Promise<Response> => {
       
       const resetUrl = `${appOrigin}/reset-password?token=${resetToken}`;
       
-      // Get user's language preference, default to Swedish
-      const userLanguage = (profileData.language as 'sv' | 'en') || 'sv';
-      
-      // Generate email template in user's preferred language
-      const { subject, html } = generateEmailTemplate(resetUrl, userLanguage);
+      // Generate email template
+      const { subject, html } = generateEmailTemplate(resetUrl);
 
       // Send email with Resend
       const emailResponse = await resend.emails.send({
@@ -319,7 +290,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       return new Response(JSON.stringify({ 
         success: true, 
-        message: 'Om emailadressen finns i vårt system har ett återställningsmejl skickats.' 
+        message: 'If the email address exists in our system, a password reset email has been sent.' 
       }), {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -340,7 +311,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.error("Error in password reset function:", error);
     return new Response(JSON.stringify({ 
       success: false, 
-      error: error.message || 'Ett oväntat fel uppstod' 
+      error: error.message || 'An unexpected error occurred' 
     }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
