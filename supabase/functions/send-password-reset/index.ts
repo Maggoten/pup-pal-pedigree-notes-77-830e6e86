@@ -259,19 +259,8 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error('Could not create reset token');
       }
 
-      // Create reset URL - get the app origin from referrer header or default to breedingjourney.com
-      let appOrigin = 'https://breedingjourney.com'; // Default fallback
-      
-      // Try to get the origin from the Referer header (when called from the frontend)
-      const refererHeader = req.headers.get('referer');
-      if (refererHeader) {
-        try {
-          const refererUrl = new URL(refererHeader);
-          appOrigin = refererUrl.origin;
-        } catch (e) {
-          console.log('Could not parse referer header:', refererHeader);
-        }
-      }
+      // Create reset URL - always use breedingjourney.com
+      const appOrigin = 'https://breedingjourney.com';
       
       const resetUrl = `${appOrigin}/reset-password?token=${resetToken}`;
       
