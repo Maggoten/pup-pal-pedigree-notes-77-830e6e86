@@ -13,8 +13,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertTriangle, ArrowRight, ArrowLeft, Mail } from 'lucide-react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 const Login: React.FC = () => {
+  const { t } = useTranslation('auth');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login, register, isLoading: authLoading } = useAuth();
@@ -382,7 +384,7 @@ const Login: React.FC = () => {
               onClick={() => setShowForgotPassword(true)}
               className="text-sm text-warmgreen-600 hover:text-warmgreen-700 underline"
             >
-              Forgot your password?
+              {t('forgotPassword')}
             </button>
           </div>
         </div>
