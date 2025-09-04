@@ -233,11 +233,12 @@ const SubscriptionSettings: React.FC = () => {
     if (subscriptionStatus === 'active_until_period_end') {
       return <Badge className="bg-red-100 text-red-800">Cancelled - Expires Soon</Badge>;
     }
-    if (hasPaid) {
-      return <Badge className="bg-green-100 text-green-800">Active Subscription</Badge>;
+    // Handle trialing status specifically
+    if (subscriptionStatus === 'trialing' || isTrialActive) {
+      return <Badge className="bg-blue-100 text-blue-800">Active Trial</Badge>;
     }
-    if (isTrialActive) {
-      return <Badge className="bg-blue-100 text-blue-800">Free Trial</Badge>;
+    if (hasPaid || subscriptionStatus === 'active') {
+      return <Badge className="bg-green-100 text-green-800">Active Subscription</Badge>;
     }
     if (isExpired) {
       return <Badge className="bg-red-100 text-red-800">Expired</Badge>;
@@ -255,12 +256,16 @@ const SubscriptionSettings: React.FC = () => {
     if (subscriptionStatus === 'canceled' && hasPaid) {
       return 'Your subscription is cancelled and will end at the current billing period.';
     }
-    if (hasPaid) {
-      return 'You have an active subscription to Breeding Journey.';
+    // Handle trialing status specifically
+    if (subscriptionStatus === 'trialing' || (isTrialActive && !hasPaid)) {
+      if (daysRemaining !== null) {
+        const daysText = daysRemaining === 1 ? 'day' : 'days';
+        return `Your free trial is active and expires in ${daysRemaining} ${daysText}.`;
+      }
+      return 'Your free trial is currently active.';
     }
-    if (isTrialActive && daysRemaining !== null) {
-      const daysText = daysRemaining === 1 ? 'day' : 'days';
-      return `Your free trial expires in ${daysRemaining} ${daysText}.`;
+    if (hasPaid || subscriptionStatus === 'active') {
+      return 'You have an active paid subscription to Breeding Journey.';
     }
     if (isExpired) {
       return 'Your free trial has expired. Activate your subscription to continue.';

@@ -28,6 +28,7 @@ const SubscriptionDebugPanel: React.FC = () => {
       },
       subscription: subscriptionAccess,
       profile: null,
+      checkSubscriptionResponse: null,
       errors: []
     };
 
@@ -36,7 +37,7 @@ const SubscriptionDebugPanel: React.FC = () => {
       try {
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('stripe_customer_id, subscription_status, has_paid, friend, trial_end_date')
+          .select('stripe_customer_id, subscription_status, has_paid, friend, trial_end_date, updated_at')
           .eq('id', session.user.id)
           .single();
 
@@ -49,11 +50,29 @@ const SubscriptionDebugPanel: React.FC = () => {
             subscriptionStatus: profile?.subscription_status,
             hasPaid: profile?.has_paid,
             friend: profile?.friend,
-            trialEndDate: profile?.trial_end_date
+            trialEndDate: profile?.trial_end_date,
+            profileUpdatedAt: profile?.updated_at
           };
         }
       } catch (error) {
         info.errors.push(`Profile fetch exception: ${error}`);
+      }
+
+      // Try to call check-subscription directly to see backend response
+      try {
+        const { data: checkData, error: checkError } = await supabase.functions.invoke('check-subscription', {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
+        
+        if (checkError) {
+          info.errors.push(`Check-subscription error: ${checkError.message}`);
+        } else {
+          info.checkSubscriptionResponse = checkData;
+        }
+      } catch (error) {
+        info.errors.push(`Check-subscription exception: ${error}`);
       }
     }
 
@@ -131,6 +150,15 @@ const SubscriptionDebugPanel: React.FC = () => {
                     <Badge variant="outline">Profile Data</Badge>
                     <pre className="mt-1 p-2 bg-white rounded text-xs overflow-auto">
                       {JSON.stringify(debugInfo.profile, null, 2)}
+                    </pre>
+                  </div>
+                )}
+
+                {debugInfo.checkSubscriptionResponse && (
+                  <div>
+                    <Badge variant="outline">Check-Subscription Response</Badge>
+                    <pre className="mt-1 p-2 bg-blue-50 rounded text-xs overflow-auto">
+                      {JSON.stringify(debugInfo.checkSubscriptionResponse, null, 2)}
                     </pre>
                   </div>
                 )}

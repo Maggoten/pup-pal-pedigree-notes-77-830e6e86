@@ -35,7 +35,8 @@ export const useSubscriptionAccess = (): SubscriptionAccessInfo => {
     if (trialEnd) {
       const timeDiff = trialEnd.getTime() - now.getTime();
       daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
-      isTrialActive = subscriptionStatus === 'trial' && daysRemaining > 0;
+      // Handle both 'trial' and 'trialing' status from Stripe
+      isTrialActive = (subscriptionStatus === 'trial' || subscriptionStatus === 'trialing') && daysRemaining > 0;
       isExpired = daysRemaining <= 0 && !hasPaid && !friend;
     }
 
