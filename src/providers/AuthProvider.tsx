@@ -193,8 +193,264 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     };
   }, [isAuthReady]);
 
+  // Cache busting: Force subscription refresh when returning from Stripe
+  useEffect(() => {
+    const handleStripeReturn = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isStripeReturn = urlParams.has('session_id') || 
+                             window.location.pathname.includes('success') || 
+                             window.location.pathname.includes('checkout') ||
+                             document.referrer.includes('stripe.com') ||
+                             document.referrer.includes('checkout.stripe.com');
+      
+      if (isStripeReturn && session) {
+        if (import.meta.env.DEV) {
+          console.log('[Auth] Detected return from Stripe - forcing subscription refresh');
+        }
+        // Clear cache and force refresh
+        setLastSubscriptionCheck(0);
+        checkSubscription(true);
+      }
+    };
+
+    // Check on component mount
+    handleStripeReturn();
+    
+    // Also check when page becomes visible (user switches back to tab)
+    const handleVisibilityChange = () => {
+      if (!document.hidden && session) {
+        // Only check if it's been more than 30 seconds since last check
+        const timeSinceLastCheck = Date.now() - lastSubscriptionCheck;
+        if (timeSinceLastCheck > 30000) {
+          if (import.meta.env.DEV) {
+            console.log('[Auth] Page visibility change - refreshing subscription');
+          }
+          checkSubscription(true);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  // Check subscription status with smart caching and enhanced performance  
+  const checkSubscription = async (forceRefresh = false): Promise<void> => {
+    const now = Date.now();
+    
+    // Use cached data if recent and not forcing refresh (optimized for returning users)
+    if (!forceRefresh && (now - lastSubscriptionCheck) < SUBSCRIPTION_CACHE_TIME) {
+      if (import.meta.env.DEV) {
+        console.log('[Auth] Using cached subscription data - immediate access granted');
+      }
+      // Ensure states are properly set for cached access
+      setAccessCheckComplete(true);
+      setIsAccessChecking(false);
+      setSubscriptionLoading(false);
+      return;
+    }
+
+    if (!session) {
+      if (import.meta.env.DEV) {
+        console.log('[Auth] No session available for subscription check');
+      }
+      // Properly handle no session state
+      setAccessCheckComplete(true);
+      setIsAccessChecking(false);
+      setSubscriptionLoading(false);
+      return;
+    }
+    
+    // Set access checking state immediately when starting the check
+    setIsAccessChecking(true);
+    setSubscriptionLoading(true);
+    setAccessCheckComplete(false); // Explicitly set to false
+    const timestamp = new Date().toISOString();
+    
+    try {
+      if (import.meta.env.DEV) {
+        console.log(`[Auth] ${timestamp} - Starting subscription check for user:`, user?.id);
+      }
+
+      // Enhanced timeout for edge function with fallback (5 seconds for better mobile support)
+      // Add cache busting parameter when force refresh is requested
+      const cacheBuster = forceRefresh ? `?t=${Date.now()}` : '';
+      const edgeFunctionPromise = supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Edge function timeout - fallback to direct database check')), 5000);
+      });
+
+      let edgeResponse;
+      try {
+        edgeResponse = await Promise.race([
+          edgeFunctionPromise,
+          timeoutPromise
+        ]) as any;
+      } catch (raceError) {
+        console.warn(`[Auth] ${timestamp} - Edge function failed, using fallback:`, raceError);
+        edgeResponse = { error: raceError };
+      }
+
+      const { data, error } = edgeResponse;
+
+      if (error || (!data && edgeResponse.error)) {
+        const errorMsg = error?.message || edgeResponse.error?.message || 'Unknown error';
+        console.error(`[Auth] ${timestamp} - Edge function error:`, errorMsg);
+        
+        // IMMEDIATE FALLBACK: Check friend status directly from database
+        if (user?.id) {
+          if (import.meta.env.DEV) {
+            console.log(`[Auth] ${timestamp} - Using fallback: querying profiles table directly for friend access`);
+          }
+          
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('friend, subscription_status, has_paid, trial_end_date, stripe_customer_id')
+            .eq('id', user.id)
+            .single();
+
+          if (!profileError && profileData) {
+            setFriend(profileData.friend || false);
+            setSubscriptionStatus(profileData.subscription_status);
+            setHasPaid(profileData.has_paid || false);
+            setTrialEndDate(profileData.trial_end_date);
+            setStripeCustomerId(profileData.stripe_customer_id);
+            
+            const accessResult = calculateSequentialAccess(
+              profileData.has_paid || false,
+              profileData.friend || false,
+              profileData.subscription_status,
+              profileData.trial_end_date
+            );
+            setHasAccess(accessResult);
+            
+            if (import.meta.env.DEV) {
+              console.log(`[Auth] ${timestamp} - Fallback access result:`, {
+                hasAccess: accessResult,
+                friend: profileData.friend,
+                hasPaid: profileData.has_paid,
+                subscriptionStatus: profileData.subscription_status
+              });
+            }
+          } else if (profileError) {
+            console.error(`[Auth] ${timestamp} - Profile query error in fallback:`, profileError);
+          }
+        }
+        return;
+      }
+
+      if (data) {
+        if (import.meta.env.DEV) {
+          console.log(`[Auth] ${timestamp} - Edge function response:`, data);
+        }
+
+        setSubscriptionStatus(data.subscription_status);
+        setTrialEndDate(data.trial_end_date);
+        setCurrentPeriodEnd(data.current_period_end);
+        setHasPaid(data.has_paid || false);
+        setFriend(data.is_friend || false);
+        
+        // Get stripe_customer_id from profile if not in response
+        if (user?.id && !stripeCustomerId) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('stripe_customer_id')
+            .eq('id', user.id)
+            .single();
+          
+          if (profileData) {
+            setStripeCustomerId(profileData.stripe_customer_id);
+          }
+        }
+
+        const accessResult = calculateSequentialAccess(
+          data.has_paid || false,
+          data.is_friend || false,
+          data.subscription_status,
+          data.trial_end_date
+        );
+        
+        setHasAccess(accessResult);
+        setLastSubscriptionCheck(now);
+        
+        if (import.meta.env.DEV) {
+          console.log(`[Auth] ${timestamp} - Sequential access result:`, {
+            hasAccess: accessResult,
+            friend: data.is_friend,
+            hasPaid: data.has_paid,
+            subscriptionStatus: data.subscription_status,
+            trialEndDate: data.trial_end_date
+          });
+        }
+      }
+    } catch (error) {
+      console.error(`[Auth] ${timestamp} - Error during subscription check:`, error);
+      // Don't throw - use fallback data if available
+    } finally {
+      // Enhanced state cleanup with explicit logging
+      setIsAccessChecking(false);
+      setAccessCheckComplete(true);
+      setSubscriptionLoading(false);
+      
+      if (import.meta.env.DEV) {
+        console.log(`[Auth] ${timestamp} - Subscription check completed with final state:`, {
+          hasAccess,
+          friend,
+          hasPaid,
+          subscriptionStatus,
+          accessCheckComplete: true,
+          isAccessChecking: false
+        });
+      }
+    }
+  };
+
+  // Cache busting: Force subscription refresh when returning from Stripe
+  useEffect(() => {
+    const handleStripeReturn = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isStripeReturn = urlParams.has('session_id') || 
+                             window.location.pathname.includes('success') || 
+                             window.location.pathname.includes('checkout') ||
+                             document.referrer.includes('stripe.com') ||
+                             document.referrer.includes('checkout.stripe.com');
+      
+      if (isStripeReturn && session) {
+        if (import.meta.env.DEV) {
+          console.log('[Auth] Detected return from Stripe - forcing subscription refresh');
+        }
+        // Clear cache and force refresh
+        setLastSubscriptionCheck(0);
+        checkSubscription(true);
+      }
+    };
+
+    // Check on component mount
+    handleStripeReturn();
+    
+    // Also check when page becomes visible (user switches back to tab)
+    const handleVisibilityChange = () => {
+      if (!document.hidden && session) {
+        // Only check if it's been more than 30 seconds since last check
+        const timeSinceLastCheck = Date.now() - lastSubscriptionCheck;
+        if (timeSinceLastCheck > 30000) {
+          if (import.meta.env.DEV) {
+            console.log('[Auth] Page visibility change - refreshing subscription');
+          }
+          checkSubscription(true);
+        }
+      }
+    };
+
+    };
+  }, [session, lastSubscriptionCheck]);
+
   // New method for password-based login to match expected interface
-  const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -507,8 +763,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const calculateSequentialAccess = (paid: boolean, isFriend: boolean, status: string | null, endDate: string | null): boolean => {
     const timestamp = new Date().toISOString();
     
+    // Feature flag for new subscription flow
+    const enableNewSubFlow = import.meta.env.VITE_ENABLE_NEW_SUB_FLOW === 'true';
+    
     if (import.meta.env.DEV) {
-      console.log(`[Auth] ${timestamp} - Starting sequential access check:`, {
+      console.log(`[Auth] ${timestamp} - Starting sequential access check (${enableNewSubFlow ? 'NEW' : 'LEGACY'} flow):`, {
         isFriend,
         status,
         endDate,
@@ -516,6 +775,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       });
     }
 
+    if (enableNewSubFlow) {
+      // NEW FLOW: Handle 'trialing' and 'active' properly
+      // Step 1: Check for friend status first (highest priority)
+      if (isFriend) {
+        if (import.meta.env.DEV) {
+          console.log(`[Auth] ${timestamp} - STEP 1: Friend status found - granting immediate access`);
+        }
+        return true;
+      }
+
+      // Step 2: Check if user has active or trialing subscription
+      if (status === 'active' || status === 'trialing') {
+        if (import.meta.env.DEV) {
+          console.log(`[Auth] ${timestamp} - STEP 2: Active/trialing subscription found (${status}) - granting access`);
+        }
+        return true;
+      }
+
+      // Step 3: Check past_due (soft block - show banner but allow access to portal)
+      if (status === 'past_due') {
+        if (import.meta.env.DEV) {
+          console.log(`[Auth] ${timestamp} - STEP 3: Past due subscription - granting access for payment update`);
+        }
+        return true;
+      }
+
+      // Step 4: No access conditions met
+      if (import.meta.env.DEV) {
+        console.log(`[Auth] ${timestamp} - STEP 4: No access conditions met (status: ${status}) - denying access`);
+      }
+      return false;
+    }
+    
+    // LEGACY FLOW: Keep existing logic for compatibility
     // Step 1: Check if user is marked as a friend
     if (isFriend) {
       if (import.meta.env.DEV) {
@@ -589,6 +882,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       }
 
       // Enhanced timeout for edge function with fallback (5 seconds for better mobile support)
+      // Add cache busting parameter when force refresh is requested
+      const cacheBuster = forceRefresh ? `?t=${Date.now()}` : '';
       const edgeFunctionPromise = supabase.functions.invoke('check-subscription', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
