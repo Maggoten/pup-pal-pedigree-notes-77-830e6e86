@@ -104,10 +104,14 @@ const handler = async (req: Request): Promise<Response> => {
       const { email }: PasswordResetRequest = requestBody;
       console.log('Sending password reset for email:', email);
 
-      // Check if user exists
-      const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(email);
+      // Check if user exists in profiles table
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, email')
+        .eq('email', email)
+        .single();
       
-      if (userError || !userData.user) {
+      if (profileError || !profileData) {
         console.log('User not found for email:', email);
         // Return success even if user doesn't exist (security best practice)
         return new Response(JSON.stringify({ success: true, message: 'Om emailadressen finns i vårt system har ett återställningsmejl skickats.' }), {
@@ -125,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
       const { error: tokenError } = await supabase
         .from('password_reset_tokens')
         .insert({
-          user_id: userData.user.id,
+          user_id: profileData.id,
           email: email,
           token: resetToken,
           expires_at: expiresAt.toISOString(),
