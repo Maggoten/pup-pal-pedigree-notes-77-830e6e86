@@ -39,7 +39,7 @@ const TemperatureTrendChart: React.FC<TemperatureTrendChartProps> = ({
 
   if (temperatureData.length === 0) {
     return (
-      <Card className={`${className}`}>
+      <Card className={className}>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Thermometer className="h-5 w-5" />
@@ -86,7 +86,7 @@ const TemperatureTrendChart: React.FC<TemperatureTrendChartProps> = ({
   };
 
   return (
-    <Card className={`${className}`}>
+    <Card className={className}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Thermometer className="h-5 w-5" />
