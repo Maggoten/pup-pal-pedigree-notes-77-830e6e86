@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, PawPrint } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +16,7 @@ const UpcomingHeatsCard: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const { upcomingHeats, loading } = useUpcomingHeats();
   const { dogs } = useDogs();
+  const navigate = useNavigate();
 
   // Show loading state if data is being fetched
   if (loading) {
@@ -53,6 +55,10 @@ const UpcomingHeatsCard: React.FC = () => {
     return 'bg-warmgreen-500'; // green
   };
 
+  const handleHeatClick = (dogId: string) => {
+    navigate(`/my-dogs/${dogId}/heat-tracking`);
+  };
+
   // Show first 3 upcoming heats
   const displayHeats = upcomingHeats.slice(0, 3);
   const hasMoreHeats = upcomingHeats.length > 3;
@@ -78,7 +84,11 @@ const UpcomingHeatsCard: React.FC = () => {
                 const isOverdue = daysRemaining < 0;
                 
                 return (
-                  <div key={heat.dogId} className="flex items-center gap-3 py-2">
+                  <div 
+                    key={heat.dogId} 
+                    className="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded-md px-2 -mx-2 transition-colors"
+                    onClick={() => handleHeatClick(heat.dogId)}
+                  >
                     <Avatar className="h-8 w-8">
                       <AvatarImage 
                         src={heat.dogImageUrl} 

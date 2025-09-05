@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,7 @@ export const UpcomingHeatsModal: React.FC<UpcomingHeatsModalProps> = ({
 }) => {
   const { t, i18n } = useTranslation('home');
   const [filter, setFilter] = useState<FilterType>('all');
+  const navigate = useNavigate();
 
   const filterHeats = (heats: UpcomingHeat[], filterType: FilterType): UpcomingHeat[] => {
     const today = new Date();
@@ -70,6 +72,11 @@ export const UpcomingHeatsModal: React.FC<UpcomingHeatsModalProps> = ({
     const daysUntil = differenceInDays(date, new Date());
     if (daysUntil <= 7) return 'secondary';
     return 'outline';
+  };
+
+  const handleHeatClick = (dogId: string) => {
+    navigate(`/my-dogs/${dogId}/heat-tracking`);
+    onClose();
   };
 
   return (
@@ -137,7 +144,8 @@ export const UpcomingHeatsModal: React.FC<UpcomingHeatsModalProps> = ({
               return (
                 <div
                   key={`${heat.dogId}-${heat.date.toISOString()}`}
-                  className="flex items-center gap-3 p-4 rounded-lg bg-greige-50 border border-greige-200 hover:bg-greige-100 transition-colors"
+                  className="flex items-center gap-3 p-4 rounded-lg bg-greige-50 border border-greige-200 hover:bg-greige-100 transition-colors cursor-pointer"
+                  onClick={() => handleHeatClick(heat.dogId)}
                 >
                   <Avatar className="h-10 w-10">
                     <AvatarImage 

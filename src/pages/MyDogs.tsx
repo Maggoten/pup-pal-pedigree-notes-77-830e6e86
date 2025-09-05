@@ -1,5 +1,6 @@
 import { useAuth } from '@/hooks/useAuth';
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlusCircle, Filter, AlertCircle, Loader2 } from 'lucide-react';
@@ -27,11 +28,20 @@ const MyDogsContent: React.FC = () => {
   const [retryAttempts, setRetryAttempts] = useState(0);
   const [showError, setShowError] = useState(false);
   const { t } = useTranslation('dogs');
+  const { dogId, tab } = useParams<{ dogId?: string; tab?: string }>();
   
-  // Clear active dog when navigating to My Dogs page
+  // Handle direct navigation to specific dog
   useEffect(() => {
-    setActiveDog(null);
-  }, [setActiveDog]);
+    if (dogId && dogs.length > 0) {
+      const dog = dogs.find(d => d.id === dogId);
+      if (dog) {
+        setActiveDog(dog);
+      }
+    } else if (!dogId) {
+      // Clear active dog when navigating to My Dogs page without dogId
+      setActiveDog(null);
+    }
+  }, [dogId, dogs, setActiveDog]);
   
   // Wait for auth to be ready before considering the page ready
   useEffect(() => {
@@ -142,7 +152,7 @@ const MyDogsContent: React.FC = () => {
           <p className="text-muted-foreground">{t('list.loading')}</p>
         </div>
       ) : activeDog ? (
-        <DogDetails dog={activeDog} />
+        <DogDetails dog={activeDog} activeTab={tab} />
       ) : (
         <>
           <div className="flex justify-between items-center mb-4">

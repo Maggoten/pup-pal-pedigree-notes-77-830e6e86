@@ -17,9 +17,10 @@ import { useTranslation } from 'react-i18next';
 
 interface DogDetailsProps {
   dog: Dog;
+  activeTab?: string;
 }
 
-const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
+const DogDetails: React.FC<DogDetailsProps> = ({ dog, activeTab }) => {
   const { setActiveDog, updateDog, removeDog, loading } = useDogs();
   const { t } = useTranslation('dogs');
   const [isEditing, setIsEditing] = useState(false);
@@ -196,7 +197,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog }) => {
         Back to list
       </Button>
       
-      <Tabs defaultValue="overview" className="w-full">
+      <Tabs defaultValue={activeTab || "overview"} className="w-full">
         <TabsList className={`grid w-full ${dog.gender === 'female' ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <PawPrint className="h-4 w-4" />

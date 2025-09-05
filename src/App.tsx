@@ -146,6 +146,8 @@ const App = () => {
                     <Route path="/registration-success" element={<RegistrationSuccess />} />
                     <Route path="/" element={<Index />} />
                     <Route path="/my-dogs" element={<MyDogs />} />
+                    <Route path="/my-dogs/:dogId" element={<MyDogs />} />
+                    <Route path="/my-dogs/:dogId/:tab" element={<MyDogs />} />
                     <Route path="/planned-litters" element={<PlannedLitters />} />
                     {/* Handle pregnancy routes with loading state */}
                     <Route path="/pregnancy" element={loading ? <div>Loading...</div> : 
