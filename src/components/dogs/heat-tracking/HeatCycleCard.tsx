@@ -9,6 +9,7 @@ import { HeatService } from '@/services/HeatService';
 import HeatLoggingDialog from './HeatLoggingDialog';
 import HeatLogsDialog from './HeatLogsDialog';
 import EndHeatCycleDialog from './EndHeatCycleDialog';
+import EditHeatCycleDialog from './EditHeatCycleDialog';
 import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
 import { toast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
@@ -27,6 +28,7 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
   const [showLoggingDialog, setShowLoggingDialog] = useState(false);
   const [showLogsDialog, setShowLogsDialog] = useState(false);
   const [showEndDialog, setShowEndDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -114,27 +116,33 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
             </div>
             
             {/* Action buttons - separated from delete for safety */}
-            {isActive && (
-              <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex gap-2 w-full sm:w-auto">
+              {isActive && (
                 <Button 
                   className="flex-1 sm:flex-none touch-manipulation"
                   onClick={() => setShowLoggingDialog(true)}
                 >
-                    <Plus className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">{t('heatTracking.logging.addEntry')}</span>
-                    <span className="sm:hidden">{t('heatTracking.logging.addEntry')}</span>
+                  <Plus className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">{t('heatTracking.logging.addEntry')}</span>
+                  <span className="sm:hidden">{t('heatTracking.logging.addEntry')}</span>
                 </Button>
-                  <Button 
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-destructive touch-manipulation"
-                    onClick={() => setShowDeleteDialog(true)}
-                    disabled={isDeleting}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-              </div>
-            )}
+              )}
+              <EditHeatCycleDialog 
+                heatCycle={heatCycle}
+                onSuccess={onUpdate}
+              />
+              {isActive && (
+                <Button 
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-destructive touch-manipulation"
+                  onClick={() => setShowDeleteDialog(true)}
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
           <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm">
             <span className="flex items-center gap-1">
