@@ -623,6 +623,7 @@ export type Database = {
           kennel_name: string | null
           language: string | null
           last_name: string | null
+          newsletter_consent: boolean | null
           phone: string | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
@@ -641,6 +642,7 @@ export type Database = {
           kennel_name?: string | null
           language?: string | null
           last_name?: string | null
+          newsletter_consent?: boolean | null
           phone?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -659,6 +661,7 @@ export type Database = {
           kennel_name?: string | null
           language?: string | null
           last_name?: string | null
+          newsletter_consent?: boolean | null
           phone?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
