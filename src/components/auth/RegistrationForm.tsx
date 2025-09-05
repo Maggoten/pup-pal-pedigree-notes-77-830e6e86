@@ -118,6 +118,30 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="subscribeToNewsletter"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-warmbeige-100/30 border-warmbeige-200">
+              <FormControl>
+                <input
+                  type="checkbox"
+                  checked={field.value || false}
+                  onChange={field.onChange}
+                  className="h-4 w-4 rounded border-warmbeige-300 text-warmgreen-600 focus:ring-warmgreen-500"
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel className="text-brown-800">{t('subscribeToNewsletter')}</FormLabel>
+                <FormDescription className="text-brown-600">
+                  {t('newsletterDescription')}
+                </FormDescription>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="bg-warmbeige-100/50 border border-warmbeige-300 rounded-md p-4 mb-4">
           <h4 className="text-brown-800 font-semibold mb-2">{t('whatHappensNext')}</h4>
           <div className="text-brown-600 text-sm space-y-1">
@@ -152,29 +176,6 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="subscribeToNewsletter"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-warmbeige-100/30 border-warmbeige-200">
-              <FormControl>
-                <input
-                  type="checkbox"
-                  checked={field.value || false}
-                  onChange={field.onChange}
-                  className="h-4 w-4 rounded border-warmbeige-300 text-warmgreen-600 focus:ring-warmgreen-500"
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel className="text-brown-800">{t('subscribeToNewsletter')}</FormLabel>
-                <FormDescription className="text-brown-600">
-                  {t('newsletterDescription')}
-                </FormDescription>
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         
         <Button
           className="w-full bg-warmgreen-600 hover:bg-warmgreen-700 text-white" 
