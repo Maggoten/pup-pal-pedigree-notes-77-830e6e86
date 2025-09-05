@@ -33,10 +33,12 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
   dogName,
   className = "" 
 }) => {
-  const { t } = useTranslation('dogs');
+  const { t, i18n } = useTranslation('dogs');
   
-  // Debug log to check translation value
-  console.log('Translation debug - cycle:', t('cycle'));
+  // Debug logs to check language and translation
+  console.log('Current language:', i18n.language);
+  console.log('Translation debug - cycle with namespace:', t('dogs:cycle'));
+  console.log('Translation debug - cycle without namespace:', t('cycle'));
   
   const calculateStats = (): CycleStats => {
     const completedCycles = heatCycles.filter(cycle => cycle.end_date);
@@ -126,7 +128,7 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
         <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
-          {dogName}s {t('cycle')}
+           {dogName}s {t('dogs:cycle')}
         </CardTitle>
           <CardDescription>
             {t('heatTracking.analytics.noData')}
@@ -147,7 +149,7 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
-          {dogName}s {t('cycle')}
+          {dogName}s {t('dogs:cycle')}
         </CardTitle>
         <CardDescription>
           {t('heatTracking.analytics.description', { count: stats.totalCycles })}
