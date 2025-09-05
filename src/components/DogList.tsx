@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Loader2, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 interface DogListProps {
   dogsList?: Dog[];
 }
@@ -21,6 +22,7 @@ const DogList: React.FC<DogListProps> = ({
   const {
     t
   } = useTranslation('dogs');
+  const navigate = useNavigate();
 
   // Use the provided dogsList or fall back to all dogs from context
   const dogs = dogsList || allDogs;
@@ -30,6 +32,7 @@ const DogList: React.FC<DogListProps> = ({
   });
   const handleDogClick = (dog: Dog) => {
     setActiveDog(dog);
+    navigate(`/my-dogs/${dog.id}/overview`);
     console.log('Clicked on dog:', dog.name);
   };
 
