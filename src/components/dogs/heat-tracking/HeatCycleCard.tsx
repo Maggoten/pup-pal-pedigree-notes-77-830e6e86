@@ -115,61 +115,90 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
 
   return (
     <>
-      <Card className={`${isActive ? 'border-primary shadow-sm' : 'border-muted'} transition-shadow hover:shadow-md`}>
-        <CardHeader className="pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Calendar className="h-4 w-4" />
-                <CardTitle className="text-base sm:text-lg">
-                  {format(startDate, 'MMMM dd, yyyy')}
-                </CardTitle>
-                {isActive && (
-                  <Badge variant="default" className="text-xs">
-                    {t('heatTracking.cycles.badges.active')}
-                  </Badge>
-                )}
+      <Card className={`${isActive ? 'border-primary shadow-md' : 'border-muted'} transition-all hover:shadow-lg`}>
+        <CardHeader className="pb-4 sm:pb-3">
+          {/* Mobile-first header layout */}
+          <div className="space-y-4 sm:space-y-0">
+            {/* Date and status row */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="space-y-2">
+                {/* Prominent date display */}
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg sm:text-xl font-semibold">
+                    {format(startDate, 'MMMM dd, yyyy')}
+                  </CardTitle>
+                </div>
+                
+                {/* Status badges */}
+                <div className="flex items-center gap-2">
+                  {isActive && (
+                    <Badge variant="default" className="text-sm px-3 py-1">
+                      {t('heatTracking.cycles.badges.active')}
+                    </Badge>
+                  )}
+                </div>
               </div>
-              {/* Add Entry button aligned with active badge on mobile */}
-              {isActive && (
-                <Button 
-                  className="w-full sm:hidden touch-manipulation"
-                  onClick={() => setShowLoggingDialog(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t('heatTracking.logging.addEntry')}
-                </Button>
-              )}
-            </div>
-            
-            {/* Action buttons - separated from delete for safety */}
-            <div className="flex gap-2 w-full sm:w-auto">
-              {isActive && (
-                <Button 
-                  className="hidden sm:flex flex-1 sm:flex-none touch-manipulation"
-                  onClick={() => setShowLoggingDialog(true)}
-                >
-                  <Plus className="h-4 w-4 sm:mr-2" />
-                  <span>{t('heatTracking.logging.addEntry')}</span>
-                </Button>
-              )}
-              <Button 
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground touch-manipulation"
-                onClick={() => setShowEditDialog(true)}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              {isActive && (
+              
+              {/* Desktop action buttons */}
+              <div className="hidden sm:flex gap-2">
+                {isActive && (
+                  <Button 
+                    className="touch-manipulation"
+                    onClick={() => setShowLoggingDialog(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    <span>{t('heatTracking.logging.addEntry')}</span>
+                  </Button>
+                )}
                 <Button 
                   variant="ghost"
                   size="sm"
-                  className="text-muted-foreground hover:text-destructive touch-manipulation"
+                  className="text-muted-foreground hover:text-foreground touch-manipulation min-w-[44px] min-h-[44px]"
+                  onClick={() => setShowEditDialog(true)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                {isActive && (
+                  <Button 
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-destructive touch-manipulation min-w-[44px] min-h-[44px]"
+                    onClick={() => setShowDeleteDialog(true)}
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Mobile action buttons - larger and more prominent */}
+            <div className="flex sm:hidden gap-3">
+              {isActive && (
+                <Button 
+                  className="flex-1 h-12 text-base font-medium touch-manipulation"
+                  onClick={() => setShowLoggingDialog(true)}
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  {t('heatTracking.logging.addEntry')}
+                </Button>
+              )}
+              <Button 
+                variant="outline"
+                className="min-w-[48px] h-12 touch-manipulation"
+                onClick={() => setShowEditDialog(true)}
+              >
+                <Edit className="h-5 w-5" />
+              </Button>
+              {isActive && (
+                <Button 
+                  variant="outline"
+                  className="min-w-[48px] h-12 text-destructive hover:bg-destructive hover:text-destructive-foreground touch-manipulation"
                   onClick={() => setShowDeleteDialog(true)}
                   disabled={isDeleting}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-5 w-5" />
                 </Button>
               )}
             </div>
