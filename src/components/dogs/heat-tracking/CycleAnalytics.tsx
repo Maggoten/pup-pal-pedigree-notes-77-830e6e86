@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Calendar, TrendingUp, Clock, Target, AlertCircle } from 'lucide-react';
+import { Calendar, TrendingUp, Clock, Heart, AlertCircle } from 'lucide-react';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import type { Database } from '@/integrations/supabase/types';
@@ -156,7 +156,7 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
         {currentCycle && stats.currentDayInCycle && (
           <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Target className="h-4 w-4 text-primary" />
+              <Heart className="h-4 w-4 text-primary" />
               <h4 className="font-semibold text-primary">
                 {t('heatTracking.analytics.currentCycle')}
               </h4>
