@@ -8,11 +8,12 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, AlertCircle, Filter } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Calendar, AlertCircle, Filter, PawPrint } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { UpcomingHeat } from '@/types/reminders';
-import { formatDistanceToNow, isToday, isPast, addDays } from 'date-fns';
-import { sv, enUS } from 'date-fns/locale';
+import { formatDateWithLocale } from '@/utils/localizedDateFormat';
+import { addDays, differenceInDays, isPast, isToday } from 'date-fns';
 
 interface UpcomingHeatsModalProps {
   open: boolean;
@@ -27,7 +28,7 @@ export const UpcomingHeatsModal: React.FC<UpcomingHeatsModalProps> = ({
   onClose,
   heats
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation('home');
   const [filter, setFilter] = useState<FilterType>('all');
 
   const filterHeats = (heats: UpcomingHeat[], filterType: FilterType): UpcomingHeat[] => {
@@ -47,26 +48,26 @@ export const UpcomingHeatsModal: React.FC<UpcomingHeatsModalProps> = ({
 
   const filteredHeats = filterHeats(heats, filter);
 
-  const formatHeatDate = (date: Date) => {
-    const locale = i18n.language === 'sv' ? sv : enUS;
+  const formatHeatDate = (date: Date): string => {
+    const daysRemaining = differenceInDays(date, new Date());
     
     if (isToday(date)) {
-      return t('home:upcomingHeats.today');
+      return t('upcomingHeats.today');
+    } else if (daysRemaining < 0) {
+      return t('upcomingHeats.overdue', { days: Math.abs(daysRemaining) });
+    } else {
+      return t('upcomingHeats.days', { days: daysRemaining });
     }
-    
-    if (isPast(date)) {
-      const days = Math.abs(Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24)));
-      return t('home:upcomingHeats.overdue', { days });
-    }
-    
-    const days = Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    return t('home:upcomingHeats.days', { days });
+  };
+
+  const formatDetailedDate = (date: Date): string => {
+    return formatDateWithLocale(date, 'd MMM yyyy', i18n.language);
   };
 
   const getStatusVariant = (date: Date) => {
     if (isPast(date) && !isToday(date)) return 'destructive';
     if (isToday(date)) return 'default';
-    const daysUntil = Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    const daysUntil = differenceInDays(date, new Date());
     if (daysUntil <= 7) return 'secondary';
     return 'outline';
   };
@@ -77,10 +78,10 @@ export const UpcomingHeatsModal: React.FC<UpcomingHeatsModalProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Calendar className="h-5 w-5 text-warmgreen-600" />
-            <span>{t('home:upcomingHeats.title')}</span>
+            <span>{t('upcomingHeats.title')}</span>
           </DialogTitle>
           <DialogDescription>
-            {t('home:upcomingHeats.description')} ({heats.length} {heats.length === 1 ? 'löp' : 'löp'})
+            {t('upcomingHeats.description')} ({heats.length} {heats.length === 1 ? 'löp' : 'löp'})
           </DialogDescription>
         </DialogHeader>
 
@@ -120,7 +121,7 @@ export const UpcomingHeatsModal: React.FC<UpcomingHeatsModalProps> = ({
               <AlertCircle className="h-8 w-8 text-greige-400 mx-auto mb-2" />
               <p className="text-sm text-brown-600">
                 {filter === 'all' 
-                  ? t('home:upcomingHeats.empty.description')
+                  ? t('upcomingHeats.empty.description')
                   : (i18n.language === 'sv' 
                       ? 'Inga löp i den valda tidsperioden' 
                       : 'No heats in the selected time period'
@@ -130,32 +131,58 @@ export const UpcomingHeatsModal: React.FC<UpcomingHeatsModalProps> = ({
             </div>
           ) : (
             filteredHeats.map((heat) => {
-              const isOverdue = isPast(heat.date) && !isToday(heat.date);
-              const formattedDate = heat.date.toLocaleDateString(i18n.language === 'sv' ? 'sv-SE' : 'en-US');
+              const daysRemaining = differenceInDays(heat.date, new Date());
+              const isOverdue = daysRemaining < 0;
               
               return (
                 <div
                   key={`${heat.dogId}-${heat.date.toISOString()}`}
-                  className="flex items-center justify-between p-4 rounded-lg bg-greige-50 border border-greige-200 hover:bg-greige-100 transition-colors"
+                  className="flex items-center gap-3 p-4 rounded-lg bg-greige-50 border border-greige-200 hover:bg-greige-100 transition-colors"
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <h4 className="font-medium text-brown-800">{heat.dogName}</h4>
-                      <Badge variant={getStatusVariant(heat.date)} className="text-xs">
-                        {formatHeatDate(heat.date)}
-                      </Badge>
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage 
+                      src={heat.dogImageUrl} 
+                      alt={heat.dogName} 
+                      className="object-cover" 
+                    />
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      <PawPrint className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium text-brown-800 truncate">{heat.dogName}</h4>
+                      {isOverdue && <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />}
                     </div>
-                    <div className="flex items-center space-x-4 text-xs text-brown-600">
-                      <div className="flex items-center space-x-1">
-                        <Calendar className="h-3 w-3" />
-                        <span>{formattedDate}</span>
+                    
+                    <div className="text-sm text-brown-600 space-y-1">
+                      <div className="flex items-center gap-1">
+                        <span>
+                          {t('upcomingHeats.nextHeat', {
+                            date: formatDetailedDate(heat.date),
+                            days: Math.abs(daysRemaining)
+                          })}
+                        </span>
+                        {heat.source === 'predicted' && (
+                          <span className="text-muted-foreground/70">
+                            {t('upcomingHeats.predicted')}
+                          </span>
+                        )}
                       </div>
+                      {heat.lastHeatDate && (
+                        <div>
+                          {t('upcomingHeats.lastHeat', {
+                            date: formatDetailedDate(heat.lastHeatDate)
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                   
-                  {isOverdue && (
-                    <AlertCircle className="h-5 w-5 text-red-500 ml-2" />
-                  )}
+                  <Badge variant={getStatusVariant(heat.date)} className="text-xs">
+                    {formatHeatDate(heat.date)}
+                  </Badge>
                 </div>
               );
             })

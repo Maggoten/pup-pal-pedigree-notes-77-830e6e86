@@ -145,6 +145,10 @@
     "days": "{{days}} dagar",
     "today": "Idag",
     "overdue": "{{days}} dagar försenat",
+    "lastHeat": "Senast: {{date}}",
+    "nextHeat": "Nästa löp: {{date}} ({{days}} dagar kvar)",
+    "predicted": "(beräknad)",
+    "confirmed": "(bekräftat)",
     "empty": {
       "title": "Inga kommande löp",
       "description": "Lägg till löphistorik för dina tikar för att få prognoser"

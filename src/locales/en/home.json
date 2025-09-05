@@ -145,6 +145,10 @@
     "days": "{{days}} days",
     "today": "Today",
     "overdue": "{{days}} days overdue",
+    "lastHeat": "Last: {{date}}",
+    "nextHeat": "Next heat: {{date}} ({{days}} days left)",
+    "predicted": "(predicted)",
+    "confirmed": "(confirmed)",
     "empty": {
       "title": "No upcoming heats",
       "description": "Add heat history for your females to get predictions"

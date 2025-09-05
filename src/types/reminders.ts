@@ -16,7 +16,10 @@ export interface Reminder {
 export interface UpcomingHeat {
   dogId: string;
   dogName: string;
+  dogImageUrl?: string;
   date: Date;
+  lastHeatDate?: Date;
+  source: 'predicted' | 'confirmed';
   heatIndex: number; // Add the index of the heat record in the dog's heatHistory array
 }
 

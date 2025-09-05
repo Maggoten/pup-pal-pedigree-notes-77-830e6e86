@@ -7,7 +7,7 @@ import { AddEventFormValues } from '@/components/calendar/types';
 import BreedingCalendar from '@/components/BreedingCalendar';
 import BreedingReminders from '@/components/BreedingReminders';
 import { HomeOfferCarousel } from '@/components/home/HomeOfferCarousel';
-import { UpcomingHeatsCard } from '@/components/home/UpcomingHeatsCard';
+import UpcomingHeatsCard from '@/components/home/UpcomingHeatsCard';
 
 interface DashboardContentProps {
   isDataReady: boolean;

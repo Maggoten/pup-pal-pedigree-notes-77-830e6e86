@@ -35,7 +35,10 @@ export const calculateUpcomingHeats = (dogs: Dog[]): UpcomingHeat[] => {
         upcomingHeats.push({
           dogId: dog.id,
           dogName: dog.name,
+          dogImageUrl: dog.image,
           date: nextHeatDate,
+          lastHeatDate: lastHeatDate,
+          source: 'predicted' as const,
           heatIndex: dog.heatHistory.findIndex(h => h.date === sortedHeatDates[0].date) // Store the index for deletion
         });
       }
@@ -71,7 +74,10 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
         upcomingHeats.push({
           dogId: dog.id,
           dogName: dog.name,
+          dogImageUrl: dog.image,
           date: nextHeatDate,
+          lastHeatDate: latestDate,
+          source: 'predicted' as const,
           heatIndex: -1 // Not used in unified system
         });
       }
@@ -91,7 +97,10 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
           upcomingHeats.push({
             dogId: dog.id,
             dogName: dog.name,
+            dogImageUrl: dog.image,
             date: nextHeatDate,
+            lastHeatDate: lastHeatDate,
+            source: 'predicted' as const,
             heatIndex: dog.heatHistory.findIndex(h => h.date === sortedHeatDates[0].date)
           });
         }
