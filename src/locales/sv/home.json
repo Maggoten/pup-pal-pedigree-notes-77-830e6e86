@@ -16,7 +16,7 @@
   "userStats": {
     "yourJourneyTitle": "Din resa 2025",
     "noDataMessage": "Du har inte registrerat några kullar under {{year}} än – din resa börjar snart!",
-    "yourStatsTitle": "Din {{year}} Statistik",
+    "yourStatsTitle": "Din statistik {{year}}",
     "litters": "Kullar",
     "puppies": "Valpar",
     "avgSize": "Snitt Storlek",
