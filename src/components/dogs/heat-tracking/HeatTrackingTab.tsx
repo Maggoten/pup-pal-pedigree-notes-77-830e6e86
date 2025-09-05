@@ -19,6 +19,7 @@ import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirm
 import type { Database } from '@/integrations/supabase/types';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
+type HeatLog = Database['public']['Tables']['heat_logs']['Row'];
 
 interface HeatTrackingTabProps {
   dog: Dog;
@@ -28,6 +29,7 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
   const { t } = useTranslation('dogs');
   const heatHistory = dog.heatHistory || [];
   const [heatCycles, setHeatCycles] = useState<HeatCycle[]>([]);
+  const [allTemperatureLogs, setAllTemperatureLogs] = useState<HeatLog[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -40,6 +42,19 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
     try {
       const cycles = await HeatService.getHeatCycles(dog.id);
       setHeatCycles(cycles);
+      
+      // Load all temperature logs from all cycles
+      const allLogs: HeatLog[] = [];
+      for (const cycle of cycles) {
+        const logs = await HeatService.getHeatLogs(cycle.id);
+        // Filter only temperature logs
+        const temperatureLogs = logs.filter(log => log.temperature !== null && log.temperature !== undefined);
+        allLogs.push(...temperatureLogs);
+      }
+      
+      // Sort by date (oldest first for chart display)
+      allLogs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      setAllTemperatureLogs(allLogs);
     } catch (error) {
       console.error('Error loading heat cycles:', error);
     } finally {
@@ -158,16 +173,10 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
         </div>
       )}
 
-      {/* Heat Cycles List with Temperature Charts */}
+      {/* Heat Cycles List */}
       <div className="space-y-6">
         {heatCycles.length > 0 ? (
           <>
-            {/* Temperature Trend Chart - show if we have heat cycles */}
-            <TemperatureTrendChart 
-              heatLogs={[]} // Will be populated with all temperature logs across cycles
-              className="mb-6"
-            />
-            
             {heatCycles.map((cycle) => (
               <HeatCycleCard 
                 key={cycle.id} 
@@ -175,6 +184,14 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
                 onUpdate={loadHeatCycles}
               />
             ))}
+            
+            {/* Temperature Trend Chart - moved to bottom */}
+            {allTemperatureLogs.length > 0 && (
+              <TemperatureTrendChart 
+                heatLogs={allTemperatureLogs}
+                className="mt-6"
+              />
+            )}
           </>
         ) : (
           <Card>
