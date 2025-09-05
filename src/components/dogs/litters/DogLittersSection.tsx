@@ -50,10 +50,8 @@ const DogLittersSection: React.FC<DogLittersSectionProps> = ({ dog }) => {
   }, [dog.id, dog.name]);
 
   const handleViewDetails = (litter: Litter) => {
-    // Navigate to MyLitters page with the selected litter
-    navigate('/my-litters', { 
-      state: { selectedLitterId: litter.id } 
-    });
+    // Navigate to MyLitters page with the selected litter as URL parameter
+    navigate(`/my-litters?selected=${litter.id}`);
   };
 
   if (loading) {
