@@ -5,6 +5,7 @@
   "language": "Språk",
   "english": "English (EN)",
   "svenska": "Svenska (SV)",
+  "days": "dagar",
   "actions": {
     "add": "Lägg till",
     "edit": "Redigera",

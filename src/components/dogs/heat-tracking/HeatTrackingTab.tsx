@@ -132,7 +132,7 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
             </CardHeader>
             <CardContent className="pt-0">
               <div className="text-2xl font-bold">
-                {averageCycle ? `${averageCycle} ${t('display.fields.days')}` : t('heatTracking.analytics.unknown', 'N/A')}
+                {averageCycle ? t('heatTracking.analytics.days', { days: averageCycle }) : t('heatTracking.analytics.unknown')}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 {heatHistory.length < 2 ? t('heatTracking.analytics.needTwoCycles') : t('heatTracking.analytics.basedOnHistory')}
@@ -167,7 +167,7 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
                 {nextHeat ? format(nextHeat, 'MMM dd') : t('heatTracking.analytics.unknown')}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                {nextHeat ? t('heatTracking.analytics.days', { days: differenceInDays(nextHeat, new Date()) }) : t('heatTracking.analytics.noData')}
+                {nextHeat ? `${differenceInDays(nextHeat, new Date())} ${t('common.days')}` : t('heatTracking.analytics.noData')}
               </p>
             </CardContent>
           </Card>
