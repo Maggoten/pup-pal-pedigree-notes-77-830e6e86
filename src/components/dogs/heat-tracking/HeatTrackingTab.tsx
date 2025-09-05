@@ -118,6 +118,7 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
       <CycleAnalytics 
         heatCycles={heatCycles}
         currentCycle={heatCycles.find(cycle => !cycle.end_date) || null}
+        dogName={dog.name}
       />
 
       {/* Quick Stats Cards for Mobile - Only show if no heat cycles */}

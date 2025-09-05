@@ -12,6 +12,7 @@ type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 interface CycleAnalyticsProps {
   heatCycles: HeatCycle[];
   currentCycle?: HeatCycle | null;
+  dogName: string;
   className?: string;
 }
 
@@ -29,6 +30,7 @@ interface CycleStats {
 const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({ 
   heatCycles, 
   currentCycle, 
+  dogName,
   className = "" 
 }) => {
   const { t } = useTranslation('dogs');
@@ -119,10 +121,10 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            {t('heatTracking.analytics.title')}
-          </CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5" />
+          {dogName}s {t('heatTracking.analytics.title')}
+        </CardTitle>
           <CardDescription>
             {t('heatTracking.analytics.noData')}
           </CardDescription>
@@ -142,7 +144,7 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
-          {t('heatTracking.analytics.title')}
+          {dogName}s {t('heatTracking.analytics.title')}
         </CardTitle>
         <CardDescription>
           {t('heatTracking.analytics.description', { count: stats.totalCycles })}
