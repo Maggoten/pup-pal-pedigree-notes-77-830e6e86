@@ -63,22 +63,33 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs }) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-64 w-full">
+        {/* Mobile-responsive chart container */}
+        <div className="h-64 sm:h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={progesteroneData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <LineChart 
+              data={progesteroneData} 
+              margin={{ 
+                top: 5, 
+                right: 15, 
+                left: 10, 
+                bottom: 5 
+              }}
+            >
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis 
                 dataKey="formattedDate" 
                 className="text-xs fill-muted-foreground"
+                tick={{ fontSize: 12 }}
               />
               <YAxis 
                 label={{ 
                   value: 'ng/ml', 
                   angle: -90, 
                   position: 'insideLeft',
-                  className: 'fill-muted-foreground'
+                  className: 'fill-muted-foreground text-xs'
                 }}
                 className="text-xs fill-muted-foreground"
+                tick={{ fontSize: 12 }}
               />
               <Tooltip content={<CustomTooltip />} />
               
@@ -100,9 +111,10 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs }) => {
                 type="monotone" 
                 dataKey="value" 
                 stroke="hsl(var(--primary))" 
-                strokeWidth={3}
-                dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: "hsl(var(--primary))", strokeWidth: 2 }}
+                strokeWidth={2}
+                dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 3 }}
+                activeDot={{ r: 5, stroke: "hsl(var(--primary))", strokeWidth: 2 }}
+                connectNulls={false}
               />
             </LineChart>
           </ResponsiveContainer>

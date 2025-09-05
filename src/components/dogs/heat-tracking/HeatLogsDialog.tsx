@@ -80,8 +80,8 @@ const HeatLogsDialog: React.FC<HeatLogsDialogProps> = ({
       const success = await HeatService.deleteHeatLog(selectedLog.id);
       if (success) {
         toast({
-          title: 'Log Deleted',
-          description: 'Heat log entry has been deleted successfully.',
+          title: t('heatTracking.logs.deleteSuccess'),
+          description: t('heatTracking.logs.deleteSuccessDescription'),
         });
         loadHeatLogs();
         onUpdate();
@@ -93,8 +93,8 @@ const HeatLogsDialog: React.FC<HeatLogsDialogProps> = ({
     } catch (error) {
       console.error('Error deleting heat log:', error);
       toast({
-        title: 'Delete Failed',
-        description: 'Failed to delete the heat log entry.',
+        title: t('heatTracking.logs.deleteError'),
+        description: t('heatTracking.logs.deleteErrorDescription'),
         variant: 'destructive',
       });
     } finally {
@@ -119,21 +119,21 @@ const HeatLogsDialog: React.FC<HeatLogsDialogProps> = ({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Thermometer className="h-5 w-5" />
-              Heat Cycle Logs
+              {t('heatTracking.logs.title')}
             </DialogTitle>
             <DialogDescription>
-              All log entries for heat cycle started on {format(startDate, 'MMMM dd, yyyy')}
+              {t('heatTracking.logs.description', { date: format(startDate, 'MMMM dd, yyyy') })}
             </DialogDescription>
           </DialogHeader>
           
           <div className="flex justify-between items-center">
             <p className="text-sm text-muted-foreground">
-              {heatLogs.length} {heatLogs.length === 1 ? 'entry' : 'entries'}
+              {t('heatTracking.logs.entryCount', { count: heatLogs.length })}
             </p>
             {isActive && (
               <Button size="sm" onClick={() => setShowAddDialog(true)}>
                 <Plus className="h-4 w-4 mr-1" />
-                Add Entry
+                {t('heatTracking.logging.addEntry')}
               </Button>
             )}
           </div>
@@ -142,14 +142,14 @@ const HeatLogsDialog: React.FC<HeatLogsDialogProps> = ({
             <div className="space-y-3">
               {isLoading ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  Loading logs...
+                  {t('heatTracking.logs.loading')}
                 </div>
               ) : heatLogs.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Thermometer className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>No log entries yet</p>
+                  <p>{t('heatTracking.logs.noEntries')}</p>
                   {isActive && (
-                    <p className="text-xs mt-1">Add your first entry to start tracking</p>
+                    <p className="text-xs mt-1">{t('heatTracking.logs.startTracking')}</p>
                   )}
                 </div>
               ) : (
@@ -201,14 +201,14 @@ const HeatLogsDialog: React.FC<HeatLogsDialogProps> = ({
                     
                     {log.observations && (
                       <div className="text-sm">
-                        <span className="font-medium text-muted-foreground">Observations: </span>
+                        <span className="font-medium text-muted-foreground">{t('heatTracking.logging.observations')}: </span>
                         <span>{log.observations}</span>
                       </div>
                     )}
                     
                     {log.notes && (
                       <div className="text-sm">
-                        <span className="font-medium text-muted-foreground">Notes: </span>
+                        <span className="font-medium text-muted-foreground">{t('heatTracking.logging.notes')}: </span>
                         <span>{log.notes}</span>
                       </div>
                     )}
@@ -240,9 +240,9 @@ const HeatLogsDialog: React.FC<HeatLogsDialogProps> = ({
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         onConfirm={handleDelete}
-        title="Delete Heat Log Entry"
-        description="Are you sure you want to delete this heat log entry? This action cannot be undone."
-        itemDetails={selectedLog ? `Entry from ${format(parseISO(selectedLog.date), 'MMM dd, yyyy')}` : ''}
+        title={t('heatTracking.logs.deleteConfirmTitle')}
+        description={t('heatTracking.logs.deleteConfirmDescription')}
+        itemDetails={selectedLog ? t('heatTracking.logs.entryFrom', { date: format(parseISO(selectedLog.date), 'MMM dd, yyyy') }) : ''}
       />
     </>
   );
