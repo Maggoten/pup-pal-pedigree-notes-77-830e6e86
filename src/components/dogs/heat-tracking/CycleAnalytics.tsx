@@ -123,7 +123,7 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
         <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
-          {dogName}s {t('heatTracking.analytics.title')}
+          {dogName}s cykel
         </CardTitle>
           <CardDescription>
             {t('heatTracking.analytics.noData')}
@@ -144,7 +144,7 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
-          {dogName}s {t('heatTracking.analytics.title')}
+          {dogName}s cykel
         </CardTitle>
         <CardDescription>
           {t('heatTracking.analytics.description', { count: stats.totalCycles })}
