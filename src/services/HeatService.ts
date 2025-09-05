@@ -268,6 +268,66 @@ export class HeatService {
    * @param heatIndex The index of the heat entry in the dog's heatHistory array
    * @returns A boolean indicating whether the operation was successful
    */
+  /**
+   * Edits a specific heat entry in a dog's heat history
+   * @param dogId The ID of the dog
+   * @param heatIndex The index of the heat entry in the dog's heatHistory array
+   * @param newDate The new date for the heat entry
+   * @returns A boolean indicating whether the operation was successful
+   */
+  static async editHeatEntry(dogId: string, heatIndex: number, newDate: Date): Promise<boolean> {
+    try {
+      // First, fetch the current dog data
+      const { data: dog, error: fetchError } = await supabase
+        .from('dogs')
+        .select('heatHistory')
+        .eq('id', dogId)
+        .single();
+      
+      if (fetchError || !dog) {
+        console.error('Error fetching dog heat history:', fetchError);
+        return false;
+      }
+      
+      // Make a copy of the heat history, ensuring it's an array
+      const heatHistory = Array.isArray(dog.heatHistory) ? [...(dog.heatHistory as HeatHistoryArray)] : [];
+      
+      // Validate the index
+      if (heatIndex < 0 || heatIndex >= heatHistory.length) {
+        console.error('Invalid heat index:', heatIndex);
+        return false;
+      }
+      
+      // Validate the new date (should not be in the future)
+      if (newDate > new Date()) {
+        console.error('Cannot set heat date in the future');
+        return false;
+      }
+      
+      // Update the heat entry with the new date
+      heatHistory[heatIndex] = { date: newDate.toISOString() };
+      
+      // Sort the heat history by date to maintain chronological order
+      heatHistory.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      
+      // Update the dog with the modified heat history
+      const { error: updateError } = await supabase
+        .from('dogs')
+        .update({ heatHistory })
+        .eq('id', dogId);
+      
+      if (updateError) {
+        console.error('Error updating dog heat history:', updateError);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Unexpected error in editHeatEntry:', error);
+      return false;
+    }
+  }
+
   static async deleteHeatEntry(dogId: string, heatIndex: number): Promise<boolean> {
     try {
       // First, fetch the current dog data
@@ -283,7 +343,7 @@ export class HeatService {
       }
       
       // Make a copy of the heat history, ensuring it's an array
-      const heatHistory = Array.isArray(dog.heatHistory) ? [...dog.heatHistory] : [];
+      const heatHistory = Array.isArray(dog.heatHistory) ? [...(dog.heatHistory as HeatHistoryArray)] : [];
       
       // Validate the index
       if (heatIndex < 0 || heatIndex >= heatHistory.length) {

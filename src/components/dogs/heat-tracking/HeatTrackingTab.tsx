@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import { HeatService } from '@/services/HeatService';
 import CreateHeatCycleDialog from './CreateHeatCycleDialog';
 import HeatCycleCard from './HeatCycleCard';
+import { EditLegacyHeatDialog } from './EditLegacyHeatDialog';
+import { DeleteLegacyHeatDialog } from './DeleteLegacyHeatDialog';
 import type { Database } from '@/integrations/supabase/types';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
@@ -213,7 +215,7 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
                   return (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                      className="group flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 rounded-full bg-primary" />
@@ -237,6 +239,18 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
                             {t('heatTracking.cycles.badges.latest')}
                           </Badge>
                         )}
+                        <EditLegacyHeatDialog
+                          dogId={dog.id}
+                          heatIndex={index}
+                          currentDate={heat.date}
+                          onSuccess={handleStartCycleSuccess}
+                        />
+                        <DeleteLegacyHeatDialog
+                          dogId={dog.id}
+                          heatIndex={index}
+                          heatDate={heat.date}
+                          onSuccess={handleStartCycleSuccess}
+                        />
                       </div>
                     </div>
                   );
