@@ -118,15 +118,27 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
       <Card className={`${isActive ? 'border-primary shadow-sm' : 'border-muted'} transition-shadow hover:shadow-md`}>
         <CardHeader className="pb-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Calendar className="h-4 w-4" />
-              <CardTitle className="text-base sm:text-lg">
-                {format(startDate, 'MMMM dd, yyyy')}
-              </CardTitle>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Calendar className="h-4 w-4" />
+                <CardTitle className="text-base sm:text-lg">
+                  {format(startDate, 'MMMM dd, yyyy')}
+                </CardTitle>
+                {isActive && (
+                  <Badge variant="default" className="text-xs">
+                    {t('heatTracking.cycles.badges.active')}
+                  </Badge>
+                )}
+              </div>
+              {/* Add Entry button aligned with active badge on mobile */}
               {isActive && (
-                <Badge variant="default" className="text-xs">
-                  {t('heatTracking.cycles.badges.active')}
-                </Badge>
+                <Button 
+                  className="w-full sm:hidden touch-manipulation"
+                  onClick={() => setShowLoggingDialog(true)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t('heatTracking.logging.addEntry')}
+                </Button>
               )}
             </div>
             
@@ -134,12 +146,11 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
             <div className="flex gap-2 w-full sm:w-auto">
               {isActive && (
                 <Button 
-                  className="flex-1 sm:flex-none touch-manipulation"
+                  className="hidden sm:flex flex-1 sm:flex-none touch-manipulation"
                   onClick={() => setShowLoggingDialog(true)}
                 >
                   <Plus className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">{t('heatTracking.logging.addEntry')}</span>
-                  <span className="sm:hidden">{t('heatTracking.logging.addEntry')}</span>
+                  <span>{t('heatTracking.logging.addEntry')}</span>
                 </Button>
               )}
               <Button 
