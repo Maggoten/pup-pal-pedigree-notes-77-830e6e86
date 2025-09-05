@@ -533,5 +533,6 @@
     "nameRequired": "Namn krävs",
     "breedRequired": "Ras krävs",
     "dateOfBirthRequired": "Födelsedatum krävs"
-  }
+  },
+  "cycle": "cykel"
 }

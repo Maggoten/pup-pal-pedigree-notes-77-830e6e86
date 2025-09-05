@@ -533,5 +533,6 @@
     "nameRequired": "Name is required",
     "breedRequired": "Breed is required", 
     "dateOfBirthRequired": "Date of birth is required"
-  }
+  },
+  "cycle": "cycle"
 }
