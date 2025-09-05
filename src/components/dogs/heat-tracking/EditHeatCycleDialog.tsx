@@ -196,10 +196,10 @@ export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({
                 onClick={() => onOpenChange(false)}
                 disabled={isLoading}
               >
-                {t('common.cancel')}
+                {t('common.actions.cancel')}
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? t('common.saving') : t('common.save')}
+                {isLoading ? t('common.status.saving') : t('common.save')}
               </Button>
             </div>
           </form>
