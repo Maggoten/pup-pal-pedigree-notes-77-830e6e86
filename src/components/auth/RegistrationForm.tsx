@@ -23,6 +23,7 @@ export type RegistrationFormValues = {
   email: string;
   password: string;
   agreeToTerms: boolean;
+  subscribeToNewsletter?: boolean;
 };
 
 interface RegistrationFormProps {
@@ -40,7 +41,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
     password: z.string().min(6, t('validation.passwordMin')),
     agreeToTerms: z.boolean().refine(val => val === true, {
       message: t('validation.termsRequired')
-    })
+    }),
+    subscribeToNewsletter: z.boolean().optional()
   });
 
   const form = useForm<RegistrationFormValues>({
@@ -51,6 +53,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
       email: '',
       password: '',
       agreeToTerms: false,
+      subscribeToNewsletter: false,
     },
   });
 
@@ -148,8 +151,32 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit, isLoading
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="subscribeToNewsletter"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-warmbeige-100/30 border-warmbeige-200">
+              <FormControl>
+                <input
+                  type="checkbox"
+                  checked={field.value || false}
+                  onChange={field.onChange}
+                  className="h-4 w-4 rounded border-warmbeige-300 text-warmgreen-600 focus:ring-warmgreen-500"
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel className="text-brown-800">{t('subscribeToNewsletter')}</FormLabel>
+                <FormDescription className="text-brown-600">
+                  {t('newsletterDescription')}
+                </FormDescription>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
-        <Button 
+        <Button
           className="w-full bg-warmgreen-600 hover:bg-warmgreen-700 text-white" 
           type="submit"
           disabled={isLoading}

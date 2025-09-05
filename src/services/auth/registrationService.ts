@@ -15,7 +15,8 @@ export const registerUser = async (userData: RegisterData): Promise<User | null>
           firstName: userData.firstName,
           lastName: userData.lastName,
           // Since address was removed from RegisterData, use empty string
-          address: ''
+          address: '',
+          newsletter_consent: userData.subscribeToNewsletter || false
         }
       }
     });
