@@ -102,7 +102,7 @@ const UpcomingHeatsCard: React.FC = () => {
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-sm truncate">{heat.dogName}</span>
+                        <span className="font-semibold text-sm text-primary truncate">{heat.dogName}</span>
                         {isOverdue && <AlertCircle className="h-3 w-3 text-destructive flex-shrink-0" />}
                       </div>
                       
