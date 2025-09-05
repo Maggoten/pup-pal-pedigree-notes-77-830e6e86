@@ -35,6 +35,9 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
 }) => {
   const { t } = useTranslation('dogs');
   
+  // Debug log to check translation value
+  console.log('Translation debug - cycle:', t('cycle'));
+  
   const calculateStats = (): CycleStats => {
     const completedCycles = heatCycles.filter(cycle => cycle.end_date);
     
