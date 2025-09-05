@@ -412,6 +412,21 @@
         "description": "Kunde inte lägga till den tidigare löpcykeln. Försök igen."
       }
     },
+    "editDialog": {
+      "title": "Redigera Löpcykel",
+      "startDate": "Löpets Startdatum",
+      "selectDate": "Välj startdatum",
+      "endDate": "Löpets Slutdatum",
+      "selectEndDate": "Välj slutdatum"
+    },
+    "editSuccess": {
+      "title": "Löpcykel Uppdaterad",
+      "description": "Löpcykeln har uppdaterats framgångsrikt"
+    },
+    "editError": {
+      "title": "Uppdatering Misslyckades",
+      "description": "Kunde inte uppdatera löpcykeln. Försök igen."
+    },
     "comingSoon": {
       "title": "Kommer Snart",
       "features": {

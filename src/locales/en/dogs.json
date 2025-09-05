@@ -412,6 +412,21 @@
         "description": "Could not add the previous heat cycle. Please try again."
       }
     },
+    "editDialog": {
+      "title": "Edit Heat Cycle",
+      "startDate": "Heat Start Date",
+      "selectDate": "Select start date",
+      "endDate": "Heat End Date",
+      "selectEndDate": "Select end date"
+    },
+    "editSuccess": {
+      "title": "Heat Cycle Updated",
+      "description": "Heat cycle has been updated successfully"
+    },
+    "editError": {
+      "title": "Update Failed",
+      "description": "Failed to update heat cycle. Please try again."
+    },
     "comingSoon": {
       "title": "Coming Soon",
       "features": {
