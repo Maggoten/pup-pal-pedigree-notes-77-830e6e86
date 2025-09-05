@@ -137,5 +137,19 @@
     "overdue": "Försenad: ",
     "upcoming": "Kommande Löp",
     "dueDate": "Beräknad födsel"
+  },
+  "upcomingHeats": {
+    "title": "Kommande Löp",
+    "description": "Nästa förväntade löptider",
+    "viewAll": "Visa alla ({{count}})",
+    "days": "{{days}} dagar",
+    "today": "Idag",
+    "overdue": "{{days}} dagar försenat",
+    "empty": {
+      "title": "Inga kommande löp",
+      "description": "Lägg till löphistorik för dina tikar för att få prognoser"
+    },
+    "loading": "Laddar kommande löp...",
+    "error": "Det gick inte att ladda kommande löp"
   }
 }

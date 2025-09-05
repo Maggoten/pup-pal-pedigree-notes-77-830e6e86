@@ -137,5 +137,19 @@
     "overdue": "Overdue: ",
     "upcoming": "Upcoming Heat",
     "dueDate": "Due Date"
+  },
+  "upcomingHeats": {
+    "title": "Upcoming Heats",
+    "description": "Next expected heat cycles",
+    "viewAll": "View all ({{count}})",
+    "days": "{{days}} days",
+    "today": "Today",
+    "overdue": "{{days}} days overdue",
+    "empty": {
+      "title": "No upcoming heats",
+      "description": "Add heat history for your females to get predictions"
+    },
+    "loading": "Loading upcoming heats...",
+    "error": "Failed to load upcoming heats"
   }
 }

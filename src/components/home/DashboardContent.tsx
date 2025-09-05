@@ -7,6 +7,7 @@ import { AddEventFormValues } from '@/components/calendar/types';
 import BreedingCalendar from '@/components/BreedingCalendar';
 import BreedingReminders from '@/components/BreedingReminders';
 import { HomeOfferCarousel } from '@/components/home/HomeOfferCarousel';
+import { UpcomingHeatsCard } from '@/components/home/UpcomingHeatsCard';
 
 interface DashboardContentProps {
   isDataReady: boolean;
@@ -107,6 +108,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                   setRemindersDialogOpen={setRemindersDialogOpen}
                 />
               )}
+            </div>
+            
+            {/* Upcoming Heats Card */}
+            <div>
+              <UpcomingHeatsCard />
             </div>
             
             {/* Carousel beneath reminders */}
