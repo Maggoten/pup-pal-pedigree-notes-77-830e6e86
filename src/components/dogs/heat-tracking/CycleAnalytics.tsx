@@ -256,7 +256,7 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
                 <span className="text-muted-foreground">
                   {t('heatTracking.analytics.lastCycleLength')}:
                 </span>
-                <span className="font-medium">{stats.lastCycleLength} days</span>
+                <span className="font-medium">{stats.lastCycleLength} {t('common.days')}</span>
               </div>
               
               <div className="flex items-center justify-between">
@@ -271,7 +271,7 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
                     : 'text-green-600'
                 }`}>
                   {stats.lastCycleLength > stats.averageCycleLength ? '+' : ''}
-                  {stats.lastCycleLength - stats.averageCycleLength} days
+                  {stats.lastCycleLength - stats.averageCycleLength} {t('common.days')}
                 </span>
               </div>
             </div>

@@ -1,5 +1,20 @@
 
 {
+  "common": {
+    "loading": "Laddar...",
+    "error": "Fel",
+    "success": "Framgång",
+    "cancel": "Avbryt",
+    "save": "Spara",
+    "delete": "Radera",
+    "edit": "Redigera",
+    "add": "Lägg till",
+    "close": "Stäng",
+    "confirm": "Bekräfta",
+    "yes": "Ja",
+    "no": "Nej",
+    "days": "dagar"
+  },
   "page": {
     "title": "Mina Hundar",
     "description": "Hantera dina hundar",
@@ -434,6 +449,60 @@
         "temperatureCharts": "Temperaturtrend-analys",
         "enhancedPredictions": "AI-drivna löpförutsägelser"
       }
+    },
+    "optimalMating": "Optimalt Parningsfönster",
+    "noProgesteroneData": "Ingen progesterondata tillgänglig för denna löpcykel.",
+    "progesteroneLevel": "Progesteronnivå",
+    "baseline": "Baslinje (2 ng/ml)",
+    "lhSurge": "LH-skov (5 ng/ml)",
+    "analytics": {
+      "title": "Cykelanalys",
+      "description": "Analys baserad på {{count}} registrerade löpcykler",
+      "noData": "Ingen löpcykeldata tillgänglig än",
+      "startTracking": "Börja spåra löpcykler för att se analys",
+      "currentCycle": "Aktuell Löpcykel",
+      "dayInCycle": "Dag i cykel",
+      "dayOf": "Dag {{current}} av {{total}}",
+      "predictedEnd": "Förutsett slut",
+      "avgCycleLength": "Snitt Längd (dagar)",
+      "avgInterval": "Snitt Intervall (dagar)",
+      "shortestCycle": "Kortast (dagar)",
+      "longestCycle": "Längst (dagar)",
+      "comparison": "Cykeljämförelse",
+      "lastCycleLength": "Senaste cykellängd",
+      "difference": "Skillnad från genomsnitt",
+      "significantDifference": "Betydande skillnad från genomsnittlig cykellängd. Överväg att rådfråga veterinär.",
+      "proestrusDescription": "Tidig löpfas - blödning och svullnad börjar",
+      "estrusDescription": "Fertil fas - optimalt parningsfönster",
+      "metestrusDescription": "Sen fas - fertiliteten minskar"
+    },
+    "temperature": {
+      "chartTitle": "Temperaturtrend",
+      "chartDescription": "Daglig kroppstemperaturspårning under löpcykel",
+      "noData": "Ingen temperaturdata tillgänglig för denna löpcykel",
+      "startTracking": "Börja logga temperaturer för att se trender",
+      "dayInCycle": "Dag {{day}} i cykel",
+      "averageTemp": "Genomsnittstemperatur",
+      "dropDetected": "Temperaturfall Upptäckt",
+      "dropDescription": "Betydande fall den {{date}} ({{temp}}°C) - möjlig ovulationsindikator",
+      "bodyTemperature": "Kroppstemperatur",
+      "averageLine": "Genomsnittstemperaturlinje",
+      "ovulationIndicator": "Potentiell ovulationsindikator"
+    },
+    "logs": {
+      "title": "Löpspårningsloggar",
+      "description": "Alla spårningsposter för löpcykel startad {{date}}",
+      "entryCount": "{{count}} poster registrerade",
+      "loading": "Laddar poster...",
+      "noEntries": "Inga spårningsposter än",
+      "startTracking": "Lägg till din första spårningspost ovan",
+      "deleteSuccess": "Post Raderad",
+      "deleteSuccessDescription": "Löpspårningspost har raderats",
+      "deleteError": "Radering Misslyckades",
+      "deleteErrorDescription": "Kunde inte radera löpspårningsposten",
+      "deleteConfirmTitle": "Radera Löpspårningspost",
+      "deleteConfirmDescription": "Detta kommer permanent ta bort denna spårningspost från dina register",
+      "entryFrom": "Post från {{date}}"
     }
   },
   "toast": {

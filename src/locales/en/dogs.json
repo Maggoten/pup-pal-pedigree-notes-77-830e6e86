@@ -1,5 +1,20 @@
 
 {
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "days": "days"
+  },
   "page": {
     "title": "My Dogs",
     "description": "Manage your breeding dogs",
@@ -434,6 +449,60 @@
         "temperatureCharts": "Temperature trend analysis",
         "enhancedPredictions": "AI-powered heat predictions"
       }
+    },
+    "optimalMating": "Optimal Mating Window",
+    "noProgesteroneData": "No progesterone data available for this heat cycle.",
+    "progesteroneLevel": "Progesterone Level",
+    "baseline": "Baseline (2 ng/ml)",
+    "lhSurge": "LH Surge (5 ng/ml)",
+    "analytics": {
+      "title": "Cycle Analytics",
+      "description": "Analysis based on {{count}} recorded heat cycles",
+      "noData": "No heat cycle data available yet",
+      "startTracking": "Start tracking heat cycles to see analytics",
+      "currentCycle": "Current Heat Cycle",
+      "dayInCycle": "Day in cycle",
+      "dayOf": "Day {{current}} of {{total}}",
+      "predictedEnd": "Predicted end",
+      "avgCycleLength": "Avg Length (days)",
+      "avgInterval": "Avg Interval (days)",
+      "shortestCycle": "Shortest (days)",
+      "longestCycle": "Longest (days)",
+      "comparison": "Cycle Comparison",
+      "lastCycleLength": "Last cycle length",
+      "difference": "Difference from average",
+      "significantDifference": "Significant difference from average cycle length. Consider consulting your vet.",
+      "proestrusDescription": "Early heat phase - bleeding and swelling begins",
+      "estrusDescription": "Fertile phase - optimal breeding window",
+      "metestrusDescription": "Late phase - fertility decreases"
+    },
+    "temperature": {
+      "chartTitle": "Temperature Trend",
+      "chartDescription": "Daily body temperature tracking during heat cycle",
+      "noData": "No temperature data available for this heat cycle",
+      "startTracking": "Start logging temperatures to see trends",
+      "dayInCycle": "Day {{day}} in cycle",
+      "averageTemp": "Average temperature",
+      "dropDetected": "Temperature Drop Detected",
+      "dropDescription": "Significant drop on {{date}} ({{temp}}°C) - possible ovulation indicator",
+      "bodyTemperature": "Body temperature",
+      "averageLine": "Average temperature line",
+      "ovulationIndicator": "Potential ovulation indicator"
+    },
+    "logs": {
+      "title": "Heat Tracking Logs",
+      "description": "All tracking entries for heat cycle started {{date}}",
+      "entryCount": "{{count}} entries recorded",
+      "loading": "Loading entries...",
+      "noEntries": "No tracking entries yet",
+      "startTracking": "Add your first tracking entry above",
+      "deleteSuccess": "Entry Deleted",
+      "deleteSuccessDescription": "Heat log entry has been successfully removed",
+      "deleteError": "Delete Failed", 
+      "deleteErrorDescription": "Unable to delete the heat log entry",
+      "deleteConfirmTitle": "Delete Heat Log Entry",
+      "deleteConfirmDescription": "This will permanently remove this tracking entry from your records",
+      "entryFrom": "Entry from {{date}}"
     }
   },
   "toast": {

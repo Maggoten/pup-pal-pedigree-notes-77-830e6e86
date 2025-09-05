@@ -133,10 +133,10 @@ const TemperatureTrendChart: React.FC<TemperatureTrendChartProps> = ({
                 y={avgTemp} 
                 stroke="hsl(var(--muted-foreground))" 
                 strokeDasharray="2 2"
-                label={{ 
-                  value: `Avg: ${avgTemp.toFixed(1)}°C`, 
-                  position: "top"
-                }}
+                  label={{ 
+                    value: `${t('heatTracking.temperature.averageTemp')}: ${avgTemp.toFixed(1)}°C`, 
+                    position: "top"
+                  }}
               />
               
               {/* Temperature drop indicator */}
@@ -146,7 +146,7 @@ const TemperatureTrendChart: React.FC<TemperatureTrendChartProps> = ({
                   stroke="hsl(var(--warning))" 
                   strokeDasharray="5 5"
                   label={{ 
-                    value: "Temp Drop", 
+                    value: t('heatTracking.temperature.dropDetected'), 
                     position: "top",
                     className: "text-xs fill-warning"
                   }}
