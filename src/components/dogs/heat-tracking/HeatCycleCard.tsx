@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Thermometer, Plus, Eye, Calendar, Clock, Trash2, StopCircle, TestTube } from 'lucide-react';
+import { Thermometer, Plus, Eye, Calendar, Clock, Trash2, StopCircle, TestTube, Edit } from 'lucide-react';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { HeatService } from '@/services/HeatService';
@@ -148,7 +148,7 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                 className="text-muted-foreground hover:text-foreground touch-manipulation"
                 onClick={() => setShowEditDialog(true)}
               >
-                <Plus className="h-4 w-4" />
+                <Edit className="h-4 w-4" />
               </Button>
               {isActive && (
                 <Button 

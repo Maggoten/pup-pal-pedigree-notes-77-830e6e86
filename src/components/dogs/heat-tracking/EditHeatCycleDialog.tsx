@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, Edit } from 'lucide-react';
@@ -30,7 +29,6 @@ const formSchema = z.object({
     required_error: "Start date is required.",
   }),
   end_date: z.date().optional(),
-  notes: z.string().optional(),
 }).refine((data) => {
   if (data.end_date && data.start_date) {
     return data.end_date >= data.start_date;
@@ -62,7 +60,6 @@ export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({
     defaultValues: {
       start_date: parseISO(heatCycle.start_date),
       end_date: heatCycle.end_date ? parseISO(heatCycle.end_date) : undefined,
-      notes: heatCycle.notes || '',
     },
   });
 
@@ -71,7 +68,6 @@ export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({
     try {
       const updates = {
         start_date: data.start_date.toISOString(),
-        notes: data.notes || null,
         ...(data.end_date && { end_date: data.end_date.toISOString() }),
       };
 
@@ -188,24 +184,6 @@ export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({
                       />
                     </PopoverContent>
                   </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('heatTracking.editDialog.notes')}</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder={t('heatTracking.editDialog.notesPlaceholder')}
-                      className="min-h-[80px]"
-                      {...field}
-                    />
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
