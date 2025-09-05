@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { CalendarIcon, Loader2, Thermometer } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { CalendarIcon, Loader2, Thermometer, TestTube } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -40,7 +41,9 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
   const { t } = useTranslation('dogs');
   const { toast } = useToast();
   const [date, setDate] = useState<Date>(new Date());
+  const [testType, setTestType] = useState<'temperature' | 'progesterone'>('temperature');
   const [temperature, setTemperature] = useState('');
+  const [progesteroneValue, setProgesteroneValue] = useState('');
   const [phase, setPhase] = useState('');
   const [observations, setObservations] = useState('');
   const [notes, setNotes] = useState('');
@@ -78,10 +81,20 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
 
     try {
       const temp = temperature ? parseFloat(temperature) : undefined;
+      const progesterone = progesteroneValue ? parseFloat(progesteroneValue) : undefined;
       
-      if (temperature && (isNaN(temp!) || temp! < 35 || temp! > 45)) {
+      if (testType === 'temperature' && temperature && (isNaN(temp!) || temp! < 35 || temp! > 45)) {
         toast({
           title: t('heatTracking.logging.validation.invalidTemperature'),
+          variant: 'destructive'
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (testType === 'progesterone' && progesteroneValue && (isNaN(progesterone!) || progesterone! < 0 || progesterone! > 50)) {
+        toast({
+          title: t('heatTracking.logging.validation.invalidProgesterone', { defaultValue: 'Invalid progesterone value. Must be between 0-50 ng/ml' }),
           variant: 'destructive'
         });
         setIsLoading(false);
@@ -91,10 +104,12 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
       const result = await HeatService.createHeatLog(
         heatCycle.id,
         date,
-        temp,
+        testType === 'temperature' ? temp : undefined,
         phase || undefined,
         observations || undefined,
-        notes || undefined
+        notes || undefined,
+        testType,
+        testType === 'progesterone' ? progesterone : undefined
       );
       
       if (result) {
@@ -106,7 +121,9 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
         onOpenChange(false);
         // Reset form
         setDate(new Date());
+        setTestType('temperature');
         setTemperature('');
+        setProgesteroneValue('');
         setPhase('');
         setObservations('');
         setNotes('');
@@ -134,7 +151,11 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Thermometer className="h-5 w-5" />
+            {testType === 'temperature' ? (
+              <Thermometer className="h-5 w-5" />
+            ) : (
+              <TestTube className="h-5 w-5" />
+            )}
             {t('heatTracking.logging.title')}
           </DialogTitle>
           <DialogDescription>
@@ -143,6 +164,27 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
         </DialogHeader>
         
         <div className="space-y-4 py-4">
+          {/* Test Type Selection */}
+          <div className="space-y-3">
+            <Label>{t('heatTracking.logging.testType', { defaultValue: 'Test Type' })}</Label>
+            <RadioGroup value={testType} onValueChange={(value) => setTestType(value as 'temperature' | 'progesterone')} className="flex gap-6">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="temperature" id="temperature-test" />
+                <Label htmlFor="temperature-test" className="flex items-center gap-2 cursor-pointer">
+                  <Thermometer className="h-4 w-4" />
+                  {t('heatTracking.logging.temperatureTest', { defaultValue: 'Temperature' })}
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="progesterone" id="progesterone-test" />
+                <Label htmlFor="progesterone-test" className="flex items-center gap-2 cursor-pointer">
+                  <TestTube className="h-4 w-4" />
+                  {t('heatTracking.logging.progesteroneTest', { defaultValue: 'Progesterone Test' })}
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>{t('heatTracking.logging.date')}</Label>
@@ -166,29 +208,51 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
                     onSelect={setDate}
                     initialFocus
                     disabled={(date) => date > new Date() || date < new Date(heatCycle.start_date)}
+                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="temperature">{t('heatTracking.logging.temperature')}</Label>
-              <div className="relative">
-                <Input
-                  id="temperature"
-                  type="number"
-                  step="0.1"
-                  min="35"
-                  max="45"
-                  placeholder="38.5"
-                  value={temperature}
-                  onChange={(e) => setTemperature(e.target.value)}
-                />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm">
-                  °C
-                </span>
+            {testType === 'temperature' ? (
+              <div className="space-y-2">
+                <Label htmlFor="temperature">{t('heatTracking.logging.temperature')}</Label>
+                <div className="relative">
+                  <Input
+                    id="temperature"
+                    type="number"
+                    step="0.1"
+                    min="35"
+                    max="45"
+                    placeholder="38.5"
+                    value={temperature}
+                    onChange={(e) => setTemperature(e.target.value)}
+                  />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm">
+                    °C
+                  </span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="progesterone">{t('heatTracking.logging.progesteroneValue', { defaultValue: 'Progesterone Value' })}</Label>
+                <div className="relative">
+                  <Input
+                    id="progesterone"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="50"
+                    placeholder="2.5"
+                    value={progesteroneValue}
+                    onChange={(e) => setProgesteroneValue(e.target.value)}
+                  />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm">
+                    ng/ml
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

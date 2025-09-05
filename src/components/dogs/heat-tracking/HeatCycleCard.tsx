@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Thermometer, Plus, Eye, Calendar, Clock, Trash2, StopCircle } from 'lucide-react';
+import { Thermometer, Plus, Eye, Calendar, Clock, Trash2, StopCircle, TestTube } from 'lucide-react';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { HeatService } from '@/services/HeatService';
@@ -10,8 +10,11 @@ import HeatLoggingDialog from './HeatLoggingDialog';
 import HeatLogsDialog from './HeatLogsDialog';
 import EndHeatCycleDialog from './EndHeatCycleDialog';
 import EditHeatCycleDialog from './EditHeatCycleDialog';
+import ProgesteroneChart from './ProgesteroneChart';
+import OptimalMatingWindow from './OptimalMatingWindow';
 import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
 import { toast } from '@/hooks/use-toast';
+import { calculateOptimalMatingDays, getNextTestRecommendation } from '@/utils/progesteroneCalculator';
 import type { Database } from '@/integrations/supabase/types';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
@@ -98,6 +101,18 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
 
   const latestLog = heatLogs[0];
 
+  // Calculate progesterone-based mating window
+  const matingWindow = calculateOptimalMatingDays(heatLogs);
+  const lastProgesteroneTest = heatLogs
+    .filter(log => log.test_type === 'progesterone')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  const nextTestDate = lastProgesteroneTest 
+    ? getNextTestRecommendation(matingWindow, new Date(lastProgesteroneTest.date))
+    : null;
+
+  // Check if there are any progesterone tests
+  const hasProgesteroneData = heatLogs.some(log => log.test_type === 'progesterone' && log.progesterone_value !== null);
+
   return (
     <>
       <Card className={`${isActive ? 'border-primary shadow-sm' : 'border-muted'} transition-shadow hover:shadow-md`}>
@@ -127,10 +142,14 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                   <span className="sm:hidden">{t('heatTracking.logging.addEntry')}</span>
                 </Button>
               )}
-              <EditHeatCycleDialog 
-                heatCycle={heatCycle}
-                onSuccess={onUpdate}
-              />
+              <Button 
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground touch-manipulation"
+                onClick={() => setShowEditDialog(true)}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
               {isActive && (
                 <Button 
                   variant="ghost"
@@ -178,10 +197,16 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
               </div>
               
               <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3 text-sm">
-                {latestLog.temperature && (
+                {latestLog.test_type === 'temperature' && latestLog.temperature && (
                   <div className="flex items-center gap-2">
                     <Thermometer className="h-4 w-4" />
                     <span className="font-medium">{latestLog.temperature}°C</span>
+                  </div>
+                )}
+                {latestLog.test_type === 'progesterone' && latestLog.progesterone_value && (
+                  <div className="flex items-center gap-2">
+                    <TestTube className="h-4 w-4" />
+                    <span className="font-medium">{latestLog.progesterone_value} ng/ml</span>
                   </div>
                 )}
                 {latestLog.phase && (
@@ -224,6 +249,19 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
             </div>
           )}
 
+          {/* Progesterone Chart */}
+          {hasProgesteroneData && (
+            <ProgesteroneChart heatLogs={heatLogs} />
+          )}
+
+          {/* Optimal Mating Window */}
+          {hasProgesteroneData && isActive && (
+            <OptimalMatingWindow 
+              matingWindow={matingWindow}
+              nextTestDate={nextTestDate}
+            />
+          )}
+
           {/* End cycle button at bottom for active cycles */}
           {isActive && (
             <div className="flex justify-center pt-4 border-t">
@@ -261,7 +299,14 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
         onSuccess={onUpdate}
       />
 
-      <DeleteConfirmationDialog 
+      <EditHeatCycleDialog 
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        heatCycle={heatCycle}
+        onSuccess={onUpdate}
+      />
+
+      <DeleteConfirmationDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         onConfirm={handleDelete}

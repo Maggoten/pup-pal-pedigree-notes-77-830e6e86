@@ -228,7 +228,9 @@ export type Database = {
           notes: string | null
           observations: string | null
           phase: string | null
+          progesterone_value: number | null
           temperature: number | null
+          test_type: string | null
           updated_at: string
           user_id: string
         }
@@ -240,7 +242,9 @@ export type Database = {
           notes?: string | null
           observations?: string | null
           phase?: string | null
+          progesterone_value?: number | null
           temperature?: number | null
+          test_type?: string | null
           updated_at?: string
           user_id: string
         }
@@ -252,7 +256,9 @@ export type Database = {
           notes?: string | null
           observations?: string | null
           phase?: string | null
+          progesterone_value?: number | null
           temperature?: number | null
+          test_type?: string | null
           updated_at?: string
           user_id?: string
         }

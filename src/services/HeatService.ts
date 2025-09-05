@@ -513,7 +513,9 @@ export class HeatService {
     temperature?: number,
     phase?: string,
     observations?: string,
-    notes?: string
+    notes?: string,
+    testType: 'temperature' | 'progesterone' = 'temperature',
+    progesteroneValue?: number
   ): Promise<HeatLog | null> {
     try {
       const { data, error } = await supabase
@@ -525,7 +527,9 @@ export class HeatService {
           temperature,
           phase,
           observations,
-          notes
+          notes,
+          test_type: testType,
+          progesterone_value: progesteroneValue
         })
         .select()
         .single();

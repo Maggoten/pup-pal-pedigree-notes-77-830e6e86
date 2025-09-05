@@ -19,6 +19,8 @@ import type { Database } from '@/integrations/supabase/types';
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 
 interface EditHeatCycleDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   heatCycle: HeatCycle;
   onSuccess: () => void;
 }
@@ -46,9 +48,13 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({ heatCycle, onSuccess }) => {
+export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({ 
+  open, 
+  onOpenChange, 
+  heatCycle, 
+  onSuccess 
+}) => {
   const { t } = useTranslation('dogs');
-  const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<FormData>({
@@ -77,7 +83,7 @@ export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({ heatCy
           description: t('heatTracking.editSuccess.description'),
         });
         onSuccess();
-        setOpen(false);
+        onOpenChange(false);
       } else {
         throw new Error('Failed to update heat cycle');
       }
@@ -94,16 +100,7 @@ export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({ heatCy
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-muted-foreground hover:text-foreground touch-manipulation"
-        >
-          <Edit className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{t('heatTracking.editDialog.title')}</DialogTitle>
@@ -218,7 +215,7 @@ export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({ heatCy
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setOpen(false)}
+                onClick={() => onOpenChange(false)}
                 disabled={isLoading}
               >
                 {t('common.cancel')}
