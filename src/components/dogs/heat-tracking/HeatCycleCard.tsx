@@ -139,13 +139,28 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
 
   const handleEditNotes = async (newNotes: string) => {
     try {
-      const success = await HeatService.updateHeatCycle(heatCycle.id, { notes: newNotes });
-      if (success) {
-        toast({
-          title: t('heatTracking.notes.editSuccess'),
-          description: t('heatTracking.notes.editSuccessDescription'),
-        });
-        onUpdate();
+      // Check if we're editing entry notes or cycle notes
+      if (latestLog && latestLog.notes !== undefined) {
+        // Editing entry notes
+        const success = await HeatService.updateHeatLog(latestLog.id, { notes: newNotes });
+        if (success) {
+          toast({
+            title: t('heatTracking.notes.editSuccess'),
+            description: t('heatTracking.notes.editSuccessDescription'),
+          });
+          loadHeatLogs();
+          onUpdate();
+        }
+      } else {
+        // Editing cycle notes
+        const success = await HeatService.updateHeatCycle(heatCycle.id, { notes: newNotes });
+        if (success) {
+          toast({
+            title: t('heatTracking.notes.editSuccess'),
+            description: t('heatTracking.notes.editSuccessDescription'),
+          });
+          onUpdate();
+        }
       }
     } catch (error) {
       console.error('Error updating notes:', error);
@@ -274,11 +289,7 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                     variant="ghost"
                     size="sm"
                     className="h-6 w-6 p-0"
-                    onClick={() => {
-                      if (entryToDelete) {
-                        handleDeleteEntry(entryToDelete.id);
-                      }
-                    }}
+                    onClick={() => handleDeleteEntry(latestLog.id)}
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -312,14 +323,53 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                   {latestLog.observations}
                 </p>
               )}
+              
+              {latestLog.notes && (
+                <div className="mt-3 p-2 bg-muted/50 rounded">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-muted-foreground">{t('heatTracking.notes.editTitle')}</span>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-5 w-5 p-0"
+                        onClick={() => {
+                          setEditingNotes(latestLog.notes || '');
+                          setShowEditNotesDialog(true);
+                        }}
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-5 w-5 p-0"
+                        onClick={() => HeatService.updateHeatLog(latestLog.id, { notes: null }).then(() => {
+                          toast({
+                            title: t('heatTracking.notes.deleteSuccess'),
+                            description: t('heatTracking.notes.deleteSuccessDescription'),
+                          });
+                          loadHeatLogs();
+                          onUpdate();
+                        })}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {latestLog.notes}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Notes Section - Moved below latest entry */}
-          {heatCycle.notes && (
+          {/* Notes Section - Only show cycle notes if they're not migration notes */}
+          {heatCycle.notes && !heatCycle.notes.includes('Migrated from heat history') && (
             <div className="border rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="font-medium text-sm">{t('heatTracking.notes.editTitle')}</h4>
+                <h4 className="font-medium text-sm">{t('heatTracking.notes.editTitle')} (Cykel)</h4>
                 <div className="flex gap-1">
                   <Button
                     variant="ghost"

@@ -113,7 +113,7 @@ export class HeatService {
         const dateString = heatDate.toDateString();
 
         if (!existingDates.has(dateString)) {
-          await this.createHeatCycle(dogId, heatDate, 'Migrated from heat history');
+          await this.createHeatCycle(dogId, heatDate);
         }
       }
 
