@@ -23,6 +23,7 @@ interface SummaryStats {
   daysUntilNextHeat: number | null;
   lastHeatDate: Date | null;
   totalCycles: number;
+  isBasedOnOngoing: boolean;
 }
 
 const HeatSummaryCard: React.FC<HeatSummaryCardProps> = ({ 
@@ -33,8 +34,9 @@ const HeatSummaryCard: React.FC<HeatSummaryCardProps> = ({
 }) => {
   const { t } = useTranslation('dogs');
   
-  const calculateSummary = (): SummaryStats => {
+  const calculateSummary = (): SummaryStats & { isBasedOnOngoing: boolean } => {
     const completedCycles = heatCycles.filter(cycle => cycle.end_date);
+    const ongoingCycles = heatCycles.filter(cycle => !cycle.end_date);
     
     // Calculate average cycle length
     const cycleLengths = completedCycles.map(cycle => 
@@ -65,19 +67,31 @@ const HeatSummaryCard: React.FC<HeatSummaryCardProps> = ({
       ? Math.round(intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length)
       : dog.heatInterval || 180; // Use dog's interval or default 6 months
     
-    // Find the most recent heat date
-    let lastHeatDate: Date | null = null;
-    if (allHeatDates.length > 0) {
-      const lastDateString = allHeatDates[allHeatDates.length - 1];
-      lastHeatDate = parseISO(lastDateString);
-    }
-    
-    // Calculate next heat date and days until
+    // Calculate next heat date and days until - prioritize ongoing heat cycles
     let nextHeatDate: Date | null = null;
     let daysUntilNextHeat: number | null = null;
+    let lastHeatDate: Date | null = null;
+    let isBasedOnOngoing = false;
     
-    if (lastHeatDate) {
+    if (ongoingCycles.length > 0) {
+      // Use the most recent ongoing cycle
+      const mostRecentOngoing = ongoingCycles.sort((a, b) => 
+        new Date(b.start_date).getTime() - new Date(a.start_date).getTime()
+      )[0];
+      
+      const ongoingStartDate = parseISO(mostRecentOngoing.start_date);
+      lastHeatDate = ongoingStartDate;
+      nextHeatDate = addDays(ongoingStartDate, averageInterval);
+      isBasedOnOngoing = true;
+    } else if (allHeatDates.length > 0) {
+      // Use the most recent completed heat date
+      const lastDateString = allHeatDates[allHeatDates.length - 1];
+      lastHeatDate = parseISO(lastDateString);
       nextHeatDate = addDays(lastHeatDate, averageInterval);
+    }
+    
+    // Calculate days until next heat
+    if (nextHeatDate) {
       const today = new Date();
       if (nextHeatDate > today) {
         daysUntilNextHeat = differenceInDays(nextHeatDate, today);
@@ -90,7 +104,8 @@ const HeatSummaryCard: React.FC<HeatSummaryCardProps> = ({
       nextHeatDate,
       daysUntilNextHeat,
       lastHeatDate,
-      totalCycles: heatCycles.length + heatHistory.length
+      totalCycles: heatCycles.length + heatHistory.length,
+      isBasedOnOngoing
     };
   };
   
@@ -173,8 +188,16 @@ const HeatSummaryCard: React.FC<HeatSummaryCardProps> = ({
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">
-                  {t('heatTracking.summary.predictedNext')}
+                  {stats.isBasedOnOngoing 
+                    ? t('heatTracking.summary.predictedFromOngoing', { fallback: 'Next heat (from ongoing)' })
+                    : t('heatTracking.summary.predictedNext')
+                  }
                 </span>
+                {stats.isBasedOnOngoing && (
+                  <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20 text-xs">
+                    {t('heatTracking.summary.ongoing', { fallback: 'Ongoing' })}
+                  </Badge>
+                )}
               </div>
               <div className="text-right">
                 <div className="font-semibold">
