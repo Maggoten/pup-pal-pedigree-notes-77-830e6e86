@@ -4,9 +4,14 @@ import { Dog } from '@/context/DogsContext';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Heart, Calendar, Clock } from 'lucide-react';
+import { Heart, Calendar, Clock, StopCircle } from 'lucide-react';
 import { markHeatAsStarted } from '@/services/CalendarEventService';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
+import { HeatService } from '@/services/HeatService';
+import EndHeatCycleDialog from '@/components/dogs/heat-tracking/EndHeatCycleDialog';
+import type { Database } from '@/integrations/supabase/types';
+
+type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 
 interface HeatEventControlProps {
   event: CalendarEvent;
@@ -20,6 +25,9 @@ const HeatEventControl: React.FC<HeatEventControlProps> = ({
   onEventUpdate 
 }) => {
   const [isStarting, setIsStarting] = useState(false);
+  const [isEndDialogOpen, setIsEndDialogOpen] = useState(false);
+  const [activeHeatCycle, setActiveHeatCycle] = useState<HeatCycle | null>(null);
+  const [isLoadingHeatCycle, setIsLoadingHeatCycle] = useState(false);
   
   // Only show heat controls for heat type events
   if (event.type !== 'heat' && event.type !== 'heat-active') {
@@ -76,6 +84,44 @@ const HeatEventControl: React.FC<HeatEventControlProps> = ({
     }
     
     return { phase, description, dayInCycle, phaseColor };
+  };
+
+  const handleEndHeatClick = async () => {
+    if (!event.dogId) return;
+    
+    setIsLoadingHeatCycle(true);
+    try {
+      const heatCycle = await HeatService.getActiveHeatCycle(event.dogId);
+      if (heatCycle) {
+        setActiveHeatCycle(heatCycle);
+        setIsEndDialogOpen(true);
+      } else {
+        toast({
+          title: 'No Active Heat Cycle',
+          description: 'No active heat cycle found for this dog.',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching active heat cycle:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch heat cycle data. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoadingHeatCycle(false);
+    }
+  };
+
+  const handleEndHeatSuccess = () => {
+    setIsEndDialogOpen(false);
+    setActiveHeatCycle(null);
+    onEventUpdate(); // Refresh the calendar
+    toast({
+      title: 'Heat Cycle Ended',
+      description: 'The heat cycle has been ended and calendar updated.',
+    });
   };
   
   const phaseInfo = getHeatPhaseInfo();
@@ -157,7 +203,29 @@ const HeatEventControl: React.FC<HeatEventControlProps> = ({
               </p>
             </div>
           )}
+          
+          <div className="pt-2 border-t border-rose-200">
+            <Button
+              onClick={handleEndHeatClick}
+              disabled={isLoadingHeatCycle}
+              variant="outline"
+              className="w-full border-rose-300 text-rose-700 hover:bg-rose-50"
+              size="sm"
+            >
+              <StopCircle className="mr-2 h-4 w-4" />
+              {isLoadingHeatCycle ? 'Loading...' : 'End Heat Cycle'}
+            </Button>
+          </div>
         </div>
+      )}
+      
+      {activeHeatCycle && (
+        <EndHeatCycleDialog
+          open={isEndDialogOpen}
+          onOpenChange={setIsEndDialogOpen}
+          heatCycle={activeHeatCycle}
+          onSuccess={handleEndHeatSuccess}
+        />
       )}
     </div>
   );
