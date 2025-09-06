@@ -290,8 +290,8 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
           </div>
         </div>
         
-        {/* Comparison with Previous Cycle */}
-        {stats.lastCycleLength && stats.totalCycles > 1 && (
+        {/* Comparison with Previous Cycle - Only show when there's an active cycle */}
+        {activeCycle && stats.lastCycleLength && stats.totalCycles > 1 && (
           <div className="border rounded-lg p-4">
             <h4 className="font-medium mb-3 flex items-center gap-2">
               <Clock className="h-4 w-4" />
