@@ -4,11 +4,13 @@ import { Dog } from '@/context/DogsContext';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Heart, Calendar, Clock, StopCircle } from 'lucide-react';
-import { markHeatAsStarted } from '@/services/CalendarEventService';
+import { Heart, Calendar, Clock, StopCircle, Trash2 } from 'lucide-react';
+import { markHeatAsStarted, deleteEventFromSupabase } from '@/services/CalendarEventService';
 import { toast } from '@/hooks/use-toast';
 import { HeatService } from '@/services/HeatService';
+import { HeatCalendarSyncService } from '@/services/HeatCalendarSyncService';
 import EndHeatCycleDialog from '@/components/dogs/heat-tracking/EndHeatCycleDialog';
+import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
 import type { Database } from '@/integrations/supabase/types';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
@@ -28,6 +30,8 @@ const HeatEventControl: React.FC<HeatEventControlProps> = ({
   const [isEndDialogOpen, setIsEndDialogOpen] = useState(false);
   const [activeHeatCycle, setActiveHeatCycle] = useState<HeatCycle | null>(null);
   const [isLoadingHeatCycle, setIsLoadingHeatCycle] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Only show heat controls for heat type events
   if (event.type !== 'heat' && event.type !== 'heat-active') {
@@ -91,7 +95,55 @@ const HeatEventControl: React.FC<HeatEventControlProps> = ({
     
     setIsLoadingHeatCycle(true);
     try {
-      const heatCycle = await HeatService.getActiveHeatCycle(event.dogId);
+      let heatCycle = await HeatService.getActiveHeatCycle(event.dogId);
+      
+      // If no heat cycle found but calendar shows active heat (legacy case)
+      if (!heatCycle && isHeatActive) {
+        console.log('No heat cycle found, attempting to create from calendar event (legacy support)');
+        toast({
+          title: 'Creating Heat Cycle',
+          description: 'Creating heat cycle from calendar data...',
+        });
+        
+        try {
+          // Convert CalendarEvent to the format expected by createHeatCycleFromCalendar
+          const calendarEventData = {
+            ...event,
+            dog_id: event.dogId || '',
+            dog_name: event.dogName || '',
+            created_at: '',
+            updated_at: '',
+            user_id: '',
+            date: typeof event.date === 'string' ? event.date : event.date.toISOString(),
+            startDate: typeof event.startDate === 'string' ? event.startDate : event.startDate.toISOString(),
+            endDate: typeof event.endDate === 'string' ? event.endDate : (event.endDate || event.date).toString(),
+            end_date: typeof event.endDate === 'string' ? event.endDate : (event.endDate || event.date).toString(),
+            heat_phase: event.heatPhase || '',
+            pregnancy_id: '',
+            status: event.status || '',
+            time: event.time || '',
+            type: event.type || '',
+            notes: event.notes || ''
+          };
+          
+          heatCycle = await HeatCalendarSyncService.createHeatCycleFromCalendar(calendarEventData, event.dogId);
+          if (heatCycle) {
+            toast({
+              title: 'Heat Cycle Created',
+              description: 'Successfully created heat cycle from calendar data.',
+            });
+          }
+        } catch (createError) {
+          console.error('Error creating heat cycle from calendar:', createError);
+          toast({
+            title: 'Legacy Heat Cycle',
+            description: 'Cannot end this heat cycle automatically. Please use the calendar to remove the event.',
+            variant: 'destructive'
+          });
+          return;
+        }
+      }
+      
       if (heatCycle) {
         setActiveHeatCycle(heatCycle);
         setIsEndDialogOpen(true);
@@ -122,6 +174,49 @@ const HeatEventControl: React.FC<HeatEventControlProps> = ({
       title: 'Heat Cycle Ended',
       description: 'The heat cycle has been ended and calendar updated.',
     });
+  };
+
+  const handleDeleteHeatClick = async () => {
+    if (!event.dogId) return;
+    
+    setIsDeleting(true);
+    try {
+      // Check if there's an associated heat cycle in the database
+      const heatCycle = await HeatService.getActiveHeatCycle(event.dogId);
+      
+      if (heatCycle) {
+        // Delete heat cycle from database (this also removes from heat history)
+        const deleteSuccess = await HeatService.deleteHeatCycle(heatCycle.id);
+        if (!deleteSuccess) {
+          throw new Error('Failed to delete heat cycle from database');
+        }
+        
+        // Remove all related calendar events
+        await HeatCalendarSyncService.removeCalendarEventsForHeatCycle(event.dogId);
+      } else {
+        // Legacy calendar event - just delete the calendar event
+        await deleteEventFromSupabase(event.id);
+        
+        // Also try to clean up any related events for this dog
+        await HeatCalendarSyncService.removeCalendarEventsForHeatCycle(event.dogId);
+      }
+      
+      setIsDeleteDialogOpen(false);
+      onEventUpdate(); // Refresh the calendar
+      toast({
+        title: 'Heat Cycle Deleted',
+        description: 'The heat cycle and all related data have been removed.',
+      });
+    } catch (error) {
+      console.error('Error deleting heat cycle:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete heat cycle. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
   
   const phaseInfo = getHeatPhaseInfo();
@@ -204,17 +299,30 @@ const HeatEventControl: React.FC<HeatEventControlProps> = ({
             </div>
           )}
           
-          <div className="pt-2 border-t border-rose-200">
-            <Button
-              onClick={handleEndHeatClick}
-              disabled={isLoadingHeatCycle}
-              variant="outline"
-              className="w-full border-rose-300 text-rose-700 hover:bg-rose-50"
-              size="sm"
-            >
-              <StopCircle className="mr-2 h-4 w-4" />
-              {isLoadingHeatCycle ? 'Loading...' : 'End Heat Cycle'}
-            </Button>
+          <div className="pt-2 border-t border-rose-200 space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                onClick={handleEndHeatClick}
+                disabled={isLoadingHeatCycle || isDeleting}
+                variant="outline"
+                className="border-rose-300 text-rose-700 hover:bg-rose-50"
+                size="sm"
+              >
+                <StopCircle className="mr-2 h-4 w-4" />
+                {isLoadingHeatCycle ? 'Loading...' : 'End Cycle'}
+              </Button>
+              
+              <Button
+                onClick={() => setIsDeleteDialogOpen(true)}
+                disabled={isLoadingHeatCycle || isDeleting}
+                variant="outline"
+                className="border-red-300 text-red-700 hover:bg-red-50"
+                size="sm"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -227,6 +335,15 @@ const HeatEventControl: React.FC<HeatEventControlProps> = ({
           onSuccess={handleEndHeatSuccess}
         />
       )}
+      
+      <DeleteConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteHeatClick}
+        title="Delete Heat Cycle"
+        description="Are you sure you want to delete this heat cycle? This will remove all heat data, logs, and related calendar events."
+        itemDetails={`${event.dogName}'s heat cycle from ${new Date(event.startDate || event.date).toLocaleDateString()}`}
+      />
     </div>
   );
 };
