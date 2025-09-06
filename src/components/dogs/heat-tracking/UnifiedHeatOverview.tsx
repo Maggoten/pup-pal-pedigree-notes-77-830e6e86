@@ -3,45 +3,48 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Calendar, TrendingUp, Clock, Heart, AlertCircle } from 'lucide-react';
-import { format, differenceInDays, parseISO } from 'date-fns';
+import { format, differenceInDays, parseISO, addDays } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import type { Database } from '@/integrations/supabase/types';
+import { Dog } from '@/types/dogs';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 
-interface CycleAnalyticsProps {
+interface UnifiedHeatOverviewProps {
+  dog: Dog;
   heatCycles: HeatCycle[];
   heatHistory?: { date: string }[];
-  currentCycle?: HeatCycle | null;
-  dogName: string;
   className?: string;
 }
 
-interface CycleStats {
+interface SummaryStats {
   averageCycleLength: number;
+  averageInterval: number;
+  nextHeatDate: Date | null;
+  daysUntilNextHeat: number | null;
+  lastHeatDate: Date | null;
   totalCycles: number;
   shortestCycle: number;
   longestCycle: number;
   lastCycleLength: number | null;
-  intervalsAverage: number;
   currentDayInCycle: number | null;
   predictedEndDate: Date | null;
+  isBasedOnOngoing: boolean;
 }
 
-const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({ 
+const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({ 
+  dog, 
   heatCycles, 
   heatHistory = [],
-  currentCycle, 
-  dogName,
   className = "" 
 }) => {
-  const { t, i18n } = useTranslation('dogs');
+  const { t } = useTranslation('dogs');
   
-  
-  const calculateStats = (): CycleStats => {
+  const calculateSummary = (): SummaryStats => {
     const completedCycles = heatCycles.filter(cycle => cycle.end_date);
+    const activeCycle = heatCycles.find(cycle => !cycle.end_date);
     
-    // Combine cycle lengths from both sources
+    // Calculate cycle lengths from completed cycles
     const cycleLengths = completedCycles.map(cycle => 
       differenceInDays(parseISO(cycle.end_date!), parseISO(cycle.start_date))
     );
@@ -49,12 +52,10 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
     const averageCycleLength = cycleLengths.length > 0 
       ? Math.round(cycleLengths.reduce((sum, length) => sum + length, 0) / cycleLengths.length)
       : 21; // Default average
-    
+
     const shortestCycle = cycleLengths.length > 0 ? Math.min(...cycleLengths) : 0;
     const longestCycle = cycleLengths.length > 0 ? Math.max(...cycleLengths) : 0;
-    
-    // Calculate intervals between cycles including legacy data
-    const intervals = [];
+    const lastCycleLength = cycleLengths.length > 0 ? cycleLengths[cycleLengths.length - 1] : null;
     
     // Get all heat dates (both from cycles and legacy history)
     const allHeatDates = [
@@ -62,7 +63,14 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
       ...heatHistory.map(heat => heat.date)
     ].filter(date => date).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
     
+    // Add ongoing cycle start date if exists
+    if (activeCycle) {
+      allHeatDates.push(activeCycle.start_date);
+      allHeatDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    }
+    
     // Calculate intervals between consecutive heat dates
+    const intervals = [];
     for (let i = 1; i < allHeatDates.length; i++) {
       const interval = differenceInDays(
         parseISO(allHeatDates[i]),
@@ -71,36 +79,64 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
       intervals.push(interval);
     }
     
-    const intervalsAverage = intervals.length > 0 
+    const averageInterval = intervals.length > 0 
       ? Math.round(intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length)
-      : 180; // Default 6 months
-    
-    const lastCycleLength = cycleLengths.length > 0 ? cycleLengths[cycleLengths.length - 1] : null;
-    
+      : dog.heatInterval || 180; // Use dog's heat interval or default 6 months
+
+    // Calculate next heat date and days until
+    let nextHeatDate: Date | null = null;
+    let daysUntilNextHeat: number | null = null;
+    let lastHeatDate: Date | null = null;
+    let isBasedOnOngoing = false;
+
+    if (allHeatDates.length > 0) {
+      const mostRecentHeatDate = parseISO(allHeatDates[allHeatDates.length - 1]);
+      lastHeatDate = mostRecentHeatDate;
+      
+      // If there's an active cycle, use its start date + average interval
+      if (activeCycle) {
+        nextHeatDate = addDays(parseISO(activeCycle.start_date), averageInterval);
+        isBasedOnOngoing = true;
+      } else {
+        // Use the most recent heat date + average interval
+        nextHeatDate = addDays(mostRecentHeatDate, averageInterval);
+      }
+      
+      // Ensure next heat date is in the future
+      const today = new Date();
+      if (nextHeatDate <= today) {
+        nextHeatDate = addDays(today, 1);
+      }
+      
+      daysUntilNextHeat = differenceInDays(nextHeatDate, today);
+    }
+
+    // Current cycle calculations
     let currentDayInCycle = null;
     let predictedEndDate = null;
     
-    if (currentCycle) {
-      const startDate = parseISO(currentCycle.start_date);
+    if (activeCycle) {
+      const startDate = parseISO(activeCycle.start_date);
       currentDayInCycle = differenceInDays(new Date(), startDate) + 1;
-      predictedEndDate = new Date(startDate);
-      predictedEndDate.setDate(startDate.getDate() + averageCycleLength);
+      predictedEndDate = addDays(startDate, averageCycleLength);
     }
     
     return {
       averageCycleLength,
+      averageInterval,
+      nextHeatDate,
+      daysUntilNextHeat,
+      lastHeatDate,
       totalCycles: heatCycles.length + heatHistory.length,
       shortestCycle,
       longestCycle,
       lastCycleLength,
-      intervalsAverage,
       currentDayInCycle,
-      predictedEndDate
+      predictedEndDate,
+      isBasedOnOngoing
     };
   };
-  
-  const stats = calculateStats();
-  
+
   const getCyclePhaseInfo = (dayInCycle: number) => {
     if (dayInCycle <= 9) {
       return {
@@ -122,15 +158,18 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
       };
     }
   };
-  
+
+  const stats = calculateSummary();
+  const activeCycle = heatCycles.find(cycle => !cycle.end_date);
+
   if (stats.totalCycles === 0) {
     return (
       <Card className={className}>
         <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" />
-           {dogName}s {t('cycle')}
-        </CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            {dog.name}s {t('heatTracking.analytics.cycle')}
+          </CardTitle>
           <CardDescription>
             {t('heatTracking.analytics.noData')}
           </CardDescription>
@@ -144,13 +183,13 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
       </Card>
     );
   }
-  
+
   return (
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
-          {dogName}s {t('cycle')}
+          {dog.name}s {t('heatTracking.analytics.cycle')}
         </CardTitle>
         <CardDescription>
           {t('heatTracking.analytics.description', { count: stats.totalCycles })}
@@ -158,8 +197,8 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
       </CardHeader>
       <CardContent className="space-y-6">
         
-        {/* Current Cycle Status */}
-        {currentCycle && stats.currentDayInCycle && (
+        {/* Current Cycle Status - Only show when there's an active cycle */}
+        {activeCycle && stats.currentDayInCycle && (
           <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
               <Heart className="h-4 w-4 text-primary" />
@@ -211,8 +250,45 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
             </div>
           </div>
         )}
+
+        {/* Next Heat Prediction - Green highlighted section when no active cycle */}
+        {!activeCycle && stats.nextHeatDate && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar className="h-4 w-4 text-green-600" />
+              <h4 className="font-semibold text-green-800">
+                {t('heatTracking.summary.predictedNext')}
+              </h4>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-green-700">
+                  {t('heatTracking.summary.nextHeat')}:
+                </span>
+                <span className="font-medium text-green-800">
+                  {format(stats.nextHeatDate, 'MMM dd, yyyy')}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-green-700">
+                  {t('heatTracking.summary.daysUntil')}:
+                </span>
+                <span className="font-medium text-green-800">
+                  {stats.daysUntilNextHeat === 0 
+                    ? t('heatTracking.summary.today')
+                    : stats.daysUntilNextHeat === 1 
+                    ? t('heatTracking.summary.tomorrow')
+                    : t('heatTracking.summary.inDays', { days: stats.daysUntilNextHeat })
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
         
-        {/* Cycle Statistics Grid */}
+        {/* Basic Statistics Grid - Always shown */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">
@@ -225,7 +301,7 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
           
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">
-              {stats.intervalsAverage}
+              {stats.averageInterval}
             </div>
             <div className="text-xs text-muted-foreground">
               {t('heatTracking.analytics.avgInterval')}
@@ -250,6 +326,51 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Next Heat Info - Always show when calculated (with distinction for ongoing) */}
+        {stats.nextHeatDate && (
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">
+                {stats.isBasedOnOngoing 
+                  ? t('heatTracking.summary.predictedFromOngoing')
+                  : t('heatTracking.summary.predictedNext')
+                }
+              </span>
+              {stats.isBasedOnOngoing && (
+                <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20 text-xs">
+                  {t('heatTracking.summary.ongoing')}
+                </Badge>
+              )}
+            </div>
+            
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">
+                  {format(stats.nextHeatDate, 'EEEE, MMMM dd, yyyy')}
+                </span>
+                <span className="font-medium">
+                  {stats.daysUntilNextHeat === 0 
+                    ? t('heatTracking.summary.today')
+                    : stats.daysUntilNextHeat === 1 
+                    ? t('heatTracking.summary.tomorrow')
+                    : t('heatTracking.summary.inDays', { days: stats.daysUntilNextHeat })
+                  }
+                </span>
+              </div>
+            </div>
+
+            {stats.daysUntilNextHeat !== null && stats.daysUntilNextHeat <= 7 && (
+              <div className="mt-3 p-2 bg-warning/10 border border-warning/20 rounded flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-warning-foreground">
+                  {t('heatTracking.summary.upcomingHeat')}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
         
         {/* Comparison with Previous Cycle */}
         {stats.lastCycleLength && stats.totalCycles > 1 && (
@@ -300,4 +421,4 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
   );
 };
 
-export default CycleAnalytics;
+export default UnifiedHeatOverview;

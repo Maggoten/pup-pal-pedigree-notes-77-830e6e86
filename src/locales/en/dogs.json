@@ -299,6 +299,7 @@
       "upcomingSoon": "Heat cycle expected soon"
     },
     "analytics": {
+      "cycle": "cycle",
       "title": "Cycle Analytics",
       "description": "Analysis based on {{count}} recorded heat cycles",
       "averageCycle": "Average Cycle",

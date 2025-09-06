@@ -14,9 +14,8 @@ import { DeleteLegacyHeatDialog } from './DeleteLegacyHeatDialog';
 import ProgesteroneChart from './ProgesteroneChart';
 import OptimalMatingWindow from './OptimalMatingWindow';
 import TemperatureTrendChart from './TemperatureTrendChart';
-import CycleAnalytics from './CycleAnalytics';
 import PreviousHeatsList from './PreviousHeatsList';
-import HeatSummaryCard from './HeatSummaryCard';
+import UnifiedHeatOverview from './UnifiedHeatOverview';
 import { useUnifiedHeatData } from '@/hooks/useUnifiedHeatData';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -72,19 +71,11 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
 
   return (
     <div className="space-y-6">
-      {/* Heat Summary Overview */}
-      <HeatSummaryCard 
+      {/* Unified Heat Overview */}
+      <UnifiedHeatOverview 
         dog={dog}
         heatCycles={heatCycles}
         heatHistory={heatHistory}
-      />
-
-      {/* Advanced Analytics */}
-      <CycleAnalytics 
-        heatCycles={heatCycles}
-        heatHistory={heatHistory}
-        currentCycle={heatCycles.find(cycle => !cycle.end_date) || null}
-        dogName={dog.name}
       />
 
       {/* New Heat Button - Always Available */}

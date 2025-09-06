@@ -299,6 +299,7 @@
       "upcomingSoon": "Löpcykel väntas snart"
     },
     "analytics": {
+      "cycle": "cykel",
       "title": "Cykelanalys",
       "description": "Analys baserad på {{count}} registrerade löpcykler",
       "averageCycle": "Genomsnittlig Cykel",
