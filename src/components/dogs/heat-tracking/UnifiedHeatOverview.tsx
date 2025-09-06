@@ -290,49 +290,6 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
           </div>
         </div>
         
-        {/* Comparison with Previous Cycle - Only show when there's an active cycle */}
-        {activeCycle && stats.lastCycleLength && stats.totalCycles > 1 && (
-          <div className="border rounded-lg p-4">
-            <h4 className="font-medium mb-3 flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              {t('heatTracking.analytics.comparison')}
-            </h4>
-            
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  {t('heatTracking.analytics.lastCycleLength')}:
-                </span>
-                <span className="font-medium">{stats.lastCycleLength} {t('common.days')}</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  {t('heatTracking.analytics.difference')}:
-                </span>
-                <span className={`font-medium ${
-                  stats.lastCycleLength > stats.averageCycleLength 
-                    ? 'text-orange-600' 
-                    : stats.lastCycleLength < stats.averageCycleLength 
-                    ? 'text-blue-600' 
-                    : 'text-green-600'
-                }`}>
-                  {stats.lastCycleLength > stats.averageCycleLength ? '+' : ''}
-                  {stats.lastCycleLength - stats.averageCycleLength} {t('common.days')}
-                </span>
-              </div>
-            </div>
-            
-            {Math.abs(stats.lastCycleLength - stats.averageCycleLength) > 5 && (
-              <div className="mt-3 p-2 bg-warning/10 border border-warning/20 rounded flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-warning-foreground">
-                  {t('heatTracking.analytics.significantDifference')}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
         
       </CardContent>
     </Card>
