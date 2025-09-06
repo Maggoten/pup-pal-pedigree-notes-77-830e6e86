@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Eye, Edit2, Trash2, Thermometer, TestTube } from 'lucide-react';
+import { Calendar, Edit2, Trash2, Thermometer, TestTube } from 'lucide-react';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { EditLegacyHeatDialog } from './EditLegacyHeatDialog';
@@ -49,7 +49,7 @@ const PreviousHeatCard: React.FC<PreviousHeatCardProps> = ({
     const daysAgo = differenceInDays(new Date(), endDate || startDate);
 
     return (
-      <Card className="hover:bg-muted/50 transition-colors">
+      <Card className="hover:bg-muted/50 transition-colors cursor-pointer" onClick={onViewDetails}>
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -89,14 +89,6 @@ const PreviousHeatCard: React.FC<PreviousHeatCardProps> = ({
                 heatCycle={heatCycle}
                 onSuccess={onSuccess || (() => {})}
               />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onViewDetails}
-                className="h-8 w-8 p-0"
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
             </div>
           </div>
 
