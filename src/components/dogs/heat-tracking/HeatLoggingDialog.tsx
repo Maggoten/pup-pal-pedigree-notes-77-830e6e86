@@ -107,7 +107,9 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
         notes || undefined,
         testType === 'temperature' ? temp : undefined,
         testType === 'progesterone' ? progesterone : undefined,
-        testType
+        testType,
+        observations || undefined,
+        phase || undefined
       );
       
       if (result) {

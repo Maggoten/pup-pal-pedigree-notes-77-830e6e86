@@ -578,7 +578,9 @@ export class HeatService {
     notes?: string,
     temperature?: number,
     progesteroneValue?: number,
-    testType?: string
+    testType?: string,
+    observations?: string,
+    phase?: string
   ): Promise<HeatLog | null> {
     try {
       const userId = (await supabase.auth.getUser()).data.user?.id;
@@ -596,7 +598,9 @@ export class HeatService {
           notes,
           temperature,
           progesterone_value: progesteroneValue,
-          test_type: testType
+          test_type: testType,
+          observations,
+          phase
         })
         .select()
         .single();
