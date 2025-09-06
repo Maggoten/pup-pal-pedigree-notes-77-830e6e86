@@ -291,6 +291,8 @@
       "nextHeat": "Nästa Löp",
       "daysUntil": "Dagar Kvar",
       "predictedNext": "Förväntat Nästa Löp",
+      "predictedFromOngoing": "Nästa Löp (från pågående)",
+      "ongoing": "Pågående",
       "today": "Väntas idag",
       "tomorrow": "Väntas imorgon",
       "inDays": "Om {{days}} dagar",

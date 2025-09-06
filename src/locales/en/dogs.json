@@ -291,6 +291,8 @@
       "nextHeat": "Next Heat",
       "daysUntil": "Days Until",
       "predictedNext": "Predicted Next Heat",
+      "predictedFromOngoing": "Next Heat (from ongoing)",
+      "ongoing": "Ongoing",
       "today": "Expected today",
       "tomorrow": "Expected tomorrow", 
       "inDays": "In {{days}} days",

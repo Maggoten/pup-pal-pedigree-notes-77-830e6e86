@@ -189,13 +189,13 @@ const HeatSummaryCard: React.FC<HeatSummaryCardProps> = ({
                 <Calendar className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">
                   {stats.isBasedOnOngoing 
-                    ? t('heatTracking.summary.predictedFromOngoing', { fallback: 'Next heat (from ongoing)' })
+                    ? t('heatTracking.summary.predictedFromOngoing')
                     : t('heatTracking.summary.predictedNext')
                   }
                 </span>
                 {stats.isBasedOnOngoing && (
                   <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20 text-xs">
-                    {t('heatTracking.summary.ongoing', { fallback: 'Ongoing' })}
+                    {t('heatTracking.summary.ongoing')}
                   </Badge>
                 )}
               </div>
