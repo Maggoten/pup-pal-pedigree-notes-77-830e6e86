@@ -147,7 +147,7 @@ const HeatSummaryCard: React.FC<HeatSummaryCardProps> = ({
           
           {/* Next Heat Date */}
           <div className="text-center">
-            <div className="text-lg font-bold text-primary">
+            <div className="text-2xl font-bold text-primary">
               {stats.nextHeatDate ? format(stats.nextHeatDate, 'MMM dd') : '-'}
             </div>
             <div className="text-xs text-muted-foreground">
