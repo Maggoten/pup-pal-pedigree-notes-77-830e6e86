@@ -153,7 +153,9 @@ const HeatLogsDialog: React.FC<HeatLogsDialogProps> = ({
                   )}
                 </div>
               ) : (
-                heatLogs.map((log) => (
+                heatLogs
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map((log) => (
                   <div key={log.id} className="border rounded-lg p-3 space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
