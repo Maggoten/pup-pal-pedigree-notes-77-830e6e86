@@ -33,6 +33,10 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
   const [showEndDialog, setShowEndDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditNotesDialog, setShowEditNotesDialog] = useState(false);
+  const [editingNotes, setEditingNotes] = useState('');
+  const [showDeleteEntryDialog, setShowDeleteEntryDialog] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<HeatLog | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -86,6 +90,72 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
       });
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteNotes = async () => {
+    try {
+      const success = await HeatService.updateHeatCycle(heatCycle.id, { notes: null });
+      if (success) {
+        toast({
+          title: t('heatTracking.notes.deleteSuccess'),
+          description: t('heatTracking.notes.deleteSuccessDescription'),
+        });
+        onUpdate();
+      }
+    } catch (error) {
+      console.error('Error deleting notes:', error);
+      toast({
+        title: t('heatTracking.notes.deleteError'),
+        description: t('heatTracking.notes.deleteErrorDescription'),
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteEntry = async (entryId: string) => {
+    try {
+      const success = await HeatService.deleteHeatLog(entryId);
+      if (success) {
+        toast({
+          title: t('heatTracking.logs.deleteSuccess'),
+          description: t('heatTracking.logs.deleteSuccessDescription'),
+        });
+        loadHeatLogs();
+        onUpdate();
+      }
+    } catch (error) {
+      console.error('Error deleting heat log entry:', error);
+      toast({
+        title: t('heatTracking.logs.deleteError'),
+        description: t('heatTracking.logs.deleteErrorDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setShowDeleteEntryDialog(false);
+      setEntryToDelete(null);
+    }
+  };
+
+  const handleEditNotes = async (newNotes: string) => {
+    try {
+      const success = await HeatService.updateHeatCycle(heatCycle.id, { notes: newNotes });
+      if (success) {
+        toast({
+          title: t('heatTracking.notes.editSuccess'),
+          description: t('heatTracking.notes.editSuccessDescription'),
+        });
+        onUpdate();
+      }
+    } catch (error) {
+      console.error('Error updating notes:', error);
+      toast({
+        title: t('heatTracking.notes.editError'),
+        description: t('heatTracking.notes.editErrorDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setShowEditNotesDialog(false);
     }
   };
 
@@ -192,19 +262,27 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
         </CardHeader>
         
         <CardContent className="space-y-4">
-          {heatCycle.notes && (
-            <div className="text-sm text-muted-foreground bg-muted p-2 rounded-md">
-              {heatCycle.notes}
-            </div>
-          )}
-
           {latestLog && (
             <div className="border rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="font-medium text-sm">{t('heatTracking.cycles.latestEntry')}</h4>
-                <span className="text-xs text-muted-foreground">
-                  {format(parseISO(latestLog.date), 'MMM dd')}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    {format(parseISO(latestLog.date), 'MMM dd')}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => {
+                      if (entryToDelete) {
+                        handleDeleteEntry(entryToDelete.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
               </div>
               
               <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3 text-sm">
@@ -234,6 +312,39 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                   {latestLog.observations}
                 </p>
               )}
+            </div>
+          )}
+
+          {/* Notes Section - Moved below latest entry */}
+          {heatCycle.notes && (
+            <div className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-medium text-sm">{t('heatTracking.notes')}</h4>
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => {
+                      setEditingNotes(heatCycle.notes || '');
+                      setShowEditNotesDialog(true);
+                    }}
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => handleDeleteNotes()}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+              <div className="text-sm text-muted-foreground bg-muted p-2 rounded-md">
+                {heatCycle.notes}
+              </div>
             </div>
           )}
 
@@ -326,6 +437,50 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
         description={t('heatTracking.deleteDialog.description')}
         itemDetails={`${t('heatTracking.cycles.title')} - ${format(startDate, 'yyyy-MM-dd')}`}
       />
+
+      {/* Delete Entry Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={showDeleteEntryDialog}
+        onOpenChange={setShowDeleteEntryDialog}
+        onConfirm={() => {
+          if (entryToDelete) {
+            handleDeleteEntry(entryToDelete.id);
+          }
+        }}
+        title={t('heatTracking.logs.deleteConfirmTitle')}
+        description={t('heatTracking.logs.deleteConfirmDescription')}
+        itemDetails={entryToDelete ? format(parseISO(entryToDelete.date), 'yyyy-MM-dd') : ''}
+      />
+
+      {/* Edit Notes Dialog - Simple dialog for editing notes */}
+      {showEditNotesDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold mb-4">{t('heatTracking.notes.editTitle')}</h3>
+            <textarea
+              value={editingNotes}
+              onChange={(e) => setEditingNotes(e.target.value)}
+              className="w-full h-32 p-2 border rounded-md resize-none"
+              placeholder={t('heatTracking.notes.placeholder')}
+            />
+            <div className="flex gap-2 mt-4">
+              <Button
+                onClick={() => handleEditNotes(editingNotes)}
+                className="flex-1"
+              >
+                {t('common.save')}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowEditNotesDialog(false)}
+                className="flex-1"
+              >
+                {t('common.cancel')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

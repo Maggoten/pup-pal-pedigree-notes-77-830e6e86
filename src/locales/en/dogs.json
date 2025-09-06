@@ -566,6 +566,18 @@
       "deleteConfirmTitle": "Delete Heat Log Entry",
       "deleteConfirmDescription": "This will permanently remove this tracking entry from your records",
       "entryFrom": "Entry from {{date}}"
+    },
+    "notes": {
+      "editTitle": "Edit Notes",
+      "editSuccess": "Notes Updated", 
+      "editSuccessDescription": "Heat cycle notes have been successfully updated",
+      "editError": "Update Failed",
+      "editErrorDescription": "Unable to update the notes",
+      "deleteSuccess": "Notes Deleted",
+      "deleteSuccessDescription": "Heat cycle notes have been successfully removed", 
+      "deleteError": "Delete Failed",
+      "deleteErrorDescription": "Unable to delete the notes",
+      "placeholder": "Add notes about this heat cycle..."
     }
   },
   "toast": {

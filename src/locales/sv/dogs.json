@@ -566,6 +566,18 @@
       "deleteConfirmTitle": "Radera Löpspårningspost",
       "deleteConfirmDescription": "Detta kommer permanent ta bort denna spårningspost från dina register",
       "entryFrom": "Post från {{date}}"
+    },
+    "notes": {
+      "editTitle": "Redigera Anteckningar",
+      "editSuccess": "Anteckningar Uppdaterade",
+      "editSuccessDescription": "Löpcykelanteckningar har uppdaterats",
+      "editError": "Uppdatering Misslyckades", 
+      "editErrorDescription": "Kunde inte uppdatera anteckningarna",
+      "deleteSuccess": "Anteckningar Raderade",
+      "deleteSuccessDescription": "Löpcykelanteckningar har raderats",
+      "deleteError": "Radering Misslyckades",
+      "deleteErrorDescription": "Kunde inte radera anteckningarna",
+      "placeholder": "Lägg till anteckningar om denna löpcykel..."
     }
   },
   "toast": {
