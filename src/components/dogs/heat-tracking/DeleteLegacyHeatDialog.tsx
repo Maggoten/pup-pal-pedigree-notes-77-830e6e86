@@ -37,8 +37,8 @@ export const DeleteLegacyHeatDialog: React.FC<DeleteLegacyHeatDialogProps> = ({
       
       if (success) {
         toast({
-          title: "Success",
-          description: "Heat entry deleted successfully"
+          title: "Heat entry deleted",
+          description: "The heat entry has been successfully removed."
         });
         onSuccess();
         setOpen(false);
@@ -47,9 +47,11 @@ export const DeleteLegacyHeatDialog: React.FC<DeleteLegacyHeatDialogProps> = ({
       }
     } catch (error) {
       console.error('Error deleting heat entry:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete heat entry';
+      
       toast({
-        title: "Error",
-        description: "Failed to delete heat entry",
+        title: "Unable to delete heat entry",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

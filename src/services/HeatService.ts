@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
@@ -263,12 +262,6 @@ export class HeatService {
   }
 
   /**
-   * Deletes a specific heat entry from a dog's heat history
-   * @param dogId The ID of the dog
-   * @param heatIndex The index of the heat entry in the dog's heatHistory array
-   * @returns A boolean indicating whether the operation was successful
-   */
-  /**
    * Edits a specific heat entry in a dog's heat history
    * @param dogId The ID of the dog
    * @param heatIndex The index of the heat entry in the dog's heatHistory array
@@ -328,8 +321,16 @@ export class HeatService {
     }
   }
 
+  /**
+   * Deletes a specific heat entry from a dog's heat history
+   * @param dogId The ID of the dog
+   * @param heatIndex The index of the heat entry in the dog's heatHistory array
+   * @returns A boolean indicating whether the operation was successful
+   */
   static async deleteHeatEntry(dogId: string, heatIndex: number): Promise<boolean> {
     try {
+      console.log(`Attempting to delete heat entry at index ${heatIndex} for dog ${dogId}`);
+      
       // First, fetch the current dog data
       const { data: dog, error: fetchError } = await supabase
         .from('dogs')
@@ -339,17 +340,30 @@ export class HeatService {
       
       if (fetchError || !dog) {
         console.error('Error fetching dog heat history:', fetchError);
-        return false;
+        throw new Error('Could not fetch dog data');
       }
       
       // Make a copy of the heat history, ensuring it's an array
       const heatHistory = Array.isArray(dog.heatHistory) ? [...(dog.heatHistory as HeatHistoryArray)] : [];
+      console.log(`Current heatHistory length: ${heatHistory.length}, requested index: ${heatIndex}`);
       
-      // Validate the index
-      if (heatIndex < 0 || heatIndex >= heatHistory.length) {
-        console.error('Invalid heat index:', heatIndex);
-        return false;
+      // Validate the index with more specific error messages
+      if (heatHistory.length === 0) {
+        console.error('Cannot delete heat entry: heatHistory is empty (possibly already migrated to heat_cycles)');
+        throw new Error('No legacy heat entries available to delete');
       }
+      
+      if (heatIndex < 0) {
+        console.error(`Invalid heat index: ${heatIndex} (cannot be negative)`);
+        throw new Error('Invalid heat entry index');
+      }
+      
+      if (heatIndex >= heatHistory.length) {
+        console.error(`Invalid heat index: ${heatIndex} (max available: ${heatHistory.length - 1})`);
+        throw new Error(`Heat entry not found at index ${heatIndex}`);
+      }
+      
+      console.log(`Removing heat entry at index ${heatIndex}: ${heatHistory[heatIndex].date}`);
       
       // Remove the specified heat entry
       heatHistory.splice(heatIndex, 1);
@@ -362,13 +376,14 @@ export class HeatService {
       
       if (updateError) {
         console.error('Error updating dog heat history:', updateError);
-        return false;
+        throw new Error('Failed to update heat history in database');
       }
       
+      console.log(`Successfully deleted heat entry at index ${heatIndex}`);
       return true;
     } catch (error) {
-      console.error('Unexpected error in deleteHeatEntry:', error);
-      return false;
+      console.error('Error in deleteHeatEntry:', error);
+      throw error; // Re-throw to preserve specific error messages
     }
   }
 
@@ -396,27 +411,9 @@ export class HeatService {
       // Sync to heat history
       await this.syncHeatCycleToHeatHistory(dogId, data.id);
 
-      // Sync to calendar - get dog name first
-      try {
-        const { data: dogData } = await supabase
-          .from('dogs')
-          .select('name')
-          .eq('id', dogId)
-          .single();
-        
-        if (dogData) {
-          const { HeatCalendarSyncService } = await import('./HeatCalendarSyncService');
-          await HeatCalendarSyncService.syncHeatCycleToCalendar(data, dogData.name);
-          console.log('Heat cycle synced to calendar successfully');
-        }
-      } catch (syncError) {
-        console.error('Error syncing heat cycle to calendar:', syncError);
-        // Don't fail the heat cycle creation if calendar sync fails
-      }
-
       return data;
     } catch (error) {
-      console.error('Unexpected error creating heat cycle:', error);
+      console.error('Error creating heat cycle:', error);
       return null;
     }
   }
@@ -438,20 +435,15 @@ export class HeatService {
         return null;
       }
 
-      // Sync to heat history if start_date was updated
-      if (updates.start_date || updates.end_date) {
-        await this.syncHeatCycleToHeatHistory(data.dog_id, data.id);
-      }
-
       return data;
     } catch (error) {
-      console.error('Unexpected error updating heat cycle:', error);
+      console.error('Error updating heat cycle:', error);
       return null;
     }
   }
 
   /**
-   * Gets heat cycles for a specific dog
+   * Gets all heat cycles for a dog
    */
   static async getHeatCycles(dogId: string): Promise<HeatCycle[]> {
     try {
@@ -468,20 +460,20 @@ export class HeatService {
 
       return data || [];
     } catch (error) {
-      console.error('Unexpected error fetching heat cycles:', error);
+      console.error('Error fetching heat cycles:', error);
       return [];
     }
   }
 
   /**
-   * Deletes a heat cycle and all associated logs
+   * Deletes a heat cycle and its logs
    */
   static async deleteHeatCycle(cycleId: string): Promise<boolean> {
     try {
-      // First get the heat cycle to get the dog_id and start_date
+      // First get the heat cycle to get its start date and dog ID
       const { data: heatCycle, error: fetchError } = await supabase
         .from('heat_cycles')
-        .select('dog_id, start_date')
+        .select('*')
         .eq('id', cycleId)
         .single();
 
@@ -490,7 +482,7 @@ export class HeatService {
         return false;
       }
 
-      // Delete all heat logs for this cycle
+      // Delete all logs for this heat cycle first
       const { error: logsError } = await supabase
         .from('heat_logs')
         .delete()
@@ -502,13 +494,13 @@ export class HeatService {
       }
 
       // Delete the heat cycle
-      const { error } = await supabase
+      const { error: deleteError } = await supabase
         .from('heat_cycles')
         .delete()
         .eq('id', cycleId);
 
-      if (error) {
-        console.error('Error deleting heat cycle:', error);
+      if (deleteError) {
+        console.error('Error deleting heat cycle:', deleteError);
         return false;
       }
 
@@ -523,118 +515,7 @@ export class HeatService {
   }
 
   /**
-   * Creates a new heat log entry
-   */
-  static async createHeatLog(
-    heatCycleId: string,
-    date: Date,
-    temperature?: number,
-    phase?: string,
-    observations?: string,
-    notes?: string,
-    testType: 'temperature' | 'progesterone' = 'temperature',
-    progesteroneValue?: number
-  ): Promise<HeatLog | null> {
-    try {
-      const { data, error } = await supabase
-        .from('heat_logs')
-        .insert({
-          heat_cycle_id: heatCycleId,
-          user_id: (await supabase.auth.getUser()).data.user?.id!,
-          date: date.toISOString(),
-          temperature,
-          phase,
-          observations,
-          notes,
-          test_type: testType,
-          progesterone_value: progesteroneValue
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating heat log:', error);
-        return null;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Unexpected error creating heat log:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Gets heat logs for a specific heat cycle
-   */
-  static async getHeatLogs(heatCycleId: string): Promise<HeatLog[]> {
-    try {
-      const { data, error } = await supabase
-        .from('heat_logs')
-        .select('*')
-        .eq('heat_cycle_id', heatCycleId)
-        .order('date', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching heat logs:', error);
-        return [];
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Unexpected error fetching heat logs:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Updates a heat log entry
-   */
-  static async updateHeatLog(logId: string, updates: HeatLogUpdate): Promise<HeatLog | null> {
-    try {
-      const { data, error } = await supabase
-        .from('heat_logs')
-        .update(updates)
-        .eq('id', logId)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating heat log:', error);
-        return null;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Unexpected error updating heat log:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Deletes a heat log entry
-   */
-  static async deleteHeatLog(logId: string): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from('heat_logs')
-        .delete()
-        .eq('id', logId);
-
-      if (error) {
-        console.error('Error deleting heat log:', error);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Unexpected error deleting heat log:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Gets the active heat cycle for a dog (if any)
+   * Gets the active heat cycle for a dog (one without end_date)
    */
   static async getActiveHeatCycle(dogId: string): Promise<HeatCycle | null> {
     try {
@@ -654,25 +535,34 @@ export class HeatService {
 
       return data;
     } catch (error) {
-      console.error('Unexpected error fetching active heat cycle:', error);
+      console.error('Error fetching active heat cycle:', error);
       return null;
     }
   }
 
   /**
-   * Ends an active heat cycle by setting the end date
+   * Ends a heat cycle by setting the end date
    */
-  static async endHeatCycle(cycleId: string, endDate: Date = new Date()): Promise<HeatCycle | null> {
+  static async endHeatCycle(cycleId: string, endDate?: Date): Promise<HeatCycle | null> {
     try {
-      const cycleLength = await this.calculateCycleLength(cycleId, endDate);
+      const finalEndDate = endDate || new Date();
+      
+      const { data, error } = await supabase
+        .from('heat_cycles')
+        .update({ 
+          end_date: finalEndDate.toISOString(),
+          cycle_length: Math.ceil((finalEndDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+        })
+        .eq('id', cycleId)
+        .select()
+        .single();
 
-      const updates: HeatCycleUpdate = {
-        end_date: endDate.toISOString(),
-        cycle_length: cycleLength
-      };
+      if (error) {
+        console.error('Error ending heat cycle:', error);
+        return null;
+      }
 
-      const result = await this.updateHeatCycle(cycleId, updates);
-      return result;
+      return data;
     } catch (error) {
       console.error('Error ending heat cycle:', error);
       return null;
@@ -680,29 +570,115 @@ export class HeatService {
   }
 
   /**
-   * Calculates the cycle length in days
+   * Creates a new heat log entry
    */
-  private static async calculateCycleLength(cycleId: string, endDate: Date): Promise<number | null> {
+  static async createHeatLog(
+    heatCycleId: string,
+    logDate: Date,
+    notes?: string,
+    temperature?: number,
+    progesteroneValue?: number,
+    testType?: string
+  ): Promise<HeatLog | null> {
     try {
-      const { data: cycle, error } = await supabase
-        .from('heat_cycles')
-        .select('start_date')
-        .eq('id', cycleId)
-        .single();
-
-      if (error || !cycle) {
-        console.error('Error fetching cycle for length calculation:', error);
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      if (!userId) {
+        console.error('No authenticated user found');
         return null;
       }
 
-      const startDate = new Date(cycle.start_date);
-      const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      return diffDays;
+      const { data, error } = await supabase
+        .from('heat_logs')
+        .insert({
+          heat_cycle_id: heatCycleId,
+          user_id: userId,
+          date: logDate.toISOString(),
+          notes,
+          temperature,
+          progesterone_value: progesteroneValue,
+          test_type: testType
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating heat log:', error);
+        return null;
+      }
+
+      return data;
     } catch (error) {
-      console.error('Error calculating cycle length:', error);
+      console.error('Error creating heat log:', error);
       return null;
+    }
+  }
+
+  /**
+   * Gets all heat logs for a heat cycle
+   */
+  static async getHeatLogs(heatCycleId: string): Promise<HeatLog[]> {
+    try {
+      const { data, error } = await supabase
+        .from('heat_logs')
+        .select('*')
+        .eq('heat_cycle_id', heatCycleId)
+        .order('date', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching heat logs:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching heat logs:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Updates an existing heat log
+   */
+  static async updateHeatLog(logId: string, updates: HeatLogUpdate): Promise<HeatLog | null> {
+    try {
+      const { data, error } = await supabase
+        .from('heat_logs')
+        .update(updates)
+        .eq('id', logId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating heat log:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error updating heat log:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Deletes a heat log
+   */
+  static async deleteHeatLog(logId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('heat_logs')
+        .delete()
+        .eq('id', logId);
+
+      if (error) {
+        console.error('Error deleting heat log:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting heat log:', error);
+      return false;
     }
   }
 }

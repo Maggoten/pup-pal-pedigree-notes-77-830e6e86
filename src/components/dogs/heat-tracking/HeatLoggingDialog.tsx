@@ -104,12 +104,10 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
       const result = await HeatService.createHeatLog(
         heatCycle.id,
         date,
-        testType === 'temperature' ? temp : undefined,
-        phase || undefined,
-        observations || undefined,
         notes || undefined,
-        testType,
-        testType === 'progesterone' ? progesterone : undefined
+        testType === 'temperature' ? temp : undefined,
+        testType === 'progesterone' ? progesterone : undefined,
+        testType
       );
       
       if (result) {

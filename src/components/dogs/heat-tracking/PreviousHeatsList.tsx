@@ -72,10 +72,15 @@ const PreviousHeatsList: React.FC<PreviousHeatsListProps> = ({ dog, onUpdate }) 
     onUpdate?.();
   };
 
-  // Combine and sort all previous heats (completed cycles + legacy history)
+  // Filter out empty legacy entries and validate data consistency
+  const validLegacyHistory = heatHistory.filter(heat => heat?.date);
   const hasCompletedCycles = completedHeatCycles.length > 0;
-  const hasLegacyHistory = heatHistory.length > 0;
-  const hasAnyPreviousHeats = hasCompletedCycles || hasLegacyHistory;
+  const hasValidLegacyHistory = validLegacyHistory.length > 0;
+  const hasAnyPreviousHeats = hasCompletedCycles || hasValidLegacyHistory;
+
+  // If we have completed cycles but legacy history is empty or invalid, 
+  // migration likely occurred - don't show legacy entries
+  const shouldShowLegacyHistory = hasValidLegacyHistory && (!hasCompletedCycles || validLegacyHistory.length > 0);
 
   if (!hasAnyPreviousHeats) {
     return null;
@@ -90,14 +95,14 @@ const PreviousHeatsList: React.FC<PreviousHeatsListProps> = ({ dog, onUpdate }) 
             {t('heatTracking.previous.title')}
           </CardTitle>
           <CardDescription>
-            {hasCompletedCycles && hasLegacyHistory 
+            {hasCompletedCycles && shouldShowLegacyHistory 
               ? t('heatTracking.previous.descriptionBoth', { 
                   completed: completedHeatCycles.length,
-                  legacy: heatHistory.length 
+                  legacy: validLegacyHistory.length 
                 })
               : hasCompletedCycles
               ? t('heatTracking.previous.descriptionCompleted', { count: completedHeatCycles.length })
-              : t('heatTracking.previous.descriptionLegacy', { count: heatHistory.length })
+              : t('heatTracking.previous.descriptionLegacy', { count: validLegacyHistory.length })
             }
           </CardDescription>
         </CardHeader>
@@ -120,19 +125,24 @@ const PreviousHeatsList: React.FC<PreviousHeatsListProps> = ({ dog, onUpdate }) 
                 />
               ))}
               
-              {/* Legacy Heat History */}
-              {heatHistory
-                .filter(heat => heat.date)
-                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                .map((heat, index) => (
-                  <PreviousHeatCard
-                    key={`legacy-${index}`}
-                    legacyHeat={heat}
-                    legacyIndex={index}
-                    dogId={dog.id}
-                    onLegacyUpdate={handleUpdate}
-                  />
-                ))}
+              {/* Legacy Heat History - Only show if we should display legacy entries */}
+              {shouldShowLegacyHistory && 
+                validLegacyHistory
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map((heat, sortedIndex) => {
+                    // Find the original index in the unsorted heatHistory array
+                    const originalIndex = heatHistory.findIndex(h => h.date === heat.date);
+                    return (
+                      <PreviousHeatCard
+                        key={`legacy-${originalIndex}`}
+                        legacyHeat={heat}
+                        legacyIndex={originalIndex}
+                        dogId={dog.id}
+                        onLegacyUpdate={handleUpdate}
+                      />
+                    );
+                  })
+              }
             </div>
           )}
         </CardContent>
