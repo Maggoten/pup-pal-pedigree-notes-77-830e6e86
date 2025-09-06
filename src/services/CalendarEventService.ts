@@ -319,6 +319,33 @@ export async function markHeatAsStarted(eventId: string, dogs: Dog[]): Promise<b
       console.error('Error fetching event:', fetchError);
       return false;
     }
+
+    // Create heat cycle in heat journal if dogId exists
+    if (event.dog_id) {
+      try {
+        const { HeatCalendarSyncService } = await import('./HeatCalendarSyncService');
+        
+        // Create heat cycle directly since we already have all the data we need
+        const startDate = new Date(event.date);
+        const { HeatService } = await import('./HeatService');
+        
+        // Check if active heat cycle already exists for this dog
+        const existingCycle = await HeatService.getActiveHeatCycle(event.dog_id);
+        if (!existingCycle) {
+          await HeatService.createHeatCycle(
+            event.dog_id,
+            startDate,
+            event.notes || 'Started from calendar'
+          );
+          console.log('Heat cycle created in journal from calendar');
+        } else {
+          console.log('Active heat cycle already exists for dog:', event.dog_id);
+        }
+      } catch (syncError) {
+        console.error('Error creating heat cycle in journal:', syncError);
+        // Continue with calendar updates even if journal sync fails
+      }
+    }
     
     const startDate = new Date(event.date);
     const endDate = new Date(startDate);

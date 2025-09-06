@@ -396,6 +396,24 @@ export class HeatService {
       // Sync to heat history
       await this.syncHeatCycleToHeatHistory(dogId, data.id);
 
+      // Sync to calendar - get dog name first
+      try {
+        const { data: dogData } = await supabase
+          .from('dogs')
+          .select('name')
+          .eq('id', dogId)
+          .single();
+        
+        if (dogData) {
+          const { HeatCalendarSyncService } = await import('./HeatCalendarSyncService');
+          await HeatCalendarSyncService.syncHeatCycleToCalendar(data, dogData.name);
+          console.log('Heat cycle synced to calendar successfully');
+        }
+      } catch (syncError) {
+        console.error('Error syncing heat cycle to calendar:', syncError);
+        // Don't fail the heat cycle creation if calendar sync fails
+      }
+
       return data;
     } catch (error) {
       console.error('Unexpected error creating heat cycle:', error);
