@@ -155,7 +155,7 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm font-medium">
-                  {t('heatTracking.notes')}
+                  {t('common.notes')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -210,7 +210,7 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
                       {t('heatTracking.phase.title')}:
                     </span>
                     <Badge variant="outline" className="text-xs">
-                      {t(`heatTracking.phase.${latestLog.phase}`)}
+                      {t(`heatTracking.phases.${latestLog.phase}`)}
                     </Badge>
                   </div>
                 )}
