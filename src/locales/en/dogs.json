@@ -143,6 +143,7 @@
       "delete": "Delete",
       "adding": "Adding...",
       "saving": "Saving...",
+      "deleting": "Deleting...",
       "loading": "Loading..."
     }
   },
