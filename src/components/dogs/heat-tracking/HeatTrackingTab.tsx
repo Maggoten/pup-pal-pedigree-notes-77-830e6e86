@@ -16,6 +16,7 @@ import OptimalMatingWindow from './OptimalMatingWindow';
 import TemperatureTrendChart from './TemperatureTrendChart';
 import CycleAnalytics from './CycleAnalytics';
 import PreviousHeatsList from './PreviousHeatsList';
+import HeatSummaryCard from './HeatSummaryCard';
 import { useUnifiedHeatData } from '@/hooks/useUnifiedHeatData';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -71,6 +72,13 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
 
   return (
     <div className="space-y-6">
+      {/* Heat Summary Overview */}
+      <HeatSummaryCard 
+        dog={dog}
+        heatCycles={heatCycles}
+        heatHistory={heatHistory}
+      />
+
       {/* Advanced Analytics */}
       <CycleAnalytics 
         heatCycles={heatCycles}

@@ -286,6 +286,16 @@
     "title": "Löpcykler",
     "description": "{{count}} cykel registrerad",
     "descriptionPlural": "{{count}} cykler registrerade",
+    "summary": {
+      "title": "Löpcykel Översikt",
+      "nextHeat": "Nästa Löp",
+      "daysUntil": "Dagar Kvar",
+      "predictedNext": "Förväntat Nästa Löp",
+      "today": "Väntas idag",
+      "tomorrow": "Väntas imorgon",
+      "inDays": "Om {{days}} dagar",
+      "upcomingSoon": "Löpcykel väntas snart"
+    },
     "analytics": {
       "title": "Cykelanalys",
       "description": "Analys baserad på {{count}} registrerade löpcykler",

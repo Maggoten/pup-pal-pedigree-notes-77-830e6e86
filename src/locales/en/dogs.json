@@ -286,6 +286,16 @@
     "title": "Heat Cycles",
     "description": "{{count}} cycle recorded",
     "descriptionPlural": "{{count}} cycles recorded",
+    "summary": {
+      "title": "Heat Cycle Overview",
+      "nextHeat": "Next Heat",
+      "daysUntil": "Days Until",
+      "predictedNext": "Predicted Next Heat",
+      "today": "Expected today",
+      "tomorrow": "Expected tomorrow", 
+      "inDays": "In {{days}} days",
+      "upcomingSoon": "Heat cycle expected soon"
+    },
     "analytics": {
       "title": "Cycle Analytics",
       "description": "Analysis based on {{count}} recorded heat cycles",
