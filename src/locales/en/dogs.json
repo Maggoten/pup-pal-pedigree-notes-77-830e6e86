@@ -321,6 +321,8 @@
       "predictedEnd": "Predicted end",
       "avgCycleLength": "Avg Length (days)",
       "avgInterval": "Avg Interval (days)",
+      "nextHeat": "Next Heat",
+      "daysUntil": "Days Until",
       "shortestCycle": "Shortest (days)",
       "longestCycle": "Longest (days)",
       "comparison": "Cycle Comparison",

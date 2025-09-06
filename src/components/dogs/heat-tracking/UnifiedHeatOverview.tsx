@@ -251,43 +251,6 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
           </div>
         )}
 
-        {/* Next Heat Prediction - Green highlighted section when no active cycle */}
-        {!activeCycle && stats.nextHeatDate && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Calendar className="h-4 w-4 text-green-600" />
-              <h4 className="font-semibold text-green-800">
-                {t('heatTracking.summary.predictedNext')}
-              </h4>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-green-700">
-                  {t('heatTracking.summary.nextHeat')}:
-                </span>
-                <span className="font-medium text-green-800">
-                  {format(stats.nextHeatDate, 'MMM dd, yyyy')}
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-green-700">
-                  {t('heatTracking.summary.daysUntil')}:
-                </span>
-                <span className="font-medium text-green-800">
-                  {stats.daysUntilNextHeat === 0 
-                    ? t('heatTracking.summary.today')
-                    : stats.daysUntilNextHeat === 1 
-                    ? t('heatTracking.summary.tomorrow')
-                    : t('heatTracking.summary.inDays', { days: stats.daysUntilNextHeat })
-                  }
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-        
         {/* Basic Statistics Grid - Always shown */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="text-center">
@@ -310,67 +273,22 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
           
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">
-              {stats.shortestCycle || '-'}
+              {stats.nextHeatDate ? format(stats.nextHeatDate, 'MMM dd') : '-'}
             </div>
             <div className="text-xs text-muted-foreground">
-              {t('heatTracking.analytics.shortestCycle')}
+              {t('heatTracking.analytics.nextHeat')}
             </div>
           </div>
           
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">
-              {stats.longestCycle || '-'}
+              {stats.daysUntilNextHeat !== null ? stats.daysUntilNextHeat : '-'}
             </div>
             <div className="text-xs text-muted-foreground">
-              {t('heatTracking.analytics.longestCycle')}
+              {t('heatTracking.analytics.daysUntil')}
             </div>
           </div>
         </div>
-
-        {/* Next Heat Info - Always show when calculated (with distinction for ongoing) */}
-        {stats.nextHeatDate && (
-          <div className="border rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Calendar className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">
-                {stats.isBasedOnOngoing 
-                  ? t('heatTracking.summary.predictedFromOngoing')
-                  : t('heatTracking.summary.predictedNext')
-                }
-              </span>
-              {stats.isBasedOnOngoing && (
-                <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20 text-xs">
-                  {t('heatTracking.summary.ongoing')}
-                </Badge>
-              )}
-            </div>
-            
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  {format(stats.nextHeatDate, 'EEEE, MMMM dd, yyyy')}
-                </span>
-                <span className="font-medium">
-                  {stats.daysUntilNextHeat === 0 
-                    ? t('heatTracking.summary.today')
-                    : stats.daysUntilNextHeat === 1 
-                    ? t('heatTracking.summary.tomorrow')
-                    : t('heatTracking.summary.inDays', { days: stats.daysUntilNextHeat })
-                  }
-                </span>
-              </div>
-            </div>
-
-            {stats.daysUntilNextHeat !== null && stats.daysUntilNextHeat <= 7 && (
-              <div className="mt-3 p-2 bg-warning/10 border border-warning/20 rounded flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-warning-foreground">
-                  {t('heatTracking.summary.upcomingHeat')}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
         
         {/* Comparison with Previous Cycle */}
         {stats.lastCycleLength && stats.totalCycles > 1 && (

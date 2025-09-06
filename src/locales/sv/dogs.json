@@ -321,6 +321,8 @@
       "predictedEnd": "Förutsett slut",
       "avgCycleLength": "Snitt Längd (dagar)",
       "avgInterval": "Snitt Intervall (dagar)",
+      "nextHeat": "Nästa Löp",
+      "daysUntil": "Dagar Kvar",
       "shortestCycle": "Kortast (dagar)",
       "longestCycle": "Längst (dagar)",
       "comparison": "Cykeljämförelse",
