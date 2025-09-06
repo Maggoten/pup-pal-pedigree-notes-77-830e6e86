@@ -16,6 +16,7 @@ import OptimalMatingWindow from './OptimalMatingWindow';
 import TemperatureTrendChart from './TemperatureTrendChart';
 import CycleAnalytics from './CycleAnalytics';
 import PreviousHeatsList from './PreviousHeatsList';
+import { useUnifiedHeatData } from '@/hooks/useUnifiedHeatData';
 import type { Database } from '@/integrations/supabase/types';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
@@ -27,25 +28,29 @@ interface HeatTrackingTabProps {
 
 const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
   const { t } = useTranslation('dogs');
-  const heatHistory = dog.heatHistory || [];
-  const [heatCycles, setHeatCycles] = useState<HeatCycle[]>([]);
+  const { 
+    heatCycles, 
+    heatHistory, 
+    isLoading, 
+    refresh 
+  } = useUnifiedHeatData(dog.id);
   const [allTemperatureLogs, setAllTemperatureLogs] = useState<HeatLog[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadHeatCycles();
-  }, [dog.id]);
+    loadTemperatureLogs();
+  }, [heatCycles]);
 
-  const loadHeatCycles = async () => {
-    setIsLoading(true);
+  const loadTemperatureLogs = async () => {
+    if (!heatCycles.length) {
+      setAllTemperatureLogs([]);
+      return;
+    }
+
     try {
-      const cycles = await HeatService.getHeatCycles(dog.id);
-      setHeatCycles(cycles);
-      
       // Load all temperature logs from all cycles
       const allLogs: HeatLog[] = [];
-      for (const cycle of cycles) {
+      for (const cycle of heatCycles) {
         const logs = await HeatService.getHeatLogs(cycle.id);
         // Filter only temperature logs
         const temperatureLogs = logs.filter(log => log.temperature !== null && log.temperature !== undefined);
@@ -56,67 +61,20 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
       allLogs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
       setAllTemperatureLogs(allLogs);
     } catch (error) {
-      console.error('Error loading heat cycles:', error);
-    } finally {
-      setIsLoading(false);
+      console.error('Error loading temperature logs:', error);
     }
   };
 
   const handleStartCycleSuccess = () => {
-    loadHeatCycles();
+    refresh();
   };
-  
-  // Calculate basic analytics
-  const getAverageCycleLength = () => {
-    if (heatHistory.length < 2) return null;
-    
-    const sortedHeats = [...heatHistory]
-      .filter(heat => heat.date)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    
-    const intervals = [];
-    for (let i = 1; i < sortedHeats.length; i++) {
-      const daysBetween = differenceInDays(
-        parseISO(sortedHeats[i].date),
-        parseISO(sortedHeats[i - 1].date)
-      );
-      intervals.push(daysBetween);
-    }
-    
-    return intervals.length > 0 
-      ? Math.round(intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length)
-      : null;
-  };
-
-  const getLastHeatDate = () => {
-    if (heatHistory.length === 0) return null;
-    const sortedHeats = [...heatHistory]
-      .filter(heat => heat.date)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return sortedHeats[0]?.date || null;
-  };
-
-  const getNextPredictedHeat = () => {
-    const lastHeat = getLastHeatDate();
-    if (!lastHeat) return null;
-    
-    const intervalDays = dog.heatInterval || 180; // Default 6 months
-    const nextHeatDate = new Date(parseISO(lastHeat));
-    nextHeatDate.setDate(nextHeatDate.getDate() + intervalDays);
-    
-    return nextHeatDate;
-  };
-
-  const averageCycle = getAverageCycleLength();
-  const lastHeat = getLastHeatDate();
-  const nextHeat = getNextPredictedHeat();
-  const daysSinceLastHeat = lastHeat ? differenceInDays(new Date(), parseISO(lastHeat)) : null;
 
   return (
     <div className="space-y-6">
       {/* Advanced Analytics */}
       <CycleAnalytics 
         heatCycles={heatCycles}
+        heatHistory={heatHistory}
         currentCycle={heatCycles.find(cycle => !cycle.end_date) || null}
         dogName={dog.name}
       />
@@ -142,7 +100,7 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
               <HeatCycleCard 
                 key={cycle.id} 
                 heatCycle={cycle} 
-                onUpdate={loadHeatCycles}
+                onUpdate={refresh}
               />
             ))}
         </div>
@@ -163,7 +121,7 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
       {/* Previous Heats - Unified List */}
       <PreviousHeatsList 
         dog={dog}
-        onUpdate={loadHeatCycles}
+        onUpdate={refresh}
       />
 
       {/* Temperature Trend Chart - Always show when data exists */}

@@ -11,6 +11,7 @@ type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 
 interface CycleAnalyticsProps {
   heatCycles: HeatCycle[];
+  heatHistory?: { date: string }[];
   currentCycle?: HeatCycle | null;
   dogName: string;
   className?: string;
@@ -29,20 +30,18 @@ interface CycleStats {
 
 const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({ 
   heatCycles, 
+  heatHistory = [],
   currentCycle, 
   dogName,
   className = "" 
 }) => {
   const { t, i18n } = useTranslation('dogs');
   
-  // Debug logs to check language and translation
-  console.log('Current language:', i18n.language);
-  console.log('Translation debug - cycle with namespace:', t('dogs:cycle'));
-  console.log('Translation debug - cycle without namespace:', t('cycle'));
   
   const calculateStats = (): CycleStats => {
     const completedCycles = heatCycles.filter(cycle => cycle.end_date);
     
+    // Combine cycle lengths from both sources
     const cycleLengths = completedCycles.map(cycle => 
       differenceInDays(parseISO(cycle.end_date!), parseISO(cycle.start_date))
     );
@@ -54,20 +53,22 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
     const shortestCycle = cycleLengths.length > 0 ? Math.min(...cycleLengths) : 0;
     const longestCycle = cycleLengths.length > 0 ? Math.max(...cycleLengths) : 0;
     
-    // Calculate intervals between cycles
+    // Calculate intervals between cycles including legacy data
     const intervals = [];
-    if (completedCycles.length > 1) {
-      const sortedCycles = [...completedCycles].sort((a, b) => 
-        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+    
+    // Get all heat dates (both from cycles and legacy history)
+    const allHeatDates = [
+      ...completedCycles.map(cycle => cycle.start_date),
+      ...heatHistory.map(heat => heat.date)
+    ].filter(date => date).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    
+    // Calculate intervals between consecutive heat dates
+    for (let i = 1; i < allHeatDates.length; i++) {
+      const interval = differenceInDays(
+        parseISO(allHeatDates[i]),
+        parseISO(allHeatDates[i - 1])
       );
-      
-      for (let i = 1; i < sortedCycles.length; i++) {
-        const interval = differenceInDays(
-          parseISO(sortedCycles[i].start_date),
-          parseISO(sortedCycles[i - 1].start_date)
-        );
-        intervals.push(interval);
-      }
+      intervals.push(interval);
     }
     
     const intervalsAverage = intervals.length > 0 
@@ -88,7 +89,7 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
     
     return {
       averageCycleLength,
-      totalCycles: heatCycles.length,
+      totalCycles: heatCycles.length + heatHistory.length,
       shortestCycle,
       longestCycle,
       lastCycleLength,
@@ -128,7 +129,7 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
         <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
-           {dogName}s {t('dogs:cycle')}
+           {dogName}s {t('cycle')}
         </CardTitle>
           <CardDescription>
             {t('heatTracking.analytics.noData')}
@@ -149,7 +150,7 @@ const CycleAnalytics: React.FC<CycleAnalyticsProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
-          {dogName}s {t('dogs:cycle')}
+          {dogName}s {t('cycle')}
         </CardTitle>
         <CardDescription>
           {t('heatTracking.analytics.description', { count: stats.totalCycles })}
