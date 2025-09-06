@@ -101,8 +101,8 @@ export async function addDog(
       
       // For female dogs with heat history, sync heat events
       if (addedDog.gender === 'female' && addedDog.heatHistory && addedDog.heatHistory.length > 0) {
-        const { calculateUpcomingHeats } = await import('@/utils/heatCalculator');
-        const upcomingHeats = calculateUpcomingHeats([addedDog]);
+        const { calculateUpcomingHeatsSafe } = await import('@/utils/heatCalculatorSafe');
+        const upcomingHeats = await calculateUpcomingHeatsSafe([addedDog], 'dogServices');
         
         for (const heat of upcomingHeats) {
           await ReminderCalendarSyncService.syncHeatCycleEvents(heat);

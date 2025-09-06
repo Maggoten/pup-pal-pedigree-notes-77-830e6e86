@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useDogs } from '@/context/DogsContext';
 import { PlannedLitter } from '@/types/breeding';
 import { plannedLittersService } from '@/services/PlannedLitterService';
-import { calculateUpcomingHeats } from '@/utils/heatCalculator';
+import { calculateUpcomingHeatsSafe } from '@/utils/heatCalculatorSafe';
 import { useRecentMatings } from './useRecentMatings';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchWithRetry } from '@/utils/fetchUtils';
@@ -13,7 +13,7 @@ export const usePlannedLitterQueries = () => {
   const { dogs } = useDogs();
   const { user, isAuthReady } = useAuth();
   const [plannedLitters, setPlannedLitters] = useState<PlannedLitter[]>([]);
-  const [upcomingHeats, setUpcomingHeats] = useState(calculateUpcomingHeats([]));
+  const [upcomingHeats, setUpcomingHeats] = useState<Awaited<ReturnType<typeof calculateUpcomingHeatsSafe>>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadAttempted, setLoadAttempted] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -108,14 +108,23 @@ export const usePlannedLitterQueries = () => {
     }
   };
 
-  // Initial load
+  // Effect to handle dogs data and calculate upcoming heats
   useEffect(() => {
-    // Only load litters when auth is ready and we have a user
-    if (isAuthReady && user) {
-      loadLitters();
-    }
-    
-    setUpcomingHeats(calculateUpcomingHeats(dogs));
+    const loadHeats = async () => {
+      if (isAuthReady && user) {
+        loadLitters();
+      }
+      
+      try {
+        const heats = await calculateUpcomingHeatsSafe(dogs, 'plannedLitters');
+        setUpcomingHeats(heats);
+      } catch (error) {
+        console.error('Error calculating upcoming heats for planned litters:', error);
+        setUpcomingHeats([]);
+      }
+    };
+
+    loadHeats();
   }, [dogs, isAuthReady, user]);
 
   // Add an effect to retry loading if needed after a timeout

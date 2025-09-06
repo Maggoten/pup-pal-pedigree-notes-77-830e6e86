@@ -480,10 +480,9 @@ export class ReminderCalendarSyncService {
    * @returns Array of upcoming heat objects
    */
   private static async getUpcomingHeats(dogs: Dog[]): Promise<UpcomingHeat[]> {
-    // Import the calculateUpcomingHeats function dynamically
-    // to avoid import cycles
-    const { calculateUpcomingHeats } = await import('@/utils/heatCalculator');
-    return calculateUpcomingHeats(dogs);
+    // Import the safe calculator wrapper to support migration
+    const { calculateUpcomingHeatsSafe } = await import('@/utils/heatCalculatorSafe');
+    return calculateUpcomingHeatsSafe(dogs, 'reminderSync');
   }
 
   /**

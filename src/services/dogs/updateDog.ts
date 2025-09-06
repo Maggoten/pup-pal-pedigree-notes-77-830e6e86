@@ -220,8 +220,8 @@ export async function updateDog(id: string, updates: Partial<Dog>): Promise<Dog 
         
         if (needsHeatSync && updatedDog.gender === 'female') {
           console.log('[Dogs Debug] Syncing heat cycle events due to heat data change');
-          const { calculateUpcomingHeats } = await import('@/utils/heatCalculator');
-          const upcomingHeats = calculateUpcomingHeats([updatedDog]);
+          const { calculateUpcomingHeatsSafe } = await import('@/utils/heatCalculatorSafe');
+          const upcomingHeats = await calculateUpcomingHeatsSafe([updatedDog], 'dogServices');
           
           for (const heat of upcomingHeats) {
             await ReminderCalendarSyncService.syncHeatCycleEvents(heat);
