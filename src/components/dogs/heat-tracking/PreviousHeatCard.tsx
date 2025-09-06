@@ -7,6 +7,8 @@ import { format, parseISO, differenceInDays } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { EditLegacyHeatDialog } from './EditLegacyHeatDialog';
 import { DeleteLegacyHeatDialog } from './DeleteLegacyHeatDialog';
+import { EditHeatCycleDialog } from './EditHeatCycleDialog';
+import { DeleteHeatCycleDialog } from './DeleteHeatCycleDialog';
 import type { Database } from '@/integrations/supabase/types';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
@@ -17,6 +19,7 @@ interface PreviousHeatCardProps {
   temperatureCount?: number;
   progesteroneCount?: number;
   onViewDetails?: () => void;
+  onSuccess?: () => void;
   
   // For legacy heat history
   legacyHeat?: { date: string };
@@ -30,6 +33,7 @@ const PreviousHeatCard: React.FC<PreviousHeatCardProps> = ({
   temperatureCount = 0,
   progesteroneCount = 0,
   onViewDetails,
+  onSuccess,
   legacyHeat,
   legacyIndex,
   dogId,
@@ -77,6 +81,16 @@ const PreviousHeatCard: React.FC<PreviousHeatCardProps> = ({
                 </Badge>
               )}
               
+              <EditHeatCycleDialog
+                open={false}
+                onOpenChange={() => {}}
+                heatCycle={heatCycle}
+                onSuccess={onSuccess || (() => {})}
+              />
+              <DeleteHeatCycleDialog
+                heatCycle={heatCycle}
+                onSuccess={onSuccess || (() => {})}
+              />
               <Button
                 variant="ghost"
                 size="sm"

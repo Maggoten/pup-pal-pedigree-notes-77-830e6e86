@@ -431,7 +431,12 @@
     },
     "deleteDialog": {
       "title": "Ta bort löpcykel",
-      "description": "Är du säker på att du vill ta bort denna löpcykel? Detta kommer även ta bort alla associerade loggposter. Denna åtgärd kan inte ångras."
+      "description": "Är du säker på att du vill ta bort denna löpcykel? Detta kommer även ta bort alla associerade loggposter. Denna åtgärd kan inte ångras.",
+      "confirmationMessage": "Är du säker på att du vill ta bort denna löpcykel?",
+      "startDate": "Startdatum",
+      "endDate": "Slutdatum",
+      "duration": "Varaktighet", 
+      "warningMessage": "Detta kommer även ta bort alla associerade temperatur- och progesteronloggar. Denna åtgärd kan inte ångras."
     },
     "deleteSuccess": {
       "title": "Löpcykel borttagen",

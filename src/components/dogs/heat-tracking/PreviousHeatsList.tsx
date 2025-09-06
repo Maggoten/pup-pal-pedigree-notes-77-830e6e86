@@ -116,6 +116,7 @@ const PreviousHeatsList: React.FC<PreviousHeatsListProps> = ({ dog, onUpdate }) 
                   temperatureCount={heatLogCounts[cycle.id]?.temp || 0}
                   progesteroneCount={heatLogCounts[cycle.id]?.prog || 0}
                   onViewDetails={() => handleViewDetails(cycle)}
+                  onSuccess={handleUpdate}
                 />
               ))}
               
