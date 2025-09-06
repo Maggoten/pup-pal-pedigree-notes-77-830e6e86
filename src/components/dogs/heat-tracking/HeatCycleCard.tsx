@@ -184,7 +184,7 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
     }
   };
 
-  const latestLog = heatLogs[0];
+  const latestLog = heatLogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
   // Calculate progesterone-based mating window
   const matingWindow = calculateOptimalMatingDays(heatLogs);
