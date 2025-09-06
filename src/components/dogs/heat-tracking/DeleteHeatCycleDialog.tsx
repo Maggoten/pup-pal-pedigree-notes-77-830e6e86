@@ -97,7 +97,7 @@ export const DeleteHeatCycleDialog: React.FC<DeleteHeatCycleDialogProps> = ({
             {getDuration() && (
               <div className="text-sm">
                 <span className="font-medium">{t('heatTracking.deleteDialog.duration')}: </span>
-                {getDuration()} {t('heatTracking.days')}
+                {t('heatTracking.analytics.days', { days: getDuration() })}
               </div>
             )}
           </div>
