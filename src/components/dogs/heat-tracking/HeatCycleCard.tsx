@@ -315,6 +315,7 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
         onOpenChange={setShowEditDialog}
         heatCycle={heatCycle}
         onSuccess={onUpdate}
+        showTrigger={false}
       />
 
       <DeleteConfirmationDialog

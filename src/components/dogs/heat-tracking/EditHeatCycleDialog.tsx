@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, Edit } from 'lucide-react';
+import { CalendarIcon, Pencil } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,10 +18,13 @@ import type { Database } from '@/integrations/supabase/types';
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 
 interface EditHeatCycleDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   heatCycle: HeatCycle;
   onSuccess: () => void;
+  // Optional props for external control
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  // Optional trigger mode - if false, no trigger button will be shown
+  showTrigger?: boolean;
 }
 
 const formSchema = z.object({
@@ -47,13 +50,19 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({ 
-  open, 
-  onOpenChange, 
   heatCycle, 
-  onSuccess 
+  onSuccess,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
+  showTrigger = true
 }) => {
   const { t } = useTranslation('dogs');
   const [isLoading, setIsLoading] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  
+  // Use external state if provided, otherwise use internal state
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = externalOnOpenChange || setInternalOpen;
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -79,7 +88,7 @@ export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({
           description: t('heatTracking.editSuccess.description'),
         });
         onSuccess();
-        onOpenChange(false);
+        setOpen(false);
       } else {
         throw new Error('Failed to update heat cycle');
       }
@@ -96,7 +105,18 @@ export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      {showTrigger && (
+        <DialogTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 w-8 p-0"
+          >
+            <Pencil className="h-3 w-3" />
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{t('heatTracking.editDialog.title')}</DialogTitle>
@@ -193,7 +213,7 @@ export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={() => setOpen(false)}
                 disabled={isLoading}
               >
                 {t('form.actions.cancel')}

@@ -82,8 +82,6 @@ const PreviousHeatCard: React.FC<PreviousHeatCardProps> = ({
               )}
               
               <EditHeatCycleDialog
-                open={false}
-                onOpenChange={() => {}}
                 heatCycle={heatCycle}
                 onSuccess={onSuccess || (() => {})}
               />
