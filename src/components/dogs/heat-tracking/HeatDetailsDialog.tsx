@@ -155,7 +155,7 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm font-medium">
-                  {t('sections.notes')}
+                  {t('form.sections.notes')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
