@@ -335,7 +335,7 @@
     },
     "cycles": {
       "title": "Heat Cycles",
-      "newHeat": "+ New Heat",
+      "newHeat": "New Heat",
       "empty": {
         "title": "No heat cycles recorded",
         "description": "Start tracking by adding the first heat cycle"
