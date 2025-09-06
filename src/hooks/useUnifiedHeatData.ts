@@ -34,10 +34,7 @@ export const useUnifiedHeatData = (dogId: string | null) => {
     try {
       setData(prev => ({ ...prev, isLoading: true, error: null }));
 
-      // Attempt automatic migration on first load
-      await HeatService.migrateHeatHistoryToCycles(dogId);
-
-      // Load unified data
+      // Load unified data directly - migration handled elsewhere
       const unifiedData = await HeatService.getUnifiedHeatData(dogId);
 
       setData({

@@ -105,7 +105,7 @@ const PreviousHeatCard: React.FC<PreviousHeatCardProps> = ({
     const isRecent = daysAgo <= 30;
 
     return (
-      <Card className="hover:bg-muted/50 transition-colors">
+      <Card className="group hover:bg-muted/50 transition-colors">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

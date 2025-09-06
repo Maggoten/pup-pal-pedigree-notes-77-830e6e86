@@ -89,7 +89,7 @@ export const EditLegacyHeatDialog: React.FC<EditLegacyHeatDialogProps> = ({
         <Button 
           variant="ghost" 
           size="sm" 
-          className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="h-8 w-8 p-0"
         >
           <Pencil className="h-3 w-3" />
         </Button>
