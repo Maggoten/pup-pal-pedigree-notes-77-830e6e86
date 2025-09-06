@@ -7,10 +7,11 @@ import { SymptomRecord } from './types';
 interface SymptomHistoryProps {
   symptoms: SymptomRecord[];
   onDeleteSymptom: (id: string) => void;
+  onUpdateSymptom: (id: string, updates: Partial<Omit<SymptomRecord, 'id'>>) => void;
   femaleName: string;
 }
 
-const SymptomHistory: React.FC<SymptomHistoryProps> = ({ symptoms, onDeleteSymptom, femaleName }) => {
+const SymptomHistory: React.FC<SymptomHistoryProps> = ({ symptoms, onDeleteSymptom, onUpdateSymptom, femaleName }) => {
   if (symptoms.length === 0) {
     return (
       <div className="text-center py-10 px-6 bg-blush-50/50 border border-dashed border-blush-200 rounded-lg">
@@ -47,7 +48,8 @@ const SymptomHistory: React.FC<SymptomHistoryProps> = ({ symptoms, onDeleteSympt
           <SymptomItem 
             key={record.id} 
             record={record} 
-            onDelete={onDeleteSymptom} 
+            onDelete={onDeleteSymptom}
+            onUpdate={onUpdateSymptom}
           />
         ))}
       </div>

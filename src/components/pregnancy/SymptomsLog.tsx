@@ -13,7 +13,7 @@ interface SymptomsLogProps {
 
 const SymptomsLog: React.FC<SymptomsLogProps> = ({ pregnancyId, femaleName }) => {
   const { t, ready } = useTranslation('pregnancy');
-  const { symptoms, addSymptom, deleteSymptom } = useSymptomLog(pregnancyId, femaleName);
+  const { symptoms, addSymptom, updateSymptom, deleteSymptom } = useSymptomLog(pregnancyId, femaleName);
   
   if (!ready) {
     return (
@@ -43,6 +43,7 @@ const SymptomsLog: React.FC<SymptomsLogProps> = ({ pregnancyId, femaleName }) =>
           <SymptomHistory 
             symptoms={symptoms}
             onDeleteSymptom={deleteSymptom}
+            onUpdateSymptom={updateSymptom}
             femaleName={femaleName}
           />
         </div>

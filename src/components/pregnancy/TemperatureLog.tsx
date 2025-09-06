@@ -13,7 +13,7 @@ interface TemperatureLogProps {
 
 const TemperatureLog: React.FC<TemperatureLogProps> = ({ pregnancyId, femaleName }) => {
   const { t, ready } = useTranslation('pregnancy');
-  const { temperatures, addTemperature, deleteTemperature } = useTemperatureLog(pregnancyId);
+  const { temperatures, addTemperature, updateTemperature, deleteTemperature } = useTemperatureLog(pregnancyId);
   
   if (!ready) {
     return (
@@ -42,7 +42,8 @@ const TemperatureLog: React.FC<TemperatureLogProps> = ({ pregnancyId, femaleName
           <TemperatureLogForm onAddTemperature={addTemperature} />
           <TemperatureHistory 
             temperatures={temperatures} 
-            onDeleteTemperature={deleteTemperature} 
+            onDeleteTemperature={deleteTemperature}
+            onUpdateTemperature={updateTemperature}
           />
         </div>
       </CardContent>

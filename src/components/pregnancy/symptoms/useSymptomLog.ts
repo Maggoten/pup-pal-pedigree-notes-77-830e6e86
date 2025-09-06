@@ -139,6 +139,78 @@ export const useSymptomLog = (pregnancyId: string, femaleName: string) => {
     }
   };
 
+  const updateSymptom = async (id: string, updates: Partial<Omit<SymptomRecord, 'id'>>) => {
+    try {
+      // Get auth session for authentication
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData.session) {
+        toast({
+          title: "Authentication required",
+          description: "You need to be logged in to update observations.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const supabaseUrl = "https://yqcgqriecxtppuvcguyj.supabase.co";
+      const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2dxcmllY3h0cHB1dmNndXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTI4NjksImV4cCI6MjA2MDI2ODg2OX0.PD0W-rLpQBHUGm9--nv4-3PVYQFMAsRujmExBDuP5oA";
+      
+      const updateData: any = {};
+      if (updates.title !== undefined) updateData.title = updates.title;
+      if (updates.description !== undefined) updateData.description = updates.description;
+      if (updates.date !== undefined) updateData.date = updates.date.toISOString();
+      
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/symptom_logs?id=eq.${id}`, 
+        {
+          method: 'PATCH',
+          headers: {
+            'apikey': supabaseKey,
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(updateData)
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to update symptom data');
+      }
+      
+      const data = await response.json();
+      const updatedRecordData = data[0];
+      
+      if (!updatedRecordData) {
+        throw new Error('No data returned after update');
+      }
+
+      const updatedRecord: SymptomRecord = {
+        id: updatedRecordData.id,
+        date: new Date(updatedRecordData.date),
+        title: updatedRecordData.title,
+        description: updatedRecordData.description
+      };
+
+      setSymptoms(prev => prev.map(symptom => 
+        symptom.id === id ? updatedRecord : symptom
+      ).sort((a, b) => b.date.getTime() - a.date.getTime()));
+
+      toast({
+        title: "Observation updated",
+        description: "The observation has been successfully updated."
+      });
+    } catch (err) {
+      console.error('Error in symptom update:', err);
+      toast({
+        title: "Error updating observation",
+        description: "The observation could not be updated.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const deleteSymptom = async (id: string) => {
     try {
       // Get auth session for authentication  
@@ -192,6 +264,7 @@ export const useSymptomLog = (pregnancyId: string, femaleName: string) => {
     symptoms,
     loading,
     addSymptom,
+    updateSymptom,
     deleteSymptom
   };
 };

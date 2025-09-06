@@ -139,6 +139,78 @@ export const useTemperatureLog = (pregnancyId: string) => {
     }
   };
 
+  const updateTemperature = async (id: string, updates: Partial<Omit<TemperatureRecord, 'id'>>) => {
+    try {
+      // Get auth session for authentication
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData.session) {
+        toast({
+          title: "Authentication required",
+          description: "You need to be logged in to update temperature records.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const supabaseUrl = "https://yqcgqriecxtppuvcguyj.supabase.co";
+      const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2dxcmllY3h0cHB1dmNndXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTI4NjksImV4cCI6MjA2MDI2ODg2OX0.PD0W-rLpQBHUGm9--nv4-3PVYQFMAsRujmExBDuP5oA";
+      
+      const updateData: any = {};
+      if (updates.temperature !== undefined) updateData.temperature = updates.temperature;
+      if (updates.notes !== undefined) updateData.notes = updates.notes;
+      if (updates.date !== undefined) updateData.date = updates.date.toISOString();
+      
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/temperature_logs?id=eq.${id}`, 
+        {
+          method: 'PATCH',
+          headers: {
+            'apikey': supabaseKey,
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(updateData)
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to update temperature data');
+      }
+      
+      const data = await response.json();
+      const updatedRecordData = data[0];
+      
+      if (!updatedRecordData) {
+        throw new Error('No data returned after update');
+      }
+
+      const updatedRecord: TemperatureRecord = {
+        id: updatedRecordData.id,
+        date: new Date(updatedRecordData.date),
+        temperature: updatedRecordData.temperature,
+        notes: updatedRecordData.notes
+      };
+
+      setTemperatures(prev => prev.map(temp => 
+        temp.id === id ? updatedRecord : temp
+      ).sort((a, b) => b.date.getTime() - a.date.getTime()));
+
+      toast({
+        title: "Temperature updated",
+        description: "The temperature record has been successfully updated."
+      });
+    } catch (err) {
+      console.error('Error in temperature update:', err);
+      toast({
+        title: "Error updating temperature",
+        description: "The temperature record could not be updated.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const deleteTemperature = async (id: string) => {
     try {
       // Get auth session for authentication  
@@ -192,6 +264,7 @@ export const useTemperatureLog = (pregnancyId: string) => {
     temperatures,
     loading,
     addTemperature,
+    updateTemperature,
     deleteTemperature
   };
 };

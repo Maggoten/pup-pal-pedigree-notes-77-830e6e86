@@ -7,9 +7,10 @@ import { TemperatureRecord } from './types';
 interface TemperatureHistoryProps {
   temperatures: TemperatureRecord[];
   onDeleteTemperature: (id: string) => void;
+  onUpdateTemperature: (id: string, updates: Partial<Omit<TemperatureRecord, 'id'>>) => void;
 }
 
-const TemperatureHistory: React.FC<TemperatureHistoryProps> = ({ temperatures, onDeleteTemperature }) => {
+const TemperatureHistory: React.FC<TemperatureHistoryProps> = ({ temperatures, onDeleteTemperature, onUpdateTemperature }) => {
   if (temperatures.length === 0) {
     return (
       <div className="text-center py-10 px-6 bg-sage-50/50 border border-dashed border-sage-200 rounded-lg">
@@ -44,7 +45,8 @@ const TemperatureHistory: React.FC<TemperatureHistoryProps> = ({ temperatures, o
           <TemperatureItem 
             key={record.id} 
             record={record} 
-            onDelete={onDeleteTemperature} 
+            onDelete={onDeleteTemperature}
+            onUpdate={onUpdateTemperature}
           />
         ))}
       </div>
