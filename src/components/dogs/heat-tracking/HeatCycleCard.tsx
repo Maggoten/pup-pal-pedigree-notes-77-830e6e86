@@ -319,7 +319,7 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
           {heatCycle.notes && (
             <div className="border rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="font-medium text-sm">{t('heatTracking.notes')}</h4>
+                <h4 className="font-medium text-sm">{t('heatTracking.notes.editTitle')}</h4>
                 <div className="flex gap-1">
                   <Button
                     variant="ghost"

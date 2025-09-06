@@ -551,7 +551,6 @@
       "entries": "entries",
       "latestEntry": "Latest Entry"
     },
-    "notes": "Notes",
     "logs": {
       "title": "Heat Tracking Logs",
       "description": "All tracking entries for heat cycle started {{date}}",

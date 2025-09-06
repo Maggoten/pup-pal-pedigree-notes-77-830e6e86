@@ -551,7 +551,6 @@
       "entries": "poster",
       "latestEntry": "Senaste Post"
     },
-    "notes": "Anteckningar",
     "logs": {
       "title": "Löpspårningsloggar",
       "description": "Alla spårningsposter för löpcykel startad {{date}}",
