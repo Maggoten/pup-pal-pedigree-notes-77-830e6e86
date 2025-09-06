@@ -326,6 +326,8 @@
       "noData": "Inga löpcykler registrerade",
       "getStarted": "Börja spåra löpcykler för att se detaljerad analys och få bättre insikter om din hunds reproduktionscykel",
       "startTracking": "Börja Spåra Löpcykler",
+      "noActive": "Inga aktiva löpcykler",
+      "noActiveDescription": "Starta en ny löpcykel för att börja spåra temperaturer och progesteronnivåer",
       "badges": {
         "recent": "Nylig",
         "latest": "Senaste",
@@ -341,6 +343,23 @@
       "deleteButton": "Ta bort Löpcykel",
       "endCycle": "Avsluta Löp",
       "endCycleShort": "Avsluta"
+    },
+    "current": {
+      "title": "Nuvarande Löpcykler"
+    },
+    "previous": {
+      "title": "Tidigare Löp",
+      "descriptionBoth": "{{completed}} avslutade cykler och {{legacy}} tidigare poster",
+      "descriptionCompleted": "{{count}} avslutade löpcykler",
+      "descriptionLegacy": "{{count}} tidigare löpregister"
+    },
+    "details": {
+      "title": "Löpcykeldetaljer",
+      "measurements": "mätningar",
+      "tests": "tester",
+      "totalLogs": "Totalt Antal Loggposter",
+      "entries": "poster",
+      "latestEntry": "Senaste Post"
     },
     "newSystem": {
       "title": "Detaljerad Löpspårning"
@@ -487,7 +506,9 @@
       "dropDescription": "Betydande fall den {{date}} ({{temp}}°C) - möjlig ovulationsindikator",
       "bodyTemperature": "Kroppstemperatur",
       "averageLine": "Genomsnittstemperaturlinje",
-      "ovulationIndicator": "Potentiell ovulationsindikator"
+      "ovulationIndicator": "Potentiell ovulationsindikator",
+      "overallTrend": "Temperaturtrender",
+      "title": "Temperatur"
     },
     "logs": {
       "title": "Löpspårningsloggar",

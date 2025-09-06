@@ -326,6 +326,8 @@
       "noData": "No heat cycles recorded",
       "getStarted": "Start tracking heat cycles to see detailed analytics and get better insights into your dog's reproductive cycle",
       "startTracking": "Start Tracking Heat Cycles",
+      "noActive": "No active heat cycles",
+      "noActiveDescription": "Start a new heat cycle to begin tracking temperatures and progesterone levels",
       "badges": {
         "recent": "Recent",
         "latest": "Latest",
@@ -341,6 +343,23 @@
       "deleteButton": "Delete Heat Cycle",
       "endCycle": "End Cycle",
       "endCycleShort": "End"
+    },
+    "current": {
+      "title": "Current Heat Cycles"
+    },
+    "previous": {
+      "title": "Previous Heats",
+      "descriptionBoth": "{{completed}} completed cycles and {{legacy}} legacy records",
+      "descriptionCompleted": "{{count}} completed heat cycles",
+      "descriptionLegacy": "{{count}} previous heat records"
+    },
+    "details": {
+      "title": "Heat Cycle Details",
+      "measurements": "measurements",
+      "tests": "tests",
+      "totalLogs": "Total Log Entries",
+      "entries": "entries",
+      "latestEntry": "Latest Entry"
     },
     "newSystem": {
       "title": "Detailed Heat Tracking"
@@ -487,7 +506,9 @@
       "dropDescription": "Significant drop on {{date}} ({{temp}}°C) - possible ovulation indicator",
       "bodyTemperature": "Body temperature",
       "averageLine": "Average temperature line",
-      "ovulationIndicator": "Potential ovulation indicator"
+      "ovulationIndicator": "Potential ovulation indicator",
+      "overallTrend": "Temperature Trends",
+      "title": "Temperature"
     },
     "logs": {
       "title": "Heat Tracking Logs",
