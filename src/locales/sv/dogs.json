@@ -533,8 +533,25 @@
       "averageLine": "Genomsnittstemperaturlinje",
       "ovulationIndicator": "Potentiell ovulationsindikator",
       "overallTrend": "Temperaturtrender",
-      "title": "Temperatur"
+      "title": "Temperatur",
+      "trend": "Temperaturtrender"
     },
+    "progesterone": {
+      "title": "Progesteron",
+      "chart": "Progesteronnivåer"
+    },
+    "phase": {
+      "title": "Fas"
+    },
+    "details": {
+      "title": "Löpcykel Detaljer",
+      "measurements": "mätningar",
+      "tests": "tester",
+      "totalLogs": "Totalt Loggar",
+      "entries": "poster",
+      "latestEntry": "Senaste Post"
+    },
+    "notes": "Anteckningar",
     "logs": {
       "title": "Löpspårningsloggar",
       "description": "Alla spårningsposter för löpcykel startad {{date}}",

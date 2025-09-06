@@ -533,8 +533,25 @@
       "averageLine": "Average temperature line",
       "ovulationIndicator": "Potential ovulation indicator",
       "overallTrend": "Temperature Trends",
-      "title": "Temperature"
+      "title": "Temperature",
+      "trend": "Temperature Trends"
     },
+    "progesterone": {
+      "title": "Progesterone",
+      "chart": "Progesterone Levels"
+    },
+    "phase": {
+      "title": "Phase"
+    },
+    "details": {
+      "title": "Heat Cycle Details",
+      "measurements": "measurements",
+      "tests": "tests", 
+      "totalLogs": "Total Logs",
+      "entries": "entries",
+      "latestEntry": "Latest Entry"
+    },
+    "notes": "Notes",
     "logs": {
       "title": "Heat Tracking Logs",
       "description": "All tracking entries for heat cycle started {{date}}",
