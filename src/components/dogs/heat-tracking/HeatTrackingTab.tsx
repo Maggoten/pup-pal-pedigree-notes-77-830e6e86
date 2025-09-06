@@ -15,7 +15,7 @@ import ProgesteroneChart from './ProgesteroneChart';
 import OptimalMatingWindow from './OptimalMatingWindow';
 import TemperatureTrendChart from './TemperatureTrendChart';
 import CycleAnalytics from './CycleAnalytics';
-import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
+import PreviousHeatsList from './PreviousHeatsList';
 import type { Database } from '@/integrations/supabase/types';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
@@ -121,180 +121,60 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
         dogName={dog.name}
       />
 
-      {/* Quick Stats Cards for Mobile - Only show if no heat cycles */}
-      {heatCycles.length === 0 && (
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t('heatTracking.analytics.averageCycle')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-2xl font-bold">
-                {averageCycle ? t('heatTracking.analytics.days', { days: averageCycle }) : t('heatTracking.analytics.unknown')}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {heatHistory.length < 2 ? t('heatTracking.analytics.needTwoCycles') : t('heatTracking.analytics.basedOnHistory')}
-              </p>
-            </CardContent>
-          </Card>
+      {/* New Heat Button - Always Available */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-semibold">{t('heatTracking.current.title')}</h2>
+        <Button 
+          onClick={() => setShowCreateDialog(true)}
+          className="touch-manipulation"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          {t('heatTracking.cycles.newHeat')}
+        </Button>
+      </div>
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t('heatTracking.analytics.lastHeat')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-2xl font-bold">
-                {daysSinceLastHeat !== null ? t('heatTracking.analytics.daysAgo', { days: daysSinceLastHeat }) : t('heatTracking.analytics.never')}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {lastHeat ? format(parseISO(lastHeat), 'MMM dd, yyyy') : t('heatTracking.analytics.noRecords')}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t('heatTracking.analytics.nextPredicted')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-2xl font-bold">
-                {nextHeat ? format(nextHeat, 'MMM dd') : t('heatTracking.analytics.unknown')}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {nextHeat ? `${differenceInDays(nextHeat, new Date())} ${t('common.days')}` : t('heatTracking.analytics.noData')}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Heat Cycles List */}
-      <div className="space-y-6">
-        {heatCycles.length > 0 ? (
-          <>
-            {heatCycles.map((cycle) => (
+      {/* Active Heat Cycles */}
+      {heatCycles.filter(cycle => !cycle.end_date).length > 0 ? (
+        <div className="space-y-4">
+          {heatCycles
+            .filter(cycle => !cycle.end_date)
+            .map((cycle) => (
               <HeatCycleCard 
                 key={cycle.id} 
                 heatCycle={cycle} 
                 onUpdate={loadHeatCycles}
               />
             ))}
-            
-            {/* Temperature Trend Chart - moved to bottom */}
-            {allTemperatureLogs.length > 0 && (
-              <TemperatureTrendChart 
-                heatLogs={allTemperatureLogs}
-                className="mt-6"
-              />
-            )}
-          </>
-        ) : (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    {dog.name}'s {t('heatTracking.cycles.title')}
-                  </CardTitle>
-                  <CardDescription>
-                    {heatHistory.length === 1 
-                      ? t('heatTracking.description', { count: heatHistory.length })
-                      : t('heatTracking.descriptionPlural', { count: heatHistory.length })
-                    }
-                  </CardDescription>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Button 
-                    onClick={() => setShowCreateDialog(true)}
-                    className="w-full sm:w-auto touch-manipulation"
-                  >
-                    {t('heatTracking.cycles.newHeat')}
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {(heatHistory.length === 0 && heatCycles.length === 0) ? (
-                <div className="text-center py-12">
-                  <Thermometer className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                  <h3 className="text-lg font-semibold mb-2">{t('heatTracking.cycles.noData')}</h3>
-                  <p className="text-muted-foreground mb-4 max-w-md mx-auto">
-                    {t('heatTracking.cycles.getStarted')}
-                  </p>
-                  <Button onClick={() => setShowCreateDialog(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t('heatTracking.cycles.startTracking')}
-                  </Button>
-                </div>
-              ) : heatHistory.length > 0 ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
-                    <Calendar className="h-4 w-4" />
-                    {t('heatTracking.legacySystem.title')}
-                  </div>
-                  {heatHistory
-                    .filter(heat => heat.date)
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .map((heat, index) => {
-                      const heatDate = parseISO(heat.date);
-                      const isRecent = differenceInDays(new Date(), heatDate) <= 30;
-                      
-                      return (
-                        <div
-                          key={index}
-                          className="group flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 rounded-full bg-primary" />
-                            <div>
-                              <p className="font-medium">
-                                {format(heatDate, 'MMMM dd, yyyy')}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {t('heatTracking.analytics.daysAgo', { days: differenceInDays(new Date(), heatDate) })}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {isRecent && (
-                              <Badge variant="secondary" className="text-xs">
-                                {t('heatTracking.cycles.badges.recent')}
-                              </Badge>
-                            )}
-                            {index === 0 && (
-                              <Badge variant="default" className="text-xs">
-                                {t('heatTracking.cycles.badges.latest')}
-                              </Badge>
-                            )}
-                            <EditLegacyHeatDialog
-                              dogId={dog.id}
-                              heatIndex={index}
-                              currentDate={heat.date}
-                              onSuccess={handleStartCycleSuccess}
-                            />
-                            <DeleteLegacyHeatDialog
-                              dogId={dog.id}
-                              heatIndex={index}
-                              heatDate={heat.date}
-                              onSuccess={handleStartCycleSuccess}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              ) : null}
-            </CardContent>
-          </Card>
-        )}
-      </div>
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center">
+              <Thermometer className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+              <h3 className="text-lg font-semibold mb-2">{t('heatTracking.cycles.noActive')}</h3>
+              <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+                {t('heatTracking.cycles.noActiveDescription')}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Previous Heats - Unified List */}
+      <PreviousHeatsList 
+        dog={dog}
+        onUpdate={loadHeatCycles}
+      />
+
+      {/* Temperature Trend Chart - Always show when data exists */}
+      {allTemperatureLogs.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold mb-4">{t('heatTracking.temperature.overallTrend')}</h2>
+          <TemperatureTrendChart 
+            heatLogs={allTemperatureLogs}
+          />
+        </div>
+      )}
 
 
       <CreateHeatCycleDialog
