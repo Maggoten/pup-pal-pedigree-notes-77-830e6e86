@@ -54,20 +54,7 @@ export const generateDogReminders = async (dogs: Dog[]): Promise<Reminder[]> => 
         hasHeatData = !!(dog.heatHistory && dog.heatHistory.length > 0);
       }
 
-      if (!hasHeatData) {
-        // Suggest starting heat tracking
-        reminders.push({
-          id: generateSystemReminderId(dog.id, 'heat-tracking', today),
-          title: t('reminderTypes.heatTracking.title', { dogName: dog.name }),
-          description: t('reminderTypes.heatTracking.suggestion'),
-          icon: createPawPrintIcon("pink-500"),
-          dueDate: today,
-          priority: 'medium',
-          type: 'other', 
-          relatedId: dog.id
-        });
-        console.log(`Created heat tracking suggestion for dog ${dog.name}`);
-      } else {
+      if (hasHeatData) {
         // Has heat history, create cycle reminders
         // Get the last heat date (already retrieved above for unified, or get from legacy)
         if (!lastHeatDate) {
