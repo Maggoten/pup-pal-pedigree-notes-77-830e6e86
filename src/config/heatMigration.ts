@@ -6,7 +6,7 @@
 // Feature flags for gradual migration
 export const HEAT_MIGRATION_CONFIG = {
   // Enable unified heat calculation (default: false for safety)
-  USE_UNIFIED_CALCULATION: false,
+  USE_UNIFIED_CALCULATION: true,
   
   // Enable validation comparing legacy vs unified (default: true)
   VALIDATE_CALCULATIONS: true,
@@ -16,8 +16,8 @@ export const HEAT_MIGRATION_CONFIG = {
   
   // Services that should use unified calculation (gradual rollout)
   SERVICES_USING_UNIFIED: {
-    upcomingHeats: false,      // useUpcomingHeats hook
-    plannedLitters: false,     // usePlannedLitterQueries  
+    upcomingHeats: true,       // useUpcomingHeats hook
+    plannedLitters: true,      // usePlannedLitterQueries  
     reminderSync: false,       // ReminderCalendarSyncService
     dogServices: false,        // addDog.ts, updateDog.ts
   },
