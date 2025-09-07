@@ -20,6 +20,7 @@ export const HEAT_MIGRATION_CONFIG = {
     plannedLitters: true,      // usePlannedLitterQueries  
     reminderSync: false,       // ReminderCalendarSyncService
     dogServices: false,        // addDog.ts, updateDog.ts
+    dogReminders: true,        // DogReminderService
   },
   
   // Safety timeouts and limits

@@ -5,6 +5,8 @@ import { differenceInDays, parseISO, addDays, isSameMonth, isSameDay, addYears, 
 import { createPawPrintIcon, createCalendarClockIcon } from '@/utils/iconUtils';
 import { v5 as uuidv5 } from 'uuid';
 import i18n from '@/i18n';
+import { HeatService } from '@/services/HeatService';
+import { shouldUseUnified, logMigration } from '@/config/heatMigration';
 
 // Namespace UUID for deterministic reminder IDs (prevents collisions)
 const REMINDER_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
@@ -22,20 +24,37 @@ const generateSystemReminderId = (dogId: string, type: string, date: Date): stri
   return uuidv5(seed, REMINDER_NAMESPACE);
 };
 
-export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
+export const generateDogReminders = async (dogs: Dog[]): Promise<Reminder[]> => {
   const reminders: Reminder[] = [];
   const today = startOfDay(new Date());
   
   console.log(`Generating reminders for ${dogs.length} dogs`);
   
-  // Check each dog for upcoming events
-  dogs.forEach((dog) => {
+  // Process each dog for upcoming events
+  for (const dog of dogs) {
     console.log(`Processing dog: ${dog.name}, ID: ${dog.id}, Owner ID: ${dog.owner_id}`);
     
     // If female and not sterilized, check if heat tracking should be suggested or if cycle reminders should be created
     if (dog.gender === 'female' && !dog.sterilization_date) {
-      // Check if dog has heat history
-      if (!dog.heatHistory || dog.heatHistory.length === 0) {
+      // Check if dog has heat history using unified system if enabled
+      const useUnified = shouldUseUnified('dogReminders');
+      let hasHeatData = false;
+      let lastHeatDate: Date | null = null;
+
+      if (useUnified) {
+        try {
+          lastHeatDate = await HeatService.getLatestHeatDate(dog.id);
+          hasHeatData = lastHeatDate !== null;
+          logMigration(`Dog ${dog.name}: Using unified heat data, latest date: ${lastHeatDate?.toISOString() || 'none'}`);
+        } catch (error) {
+          logMigration(`Dog ${dog.name}: Failed to get unified heat data, falling back to legacy`, error);
+          hasHeatData = !!(dog.heatHistory && dog.heatHistory.length > 0);
+        }
+      } else {
+        hasHeatData = !!(dog.heatHistory && dog.heatHistory.length > 0);
+      }
+
+      if (!hasHeatData) {
         // Suggest starting heat tracking
         reminders.push({
           id: generateSystemReminderId(dog.id, 'heat-tracking', today),
@@ -50,12 +69,13 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
         console.log(`Created heat tracking suggestion for dog ${dog.name}`);
       } else {
         // Has heat history, create cycle reminders
-        // Find the last heat date
-        const sortedHeatDates = [...dog.heatHistory].sort((a, b) => 
-          new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
-        
-        const lastHeatDate = parseISO(sortedHeatDates[0].date);
+        // Get the last heat date (already retrieved above for unified, or get from legacy)
+        if (!lastHeatDate) {
+          const sortedHeatDates = [...(dog.heatHistory || [])].sort((a, b) => 
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+          lastHeatDate = parseISO(sortedHeatDates[0].date);
+        }
         // Use heat interval if available, otherwise default to 180 days (6 months)
         const intervalDays = dog.heatInterval || 180;
         const nextHeatDate = addDays(lastHeatDate, intervalDays);
@@ -155,7 +175,7 @@ export const generateDogReminders = (dogs: Dog[]): Reminder[] => {
         console.log(`Created birthday reminder for dog ${dog.name}`);
       }
     }
-  });
+  }
   
   console.log(`Generated ${reminders.length} total dog reminders`);
   return reminders;

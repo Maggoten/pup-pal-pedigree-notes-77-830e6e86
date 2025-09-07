@@ -40,7 +40,7 @@ export const triggerAllReminders: TriggerAllRemindersFunction = async (userId: s
     console.log(`[Manual Reminder Generation] Found ${userDogs.length} dogs for user`);
     
     // Generate all reminders without dynamic imports
-    const dogReminders = generateDogReminders(userDogs);
+    const dogReminders = await generateDogReminders(userDogs);
     console.log(`[Manual Reminder Generation] Generated ${dogReminders.length} dog reminders`);
     
     const litterReminders = await generateLitterReminders(userId);

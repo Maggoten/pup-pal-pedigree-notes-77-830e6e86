@@ -119,7 +119,7 @@ export const useBreedingRemindersProvider = () => {
       try {
         // Generate all system reminders in sequence
         console.log(`[Reminders Debug] Generating dog reminders`);
-        const dogReminders = generateDogReminders(userDogs);
+        const dogReminders = await generateDogReminders(userDogs);
         console.log(`[Reminders Debug] Generated ${dogReminders.length} dog reminders`);
         
         console.log(`[Reminders Debug] Generating litter reminders`);
