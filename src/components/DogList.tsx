@@ -63,7 +63,7 @@ const DogList: React.FC<DogListProps> = ({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
-          placeholder={t('search_dogs')}
+          placeholder={t('filters.search.placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-10"
@@ -84,7 +84,7 @@ const DogList: React.FC<DogListProps> = ({
       ) : (
         <div className="text-center py-12">
           <p className="text-muted-foreground">
-            {search ? t('no_dogs_found') : t('no_dogs_yet')}
+            {search ? t('list.empty.noResults') : t('list.empty.noDogs')}
           </p>
         </div>
       )}
