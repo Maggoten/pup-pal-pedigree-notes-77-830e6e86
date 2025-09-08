@@ -76,6 +76,9 @@ const CreateHeatCycleDialog: React.FC<CreateHeatCycleDialogProps> = ({
         // For previous heats, immediately end the cycle with the end date
         if (heatType === 'previous' && endDate) {
           await HeatService.endHeatCycle(result.id, endDate);
+          
+          // Remove any legacy heat history entry for the same date to avoid duplicates
+          await HeatService.removeFromHeatHistory(dog.id, startDate!);
         }
         
         toast({
