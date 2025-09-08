@@ -70,17 +70,17 @@ const CreateHeatCycleDialog: React.FC<CreateHeatCycleDialogProps> = ({
     setIsLoading(true);
 
     try {
-      const result = await HeatService.createHeatCycle(dog.id, startDate!, notes || undefined);
+      let result;
+      
+      if (heatType === 'previous' && endDate) {
+        // Create a completed heat cycle directly
+        result = await HeatService.createCompletedHeatCycle(dog.id, startDate!, endDate, notes || undefined);
+      } else {
+        // Create an active heat cycle
+        result = await HeatService.createHeatCycle(dog.id, startDate!, notes || undefined);
+      }
       
       if (result) {
-        // For previous heats, immediately end the cycle with the end date
-        if (heatType === 'previous' && endDate) {
-          await HeatService.endHeatCycle(result.id, endDate);
-          
-          // Remove any legacy heat history entry for the same date to avoid duplicates
-          await HeatService.removeFromHeatHistory(dog.id, startDate!);
-        }
-        
         toast({
           title: heatType === 'previous' 
             ? t('heatTracking.dialog.success.createdPrevious')

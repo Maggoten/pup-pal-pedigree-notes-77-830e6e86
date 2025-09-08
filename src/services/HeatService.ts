@@ -473,6 +473,44 @@ export class HeatService {
   }
 
   /**
+   * Creates a completed heat cycle with both start and end dates
+   */
+  static async createCompletedHeatCycle(dogId: string, startDate: Date, endDate: Date, notes?: string): Promise<HeatCycle | null> {
+    try {
+      const cycleLength = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      const { data, error } = await supabase
+        .from('heat_cycles')
+        .insert({
+          dog_id: dogId,
+          user_id: (await supabase.auth.getUser()).data.user?.id!,
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString(),
+          cycle_length: cycleLength,
+          notes
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating completed heat cycle:', error);
+        return null;
+      }
+
+      // Sync to heat history
+      await this.syncHeatCycleToHeatHistory(dogId, data.id);
+      
+      // Remove any legacy heat history entry for the same date to avoid duplicates
+      await this.removeFromHeatHistory(dogId, startDate);
+
+      return data;
+    } catch (error) {
+      console.error('Error creating completed heat cycle:', error);
+      return null;
+    }
+  }
+
+  /**
    * Updates an existing heat cycle
    */
   static async updateHeatCycle(cycleId: string, updates: HeatCycleUpdate): Promise<HeatCycle | null> {
