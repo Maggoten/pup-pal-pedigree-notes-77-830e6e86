@@ -76,12 +76,6 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isLoad
           <div className="space-y-6">
             <DogFormFields form={form} disabled={isLoading} />
             
-            {form.watch('gender') === 'female' && (
-              <div className="border-t pt-4">
-                <h3 className="text-lg font-medium mb-4">{t('form.breeding.title')}</h3>
-                <HeatRecordsField form={form} disabled={isLoading} />
-              </div>
-            )}
             
             {/* Notes section moved after heat cycle information */}
             <NotesField form={form} disabled={isLoading} />
