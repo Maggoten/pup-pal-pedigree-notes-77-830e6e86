@@ -388,7 +388,9 @@
       "title": "Nytt Löp",
       "description": "Registrera en löpcykel för {{dogName}}",
       "startDate": "Löpets Startdatum",
+      "endDate": "Löpets Slutdatum",
       "selectDate": "Välj startdatum",
+      "selectEndDate": "Välj slutdatum",
       "notes": "Anteckningar (Valfritt)",
       "notesPlaceholder": "Observationer eller anteckningar...",
       "type": {
@@ -399,9 +401,12 @@
         "previousDescription": "Lägg till historisk löpcykel"
       },
       "startCycle": "Skapa Löpcykel",
+      "registerPrevious": "Registrera Tidigare Löp",
       "validation": {
         "dateRequired": "Välj ett startdatum",
-        "futureDate": "Startdatum kan inte vara i framtiden"
+        "futureDate": "Startdatum kan inte vara i framtiden",
+        "endDateRequired": "Välj ett slutdatum för tidigare löp",
+        "endDateAfterStart": "Slutdatum måste vara efter startdatum"
       },
       "success": {
         "created": "Löpcykel startad",
