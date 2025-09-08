@@ -120,6 +120,7 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
       {/* Previous Heats - Unified List */}
       <PreviousHeatsList 
         dog={dog}
+        heatCycles={heatCycles}
         onUpdate={refresh}
       />
 

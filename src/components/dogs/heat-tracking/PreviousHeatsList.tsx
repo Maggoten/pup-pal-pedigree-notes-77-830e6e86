@@ -13,37 +13,34 @@ type HeatLog = Database['public']['Tables']['heat_logs']['Row'];
 
 interface PreviousHeatsListProps {
   dog: Dog;
+  heatCycles: HeatCycle[];
   onUpdate?: () => void;
 }
 
-const PreviousHeatsList: React.FC<PreviousHeatsListProps> = ({ dog, onUpdate }) => {
+const PreviousHeatsList: React.FC<PreviousHeatsListProps> = ({ dog, heatCycles, onUpdate }) => {
   const { t } = useTranslation('dogs');
-  const [completedHeatCycles, setCompletedHeatCycles] = useState<HeatCycle[]>([]);
   const [heatLogCounts, setHeatLogCounts] = useState<Record<string, { temp: number; prog: number }>>({});
   const [selectedHeatCycle, setSelectedHeatCycle] = useState<HeatCycle | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const heatHistory = dog.heatHistory || [];
+  
+  // Filter and sort completed cycles from props
+  const completedHeatCycles = heatCycles
+    .filter(cycle => cycle.end_date)
+    .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
 
   useEffect(() => {
-    loadCompletedHeatCycles();
-  }, [dog.id]);
+    loadHeatLogCounts();
+  }, [completedHeatCycles]);
 
-  const loadCompletedHeatCycles = async () => {
+  const loadHeatLogCounts = async () => {
     setIsLoading(true);
     try {
-      const allCycles = await HeatService.getHeatCycles(dog.id);
-      const completed = allCycles.filter(cycle => cycle.end_date);
-      
-      // Sort by start date (newest first)
-      completed.sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
-      
-      setCompletedHeatCycles(completed);
-      
       // Load log counts for each completed cycle
       const counts: Record<string, { temp: number; prog: number }> = {};
-      for (const cycle of completed) {
+      for (const cycle of completedHeatCycles) {
         try {
           const logs = await HeatService.getHeatLogs(cycle.id);
           const tempCount = logs.filter(log => log.temperature !== null && log.temperature !== undefined).length;
@@ -56,7 +53,7 @@ const PreviousHeatsList: React.FC<PreviousHeatsListProps> = ({ dog, onUpdate }) 
       }
       setHeatLogCounts(counts);
     } catch (error) {
-      console.error('Error loading completed heat cycles:', error);
+      console.error('Error loading heat log counts:', error);
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +65,7 @@ const PreviousHeatsList: React.FC<PreviousHeatsListProps> = ({ dog, onUpdate }) 
   };
 
   const handleUpdate = () => {
-    loadCompletedHeatCycles();
+    loadHeatLogCounts();
     onUpdate?.();
   };
 
