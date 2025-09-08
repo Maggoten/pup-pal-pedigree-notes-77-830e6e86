@@ -132,12 +132,7 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
             
             <DogFormFields form={form} />
             
-            {form.watch('gender') === 'female' && (
-              <div className="pt-4 border-t">
-                <h3 className="text-lg font-medium mb-4">Heat Cycle Information</h3>
-                <HeatRecordsField form={form} />
-              </div>
-            )}
+            {/* Heat input removed - users should use Heat Journal instead */}
             
             <DialogFooter>
               <DialogClose asChild>

@@ -18,8 +18,8 @@ export const HEAT_MIGRATION_CONFIG = {
   SERVICES_USING_UNIFIED: {
     upcomingHeats: true,       // useUpcomingHeats hook
     plannedLitters: true,      // usePlannedLitterQueries  
-    reminderSync: false,       // ReminderCalendarSyncService
-    dogServices: false,        // addDog.ts, updateDog.ts
+    reminderSync: true,        // ReminderCalendarSyncService
+    dogServices: true,         // addDog.ts, updateDog.ts
     dogReminders: true,        // DogReminderService
   },
   
