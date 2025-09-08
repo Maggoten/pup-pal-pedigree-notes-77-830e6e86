@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { HeatService } from '@/services/HeatService';
 import { Database } from '@/integrations/supabase/types';
+import { useHeatSubscription } from '@/hooks/heat/useHeatSubscription';
+import { supabase } from '@/integrations/supabase/client';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 
@@ -59,6 +61,26 @@ export const useUnifiedHeatData = (dogId: string | null) => {
   const refresh = useCallback(() => {
     loadData();
   }, [loadData]);
+
+  // Set up real-time subscription for heat cycles
+  const [userId, setUserId] = useState<string | undefined>();
+  const { setupSubscription } = useHeatSubscription(refresh, userId);
+
+  useEffect(() => {
+    // Get current user ID for subscription
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id);
+    };
+    getCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      const cleanup = setupSubscription();
+      return cleanup;
+    }
+  }, [userId, setupSubscription]);
 
   return {
     ...data,

@@ -29,5 +29,15 @@ ALTER PUBLICATION supabase_realtime ADD TABLE pregnancies;
 ALTER TABLE mating_dates REPLICA IDENTITY FULL;
 ALTER PUBLICATION supabase_realtime ADD TABLE mating_dates;
 
+-- Enable REPLICA IDENTITY FULL for the heat_cycles table
+ALTER TABLE heat_cycles REPLICA IDENTITY FULL;
+
+-- Enable REPLICA IDENTITY FULL for the heat_logs table  
+ALTER TABLE heat_logs REPLICA IDENTITY FULL;
+
+-- Add heat tables to the supabase_realtime publication
+ALTER PUBLICATION supabase_realtime ADD TABLE heat_cycles;
+ALTER PUBLICATION supabase_realtime ADD TABLE heat_logs;
+
 -- Note: Run this SQL in the Supabase SQL Editor to enable realtime functionality
 -- This will allow the React app to receive real-time updates when data changes
