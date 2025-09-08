@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
@@ -38,6 +38,7 @@ interface HeatLogPayload {
 
 export function useHeatSubscription(refreshData: () => void, userId?: string) {
   const queryClient = useQueryClient();
+  const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const setupSubscription = useCallback(() => {
     if (!userId) return () => {};
@@ -80,12 +81,19 @@ export function useHeatSubscription(refreshData: () => void, userId?: string) {
             });
           }
           
-          // Invalidate queries to trigger refetch
-          queryClient.invalidateQueries({ queryKey: ['heat-cycles'] });
-          queryClient.invalidateQueries({ queryKey: ['unified-heat-data'] });
+          // Debounce refresh calls to prevent rapid updates
+          if (refreshTimeoutRef.current) {
+            clearTimeout(refreshTimeoutRef.current);
+          }
           
-          // Also reload the full data set
-          refreshData();
+          refreshTimeoutRef.current = setTimeout(() => {
+            // Invalidate queries to trigger refetch
+            queryClient.invalidateQueries({ queryKey: ['heat-cycles'] });
+            queryClient.invalidateQueries({ queryKey: ['unified-heat-data'] });
+            
+            // Also reload the full data set
+            refreshData();
+          }, 500);
         }
       )
       .on('postgres_changes',
@@ -98,12 +106,19 @@ export function useHeatSubscription(refreshData: () => void, userId?: string) {
         (payload: HeatLogPayload) => {
           console.log('Heat log change detected:', payload);
           
-          // Invalidate queries for heat logs
-          queryClient.invalidateQueries({ queryKey: ['heat-logs'] });
-          queryClient.invalidateQueries({ queryKey: ['unified-heat-data'] });
+          // Debounce refresh calls for heat logs too
+          if (refreshTimeoutRef.current) {
+            clearTimeout(refreshTimeoutRef.current);
+          }
           
-          // Refresh data
-          refreshData();
+          refreshTimeoutRef.current = setTimeout(() => {
+            // Invalidate queries for heat logs
+            queryClient.invalidateQueries({ queryKey: ['heat-logs'] });
+            queryClient.invalidateQueries({ queryKey: ['unified-heat-data'] });
+            
+            // Refresh data
+            refreshData();
+          }, 500);
         }
       )
       .subscribe((status) => {
@@ -122,6 +137,9 @@ export function useHeatSubscription(refreshData: () => void, userId?: string) {
       
     return () => {
       console.log('Cleaning up Supabase heat channel');
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
       supabase.removeChannel(heatCyclesChannel);
     };
   }, [refreshData, userId, queryClient]);

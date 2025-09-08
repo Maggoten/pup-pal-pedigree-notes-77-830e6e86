@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useDogs } from '@/context/DogsContext';
 import { PlannedLitter } from '@/types/breeding';
 import { plannedLittersService } from '@/services/PlannedLitterService';
-import { calculateUpcomingHeatsSafe } from '@/utils/heatCalculatorSafe';
+import { useUpcomingHeats } from '@/hooks/useUpcomingHeats';
 import { useRecentMatings } from './useRecentMatings';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchWithRetry } from '@/utils/fetchUtils';
@@ -13,7 +13,6 @@ export const usePlannedLitterQueries = () => {
   const { dogs } = useDogs();
   const { user, isAuthReady } = useAuth();
   const [plannedLitters, setPlannedLitters] = useState<PlannedLitter[]>([]);
-  const [upcomingHeats, setUpcomingHeats] = useState<Awaited<ReturnType<typeof calculateUpcomingHeatsSafe>>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadAttempted, setLoadAttempted] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -21,6 +20,8 @@ export const usePlannedLitterQueries = () => {
   const males = dogs.filter(dog => dog.gender === 'male');
   const females = dogs.filter(dog => dog.gender === 'female');
   
+  // Use centralized upcoming heats hook instead of calculating here
+  const { upcomingHeats } = useUpcomingHeats();
   const { recentMatings, setRecentMatings } = useRecentMatings(plannedLitters);
   
   // Function to handle visibility change for reloading
@@ -108,24 +109,12 @@ export const usePlannedLitterQueries = () => {
     }
   };
 
-  // Effect to handle dogs data and calculate upcoming heats
+  // Effect to load planned litters when auth is ready
   useEffect(() => {
-    const loadHeats = async () => {
-      if (isAuthReady && user) {
-        loadLitters();
-      }
-      
-      try {
-        const heats = await calculateUpcomingHeatsSafe(dogs, 'plannedLitters');
-        setUpcomingHeats(heats);
-      } catch (error) {
-        console.error('Error calculating upcoming heats for planned litters:', error);
-        setUpcomingHeats([]);
-      }
-    };
-
-    loadHeats();
-  }, [dogs, isAuthReady, user]);
+    if (isAuthReady && user) {
+      loadLitters();
+    }
+  }, [isAuthReady, user]);
 
   // Add an effect to retry loading if needed after a timeout
   useEffect(() => {
