@@ -79,8 +79,12 @@ const CreateHeatCycleDialog: React.FC<CreateHeatCycleDialogProps> = ({
         }
         
         toast({
-          title: t('heatTracking.dialog.success.created'),
-          description: t('heatTracking.dialog.success.createdDescription') + ' Synced to calendar.'
+          title: heatType === 'previous' 
+            ? t('heatTracking.dialog.success.createdPrevious')
+            : t('heatTracking.dialog.success.created'),
+          description: heatType === 'previous'
+            ? t('heatTracking.dialog.success.createdPreviousDescription')
+            : t('heatTracking.dialog.success.createdDescription') + ' Synced to calendar.'
         });
         onSuccess();
         handleCancel();

@@ -408,10 +408,12 @@
          "endDateRequired": "Välj ett slutdatum för tidigare löp",
          "endDateAfterStart": "Slutdatum måste vara efter startdatum"
        },
-      "success": {
-        "created": "Löpcykel startad",
-        "createdDescription": "Löpcykel har registrerats"
-      },
+       "success": {
+         "created": "Löpcykel startad",
+         "createdDescription": "Löpcykel har registrerats",
+         "createdPrevious": "Tidigare löpcykel tillagd",
+         "createdPreviousDescription": "Tidigare löpcykel har registrerats i historiken"
+       },
       "error": {
         "failed": "Misslyckades med att starta löpcykel",
         "failedDescription": "Försök igen eller kontakta support"

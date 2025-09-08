@@ -408,10 +408,12 @@
          "endDateRequired": "Please select an end date for previous heats",
          "endDateAfterStart": "End date must be after start date"
        },
-      "success": {
-        "created": "Heat cycle started",
-        "createdDescription": "Heat cycle has been recorded successfully"
-      },
+       "success": {
+         "created": "Heat cycle started",
+         "createdDescription": "Heat cycle has been recorded successfully",
+         "createdPrevious": "Previous heat cycle added",
+         "createdPreviousDescription": "Previous heat cycle has been recorded in history"
+       },
       "error": {
         "failed": "Failed to start heat cycle",
         "failedDescription": "Please try again or contact support"

@@ -547,11 +547,23 @@ export class HeatService {
     try {
       const finalEndDate = endDate || new Date();
       
+      // First get the heat cycle to access start_date
+      const { data: heatCycle, error: fetchError } = await supabase
+        .from('heat_cycles')
+        .select('start_date')
+        .eq('id', cycleId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching heat cycle:', fetchError);
+        return null;
+      }
+      
       const { data, error } = await supabase
         .from('heat_cycles')
         .update({ 
           end_date: finalEndDate.toISOString(),
-          cycle_length: Math.ceil((finalEndDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+          cycle_length: Math.ceil((finalEndDate.getTime() - new Date(heatCycle.start_date).getTime()) / (1000 * 60 * 60 * 24))
         })
         .eq('id', cycleId)
         .select()
