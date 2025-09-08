@@ -384,25 +384,30 @@
     "legacySystem": {
       "title": "Previous Heat Records"
     },
-    "dialog": {
-      "title": "New Heat Cycle",
-      "description": "Record a heat cycle for {{dogName}}",
-      "startDate": "Heat Start Date",
-      "selectDate": "Select start date",
-      "notes": "Notes (Optional)",
-      "notesPlaceholder": "Any initial observations or notes...",
-      "type": {
-        "label": "Cycle Type",
-        "active": "Active Heat",
-        "activeDescription": "Currently happening heat cycle",
-        "previous": "Previous Heat", 
-        "previousDescription": "Add historical heat cycle"
-      },
-      "startCycle": "Create Heat Cycle",
-      "validation": {
-        "dateRequired": "Please select a start date",
-        "futureDate": "Start date cannot be in the future"
-      },
+     "dialog": {
+       "title": "New Heat Cycle",
+       "description": "Record a heat cycle for {{dogName}}",
+       "startDate": "Heat Start Date",
+       "endDate": "Heat End Date",
+       "selectDate": "Select start date",
+       "selectEndDate": "Select end date",
+       "notes": "Notes (Optional)",
+       "notesPlaceholder": "Any initial observations or notes...",
+       "type": {
+         "label": "Cycle Type",
+         "active": "Active Heat",
+         "activeDescription": "Currently happening heat cycle",
+         "previous": "Previous Heat", 
+         "previousDescription": "Add historical heat cycle"
+       },
+       "startCycle": "Create Heat Cycle",
+       "registerPrevious": "Register Previous Heat",
+       "validation": {
+         "dateRequired": "Please select a start date",
+         "futureDate": "Start date cannot be in the future",
+         "endDateRequired": "Please select an end date for previous heats",
+         "endDateAfterStart": "End date must be after start date"
+       },
       "success": {
         "created": "Heat cycle started",
         "createdDescription": "Heat cycle has been recorded successfully"

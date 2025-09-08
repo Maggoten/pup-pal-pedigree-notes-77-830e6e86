@@ -33,6 +33,7 @@ const CreateHeatCycleDialog: React.FC<CreateHeatCycleDialogProps> = ({
   const { toast } = useToast();
   const [heatType, setHeatType] = useState<HeatType>('active');
   const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
   const [notes, setNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -44,6 +45,17 @@ const CreateHeatCycleDialog: React.FC<CreateHeatCycleDialogProps> = ({
       newErrors.startDate = t('heatTracking.dialog.validation.dateRequired');
     } else if (startDate > new Date()) {
       newErrors.startDate = t('heatTracking.dialog.validation.futureDate');
+    }
+
+    // Validate end date for previous heats
+    if (heatType === 'previous') {
+      if (!endDate) {
+        newErrors.endDate = t('heatTracking.dialog.validation.endDateRequired');
+      } else if (endDate > new Date()) {
+        newErrors.endDate = t('heatTracking.dialog.validation.futureDate');
+      } else if (startDate && endDate <= startDate) {
+        newErrors.endDate = t('heatTracking.dialog.validation.endDateAfterStart');
+      }
     }
 
     setErrors(newErrors);
@@ -61,6 +73,11 @@ const CreateHeatCycleDialog: React.FC<CreateHeatCycleDialogProps> = ({
       const result = await HeatService.createHeatCycle(dog.id, startDate!, notes || undefined);
       
       if (result) {
+        // For previous heats, immediately end the cycle with the end date
+        if (heatType === 'previous' && endDate) {
+          await HeatService.endHeatCycle(result.id, endDate);
+        }
+        
         toast({
           title: t('heatTracking.dialog.success.created'),
           description: t('heatTracking.dialog.success.createdDescription') + ' Synced to calendar.'
@@ -88,6 +105,7 @@ const CreateHeatCycleDialog: React.FC<CreateHeatCycleDialogProps> = ({
 
   const handleCancel = () => {
     setStartDate(undefined);
+    setEndDate(undefined);
     setNotes('');
     setHeatType('active');
     setErrors({});
@@ -174,6 +192,39 @@ const CreateHeatCycleDialog: React.FC<CreateHeatCycleDialogProps> = ({
             )}
           </div>
 
+          {heatType === 'previous' && (
+            <div className="space-y-2">
+              <Label>{t('heatTracking.dialog.endDate')}</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal touch-manipulation",
+                      !endDate && "text-muted-foreground",
+                      errors.endDate && "border-destructive"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {endDate ? format(endDate, "PPP") : t('heatTracking.dialog.selectEndDate')}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={endDate}
+                    onSelect={setEndDate}
+                    initialFocus
+                    disabled={(date) => date > new Date() || (startDate && date <= startDate)}
+                  />
+                </PopoverContent>
+              </Popover>
+              {errors.endDate && (
+                <p className="text-sm text-destructive">{errors.endDate}</p>
+              )}
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="notes">{t('heatTracking.dialog.notes')}</Label>
             <Textarea
@@ -198,11 +249,11 @@ const CreateHeatCycleDialog: React.FC<CreateHeatCycleDialogProps> = ({
           </Button>
           <Button 
             onClick={handleSubmit} 
-            disabled={!startDate || isLoading}
+            disabled={!startDate || (heatType === 'previous' && !endDate) || isLoading}
             className="w-full sm:w-auto touch-manipulation"
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {t('heatTracking.dialog.startCycle')}
+            {heatType === 'active' ? t('heatTracking.dialog.startCycle') : t('heatTracking.dialog.registerPrevious')}
           </Button>
         </DialogFooter>
       </DialogContent>
