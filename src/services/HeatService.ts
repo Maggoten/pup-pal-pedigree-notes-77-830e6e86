@@ -462,9 +462,6 @@ export class HeatService {
         return null;
       }
 
-      // Sync to heat history
-      await this.syncHeatCycleToHeatHistory(dogId, data.id);
-
       return data;
     } catch (error) {
       console.error('Error creating heat cycle:', error);
@@ -496,12 +493,6 @@ export class HeatService {
         console.error('Error creating completed heat cycle:', error);
         return null;
       }
-
-      // Sync to heat history
-      await this.syncHeatCycleToHeatHistory(dogId, data.id);
-      
-      // Remove any legacy heat history entry for the same date to avoid duplicates
-      await this.removeFromHeatHistory(dogId, startDate);
 
       return data;
     } catch (error) {

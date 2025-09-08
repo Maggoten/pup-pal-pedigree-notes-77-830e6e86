@@ -77,15 +77,25 @@ const PreviousHeatsList: React.FC<PreviousHeatsListProps> = ({ dog, heatCycles, 
     onUpdate?.();
   };
 
-  // Filter out empty legacy entries and validate data consistency
-  const validLegacyHistory = heatHistory.filter(heat => heat?.date);
+  // Filter out empty legacy entries and deduplicate against modern heat cycles
+  const validLegacyHistory = heatHistory.filter(heat => {
+    if (!heat?.date) return false;
+    
+    // Check if this legacy date already exists in modern heat cycles
+    const legacyDate = new Date(heat.date).toDateString();
+    const isDuplicate = completedHeatCycles.some(cycle => 
+      new Date(cycle.start_date).toDateString() === legacyDate
+    );
+    
+    return !isDuplicate;
+  });
+  
   const hasCompletedCycles = completedHeatCycles.length > 0;
   const hasValidLegacyHistory = validLegacyHistory.length > 0;
   const hasAnyPreviousHeats = hasCompletedCycles || hasValidLegacyHistory;
 
-  // If we have completed cycles but legacy history is empty or invalid, 
-  // migration likely occurred - don't show legacy entries
-  const shouldShowLegacyHistory = hasValidLegacyHistory && (!hasCompletedCycles || validLegacyHistory.length > 0);
+  // Show legacy history only if it has unique entries not already in modern cycles
+  const shouldShowLegacyHistory = hasValidLegacyHistory;
 
   if (!hasAnyPreviousHeats) {
     return null;
