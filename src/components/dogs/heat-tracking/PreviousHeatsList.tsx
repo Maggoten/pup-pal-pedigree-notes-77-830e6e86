@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -26,16 +26,20 @@ const PreviousHeatsList: React.FC<PreviousHeatsListProps> = ({ dog, heatCycles, 
 
   const heatHistory = dog.heatHistory || [];
   
-  // Filter and sort completed cycles from props
-  const completedHeatCycles = heatCycles
-    .filter(cycle => cycle.end_date)
-    .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
+  // Filter and sort completed cycles from props - memoized to prevent infinite loops
+  const completedHeatCycles = useMemo(() => 
+    heatCycles
+      .filter(cycle => cycle.end_date)
+      .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime()),
+    [heatCycles]
+  );
 
-  useEffect(() => {
-    loadHeatLogCounts();
-  }, [completedHeatCycles]);
+  const loadHeatLogCounts = useCallback(async () => {
+    if (completedHeatCycles.length === 0) {
+      setIsLoading(false);
+      return;
+    }
 
-  const loadHeatLogCounts = async () => {
     setIsLoading(true);
     try {
       // Load log counts for each completed cycle
@@ -57,7 +61,11 @@ const PreviousHeatsList: React.FC<PreviousHeatsListProps> = ({ dog, heatCycles, 
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [completedHeatCycles]);
+
+  useEffect(() => {
+    loadHeatLogCounts();
+  }, [loadHeatLogCounts]);
 
   const handleViewDetails = (heatCycle: HeatCycle) => {
     setSelectedHeatCycle(heatCycle);
