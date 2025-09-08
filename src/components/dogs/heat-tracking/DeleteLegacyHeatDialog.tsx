@@ -33,24 +33,32 @@ export const DeleteLegacyHeatDialog: React.FC<DeleteLegacyHeatDialogProps> = ({
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const success = await HeatService.deleteHeatEntry(dogId, heatIndex);
+      const success = await HeatService.deleteHeatEntryFlexible(dogId, heatDate);
       
       if (success) {
         toast({
-          title: "Heat entry deleted",
-          description: "The heat entry has been successfully removed."
+          title: "Löpcykel raderad",
+          description: "Löpcykeln har tagits bort framgångsrikt."
         });
         onSuccess();
         setOpen(false);
       } else {
-        throw new Error('Failed to delete heat entry');
+        throw new Error('Misslyckades att radera löpcykeln');
       }
     } catch (error) {
       console.error('Error deleting heat entry:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to delete heat entry';
+      let errorMessage = 'Misslyckades att radera löpcykeln';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('not found')) {
+          errorMessage = 'Löpcykeln kunde inte hittas. Den kan redan ha raderats.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
       
       toast({
-        title: "Unable to delete heat entry",
+        title: "Kunde inte radera löpcykeln",
         description: errorMessage,
         variant: "destructive"
       });

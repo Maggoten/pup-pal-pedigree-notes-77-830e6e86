@@ -322,6 +322,60 @@ export class HeatService {
   }
 
   /**
+   * Flexibly deletes a heat entry - tries legacy system first, then heat cycles
+   * @param dogId The ID of the dog
+   * @param heatDate The date of the heat entry to delete
+   * @returns A boolean indicating whether the operation was successful
+   */
+  static async deleteHeatEntryFlexible(dogId: string, heatDate: string): Promise<boolean> {
+    try {
+      const targetDate = new Date(heatDate);
+      console.log(`Attempting flexible delete for heat entry: ${heatDate}`);
+      
+      // First try to find it in heat cycles and delete it
+      const heatCycles = await this.getHeatCycles(dogId);
+      const matchingCycle = heatCycles.find(cycle => 
+        new Date(cycle.start_date).toDateString() === targetDate.toDateString()
+      );
+      
+      if (matchingCycle) {
+        console.log(`Found matching heat cycle ${matchingCycle.id}, deleting...`);
+        const success = await this.deleteHeatCycle(matchingCycle.id);
+        if (success) {
+          console.log('Successfully deleted heat cycle');
+          return true;
+        }
+        console.log('Heat cycle deletion failed, trying legacy method');
+      }
+      
+      // If not found in cycles or cycle deletion failed, try legacy method
+      const { data: dog } = await supabase
+        .from('dogs')
+        .select('heatHistory')
+        .eq('id', dogId)
+        .single();
+      
+      if (dog?.heatHistory && Array.isArray(dog.heatHistory)) {
+        const heatHistory = dog.heatHistory as HeatHistoryEntry[];
+        const heatIndex = heatHistory.findIndex(h => 
+          new Date(h.date).toDateString() === targetDate.toDateString()
+        );
+        
+        if (heatIndex >= 0) {
+          console.log(`Found legacy heat entry at index ${heatIndex}, deleting...`);
+          return await this.deleteHeatEntry(dogId, heatIndex);
+        }
+      }
+      
+      console.log('Heat entry not found in either system');
+      throw new Error('Heat entry not found');
+    } catch (error) {
+      console.error('Error in deleteHeatEntryFlexible:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Deletes a specific heat entry from a dog's heat history
    * @param dogId The ID of the dog
    * @param heatIndex The index of the heat entry in the dog's heatHistory array
