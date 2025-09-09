@@ -112,7 +112,8 @@
       "physicalMeasurements": "Viktinformation",
       "identification": "Identifiering",
       "statusAndOwnership": "Status & Ägarskap",
-      "recentNotes": "Senaste Anteckningar"
+      "recentNotes": "Senaste Anteckningar",
+      "recentHeightRecords": "Senaste Höjdregisteringar"
     },
     "labels": {
       "age": "Ålder",
