@@ -21,7 +21,7 @@ const SyncHeatCalendarButton: React.FC<SyncHeatCalendarButtonProps> = ({
     setIsLoading(true);
     
     try {
-      console.log('Starting sync of all heat cycles (active & upcoming) to calendar...');
+      console.log('🚀 Starting sync of all heat cycles (active & upcoming) to calendar...');
       
       // Get current user
       const { data: { user }, error: authError } = await supabase.auth.getUser();

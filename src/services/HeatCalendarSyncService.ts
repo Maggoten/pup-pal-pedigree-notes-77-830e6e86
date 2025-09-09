@@ -23,6 +23,9 @@ export class HeatCalendarSyncService {
         end_date: heatCycle.end_date,
         isActive: !heatCycle.end_date
       });
+      
+      // Debug: Log the specific heat cycle we're working with
+      console.log(`🐕 Processing heat cycle ID: ${heatCycle.id} for dog: ${dogName}`);
 
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
