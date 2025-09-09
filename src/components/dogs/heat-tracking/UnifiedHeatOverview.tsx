@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Calendar, TrendingUp, Clock, Heart, AlertCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Calendar, TrendingUp, Clock, Heart, AlertCircle, Info } from 'lucide-react';
 import { format, differenceInDays, parseISO, addDays } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import type { Database } from '@/integrations/supabase/types';
@@ -140,26 +141,43 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
     };
   };
 
+  const [showPhaseInfo, setShowPhaseInfo] = useState(false);
+  const [selectedPhase, setSelectedPhase] = useState<any>(null);
+
   const getCyclePhaseInfo = (dayInCycle: number) => {
     if (dayInCycle <= 9) {
       return {
         phase: t('heatTracking.phases.proestrus'),
         color: 'bg-pink-100 text-pink-800',
-        description: t('heatTracking.analytics.proestrusDescription')
+        description: t('heatTracking.analytics.proestrusDescription'),
+        days: '1-9',
+        details: t('heatTracking.phases.proestrus.details'),
+        signs: t('heatTracking.phases.proestrus.signs')
       };
     } else if (dayInCycle <= 16) {
       return {
         phase: t('heatTracking.phases.estrus'),
         color: 'bg-red-100 text-red-800',
-        description: t('heatTracking.analytics.estrusDescription')
+        description: t('heatTracking.analytics.estrusDescription'),
+        days: '10-16',
+        details: t('heatTracking.phases.estrus.details'),
+        signs: t('heatTracking.phases.estrus.signs')
       };
     } else {
       return {
         phase: t('heatTracking.phases.metestrus'),
         color: 'bg-orange-100 text-orange-800',
-        description: t('heatTracking.analytics.metestrusDescription')
+        description: t('heatTracking.analytics.metestrusDescription'),
+        days: '17-21',
+        details: t('heatTracking.phases.metestrus.details'),
+        signs: t('heatTracking.phases.metestrus.signs')
       };
     }
+  };
+
+  const handlePhaseClick = (phaseInfo: any) => {
+    setSelectedPhase(phaseInfo);
+    setShowPhaseInfo(true);
   };
 
   const stats = calculateSummary();
@@ -224,9 +242,11 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
                   </span>
                   <Badge 
                     variant="secondary" 
-                    className={getCyclePhaseInfo(stats.currentDayInCycle).color}
+                    className={`${getCyclePhaseInfo(stats.currentDayInCycle).color} cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1`}
+                    onClick={() => handlePhaseClick(getCyclePhaseInfo(stats.currentDayInCycle))}
                   >
                     {getCyclePhaseInfo(stats.currentDayInCycle).phase}
+                    <Info className="h-3 w-3" />
                   </Badge>
                 </div>
               </div>
@@ -295,6 +315,43 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
         
         
       </CardContent>
+
+      {/* Phase Information Dialog */}
+      <Dialog open={showPhaseInfo} onOpenChange={setShowPhaseInfo}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Heart className="h-5 w-5 text-primary" />
+              {selectedPhase?.phase}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Badge variant="outline" className={selectedPhase?.color}>
+                {t('heatTracking.phases.days')}: {selectedPhase?.days}
+              </Badge>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-sm mb-2">
+                {t('heatTracking.phases.description')}
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                {selectedPhase?.details || selectedPhase?.description}
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-sm mb-2">
+                {t('heatTracking.phases.commonSigns')}
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                {selectedPhase?.signs || t('heatTracking.phases.noSignsData')}
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
