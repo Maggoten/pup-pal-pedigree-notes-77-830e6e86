@@ -6,6 +6,7 @@ import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { Loader2 } from 'lucide-react';
 import MetricCardGrid from './MetricCardGrid';
 import WelcomeHeader from './WelcomeHeader';
+import SyncHeatCalendarButton from '../SyncHeatCalendarButton';
 
 interface DashboardHeroProps {
   username: string;
@@ -40,13 +41,20 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
               <span className="ml-2 text-muted-foreground">{t('loading.statistics')}</span>
             </div>
           ) : (
-            <MetricCardGrid 
-              reminderCount={reminders} 
-              plannedLittersCount={plannedLitters} 
-              activePregnanciesCount={activePregnancies.length} 
-              recentLittersCount={recentLitters} 
-              onRemindersClick={onRemindersClick}
-            />
+            <>
+              <MetricCardGrid 
+                reminderCount={reminders} 
+                plannedLittersCount={plannedLitters} 
+                activePregnanciesCount={activePregnancies.length} 
+                recentLittersCount={recentLitters} 
+                onRemindersClick={onRemindersClick}
+              />
+              
+              {/* Heat Calendar Sync Button - temporary fix for missing calendar events */}
+              <div className="mt-3 flex justify-center">
+                <SyncHeatCalendarButton />
+              </div>
+            </>
           )}
         </div>
       </div>

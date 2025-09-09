@@ -396,6 +396,33 @@ export class HeatService {
         return null;
       }
 
+      // Auto-sync to calendar after successful creation
+      if (data) {
+        try {
+          // Get dog name for calendar sync
+          const { data: dog } = await supabase
+            .from('dogs')
+            .select('name')
+            .eq('id', dogId)
+            .single();
+          
+          const dogName = dog?.name || 'Unknown Dog';
+          
+          // Import and use HeatCalendarSyncService
+          const { HeatCalendarSyncService } = await import('./HeatCalendarSyncService');
+          const syncSuccess = await HeatCalendarSyncService.syncHeatCycleToCalendar(data, dogName);
+          
+          if (syncSuccess) {
+            console.log(`Successfully synced heat cycle to calendar for ${dogName}`);
+          } else {
+            console.warn(`Failed to sync heat cycle to calendar for ${dogName}, but heat cycle was created`);
+          }
+        } catch (syncError) {
+          console.error('Error syncing heat cycle to calendar:', syncError);
+          // Don't fail the heat cycle creation if sync fails
+        }
+      }
+
       return data;
     } catch (error) {
       console.error('Error creating heat cycle:', error);
@@ -426,6 +453,33 @@ export class HeatService {
       if (error) {
         console.error('Error creating completed heat cycle:', error);
         return null;
+      }
+
+      // Auto-sync to calendar after successful creation
+      if (data) {
+        try {
+          // Get dog name for calendar sync
+          const { data: dog } = await supabase
+            .from('dogs')
+            .select('name')
+            .eq('id', dogId)
+            .single();
+          
+          const dogName = dog?.name || 'Unknown Dog';
+          
+          // Import and use HeatCalendarSyncService
+          const { HeatCalendarSyncService } = await import('./HeatCalendarSyncService');
+          const syncSuccess = await HeatCalendarSyncService.syncHeatCycleToCalendar(data, dogName);
+          
+          if (syncSuccess) {
+            console.log(`Successfully synced completed heat cycle to calendar for ${dogName}`);
+          } else {
+            console.warn(`Failed to sync completed heat cycle to calendar for ${dogName}, but heat cycle was created`);
+          }
+        } catch (syncError) {
+          console.error('Error syncing completed heat cycle to calendar:', syncError);
+          // Don't fail the heat cycle creation if sync fails
+        }
       }
 
       return data;
