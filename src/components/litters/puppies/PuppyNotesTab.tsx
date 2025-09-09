@@ -156,14 +156,14 @@ const PuppyNotesTab: React.FC<PuppyNotesTabProps> = ({
                     )}
                   </div>
                   {editingNoteIndex !== index && (
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2">
+                    <div className="flex gap-1 absolute top-2 right-2">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEditClick(index, note.content)}
-                        className="h-6 w-6 p-0 hover:bg-blue-50"
+                        className="h-6 w-6 p-0 hover:bg-muted/50"
                       >
-                        <Edit3 className="h-3 w-3 text-blue-600" />
+                        <Edit3 className="h-3 w-3 text-muted-foreground" />
                       </Button>
                       <Button
                         variant="ghost"
