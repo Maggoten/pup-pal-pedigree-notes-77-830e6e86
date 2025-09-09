@@ -36,6 +36,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
   const [timeOfBirth, setTimeOfBirth] = useState<string>('');
   const [dateOfBirth, setDateOfBirth] = useState<Date>(defaultDob);
   const [breed, setBreed] = useState<string>(damBreed);
+  const [markings, setMarkings] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string>('');
   
@@ -88,6 +89,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
         name,
         gender,
         color: color || '', // Ensure color is not undefined
+        markings: markings || undefined,
         breed: breed || damBreed || '', // Use breed if selected, fallback to dam breed, or empty string
         birthWeight: weightValue,
         birthDateTime: birthDateTime.toISOString(),
@@ -171,6 +173,17 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
               value={color} 
               onChange={(e) => setColor(e.target.value)} 
               placeholder={t('puppies.placeholders.puppyColor')}
+              className="bg-white border-greige-300"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="markings">{t('puppies.labels.markings')}</Label>
+            <Input 
+              id="markings" 
+              value={markings} 
+              onChange={(e) => setMarkings(e.target.value)} 
+              placeholder={t('puppies.placeholders.markings')}
               className="bg-white border-greige-300"
             />
           </div>
