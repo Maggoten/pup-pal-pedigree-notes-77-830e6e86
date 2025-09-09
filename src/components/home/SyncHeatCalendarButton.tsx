@@ -21,7 +21,7 @@ const SyncHeatCalendarButton: React.FC<SyncHeatCalendarButtonProps> = ({
     setIsLoading(true);
     
     try {
-      console.log('Starting sync of all active heat cycles to calendar...');
+      console.log('Starting sync of all heat cycles (active & upcoming) to calendar...');
       
       // Get current user
       const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -33,6 +33,10 @@ const SyncHeatCalendarButton: React.FC<SyncHeatCalendarButtonProps> = ({
         });
         return;
       }
+      
+      // Get user's dogs using the proper service
+      const { fetchDogs } = await import('@/services/dogs/fetchDogs');
+      const dogs = await fetchDogs();
       
       // Get all active heat cycles (no end_date)
       const { data: activeHeats, error: heatsError } = await supabase
@@ -52,54 +56,99 @@ const SyncHeatCalendarButton: React.FC<SyncHeatCalendarButtonProps> = ({
         return;
       }
       
-      if (!activeHeats || activeHeats.length === 0) {
-        console.log('No active heat cycles found to sync');
-        toast({
-          title: 'No Active Heats',
-          description: 'No active heat cycles found to sync.',
-        });
-        return;
-      }
-      
-      console.log(`Found ${activeHeats.length} active heat cycles to sync`);
-      
-      // Dynamic import to avoid circular dependency
+      // Dynamic imports to avoid circular dependency
       const { HeatCalendarSyncService } = await import('@/services/HeatCalendarSyncService');
+      const { ReminderCalendarSyncService } = await import('@/services/ReminderCalendarSyncService');
+      const { calculateUpcomingHeatsSafe } = await import('@/utils/heatCalculatorSafe');
       
-      let synced = 0;
+      let syncedActive = 0;
+      let syncedUpcoming = 0;
       const errors: string[] = [];
       
-      // Sync each active heat cycle
-      for (const heat of activeHeats) {
-        try {
-          // Get dog name separately
-          const { data: dog } = await supabase
-            .from('dogs')
-            .select('name')
-            .eq('id', heat.dog_id)
-            .single();
-          
-          const dogName = dog?.name || 'Unknown Dog';
-          console.log(`Syncing heat cycle for ${dogName}...`);
-          
-          const syncSuccess = await HeatCalendarSyncService.syncHeatCycleToCalendar(heat, dogName);
-          
-          if (syncSuccess) {
-            synced++;
-            console.log(`✓ Successfully synced heat cycle for ${dogName}`);
-          } else {
-            errors.push(`Failed to sync heat cycle for ${dogName}`);
+      // 1. Sync active heat cycles
+      if (activeHeats && activeHeats.length > 0) {
+        console.log(`Found ${activeHeats.length} active heat cycles to sync`);
+        
+        for (const heat of activeHeats) {
+          try {
+            // Get dog name separately
+            const { data: dog } = await supabase
+              .from('dogs')
+              .select('name')
+              .eq('id', heat.dog_id)
+              .single();
+            
+            const dogName = dog?.name || 'Unknown Dog';
+            console.log(`Syncing active heat cycle for ${dogName}...`);
+            
+            const syncSuccess = await HeatCalendarSyncService.syncHeatCycleToCalendar(heat, dogName);
+            
+            if (syncSuccess) {
+              syncedActive++;
+              console.log(`✓ Successfully synced active heat cycle for ${dogName}`);
+            } else {
+              errors.push(`Failed to sync active heat cycle for ${dogName}`);
+            }
+          } catch (syncError) {
+            errors.push(`Error syncing active heat cycle: ${syncError}`);
+            console.error(`Error syncing active heat cycle:`, syncError);
           }
-        } catch (syncError) {
-          errors.push(`Error syncing heat cycle: ${syncError}`);
-          console.error(`Error syncing heat cycle:`, syncError);
+        }
+      } else {
+        console.log('No active heat cycles found');
+      }
+      
+      // 2. Sync upcoming/predicted heat cycles
+      if (dogs && dogs.length > 0) {
+        try {
+          console.log('Calculating and syncing upcoming heat cycles...');
+          const upcomingHeats = await calculateUpcomingHeatsSafe(dogs, 'dogServices');
+          
+          if (upcomingHeats.length > 0) {
+            console.log(`Found ${upcomingHeats.length} upcoming heat cycles to sync`);
+            
+            for (const heat of upcomingHeats) {
+              try {
+                console.log(`Syncing upcoming heat cycle for ${heat.dogName}...`);
+                
+                const syncSuccess = await ReminderCalendarSyncService.syncHeatCycleEvents(heat);
+                
+                if (syncSuccess) {
+                  syncedUpcoming++;
+                  console.log(`✓ Successfully synced upcoming heat cycle for ${heat.dogName}`);
+                } else {
+                  errors.push(`Failed to sync upcoming heat cycle for ${heat.dogName}`);
+                }
+              } catch (syncError) {
+                errors.push(`Error syncing upcoming heat cycle: ${syncError}`);
+                console.error(`Error syncing upcoming heat cycle:`, syncError);
+              }
+            }
+          } else {
+            console.log('No upcoming heat cycles found');
+          }
+        } catch (upcomingError) {
+          console.error('Error calculating upcoming heats:', upcomingError);
+          errors.push('Failed to calculate upcoming heat cycles');
         }
       }
       
-      if (synced > 0) {
+      // Show results
+      const totalSynced = syncedActive + syncedUpcoming;
+      
+      if (totalSynced > 0) {
+        const message = [];
+        if (syncedActive > 0) message.push(`${syncedActive} active heat${syncedActive > 1 ? 's' : ''}`);
+        if (syncedUpcoming > 0) message.push(`${syncedUpcoming} upcoming heat${syncedUpcoming > 1 ? 's' : ''}`);
+        
         toast({
           title: 'Heat Cycles Synced',
-          description: `Successfully synced ${synced} active heat cycle${synced > 1 ? 's' : ''} to calendar.`,
+          description: `Successfully synced ${message.join(' and ')} to calendar.`,
+        });
+      } else if (errors.length === 0) {
+        toast({
+          title: 'No Heat Cycles to Sync',
+          description: 'No active or upcoming heat cycles found to sync.',
         });
       }
       
@@ -107,7 +156,7 @@ const SyncHeatCalendarButton: React.FC<SyncHeatCalendarButtonProps> = ({
         console.error('Sync errors:', errors);
         toast({
           title: 'Sync Issues',
-          description: `Synced ${synced} heat cycles with ${errors.length} error(s). Check console for details.`,
+          description: `Synced ${totalSynced} heat cycles with ${errors.length} error(s). Check console for details.`,
           variant: 'destructive'
         });
       }
