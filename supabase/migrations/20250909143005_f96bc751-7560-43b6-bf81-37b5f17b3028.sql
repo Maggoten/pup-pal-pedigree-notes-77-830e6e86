@@ -1,0 +1,1 @@
+DELETE FROM reminders WHERE title ILIKE '%Track%Heat%Cycle%';
