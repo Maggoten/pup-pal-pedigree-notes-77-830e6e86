@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
-import { FileText, Trash2 } from 'lucide-react';
+import { FileText, Trash2, Edit3, Check, X } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import PuppyNotesHistoryDialog from './PuppyNotesHistoryDialog';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
@@ -19,6 +19,7 @@ interface PuppyNotesTabProps {
   selectedTime: string;
   onAddNote: () => void;
   onDeleteNote: (index: number) => void;
+  onEditNote: (index: number, newContent: string) => void;
 }
 
 const PuppyNotesTab: React.FC<PuppyNotesTabProps> = ({
@@ -28,11 +29,14 @@ const PuppyNotesTab: React.FC<PuppyNotesTabProps> = ({
   selectedDate,
   selectedTime,
   onAddNote,
-  onDeleteNote
+  onDeleteNote,
+  onEditNote
 }) => {
   const [showAllNotes, setShowAllNotes] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedNoteIndex, setSelectedNoteIndex] = useState<number | null>(null);
+  const [editingNoteIndex, setEditingNoteIndex] = useState<number | null>(null);
+  const [editingContent, setEditingContent] = useState<string>('');
   
   const hasNotes = puppy.notes && puppy.notes.length > 0;
   const notesToShow = hasNotes ? puppy.notes.slice(0, 5) : [];
@@ -52,6 +56,28 @@ const PuppyNotesTab: React.FC<PuppyNotesTabProps> = ({
     }
     setDeleteDialogOpen(false);
     setSelectedNoteIndex(null);
+  };
+
+  const handleEditClick = (index: number, content: string) => {
+    setEditingNoteIndex(index);
+    setEditingContent(content);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingNoteIndex !== null) {
+      onEditNote(editingNoteIndex, editingContent);
+      toast({
+        title: "Note Updated",
+        description: "The note has been successfully updated."
+      });
+    }
+    setEditingNoteIndex(null);
+    setEditingContent('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingNoteIndex(null);
+    setEditingContent('');
   };
 
   const selectedNote = selectedNoteIndex !== null && hasNotes ? puppy.notes[selectedNoteIndex] : null;
@@ -98,16 +124,57 @@ const PuppyNotesTab: React.FC<PuppyNotesTabProps> = ({
                     <div className="text-xs text-muted-foreground mb-1">
                       {format(new Date(note.date), "PPP p")}
                     </div>
-                    <p className="text-sm pr-8 whitespace-pre-wrap">{note.content}</p>
+                    {editingNoteIndex === index ? (
+                      <div className="space-y-2">
+                        <Textarea
+                          value={editingContent}
+                          onChange={(e) => setEditingContent(e.target.value)}
+                          className="text-sm"
+                          rows={3}
+                        />
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleSaveEdit}
+                            className="h-6 px-2 text-green-600 hover:bg-green-50"
+                          >
+                            <Check className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleCancelEdit}
+                            className="h-6 px-2 text-gray-600 hover:bg-gray-50"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm pr-16 whitespace-pre-wrap">{note.content}</p>
+                    )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteClick(index)}
-                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 absolute top-2 right-2"
-                  >
-                    <Trash2 className="h-3 w-3 text-destructive" />
-                  </Button>
+                  {editingNoteIndex !== index && (
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditClick(index, note.content)}
+                        className="h-6 w-6 p-0 hover:bg-blue-50"
+                      >
+                        <Edit3 className="h-3 w-3 text-blue-600" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteClick(index)}
+                        className="h-6 w-6 p-0 hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-3 w-3 text-destructive" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

@@ -408,10 +408,6 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       setLocalPuppy(updatedPuppy);
       onUpdate(updatedPuppy);
       
-      toast({
-        title: "Note Deleted",
-        description: "The note has been removed."
-      });
     } catch (error) {
       console.error('Error deleting note:', error);
       toast({
@@ -423,6 +419,28 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
       isUpdating.current = false;
     }
   }, [localPuppy, onUpdate, litterService]);
+
+  const handleEditNote = useCallback(async (index: number, newContent: string) => {
+    if (isUpdating.current) return;
+    
+    const updatedNotes = [...(localPuppy.notes || [])];
+    const noteToEdit = updatedNotes[index];
+    if (!noteToEdit) return;
+    
+    // Update the note content in local state
+    updatedNotes[index] = {
+      ...noteToEdit,
+      content: newContent.trim()
+    };
+    
+    const updatedPuppy = {
+      ...localPuppy,
+      notes: updatedNotes
+    };
+
+    setLocalPuppy(updatedPuppy);
+    onUpdate(updatedPuppy);
+  }, [localPuppy, onUpdate]);
 
   return (
     <DialogContent className="sm:max-w-[600px]" onInteractOutside={onClose}>
@@ -477,6 +495,7 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
             selectedTime={selectedTime}
             onAddNote={handleAddNote}
             onDeleteNote={handleDeleteNote}
+            onEditNote={handleEditNote}
           />
         </TabsContent>
       </Tabs>
