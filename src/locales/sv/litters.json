@@ -147,6 +147,7 @@
       "female": "Tik",
       "weight": "Vikt",
       "height": "Höjd",
+      "weightKg": "Vikt (kg)",
       "notSet": "Ej angett",
       "notRecorded": "Ej registrerat",
       "birthDateNotSet": "Födelsedatum ej angett",

@@ -147,6 +147,7 @@
       "female": "Female",
       "weight": "Weight",
       "height": "Height",
+      "weightKg": "Weight (kg)",
       "notSet": "Not set",
       "notRecorded": "Not recorded",
       "birthDateNotSet": "Birth date not set",

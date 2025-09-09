@@ -69,7 +69,7 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
   return (
     <div className="space-y-4">
       <div className="grid gap-1.5">
-        <Label htmlFor="weight">Weight (kg)</Label>
+        <Label htmlFor="weight">{t('puppies.labels.weightKg')}</Label>
         <div className="flex space-x-2">
           <Input
             id="weight"
