@@ -28,9 +28,16 @@ export const calculateUpcomingHeats = (dogs: Dog[]): UpcomingHeat[] => {
       const lastHeatDate = parseISO(sortedHeatDates[0].date);
       // Use dog's heat interval or default to 180 days (6 months)
       const intervalDays = dog.heatInterval || 180;
-      const nextHeatDate = addDays(lastHeatDate, intervalDays);
+      let nextHeatDate = addDays(lastHeatDate, intervalDays);
       
-      // Only include if the next heat date is in the future
+      // Handle overdue heats - recalculate to next future cycle
+      if (nextHeatDate <= today) {
+        const daysPassed = Math.ceil((today.getTime() - nextHeatDate.getTime()) / (1000 * 60 * 60 * 24));
+        const intervalsPassed = Math.floor(daysPassed / intervalDays) + 1;
+        nextHeatDate = addDays(nextHeatDate, intervalsPassed * intervalDays);
+      }
+      
+      // Now we always include since we've ensured the date is in the future
       if (nextHeatDate > today) {
         upcomingHeats.push({
           dogId: dog.id,
@@ -67,7 +74,14 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
 
       // Use dog's heat interval or default to 180 days (6 months)
       const intervalDays = dog.heatInterval || 180;
-      const nextHeatDate = addDays(latestDate, intervalDays);
+      let nextHeatDate = addDays(latestDate, intervalDays);
+      
+      // Handle overdue heats in unified calculation
+      if (nextHeatDate <= today) {
+        const daysPassed = Math.ceil((today.getTime() - nextHeatDate.getTime()) / (1000 * 60 * 60 * 24));
+        const intervalsPassed = Math.floor(daysPassed / intervalDays) + 1;
+        nextHeatDate = addDays(nextHeatDate, intervalsPassed * intervalDays);
+      }
       
       // Only include if the next heat date is in the future
       if (nextHeatDate > today) {
@@ -91,7 +105,14 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
         
         const lastHeatDate = parseISO(sortedHeatDates[0].date);
         const intervalDays = dog.heatInterval || 180;
-        const nextHeatDate = addDays(lastHeatDate, intervalDays);
+        let nextHeatDate = addDays(lastHeatDate, intervalDays);
+        
+        // Handle overdue heats in fallback logic too
+        if (nextHeatDate <= today) {
+          const daysPassed = Math.ceil((today.getTime() - nextHeatDate.getTime()) / (1000 * 60 * 60 * 24));
+          const intervalsPassed = Math.floor(daysPassed / intervalDays) + 1;
+          nextHeatDate = addDays(nextHeatDate, intervalsPassed * intervalDays);
+        }
         
         if (nextHeatDate > today) {
           upcomingHeats.push({

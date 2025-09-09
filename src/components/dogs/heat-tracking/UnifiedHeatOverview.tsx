@@ -102,10 +102,13 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
         nextHeatDate = addDays(mostRecentHeatDate, averageInterval);
       }
       
-      // Ensure next heat date is in the future
+      // Handle overdue heats properly - recalculate to next cycle
       const today = new Date();
       if (nextHeatDate <= today) {
-        nextHeatDate = addDays(today, 1);
+        // Calculate how many intervals have passed since the original date
+        const daysPassed = differenceInDays(today, nextHeatDate);
+        const intervalsPassed = Math.floor(daysPassed / averageInterval) + 1;
+        nextHeatDate = addDays(nextHeatDate, intervalsPassed * averageInterval);
       }
       
       daysUntilNextHeat = differenceInDays(nextHeatDate, today);
