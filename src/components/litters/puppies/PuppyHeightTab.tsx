@@ -109,7 +109,7 @@ const PuppyHeightTab: React.FC<PuppyHeightTabProps> = ({
           </div>
         ) : (
           <div className="text-center py-4 border rounded-md text-muted-foreground">
-            No height records yet
+            {t('puppies.messages.noHeightRecords')}
           </div>
         )}
       </div>
