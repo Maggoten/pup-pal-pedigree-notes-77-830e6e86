@@ -152,6 +152,7 @@
     "placeholders": {
       "puppyName": "Puppy name",
       "puppyColor": "Puppy color",
+      "markings": "Puppy's markings/identifying features",
       "registeredName": "Optional registered name",
       "registrationNumber": "Optional registration number", 
       "collarId": "Collar identifier",

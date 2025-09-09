@@ -152,6 +152,7 @@
     "placeholders": {
       "puppyName": "Valpens namn",
       "puppyColor": "Valpens färg",
+      "markings": "Valpens teckning/kännetecken",
       "registeredName": "Registrerat namn",
       "registrationNumber": "Registreringsnummer", 
       "collarId": "Halsbandsidentifierare",
