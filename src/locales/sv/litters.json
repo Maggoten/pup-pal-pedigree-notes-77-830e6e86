@@ -111,7 +111,8 @@
       "basicInformation": "Grundläggande Information",
       "physicalMeasurements": "Viktinformation",
       "identification": "Identifiering",
-      "statusAndOwnership": "Status & Ägarskap"
+      "statusAndOwnership": "Status & Ägarskap",
+      "recentNotes": "Senaste Anteckningar"
     },
     "labels": {
       "age": "Ålder",

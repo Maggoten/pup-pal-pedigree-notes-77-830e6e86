@@ -111,7 +111,8 @@
       "basicInformation": "Basic Information",
       "physicalMeasurements": "Physical Measurements",
       "identification": "Identification",
-      "statusAndOwnership": "Status & Ownership"
+      "statusAndOwnership": "Status & Ownership",
+      "recentNotes": "Recent Notes"
     },
     "labels": {
       "age": "Age",

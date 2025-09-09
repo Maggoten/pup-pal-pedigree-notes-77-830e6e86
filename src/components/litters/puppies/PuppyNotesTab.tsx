@@ -7,7 +7,8 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { FileText, Trash2, Edit3, Check, X } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 import PuppyNotesHistoryDialog from './PuppyNotesHistoryDialog';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 
@@ -32,6 +33,7 @@ const PuppyNotesTab: React.FC<PuppyNotesTabProps> = ({
   onDeleteNote,
   onEditNote
 }) => {
+  const { t } = useTranslation('litters');
   const [showAllNotes, setShowAllNotes] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedNoteIndex, setSelectedNoteIndex] = useState<number | null>(null);
@@ -98,7 +100,7 @@ const PuppyNotesTab: React.FC<PuppyNotesTabProps> = ({
       
       <div className="mt-4">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-sm font-medium">Recent Notes</h3>
+          <h3 className="text-sm font-medium">{t('puppies.titles.recentNotes')}</h3>
           {hasNotes && puppy.notes.length > 5 && (
             <Dialog open={showAllNotes} onOpenChange={setShowAllNotes}>
               <DialogTrigger asChild>
