@@ -27,10 +27,7 @@ export class HeatCalendarSyncService {
       const startDate = new Date(heatCycle.start_date);
       const isActive = !heatCycle.end_date;
 
-      console.log(`Syncing heat cycle for ${dogName}: isActive=${isActive}, start=${startDate.toISOString()}`);
-
       // Clean up existing heat events for this dog to avoid duplicates
-      console.log('Cleaning up existing heat-related events...');
       await ReminderCalendarSyncService.cleanupSpecificEventTypes(heatCycle.dog_id, [
         'heat', 'heat-active', 'ovulation-predicted', 'fertility-window'
       ]);
@@ -49,32 +46,21 @@ export class HeatCalendarSyncService {
         heat_phase: isActive ? 'proestrus' : undefined
       };
 
-      console.log(`Creating ${isActive ? 'active' : 'completed'} heat event:`, {
-        title: heatEventData.title,
-        type: heatEventData.type,
-        date: heatEventData.date
-      });
-
-      const { data: insertedEvent, error: heatEventError } = await supabase
+      const { error: heatEventError } = await supabase
         .from('calendar_events')
-        .insert(heatEventData)
-        .select('*')
-        .single();
+        .insert(heatEventData);
 
       if (heatEventError) {
         console.error('Error creating heat calendar event:', heatEventError);
         return false;
       }
 
-      console.log('Successfully created heat event:', insertedEvent?.id);
-
       // If active heat cycle, create predictive events
       if (isActive) {
-        console.log('Creating predictive events for active heat...');
         await this.createPredictiveHeatEvents(heatCycle, dogName, user.id);
       }
 
-      console.log(`Successfully synced heat cycle to calendar for ${dogName}`);
+      console.log('Successfully synced heat cycle to calendar');
       return true;
     } catch (error) {
       console.error('Error in syncHeatCycleToCalendar:', error);
@@ -91,7 +77,6 @@ export class HeatCalendarSyncService {
     userId: string
   ): Promise<void> {
     const startDate = new Date(heatCycle.start_date);
-    console.log(`Creating predictive events for ${dogName}, heat started: ${startDate.toISOString()}`);
 
     // Create ovulation prediction (days 12-14, peak at day 13)
     const ovulationDate = addDays(startDate, 12);
@@ -106,23 +91,7 @@ export class HeatCalendarSyncService {
       status: 'predicted'
     };
 
-    console.log('Creating ovulation prediction event:', {
-      title: ovulationEventData.title,
-      date: ovulationEventData.date,
-      type: ovulationEventData.type
-    });
-
-    const { data: ovulationEvent, error: ovulationError } = await supabase
-      .from('calendar_events')
-      .insert(ovulationEventData)
-      .select('*')
-      .single();
-
-    if (ovulationError) {
-      console.error('Error creating ovulation prediction event:', ovulationError);
-    } else {
-      console.log('Successfully created ovulation event:', ovulationEvent?.id);
-    }
+    await supabase.from('calendar_events').insert(ovulationEventData);
 
     // Create fertility window (days 10-16)
     const fertilityStart = addDays(startDate, 9); // Day 10
@@ -139,23 +108,7 @@ export class HeatCalendarSyncService {
       status: 'active'
     };
 
-    console.log('Creating fertility window event:', {
-      title: fertilityEventData.title,
-      dateRange: `${fertilityEventData.date} - ${fertilityEventData.end_date}`,
-      type: fertilityEventData.type
-    });
-
-    const { data: fertilityEvent, error: fertilityError } = await supabase
-      .from('calendar_events')
-      .insert(fertilityEventData)
-      .select('*')
-      .single();
-
-    if (fertilityError) {
-      console.error('Error creating fertility window event:', fertilityError);
-    } else {
-      console.log('Successfully created fertility window event:', fertilityEvent?.id);
-    }
+    await supabase.from('calendar_events').insert(fertilityEventData);
   }
 
   /**
