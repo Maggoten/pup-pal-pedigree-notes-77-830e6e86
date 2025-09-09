@@ -296,7 +296,7 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
           
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">
-              {stats.nextHeatDate ? format(stats.nextHeatDate, 'MMM dd') : '-'}
+              {stats.nextHeatDate && !isNaN(stats.nextHeatDate.getTime()) ? format(stats.nextHeatDate, 'MMM dd') : '-'}
             </div>
             <div className="text-xs text-muted-foreground">
               {t('heatTracking.analytics.nextHeat')}

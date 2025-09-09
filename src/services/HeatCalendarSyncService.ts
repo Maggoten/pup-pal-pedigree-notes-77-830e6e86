@@ -288,41 +288,103 @@ export class HeatCalendarSyncService {
 
   /**
    * Full bilateral sync - ensures calendar and heat cycles are in sync
+   * This handles migration of existing active heat cycles to calendar events
    */
   static async performFullSync(dogId: string, dogName: string): Promise<boolean> {
     try {
       console.log(`🚀 Starting full sync for ${dogName} (${dogId})`);
       
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        console.error('❌ No authenticated user for full sync:', authError);
+        return false;
+      }
+      
       // Get all heat cycles for the dog
       const heatCycles = await HeatService.getHeatCycles(dogId);
-      console.log(`📊 Found ${heatCycles.length} heat cycles for ${dogName}:`, 
-        heatCycles.map(h => ({ 
-          start: h.start_date, 
-          end: h.end_date, 
-          active: !h.end_date 
-        }))
-      );
+      const activeHeatCycles = heatCycles.filter(h => !h.end_date);
+      const endedHeatCycles = heatCycles.filter(h => h.end_date);
+      
+      console.log(`📊 Found ${heatCycles.length} total heat cycles for ${dogName}:`, {
+        active: activeHeatCycles.length,
+        ended: endedHeatCycles.length,
+        activeIds: activeHeatCycles.map(h => h.id)
+      });
+      
+      // Check what calendar events already exist
+      const { data: existingEvents, error: eventError } = await supabase
+        .from('calendar_events')
+        .select('*')
+        .eq('dog_id', dogId)
+        .eq('user_id', user.id)
+        .in('type', ['heat', 'heat-active', 'ovulation-predicted', 'fertility-window']);
+        
+      if (eventError) {
+        console.error('❌ Error fetching existing events:', eventError);
+      } else {
+        console.log(`📅 Found ${existingEvents?.length || 0} existing calendar events:`, 
+          existingEvents?.map(e => ({ type: e.type, title: e.title, date: e.date }))
+        );
+      }
       
       // Clean up ALL existing heat-related calendar events (including predicted ones)
       console.log(`🧹 Cleaning up existing calendar events for ${dogName}...`);
-      await ReminderCalendarSyncService.cleanupSpecificEventTypes(dogId, [
+      const cleanupSuccess = await ReminderCalendarSyncService.cleanupSpecificEventTypes(dogId, [
         'heat', 'heat-active', 'ovulation-predicted', 'fertility-window'
       ]);
+      
+      if (!cleanupSuccess) {
+        console.error(`❌ Failed to cleanup existing events for ${dogName}`);
+      }
 
       // Sync each heat cycle to calendar with proper type and status
+      let successCount = 0;
       for (const heatCycle of heatCycles) {
         const isActive = !heatCycle.end_date;
-        console.log(`⏳ Syncing ${isActive ? 'ACTIVE' : 'ended'} heat cycle ${heatCycle.id} for ${dogName}...`);
+        console.log(`⏳ [${successCount + 1}/${heatCycles.length}] Syncing ${isActive ? 'ACTIVE' : 'ended'} heat cycle ${heatCycle.id} for ${dogName}...`);
+        
         const success = await this.syncHeatCycleToCalendar(heatCycle, dogName);
-        if (success && isActive) {
-          console.log(`✅ Created ACTIVE heat-active event for ${dogName}`);
-        } else if (success) {
-          console.log(`✅ Created ended heat event for ${dogName}`);
+        
+        if (success) {
+          successCount++;
+          if (isActive) {
+            console.log(`✅ Successfully created ACTIVE heat-active event for ${dogName} (cycle: ${heatCycle.id})`);
+            
+            // Verify the event was actually created
+            const { data: verifyEvent, error: verifyError } = await supabase
+              .from('calendar_events')
+              .select('*')
+              .eq('dog_id', dogId)
+              .eq('user_id', user.id)
+              .eq('type', 'heat-active')
+              .limit(1);
+              
+            if (verifyError || !verifyEvent?.length) {
+              console.error(`❌ VERIFICATION FAILED: heat-active event not found for ${dogName}`, verifyError);
+            } else {
+              console.log(`✅ VERIFICATION SUCCESS: heat-active event confirmed for ${dogName}`, verifyEvent[0]);
+            }
+          } else {
+            console.log(`✅ Successfully created ended heat event for ${dogName} (cycle: ${heatCycle.id})`);
+          }
+        } else {
+          console.error(`❌ Failed to sync heat cycle ${heatCycle.id} for ${dogName}`);
         }
       }
 
-      console.log(`✅ Full sync completed for dog ${dogName} (${dogId})`);
-      return true;
+      console.log(`🎯 Full sync completed for ${dogName}: ${successCount}/${heatCycles.length} cycles synced successfully`);
+      
+      // Final verification - check for heat-active events
+      const { data: finalActiveEvents } = await supabase
+        .from('calendar_events')
+        .select('*')
+        .eq('dog_id', dogId)
+        .eq('user_id', user.id)
+        .eq('type', 'heat-active');
+        
+      console.log(`🔍 Final check: ${finalActiveEvents?.length || 0} heat-active events now exist for ${dogName}`);
+      
+      return successCount === heatCycles.length;
     } catch (error) {
       console.error('❌ Error in performFullSync:', error);
       return false;
