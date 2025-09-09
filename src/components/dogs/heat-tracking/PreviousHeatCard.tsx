@@ -49,7 +49,16 @@ const PreviousHeatCard: React.FC<PreviousHeatCardProps> = ({
     const daysAgo = differenceInDays(new Date(), endDate || startDate);
 
     return (
-      <Card className="hover:bg-muted/50 transition-colors cursor-pointer" onClick={onViewDetails}>
+      <Card 
+        className="hover:bg-muted/50 transition-colors cursor-pointer" 
+        onClick={(e) => {
+          // Prevent accidental clicks during delete operations
+          if (e.target !== e.currentTarget && (e.target as Element).closest('button')) {
+            return;
+          }
+          onViewDetails?.();
+        }}
+      >
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

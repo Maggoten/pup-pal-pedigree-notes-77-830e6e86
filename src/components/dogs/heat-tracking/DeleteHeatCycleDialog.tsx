@@ -29,12 +29,15 @@ export const DeleteHeatCycleDialog: React.FC<DeleteHeatCycleDialogProps> = ({
       const success = await HeatService.deleteHeatCycle(heatCycle.id);
       
       if (success) {
+        setOpen(false);
         toast({
           title: t('heatTracking.deleteSuccess.title'),
           description: t('heatTracking.deleteSuccess.description'),
         });
-        onSuccess();
-        setOpen(false);
+        // Add delay to prevent synthetic clicks
+        setTimeout(() => {
+          onSuccess();
+        }, 100);
       } else {
         throw new Error('Failed to delete heat cycle');
       }
