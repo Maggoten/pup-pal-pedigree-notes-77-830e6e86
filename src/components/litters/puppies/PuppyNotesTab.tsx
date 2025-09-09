@@ -87,15 +87,15 @@ const PuppyNotesTab: React.FC<PuppyNotesTabProps> = ({
   return (
     <div className="space-y-4">
       <div className="grid gap-1.5">
-        <Label htmlFor="note">Add Note</Label>
+        <Label htmlFor="note">{t('puppies.actions.addNote')}</Label>
         <Textarea
           id="note"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Enter a note about this puppy"
+          placeholder={t('puppies.placeholders.enterNote')}
           rows={3}
         />
-        <Button onClick={onAddNote} className="mt-2">Add Note</Button>
+        <Button onClick={onAddNote} className="mt-2">{t('puppies.actions.addNote')}</Button>
       </div>
       
       <div className="mt-4">
@@ -183,7 +183,7 @@ const PuppyNotesTab: React.FC<PuppyNotesTabProps> = ({
           </div>
         ) : (
           <div className="text-center py-4 border rounded-md text-muted-foreground">
-            No notes yet
+            {t('puppies.messages.noNotesYet')}
           </div>
         )}
       </div>
