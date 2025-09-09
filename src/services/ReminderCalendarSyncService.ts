@@ -276,11 +276,13 @@ export class ReminderCalendarSyncService {
         if (dog.vaccinationDate) {
           await this.syncVaccinationEvents(dog);
         }
-        
       }
       
       // Sync due date events for active pregnancies
       await this.syncDueDateEvents();
+      
+      // Sync predicted heat events for upcoming heats
+      await this.syncPredictedHeatEvents(dogs);
       
       return true;
     } catch (error) {
@@ -388,6 +390,82 @@ export class ReminderCalendarSyncService {
     } catch (error) {
       const elapsed = Date.now() - startTime;
       console.error(`[ReminderCalendarSyncService] Unexpected error in syncDueDateEvents after ${elapsed}ms:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Syncs predicted heat events to calendar for all dogs
+   * Creates calendar events for upcoming heats that can be started from the calendar
+   * @param dogs Array of dogs to create predicted heat events for
+   * @returns A boolean indicating whether the operation was successful
+   */
+  static async syncPredictedHeatEvents(dogs: Dog[]): Promise<boolean> {
+    try {
+      console.log(`Starting sync of predicted heat events for ${dogs.length} dogs...`);
+      
+      // Get current user ID
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !authData.user) {
+        console.error('Error getting user for predicted heat calendar events:', authError);
+        return false;
+      }
+      
+      const userId = authData.user.id;
+
+      // Clean up existing predicted heat events to prevent duplicates
+      const { error: cleanupError } = await supabase
+        .from('calendar_events')
+        .delete()
+        .eq('user_id', userId)
+        .eq('type', 'heat')
+        .eq('status', 'predicted');
+
+      if (cleanupError) {
+        console.error('Error cleaning up existing predicted heat events:', cleanupError);
+        return false;
+      }
+
+      // Get upcoming heats using the safe calculator
+      const upcomingHeats = await this.getUpcomingHeats(dogs);
+      
+      if (!upcomingHeats || upcomingHeats.length === 0) {
+        console.log('No upcoming heats found for predicted heat events');
+        return true;
+      }
+
+      console.log(`Found ${upcomingHeats.length} upcoming heats to sync to calendar`);
+
+      // Create predicted heat events for each upcoming heat
+      for (const upcomingHeat of upcomingHeats) {
+        const eventData = {
+          title: `${upcomingHeat.dogName}'s Heat Cycle`,
+          date: upcomingHeat.date.toISOString(),
+          type: 'heat',
+          dog_id: upcomingHeat.dogId,
+          dog_name: upcomingHeat.dogName,
+          notes: `Predicted heat cycle for ${upcomingHeat.dogName}. Click "Start Heat Cycle" when it begins.`,
+          user_id: userId,
+          status: 'predicted'
+        };
+
+        const { error: insertError } = await supabase
+          .from('calendar_events')
+          .insert(eventData);
+
+        if (insertError) {
+          console.error(`Error creating predicted heat event for ${upcomingHeat.dogName}:`, insertError);
+          // Continue with other events even if one fails
+        } else {
+          console.log(`✅ Created predicted heat event for ${upcomingHeat.dogName}`);
+        }
+      }
+
+      console.log(`Successfully synced ${upcomingHeats.length} predicted heat events to calendar`);
+      return true;
+    } catch (error) {
+      console.error('Unexpected error in syncPredictedHeatEvents:', error);
       return false;
     }
   }

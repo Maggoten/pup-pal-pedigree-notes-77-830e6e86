@@ -99,22 +99,37 @@ const SyncHeatCalendarButton: React.FC<SyncHeatCalendarButtonProps> = ({
         console.log('No active heat cycles found');
       }
       
-      // 2. Note: Upcoming heat cycles are now managed through the original heat cycle system
-      // The calendar should use the existing heat cycle events created through the HeatCalendarSyncService
-      console.log('Upcoming heat cycles are managed through the existing heat cycle system in calendar');
+      // 2. Sync predicted heat events for upcoming heats  
+      console.log('Syncing predicted heat events for upcoming heats...');
+      try {
+        const syncPredictedSuccess = await ReminderCalendarSyncService.syncPredictedHeatEvents(dogs);
+        if (syncPredictedSuccess) {
+          syncedUpcoming++;
+          console.log('✅ Successfully synced predicted heat events');
+        } else {
+          errors.push('Failed to sync predicted heat events');
+        }
+      } catch (predictedSyncError) {
+        errors.push(`Error syncing predicted heat events: ${predictedSyncError}`);
+        console.error('Error syncing predicted heat events:', predictedSyncError);
+      }
       
-      // Show results for active heat sync only
-      const totalSynced = syncedActive;
+      // Show results for both active and predicted heat sync
+      const totalSynced = syncedActive + syncedUpcoming;
       
       if (totalSynced > 0) {
+        const parts = [];
+        if (syncedActive > 0) parts.push(`${syncedActive} active heat cycle${syncedActive > 1 ? 's' : ''}`);
+        if (syncedUpcoming > 0) parts.push(`${syncedUpcoming} predicted heat event${syncedUpcoming > 1 ? 's' : ''}`);
+        
         toast({
-          title: 'Active Heat Cycles Synced',
-          description: `Successfully synced ${syncedActive} active heat cycle${syncedActive > 1 ? 's' : ''} to calendar.`,
+          title: 'Heat Calendar Synced',
+          description: `Successfully synced ${parts.join(' and ')} to calendar.`,
         });
       } else if (errors.length === 0) {
         toast({
-          title: 'No Active Heat Cycles to Sync',
-          description: 'No active heat cycles found to sync.',
+          title: 'No Heat Cycles to Sync',
+          description: 'No active or upcoming heat cycles found to sync.',
         });
       }
       
