@@ -113,7 +113,8 @@
       "identification": "Identifiering",
       "statusAndOwnership": "Status & Ägarskap",
       "recentNotes": "Senaste Anteckningar",
-      "recentHeightRecords": "Senaste Höjdregisteringar"
+      "recentHeightRecords": "Senaste Höjdregisteringar",
+      "recentWeightRecords": "Senaste Viktregisteringar"
     },
     "labels": {
       "age": "Ålder",

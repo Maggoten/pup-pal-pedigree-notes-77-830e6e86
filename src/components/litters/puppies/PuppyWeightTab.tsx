@@ -7,7 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { Trash2 } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 
 interface PuppyWeightTabProps {
@@ -29,6 +30,7 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
   onAddWeight,
   onDeleteWeight
 }) => {
+  const { t } = useTranslation('litters');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedWeightIndex, setSelectedWeightIndex] = useState<number | null>(null);
 
@@ -83,7 +85,7 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
       </div>
       
       <div className="mt-4">
-        <h3 className="text-sm font-medium mb-2">Recent Weight Records</h3>
+        <h3 className="text-sm font-medium mb-2">{t('puppies.titles.recentWeightRecords')}</h3>
         {weightLogEntries.length > 0 ? (
           <div className="max-h-40 overflow-y-auto border rounded-md">
             <Table>

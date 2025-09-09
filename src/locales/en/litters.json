@@ -113,7 +113,8 @@
       "identification": "Identification",
       "statusAndOwnership": "Status & Ownership",
       "recentNotes": "Recent Notes",
-      "recentHeightRecords": "Recent Height Records"
+      "recentHeightRecords": "Recent Height Records",
+      "recentWeightRecords": "Recent Weight Records"
     },
     "labels": {
       "age": "Age",
