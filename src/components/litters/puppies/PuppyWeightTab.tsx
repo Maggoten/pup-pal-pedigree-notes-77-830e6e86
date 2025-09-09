@@ -77,7 +77,7 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
             onChange={(e) => setWeight(e.target.value)}
             type="number"
             step="0.01"
-            placeholder="Enter weight"
+            placeholder={t('puppies.placeholders.enterWeight')}
             className="flex-1"
           />
           <Button onClick={onAddWeight}>Add</Button>
