@@ -120,7 +120,7 @@ const PuppyWeightTab: React.FC<PuppyWeightTabProps> = ({
           </div>
         ) : (
           <div className="text-center py-4 border rounded-md text-muted-foreground">
-            No weight records yet
+            {t('puppies.messages.noWeightRecords')}
           </div>
         )}
       </div>
