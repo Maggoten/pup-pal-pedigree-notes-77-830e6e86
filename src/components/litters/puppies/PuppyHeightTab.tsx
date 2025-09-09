@@ -66,7 +66,7 @@ const PuppyHeightTab: React.FC<PuppyHeightTabProps> = ({
             onChange={(e) => setHeight(e.target.value)}
             type="number"
             step="0.1"
-            placeholder="Enter height"
+            placeholder={t('puppies.placeholders.enterHeight')}
             className="flex-1"
           />
           <Button onClick={onAddHeight}>Add</Button>
