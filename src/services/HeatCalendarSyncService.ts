@@ -300,16 +300,22 @@ export class HeatCalendarSyncService {
         }))
       );
       
-      // Clean up existing heat-related calendar events
+      // Clean up ALL existing heat-related calendar events (including predicted ones)
       console.log(`🧹 Cleaning up existing calendar events for ${dogName}...`);
       await ReminderCalendarSyncService.cleanupSpecificEventTypes(dogId, [
         'heat', 'heat-active', 'ovulation-predicted', 'fertility-window'
       ]);
 
-      // Sync each heat cycle to calendar
+      // Sync each heat cycle to calendar with proper type and status
       for (const heatCycle of heatCycles) {
-        console.log(`⏳ Syncing heat cycle ${heatCycle.id} for ${dogName}...`);
-        await this.syncHeatCycleToCalendar(heatCycle, dogName);
+        const isActive = !heatCycle.end_date;
+        console.log(`⏳ Syncing ${isActive ? 'ACTIVE' : 'ended'} heat cycle ${heatCycle.id} for ${dogName}...`);
+        const success = await this.syncHeatCycleToCalendar(heatCycle, dogName);
+        if (success && isActive) {
+          console.log(`✅ Created ACTIVE heat-active event for ${dogName}`);
+        } else if (success) {
+          console.log(`✅ Created ended heat event for ${dogName}`);
+        }
       }
 
       console.log(`✅ Full sync completed for dog ${dogName} (${dogId})`);
