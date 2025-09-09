@@ -452,9 +452,23 @@
     },
     "phases": {
       "proestrus": "Proöstrus",
-      "estrus": "Östrus",
+      "estrus": "Östrus", 
       "metestrus": "Metöstrus",
-      "anestrus": "Anöstrus"
+      "anestrus": "Anöstrus",
+      "days": "Dagar",
+      "description": "Beskrivning",
+      "commonSigns": "Vanliga Tecken",
+      "noSignsData": "Ingen detaljerad teckeninformation tillgänglig för denna fas.",
+      "details": {
+        "proestrus": "Den tidiga fasen av löpcykeln. Under detta stadium börjar vulvan att svullna och det kan förekomma lätt blödning. Tiken är ännu inte redo för parning och kommer vanligtvis att avvisa hanens närmanden.",
+        "estrus": "Den fertila fasen när parning mest sannolikt resulterar i dräktighet. Flytningen blir ljusare i färg och tiken blir mottaglig för hanar. Detta är det optimala parningstillfället.",
+        "metestrus": "Den sena fasen av löpcykeln när fertiliteten minskar. Flytningen avtar och tiken blir mindre mottaglig för hanar. Denna fas övergår i diöstrus."
+      },
+      "signs": {
+        "proestrus": "Vulvasvullnad, lätt blodig flytning, ökad urinering, rastlöshet, hanar visar intresse men tiken avvisar närmanden",
+        "estrus": "Ljusare/halmfärgad flytning, mottaglig för hanar, 'flaggbeteende' (flyttar svansen åt sidan), minskad svullnad",
+        "metestrus": "Flytning minskar, mindre mottaglig för hanar, vulvasvullnad avtar, återgång till normalt beteende"
+      }
     },
     "deleteDialog": {
       "title": "Ta bort löpcykel",

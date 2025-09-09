@@ -454,7 +454,21 @@
       "proestrus": "Proestrus",
       "estrus": "Estrus",
       "metestrus": "Metestrus",
-      "anestrus": "Anestrus"
+      "anestrus": "Anestrus",
+      "days": "Days",
+      "description": "Description",
+      "commonSigns": "Common Signs",
+      "noSignsData": "No detailed signs information available for this phase.",
+      "details": {
+        "proestrus": "The early phase of the heat cycle. During this stage, the vulva begins to swell and there may be light bleeding. The female is not yet ready to mate and will typically reject male advances.",
+        "estrus": "The fertile phase when mating is most likely to result in pregnancy. The discharge becomes lighter in color and the female becomes receptive to males. This is the optimal breeding window.",
+        "metestrus": "The late phase of the heat cycle when fertility decreases. The discharge lessens and the female becomes less receptive to males. This phase transitions into diestrus."
+      },
+      "signs": {
+        "proestrus": "Vulvar swelling, light bloody discharge, increased urination, restlessness, males showing interest but female rejecting advances",
+        "estrus": "Lighter/straw-colored discharge, receptive to males, 'flagging' behavior (moving tail to side), decreased swelling",
+        "metestrus": "Discharge decreasing, less receptive to males, vulvar swelling reducing, return to normal behavior"
+      }
     },
     "deleteDialog": {
       "title": "Delete Heat Cycle",

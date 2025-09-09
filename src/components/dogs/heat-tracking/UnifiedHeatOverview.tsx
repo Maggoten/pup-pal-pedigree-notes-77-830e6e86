@@ -151,8 +151,8 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
         color: 'bg-pink-100 text-pink-800',
         description: t('heatTracking.analytics.proestrusDescription'),
         days: '1-9',
-        details: t('heatTracking.phases.proestrus.details'),
-        signs: t('heatTracking.phases.proestrus.signs')
+        details: t('heatTracking.phases.details.proestrus'),
+        signs: t('heatTracking.phases.signs.proestrus')
       };
     } else if (dayInCycle <= 16) {
       return {
@@ -160,8 +160,8 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
         color: 'bg-red-100 text-red-800',
         description: t('heatTracking.analytics.estrusDescription'),
         days: '10-16',
-        details: t('heatTracking.phases.estrus.details'),
-        signs: t('heatTracking.phases.estrus.signs')
+        details: t('heatTracking.phases.details.estrus'),
+        signs: t('heatTracking.phases.signs.estrus')
       };
     } else {
       return {
@@ -169,8 +169,8 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
         color: 'bg-orange-100 text-orange-800',
         description: t('heatTracking.analytics.metestrusDescription'),
         days: '17-21',
-        details: t('heatTracking.phases.metestrus.details'),
-        signs: t('heatTracking.phases.metestrus.signs')
+        details: t('heatTracking.phases.details.metestrus'),
+        signs: t('heatTracking.phases.signs.metestrus')
       };
     }
   };
