@@ -79,13 +79,14 @@ const SyncHeatCalendarButton: React.FC<SyncHeatCalendarButtonProps> = ({
               .single();
             
             const dogName = dog?.name || 'Unknown Dog';
-            console.log(`Syncing active heat cycle for ${dogName}...`);
+            console.log(`📅 Found active heat for ${dogName}, performing full sync...`);
             
-            const syncSuccess = await HeatCalendarSyncService.syncHeatCycleToCalendar(heat, dogName);
+            // Use performFullSync to ensure complete synchronization including all heat events
+            const syncSuccess = await HeatCalendarSyncService.performFullSync(heat.dog_id, dogName);
             
             if (syncSuccess) {
               syncedActive++;
-              console.log(`✓ Successfully synced active heat cycle for ${dogName}`);
+              console.log(`✅ Successfully synced active heat cycle for ${dogName}`);
             } else {
               errors.push(`Failed to sync active heat cycle for ${dogName}`);
             }

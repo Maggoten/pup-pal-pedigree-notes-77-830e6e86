@@ -18,6 +18,12 @@ export class HeatCalendarSyncService {
    */
   static async syncHeatCycleToCalendar(heatCycle: HeatCycle, dogName: string): Promise<boolean> {
     try {
+      console.log(`🔄 Starting sync for ${dogName} (${heatCycle.dog_id}):`, {
+        start_date: heatCycle.start_date,
+        end_date: heatCycle.end_date,
+        isActive: !heatCycle.end_date
+      });
+
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
         console.error('No authenticated user for calendar sync:', authError);
@@ -27,6 +33,7 @@ export class HeatCalendarSyncService {
       const startDate = new Date(heatCycle.start_date);
       const isActive = !heatCycle.end_date;
 
+      console.log(`🧹 Cleaning up existing events for ${dogName}...`);
       // Clean up existing heat events for this dog to avoid duplicates
       await ReminderCalendarSyncService.cleanupSpecificEventTypes(heatCycle.dog_id, [
         'heat', 'heat-active', 'ovulation-predicted', 'fertility-window'
@@ -46,21 +53,31 @@ export class HeatCalendarSyncService {
         heat_phase: isActive ? 'proestrus' : undefined
       };
 
+      console.log(`📅 Creating calendar event for ${dogName}:`, {
+        type: heatEventData.type,
+        title: heatEventData.title,
+        date: heatEventData.date,
+        status: heatEventData.status
+      });
+
       const { error: heatEventError } = await supabase
         .from('calendar_events')
         .insert(heatEventData);
 
       if (heatEventError) {
-        console.error('Error creating heat calendar event:', heatEventError);
+        console.error('❌ Error creating heat calendar event:', heatEventError);
         return false;
       }
 
+      console.log(`✅ Successfully created ${heatEventData.type} event for ${dogName}`);
+
       // If active heat cycle, create predictive events
       if (isActive) {
+        console.log(`🔮 Creating predictive events for active heat cycle...`);
         await this.createPredictiveHeatEvents(heatCycle, dogName, user.id);
       }
 
-      console.log('Successfully synced heat cycle to calendar');
+      console.log(`✅ Successfully synced heat cycle to calendar for ${dogName}`);
       return true;
     } catch (error) {
       console.error('Error in syncHeatCycleToCalendar:', error);
@@ -271,23 +288,34 @@ export class HeatCalendarSyncService {
    */
   static async performFullSync(dogId: string, dogName: string): Promise<boolean> {
     try {
+      console.log(`🚀 Starting full sync for ${dogName} (${dogId})`);
+      
       // Get all heat cycles for the dog
       const heatCycles = await HeatService.getHeatCycles(dogId);
+      console.log(`📊 Found ${heatCycles.length} heat cycles for ${dogName}:`, 
+        heatCycles.map(h => ({ 
+          start: h.start_date, 
+          end: h.end_date, 
+          active: !h.end_date 
+        }))
+      );
       
       // Clean up existing heat-related calendar events
+      console.log(`🧹 Cleaning up existing calendar events for ${dogName}...`);
       await ReminderCalendarSyncService.cleanupSpecificEventTypes(dogId, [
         'heat', 'heat-active', 'ovulation-predicted', 'fertility-window'
       ]);
 
       // Sync each heat cycle to calendar
       for (const heatCycle of heatCycles) {
+        console.log(`⏳ Syncing heat cycle ${heatCycle.id} for ${dogName}...`);
         await this.syncHeatCycleToCalendar(heatCycle, dogName);
       }
 
-      console.log(`Full sync completed for dog ${dogName} (${dogId})`);
+      console.log(`✅ Full sync completed for dog ${dogName} (${dogId})`);
       return true;
     } catch (error) {
-      console.error('Error in performFullSync:', error);
+      console.error('❌ Error in performFullSync:', error);
       return false;
     }
   }
