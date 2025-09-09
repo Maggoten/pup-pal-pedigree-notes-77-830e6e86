@@ -14,68 +14,12 @@ type HeatHistoryArray = HeatHistoryEntry[];
 
 export class HeatService {
   /**
-   * Syncs a heat cycle to dog's heatHistory
+   * Legacy: Syncs a heat cycle to dog's heatHistory (DEPRECATED - causing duplicates)
+   * This method is kept for reference but should not be used in new code.
    */
   static async syncHeatCycleToHeatHistory(dogId: string, heatCycleId: string): Promise<boolean> {
-    try {
-      // Fetch the heat cycle
-      const { data: heatCycle, error: cycleError } = await supabase
-        .from('heat_cycles')
-        .select('*')
-        .eq('id', heatCycleId)
-        .single();
-
-      if (cycleError || !heatCycle) {
-        console.error('Error fetching heat cycle:', cycleError);
-        return false;
-      }
-
-      // Fetch current dog data
-      const { data: dog, error: dogError } = await supabase
-        .from('dogs')
-        .select('heatHistory')
-        .eq('id', dogId)
-        .single();
-
-      if (dogError || !dog) {
-        console.error('Error fetching dog:', dogError);
-        return false;
-      }
-
-      const heatHistory = Array.isArray(dog.heatHistory) ? [...(dog.heatHistory as HeatHistoryArray)] : [];
-      const heatDate = new Date(heatCycle.start_date).toISOString().split('T')[0];
-
-      // Check if this heat cycle is already in history
-      const existingIndex = heatHistory.findIndex(h => 
-        new Date(h.date).toDateString() === new Date(heatCycle.start_date).toDateString()
-      );
-
-      if (existingIndex >= 0) {
-        // Update existing entry
-        heatHistory[existingIndex] = { date: heatDate };
-      } else {
-        // Add new entry
-        heatHistory.push({ date: heatDate });
-        // Sort by date (newest first)
-        heatHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      }
-
-      // Update dog's heat history
-      const { error: updateError } = await supabase
-        .from('dogs')
-        .update({ heatHistory })
-        .eq('id', dogId);
-
-      if (updateError) {
-        console.error('Error updating dog heat history:', updateError);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error in syncHeatCycleToHeatHistory:', error);
-      return false;
-    }
+    console.warn('syncHeatCycleToHeatHistory is deprecated and should not be used to prevent duplicates');
+    return false; // Always return false to prevent execution
   }
 
   /**
@@ -199,23 +143,13 @@ export class HeatService {
   }
 
   /**
-   * Migrates heat history to cycles for a dog (one-time operation)
+   * Legacy: Migrates heat history to cycles for a dog (DEPRECATED)
+   * This method has been disabled to prevent duplicate heat entries.
+   * Use manual migration through the UI instead.
    */
   static async migrateHeatHistoryToCycles(dogId: string): Promise<boolean> {
-    try {
-      // Check if migration already happened by looking for existing cycles
-      const existingCycles = await this.getHeatCycles(dogId);
-      if (existingCycles.length > 0) {
-        // Already migrated, just ensure sync
-        return await this.syncHeatHistoryToHeatCycles(dogId);
-      }
-
-      // Perform full migration
-      return await this.syncHeatHistoryToHeatCycles(dogId);
-    } catch (error) {
-      console.error('Error migrating heat history to cycles:', error);
-      return false;
-    }
+    console.warn('migrateHeatHistoryToCycles is deprecated to prevent duplicates');
+    return false; // Always return false to prevent execution
   }
 
   /**

@@ -81,11 +81,15 @@ const PreviousHeatsList: React.FC<PreviousHeatsListProps> = ({ dog, heatCycles, 
   const validLegacyHistory = heatHistory.filter(heat => {
     if (!heat?.date) return false;
     
-    // Check if this legacy date already exists in modern heat cycles
+    // More robust duplicate checking - check against both start and end dates of cycles
     const legacyDate = new Date(heat.date).toDateString();
-    const isDuplicate = completedHeatCycles.some(cycle => 
-      new Date(cycle.start_date).toDateString() === legacyDate
-    );
+    const isDuplicate = completedHeatCycles.some(cycle => {
+      const cycleStart = new Date(cycle.start_date).toDateString();
+      const cycleEnd = cycle.end_date ? new Date(cycle.end_date).toDateString() : null;
+      
+      // Consider it a duplicate if the legacy date matches either start or end date
+      return legacyDate === cycleStart || (cycleEnd && legacyDate === cycleEnd);
+    });
     
     return !isDuplicate;
   });
