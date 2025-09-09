@@ -39,10 +39,10 @@ export const UpcomingHeatsModal: React.FC<UpcomingHeatsModalProps> = ({
     switch (filterType) {
       case 'next30':
         const next30Days = addDays(today, 30);
-        return heats.filter(heat => heat.date <= next30Days);
+        return heats.filter(heat => heat.date >= today && heat.date <= next30Days);
       case 'next90':
         const next90Days = addDays(today, 90);
-        return heats.filter(heat => heat.date <= next90Days);
+        return heats.filter(heat => heat.date >= today && heat.date <= next90Days);
       default:
         return heats;
     }
