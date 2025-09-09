@@ -148,6 +148,8 @@
       "weight": "Vikt",
       "height": "Höjd",
       "weightKg": "Vikt (kg)",
+      "date": "Datum",
+      "time": "Tid",
       "notSet": "Ej angett",
       "notRecorded": "Ej registrerat",
       "birthDateNotSet": "Födelsedatum ej angett",

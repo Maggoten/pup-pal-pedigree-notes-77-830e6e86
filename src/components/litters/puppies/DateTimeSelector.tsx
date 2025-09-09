@@ -8,6 +8,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface DateTimeSelectorProps {
   selectedDate: Date;
@@ -22,10 +23,11 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
   selectedTime,
   setSelectedTime
 }) => {
+  const { t } = useTranslation('litters');
   return (
     <div className="flex items-center space-x-4">
       <div className="grid gap-1.5 flex-1">
-        <Label htmlFor="measurement-date">Date</Label>
+        <Label htmlFor="measurement-date">{t('puppies.labels.date')}</Label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -52,7 +54,7 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
       </div>
 
       <div className="grid gap-1.5">
-        <Label htmlFor="measurement-time">Time</Label>
+        <Label htmlFor="measurement-time">{t('puppies.labels.time')}</Label>
         <div className="flex items-center">
           <Input
             id="measurement-time"

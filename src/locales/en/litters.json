@@ -148,6 +148,8 @@
       "weight": "Weight",
       "height": "Height",
       "weightKg": "Weight (kg)",
+      "date": "Date",
+      "time": "Time",
       "notSet": "Not set",
       "notRecorded": "Not recorded",
       "birthDateNotSet": "Birth date not set",
