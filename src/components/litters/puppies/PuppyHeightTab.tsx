@@ -58,7 +58,7 @@ const PuppyHeightTab: React.FC<PuppyHeightTabProps> = ({
   return (
     <div className="space-y-4">
       <div className="grid gap-1.5">
-        <Label htmlFor="height">Height (cm)</Label>
+        <Label htmlFor="height">{t('puppies.labels.heightCm')}</Label>
         <div className="flex space-x-2">
           <Input
             id="height"

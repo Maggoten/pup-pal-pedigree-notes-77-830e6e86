@@ -148,6 +148,7 @@
       "weight": "Vikt",
       "height": "Höjd",
       "weightKg": "Vikt (kg)",
+      "heightCm": "Höjd (cm)",
       "date": "Datum",
       "time": "Tid",
       "notSet": "Ej angett",

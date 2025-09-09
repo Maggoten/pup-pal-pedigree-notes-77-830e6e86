@@ -148,6 +148,7 @@
       "weight": "Weight",
       "height": "Height",
       "weightKg": "Weight (kg)",
+      "heightCm": "Height (cm)",
       "date": "Date",
       "time": "Time",
       "notSet": "Not set",
