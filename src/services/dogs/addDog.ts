@@ -99,15 +99,6 @@ export async function addDog(
         await ReminderCalendarSyncService.syncVaccinationEvents(addedDog);
       }
       
-      // For female dogs with heat history, sync heat events
-      if (addedDog.gender === 'female' && addedDog.heatHistory && addedDog.heatHistory.length > 0) {
-        const { calculateUpcomingHeatsSafe } = await import('@/utils/heatCalculatorSafe');
-        const upcomingHeats = await calculateUpcomingHeatsSafe([addedDog], 'dogServices');
-        
-        for (const heat of upcomingHeats) {
-          await ReminderCalendarSyncService.syncHeatCycleEvents(heat);
-        }
-      }
     } catch (syncError) {
       console.error('Error syncing calendar events during dog creation:', syncError);
       // Don't fail the whole operation if calendar sync fails

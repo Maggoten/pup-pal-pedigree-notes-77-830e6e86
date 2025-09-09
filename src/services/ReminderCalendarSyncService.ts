@@ -259,78 +259,6 @@ export class ReminderCalendarSyncService {
     }
   }
 
-  /**
-   * Syncs heat cycle events to calendar - creates reminder and main event
-   * Now creates events for ALL upcoming heats, not just those within 30 days
-   */
-  static async syncHeatCycleEvents(heat: UpcomingHeat): Promise<boolean> {
-    try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        console.error('No authenticated user for heat cycle sync:', authError);
-        return false;
-      }
-
-      // Clean up existing heat events for this dog
-      await this.cleanupSpecificEventTypes(heat.dogId, ['heat-upcoming', 'heat-reminder']);
-
-      const heatDate = new Date(heat.date);
-      const reminderDate = new Date(heatDate);
-      reminderDate.setDate(reminderDate.getDate() - 30); // 30 days before
-
-      // Create reminder event (30 days before) - only if it's in the future
-      if (reminderDate > new Date()) {
-        const reminderEvent = {
-          title: `Heat Reminder: ${heat.dogName}`,
-          date: reminderDate.toISOString(),
-          end_date: reminderDate.toISOString(),
-          type: 'heat-reminder',
-          dog_id: heat.dogId,
-          dog_name: heat.dogName,
-          notes: `Reminder: ${heat.dogName}'s heat is expected in 30 days`,
-          status: 'predicted',
-          user_id: user.id
-        };
-
-        const { error: reminderError } = await supabase
-          .from('calendar_events')
-          .insert(reminderEvent);
-
-        if (reminderError) {
-          console.error('Error creating heat reminder event:', reminderError);
-          return false;
-        }
-      }
-
-      // Always create main heat event for all upcoming heats
-      const heatEvent = {
-        title: `Expected Heat: ${heat.dogName}`,
-        date: heatDate.toISOString(),
-        end_date: heatDate.toISOString(),
-        type: 'heat-upcoming',
-        dog_id: heat.dogId,
-        dog_name: heat.dogName,
-        notes: `Predicted heat cycle for ${heat.dogName}`,
-        status: 'predicted',
-        user_id: user.id
-      };
-
-      const { error: heatError } = await supabase
-        .from('calendar_events')
-        .insert(heatEvent);
-
-      if (heatError) {
-        console.error('Error creating heat event:', heatError);
-        return false;
-      }
-
-      console.log(`Heat cycle events synced for ${heat.dogName} (${Math.ceil((heatDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days away)`);
-      return true;
-    } catch (error) {
-      console.error('Error syncing heat cycle events:', error);
-      return false;
-    }
-  }
 
   /**
    * Bulk sync all calendar events based on dog data with cleanup
@@ -349,13 +277,6 @@ export class ReminderCalendarSyncService {
           await this.syncVaccinationEvents(dog);
         }
         
-        // Handle heat cycles for female dogs
-        if (dog.gender === 'female' && dog.heatHistory && dog.heatHistory.length > 0) {
-          const upcomingHeats = await this.getUpcomingHeats([dog]);
-          for (const heat of upcomingHeats) {
-            await this.syncHeatCycleEvents(heat);
-          }
-        }
       }
       
       // Sync due date events for active pregnancies

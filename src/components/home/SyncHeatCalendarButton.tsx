@@ -99,57 +99,22 @@ const SyncHeatCalendarButton: React.FC<SyncHeatCalendarButtonProps> = ({
         console.log('No active heat cycles found');
       }
       
-      // 2. Sync upcoming/predicted heat cycles
-      if (dogs && dogs.length > 0) {
-        try {
-          console.log('Calculating and syncing upcoming heat cycles...');
-          const upcomingHeats = await calculateUpcomingHeatsSafe(dogs, 'dogServices');
-          
-          if (upcomingHeats.length > 0) {
-            console.log(`Found ${upcomingHeats.length} upcoming heat cycles to sync`);
-            
-            for (const heat of upcomingHeats) {
-              try {
-                console.log(`Syncing upcoming heat cycle for ${heat.dogName}...`);
-                
-                const syncSuccess = await ReminderCalendarSyncService.syncHeatCycleEvents(heat);
-                
-                if (syncSuccess) {
-                  syncedUpcoming++;
-                  console.log(`✓ Successfully synced upcoming heat cycle for ${heat.dogName}`);
-                } else {
-                  errors.push(`Failed to sync upcoming heat cycle for ${heat.dogName}`);
-                }
-              } catch (syncError) {
-                errors.push(`Error syncing upcoming heat cycle: ${syncError}`);
-                console.error(`Error syncing upcoming heat cycle:`, syncError);
-              }
-            }
-          } else {
-            console.log('No upcoming heat cycles found');
-          }
-        } catch (upcomingError) {
-          console.error('Error calculating upcoming heats:', upcomingError);
-          errors.push('Failed to calculate upcoming heat cycles');
-        }
-      }
+      // 2. Note: Upcoming heat cycles are now managed through the original heat cycle system
+      // The calendar should use the existing heat cycle events created through the HeatCalendarSyncService
+      console.log('Upcoming heat cycles are managed through the existing heat cycle system in calendar');
       
-      // Show results
-      const totalSynced = syncedActive + syncedUpcoming;
+      // Show results for active heat sync only
+      const totalSynced = syncedActive;
       
       if (totalSynced > 0) {
-        const message = [];
-        if (syncedActive > 0) message.push(`${syncedActive} active heat${syncedActive > 1 ? 's' : ''}`);
-        if (syncedUpcoming > 0) message.push(`${syncedUpcoming} upcoming heat${syncedUpcoming > 1 ? 's' : ''}`);
-        
         toast({
-          title: 'Heat Cycles Synced',
-          description: `Successfully synced ${message.join(' and ')} to calendar.`,
+          title: 'Active Heat Cycles Synced',
+          description: `Successfully synced ${syncedActive} active heat cycle${syncedActive > 1 ? 's' : ''} to calendar.`,
         });
       } else if (errors.length === 0) {
         toast({
-          title: 'No Heat Cycles to Sync',
-          description: 'No active or upcoming heat cycles found to sync.',
+          title: 'No Active Heat Cycles to Sync',
+          description: 'No active heat cycles found to sync.',
         });
       }
       
