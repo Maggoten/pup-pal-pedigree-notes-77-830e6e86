@@ -32,17 +32,6 @@ export const useUpcomingHeats = () => {
       const heats = await calculateUpcomingHeatsSafe(dogs, 'upcomingHeats');
       setUpcomingHeats(heats);
       
-      // Sync calendar events in background, but don't await it
-      setTimeout(async () => {
-        try {
-          for (const heat of heats) {
-            await ReminderCalendarSyncService.syncHeatCycleEvents(heat);
-          }
-        } catch (error) {
-          console.error('Error syncing heat calendar events:', error);
-        }
-      }, 100);
-      
     } catch (error) {
       console.error('Error calculating upcoming heats:', error);
       setUpcomingHeats([]); // Fallback to empty array
