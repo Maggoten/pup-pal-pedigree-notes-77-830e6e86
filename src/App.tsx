@@ -13,7 +13,6 @@ import PregnancyDetails from "./pages/PregnancyDetails";
 import MyLitters from "./pages/MyLitters";
 import PuppyProfile from "./pages/PuppyProfile";
 import Login from "./pages/Login";
-import About from "./pages/About";
 import RegistrationSuccess from "./pages/RegistrationSuccess";
 import ResetPassword from "./pages/ResetPassword";
 import AuthGuard from "./components/AuthGuard";
@@ -137,17 +136,13 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <Routes>
-                {/* Public routes accessible without authentication */}
-                <Route path="/about" element={<About />} />
-              </Routes>
               <AuthGuard>
                 <ProtectedApp>
                   <DogsProvider>
                     <RouteChangeTracker />
                     <Routes>
-                     <Route path="/login" element={<Login />} />
-                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/registration-success" element={<RegistrationSuccess />} />
                     <Route path="/" element={<Index />} />
                     <Route path="/my-dogs" element={<MyDogs />} />
