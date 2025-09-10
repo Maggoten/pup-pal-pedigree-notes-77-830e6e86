@@ -63,7 +63,7 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
     ? litter.matingDates.map(dateStr => typeof dateStr === 'string' ? new Date(dateStr) : dateStr)
     : [];
 
-  const DogAvatar: React.FC<{ dog: any; name: string; gender: 'male' | 'female'; externalImageUrl?: string; isExternal?: boolean }> = ({ dog, name, gender, externalImageUrl, isExternal }) => {
+  const DogAvatar: React.FC<{ dog: any; name: string; gender: 'male' | 'female'; externalImageUrl?: string }> = ({ dog, name, gender, externalImageUrl }) => {
     // For external males, use the provided image URL, otherwise use dog's image
     const imageUrl = externalImageUrl || dog?.image;
     
@@ -94,11 +94,6 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
         <div className="flex-1">
           <p className="font-medium text-sm">{name}</p>
           <p className="text-xs text-muted-foreground">{gender === 'male' ? 'Sire' : 'Dam'}</p>
-          {isExternal && (
-            <Badge variant="secondary" className="w-fit mt-1 text-xs">
-              {t('labels.externalSire')}
-            </Badge>
-          )}
         </div>
       </div>
     );
@@ -129,7 +124,6 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
               name={litter.maleName || ''} 
               gender="male"
               externalImageUrl={litter.externalMale ? litter.externalMaleImageUrl : undefined}
-              isExternal={litter.externalMale}
             />
           </div>
           
