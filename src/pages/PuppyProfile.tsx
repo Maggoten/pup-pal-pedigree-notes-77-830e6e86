@@ -245,7 +245,7 @@ const PuppyProfile: React.FC = () => {
           <CardTitle className="text-2xl font-bold text-warmgreen-800">
             {selectedPuppy.name}
             {selectedPuppy.registered_name && (
-              <span className="text-xl font-normal italic text-amber-800 ml-2">
+              <span className="text-xl font-normal italic text-green-800 ml-2">
                 - {selectedPuppy.registered_name}
               </span>
             )}
