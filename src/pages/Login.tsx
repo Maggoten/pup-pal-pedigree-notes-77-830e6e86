@@ -395,7 +395,7 @@ const Login: React.FC = () => {
                 href="/about"
                 className="hover:text-warmgreen-700 underline"
               >
-                About Us
+                About
               </a>
             </div>
           </div>
