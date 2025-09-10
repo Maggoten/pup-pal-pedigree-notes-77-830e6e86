@@ -9,12 +9,12 @@
     "whatYouCanDo": {
       "title": "Vad du kan göra med Breeding Journey",
       "features": [
-        "Spåra löpcykler med förutsagda fönster och historiska översikter.",
-        "Planera och logga parningar med datum, partners, anteckningar och utfall.",
-        "Följ dräktigheter med förväntade datum, veckovisa checklistor, symptom och temperaturanteckningar.",
-        "Hantera kullar från födsel till nya hem, inklusive valprofiler, vikter, anteckningar och status.",
-        "Ställ in smarta påminnelser för vaccinationer, avmaskning, hälsokontroller och pappersarbete.",
-        "Visa en avelskalender och årlig statistik för att förstå trender och förbättra beslut."
+        "Spåra löp: prognoser, daglig temperatur och logg för progesterontester.",
+        "Planera parningar: välj parningsdag och logga datum, partner och anteckningar.",
+        "Följ dräktigheter: beräknat födelsedatum (BF), veckovisa checklistor, symptom, daglig temperatur och nedräkning.",
+        "Hantera kullar & valpar: profiler, viktloggar, anteckningar och försäljningsstatus.",
+        "Påminnelser & kalender: smarta påminnelser och en samlad avelskalender så du inte missar något.",
+        "Överblick & statistik: årsstatistik och en snabb bild av pågående avelsarbete och trender."
       ]
     },
     "howItHelps": {

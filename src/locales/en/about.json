@@ -9,12 +9,12 @@
     "whatYouCanDo": {
       "title": "What you can do with Breeding Journey",
       "features": [
-        "Track heat cycles with predicted windows and historical overviews.",
-        "Plan and log matings with dates, partners, notes, and outcomes.",
-        "Follow pregnancies with due dates, weekly checklists, symptoms, and temperature notes.",
-        "Manage litters from birth to new homes, including puppy profiles, weights, notes, and status.",
-        "Set smart reminders for vaccinations, deworming, health checks, and paperwork.",
-        "View a breeding calendar and annual statistics to understand trends and improve decisions."
+        "Track heat: forecasts, daily temperature, and progesterone test logs.",
+        "Plan matings: choose mating day and log dates, partners, and notes.",
+        "Follow pregnancies: estimated due date (EDD), weekly checklists, symptoms, daily temperature, and countdown.",
+        "Manage litters & puppies: profiles, weight logs, notes, and sales status.",
+        "Reminders & calendar: smart reminders and a unified breeding calendar so you don't miss anything.",
+        "Overview & statistics: annual statistics and a quick overview of ongoing breeding work and trends."
       ]
     },
     "howItHelps": {
