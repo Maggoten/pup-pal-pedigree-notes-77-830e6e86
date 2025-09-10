@@ -56,7 +56,7 @@ const About: React.FC = () => {
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
             {t('subtitle')}
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 hidden">
             <Badge variant="active" className="px-4 py-2 text-sm">
               <Heart className="h-4 w-4 mr-2" />
               Breeder-friendly
