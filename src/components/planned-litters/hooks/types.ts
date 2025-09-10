@@ -17,6 +17,7 @@ export interface UsePlannedLitterQueries {
 
 export interface UsePlannedLitterMutations {
   handleAddPlannedLitter: (values: PlannedLitterFormValues) => Promise<void>;
+  handleEditPlannedLitter: (litterId: string, values: PlannedLitterFormValues) => Promise<void>;
   handleAddMatingDate: (litterId: string, date: Date) => Promise<void>;
   handleEditMatingDate: (litterId: string, dateIndex: number, newDate: Date) => Promise<void>;
   handleDeleteMatingDate: (litterId: string, dateIndex: number) => Promise<void>;

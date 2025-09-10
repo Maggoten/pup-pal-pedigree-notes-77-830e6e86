@@ -28,6 +28,7 @@ interface EnhancedPlannedLitterCardProps {
   onAddMatingDate: (litterId: string, date: Date) => void;
   onEditMatingDate?: (litterId: string, dateIndex: number, newDate: Date) => void;
   onDeleteMatingDate?: (litterId: string, dateIndex: number) => void;
+  onEditLitter: (litter: PlannedLitter) => void;
   onDeleteLitter: (litterId: string) => void;
   calendarOpen: boolean;
   onCalendarOpenChange: (open: boolean) => void;
@@ -38,6 +39,7 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
   onAddMatingDate,
   onEditMatingDate,
   onDeleteMatingDate,
+  onEditLitter,
   onDeleteLitter,
   calendarOpen,
   onCalendarOpenChange
@@ -227,6 +229,24 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{t('buttons.addMatingDate')}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-9 w-9"
+                    onClick={() => onEditLitter(litter)}
+                  >
+                    <PenLine className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('buttons.editLitter')}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

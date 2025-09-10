@@ -134,6 +134,31 @@ export const usePlannedLitterMutations = (
     }
   };
 
+  const handleEditPlannedLitter = async (litterId: string, values: PlannedLitterFormValues) => {
+    // Verify authentication first
+    if (!(await verifyAuth())) return;
+    
+    try {
+      console.log("Updating litter:", litterId, "with values:", values);
+      const updatedLitter = await plannedLittersService.updatePlannedLitter(litterId, values);
+      
+      if (updatedLitter) {
+        toast({
+          title: t('toasts.success.litterUpdated'),
+          description: `${updatedLitter.maleName || values.externalMaleName || 'Male'} × ${updatedLitter.femaleName} ${t('toasts.success.litterUpdatedSuccess')}.`
+        });
+        await refreshLitters();
+      }
+    } catch (error) {
+      console.error('Error updating planned litter:', error);
+      toast({
+        title: t('toasts.error.title'),
+        description: error instanceof Error ? error.message : t('toasts.error.failedToUpdateLitter'),
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleDeleteLitter = async (litterId: string) => {
     // Verify authentication first
     if (!(await verifyAuth())) return;
@@ -165,6 +190,7 @@ export const usePlannedLitterMutations = (
 
   return {
     handleAddPlannedLitter,
+    handleEditPlannedLitter,
     handleAddMatingDate,
     handleEditMatingDate,
     handleDeleteMatingDate,

@@ -12,6 +12,7 @@ const PlannedLittersContent: React.FC = () => {
     males,
     females,
     handleAddPlannedLitter,
+    handleEditPlannedLitter,
     handleAddMatingDate,
     handleEditMatingDate,
     handleDeleteMatingDate,
@@ -33,6 +34,7 @@ const PlannedLittersContent: React.FC = () => {
         males={males}
         females={females}
         onAddPlannedLitter={handleAddPlannedLitter}
+        onEditPlannedLitter={handleEditPlannedLitter}
         onAddMatingDate={handleAddMatingDate}
         onEditMatingDate={handleEditMatingDate}
         onDeleteMatingDate={handleDeleteMatingDate}
