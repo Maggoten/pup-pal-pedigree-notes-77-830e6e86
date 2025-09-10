@@ -1,8 +1,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Puppy } from '@/types/breeding';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { litterService } from '@/services/LitterService';
+import { shouldShowErrorToast } from '@/lib/toastConfig';
 
 export const useAddPuppyMutation = (litterId: string) => {
   const queryClient = useQueryClient();
@@ -54,11 +55,14 @@ export const useAddPuppyMutation = (litterId: string) => {
         queryClient.setQueryData(['litters'], context.previousLitters);
       }
       
-      toast({
-        title: 'Error Adding Puppy',
-        description: error instanceof Error ? error.message : 'Failed to add puppy',
-        variant: 'destructive'
-      });
+      // Only show toast for critical errors
+      if (shouldShowErrorToast(error, 'add_puppy')) {
+        toast({
+          title: 'Error Adding Puppy',
+          description: error instanceof Error ? error.message : 'Failed to add puppy',
+          variant: 'destructive'
+        });
+      }
     },
     onSettled: () => {
       // Refetch to ensure data consistency

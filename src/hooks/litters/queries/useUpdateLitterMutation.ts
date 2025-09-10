@@ -1,11 +1,12 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Litter } from '@/types/breeding';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { litterService } from '@/services/LitterService';
 import { littersQueryKey } from './useAddLitterMutation';
 import { activeLittersQueryKey } from './useActiveLittersQuery';
 import { archivedLittersQueryKey } from './useArchivedLittersQuery';
+import { shouldShowErrorToast } from '@/lib/toastConfig';
 
 export const useUpdateLitterMutation = () => {
   const queryClient = useQueryClient();
@@ -59,11 +60,14 @@ export const useUpdateLitterMutation = () => {
         queryClient.setQueryData(archivedLittersQueryKey, context.previousArchivedLitters);
       }
       
-      toast({
-        title: "Error Updating Litter",
-        description: error instanceof Error ? error.message : "Failed to update litter.",
-        variant: "destructive"
-      });
+      // Only show toast for critical errors
+      if (shouldShowErrorToast(error, 'update_litter')) {
+        toast({
+          title: "Error Updating Litter",
+          description: error instanceof Error ? error.message : "Failed to update litter.",
+          variant: "destructive"
+        });
+      }
     }
   });
 };

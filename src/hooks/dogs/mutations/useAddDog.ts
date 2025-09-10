@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dog } from '@/types/dogs';
 import { useToast } from '@/hooks/use-toast';
 import { addDog } from '@/services/dogs';
+import { shouldShowErrorToast } from '@/lib/toastConfig';
 
 export function useAddDog(userId: string | undefined) {
   const { toast } = useToast();
@@ -15,18 +16,19 @@ export function useAddDog(userId: string | undefined) {
     },
     onSuccess: (newDog) => {
       queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
-      toast({
-        title: "Success",
-        description: `${newDog.name} has been added to your dogs`,
-      });
+      // Success feedback handled by form component - no toast needed
     },
     onError: (err) => {
       const errorMessage = err instanceof Error ? err.message : 'Failed to add dog';
-      toast({
-        title: "Error adding dog",
-        description: errorMessage,
-        variant: "destructive"
-      });
+      
+      // Only show toast for critical errors (auth, network, etc.)
+      if (shouldShowErrorToast(err, 'add_dog')) {
+        toast({
+          title: "Error adding dog",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      }
     }
   });
 }

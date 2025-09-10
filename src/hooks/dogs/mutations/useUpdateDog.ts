@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dog } from '@/types/dogs';
 import { useToast } from '@/hooks/use-toast';
 import { updateDog } from '@/services/dogs';
+import { shouldShowErrorToast } from '@/lib/toastConfig';
 import { isTimeoutError } from '@/utils/timeoutUtils';
 
 export function useUpdateDog(userId: string | undefined) {
@@ -42,10 +43,7 @@ export function useUpdateDog(userId: string | undefined) {
         );
       });
       
-      toast({
-        title: "Success",
-        description: "Dog information has been updated successfully.",
-      });
+      // Success feedback handled by form component - no toast needed
     },
     onError: (err) => {
       const errorMessage = err instanceof Error 
@@ -54,11 +52,14 @@ export function useUpdateDog(userId: string | undefined) {
       
       console.error('Error in updateDog mutation:', errorMessage);
       
-      toast({
-        title: "Error updating dog",
-        description: errorMessage,
-        variant: "destructive"
-      });
+      // Only show toast for critical errors
+      if (shouldShowErrorToast(err, 'update_dog')) {
+        toast({
+          title: "Error updating dog",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      }
     }
   });
 }

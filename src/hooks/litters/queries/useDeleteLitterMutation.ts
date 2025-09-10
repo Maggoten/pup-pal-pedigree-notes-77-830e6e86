@@ -1,11 +1,12 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Litter } from '@/types/breeding';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { litterService } from '@/services/LitterService';
 import { littersQueryKey } from './useAddLitterMutation';
 import { activeLittersQueryKey } from './useActiveLittersQuery';
 import { archivedLittersQueryKey } from './useArchivedLittersQuery';
+import { shouldShowErrorToast } from '@/lib/toastConfig';
 
 export const useDeleteLitterMutation = () => {
   const queryClient = useQueryClient();
@@ -38,11 +39,7 @@ export const useDeleteLitterMutation = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: littersQueryKey });
-      toast({
-        title: "Litter Deleted",
-        description: "The litter has been deleted successfully.",
-        variant: "destructive"
-      });
+      // Success feedback handled by UI animation - no toast needed
     },
     onError: (error, _, context) => {
       // Restore previous data on error
@@ -53,11 +50,14 @@ export const useDeleteLitterMutation = () => {
         queryClient.setQueryData(archivedLittersQueryKey, context.previousArchivedLitters);
       }
       
-      toast({
-        title: "Error Deleting Litter",
-        description: error instanceof Error ? error.message : "Failed to delete litter.",
-        variant: "destructive"
-      });
+      // Only show toast for critical errors  
+      if (shouldShowErrorToast(error, 'delete_litter')) {
+        toast({
+          title: "Error Deleting Litter",
+          description: error instanceof Error ? error.message : "Failed to delete litter.",
+          variant: "destructive"
+        });
+      }
     }
   });
 };

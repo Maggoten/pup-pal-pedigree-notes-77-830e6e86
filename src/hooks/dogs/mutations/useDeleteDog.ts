@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dog } from '@/types/dogs';
 import { useToast } from '@/hooks/use-toast';
 import { deleteDog } from '@/services/dogs';
+import { shouldShowErrorToast } from '@/lib/toastConfig';
 
 export function useDeleteDog(userId: string | undefined) {
   const { toast } = useToast();
@@ -33,20 +34,20 @@ export function useDeleteDog(userId: string | undefined) {
       // Invalidate and refetch to ensure UI is in sync
       queryClient.invalidateQueries({ queryKey: ['dogs', userId] });
       
-      toast({
-        title: "Dog removed",
-        description: "Dog has been removed successfully.",
-      });
+      // Success feedback handled by UI animation - no toast needed
     },
     onError: (err, dogId) => {
       console.error('Dog deletion error in mutation:', err, 'Dog ID:', dogId);
       const errorMessage = err instanceof Error ? err.message : 'Failed to remove dog';
       
-      toast({
-        title: "Error removing dog",
-        description: errorMessage,
-        variant: "destructive"
-      });
+      // Only show toast for critical errors
+      if (shouldShowErrorToast(err, 'delete_dog')) {
+        toast({
+          title: "Error removing dog",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      }
     }
   });
 }
