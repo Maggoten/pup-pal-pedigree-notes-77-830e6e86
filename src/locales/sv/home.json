@@ -27,7 +27,7 @@
     "registerLitter": "Kom ihåg att registrera din kull hos kennelklubben."
   },
   "reminders": {
-    "title": "Påminnelser",
+    "title": "Påminnelser.",
     "hasRemindersDesc": "Uppgifter och kommande händelser",
     "noRemindersDesc": "Alla uppgifter slutförda - bra jobbat!",
     "loading": "Laddar påminnelser...",
