@@ -2,47 +2,33 @@
   "title": "Om Breeding Journey",
   "subtitle": "Din omfattande avel-kompanjon",
   "sections": {
-    "whatIs": {
-      "title": "Vad är Breeding Journey?",
-      "description": "Breeding Journey är en omfattande digital plattform designad specifikt för hundens uppfödare som är passionerade om att upprätthålla detaljerade register och säkerställa bästa möjliga vård för sina avelsprogram."
+    "ourStory": {
+      "title": "Vår historia",
+      "description": "Breeding Journey skapades av uppfödare som ville ha en enda plats för att planera, spåra och lära sig från varje avel. Kalkylark, anteckningsböcker och spridda appar gjorde det alltför lätt att missa detaljer. Vi byggde ett enkelt verktyg som för samman allt och fungerar vackert på både desktop och mobil."
     },
-    "services": {
-      "title": "Våra Tjänster",
-      "breeding": {
-        "title": "Avelsledning",
-        "description": "Planera och spåra dina avelsprogram med detaljerade register över föräldradjur, genetisk information och avelstidtabeller."
-      },
-      "pregnancy": {
-        "title": "Graviditetsuppföljning",
-        "description": "Övervaka varje stadium av dräktigheten med detaljerade loggar, hälsokontroller och milstolpe-spårning."
-      },
-      "litters": {
-        "title": "Kullhantering",
-        "description": "Håll omfattande register över varje kull inklusive individuella valprofiler, hälsoregister och utvecklingsspårning."
-      },
-      "health": {
-        "title": "Hälsoregister",
-        "description": "Upprätthåll detaljerade hälsohistorier, vaccinationsregister och medicinsk dokumentation för alla dina hundar."
-      }
+    "whatYouCanDo": {
+      "title": "Vad du kan göra med Breeding Journey",
+      "features": [
+        "Spåra löpcykler med förutsagda fönster och historiska översikter.",
+        "Planera och logga parningar med datum, partners, anteckningar och utfall.",
+        "Följ dräktigheter med förväntade datum, veckovisa checklistor, symptom och temperaturanteckningar.",
+        "Hantera kullar från födsel till nya hem, inklusive valprofiler, vikter, anteckningar och status.",
+        "Ställ in smarta påminnelser för vaccinationer, avmaskning, hälsokontroller och pappersarbete.",
+        "Visa en avelskalender och årlig statistik för att förstå trender och förbättra beslut."
+      ]
     },
-    "whyChoose": {
-      "title": "Varför välja Breeding Journey?",
-      "comprehensive": {
-        "title": "Omfattande Register",
-        "description": "Allt på ett ställe - från avelsplaner till valpregister."
-      },
-      "easyToUse": {
-        "title": "Lätt att Använda",
-        "description": "Intuitiv gränssnitt designat specifikt för uppfödarens behov."
-      },
-      "secure": {
-        "title": "Säkert & Pålitligt",
-        "description": "Din data lagras säkert och är alltid tillgänglig när du behöver den."
-      },
-      "support": {
-        "title": "Dedikerad Support",
-        "description": "Expertsupport från personer som förstår avel."
-      }
+    "howItHelps": {
+      "title": "Hur det hjälper uppfödare",
+      "benefits": [
+        "Centraliserar alla register på en pålitlig plats.",
+        "Sparar tid och minskar fel jämfört med manuella loggar.",
+        "Gör det lättare att samarbeta med medägare, hjälpare eller din veterinär.",
+        "Fungerar överallt — hemma, i kenneln eller på utställning."
+      ]
+    },
+    "whoItsFor": {
+      "title": "Vem det är för",
+      "description": "Breeding Journey är byggt för alla från förstagångsuppfödare till etablerade kennlar som hanterar flera hundar och kullar. Det är också användbart för hundägare som helt enkelt vill spåra en tikas löpcykel och hälsa."
     }
   },
   "backToLogin": "Tillbaka till Inloggning",

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Heart, Shield, Users, Award } from 'lucide-react';
+import { ArrowLeft, Heart, CheckCircle, Target, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LightweightLanguageSwitcher from '@/components/LightweightLanguageSwitcher';
@@ -31,130 +31,75 @@ const About: React.FC = () => {
           </p>
         </div>
 
-        {/* What is Section */}
+        {/* Our Story Section */}
         <Card className="mb-12 border-warmbeige-200 shadow-lg">
           <CardHeader>
             <CardTitle className="text-2xl text-warmgreen-800 flex items-center gap-2">
               <Heart className="h-6 w-6 text-warmgreen-600" />
-              {t('sections.whatIs.title')}
+              {t('sections.ourStory.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-warmgreen-700 leading-relaxed text-lg">
-              {t('sections.whatIs.description')}
+              {t('sections.ourStory.description')}
             </p>
           </CardContent>
         </Card>
 
-        {/* Services Section */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-warmgreen-800 text-center mb-8 font-playfair">
-            {t('sections.services.title')}
-          </h2>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card className="border-warmbeige-200 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold text-warmgreen-800 mb-3">
-                  {t('sections.services.breeding.title')}
-                </h3>
-                <p className="text-warmgreen-700">
-                  {t('sections.services.breeding.description')}
-                </p>
-              </CardContent>
-            </Card>
+        {/* What You Can Do Section */}
+        <Card className="mb-12 border-warmbeige-200 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-warmgreen-800 flex items-center gap-2">
+              <CheckCircle className="h-6 w-6 text-warmgreen-600" />
+              {t('sections.whatYouCanDo.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-3">
+              {(t('sections.whatYouCanDo.features', { returnObjects: true }) as string[]).map((feature: string, index: number) => (
+                <li key={index} className="flex items-start gap-3 text-warmgreen-700 text-lg leading-relaxed">
+                  <CheckCircle className="h-5 w-5 text-warmgreen-600 mt-0.5 flex-shrink-0" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
 
-            <Card className="border-warmbeige-200 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold text-warmgreen-800 mb-3">
-                  {t('sections.services.pregnancy.title')}
-                </h3>
-                <p className="text-warmgreen-700">
-                  {t('sections.services.pregnancy.description')}
-                </p>
-              </CardContent>
-            </Card>
+        {/* How It Helps Section */}
+        <Card className="mb-12 border-warmbeige-200 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-warmgreen-800 flex items-center gap-2">
+              <Target className="h-6 w-6 text-warmgreen-600" />
+              {t('sections.howItHelps.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-3">
+              {(t('sections.howItHelps.benefits', { returnObjects: true }) as string[]).map((benefit: string, index: number) => (
+                <li key={index} className="flex items-start gap-3 text-warmgreen-700 text-lg leading-relaxed">
+                  <Target className="h-5 w-5 text-warmgreen-600 mt-0.5 flex-shrink-0" />
+                  <span>{benefit}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
 
-            <Card className="border-warmbeige-200 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold text-warmgreen-800 mb-3">
-                  {t('sections.services.litters.title')}
-                </h3>
-                <p className="text-warmgreen-700">
-                  {t('sections.services.litters.description')}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-warmbeige-200 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold text-warmgreen-800 mb-3">
-                  {t('sections.services.health.title')}
-                </h3>
-                <p className="text-warmgreen-700">
-                  {t('sections.services.health.description')}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Why Choose Section */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-warmgreen-800 text-center mb-8 font-playfair">
-            {t('sections.whyChoose.title')}
-          </h2>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="border-warmbeige-200 shadow-md text-center">
-              <CardContent className="p-6">
-                <Users className="h-12 w-12 text-warmgreen-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-warmgreen-800 mb-2">
-                  {t('sections.whyChoose.comprehensive.title')}
-                </h3>
-                <p className="text-warmgreen-700 text-sm">
-                  {t('sections.whyChoose.comprehensive.description')}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-warmbeige-200 shadow-md text-center">
-              <CardContent className="p-6">
-                <Heart className="h-12 w-12 text-warmgreen-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-warmgreen-800 mb-2">
-                  {t('sections.whyChoose.easyToUse.title')}
-                </h3>
-                <p className="text-warmgreen-700 text-sm">
-                  {t('sections.whyChoose.easyToUse.description')}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-warmbeige-200 shadow-md text-center">
-              <CardContent className="p-6">
-                <Shield className="h-12 w-12 text-warmgreen-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-warmgreen-800 mb-2">
-                  {t('sections.whyChoose.secure.title')}
-                </h3>
-                <p className="text-warmgreen-700 text-sm">
-                  {t('sections.whyChoose.secure.description')}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-warmbeige-200 shadow-md text-center">
-              <CardContent className="p-6">
-                <Award className="h-12 w-12 text-warmgreen-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-warmgreen-800 mb-2">
-                  {t('sections.whyChoose.support.title')}
-                </h3>
-                <p className="text-warmgreen-700 text-sm">
-                  {t('sections.whyChoose.support.description')}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        {/* Who It's For Section */}
+        <Card className="mb-12 border-warmbeige-200 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-warmgreen-800 flex items-center gap-2">
+              <Users className="h-6 w-6 text-warmgreen-600" />
+              {t('sections.whoItsFor.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-warmgreen-700 leading-relaxed text-lg">
+              {t('sections.whoItsFor.description')}
+            </p>
+          </CardContent>
+        </Card>
 
         {/* CTA Section */}
         <div className="text-center">

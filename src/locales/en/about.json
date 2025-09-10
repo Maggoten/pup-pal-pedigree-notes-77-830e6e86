@@ -2,47 +2,33 @@
   "title": "About Breeding Journey",
   "subtitle": "Your comprehensive breeding companion",
   "sections": {
-    "whatIs": {
-      "title": "What is Breeding Journey?",
-      "description": "Breeding Journey is a comprehensive digital platform designed specifically for dog breeders who are passionate about maintaining detailed records and ensuring the best care for their breeding programs."
+    "ourStory": {
+      "title": "Our Story",
+      "description": "Breeding Journey was created by breeders who wanted a single place to plan, track, and learn from every breeding. Spreadsheets, notebooks, and scattered apps made it too easy to miss details. We built a simple tool that brings everything together and works beautifully on both desktop and mobile."
     },
-    "services": {
-      "title": "Our Services",
-      "breeding": {
-        "title": "Breeding Management",
-        "description": "Plan and track your breeding programs with detailed records of parent dogs, genetic information, and breeding schedules."
-      },
-      "pregnancy": {
-        "title": "Pregnancy Tracking", 
-        "description": "Monitor every stage of pregnancy with detailed logs, health checkups, and milestone tracking."
-      },
-      "litters": {
-        "title": "Litter Management",
-        "description": "Keep comprehensive records of each litter including individual puppy profiles, health records, and development tracking."
-      },
-      "health": {
-        "title": "Health Records",
-        "description": "Maintain detailed health histories, vaccination records, and medical documentation for all your dogs."
-      }
+    "whatYouCanDo": {
+      "title": "What you can do with Breeding Journey",
+      "features": [
+        "Track heat cycles with predicted windows and historical overviews.",
+        "Plan and log matings with dates, partners, notes, and outcomes.",
+        "Follow pregnancies with due dates, weekly checklists, symptoms, and temperature notes.",
+        "Manage litters from birth to new homes, including puppy profiles, weights, notes, and status.",
+        "Set smart reminders for vaccinations, deworming, health checks, and paperwork.",
+        "View a breeding calendar and annual statistics to understand trends and improve decisions."
+      ]
     },
-    "whyChoose": {
-      "title": "Why Choose Breeding Journey?",
-      "comprehensive": {
-        "title": "Comprehensive Records",
-        "description": "Everything in one place - from breeding plans to puppy records."
-      },
-      "easyToUse": {
-        "title": "Easy to Use",
-        "description": "Intuitive interface designed specifically for breeders' needs."
-      },
-      "secure": {
-        "title": "Secure & Reliable",
-        "description": "Your data is safely stored and always accessible when you need it."
-      },
-      "support": {
-        "title": "Dedicated Support",
-        "description": "Expert support from people who understand breeding."
-      }
+    "howItHelps": {
+      "title": "How it helps breeders",
+      "benefits": [
+        "Centralises all records in one reliable place.",
+        "Saves time and reduces errors compared to manual logs.",
+        "Makes it easier to collaborate with co-owners, helpers, or your vet.",
+        "Works anywhere — at home, in the kennel, or at a show."
+      ]
+    },
+    "whoItsFor": {
+      "title": "Who it's for",
+      "description": "Breeding Journey is built for everyone from first-time breeders to established kennels managing multiple dogs and litters. It's also helpful for dog owners who simply want to track a female's heat cycle and health."
     }
   },
   "backToLogin": "Back to Login",
