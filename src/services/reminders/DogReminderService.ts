@@ -34,58 +34,8 @@ export const generateDogReminders = async (dogs: Dog[]): Promise<Reminder[]> => 
   for (const dog of dogs) {
     console.log(`Processing dog: ${dog.name}, ID: ${dog.id}, Owner ID: ${dog.owner_id}`);
     
-    // If female and not sterilized, check if heat tracking should be suggested or if cycle reminders should be created
-    if (dog.gender === 'female' && !dog.sterilization_date) {
-      // Check if dog has heat history using unified system if enabled
-      const useUnified = shouldUseUnified('dogReminders');
-      let hasHeatData = false;
-      let lastHeatDate: Date | null = null;
-
-      if (useUnified) {
-        try {
-          lastHeatDate = await HeatService.getLatestHeatDate(dog.id);
-          hasHeatData = lastHeatDate !== null;
-          logMigration(`Dog ${dog.name}: Using unified heat data, latest date: ${lastHeatDate?.toISOString() || 'none'}`);
-        } catch (error) {
-          logMigration(`Dog ${dog.name}: Failed to get unified heat data, falling back to legacy`, error);
-          hasHeatData = !!(dog.heatHistory && dog.heatHistory.length > 0);
-        }
-      } else {
-        hasHeatData = !!(dog.heatHistory && dog.heatHistory.length > 0);
-      }
-
-      if (hasHeatData) {
-        // Has heat history, create cycle reminders
-        // Get the last heat date (already retrieved above for unified, or get from legacy)
-        if (!lastHeatDate) {
-          const sortedHeatDates = [...(dog.heatHistory || [])].sort((a, b) => 
-            new Date(b.date).getTime() - new Date(a.date).getTime()
-          );
-          lastHeatDate = parseISO(sortedHeatDates[0].date);
-        }
-        // Use heat interval if available, otherwise default to 365 days (1 year)
-        const intervalDays = dog.heatInterval || 365;
-        const nextHeatDate = addDays(lastHeatDate, intervalDays);
-        
-        console.log(`Dog ${dog.name}: Last heat date: ${lastHeatDate.toISOString()}, Next heat: ${nextHeatDate.toISOString()}, Days until: ${differenceInDays(nextHeatDate, today)}`);
-        
-        // Show reminder for upcoming heat 30 days in advance
-        if (isAfter(nextHeatDate, today) && differenceInDays(nextHeatDate, today) <= 30) {
-          const days = differenceInDays(nextHeatDate, today);
-          reminders.push({
-            id: generateSystemReminderId(dog.id, 'heat', nextHeatDate),
-            title: t('events.heat.approaching', { dogName: dog.name }),
-            description: t('events.heat.expected', { days }),
-            icon: createPawPrintIcon("rose-500"),
-            dueDate: nextHeatDate,
-            priority: 'high',
-            type: 'heat', 
-            relatedId: dog.id
-          });
-          console.log(`Created heat reminder for dog ${dog.name}`);
-        }
-      }
-    }
+    // Heat cycle reminders have been removed to prevent daily bombardment
+    // Heat tracking is still available in the heat management section
     
     // Check for upcoming vaccinations - EXTENDED TO 14 DAYS
     if (dog.vaccinationDate) {
