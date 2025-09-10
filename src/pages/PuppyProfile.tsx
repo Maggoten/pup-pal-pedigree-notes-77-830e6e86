@@ -244,6 +244,11 @@ const PuppyProfile: React.FC = () => {
         <CardHeader className="bg-primary/5">
           <CardTitle className="text-2xl font-bold text-warmgreen-800">
             {selectedPuppy.name}
+            {selectedPuppy.registered_name && (
+              <span className="text-xl font-normal italic text-muted-foreground ml-2">
+                - {selectedPuppy.registered_name}
+              </span>
+            )}
           </CardTitle>
         </CardHeader>
 
