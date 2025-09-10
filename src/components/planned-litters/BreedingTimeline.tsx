@@ -1,6 +1,6 @@
 import React from 'react';
 import { format, addDays } from 'date-fns';
-import { ChevronRight } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface BreedingTimelineProps {
@@ -43,14 +43,16 @@ const BreedingTimeline: React.FC<BreedingTimelineProps> = ({
         <div className="flex items-start justify-between relative">
           {/* Expected Heat */}
           <div className="flex flex-col items-center text-center z-10">
-            <div className="w-3 h-3 rounded-full bg-primary mb-2"></div>
+            <div className="w-3 h-3 rounded-full bg-pink-500 mb-2"></div>
             <div className="text-xs text-muted-foreground mb-1">Heat</div>
             <div className="font-medium text-xs">{format(heatDate, 'MMM dd')}</div>
           </div>
           
           {/* Optimal Mating Window */}
           <div className="flex flex-col items-center text-center z-10">
-            <div className="w-3 h-3 rounded-full bg-orange-500 mb-2"></div>
+            <div className="flex items-center justify-center w-3 h-3 mb-2">
+              <Heart className="w-3 h-3 text-red-500 fill-red-500" />
+            </div>
             <div className="text-xs text-muted-foreground mb-1">Mating</div>
             <div className="font-medium text-xs">
               {format(optimalMatingStart, 'MMM dd')} - {format(optimalMatingEnd, 'dd')}
@@ -59,7 +61,7 @@ const BreedingTimeline: React.FC<BreedingTimelineProps> = ({
           
           {/* Expected Due Date */}
           <div className="flex flex-col items-center text-center z-10">
-            <div className="w-3 h-3 rounded-full bg-green-500 mb-2"></div>
+            <div className="w-3 h-3 rounded-full bg-green-700 mb-2"></div>
             <div className="text-xs text-muted-foreground mb-1">Due</div>
             <div className="font-medium text-xs">{format(expectedDueDate, 'MMM dd')}</div>
           </div>
