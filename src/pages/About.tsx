@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Heart, Shield, Users, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
+import LightweightLanguageSwitcher from '@/components/LightweightLanguageSwitcher';
 
 const About: React.FC = () => {
   const { t } = useTranslation('about');
@@ -17,7 +17,7 @@ const About: React.FC = () => {
           <ArrowLeft className="h-5 w-5" />
           <span className="font-medium">{t('backToLogin')}</span>
         </Link>
-        <LanguageSwitcher />
+        <LightweightLanguageSwitcher />
       </header>
 
       <div className="container mx-auto px-4 py-12 max-w-4xl">

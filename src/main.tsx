@@ -1,8 +1,8 @@
 
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
+import AboutApp from './components/AboutApp.tsx'
 import './index.css'
-import './i18n'
 
 // Add global error handler for debugging mobile issues
 if (process.env.NODE_ENV === 'development') {
@@ -24,8 +24,20 @@ const initializeApp = () => {
       return;
     }
     
-    createRoot(rootElement).render(<App />);
-    console.log("[App] Successfully mounted React application");
+    // Check if we're on the about page for optimized loading
+    const isAboutPage = window.location.pathname === '/about';
+    
+    if (isAboutPage) {
+      // Use lightweight AboutApp for better performance
+      createRoot(rootElement).render(<AboutApp />);
+      console.log("[AboutApp] Successfully mounted optimized About page");
+    } else {
+      // Load full i18n and App for other routes
+      import('./i18n').then(() => {
+        createRoot(rootElement).render(<App />);
+        console.log("[App] Successfully mounted React application");
+      });
+    }
   } catch (error) {
     console.error("[App] Failed to initialize React application:", error);
     

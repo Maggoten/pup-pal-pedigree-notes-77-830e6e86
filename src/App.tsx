@@ -139,7 +139,7 @@ const App = () => {
             <BrowserRouter>
               <Routes>
                 {/* Public routes - accessible to all */}
-                <Route path="/about" element={<About />} />
+                {/* About page is handled by separate optimized app */}
                 {/* All other routes are protected */}
                 <Route path="/*" element={
                   <AuthGuard>
