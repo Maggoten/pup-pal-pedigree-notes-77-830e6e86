@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { ArrowLeft, Heart, CheckCircle, Target, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,15 +7,22 @@ import LightweightLanguageSwitcher from '@/components/LightweightLanguageSwitche
 
 const About: React.FC = () => {
   const { t } = useTranslation('about');
+  
+  const navigateToLogin = () => {
+    window.location.href = '/login';
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-warmbeige-50 to-warmgreen-50">
       {/* Header with language switcher */}
       <header className="flex justify-between items-center p-4 border-b border-warmbeige-200 bg-white/80 backdrop-blur-sm">
-        <Link to="/login" className="flex items-center gap-2 text-warmgreen-700 hover:text-warmgreen-800">
+        <button 
+          onClick={navigateToLogin}
+          className="flex items-center gap-2 text-warmgreen-700 hover:text-warmgreen-800 transition-colors cursor-pointer"
+        >
           <ArrowLeft className="h-5 w-5" />
           <span className="font-medium">{t('backToLogin')}</span>
-        </Link>
+        </button>
         <LightweightLanguageSwitcher />
       </header>
 
@@ -103,10 +109,11 @@ const About: React.FC = () => {
 
         {/* CTA Section */}
         <div className="text-center">
-          <Button asChild className="bg-warmgreen-600 hover:bg-warmgreen-700 text-white px-8 py-3 text-lg">
-            <Link to="/login">
-              {t('getStarted')}
-            </Link>
+          <Button 
+            onClick={navigateToLogin}
+            className="bg-warmgreen-600 hover:bg-warmgreen-700 text-white px-8 py-3 text-lg"
+          >
+            {t('getStarted')}
           </Button>
         </div>
       </div>
