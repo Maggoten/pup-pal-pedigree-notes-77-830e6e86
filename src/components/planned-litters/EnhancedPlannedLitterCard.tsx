@@ -95,7 +95,7 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
         </div>
         <div className="flex-1">
           <p className="font-medium text-sm">{name}</p>
-          <p className="text-xs text-muted-foreground">{gender === 'male' ? 'Sire' : 'Dam'}</p>
+          <p className="text-xs text-muted-foreground">{gender === 'male' ? t('labels.sire') : t('labels.dam')}</p>
         </div>
       </div>
     );

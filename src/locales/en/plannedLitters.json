@@ -227,7 +227,9 @@
     "breedingChecklist": "Breeding Checklist",
     "viewDetails": "View Details",
     "editDate": "Edit date",
-    "deleteDate": "Delete date"
+    "deleteDate": "Delete date",
+    "editLitter": "Edit litter",
+    "deleteLitter": "Delete litter"
   },
   "placeholders": {
     "enterDogName": "Enter dog name",
@@ -236,9 +238,11 @@
   },
   "labels": {
     "expectedHeat": "Expected heat",
-    "externalSire": "External Sire",
-    "nextHeat": "Next Heat",
-    "damFemale": "Dam (Female)"
+      "externalSire": "External Sire",
+      "nextHeat": "Next Heat",
+      "damFemale": "Dam (Female)",
+      "sire": "Sire",
+      "dam": "Dam"
   },
   "upcomingHeat": {
     "heatRecordDeleted": "Heat record deleted",

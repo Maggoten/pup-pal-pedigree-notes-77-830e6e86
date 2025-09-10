@@ -227,7 +227,9 @@
     "breedingChecklist": "Avelschecklista",
     "viewDetails": "Visa Detaljer",
     "editDate": "Redigera datum",
-    "deleteDate": "Ta bort datum"
+    "deleteDate": "Ta bort datum",
+    "editLitter": "Redigera kull",
+    "deleteLitter": "Ta bort kull"
   },
   "placeholders": {
     "enterDogName": "Ange hundens namn",
@@ -236,9 +238,11 @@
   },
   "labels": {
     "expectedHeat": "Förväntat löp",
-    "externalSire": "Extern Hanhund",
-    "nextHeat": "Nästa Löp",
-    "damFemale": "Tik"
+      "externalSire": "Extern Hanhund",
+      "nextHeat": "Nästa Löp",
+      "damFemale": "Tik",
+      "sire": "Hane",
+      "dam": "Tik"
   },
   "upcomingHeat": {
     "heatRecordDeleted": "Löpdatum borttaget",
