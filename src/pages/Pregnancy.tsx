@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Heart, AlertCircle, Loader2, PawPrint } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 import { useDogs } from '@/context/DogsContext';
 import { getActivePregnancies, getCompletedPregnancies, getFirstActivePregnancy } from '@/services/PregnancyService';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
@@ -27,6 +28,7 @@ const Pregnancy: React.FC = () => {
   const { pregnancyId } = useParams();
   const { dogs } = useDogs();
   const { user } = useAuth();
+  const { scrollToTop } = useScrollToTop();
   
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
   const [completedPregnancies, setCompletedPregnancies] = useState<ActivePregnancy[]>([]);
@@ -93,6 +95,24 @@ const Pregnancy: React.FC = () => {
     
     fetchPregnancies();
   }, [dogs, user, pregnancyId, navigate, dataFetched]);
+
+  // Scroll to top when data loading is complete or when pregnancyId changes
+  useEffect(() => {
+    if (!isLoading && dataFetched && ready) {
+      setTimeout(() => {
+        scrollToTop();
+      }, 50);
+    }
+  }, [pregnancyId, isLoading, dataFetched, ready, scrollToTop]);
+
+  // Scroll to top when switching tabs
+  useEffect(() => {
+    if (!isLoading && dataFetched) {
+      setTimeout(() => {
+        scrollToTop();
+      }, 50);
+    }
+  }, [activeTab, isLoading, dataFetched, scrollToTop]);
 
   const handleAddPregnancyClick = () => {
     setAddPregnancyDialogOpen(true);

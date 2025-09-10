@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 import PageLayout from '@/components/PageLayout';
 import { Loader2, Heart, Plus, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +21,7 @@ const PregnancyDetails = () => {
   const { t, ready } = useTranslation('pregnancy');
   const { id } = useParams<{ id: string }>();
   const { pregnancy, loading } = usePregnancyDetails(id);
+  const { scrollToTop } = useScrollToTop();
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
   const [completedPregnancies, setCompletedPregnancies] = useState<ActivePregnancy[]>([]);
   const [loadingPregnancies, setLoadingPregnancies] = useState(true);
@@ -45,6 +47,15 @@ const PregnancyDetails = () => {
     
     fetchPregnancies();
   }, []);
+
+  // Scroll to top when pregnancy data is loaded or id changes
+  useEffect(() => {
+    if (!loading && !loadingPregnancies && ready && pregnancy) {
+      setTimeout(() => {
+        scrollToTop();
+      }, 50);
+    }
+  }, [id, loading, loadingPregnancies, ready, pregnancy, scrollToTop]);
 
   const handleAddPregnancyClick = () => {
     setAddPregnancyDialogOpen(true);
