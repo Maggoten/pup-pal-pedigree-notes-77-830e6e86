@@ -1,0 +1,20 @@
+{
+  "title": "Om Oss",
+  "company": "PuppyTracker", 
+  "description": "PuppyTracker är en omfattande plattform för avelsledning som hjälper hunduppfödare att spåra sina hundar, planera kullar och hantera dräktigheter med lätthet.",
+  "mission": {
+    "title": "Vårt Uppdrag",
+    "text": "Att förse hunduppfödare med de verktyg de behöver för att upprätthålla detaljerade register, säkerställa hälsosamma avelspraxis och skapa de bästa resultaten för sina hundar och valpar."
+  },
+  "features": {
+    "title": "Funktioner",
+    "dogTracking": "Hundprofil och hälsospårning",
+    "litterPlanning": "Avel- och kullplaneringsverktyg", 
+    "pregnancyMonitoring": "Dräktighetsövervakning och vård",
+    "recordKeeping": "Omfattande journalföring"
+  },
+  "contact": {
+    "title": "Kontakta Oss",
+    "email": "support@puppytracker.com"
+  }
+}

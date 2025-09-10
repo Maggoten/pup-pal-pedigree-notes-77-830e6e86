@@ -1,0 +1,20 @@
+{
+  "title": "About Us",
+  "company": "PuppyTracker",
+  "description": "PuppyTracker is a comprehensive breeding management platform designed to help dog breeders track their dogs, plan litters, and manage pregnancies with ease.",
+  "mission": {
+    "title": "Our Mission", 
+    "text": "To provide dog breeders with the tools they need to maintain detailed records, ensure healthy breeding practices, and create the best outcomes for their dogs and puppies."
+  },
+  "features": {
+    "title": "Features",
+    "dogTracking": "Dog profile and health tracking",
+    "litterPlanning": "Breeding and litter planning tools",
+    "pregnancyMonitoring": "Pregnancy monitoring and care",
+    "recordKeeping": "Comprehensive record keeping"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "email": "support@puppytracker.com"
+  }
+}

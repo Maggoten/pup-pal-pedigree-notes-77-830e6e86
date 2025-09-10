@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -379,13 +379,21 @@ const Login: React.FC = () => {
           />
           
           {/* Forgot Password Link */}
-          <div className="mt-4 text-center">
+          <div className="mt-4 text-center space-y-2">
             <button
               onClick={() => setShowForgotPassword(true)}
               className="text-sm text-warmgreen-600 hover:text-warmgreen-700 underline"
             >
               {t('forgotPassword')}
             </button>
+            <div>
+              <Link
+                to="/about"
+                className="text-sm text-warmgreen-600 hover:text-warmgreen-700 underline"
+              >
+                About Us
+              </Link>
+            </div>
           </div>
         </div>
       ) : (
