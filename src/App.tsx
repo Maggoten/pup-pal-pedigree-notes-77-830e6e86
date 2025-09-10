@@ -137,13 +137,16 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <Routes>
+                {/* Public routes accessible without authentication */}
+                <Route path="/about" element={<About />} />
+              </Routes>
               <AuthGuard>
                 <ProtectedApp>
                   <DogsProvider>
                     <RouteChangeTracker />
                     <Routes>
                      <Route path="/login" element={<Login />} />
-                     <Route path="/about" element={<About />} />
                      <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/registration-success" element={<RegistrationSuccess />} />
                     <Route path="/" element={<Index />} />
