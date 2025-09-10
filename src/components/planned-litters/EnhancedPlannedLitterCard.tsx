@@ -240,6 +240,26 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
                     variant="outline" 
                     size="icon" 
                     className="h-9 w-9"
+                    onClick={() => setShowChecklist(true)}
+                  >
+                    <ClipboardCheck className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('buttons.breedingChecklist')}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          
+          <div className="flex gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-9 w-9"
                     onClick={() => onEditLitter(litter)}
                   >
                     <PenLine className="h-4 w-4" />
@@ -255,38 +275,20 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button 
-                    variant="outline" 
+                    variant="ghost" 
                     size="icon" 
-                    className="h-9 w-9"
-                    onClick={() => setShowChecklist(true)}
+                    className="h-9 w-9 text-destructive"
+                    onClick={() => onDeleteLitter(litter.id)}
                   >
-                    <ClipboardCheck className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{t('buttons.breedingChecklist')}</p>
+                  <p>{t('buttons.deleteLitter')}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
-          
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-9 w-9 text-destructive"
-                  onClick={() => onDeleteLitter(litter.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t('buttons.deleteLitter')}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
       </CardContent>
 
