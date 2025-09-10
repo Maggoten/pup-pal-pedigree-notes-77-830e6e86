@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigationType } from "react-router-dom";
+import { HelmetProvider } from 'react-helmet-async';
 import { useState, useEffect } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -26,6 +27,8 @@ import { isMobileDevice, isAppForeground } from "./utils/fetchUtils";
 import { queryClient, refreshOnVisibilityChange } from "./utils/reactQueryConfig";
 import ProtectedApp from "./components/ProtectedApp";
 import I18nProvider from "./providers/I18nProvider";
+import About from "./pages/About";
+import ComingSoon from "./pages/ComingSoon";
 
 // RouteChangeTracker to detect navigation changes and refresh data
 const RouteChangeTracker = () => {
@@ -129,50 +132,57 @@ const App = () => {
   
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <I18nProvider>
-          <AuthProvider>
-            <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AuthGuard>
-                <ProtectedApp>
-                  <DogsProvider>
-                    <RouteChangeTracker />
-                    <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
-                    <Route path="/registration-success" element={<RegistrationSuccess />} />
-                    <Route path="/" element={<Index />} />
-                    <Route path="/my-dogs" element={<MyDogs />} />
-                    <Route path="/my-dogs/:dogId" element={<MyDogs />} />
-                    <Route path="/my-dogs/:dogId/:tab" element={<MyDogs />} />
-                    <Route path="/planned-litters" element={<PlannedLitters />} />
-                    {/* Handle pregnancy routes with loading state */}
-                    <Route path="/pregnancy" element={loading ? <div>Loading...</div> : 
-                      firstPregnancyId ? 
-                        <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
-                        <Pregnancy />
-                    } />
-                    <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
-                    <Route path="/my-litters" element={<MyLitters />} />
-                    <Route path="/my-litters/:litterId/puppy/:puppyId" element={<PuppyProfile />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                    {/* Debug panel - moved back inside DogsProvider with conditional rendering */}
-                    <ErrorBoundary fallback={<div />}>
-                      <MobileDebugPanel />
-                    </ErrorBoundary>
-                  </DogsProvider>
-              </ProtectedApp>
-            </AuthGuard>
-            </BrowserRouter>
-            </TooltipProvider>
-          </AuthProvider>
-        </I18nProvider>
-      </QueryClientProvider>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <I18nProvider>
+            <AuthProvider>
+              <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <AuthGuard>
+                  <ProtectedApp>
+                    <DogsProvider>
+                      <RouteChangeTracker />
+                      <Routes>
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/reset-password" element={<ResetPassword />} />
+                      <Route path="/registration-success" element={<RegistrationSuccess />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/faq" element={<ComingSoon title="FAQ" description="Frequently asked questions coming soon." />} />
+                      <Route path="/privacy" element={<ComingSoon title="Privacy Policy" description="Our privacy policy information coming soon." />} />
+                      <Route path="/terms" element={<ComingSoon title="Terms of Service" description="Terms of service information coming soon." />} />
+                      <Route path="/contact" element={<ComingSoon title="Contact Us" description="Contact information coming soon." />} />
+                      <Route path="/" element={<Index />} />
+                      <Route path="/my-dogs" element={<MyDogs />} />
+                      <Route path="/my-dogs/:dogId" element={<MyDogs />} />
+                      <Route path="/my-dogs/:dogId/:tab" element={<MyDogs />} />
+                      <Route path="/planned-litters" element={<PlannedLitters />} />
+                      {/* Handle pregnancy routes with loading state */}
+                      <Route path="/pregnancy" element={loading ? <div>Loading...</div> : 
+                        firstPregnancyId ? 
+                          <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
+                          <Pregnancy />
+                      } />
+                      <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
+                      <Route path="/my-litters" element={<MyLitters />} />
+                      <Route path="/my-litters/:litterId/puppy/:puppyId" element={<PuppyProfile />} />
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                      {/* Debug panel - moved back inside DogsProvider with conditional rendering */}
+                      <ErrorBoundary fallback={<div />}>
+                        <MobileDebugPanel />
+                      </ErrorBoundary>
+                    </DogsProvider>
+                </ProtectedApp>
+              </AuthGuard>
+              </BrowserRouter>
+              </TooltipProvider>
+            </AuthProvider>
+          </I18nProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
     </ErrorBoundary>
   );
 };

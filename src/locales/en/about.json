@@ -1,0 +1,43 @@
+{
+  "seo": { 
+    "title": "About Breeding Journey", 
+    "description": "Breeding Journey helps dog breeders manage heats, matings, pregnancies, litters, and reminders in one secure, user-friendly platform." 
+  },
+  "title": "About Breeding Journey",
+  "tagline": "Created by breeders, for breeders.",
+  "short": {
+    "heading": "What we do",
+    "p1": "Breeding Journey is a digital platform to manage every step of the breeding process — from heat tracking and matings to pregnancies and litters.",
+    "p2": "We value simplicity, reliability, and data privacy. You always own your data.",
+    "p3": "From hobby breeders to larger kennels, we help you stay organized and focused on your dogs."
+  },
+  "extended": {
+    "heading": "Learn more",
+    "story": { 
+      "h": "Our Story", 
+      "p1": "We built Breeding Journey to bring heat tracking, matings, pregnancies, litters, tasks, and reminders into one modern, mobile-friendly place." 
+    },
+    "mission": {
+      "h": "Our Mission",
+      "li1": "Track heat cycles with ease",
+      "li2": "Plan and log matings",
+      "li3": "Follow pregnancies with due dates and health notes",
+      "li4": "Manage litters and puppy records from birth to new homes",
+      "li5": "Set reminders for vaccinations, deworming, and health checks"
+    },
+    "values": {
+      "h": "Our Values",
+      "v1": "User-friendly design for all experience levels",
+      "v2": "Accurate, trustworthy records — always available",
+      "v3": "Strong data privacy — you own your data"
+    },
+    "for": { 
+      "h": "Who is it for?", 
+      "p1": "From first-time dog owners to established kennels with multiple dogs and litters." 
+    },
+    "future": { 
+      "h": "Looking ahead", 
+      "p1": "We continuously develop new features based on real breeder workflows and user feedback." 
+    }
+  }
+}

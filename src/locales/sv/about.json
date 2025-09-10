@@ -1,0 +1,43 @@
+{
+  "seo": { 
+    "title": "Om Breeding Journey", 
+    "description": "Breeding Journey hjälper uppfödare att hantera löp, parningar, dräktigheter, kullar och påminnelser i en säker och användarvänlig plattform." 
+  },
+  "title": "Om Breeding Journey",
+  "tagline": "Skapad av uppfödare, för uppfödare.",
+  "short": {
+    "heading": "Vad vi gör",
+    "p1": "Breeding Journey är en digital plattform för att hantera varje steg i avelsprocessen – från löp och parningar till dräktigheter och kullar.",
+    "p2": "Vi värdesätter enkelhet, tillförlitlighet och dataskydd. Du äger alltid din data.",
+    "p3": "Från hobbyuppfödare till större kennlar – vi hjälper dig hålla ordning och fokusera på hundarna."
+  },
+  "extended": {
+    "heading": "Läs mer",
+    "story": { 
+      "h": "Vår berättelse", 
+      "p1": "Vi byggde Breeding Journey för att samla löp, parningar, dräktigheter, kullar, uppgifter och påminnelser på ett modernt och mobilanpassat ställe." 
+    },
+    "mission": {
+      "h": "Vårt uppdrag",
+      "li1": "Följ löpcykler enkelt",
+      "li2": "Planera och logga parningar",
+      "li3": "Följ dräktigheter med BF-datum och hälsonoteringar",
+      "li4": "Hantera kullar och valpuppgifter från födsel till nya hem",
+      "li5": "Sätt påminnelser för vaccinationer, avmaskning och hälsokontroller"
+    },
+    "values": {
+      "h": "Våra värderingar",
+      "v1": "Användarvänlig design för alla nivåer",
+      "v2": "Korrekt och pålitlig data – alltid tillgänglig",
+      "v3": "Starkt dataskydd – du äger din data"
+    },
+    "for": { 
+      "h": "För vem?", 
+      "p1": "Från första tikägaren till etablerade kennlar med flera hundar och kullar." 
+    },
+    "future": { 
+      "h": "Framåt", 
+      "p1": "Vi utvecklar kontinuerligt funktioner baserat på verkliga uppfödarflöden och användarfeedback." 
+    }
+  }
+}
