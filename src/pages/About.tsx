@@ -64,7 +64,7 @@ const About: React.FC = () => {
             <ul className="space-y-3">
               {(t('sections.whatYouCanDo.features', { returnObjects: true }) as string[]).map((feature: string, index: number) => (
                 <li key={index} className="flex items-start gap-3 text-warmgreen-700 text-lg leading-relaxed">
-                  <CheckCircle className="h-5 w-5 text-warmgreen-600 mt-0.5 flex-shrink-0" />
+                  <Heart className="h-5 w-5 text-warmgreen-600 mt-0.5 flex-shrink-0" />
                   <span>{feature}</span>
                 </li>
               ))}
