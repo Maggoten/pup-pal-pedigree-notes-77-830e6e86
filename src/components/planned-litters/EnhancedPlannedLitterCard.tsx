@@ -106,7 +106,7 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
       <CardHeader className="pb-4">        
         <div className="space-y-4">
           {/* Parent Dogs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <DogAvatar 
               dog={femaleDog} 
               name={litter.femaleName} 
