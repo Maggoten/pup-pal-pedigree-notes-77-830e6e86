@@ -11,6 +11,7 @@ import {
   Plus,
   Image as ImageIcon 
 } from 'lucide-react';
+import BreedingTimeline from './BreedingTimeline';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
@@ -62,7 +63,7 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
     ? litter.matingDates.map(dateStr => typeof dateStr === 'string' ? new Date(dateStr) : dateStr)
     : [];
 
-  const DogAvatar: React.FC<{ dog: any; name: string; gender: 'male' | 'female'; externalImageUrl?: string }> = ({ dog, name, gender, externalImageUrl }) => {
+  const DogAvatar: React.FC<{ dog: any; name: string; gender: 'male' | 'female'; externalImageUrl?: string; isExternal?: boolean }> = ({ dog, name, gender, externalImageUrl, isExternal }) => {
     // For external males, use the provided image URL, otherwise use dog's image
     const imageUrl = externalImageUrl || dog?.image;
     
@@ -90,9 +91,14 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
             {gender === 'male' ? '♂' : '♀'}
           </Badge>
         </div>
-        <div>
+        <div className="flex-1">
           <p className="font-medium text-sm">{name}</p>
           <p className="text-xs text-muted-foreground">{gender === 'male' ? 'Sire' : 'Dam'}</p>
+          {isExternal && (
+            <Badge variant="secondary" className="w-fit mt-1 text-xs">
+              {t('labels.externalSire')}
+            </Badge>
+          )}
         </div>
       </div>
     );
@@ -112,7 +118,7 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
         
         <div className="space-y-4">
           {/* Parent Dogs */}
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <DogAvatar 
               dog={femaleDog} 
               name={litter.femaleName} 
@@ -123,21 +129,15 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
               name={litter.maleName || ''} 
               gender="male"
               externalImageUrl={litter.externalMale ? litter.externalMaleImageUrl : undefined}
+              isExternal={litter.externalMale}
             />
           </div>
           
-          {/* Expected Heat Date */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <span>{t('labels.expectedHeat')}: {new Date(litter.expectedHeatDate).toLocaleDateString()}</span>
-          </div>
-          
-          {/* External Male Badge */}
-          {litter.externalMale && (
-            <Badge variant="secondary" className="w-fit">
-              {t('labels.externalSire')}
-            </Badge>
-          )}
+          {/* Breeding Timeline */}
+          <BreedingTimeline 
+            expectedHeatDate={litter.expectedHeatDate}
+            matingDates={litter.matingDates}
+          />
         </div>
       </CardHeader>
       
