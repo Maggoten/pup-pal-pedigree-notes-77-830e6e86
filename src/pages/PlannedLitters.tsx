@@ -11,7 +11,7 @@ const PlannedLitters: React.FC = () => {
     <PageLayout 
       title={t('pages.plannedLitters.title')} 
       description={t('pages.plannedLitters.description')}
-      className="overflow-y-auto"
+      className="bg-warmbeige-50 overflow-y-auto"
     >
       <PlannedLittersContent />
     </PageLayout>
