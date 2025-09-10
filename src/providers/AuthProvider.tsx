@@ -62,9 +62,9 @@ export const useAuth = (): AuthContextType => {
   return context;
 };
 
-export const AuthProvider = ({ 
+export const AuthProvider: React.FC<AuthProviderProps> = ({ 
   children 
-}: AuthProviderProps) => {
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);

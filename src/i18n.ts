@@ -22,8 +22,6 @@ import enSettings from './locales/en/settings.json';
 import svSettings from './locales/sv/settings.json';
 import enNavigation from './locales/en/navigation.json';
 import svNavigation from './locales/sv/navigation.json';
-import enAbout from './locales/en/about.json';
-import svAbout from './locales/sv/about.json';
 
 const resources = {
   en: {
@@ -35,8 +33,7 @@ const resources = {
     plannedLitters: enPlannedLitters,
     pregnancy: enPregnancy,
     settings: enSettings,
-    navigation: enNavigation,
-    about: enAbout
+    navigation: enNavigation
   },
   sv: {
     auth: svAuth,
@@ -47,8 +44,7 @@ const resources = {
     plannedLitters: svPlannedLitters,
     pregnancy: svPregnancy,
     settings: svSettings,
-    navigation: svNavigation,
-    about: svAbout
+    navigation: svNavigation
   }
 };
 
@@ -60,7 +56,7 @@ i18n
     fallbackLng: 'en',
     debug: process.env.NODE_ENV === 'development',
     
-    ns: ['common', 'auth', 'home', 'dogs', 'litters', 'plannedLitters', 'pregnancy', 'settings', 'navigation', 'about'],
+    ns: ['common', 'auth', 'home', 'dogs', 'litters', 'plannedLitters', 'pregnancy', 'settings', 'navigation'],
     defaultNS: 'common',
     
     detection: {

@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
 import { useUserStats } from '@/hooks/useUserStats';
 import { usePartnerOffers } from '@/hooks/usePartnerOffers';
 import { UserStatsCard } from './UserStatsCard';
@@ -11,11 +12,14 @@ export const HomeOfferCarousel: React.FC = () => {
   const { stats, isLoading: statsLoading } = useUserStats();
   const { offers, isLoading: offersLoading } = usePartnerOffers();
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: true,
-    align: 'center',
-    skipSnaps: false
-  });
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { 
+      loop: true,
+      align: 'center',
+      skipSnaps: false
+    },
+    [Autoplay({ delay: 8000, stopOnInteraction: true })]
+  );
 
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const [scrollSnaps, setScrollSnaps] = React.useState<number[]>([]);

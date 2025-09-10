@@ -13,7 +13,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertTriangle, ArrowRight, ArrowLeft, Mail } from 'lucide-react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import AuthFooterLinks from '@/components/AuthFooterLinks';
 import { useTranslation } from 'react-i18next';
 
 const Login: React.FC = () => {
@@ -388,9 +387,6 @@ const Login: React.FC = () => {
               {t('forgotPassword')}
             </button>
           </div>
-
-          {/* Footer Links */}
-          <AuthFooterLinks />
         </div>
       ) : (
         <Card className="w-full max-w-md shadow-lg bg-white border-warmbeige-200">

@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigationType } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MyDogs from "./pages/MyDogs";
@@ -26,8 +26,6 @@ import { isMobileDevice, isAppForeground } from "./utils/fetchUtils";
 import { queryClient, refreshOnVisibilityChange } from "./utils/reactQueryConfig";
 import ProtectedApp from "./components/ProtectedApp";
 import I18nProvider from "./providers/I18nProvider";
-import About from "./pages/About";
-import ComingSoon from "./pages/ComingSoon";
 
 // RouteChangeTracker to detect navigation changes and refresh data
 const RouteChangeTracker = () => {
@@ -146,11 +144,6 @@ const App = () => {
                     <Route path="/login" element={<Login />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/registration-success" element={<RegistrationSuccess />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/faq" element={<ComingSoon title="FAQ" description="Frequently asked questions coming soon." />} />
-                    <Route path="/privacy" element={<ComingSoon title="Privacy Policy" description="Our privacy policy information coming soon." />} />
-                    <Route path="/terms" element={<ComingSoon title="Terms of Service" description="Terms of service information coming soon." />} />
-                    <Route path="/contact" element={<ComingSoon title="Contact Us" description="Contact information coming soon." />} />
                     <Route path="/" element={<Index />} />
                     <Route path="/my-dogs" element={<MyDogs />} />
                     <Route path="/my-dogs/:dogId" element={<MyDogs />} />
