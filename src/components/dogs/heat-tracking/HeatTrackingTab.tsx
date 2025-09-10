@@ -16,7 +16,7 @@ import OptimalMatingWindow from './OptimalMatingWindow';
 import TemperatureTrendChart from './TemperatureTrendChart';
 import PreviousHeatsList from './PreviousHeatsList';
 import UnifiedHeatOverview from './UnifiedHeatOverview';
-import { useUnifiedHeatData } from '@/hooks/useUnifiedHeatData';
+import { useUnifiedHeatDataQuery } from '@/hooks/heat/useUnifiedHeatDataQuery';
 import type { Database } from '@/integrations/supabase/types';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
@@ -29,11 +29,10 @@ interface HeatTrackingTabProps {
 const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
   const { t } = useTranslation('dogs');
   const { 
-    heatCycles, 
-    heatHistory, 
+    data: { heatCycles, heatHistory }, 
     isLoading, 
     refresh 
-  } = useUnifiedHeatData(dog.id);
+  } = useUnifiedHeatDataQuery(dog.id);
   const [allTemperatureLogs, setAllTemperatureLogs] = useState<HeatLog[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
@@ -72,11 +71,12 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
   return (
     <div className="space-y-6">
       {/* Unified Heat Overview */}
-      <UnifiedHeatOverview 
-        dog={dog}
-        heatCycles={heatCycles}
-        heatHistory={heatHistory}
-      />
+        <UnifiedHeatOverview 
+          dog={dog} 
+          heatCycles={heatCycles} 
+          heatHistory={heatHistory}
+          isLoading={isLoading}
+        />
 
       {/* New Heat Button - Always Available */}
       <div className="flex justify-between items-center">

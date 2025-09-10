@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import type { Database } from '@/integrations/supabase/types';
 import { Dog } from '@/types/dogs';
 import { calculateOptimalHeatInterval } from '@/utils/heatIntervalCalculator';
+import UnifiedHeatOverviewSkeleton from './UnifiedHeatOverviewSkeleton';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 
@@ -17,6 +18,7 @@ interface UnifiedHeatOverviewProps {
   heatCycles: HeatCycle[];
   heatHistory?: { date: string }[];
   className?: string;
+  isLoading?: boolean;
 }
 
 interface SummaryStats {
@@ -38,7 +40,8 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
   dog, 
   heatCycles, 
   heatHistory = [],
-  className = "" 
+  className = "",
+  isLoading = false
 }) => {
   const { t } = useTranslation('dogs');
   
@@ -196,6 +199,11 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
     setSelectedPhase(phaseInfo);
     setShowPhaseInfo(true);
   };
+
+  // Show skeleton during loading
+  if (isLoading) {
+    return <UnifiedHeatOverviewSkeleton dogName={dog.name} className={className} />;
+  }
 
   const stats = calculateSummary();
   const activeCycle = heatCycles.find(cycle => !cycle.end_date);
