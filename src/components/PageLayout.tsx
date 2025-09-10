@@ -20,9 +20,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({
 }) => {
   // Add useEffect to force scrollability on mount
   useEffect(() => {
-    // Reset scroll position to top
-    window.scrollTo(0, 0);
-    
     // Force scrollability on HTML and body elements
     document.documentElement.style.overflowY = 'auto';
     document.body.style.overflowY = 'auto';

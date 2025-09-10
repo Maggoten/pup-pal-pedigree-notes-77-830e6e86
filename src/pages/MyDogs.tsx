@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlusCircle, Filter, AlertCircle, Loader2 } from 'lucide-react';
@@ -29,6 +30,7 @@ const MyDogsContent: React.FC = () => {
   const [showError, setShowError] = useState(false);
   const { t } = useTranslation('dogs');
   const { dogId, tab } = useParams<{ dogId?: string; tab?: string }>();
+  const { scrollToTop } = useScrollToTop();
   
   // Handle direct navigation to specific dog
   useEffect(() => {
@@ -42,6 +44,16 @@ const MyDogsContent: React.FC = () => {
       setActiveDog(null);
     }
   }, [dogId, dogs, setActiveDog]);
+
+  // Scroll to top when activeDog changes or when loading completes
+  useEffect(() => {
+    if (!loading && pageReady) {
+      // Use setTimeout to ensure DOM is fully rendered
+      setTimeout(() => {
+        scrollToTop();
+      }, 50);
+    }
+  }, [activeDog, loading, pageReady, scrollToTop]);
   
   // Wait for auth to be ready before considering the page ready
   useEffect(() => {
