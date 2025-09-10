@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { PlannedLitter } from '@/types/breeding';
-import PlannedLitterCard from '@/components/planned-litters/PlannedLitterCard';
+import EnhancedPlannedLitterCard from '@/components/planned-litters/EnhancedPlannedLitterCard';
 import AddPlannedLitterDialog from '@/components/planned-litters/AddPlannedLitterDialog';
 import EmptyPlannedLitters from '@/components/planned-litters/EmptyPlannedLitters';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
@@ -38,7 +38,16 @@ const PlannedLittersList: React.FC<PlannedLittersListProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-playfair font-semibold text-primary">
+            Planned Litters
+          </h2>
+          <p className="text-muted-foreground">
+            Manage your upcoming breeding plans and track progress
+          </p>
+        </div>
+        
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2 whitespace-nowrap">
@@ -60,7 +69,7 @@ const PlannedLittersList: React.FC<PlannedLittersListProps> = ({
       {plannedLitters.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {plannedLitters.map(litter => (
-            <PlannedLitterCard 
+            <EnhancedPlannedLitterCard 
               key={litter.id}
               litter={litter}
               onAddMatingDate={onAddMatingDate}
