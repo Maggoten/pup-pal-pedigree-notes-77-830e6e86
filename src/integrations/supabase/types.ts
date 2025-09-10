@@ -434,6 +434,7 @@ export type Database = {
           expected_heat_date: string
           external_male: boolean | null
           external_male_breed: string | null
+          external_male_image_url: string | null
           external_male_name: string | null
           external_male_registration: string | null
           female_id: string
@@ -450,6 +451,7 @@ export type Database = {
           expected_heat_date: string
           external_male?: boolean | null
           external_male_breed?: string | null
+          external_male_image_url?: string | null
           external_male_name?: string | null
           external_male_registration?: string | null
           female_id: string
@@ -466,6 +468,7 @@ export type Database = {
           expected_heat_date?: string
           external_male?: boolean | null
           external_male_breed?: string | null
+          external_male_image_url?: string | null
           external_male_name?: string | null
           external_male_registration?: string | null
           female_id?: string

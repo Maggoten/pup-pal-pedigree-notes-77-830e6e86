@@ -39,6 +39,7 @@
       "externalSireDescription": "Select if the sire is not one of your dogs",
       "externalSireName": "External Sire Name",
       "externalSireBreed": "External Sire Breed",
+      "externalSirePhoto": "External Sire Photo",
       "registrationNumber": "Registration Number",
       "expectedHeatDate": "Expected Heat Date",
       "expectedHeatDateDescription": "When do you expect the next heat cycle?",

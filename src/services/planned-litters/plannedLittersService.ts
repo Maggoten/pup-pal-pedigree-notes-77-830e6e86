@@ -36,7 +36,8 @@ class PlannedLittersService {
       matingDates: litter.mating_dates?.map(date => date.mating_date) || [],
       externalMale: litter.external_male || false,
       externalMaleBreed: litter.external_male_breed || '',
-      externalMaleRegistration: litter.external_male_registration || ''
+      externalMaleRegistration: litter.external_male_registration || '',
+      externalMaleImageUrl: litter.external_male_image_url || ''
     }));
   }
 
@@ -58,6 +59,7 @@ class PlannedLittersService {
         external_male: formValues.externalMale,
         external_male_breed: formValues.externalMaleBreed,
         external_male_registration: formValues.externalMaleRegistration,
+        external_male_image_url: formValues.externalMaleImageUrl,
         user_id: sessionData.session.user.id
       })
       .select()
@@ -79,7 +81,8 @@ class PlannedLittersService {
       matingDates: [],
       externalMale: litter.external_male || false,
       externalMaleBreed: litter.external_male_breed || '',
-      externalMaleRegistration: litter.external_male_registration || ''
+      externalMaleRegistration: litter.external_male_registration || '',
+      externalMaleImageUrl: litter.external_male_image_url || ''
     };
   }
 

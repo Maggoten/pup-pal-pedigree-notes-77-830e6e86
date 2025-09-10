@@ -10,6 +10,7 @@ export interface PlannedLitter {
   externalMale?: boolean;
   externalMaleBreed?: string;
   externalMaleRegistration?: string;
+  externalMaleImageUrl?: string;
 }
 
 export interface Mating {

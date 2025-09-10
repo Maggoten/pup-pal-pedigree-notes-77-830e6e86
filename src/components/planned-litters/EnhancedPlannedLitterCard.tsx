@@ -62,36 +62,41 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
     ? litter.matingDates.map(dateStr => typeof dateStr === 'string' ? new Date(dateStr) : dateStr)
     : [];
 
-  const DogAvatar: React.FC<{ dog: any; name: string; gender: 'male' | 'female' }> = ({ dog, name, gender }) => (
-    <div className="flex items-center gap-3">
-      <div className="relative w-12 h-12">
-        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20">
-          {dog?.image ? (
-            <img 
-              src={dog.image} 
-              alt={name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-              <ImageIcon className="h-5 w-5 text-muted-foreground" />
-            </div>
-          )}
+  const DogAvatar: React.FC<{ dog: any; name: string; gender: 'male' | 'female'; externalImageUrl?: string }> = ({ dog, name, gender, externalImageUrl }) => {
+    // For external males, use the provided image URL, otherwise use dog's image
+    const imageUrl = externalImageUrl || dog?.image;
+    
+    return (
+      <div className="flex items-center gap-3">
+        <div className="relative w-12 h-12">
+          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20">
+            {imageUrl ? (
+              <img 
+                src={imageUrl} 
+                alt={name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                <ImageIcon className="h-5 w-5 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+          <Badge 
+            className={`absolute -top-1 -right-1 text-xs px-1 py-0 h-4 ${
+              gender === 'male' ? 'bg-blue-500' : 'bg-rose-400'
+            }`}
+          >
+            {gender === 'male' ? '♂' : '♀'}
+          </Badge>
         </div>
-        <Badge 
-          className={`absolute -top-1 -right-1 text-xs px-1 py-0 h-4 ${
-            gender === 'male' ? 'bg-blue-500' : 'bg-rose-400'
-          }`}
-        >
-          {gender === 'male' ? '♂' : '♀'}
-        </Badge>
+        <div>
+          <p className="font-medium text-sm">{name}</p>
+          <p className="text-xs text-muted-foreground">{gender === 'male' ? 'Sire' : 'Dam'}</p>
+        </div>
       </div>
-      <div>
-        <p className="font-medium text-sm">{name}</p>
-        <p className="text-xs text-muted-foreground">{gender === 'male' ? 'Sire' : 'Dam'}</p>
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <Card className="dog-card overflow-hidden">
@@ -116,7 +121,8 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
             <DogAvatar 
               dog={maleDog} 
               name={litter.maleName || ''} 
-              gender="male" 
+              gender="male"
+              externalImageUrl={litter.externalMale ? litter.externalMaleImageUrl : undefined}
             />
           </div>
           

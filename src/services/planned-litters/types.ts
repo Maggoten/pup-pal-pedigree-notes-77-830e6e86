@@ -10,6 +10,7 @@ export const plannedLitterFormSchema = z.object({
   externalMaleName: z.string().optional().nullable(),
   externalMaleBreed: z.string().optional().nullable(),
   externalMaleRegistration: z.string().optional().nullable(),
+  externalMaleImageUrl: z.string().optional().nullable(),
   expectedHeatDate: z.date({
     required_error: "Expected heat date is required",
     invalid_type_error: "Invalid date format",
