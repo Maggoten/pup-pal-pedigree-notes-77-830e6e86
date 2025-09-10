@@ -44,10 +44,6 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
   
   // Function to deduplicate heat dates from both sources
   const deduplicateHeatDates = () => {
-    console.log('🔍 DEBUG: Deduplicating heat dates for', dog.name);
-    console.log('📊 Input data:');
-    console.log('  - heatCycles:', heatCycles);
-    console.log('  - heatHistory:', heatHistory);
     
     const normalizedDates = new Set<string>();
     
@@ -61,7 +57,7 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
     heatCycles.forEach((cycle, index) => {
       if (cycle.start_date) {
         const normalized = normalizeDate(cycle.start_date);
-        console.log(`  ✅ Adding heat cycle ${index + 1}: ${cycle.start_date} → normalized: ${normalized} (active: ${!cycle.end_date})`);
+        
         normalizedDates.add(normalized);
       }
     });
@@ -70,18 +66,13 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
     heatHistory.forEach((heat, index) => {
       if (heat.date) {
         const normalized = normalizeDate(heat.date);
-        if (normalizedDates.has(normalized)) {
-          console.log(`  ⚠️ Skipping duplicate from heatHistory ${index + 1}: ${heat.date} → normalized: ${normalized} (already exists)`);
-        } else {
-          console.log(`  ✅ Adding from heatHistory ${index + 1}: ${heat.date} → normalized: ${normalized}`);
+        if (!normalizedDates.has(normalized)) {
           normalizedDates.add(normalized);
         }
       }
     });
     
     const uniqueDates = Array.from(normalizedDates).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-    console.log('🎯 Final deduplicated dates:', uniqueDates);
-    console.log('📈 Total unique cycles:', uniqueDates.length);
     
     return uniqueDates;
   };

@@ -6,9 +6,9 @@ import { differenceInDays } from 'date-fns';
  * @returns Heat interval in days (360 if less than 2 dates, otherwise calculated average)
  */
 export const calculateOptimalHeatInterval = (heatDates: Date[]): number => {
-  // If less than 2 heat dates, use 360 days (12 months) as standard
+  // If less than 2 heat dates, use 365 days (1 year) as standard
   if (!heatDates || heatDates.length < 2) {
-    return 360;
+    return 365;
   }
 
   // Sort dates to ensure newest first
@@ -40,6 +40,6 @@ export const getHeatIntervalInfo = (heatDates: Date[]) => {
     source: isCalculated ? 'calculated' as const : 'standard' as const,
     description: isCalculated 
       ? 'Beräknat från tidigare löp' 
-      : 'Standardvärde (12 månader)'
+      : 'Standardvärde (1 år)'
   };
 };

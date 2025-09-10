@@ -30,7 +30,7 @@ export const useNextHeatDate = () => {
     // Get the most recent heat date
     const lastHeatDate = parseISO(sortedHeatDates[0].date);
     
-    // Calculate optimal interval from heat history, default to 360 days (12 months)
+    // Calculate optimal interval from heat history, default to 365 days (1 year)
     const heatDates = dog.heatHistory?.map(h => parseISO(h.date)) || [];
     const intervalDays = calculateOptimalHeatInterval(heatDates);
     
@@ -57,7 +57,7 @@ export const useNextHeatDate = () => {
       if (!latestDate) return null;
 
       const today = new Date();
-      const intervalDays = heatInterval || 360;
+      const intervalDays = heatInterval || 365;
       
       // Calculate next heat cycle
       let nextHeatDate = addDays(latestDate, intervalDays);
