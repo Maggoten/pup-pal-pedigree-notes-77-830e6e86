@@ -46,7 +46,6 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
       registrationNumber: '',
       notes: '',
       heatHistory: [],
-      heatInterval: undefined,
       image: imageUrl
     }
   });
@@ -87,7 +86,6 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
         heatHistory: data.heatHistory?.map(heat => ({ 
           date: heat.date.toISOString().split('T')[0] 
         })) || [],
-        heatInterval: data.heatInterval,
         owner_id: '', // Will be set by backend
         breedingHistory: { litters: [], breedings: [] }
       });

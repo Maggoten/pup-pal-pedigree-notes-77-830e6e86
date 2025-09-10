@@ -112,9 +112,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, activeTab }) => {
           console.log('[Dogs Debug] Set empty heat history array');
         }
 
-        // Always send heatInterval for female dogs
-        updates.heatInterval = values.heatInterval;
-        console.log('[Dogs Debug] Added heat interval to updates:', values.heatInterval);
+        // Always send heatHistory for female dogs (remove heatInterval handling)
       }
 
       console.log('[Dogs Debug] Final updates object:', updates);

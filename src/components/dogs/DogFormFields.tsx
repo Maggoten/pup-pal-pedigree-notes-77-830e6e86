@@ -26,7 +26,6 @@ export const dogFormSchema = z.object({
       date: z.instanceof(Date)
     })
   ).optional(),
-  heatInterval: z.number().positive().optional(),
 });
 
 export type DogFormValues = z.infer<typeof dogFormSchema>;

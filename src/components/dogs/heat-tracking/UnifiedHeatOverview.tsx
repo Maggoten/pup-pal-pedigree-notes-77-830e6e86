@@ -82,7 +82,7 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
     
     const averageInterval = intervals.length > 0 
       ? Math.round(intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length)
-      : dog.heatInterval || 180; // Use dog's heat interval or default 6 months
+      : dog.heatInterval || 360; // Use dog's heat interval or default 12 months
 
     // Calculate next heat date and days until
     let nextHeatDate: Date | null = null;

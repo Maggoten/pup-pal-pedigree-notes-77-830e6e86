@@ -63,8 +63,8 @@ export const generateDogReminders = async (dogs: Dog[]): Promise<Reminder[]> => 
           );
           lastHeatDate = parseISO(sortedHeatDates[0].date);
         }
-        // Use heat interval if available, otherwise default to 180 days (6 months)
-        const intervalDays = dog.heatInterval || 180;
+        // Use heat interval if available, otherwise default to 360 days (12 months)
+        const intervalDays = dog.heatInterval || 360;
         const nextHeatDate = addDays(lastHeatDate, intervalDays);
         
         console.log(`Dog ${dog.name}: Last heat date: ${lastHeatDate.toISOString()}, Next heat: ${nextHeatDate.toISOString()}, Days until: ${differenceInDays(nextHeatDate, today)}`);

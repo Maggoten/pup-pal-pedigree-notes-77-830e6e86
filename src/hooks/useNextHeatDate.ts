@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Dog } from '@/types/dogs';
 import { parseISO, addDays, isAfter } from 'date-fns';
 import { HeatService } from '@/services/HeatService';
+import { calculateOptimalHeatInterval } from '@/utils/heatIntervalCalculator';
 
 /**
  * Hook to calculate the next expected heat date for a female dog
@@ -29,8 +30,9 @@ export const useNextHeatDate = () => {
     // Get the most recent heat date
     const lastHeatDate = parseISO(sortedHeatDates[0].date);
     
-    // Use the dog's heat interval if available, otherwise default to 180 days (6 months)
-    const intervalDays = dog.heatInterval || 180;
+    // Calculate optimal interval from heat history, default to 360 days (12 months)
+    const heatDates = dog.heatHistory?.map(h => parseISO(h.date)) || [];
+    const intervalDays = calculateOptimalHeatInterval(heatDates);
     
     // Calculate next heat cycle
     let nextHeatDate = addDays(lastHeatDate, intervalDays);
@@ -55,7 +57,7 @@ export const useNextHeatDate = () => {
       if (!latestDate) return null;
 
       const today = new Date();
-      const intervalDays = heatInterval || 180;
+      const intervalDays = heatInterval || 360;
       
       // Calculate next heat cycle
       let nextHeatDate = addDays(latestDate, intervalDays);

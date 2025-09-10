@@ -56,7 +56,6 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dog, onCancel, onSave, isLoad
       notes: dog.notes || '',
       image: dog.image || '',
       heatHistory: transformHeatHistory,
-      heatInterval: dog.heatInterval,
     },
   });
   

@@ -109,8 +109,6 @@ const HeatRecordsField: React.FC<HeatRecordsFieldProps> = ({ form, disabled }) =
             )}
           </div>
         </div>
-        
-        <HeatIntervalField form={form} disabled={true} />
       </div>
     </div>
   );
