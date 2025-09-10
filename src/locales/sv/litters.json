@@ -114,7 +114,8 @@
       "statusAndOwnership": "Status & Ägarskap",
       "recentNotes": "Senaste Anteckningar",
       "recentHeightRecords": "Senaste Höjdregisteringar",
-      "recentWeightRecords": "Viktregistreringar"
+      "recentWeightRecords": "Viktregistreringar",
+      "markings": "Teckningar & Identifiering"
     },
     "labels": {
       "age": "Ålder",
@@ -154,7 +155,11 @@
       "notSet": "Ej angett",
       "notRecorded": "Ej registrerat",
       "birthDateNotSet": "Födelsedatum ej angett",
-      "informationNotAvailable": "Information inte tillgänglig"
+      "informationNotAvailable": "Information inte tillgänglig",
+      "baseColor": "Grundfärg",
+      "noMarkingsRecorded": "Inga teckningar registrerade",
+      "markingsGuide": "Teckningsguide",
+      "markingsDescription": "Beskriv eventuella karakteristiska teckningar, fläckar eller färgmönster som hjälper till att identifiera denna valp."
     },
     "placeholders": {
       "puppyName": "Valpens namn",

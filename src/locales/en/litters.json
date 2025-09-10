@@ -114,7 +114,8 @@
       "statusAndOwnership": "Status & Ownership",
       "recentNotes": "Recent Notes",
       "recentHeightRecords": "Recent Height Records",
-      "recentWeightRecords": "Recent Weight Records"
+      "recentWeightRecords": "Recent Weight Records",
+      "markings": "Markings & Identification"
     },
     "labels": {
       "age": "Age",
@@ -154,7 +155,11 @@
       "notSet": "Not set",
       "notRecorded": "Not recorded",
       "birthDateNotSet": "Birth date not set",
-      "informationNotAvailable": "Information not available"
+      "informationNotAvailable": "Information not available",
+      "baseColor": "Base Color",
+      "noMarkingsRecorded": "No markings recorded",
+      "markingsGuide": "Markings Guide",
+      "markingsDescription": "Describe any distinctive markings, spots, or color patterns that help identify this puppy."
     },
     "placeholders": {
       "puppyName": "Puppy name",

@@ -14,6 +14,7 @@ import EditPuppyDialog from '@/components/litters/puppies/EditPuppyDialog';
 import PuppyMeasurementsChart from '@/components/litters/puppies/PuppyMeasurementsChart';
 import PuppyMeasurementsDialog from '@/components/litters/puppies/PuppyMeasurementsDialog';
 import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
+import PuppyMarkingsDisplay from '@/components/litters/puppies/PuppyMarkingsDisplay';
 
 const PuppyProfile: React.FC = () => {
   const { litterId, puppyId } = useParams<{ litterId: string; puppyId: string }>();
@@ -351,11 +352,19 @@ const PuppyProfile: React.FC = () => {
             </div>
           </div>
 
-          {/* Growth Chart */}
-           <div className="mb-8">
-             <h3 className="text-lg font-semibold mb-4">{t('puppies.titles.growthCharts')}</h3>
-             <PuppyMeasurementsChart puppy={selectedPuppy} />
-           </div>
+           {/* Growth Chart */}
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold mb-4">{t('puppies.titles.growthCharts')}</h3>
+              <PuppyMeasurementsChart puppy={selectedPuppy} />
+            </div>
+
+           {/* Markings Display */}
+            <div className="mb-8">
+              <PuppyMarkingsDisplay 
+                markings={selectedPuppy.markings}
+                color={selectedPuppy.color}
+              />
+            </div>
 
           {/* Notes Section */}
           <div>
