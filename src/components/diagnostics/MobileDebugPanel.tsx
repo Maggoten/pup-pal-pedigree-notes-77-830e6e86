@@ -8,6 +8,7 @@ import { useBreedingReminders } from '@/hooks/useBreedingReminders';
 import { X, Database, User, RefreshCw, ChevronDown, ChevronUp, Bug } from 'lucide-react';
 import { triggerAllReminders } from '@/services/ReminderService';
 import { useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'react-router-dom';
 
 const isMobileDevice = () => {
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -146,6 +147,7 @@ const MobileDebugPanel: React.FC = () => {
   const { dogs, loading: dogsLoading, refreshDogs } = useSafeDogsData();
   const { reminders, isLoading: remindersLoading, refreshReminderData } = useSafeRemindersData();
   const queryClient = useQueryClient();
+  const location = useLocation();
   
   // Initialize debug info on mount
   useEffect(() => {
@@ -211,8 +213,9 @@ const MobileDebugPanel: React.FC = () => {
     }
   }, [isAuthReady, refreshDogs, refreshReminderData, user, dogs.length, queryClient]);
   
-  // Don't render if not visible or if auth is not ready (prevents context errors during login)
-  if (!state.isVisible || !isAuthReady) return null;
+  // Don't render if not visible, if auth is not ready, or on public pages where it might interfere
+  const isPublicPage = ['/login', '/about', '/reset-password', '/registration-success'].includes(location.pathname);
+  if (!state.isVisible || !isAuthReady || isPublicPage) return null;
   
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
