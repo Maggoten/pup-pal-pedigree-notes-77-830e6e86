@@ -1,0 +1,50 @@
+{
+  "title": "Om Breeding Journey",
+  "subtitle": "Din omfattande avel-kompanjon",
+  "sections": {
+    "whatIs": {
+      "title": "Vad är Breeding Journey?",
+      "description": "Breeding Journey är en omfattande digital plattform designad specifikt för hundens uppfödare som är passionerade om att upprätthålla detaljerade register och säkerställa bästa möjliga vård för sina avelsprogram."
+    },
+    "services": {
+      "title": "Våra Tjänster",
+      "breeding": {
+        "title": "Avelsledning",
+        "description": "Planera och spåra dina avelsprogram med detaljerade register över föräldradjur, genetisk information och avelstidtabeller."
+      },
+      "pregnancy": {
+        "title": "Graviditetsuppföljning",
+        "description": "Övervaka varje stadium av dräktigheten med detaljerade loggar, hälsokontroller och milstolpe-spårning."
+      },
+      "litters": {
+        "title": "Kullhantering",
+        "description": "Håll omfattande register över varje kull inklusive individuella valprofiler, hälsoregister och utvecklingsspårning."
+      },
+      "health": {
+        "title": "Hälsoregister",
+        "description": "Upprätthåll detaljerade hälsohistorier, vaccinationsregister och medicinsk dokumentation för alla dina hundar."
+      }
+    },
+    "whyChoose": {
+      "title": "Varför välja Breeding Journey?",
+      "comprehensive": {
+        "title": "Omfattande Register",
+        "description": "Allt på ett ställe - från avelsplaner till valpregister."
+      },
+      "easyToUse": {
+        "title": "Lätt att Använda",
+        "description": "Intuitiv gränssnitt designat specifikt för uppfödarens behov."
+      },
+      "secure": {
+        "title": "Säkert & Pålitligt",
+        "description": "Din data lagras säkert och är alltid tillgänglig när du behöver den."
+      },
+      "support": {
+        "title": "Dedikerad Support",
+        "description": "Expertsupport från personer som förstår avel."
+      }
+    }
+  },
+  "backToLogin": "Tillbaka till Inloggning",
+  "getStarted": "Kom Igång Idag"
+}

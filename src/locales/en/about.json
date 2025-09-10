@@ -1,0 +1,50 @@
+{
+  "title": "About Breeding Journey",
+  "subtitle": "Your comprehensive breeding companion",
+  "sections": {
+    "whatIs": {
+      "title": "What is Breeding Journey?",
+      "description": "Breeding Journey is a comprehensive digital platform designed specifically for dog breeders who are passionate about maintaining detailed records and ensuring the best care for their breeding programs."
+    },
+    "services": {
+      "title": "Our Services",
+      "breeding": {
+        "title": "Breeding Management",
+        "description": "Plan and track your breeding programs with detailed records of parent dogs, genetic information, and breeding schedules."
+      },
+      "pregnancy": {
+        "title": "Pregnancy Tracking", 
+        "description": "Monitor every stage of pregnancy with detailed logs, health checkups, and milestone tracking."
+      },
+      "litters": {
+        "title": "Litter Management",
+        "description": "Keep comprehensive records of each litter including individual puppy profiles, health records, and development tracking."
+      },
+      "health": {
+        "title": "Health Records",
+        "description": "Maintain detailed health histories, vaccination records, and medical documentation for all your dogs."
+      }
+    },
+    "whyChoose": {
+      "title": "Why Choose Breeding Journey?",
+      "comprehensive": {
+        "title": "Comprehensive Records",
+        "description": "Everything in one place - from breeding plans to puppy records."
+      },
+      "easyToUse": {
+        "title": "Easy to Use",
+        "description": "Intuitive interface designed specifically for breeders' needs."
+      },
+      "secure": {
+        "title": "Secure & Reliable",
+        "description": "Your data is safely stored and always accessible when you need it."
+      },
+      "support": {
+        "title": "Dedicated Support",
+        "description": "Expert support from people who understand breeding."
+      }
+    }
+  },
+  "backToLogin": "Back to Login",
+  "getStarted": "Get Started Today"
+}

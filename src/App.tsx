@@ -26,6 +26,7 @@ import { isMobileDevice, isAppForeground } from "./utils/fetchUtils";
 import { queryClient, refreshOnVisibilityChange } from "./utils/reactQueryConfig";
 import ProtectedApp from "./components/ProtectedApp";
 import I18nProvider from "./providers/I18nProvider";
+import About from "./pages/About";
 
 // RouteChangeTracker to detect navigation changes and refresh data
 const RouteChangeTracker = () => {
@@ -136,7 +137,12 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <AuthGuard>
+              <Routes>
+                {/* Public routes - accessible to all */}
+                <Route path="/about" element={<About />} />
+                {/* All other routes are protected */}
+                <Route path="/*" element={
+                  <AuthGuard>
                 <ProtectedApp>
                   <DogsProvider>
                     <RouteChangeTracker />
@@ -160,7 +166,7 @@ const App = () => {
                     <Route path="/my-litters/:litterId/puppy/:puppyId" element={<PuppyProfile />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
-                  </Routes>
+                    </Routes>
                     {/* Debug panel - moved back inside DogsProvider with conditional rendering */}
                     <ErrorBoundary fallback={<div />}>
                       <MobileDebugPanel />
@@ -168,6 +174,8 @@ const App = () => {
                   </DogsProvider>
               </ProtectedApp>
             </AuthGuard>
+                } />
+              </Routes>
             </BrowserRouter>
             </TooltipProvider>
           </AuthProvider>

@@ -387,6 +387,18 @@ const Login: React.FC = () => {
               {t('forgotPassword')}
             </button>
           </div>
+
+          {/* Footer Links */}
+          <div className="mt-6 pt-4 border-t border-warmbeige-200 text-center space-y-2">
+            <div className="flex justify-center gap-4 text-sm text-warmgreen-600">
+              <a
+                href="/about"
+                className="hover:text-warmgreen-700 underline"
+              >
+                About Us
+              </a>
+            </div>
+          </div>
         </div>
       ) : (
         <Card className="w-full max-w-md shadow-lg bg-white border-warmbeige-200">
