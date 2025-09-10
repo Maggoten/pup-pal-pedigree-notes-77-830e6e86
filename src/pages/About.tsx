@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Helmet } from 'react-helmet-async';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Heart, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -10,17 +9,24 @@ const About: React.FC = () => {
   const { t, i18n } = useTranslation('about');
 
   useEffect(() => {
-    // Set HTML lang attribute
+    // Set HTML lang attribute and page title
     document.documentElement.lang = i18n.language;
-  }, [i18n.language]);
+    document.title = t('seo.title');
+    
+    // Set meta description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', t('seo.description'));
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'description';
+      meta.content = t('seo.description');
+      document.getElementsByTagName('head')[0].appendChild(meta);
+    }
+  }, [i18n.language, t]);
 
   return (
     <>
-      <Helmet>
-        <title>{t('seo.title')}</title>
-        <meta name="description" content={t('seo.description')} />
-      </Helmet>
-      
       <div className="min-h-screen bg-warmbeige-50/70 relative">
         {/* Language Switcher */}
         <div className="absolute top-4 right-4 z-10">
