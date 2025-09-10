@@ -319,6 +319,12 @@ const PuppyProfile: React.FC = () => {
                        <span className="text-sm text-muted-foreground">{t('puppies.labels.currentWeight')}:</span>
                        <span className="text-sm">{getLatestWeight(selectedPuppy)}</span>
                      </div>
+                     {selectedPuppy.markings && (
+                       <div className="flex justify-between">
+                         <span className="text-sm text-muted-foreground">{t('puppies.labels.markings')}:</span>
+                         <span className="text-sm">{selectedPuppy.markings}</span>
+                       </div>
+                     )}
                    </div>
                  </div>
 
