@@ -1,4 +1,5 @@
 import React, { useReducer, useCallback, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useDogs } from '@/context/DogsContext';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -141,6 +142,7 @@ const useSafeRemindersData = () => {
 };
 
 const MobileDebugPanel: React.FC = () => {
+  const location = useLocation();
   const [state, dispatch] = useReducer(debugReducer, initialState);
   const { user, session, isAuthReady } = useAuth();
   const { dogs, loading: dogsLoading, refreshDogs } = useSafeDogsData();
@@ -211,8 +213,8 @@ const MobileDebugPanel: React.FC = () => {
     }
   }, [isAuthReady, refreshDogs, refreshReminderData, user, dogs.length, queryClient]);
   
-  // Don't render if not visible or if auth is not ready (prevents context errors during login)
-  if (!state.isVisible || !isAuthReady) return null;
+  // Don't render if not visible, if auth is not ready, or if on login/auth pages
+  if (!state.isVisible || !isAuthReady || location.pathname.includes('/login') || location.pathname.includes('/about')) return null;
   
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
