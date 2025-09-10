@@ -26,6 +26,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
   const { t } = useTranslation('litters');
   const [formData, setFormData] = useState({
     name: puppy.name || '',
+    registered_name: puppy.registered_name || '',
     gender: puppy.gender || 'male',
     color: puppy.color || '',
     markings: puppy.markings || '',
@@ -45,6 +46,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
     const updatedPuppy: Puppy = {
       ...puppy,
       name: formData.name,
+      registered_name: formData.registered_name,
       gender: formData.gender as 'male' | 'female',
       color: formData.color,
       markings: formData.markings || null,
@@ -98,6 +100,17 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
               </div>
               
               <div className="space-y-2">
+                <Label htmlFor="registered_name">{t('puppies.labels.registeredName')}</Label>
+                <Input
+                  id="registered_name"
+                  value={formData.registered_name}
+                  onChange={(e) => setFormData({ ...formData, registered_name: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label htmlFor="gender">{t('puppies.labels.gender')} *</Label>
                 <Select value={formData.gender} onValueChange={(value: 'male' | 'female') => setFormData({ ...formData, gender: value })}>
                   <SelectTrigger>
@@ -109,9 +122,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+              
               <div className="space-y-2">
                 <Label htmlFor="color">{t('puppies.labels.color')}</Label>
                 <Input
@@ -120,7 +131,9 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
                   onChange={(e) => setFormData({ ...formData, color: e.target.value })}
                 />
               </div>
-              
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="markings">{t('puppies.labels.markings')}</Label>
                 <Input
