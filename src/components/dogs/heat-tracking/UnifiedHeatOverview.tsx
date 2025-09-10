@@ -8,6 +8,7 @@ import { format, differenceInDays, parseISO, addDays } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import type { Database } from '@/integrations/supabase/types';
 import { Dog } from '@/types/dogs';
+import { calculateOptimalHeatInterval } from '@/utils/heatIntervalCalculator';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 
@@ -41,6 +42,27 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
 }) => {
   const { t } = useTranslation('dogs');
   
+  // Function to deduplicate heat dates from both sources
+  const deduplicateHeatDates = () => {
+    const allDates = new Set<string>();
+    
+    // Add heat cycle start dates
+    heatCycles.forEach(cycle => {
+      if (cycle.start_date) {
+        allDates.add(cycle.start_date);
+      }
+    });
+    
+    // Add legacy heat history dates (only if not already present)
+    heatHistory.forEach(heat => {
+      if (heat.date) {
+        allDates.add(heat.date);
+      }
+    });
+    
+    return Array.from(allDates).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+  };
+
   const calculateSummary = (): SummaryStats => {
     const completedCycles = heatCycles.filter(cycle => cycle.end_date);
     const activeCycle = heatCycles.find(cycle => !cycle.end_date);
@@ -58,31 +80,12 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
     const longestCycle = cycleLengths.length > 0 ? Math.max(...cycleLengths) : 0;
     const lastCycleLength = cycleLengths.length > 0 ? cycleLengths[cycleLengths.length - 1] : null;
     
-    // Get all heat dates (both from cycles and legacy history)
-    const allHeatDates = [
-      ...completedCycles.map(cycle => cycle.start_date),
-      ...heatHistory.map(heat => heat.date)
-    ].filter(date => date).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    // Get deduplicated heat dates
+    const allHeatDates = deduplicateHeatDates();
     
-    // Add ongoing cycle start date if exists
-    if (activeCycle) {
-      allHeatDates.push(activeCycle.start_date);
-      allHeatDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-    }
-    
-    // Calculate intervals between consecutive heat dates
-    const intervals = [];
-    for (let i = 1; i < allHeatDates.length; i++) {
-      const interval = differenceInDays(
-        parseISO(allHeatDates[i]),
-        parseISO(allHeatDates[i - 1])
-      );
-      intervals.push(interval);
-    }
-    
-    const averageInterval = intervals.length > 0 
-      ? Math.round(intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length)
-      : dog.heatInterval || 360; // Use dog's heat interval or default 12 months
+    // Use the intelligent heat interval calculator
+    const heatDatesAsDate = allHeatDates.map(date => parseISO(date));
+    const averageInterval = calculateOptimalHeatInterval(heatDatesAsDate);
 
     // Calculate next heat date and days until
     let nextHeatDate: Date | null = null;
@@ -131,7 +134,7 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
       nextHeatDate,
       daysUntilNextHeat,
       lastHeatDate,
-      totalCycles: heatCycles.length + heatHistory.length,
+      totalCycles: allHeatDates.length,
       shortestCycle,
       longestCycle,
       lastCycleLength,
