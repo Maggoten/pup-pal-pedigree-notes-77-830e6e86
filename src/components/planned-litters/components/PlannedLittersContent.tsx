@@ -2,7 +2,6 @@
 import React from 'react';
 import PlannedLittersList from '@/components/planned-litters/PlannedLittersList';
 import EnhancedMatingSection from '@/components/planned-litters/mating/EnhancedMatingSection';
-import PlannedLittersHero from './PlannedLittersHero';
 import { usePlannedLitters } from '../hooks/usePlannedLitters';
 
 const PlannedLittersContent: React.FC = () => {
@@ -28,9 +27,6 @@ const PlannedLittersContent: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      {/* Hero Section */}
-      <PlannedLittersHero />
-      
       {/* Planned Litters Section */}
       <PlannedLittersList 
         plannedLitters={plannedLitters}
