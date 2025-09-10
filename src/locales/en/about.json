@@ -29,6 +29,14 @@
     "whoItsFor": {
       "title": "Who it's for",
       "description": "Breeding Journey is built for everyone from first-time breeders to established kennels managing multiple dogs and litters. It's also helpful for dog owners who simply want to track a female's heat cycle and health."
+    },
+    "dataSecurity": {
+      "title": "Data & Security",
+      "description": "Breeding Journey is built on modern, secure infrastructure with best-practice authentication and role-based access. We focus on privacy by design and give you control over your information, including the ability to update or remove your data."
+    },
+    "lookingAhead": {
+      "title": "Looking ahead",
+      "description": "We're expanding language support, refining reminders and the breeding calendar, and adding more insights and helpful automations. Your feedback guides our roadmap — tell us what would make your breeding journey smoother."
     }
   },
   "backToLogin": "Back to Login",

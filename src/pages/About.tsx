@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Heart, CheckCircle, Target, Users } from 'lucide-react';
+import { ArrowLeft, Heart, CheckCircle, Target, Users, Shield, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LightweightLanguageSwitcher from '@/components/LightweightLanguageSwitcher';
@@ -103,6 +103,36 @@ const About: React.FC = () => {
           <CardContent>
             <p className="text-warmgreen-700 leading-relaxed text-lg">
               {t('sections.whoItsFor.description')}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Data & Security Section */}
+        <Card className="mb-12 border-warmbeige-200 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-warmgreen-800 flex items-center gap-2">
+              <Shield className="h-6 w-6 text-warmgreen-600" />
+              {t('sections.dataSecurity.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-warmgreen-700 leading-relaxed text-lg">
+              {t('sections.dataSecurity.description')}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Looking Ahead Section */}
+        <Card className="mb-12 border-warmbeige-200 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-warmgreen-800 flex items-center gap-2">
+              <Rocket className="h-6 w-6 text-warmgreen-600" />
+              {t('sections.lookingAhead.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-warmgreen-700 leading-relaxed text-lg">
+              {t('sections.lookingAhead.description')}
             </p>
           </CardContent>
         </Card>

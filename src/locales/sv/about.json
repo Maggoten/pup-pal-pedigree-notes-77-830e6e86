@@ -29,6 +29,14 @@
     "whoItsFor": {
       "title": "Vem det är för",
       "description": "Breeding Journey är byggt för alla från förstagångsuppfödare till etablerade kennlar som hanterar flera hundar och kullar. Det är också användbart för hundägare som helt enkelt vill spåra en tikas löpcykel och hälsa."
+    },
+    "dataSecurity": {
+      "title": "Data & Säkerhet",
+      "description": "Breeding Journey är byggt på modern, säker infrastruktur med bästa praxis för autentisering och rollbaserad åtkomst. Vi fokuserar på integritet genom design och ger dig kontroll över din information, inklusive möjligheten att uppdatera eller ta bort dina data."
+    },
+    "lookingAhead": {
+      "title": "Blickar framåt",
+      "description": "Vi utökar språkstöd, förfinar påminnelser och avelskalendern och lägger till fler insikter och användbara automationer. Din feedback styr vår färdplan — berätta vad som skulle göra din avelsresa smidigare."
     }
   },
   "backToLogin": "Tillbaka till Inloggning",
