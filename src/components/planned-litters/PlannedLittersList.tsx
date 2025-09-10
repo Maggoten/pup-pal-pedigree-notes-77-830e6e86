@@ -39,6 +39,12 @@ const PlannedLittersList: React.FC<PlannedLittersListProps> = ({
   return <div className="space-y-6">
       <div className="flex justify-end">
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+          <DialogTrigger asChild>
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              {t('buttons.addPlannedLitter')}
+            </Button>
+          </DialogTrigger>
           
           <AddPlannedLitterDialog males={males} females={females} onSubmit={values => {
           onAddPlannedLitter(values);
