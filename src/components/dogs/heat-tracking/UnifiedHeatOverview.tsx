@@ -44,23 +44,46 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
   
   // Function to deduplicate heat dates from both sources
   const deduplicateHeatDates = () => {
-    const allDates = new Set<string>();
+    console.log('🔍 DEBUG: Deduplicating heat dates for', dog.name);
+    console.log('📊 Input data:');
+    console.log('  - heatCycles:', heatCycles);
+    console.log('  - heatHistory:', heatHistory);
     
-    // Add heat cycle start dates
-    heatCycles.forEach(cycle => {
+    const normalizedDates = new Set<string>();
+    
+    // Helper function to normalize dates to YYYY-MM-DD format
+    const normalizeDate = (dateStr: string): string => {
+      const date = new Date(dateStr);
+      return date.toISOString().split('T')[0];
+    };
+    
+    // Add heat cycle start dates (both active and completed)
+    heatCycles.forEach((cycle, index) => {
       if (cycle.start_date) {
-        allDates.add(cycle.start_date);
+        const normalized = normalizeDate(cycle.start_date);
+        console.log(`  ✅ Adding heat cycle ${index + 1}: ${cycle.start_date} → normalized: ${normalized} (active: ${!cycle.end_date})`);
+        normalizedDates.add(normalized);
       }
     });
     
     // Add legacy heat history dates (only if not already present)
-    heatHistory.forEach(heat => {
+    heatHistory.forEach((heat, index) => {
       if (heat.date) {
-        allDates.add(heat.date);
+        const normalized = normalizeDate(heat.date);
+        if (normalizedDates.has(normalized)) {
+          console.log(`  ⚠️ Skipping duplicate from heatHistory ${index + 1}: ${heat.date} → normalized: ${normalized} (already exists)`);
+        } else {
+          console.log(`  ✅ Adding from heatHistory ${index + 1}: ${heat.date} → normalized: ${normalized}`);
+          normalizedDates.add(normalized);
+        }
       }
     });
     
-    return Array.from(allDates).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    const uniqueDates = Array.from(normalizedDates).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    console.log('🎯 Final deduplicated dates:', uniqueDates);
+    console.log('📈 Total unique cycles:', uniqueDates.length);
+    
+    return uniqueDates;
   };
 
   const calculateSummary = (): SummaryStats => {
