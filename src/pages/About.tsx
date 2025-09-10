@@ -68,7 +68,7 @@ const About: React.FC = () => {
           </div>
         </div>
 
-        {/* Statistics Section */}
+        {/* Statistics Section - Hidden temporarily for new startup
         <div 
           ref={statsRef}
           className={`grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 transition-all duration-700 delay-200 ${
@@ -88,6 +88,7 @@ const About: React.FC = () => {
             <div className="text-sm text-muted-foreground">Countries</div>
           </div>
         </div>
+        */}
 
         {/* Our Story Section */}
         <AnimatedCard className="mb-12 bg-gradient-to-r from-card to-card/50 border-primary/20 shadow-lg hover:shadow-xl transition-all duration-300">
