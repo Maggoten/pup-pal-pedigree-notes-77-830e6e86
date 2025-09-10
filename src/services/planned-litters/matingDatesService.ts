@@ -155,6 +155,18 @@ class MatingDatesService {
 
     const matingDateToDelete = matingDates[dateIndex];
 
+    // Delete mating_date first to avoid foreign key constraint violation
+    const { error: deleteError } = await supabase
+      .from('mating_dates')
+      .delete()
+      .eq('id', matingDateToDelete.id);
+
+    if (deleteError) {
+      console.error('Error deleting mating date:', deleteError);
+      throw new Error('Failed to delete mating date');
+    }
+
+    // Then delete the related pregnancy if it exists
     if (matingDateToDelete.pregnancy_id) {
       const { error: pregnancyError } = await supabase
         .from('pregnancies')
@@ -165,16 +177,6 @@ class MatingDatesService {
         console.error('Error deleting pregnancy:', pregnancyError);
         throw new Error('Failed to delete related pregnancy');
       }
-    }
-
-    const { error: deleteError } = await supabase
-      .from('mating_dates')
-      .delete()
-      .eq('id', matingDateToDelete.id);
-
-    if (deleteError) {
-      console.error('Error deleting mating date:', deleteError);
-      throw new Error('Failed to delete mating date');
     }
 
     console.log(`Successfully deleted mating date at index ${dateIndex} for litter ${litterId}`);
