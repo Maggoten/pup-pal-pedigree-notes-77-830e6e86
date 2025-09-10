@@ -42,7 +42,7 @@ const PlannedLittersList: React.FC<PlannedLittersListProps> = ({
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
-              {t('buttons.addPlannedLitter')}
+              {t('actions.addPlannedLitter')}
             </Button>
           </DialogTrigger>
           
