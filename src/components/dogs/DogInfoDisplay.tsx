@@ -73,21 +73,6 @@ const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({
           </div>
         </div>
         
-        {dog.gender === 'female' && <div className="mt-4">
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">{t('display.fields.heatRecords')}</h3>
-            {dog.heatHistory && dog.heatHistory.length > 0 ? <div className="space-y-1">
-                <div className="text-sm">{t('display.fields.previousHeatDates')}</div>
-                <ul className="list-disc pl-5 space-y-1">
-                  {dog.heatHistory.map((heat, index) => <li key={index} className="text-sm">
-                      {format(new Date(heat.date), 'PPP')}
-                    </li>)}
-                </ul>
-                {dog.heatInterval && <div className="text-sm mt-2">
-                    <span className="font-medium">{t('display.fields.heatInterval')}</span> {dog.heatInterval} {t('display.fields.days')}
-                  </div>}
-              </div> : <p className="text-muted-foreground text-sm">{t('display.fields.noHeatRecords')}</p>}
-          </div>}
-        
         {dog.notes && <div>
             <h3 className="text-sm font-medium text-muted-foreground">{t('display.fields.notes')}</h3>
             <p className="whitespace-pre-wrap">{dog.notes}</p>
