@@ -133,7 +133,10 @@
   },
   "matingSection": {
     "title": "Parningsplanering",
+    "description": "Spåra kommande löp, senaste parningar och användbara aveltips",
     "upcomingHeats": "Kommande Löp",
+    "recentMatings": "Senaste Parningar",
+    "breedingGuide": "Avelsguide",
     "noUpcomingHeats": "Inga kommande löp detekterade."
   },
   "matingTips": {

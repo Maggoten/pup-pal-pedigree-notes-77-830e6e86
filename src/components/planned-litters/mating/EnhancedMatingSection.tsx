@@ -37,7 +37,7 @@ const EnhancedMatingSection: React.FC<EnhancedMatingSectionProps> = ({
             {t('matingSection.title')}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Track upcoming heats, recent matings, and helpful breeding tips
+            {t('matingSection.description')}
           </p>
         </div>
       </div>
@@ -84,14 +84,14 @@ const EnhancedMatingSection: React.FC<EnhancedMatingSectionProps> = ({
             <span className="w-6 h-6 rounded-full bg-rose-100 text-rose-700 text-xs flex items-center justify-center font-medium">
               {recentMatings.length}
             </span>
-            Recent Matings
+            {t('matingSection.recentMatings')}
           </h3>
           <EnhancedRecentMatingsCard recentMatings={recentMatings} />
         </div>
         
         {/* Mating Tips Card */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Breeding Guide</h3>
+          <h3 className="text-lg font-semibold">{t('matingSection.breedingGuide')}</h3>
           <MatingTipsCard />
         </div>
       </div>

@@ -133,7 +133,10 @@
   },
   "matingSection": {
     "title": "Mating Management",
+    "description": "Track upcoming heats, recent matings, and helpful breeding tips",
     "upcomingHeats": "Upcoming Heats",
+    "recentMatings": "Recent Matings",
+    "breedingGuide": "Breeding Guide",
     "noUpcomingHeats": "No upcoming heats detected."
   },
   "matingTips": {
