@@ -86,6 +86,7 @@ const EditPlannedLitterDialog: React.FC<EditPlannedLitterDialogProps> = ({
           males={males}
           females={females}
           onSubmit={handleSubmit}
+          buttonText={t('actions.save')}
         />
       </div>
     </DialogContent>

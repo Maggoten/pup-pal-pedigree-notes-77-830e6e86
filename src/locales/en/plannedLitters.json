@@ -30,6 +30,8 @@
   "forms": {
     "plannedLitter": {
       "title": "Add Planned Litter",
+      "editTitle": "Edit Planned Litter",
+      "editDescription": "Update the planned breeding information",
       "damLabel": "Dam (Female)",
       "sireLabel": "Sire (Male)",
       "damPlaceholder": "Select female dog",
@@ -94,7 +96,8 @@
       "matingDateCreated": "Mating date added successfully. A pregnancy has been created.",
       "matingDateUpdatedSuccess": "Mating date updated successfully.",
       "matingDateDeletedSuccess": "The mating date has been removed successfully.",
-      "plannedLitterDeleted": "The planned litter has been removed successfully."
+      "plannedLitterDeleted": "The planned litter has been removed successfully.",
+      "litterUpdated": "Planned litter updated successfully"
     },
     "error": {
       "title": "Error",
@@ -105,6 +108,7 @@
       "failedToDeleteLitter": "Failed to delete litter",
       "failedToLoad": "Failed to load planned litters",
       "failedToDeletePlannedLitter": "Failed to delete planned litter",
+      "failedToUpdateLitter": "Failed to update planned litter",
       "authenticationRequired": "You need to be logged in to perform this action",
       "pleaseWait": "Preparing your account. Please try again in a moment."
     }

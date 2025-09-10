@@ -30,6 +30,8 @@
   "forms": {
     "plannedLitter": {
       "title": "Lägg till Planerad Kull",
+      "editTitle": "Redigera Planerad Kull",
+      "editDescription": "Uppdatera informationen för den planerade kullen",
       "damLabel": "Tik",
       "sireLabel": "Hane",
       "damPlaceholder": "Välj tik",
@@ -94,7 +96,8 @@
       "matingDateCreated": "Parningsdatum tillagt framgångsrikt. En dräktighet har skapats.",
       "matingDateUpdatedSuccess": "Parningsdatum uppdaterat framgångsrikt.",
       "matingDateDeletedSuccess": "Parningsdatumet har tagits bort framgångsrikt.",
-      "plannedLitterDeleted": "Den planerade kullen har tagits bort framgångsrikt."
+      "plannedLitterDeleted": "Den planerade kullen har tagits bort framgångsrikt.",
+      "litterUpdated": "Planerad kull uppdaterad framgångsrikt"
     },
     "error": {
       "title": "Fel",
@@ -105,6 +108,7 @@
       "failedToDeleteLitter": "Misslyckades med att ta bort kull",
       "failedToLoad": "Misslyckades med att ladda planerade kullar",
       "failedToDeletePlannedLitter": "Misslyckades med att ta bort planerad kull",
+      "failedToUpdateLitter": "Misslyckades med att uppdatera planerad kull",
       "authenticationRequired": "Du måste vara inloggad för att utföra denna åtgärd",
       "pleaseWait": "Förbereder ditt konto. Försök igen om ett ögonblick."
     }

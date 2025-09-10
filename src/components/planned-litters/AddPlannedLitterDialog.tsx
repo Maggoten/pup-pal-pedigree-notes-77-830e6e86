@@ -73,6 +73,7 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
           males={males}
           females={females}
           onSubmit={handleSubmit}
+          buttonText={t('actions.addLitter')}
         />
       </div>
     </DialogContent>

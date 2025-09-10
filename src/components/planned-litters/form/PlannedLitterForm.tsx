@@ -19,13 +19,15 @@ interface PlannedLitterFormProps {
   males: Dog[];
   females: Dog[];
   onSubmit: (values: PlannedLitterFormValues) => void;
+  buttonText?: string;
 }
 
 const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
   form,
   males,
   females,
-  onSubmit
+  onSubmit,
+  buttonText
 }) => {
   const { t } = useTranslation('plannedLitters');
   const isExternalMale = form.watch("externalMale");
@@ -74,7 +76,7 @@ const PlannedLitterForm: React.FC<PlannedLitterFormProps> = ({
         <NotesField form={form} />
         
         <DialogFooter className="mt-6">
-          <Button type="submit">{t('actions.addLitter')}</Button>
+          <Button type="submit">{buttonText || t('actions.addLitter')}</Button>
         </DialogFooter>
       </form>
     </Form>
