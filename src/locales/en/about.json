@@ -40,5 +40,9 @@
     }
   },
   "backToLogin": "Back to Login",
-  "getStarted": "Become a Member"
+  "getStarted": "Become a Member",
+  "cta": {
+    "title": "Ready to get started?",
+    "description": "Join thousands of breeders who trust us with their breeding journey."
+  }
 }

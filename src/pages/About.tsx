@@ -245,8 +245,8 @@ const About: React.FC = () => {
         {/* CTA Section */}
         <div className="text-center">
           <div className="p-8 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border border-primary/20 shadow-lg">
-            <h3 className="text-2xl font-bold text-primary mb-4 font-playfair">Ready to get started?</h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">Join thousands of breeders who trust us with their breeding journey.</p>
+            <h3 className="text-2xl font-bold text-primary mb-4 font-playfair">{t('cta.title')}</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">{t('cta.description')}</p>
             <Button 
               onClick={navigateToLogin}
               className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"

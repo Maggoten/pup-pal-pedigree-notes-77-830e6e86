@@ -40,5 +40,9 @@
     }
   },
   "backToLogin": "Tillbaka till Inloggning",
-  "getStarted": "Bli medlem"
+  "getStarted": "Bli medlem",
+  "cta": {
+    "title": "Redo att komma igång?",
+    "description": "Gå med tusentals uppfödare som litar på oss med sin avelsresa."
+  }
 }
