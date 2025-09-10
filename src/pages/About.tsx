@@ -82,12 +82,19 @@ const About: React.FC = () => {
           </CardHeader>
           <CardContent>
             <ul className="space-y-3">
-              {(t('sections.howItHelps.benefits', { returnObjects: true }) as string[]).map((benefit: string, index: number) => (
-                <li key={index} className="flex items-start gap-3 text-warmgreen-700 text-lg leading-relaxed">
-                  <PawPrint className="h-5 w-5 text-warmgreen-600 mt-0.5 flex-shrink-0" />
-                  <span>{benefit}</span>
-                </li>
-              ))}
+              {(t('sections.howItHelps.benefits', { returnObjects: true }) as string[]).map((benefit: string, index: number) => {
+                const [title, ...descriptionParts] = benefit.split(':');
+                const description = descriptionParts.join(':').trim();
+                
+                return (
+                  <li key={index} className="flex items-start gap-3 text-warmgreen-700 text-lg leading-relaxed">
+                    <PawPrint className="h-5 w-5 text-warmgreen-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>{title}:</strong> {description}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           </CardContent>
         </Card>
