@@ -138,9 +138,19 @@ class MatingDatesService {
       .eq('planned_litter_id', litterId)
       .order('mating_date', { ascending: true });
 
-    if (fetchError || !matingDates || !matingDates[dateIndex]) {
+    if (fetchError) {
       console.error('Error fetching mating dates:', fetchError);
-      return;
+      throw new Error('Failed to fetch mating dates');
+    }
+
+    if (!matingDates || matingDates.length === 0) {
+      console.error('No mating dates found for litter:', litterId);
+      throw new Error('No mating dates found to delete');
+    }
+
+    if (!matingDates[dateIndex]) {
+      console.error('Mating date index out of bounds:', dateIndex);
+      throw new Error('Mating date not found at the specified index');
     }
 
     const matingDateToDelete = matingDates[dateIndex];
@@ -153,7 +163,7 @@ class MatingDatesService {
 
       if (pregnancyError) {
         console.error('Error deleting pregnancy:', pregnancyError);
-        return;
+        throw new Error('Failed to delete related pregnancy');
       }
     }
 
@@ -164,7 +174,10 @@ class MatingDatesService {
 
     if (deleteError) {
       console.error('Error deleting mating date:', deleteError);
+      throw new Error('Failed to delete mating date');
     }
+
+    console.log(`Successfully deleted mating date at index ${dateIndex} for litter ${litterId}`);
   }
 
   async editMatingDate(litterId: string, dateIndex: number, newDate: Date): Promise<void> {
@@ -174,9 +187,19 @@ class MatingDatesService {
       .eq('planned_litter_id', litterId)
       .order('mating_date', { ascending: true });
 
-    if (fetchError || !matingDates || !matingDates[dateIndex]) {
+    if (fetchError) {
       console.error('Error fetching mating dates:', fetchError);
-      return;
+      throw new Error('Failed to fetch mating dates');
+    }
+
+    if (!matingDates || matingDates.length === 0) {
+      console.error('No mating dates found for litter:', litterId);
+      throw new Error('No mating dates found to edit');
+    }
+
+    if (!matingDates[dateIndex]) {
+      console.error('Mating date index out of bounds:', dateIndex);
+      throw new Error('Mating date not found at the specified index');
     }
 
     const matingDateToUpdate = matingDates[dateIndex];
@@ -189,7 +212,7 @@ class MatingDatesService {
 
     if (updateMatingError) {
       console.error('Error updating mating date:', updateMatingError);
-      return;
+      throw new Error('Failed to update mating date');
     }
 
     if (matingDateToUpdate.pregnancy_id) {
@@ -203,8 +226,11 @@ class MatingDatesService {
 
       if (pregnancyError) {
         console.error('Error updating pregnancy:', pregnancyError);
+        throw new Error('Failed to update related pregnancy');
       }
     }
+
+    console.log(`Successfully updated mating date at index ${dateIndex} for litter ${litterId}`);
   }
 }
 
