@@ -258,29 +258,6 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
               </Tooltip>
             </TooltipProvider>
           </div>
-          
-          <Dialog>
-            <DialogTrigger asChild>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-9 w-9">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{t('buttons.viewDetails')}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </DialogTrigger>
-            <PlannedLitterDetailsDialog 
-              litter={litter} 
-              onAddMatingDate={onAddMatingDate}
-              onEditMatingDate={onEditMatingDate}
-              onDeleteMatingDate={onDeleteMatingDate}
-            />
-          </Dialog>
         </div>
       </CardContent>
 
