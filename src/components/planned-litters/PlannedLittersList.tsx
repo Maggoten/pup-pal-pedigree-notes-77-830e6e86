@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { PlannedLitter } from '@/types/breeding';
-import PlannedLitterCard from '@/components/planned-litters/PlannedLitterCard';
+import EnhancedPlannedLitterCard from '@/components/planned-litters/EnhancedPlannedLitterCard';
 import AddPlannedLitterDialog from '@/components/planned-litters/AddPlannedLitterDialog';
 import EmptyPlannedLitters from '@/components/planned-litters/EmptyPlannedLitters';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
@@ -48,7 +48,7 @@ const PlannedLittersList: React.FC<PlannedLittersListProps> = ({
       </div>
 
       {plannedLitters.length > 0 ? <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {plannedLitters.map(litter => <PlannedLitterCard key={litter.id} litter={litter} onAddMatingDate={onAddMatingDate} onEditMatingDate={onEditMatingDate} onDeleteMatingDate={onDeleteMatingDate} onDeleteLitter={onDeleteLitter} calendarOpen={calendarOpen[litter.id] || false} onCalendarOpenChange={open => setCalendarOpen({
+          {plannedLitters.map(litter => <EnhancedPlannedLitterCard key={litter.id} litter={litter} onAddMatingDate={onAddMatingDate} onEditMatingDate={onEditMatingDate} onDeleteMatingDate={onDeleteMatingDate} onDeleteLitter={onDeleteLitter} calendarOpen={calendarOpen[litter.id] || false} onCalendarOpenChange={open => setCalendarOpen({
         ...calendarOpen,
         [litter.id]: open
       })} />)}
