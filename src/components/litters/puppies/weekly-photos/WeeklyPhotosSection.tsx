@@ -41,7 +41,7 @@ const WeeklyPhotosSection: React.FC<WeeklyPhotosSectionProps> = ({
   };
 
   const currentWeek = getCurrentWeek();
-  const maxWeeks = Math.max(currentWeek + 1, 12); // Show up to current week + 1 or minimum 12 weeks
+  const maxWeeks = Math.max(currentWeek + 1, 10); // Show up to current week + 1 or minimum 10 weeks
 
   // Generate weeks array
   const weeks = Array.from({ length: maxWeeks }, (_, i) => i + 1);
