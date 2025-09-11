@@ -59,6 +59,7 @@ const GrowthLineChart: React.FC<GrowthLineChartProps> = ({
               stroke={chartConfig[selectedPuppy.id]?.color || '#8884d8'}
               activeDot={{ r: 6 }}
               strokeWidth={2}
+              connectNulls={true}
             />
           ) : (
             puppies.map((puppy) => (
@@ -69,7 +70,9 @@ const GrowthLineChart: React.FC<GrowthLineChartProps> = ({
                 name={puppy.name}
                 stroke={chartConfig[puppy.id]?.color || '#8884d8'}
                 activeDot={{ r: 4 }}
-                strokeWidth={1.5}
+                strokeWidth={2}
+                connectNulls={true}
+                dot={false}
               />
             ))
           )}
