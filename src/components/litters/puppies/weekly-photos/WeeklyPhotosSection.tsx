@@ -172,23 +172,23 @@ const WeeklyPhotosSection: React.FC<WeeklyPhotosSectionProps> = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 w-6 p-0"
+                        className="h-8 w-8 p-1 hover:bg-primary/10 touch-manipulation"
                         onClick={() => handleEditPhoto(photo)}
                       >
-                        <Edit2 className="h-3 w-3" />
+                        <Edit2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
                 ) : (
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="w-full"
+                    size="default"
+                    className="w-full h-10 touch-manipulation hover:bg-primary/5 hover:border-primary/30 transition-colors"
                     onClick={() => handleAddPhoto(week)}
                     disabled={isFutureWeek}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Lägg till
+                    <span className="font-medium">Lägg till</span>
                   </Button>
                 )}
               </CardContent>
