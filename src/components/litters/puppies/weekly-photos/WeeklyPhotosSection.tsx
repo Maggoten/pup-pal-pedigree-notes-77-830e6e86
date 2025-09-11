@@ -104,95 +104,87 @@ const WeeklyPhotosSection: React.FC<WeeklyPhotosSectionProps> = ({
   return (
     <div className="space-y-6">
       {/* Week Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-3 lg:gap-3">
         {weeks.map((week) => {
           const photo = getPhotoForWeek(week);
           const isCurrentWeek = week === currentWeek;
           const isFutureWeek = week > currentWeek;
           
           return (
-            <Card key={week} className={`relative ${isCurrentWeek ? 'ring-2 ring-primary' : ''}`}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center justify-between">
-                  <span>Vecka {week}</span>
-                  {isCurrentWeek && (
-                    <Badge variant="secondary" className="text-xs">
-                      Aktuell
-                    </Badge>
-                  )}
-                </CardTitle>
-              </CardHeader>
+            <div key={week} className={`relative ${isCurrentWeek ? 'ring-2 ring-primary rounded-2xl' : ''}`}>
+              {/* Week Header */}
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-sm font-medium">Vecka {week}</span>
+                {isCurrentWeek && (
+                  <Badge variant="secondary" className="text-xs">
+                    Aktuell
+                  </Badge>
+                )}
+              </div>
               
-              <CardContent className="space-y-3">
-                {/* Photo */}
-                <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-                  {photo ? (
+              {photo ? (
+                /* Photo Card */
+                <div className="space-y-2">
+                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-muted shadow-md group">
                     <img
                       src={photo.image_url}
                       alt={`Vecka ${week}`}
                       className="w-full h-full object-cover"
                     />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Camera className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                  )}
-                </div>
-
-                {/* Photo Info */}
-                {photo ? (
-                  <div className="space-y-2">
-                    {(photo.weight || photo.height) && (
-                      <div className="flex gap-2 text-xs text-muted-foreground">
-                        {photo.weight && (
-                          <div className="flex items-center gap-1">
-                            <Weight className="h-3 w-3" />
-                            <span>{photo.weight} kg</span>
-                          </div>
-                        )}
-                        {photo.height && (
-                          <div className="flex items-center gap-1">
-                            <Ruler className="h-3 w-3" />
-                            <span>{photo.height} cm</span>
-                          </div>
-                        )}
+                    
+                    {/* Metadata Chips Overlay */}
+                    <div className="absolute bottom-3 left-3 flex flex-wrap gap-1">
+                      {photo.weight && (
+                        <div className="bg-black/70 text-white px-2 py-1 rounded-lg text-xs font-semibold backdrop-blur-sm">
+                          {photo.weight} kg
+                        </div>
+                      )}
+                      <div className="bg-black/70 text-white px-2 py-1 rounded-lg text-xs backdrop-blur-sm">
+                        {format(parseISO(photo.date_taken), 'MMM d')}
                       </div>
-                    )}
+                    </div>
                     
-                    {photo.notes && (
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {photo.notes}
-                      </p>
-                    )}
-                    
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-muted-foreground">
-                        {format(parseISO(photo.date_taken), 'MMM d, yyyy')}
-                      </p>
+                    {/* Edit Button Overlay */}
+                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-1 hover:bg-primary/10 touch-manipulation"
+                        variant="secondary"
+                        size="icon"
+                        className="h-8 w-8 bg-white/90 hover:bg-white backdrop-blur-sm"
                         onClick={() => handleEditPhoto(photo)}
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
-                ) : (
-                  <Button
-                    variant="default"
-                    size="default"
-                    className="w-full h-10 touch-manipulation bg-primary hover:bg-primary/90 text-primary-foreground transition-colors px-3 py-2 min-w-0"
-                    onClick={() => handleAddPhoto(week)}
-                    disabled={isFutureWeek}
-                  >
-                    <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span className="font-medium truncate">Lägg till</span>
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+                  
+                  {/* Caption */}
+                  {photo.notes && (
+                    <p className="text-sm text-muted-foreground line-clamp-1">
+                      {photo.notes}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                /* Empty Week - Full Card Button */
+                <button
+                  className={`
+                    w-full aspect-[4/3] rounded-2xl border-2 border-dashed 
+                    flex flex-col items-center justify-center gap-2
+                    transition-all duration-200 touch-manipulation
+                    ${isFutureWeek 
+                      ? 'border-muted-foreground/20 text-muted-foreground/50 cursor-not-allowed' 
+                      : 'border-primary/30 text-muted-foreground hover:border-primary/60 hover:bg-primary/5 hover:text-primary'
+                    }
+                  `}
+                  onClick={() => handleAddPhoto(week)}
+                  disabled={isFutureWeek}
+                  aria-label={`Lägg till foto för vecka ${week}`}
+                >
+                  <Camera className="h-6 w-6" />
+                  <span className="text-sm font-medium">Lägg till foto</span>
+                </button>
+              )}
+            </div>
           );
         })}
       </div>
