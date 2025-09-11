@@ -48,7 +48,7 @@ const WeekSelector: React.FC<WeekSelectorProps> = ({
             {weeks.map((week) => (
               <CarouselItem 
                 key={week} 
-                className="basis-1/2.5 sm:basis-1/4 md:basis-1/6 lg:basis-1/9"
+                className="basis-1/2 sm:basis-1/4 md:basis-1/6 lg:basis-1/9"
                 data-week={week}
               >
                 <div className="p-0.5 sm:p-1">
@@ -71,8 +71,7 @@ const WeekSelector: React.FC<WeekSelectorProps> = ({
                       "text-[10px] sm:text-xs font-medium leading-tight",
                       currentWeek === week ? "text-primary" : "text-muted-foreground"
                     )}>
-                      <span className="hidden sm:inline">{t('journey.weekSelector.week')} </span>
-                      <span className="sm:hidden">V</span>{week}
+                      {t('journey.weekSelector.week')} {week}
                     </span>
                   </Button>
                 </div>
