@@ -73,7 +73,7 @@ const SymptomItem: React.FC<SymptomItemProps> = ({ record, onDelete, onUpdate })
                 placeholder="Description..."
               />
             ) : (
-              <p className="text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 w-full pr-2">
                 {record.description}
               </p>
             )}
