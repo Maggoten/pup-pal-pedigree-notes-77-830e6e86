@@ -3,17 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { ArrowLeft, Edit, Circle, Calendar, Weight, Ruler, FileText, Trash2, RefreshCw } from 'lucide-react';
-import { format, parseISO, differenceInWeeks } from 'date-fns';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Edit, Trash2, RefreshCw } from 'lucide-react';
+import { differenceInWeeks, parseISO } from 'date-fns';
 import { Puppy } from '@/types/breeding';
 import { usePuppyQueries } from '@/hooks/usePuppyQueries';
 import { toast } from '@/components/ui/use-toast';
 import { useTranslation } from 'react-i18next';
 import EditPuppyDialog from '@/components/litters/puppies/EditPuppyDialog';
-import PuppyMeasurementsChart from '@/components/litters/puppies/PuppyMeasurementsChart';
 import PuppyMeasurementsDialog from '@/components/litters/puppies/PuppyMeasurementsDialog';
 import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
+import PuppyOverviewTab from '@/components/litters/puppies/tabs/PuppyOverviewTab';
+import PuppyDevelopmentTab from '@/components/litters/puppies/tabs/PuppyDevelopmentTab';
 
 const PuppyProfile: React.FC = () => {
   const { litterId, puppyId } = useParams<{ litterId: string; puppyId: string }>();
@@ -23,6 +24,7 @@ const PuppyProfile: React.FC = () => {
   const [showMeasurementsDialog, setShowMeasurementsDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('overview');
 
   // Use the proper hook for puppy data
   const {
@@ -179,26 +181,6 @@ const PuppyProfile: React.FC = () => {
     }
   };
 
-  const getLatestWeight = (puppy: Puppy) => {
-    if (puppy.weightLog && puppy.weightLog.length > 0) {
-      const sortedWeights = [...puppy.weightLog].sort((a, b) => 
-        new Date(b.date).getTime() - new Date(a.date).getTime()
-      );
-      return `${sortedWeights[0].weight} kg`;
-    }
-    return puppy.currentWeight ? `${puppy.currentWeight} kg` : t('puppies.labels.notRecorded');
-  };
-
-  const getLatestHeight = (puppy: Puppy) => {
-    if (puppy.heightLog && puppy.heightLog.length > 0) {
-      const sortedHeights = [...puppy.heightLog].sort((a, b) => 
-        new Date(b.date).getTime() - new Date(a.date).getTime()
-      );
-      return `${sortedHeights[0].height} cm`;
-    }
-    return t('puppies.labels.notRecorded');
-  };
-
   const getPuppyAge = (puppy: Puppy) => {
     if (puppy.birthDateTime) {
       return differenceInWeeks(new Date(), parseISO(puppy.birthDateTime));
@@ -241,156 +223,50 @@ const PuppyProfile: React.FC = () => {
 
       {/* Main Profile Card */}
       <Card className="shadow-sm">
-        <CardHeader className="bg-primary/5">
-          <CardTitle className="text-2xl font-bold text-warmgreen-800">
-            {selectedPuppy.name}
-            {selectedPuppy.registered_name && (
-              <span className="text-xl font-normal italic text-green-800 ml-2">
-                - {selectedPuppy.registered_name}
-              </span>
-            )}
-          </CardTitle>
+        <CardHeader className="bg-primary/5 flex flex-row items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div>
+              <CardTitle className="text-2xl font-bold text-warmgreen-800">
+                {selectedPuppy.name}
+                {selectedPuppy.registered_name && (
+                  <span className="text-xl font-normal italic text-green-800 ml-2">
+                    - {selectedPuppy.registered_name}
+                  </span>
+                )}
+              </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                {puppyAge} {puppyAge === 1 ? 'vecka gammal' : 'veckor gammal'} • {litter?.name}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {getStatusBadge(selectedPuppy)}
+          </div>
         </CardHeader>
 
-        <CardContent className="p-6">
-          {/* Main Info Grid - Photo and Details */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr] mb-8">
-            {/* Profile Photo */}
-            <div className="w-full max-w-[200px] mx-auto md:mx-0">
-              <AspectRatio ratio={1/1} className="overflow-hidden rounded-lg border-2 border-warmbeige-200 shadow-sm">
-                {selectedPuppy.imageUrl ? (
-                  <img 
-                    src={selectedPuppy.imageUrl} 
-                    alt={selectedPuppy.name} 
-                    className="object-cover w-full h-full"
-                  />
-                ) : (
-                  <div className="bg-warmgreen-100 text-warmgreen-800 font-medium text-6xl w-full h-full flex items-center justify-center">
-                    {selectedPuppy.name.charAt(0)}
-                  </div>
-                )}
-              </AspectRatio>
-            </div>
+        <CardContent className="p-0">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 rounded-none border-b">
+              <TabsTrigger value="overview" className="text-sm">
+                Översikt
+              </TabsTrigger>
+              <TabsTrigger value="development" className="text-sm">
+                Utveckling
+              </TabsTrigger>
+            </TabsList>
 
-            {/* Basic Info */}
-            <div className="space-y-6">
+            <TabsContent value="overview" className="p-6 mt-0">
+              <PuppyOverviewTab puppy={selectedPuppy} litter={litter} />
+            </TabsContent>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex items-center gap-2">
-                  <Circle className={`h-5 w-5 ${selectedPuppy.gender === 'male' ? 'text-blue-500 fill-blue-500' : 'text-pink-500 fill-pink-500'}`} />
-                  <span className="font-medium">{selectedPuppy.gender === 'male' ? t('puppies.labels.male') : t('puppies.labels.female')}</span>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
-                  <span>
-                    {selectedPuppy.birthDateTime 
-                      ? format(parseISO(selectedPuppy.birthDateTime), 'MMM d, yyyy')
-                      : t('puppies.labels.birthDateNotSet')
-                    }
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Weight className="h-5 w-5 text-muted-foreground" />
-                  <span>{getLatestWeight(selectedPuppy)}</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Ruler className="h-5 w-5 text-muted-foreground" />
-                  <span>{getLatestHeight(selectedPuppy)}</span>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="bg-warmbeige-100 text-warmbeige-800">
-                  {selectedPuppy.color}
-                </Badge>
-                <Badge variant="secondary" className="bg-warmbeige-100 text-warmbeige-800">
-                  {selectedPuppy.breed}
-                </Badge>
-              </div>
-
-              {/* Physical and Registration Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">{t('puppies.titles.physicalDetails')}</h3>
-                   <div className="space-y-2">
-                     <div className="flex justify-between">
-                       <span className="text-sm text-muted-foreground">{t('puppies.labels.birthWeight')}:</span>
-                       <span className="text-sm">{selectedPuppy.birthWeight ? `${selectedPuppy.birthWeight} kg` : t('puppies.labels.notRecorded')}</span>
-                     </div>
-                     <div className="flex justify-between">
-                       <span className="text-sm text-muted-foreground">{t('puppies.labels.currentWeight')}:</span>
-                       <span className="text-sm">{getLatestWeight(selectedPuppy)}</span>
-                     </div>
-                     {selectedPuppy.markings && (
-                       <div className="flex justify-between">
-                         <span className="text-sm text-muted-foreground">{t('puppies.labels.markings')}:</span>
-                         <span className="text-sm">{selectedPuppy.markings}</span>
-                       </div>
-                     )}
-                   </div>
-                 </div>
-
-                 <div>
-                   <h3 className="text-lg font-semibold mb-3">{t('puppies.titles.registration')}</h3>
-                   <div className="space-y-2">
-                     <div className="flex justify-between">
-                       <span className="text-sm text-muted-foreground">{t('puppies.labels.microchip')}:</span>
-                       <span className="text-sm">{selectedPuppy.microchip || t('puppies.labels.notSet')}</span>
-                     </div>
-                     <div className="flex justify-between">
-                       <span className="text-sm text-muted-foreground">{t('puppies.labels.collar')}:</span>
-                       <span className="text-sm">{selectedPuppy.collar || t('puppies.labels.notSet')}</span>
-                     </div>
-                     <div className="flex justify-between">
-                       <span className="text-sm text-muted-foreground">{t('puppies.labels.breed')}:</span>
-                       <span className="text-sm">{selectedPuppy.breed}</span>
-                     </div>
-                   </div>
-                 </div>
-              </div>
-
-              {/* Buyer Information */}
-              {(selectedPuppy.status === 'Reserved' || selectedPuppy.status === 'Sold') && (
-                 <div>
-                   <h3 className="text-lg font-semibold mb-3">{t('puppies.titles.buyerInformation')}</h3>
-                   <p className="text-sm">{selectedPuppy.newOwner || t('puppies.labels.informationNotAvailable')}</p>
-                 </div>
-              )}
-            </div>
-          </div>
-
-           {/* Growth Chart */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">{t('puppies.titles.growthCharts')}</h3>
-              <PuppyMeasurementsChart puppy={selectedPuppy} />
-            </div>
-
-          {/* Notes Section */}
-          <div>
-             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-               <FileText className="h-5 w-5" />
-               {t('puppies.titles.notesAndRecords')}
-             </h3>
-            {selectedPuppy.notes && selectedPuppy.notes.length > 0 ? (
-              <div className="space-y-4">
-                {selectedPuppy.notes
-                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                  .map((note, index) => (
-                    <div key={index} className="border-l-4 border-primary pl-4 py-2">
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(note.date), 'MMM d, yyyy - h:mm a')}
-                      </p>
-                      <p className="whitespace-pre-wrap">{note.content}</p>
-                    </div>
-                  ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground">{t('puppies.messages.noNotesYet')}</p>
-            )}
-          </div>
+            <TabsContent value="development" className="p-6 mt-0">
+              <PuppyDevelopmentTab 
+                puppy={selectedPuppy} 
+                litter={litter}
+                onUpdatePuppy={handleEditPuppy}
+              />
+            </TabsContent>
+          </Tabs>
         </CardContent>
 
         <CardFooter className="flex justify-between items-center">
