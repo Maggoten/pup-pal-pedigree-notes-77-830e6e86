@@ -232,13 +232,14 @@ export const useWeeklyPhotos = (puppyId: string) => {
         throw error;
       }
 
-      // If weight/height was updated and date_taken was changed, update corresponding logs
-      if ((updates.weight || updates.height) && updates.date_taken) {
+      // Sync weight/height changes with growth chart logs
+      if (updates.weight !== undefined || updates.height !== undefined) {
         try {
-          const updateDate = updates.date_taken;
+          // Use the new date if provided, otherwise use the existing photo date
+          const logDate = updates.date_taken || data.date_taken;
           
-          if (updates.weight) {
-            // Find and update existing weight log or create new one
+          if (updates.weight !== undefined) {
+            // Find existing weight log entry for this puppy and date
             const { data: existingWeight } = await supabase
               .from('puppy_weight_logs')
               .select('id')
@@ -247,15 +248,25 @@ export const useWeeklyPhotos = (puppyId: string) => {
               .single();
               
             if (existingWeight) {
+              // Update existing weight log
               await supabase
                 .from('puppy_weight_logs')
-                .update({ date: updateDate, weight: updates.weight })
+                .update({ date: logDate, weight: updates.weight })
                 .eq('id', existingWeight.id);
+            } else {
+              // Create new weight log entry
+              await supabase
+                .from('puppy_weight_logs')
+                .insert({
+                  puppy_id: data.puppy_id,
+                  date: logDate,
+                  weight: updates.weight
+                });
             }
           }
           
-          if (updates.height) {
-            // Find and update existing height log or create new one
+          if (updates.height !== undefined) {
+            // Find existing height log entry for this puppy and date
             const { data: existingHeight } = await supabase
               .from('puppy_height_logs')
               .select('id')
@@ -264,14 +275,24 @@ export const useWeeklyPhotos = (puppyId: string) => {
               .single();
               
             if (existingHeight) {
+              // Update existing height log
               await supabase
                 .from('puppy_height_logs')
-                .update({ date: updateDate, height: updates.height })
+                .update({ date: logDate, height: updates.height })
                 .eq('id', existingHeight.id);
+            } else {
+              // Create new height log entry
+              await supabase
+                .from('puppy_height_logs')
+                .insert({
+                  puppy_id: data.puppy_id,
+                  date: logDate,
+                  height: updates.height
+                });
             }
           }
         } catch (logError) {
-          console.error('Error updating measurement logs:', logError);
+          console.error('Error syncing measurement logs:', logError);
           // Don't throw here - photo was updated successfully
         }
       }
@@ -280,9 +301,14 @@ export const useWeeklyPhotos = (puppyId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['puppy-weekly-photos', puppyId] });
+      // Invalidate puppy queries to update growth charts
+      queryClient.invalidateQueries({ queryKey: ['puppies'] });
+      queryClient.invalidateQueries({ queryKey: ['puppy', puppyId] });
+      queryClient.invalidateQueries({ queryKey: ['puppy-weight-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['puppy-height-logs'] });
       toast({
         title: "Foto uppdaterat",
-        description: "Fotoinformationen har uppdaterats"
+        description: "Fotoinformationen har uppdaterats och tillväxtdata synkroniserad"
       });
     },
     onError: (error) => {
