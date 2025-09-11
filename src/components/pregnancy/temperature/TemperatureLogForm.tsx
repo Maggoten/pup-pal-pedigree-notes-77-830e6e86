@@ -52,46 +52,61 @@ const TemperatureLogForm: React.FC<TemperatureLogFormProps> = ({ onAddTemperatur
   };
 
   return (
-    <div className="mx-auto max-w-full space-y-4 border rounded-lg p-3 sm:p-4 bg-greige-50">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="date">{t('temperature.form.dateLabel')}</Label>
-          <DatePicker 
-            date={date} 
-            setDate={setDate} 
-            label="" 
+    <div className="w-full max-w-2xl mx-auto">
+      <div className="bg-gradient-to-br from-white to-greige-50 border border-sage-200 rounded-xl p-6 sm:p-8 shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <Label htmlFor="date" className="text-sm font-semibold text-sage-700">
+              {t('temperature.form.dateLabel')}
+            </Label>
+            <DatePicker 
+              date={date} 
+              setDate={setDate} 
+              label="" 
+              className="w-full"
+            />
+          </div>
+          
+          <div className="space-y-3">
+            <Label htmlFor="temperature" className="text-sm font-semibold text-sage-700">
+              {t('temperature.form.temperatureLabel')}
+            </Label>
+            <Input
+              id="temperature"
+              type="number"
+              step="0.1"
+              value={temperature}
+              onChange={(e) => setTemperature(e.target.value)}
+              placeholder={t('temperature.form.temperaturePlaceholder')}
+              className="h-12 text-lg font-medium border-sage-300 focus:border-sage-500"
+            />
+          </div>
+        </div>
+        
+        <div className="mt-6 space-y-3">
+          <Label htmlFor="notes" className="text-sm font-semibold text-sage-700">
+            {t('temperature.form.notesLabel')}
+          </Label>
+          <Input
+            id="notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder={t('temperature.form.notesPlaceholder')}
+            className="h-12 border-sage-300 focus:border-sage-500"
           />
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="temperature">{t('temperature.form.temperatureLabel')}</Label>
-          <Input
-            id="temperature"
-            type="number"
-            step="0.1"
-            value={temperature}
-            onChange={(e) => setTemperature(e.target.value)}
-            placeholder={t('temperature.form.temperaturePlaceholder')}
-          />
+        <div className="mt-8 flex justify-center lg:justify-start">
+          <Button 
+            onClick={handleSubmit} 
+            size="lg"
+            className="px-8 py-3 bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+          >
+            <Plus className="mr-2 h-5 w-5" /> 
+            {t('actions.addTemperature')}
+          </Button>
         </div>
       </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="notes">{t('temperature.form.notesLabel')}</Label>
-        <Input
-          id="notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder={t('temperature.form.notesPlaceholder')}
-        />
-      </div>
-      
-      <Button 
-        onClick={handleSubmit} 
-        className="w-full md:w-auto justify-center bg-sage-600 hover:bg-sage-700 text-white"
-      >
-        <Plus className="mr-2 h-4 w-4" /> {t('actions.addTemperature')}
-      </Button>
     </div>
   );
 };
