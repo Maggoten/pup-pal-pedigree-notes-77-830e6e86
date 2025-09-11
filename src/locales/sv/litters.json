@@ -41,6 +41,7 @@
     "completed": "Avslutad",
     "parents": "Föräldrar",
     "age": "Ålder",
+    "weekOld": "vecka gammal",
     "weeksOld": "veckor gammal",
     "total": "totalt"
   },

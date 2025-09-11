@@ -239,7 +239,7 @@ const PuppyProfile: React.FC = () => {
                 )}
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                {puppyAge} {puppyAge === 1 ? 'vecka gammal' : 'veckor gammal'} • {litter?.name}
+                {puppyAge} {puppyAge === 1 ? t('display.weekOld') : t('display.weeksOld')} • {litter?.name}
               </p>
             </div>
           </div>
