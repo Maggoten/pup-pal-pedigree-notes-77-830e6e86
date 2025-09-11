@@ -109,17 +109,30 @@ const SelectedLitterSection: React.FC<SelectedLitterSectionProps> = memo(({
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <TabsList className="grid grid-cols-3 mb-6 w-full h-12 bg-muted p-1 gap-1">
-            <TabsTrigger value="puppies" className="font-sourcesans font-bold text-primary data-[state=active]:text-primary">
-              {t('tabs.puppies')}
+          <TabsList className="grid grid-cols-3 mb-6 w-full bg-muted/50 p-1 gap-1 rounded-lg">
+            <TabsTrigger 
+              value="puppies" 
+              className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 px-2 sm:px-3 font-sourcesans font-medium text-sm data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200"
+            >
+              <span className="text-xs sm:text-sm font-medium truncate">{t('tabs.puppies')}</span>
             </TabsTrigger>
-            <TabsTrigger value="development" className="font-sourcesans font-bold text-primary data-[state=active]:text-primary">
-              <span className="hidden sm:inline">{t('tabs.development')}</span>
-              <span className="sm:hidden">{t('tabs.developmentShort')}</span>
+            <TabsTrigger 
+              value="development" 
+              className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 px-2 sm:px-3 font-sourcesans font-medium text-sm data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200"
+            >
+              <span className="text-xs sm:text-sm font-medium truncate">
+                <span className="hidden sm:inline">{t('tabs.development')}</span>
+                <span className="sm:hidden">{t('tabs.developmentShort')}</span>
+              </span>
             </TabsTrigger>
-            <TabsTrigger value="charts" className="font-sourcesans font-bold text-primary data-[state=active]:text-primary">
-              <span className="hidden sm:inline">{t('tabs.charts')}</span>
-              <span className="sm:hidden">{t('tabs.chartsShort')}</span>
+            <TabsTrigger 
+              value="charts" 
+              className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 px-2 sm:px-3 font-sourcesans font-medium text-sm data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200"
+            >
+              <span className="text-xs sm:text-sm font-medium truncate">
+                <span className="hidden sm:inline">{t('tabs.charts')}</span>
+                <span className="sm:hidden">{t('tabs.chartsShort')}</span>
+              </span>
             </TabsTrigger>
           </TabsList>
 
