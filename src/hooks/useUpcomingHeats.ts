@@ -36,11 +36,9 @@ export const useUpcomingHeats = () => {
       console.error('Error calculating upcoming heats:', error);
       setUpcomingHeats([]); // Fallback to empty array
     } finally {
-      // Use a minimum loading time to prevent flickering
-      loadingTimeoutRef.current = setTimeout(() => {
-        setLoading(false);
-        isCalculatingRef.current = false;
-      }, 300);
+      // Set loading to false immediately for faster UI response
+      setLoading(false);
+      isCalculatingRef.current = false;
     }
   }, [dogs]);
 

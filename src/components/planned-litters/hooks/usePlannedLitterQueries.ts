@@ -60,12 +60,12 @@ export const usePlannedLitterQueries = () => {
       
       console.log("Loading planned litters with retry logic...");
       
-      // Use fetchWithRetry for more reliable loading
+      // Use fetchWithRetry with optimized delays for faster initial load
       const litters = await fetchWithRetry(
         () => plannedLittersService.loadPlannedLitters(),
         {
-          maxRetries: 3, // Increased from 2 to 3
-          initialDelay: 1500, // Decreased from 2000 for faster first retry
+          maxRetries: isRefresh ? 3 : 2, // Fewer retries for initial load
+          initialDelay: isRefresh ? 1500 : 300, // Much faster initial load, keep longer delays for refresh
           onRetry: (attempt) => {
             setRetryCount(attempt);
             console.log(`Retry attempt ${attempt} for loading planned litters`);

@@ -77,12 +77,12 @@ export const usePlannedLitters = () => {
         });
       }
       
-      // Use fetchWithRetry for more reliable loading with mobile optimizations
+      // Use fetchWithRetry for more reliable loading with mobile optimizations (refresh operation)
       const litters = await fetchWithRetry(
         () => plannedLittersService.loadPlannedLitters(),
         {
           maxRetries: isMobile ? 3 : 2,
-          initialDelay: isMobile ? 1000 : 1500,
+          initialDelay: isMobile ? 1000 : 1500, // Keep longer delays for refresh
           onRetry: (attempt) => {
             toast({
               title: "Retrying connection",

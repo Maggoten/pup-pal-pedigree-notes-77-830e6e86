@@ -2,6 +2,7 @@
 import React from 'react';
 import PlannedLittersList from '@/components/planned-litters/PlannedLittersList';
 import EnhancedMatingSection from '@/components/planned-litters/mating/EnhancedMatingSection';
+import PlannedLittersLoadingSkeleton from './PlannedLittersLoadingSkeleton';
 import { usePlannedLitters } from '../hooks/usePlannedLitters';
 
 const PlannedLittersContent: React.FC = () => {
@@ -11,6 +12,7 @@ const PlannedLittersContent: React.FC = () => {
     recentMatings,
     males,
     females,
+    isLoading,
     handleAddPlannedLitter,
     handleEditPlannedLitter,
     handleAddMatingDate,
@@ -25,6 +27,11 @@ const PlannedLittersContent: React.FC = () => {
     // Refresh data after a heat entry is deleted
     refreshLitters();
   };
+
+  // Show loading skeleton while initial data is loading
+  if (isLoading) {
+    return <PlannedLittersLoadingSkeleton />;
+  }
 
   return (
     <div className="space-y-8">

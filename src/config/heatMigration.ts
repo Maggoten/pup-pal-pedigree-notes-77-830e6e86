@@ -23,8 +23,8 @@ export const HEAT_MIGRATION_CONFIG = {
     dogReminders: true,        // DogReminderService
   },
   
-  // Safety timeouts and limits
-  VALIDATION_TIMEOUT_MS: 5000,
+  // Safety timeouts and limits (increased for better reliability)
+  VALIDATION_TIMEOUT_MS: 8000,
   MAX_VALIDATION_RETRIES: 3,
 };
 
