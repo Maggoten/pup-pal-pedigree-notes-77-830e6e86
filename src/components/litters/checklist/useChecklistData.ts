@@ -107,13 +107,15 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
     return filtered;
   }, [checklist, puppyAge]);
   
-  // Group items by timeline segment (week ranges)
+  // Group items by timeline segment (week ranges) and sort chronologically within each segment
   const getItemsByTimeline = useCallback((filteredItems: ChecklistItem[]) => {
     const translations = getTimelineSegmentTranslations(t);
     return timelineSegments.map(segment => ({
       ...segment,
       name: translations[segment.name] || segment.name,
-      items: filteredItems.filter(item => item.age >= segment.min && item.age <= segment.max)
+      items: filteredItems
+        .filter(item => item.age >= segment.min && item.age <= segment.max)
+        .sort((a, b) => a.age - b.age) // Sort chronologically by age in days
     }));
   }, [t]);
   
