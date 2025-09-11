@@ -32,30 +32,22 @@ const TemperatureLog: React.FC<TemperatureLogProps> = ({ pregnancyId, femaleName
   }
   
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <Card className="bg-white/80 backdrop-blur-sm border-sage-200 shadow-lg rounded-xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-sage-50 to-greige-50 border-b border-sage-100 pb-6">
-          <CardTitle className="font-le-jour text-2xl sm:text-3xl text-sage-800">
-            {t('temperature.log.title')}
-          </CardTitle>
-          <CardDescription className="text-sage-600 text-base sm:text-lg mt-2">
-            {t('temperature.log.description', { femaleName })}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-6 sm:p-8">
-          <div className="space-y-8">
-            <TemperatureLogForm onAddTemperature={addTemperature} />
-            <div className="border-t border-sage-100 pt-8">
-              <TemperatureHistory 
-                temperatures={temperatures} 
-                onDeleteTemperature={deleteTemperature}
-                onUpdateTemperature={updateTemperature}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <Card className="bg-white border-sage-200">
+      <CardHeader className="border-b border-sage-100">
+        <CardTitle className="font-le-jour">{t('temperature.log.title')}</CardTitle>
+        <CardDescription>{t('temperature.log.description', { femaleName })}</CardDescription>
+      </CardHeader>
+      <CardContent className="pt-6">
+        <div className="grid gap-6">
+          <TemperatureLogForm onAddTemperature={addTemperature} />
+          <TemperatureHistory 
+            temperatures={temperatures} 
+            onDeleteTemperature={deleteTemperature}
+            onUpdateTemperature={updateTemperature}
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
