@@ -25,16 +25,7 @@ const PuppyDevelopmentTab: React.FC<PuppyDevelopmentTabProps> = ({
 
   return (
     <div className="space-y-4">
-      <Accordion type="multiple" defaultValue={["growth-charts"]} className="w-full">
-        <AccordionItem value="growth-charts">
-          <AccordionTrigger className="text-lg font-semibold">
-            {t('puppies.titles.growthCharts')}
-          </AccordionTrigger>
-          <AccordionContent>
-            <PuppyMeasurementsChart puppy={puppy} />
-          </AccordionContent>
-        </AccordionItem>
-        
+      <Accordion type="multiple" className="w-full">
         <AccordionItem value="weekly-photos">
           <AccordionTrigger className="text-lg font-semibold">
             {t('puppies.titles.weeklyPhotos')}
@@ -45,6 +36,15 @@ const PuppyDevelopmentTab: React.FC<PuppyDevelopmentTabProps> = ({
               litter={litter}
               onUpdate={onUpdatePuppy}
             />
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="growth-charts">
+          <AccordionTrigger className="text-lg font-semibold">
+            {t('puppies.titles.growthCharts')}
+          </AccordionTrigger>
+          <AccordionContent>
+            <PuppyMeasurementsChart puppy={puppy} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
