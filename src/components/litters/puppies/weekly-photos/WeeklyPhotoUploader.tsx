@@ -167,7 +167,7 @@ const WeeklyPhotoUploader: React.FC<WeeklyPhotoUploaderProps> = ({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="height">Längd (cm)</Label>
+              <Label htmlFor="height">Höjd (cm)</Label>
               <Input
                 id="height"
                 type="number"

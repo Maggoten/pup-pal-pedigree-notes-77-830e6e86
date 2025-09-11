@@ -62,7 +62,7 @@ export const useWeeklyPhotos = (puppyId: string) => {
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('puppy-images')
+        .from('dog-photos')
         .getPublicUrl(fileName);
 
       // Save to database
@@ -84,13 +84,58 @@ export const useWeeklyPhotos = (puppyId: string) => {
         throw dbError;
       }
 
+      // If weight or height was provided, also save to puppy logs for growth charts
+      if (data.weight || data.height) {
+        const currentDate = new Date().toISOString();
+        
+        try {
+          // Add weight log entry if weight provided
+          if (data.weight) {
+            const { error: weightError } = await supabase
+              .from('puppy_weight_logs')
+              .insert({
+                puppy_id: data.puppy_id,
+                date: currentDate,
+                weight: data.weight
+              });
+            
+            if (weightError) {
+              console.error('Error saving weight log:', weightError);
+              // Don't throw here - photo was saved successfully
+            }
+          }
+
+          // Add height log entry if height provided  
+          if (data.height) {
+            const { error: heightError } = await supabase
+              .from('puppy_height_logs')
+              .insert({
+                puppy_id: data.puppy_id,
+                date: currentDate,
+                height: data.height
+              });
+            
+            if (heightError) {
+              console.error('Error saving height log:', heightError);
+              // Don't throw here - photo was saved successfully
+            }
+          }
+        } catch (logError) {
+          console.error('Error saving measurement logs:', logError);
+          // Don't throw here - photo was saved successfully, logs are secondary
+        }
+      }
+
       return photoData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['puppy-weekly-photos', puppyId] });
+      // Also invalidate puppy queries to update growth charts
+      queryClient.invalidateQueries({ queryKey: ['puppies'] });
+      queryClient.invalidateQueries({ queryKey: ['puppy', puppyId] });
       toast({
         title: "Foto uppladdad",
-        description: "Det veckovisa fotot har sparats"
+        description: "Det veckovisa fotot har sparats och mätningar lagts till i tillväxtdata"
       });
     },
     onError: (error) => {
