@@ -2,7 +2,7 @@
 import { ChecklistGroup } from "@/types/checklist";
 
 // Add a constant for the current checklist version
-export const CURRENT_CHECKLIST_VERSION = 2;
+export const CURRENT_CHECKLIST_VERSION = 3;
 
 export const defaultPregnancyChecklist: ChecklistGroup[] = [
   {
@@ -13,6 +13,13 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
         id: "week1-1",
         text: "checklist.items.week1.item1.text",
         description: "checklist.items.week1.item1.description",
+        isCompleted: false,
+        weekNumber: 1
+      },
+      {
+        id: "week1-2",
+        text: "checklist.items.week1.item2.text",
+        description: "checklist.items.week1.item2.description",
         isCompleted: false,
         weekNumber: 1
       }
@@ -48,6 +55,13 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
         description: "checklist.items.week3.item1.description",
         isCompleted: false,
         weekNumber: 3
+      },
+      {
+        id: "week3-2",
+        text: "checklist.items.week3.item2.text",
+        description: "checklist.items.week3.item2.description",
+        isCompleted: false,
+        weekNumber: 3
       }
     ]
   },
@@ -81,6 +95,13 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
         description: "checklist.items.week5.item1.description",
         isCompleted: false,
         weekNumber: 5
+      },
+      {
+        id: "week5-2",
+        text: "checklist.items.week5.item2.text",
+        description: "checklist.items.week5.item2.description",
+        isCompleted: false,
+        weekNumber: 5
       }
     ]
   },
@@ -99,6 +120,20 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
         id: "week6-2",
         text: "checklist.items.week6.item2.text",
         description: "checklist.items.week6.item2.description",
+        isCompleted: false,
+        weekNumber: 6
+      },
+      {
+        id: "week6-3",
+        text: "checklist.items.week6.item3.text",
+        description: "checklist.items.week6.item3.description",
+        isCompleted: false,
+        weekNumber: 6
+      },
+      {
+        id: "week6-4",
+        text: "checklist.items.week6.item4.text",
+        description: "checklist.items.week6.item4.description",
         isCompleted: false,
         weekNumber: 6
       }
@@ -134,6 +169,41 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
         description: "checklist.items.week8.item1.description",
         isCompleted: false,
         weekNumber: 8
+      },
+      {
+        id: "week8-2",
+        text: "checklist.items.week8.item2.text",
+        description: "checklist.items.week8.item2.description",
+        isCompleted: false,
+        weekNumber: 8
+      },
+      {
+        id: "week8-3",
+        text: "checklist.items.week8.item3.text",
+        description: "checklist.items.week8.item3.description",
+        isCompleted: false,
+        weekNumber: 8
+      },
+      {
+        id: "week8-4",
+        text: "checklist.items.week8.item4.text",
+        description: "checklist.items.week8.item4.description",
+        isCompleted: false,
+        weekNumber: 8
+      },
+      {
+        id: "week8-5",
+        text: "checklist.items.week8.item5.text",
+        description: "checklist.items.week8.item5.description",
+        isCompleted: false,
+        weekNumber: 8
+      },
+      {
+        id: "week8-6",
+        text: "checklist.items.week8.item6.text",
+        description: "checklist.items.week8.item6.description",
+        isCompleted: false,
+        weekNumber: 8
       }
     ]
   },
@@ -166,6 +236,27 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
         id: "week9-4",
         text: "checklist.items.week9.item4.text",
         description: "checklist.items.week9.item4.description",
+        isCompleted: false,
+        weekNumber: 9
+      },
+      {
+        id: "week9-5",
+        text: "checklist.items.week9.item5.text",
+        description: "checklist.items.week9.item5.description",
+        isCompleted: false,
+        weekNumber: 9
+      },
+      {
+        id: "week9-6",
+        text: "checklist.items.week9.item6.text",
+        description: "checklist.items.week9.item6.description",
+        isCompleted: false,
+        weekNumber: 9
+      },
+      {
+        id: "week9-7",
+        text: "checklist.items.week9.item7.text",
+        description: "checklist.items.week9.item7.description",
         isCompleted: false,
         weekNumber: 9
       }

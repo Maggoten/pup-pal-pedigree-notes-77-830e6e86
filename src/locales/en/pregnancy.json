@@ -245,22 +245,30 @@
         "item1": {
           "text": "Slight appetite change",
           "description": "May eat less or become slightly pickier as hormone levels begin to shift."
+        },
+        "item2": {
+          "text": "Possibly more tired than usual",
+          "description": "May seem somewhat more tired or calm due to early hormonal changes."
         }
       },
       "week2": {
         "item1": {
-          "text": "Slight behavioral change",
-          "description": "May become more affectionate, clingy or tired."
+          "text": "Mild nausea (morning sickness)",
+          "description": "Slight nausea or vomiting due to hormonal changes, usually in the morning."
         },
         "item2": {
-          "text": "Mild nausea (morning sickness)",
-          "description": "May vomit slightly or seem queasy due to hormonal changes."
+          "text": "Slight behavioral change",
+          "description": "More affectionate or distant, may seek or avoid contact more than usual."
         }
       },
       "week3": {
         "item1": {
-          "text": "Clear vaginal discharge",
-          "description": "Small amount of clear, non-smelly discharge can appear when embryos implant."
+          "text": "Vaginal discharge (clear/whitish)",
+          "description": "Small amount of clear or whitish discharge may appear when embryos implant."
+        },
+        "item2": {
+          "text": "Bitch's body begins adapting to pregnancy",
+          "description": "Body undergoes early adaptations to support the growing pregnancy."
         }
       },
       "week4": {
@@ -277,6 +285,10 @@
         "item1": {
           "text": "Increased appetite",
           "description": "Appetite increases as hormone levels stabilize and fetal growth accelerates."
+        },
+        "item2": {
+          "text": "Begin gradually increasing food amount",
+          "description": "Increase food amount by approximately 10-15% per week forward, based on the bitch's needs and condition."
         }
       },
       "week6": {
@@ -286,7 +298,15 @@
         },
         "item2": {
           "text": "Possible fetal movement",
-          "description": "Some may feel slight movement when gently palpating, but more common in Week 7–8."
+          "description": "Some may feel slight movement during gentle palpation, but more common in weeks 7-8."
+        },
+        "item3": {
+          "text": "Continue gradually increasing food amount",
+          "description": "Continue adjusting food amount according to the bitch's needs and development."
+        },
+        "item4": {
+          "text": "Prepare whelping box in a quiet place",
+          "description": "Place whelping box in a quiet, secure location and familiarize the bitch with it now."
         }
       },
       "week7": {
@@ -295,32 +315,64 @@
           "description": "Belly is clearly distended; pregnancy very visible."
         },
         "item2": {
-          "text": "Nesting behavior begins",
+          "text": "Nesting behavior starts",
           "description": "May begin arranging bedding, digging or seeking quiet areas."
         }
       },
       "week8": {
         "item1": {
-          "text": "Increased vaginal discharge",
-          "description": "Clear discharge may increase slightly as the body prepares for labor."
+          "text": "Possibly increased vaginal discharge",
+          "description": "Clear discharge may increase slightly as body prepares for labor."
+        },
+        "item2": {
+          "text": "Have thermometer and scale ready",
+          "description": "Prepare equipment for temperature monitoring and weighing puppies."
+        },
+        "item3": {
+          "text": "Prepare heat source",
+          "description": "Prepare heating pad or heat lamp with protection for the puppies."
+        },
+        "item4": {
+          "text": "Prepare whelping equipment",
+          "description": "Gather gloves, scissors, sterile umbilical cord thread, towels and disinfectant."
+        },
+        "item5": {
+          "text": "Double-check veterinarian's emergency number",
+          "description": "Ensure you have the veterinarian's contact information easily accessible."
+        },
+        "item6": {
+          "text": "Wash and prepare clean blankets/sheets",
+          "description": "Prepare clean, washed textiles for the whelping box and birthing."
         }
       },
       "week9": {
         "item1": {
           "text": "Temperature drop",
-          "description": "Rectal temperature drops below 100°F (37.8°C) 12–24 hours before labor."
+          "description": "Rectal temperature drops below 100°F (37.8°C) 12-24 hours before labor."
         },
         "item2": {
           "text": "Restlessness and panting",
           "description": "Difficulty settling, increased panting and pacing."
         },
         "item3": {
-          "text": "Refusing food",
-          "description": "Appetite may vanish shortly before labor starts."
+          "text": "Decreased appetite",
+          "description": "Appetite may disappear shortly before labor begins."
         },
         "item4": {
           "text": "Active labor begins",
           "description": "Strong contractions followed by delivery of puppies."
+        },
+        "item5": {
+          "text": "Have crate ready for emergency transport",
+          "description": "Prepare transport option to veterinarian if needed."
+        },
+        "item6": {
+          "text": "Prepare energy and fluid supplements for the bitch",
+          "description": "Have nutritious supplements ready for the bitch during and after whelping."
+        },
+        "item7": {
+          "text": "Ensure you have help available",
+          "description": "Family member, friend or mentor should be available if needed."
         }
       }
     },

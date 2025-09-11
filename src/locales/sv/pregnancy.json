@@ -244,23 +244,31 @@
       "week1": {
         "item1": {
           "text": "Lätt aptitförändring",
-          "description": "Tiken kan ha sämre matlust och bli mer kräsen när hormonnivåerna börjar förändras."
+          "description": "Kan äta mindre eller bli något kräsen när hormonerna börjar förändras."
+        },
+        "item2": {
+          "text": "Eventuellt lite tröttare än vanligt",
+          "description": "Kan verka något mer trött eller lugn på grund av tidiga hormonella förändringar."
         }
       },
       "week2": {
         "item1": {
-          "text": "Lätt beteendeförändring",
-          "description": "Kan bli mer kärleksfull, gosig eller trött."
+          "text": "Milt illamående (morgonkräkningar)",
+          "description": "Lätt illamående eller kräkning på grund av hormonella förändringar, oftast på morgonen."
         },
         "item2": {
-          "text": "Mildt illamående (morgonkräkningar)",
-          "description": "Kan kräkas lätt eller verka illamående på grund av hormonförändringar."
+          "text": "Lätt beteendeförändring",
+          "description": "Mer närhetssökande eller tvärtom, kan söka eller undvika kontakt mer än vanligt."
         }
       },
       "week3": {
         "item1": {
-          "text": "Vaginal flytning",
-          "description": "Liten mängd klar, luktfri flytning kan förekomma när embryon implanteras."
+          "text": "Vaginal flytning (klar/vitaktig)",
+          "description": "Liten mängd klar eller vitaktig flytning kan uppträda när embryona fäster sig."
+        },
+        "item2": {
+          "text": "Tikens kropp börjar anpassa sig till dräktigheten",
+          "description": "Kroppen genomgår tidiga anpassningar för att stödja den växande dräktigheten."
         }
       },
       "week4": {
@@ -270,57 +278,101 @@
         },
         "item2": {
           "text": "Märkbar viktökning",
-          "description": "Lätt ökning av kroppsvikt när dräktigheten fortskrider."
+          "description": "Lätt ökning av kroppsvikt när dräktigheten utvecklas."
         }
       },
       "week5": {
         "item1": {
           "text": "Ökad aptit",
-          "description": "Aptiten ökar när hormonnivåerna stabiliseras och fosterutvecklingen accelererar."
+          "description": "Aptiten ökar när hormonerna stabiliseras och fostertillväxten accelererar."
+        },
+        "item2": {
+          "text": "Börja successivt öka fodermängden",
+          "description": "Öka fodermängden med ca 10-15% per vecka framåt, utifrån tikens behov och hull."
         }
       },
       "week6": {
         "item1": {
           "text": "Synlig magförstoring",
-          "description": "Det börjar synas att tikens buk expanderar."
+          "description": "Buken börjar expandera synligt."
         },
         "item2": {
           "text": "Möjlig fosterrörelse",
-          "description": "Vissa kan känna lätt rörelse vid försiktig palpering, men mer vanligt i vecka 7–8."
+          "description": "Vissa kan känna lätta rörelser vid försiktig palpation, men vanligare i vecka 7-8."
+        },
+        "item3": {
+          "text": "Fortsätt successivt öka fodermängden",
+          "description": "Fortsätt att anpassa fodermängden efter tikens behov och utveckling."
+        },
+        "item4": {
+          "text": "Förbered valplådan på en lugn plats",
+          "description": "Placera valplådan på en lugn, trygg plats och vänja tiken vid den redan nu."
         }
       },
       "week7": {
         "item1": {
           "text": "Betydande bukförstoring",
-          "description": "Tikens buken är nu tydligt utspänd; dräktigheten är synlig."
+          "description": "Buken är tydligt utvidgad; dräktigheten mycket synlig."
         },
         "item2": {
           "text": "Bobyggandebeteende startar",
-          "description": "Tiken börjar bädda iordning i sin plats, gräva eller söka efter lugna områden."
+          "description": "Kan börja arrangera sängkläder, gräva eller söka tysta områden."
         }
       },
       "week8": {
         "item1": {
-          "text": "Ökad vaginal flytning",
+          "text": "Eventuellt ökad vaginal flytning",
           "description": "Klar flytning kan öka något när kroppen förbereder sig för förlossning."
+        },
+        "item2": {
+          "text": "Ha termometer och våg redo",
+          "description": "Förbered utrustning för temperaturmätning och vägning av valpar."
+        },
+        "item3": {
+          "text": "Förbered värmekälla",
+          "description": "Förbered värmedyna eller värmelampa med skydd för valparna."
+        },
+        "item4": {
+          "text": "Förbered valpningsutrustning",
+          "description": "Samla handskar, sax, steril naveltråd, handdukar och desinfektionsmedel."
+        },
+        "item5": {
+          "text": "Dubbelkolla veterinärens journummer",
+          "description": "Säkerställ att du har veterinärens kontaktuppgifter lättillgängliga."
+        },
+        "item6": {
+          "text": "Tvätta och förbered rena filtar/lakan",
+          "description": "Förbered rena, tvättade textilier för valplådan och valpningen."
         }
       },
       "week9": {
         "item1": {
           "text": "Temperaturfall",
-          "description": "Rektal temperatur sjunker under 37,8°C 12–24 timmar före förlossning."
+          "description": "Rektaltemperaturen sjunker under 37,8°C 12-24 timmar före förlossning."
         },
         "item2": {
           "text": "Rastlöshet och flämtning",
-          "description": "Svårighet att lugna sig, ökad flämtning och vandrande."
+          "description": "Svårighet att vila, ökad flämtning och vandrande."
         },
         "item3": {
-          "text": "Vägrar mat",
-          "description": "Aptiten kan försvinna strax innan förlossningen börjar."
+          "text": "Minskad aptit",
+          "description": "Aptiten kan försvinna kort innan förlossningen börjar."
         },
         "item4": {
           "text": "Aktiv förlossning börjar",
-          "description": "Starka sammandragningar följt av förlossning av valpar."
+          "description": "Kraftiga värkar följt av förlossning av valpar."
+        },
+        "item5": {
+          "text": "Ha bur redo för akut transport",
+          "description": "Förbered transportmöjlighet till veterinär om det skulle behövas."
+        },
+        "item6": {
+          "text": "Förbered energi- och vätsketillskott till tiken",
+          "description": "Ha näringsrika tillskott redo för tiken under och efter förlossningen."
+        },
+        "item7": {
+          "text": "Se till att du har hjälp tillgänglig",
+          "description": "Familjemedlem, vän eller mentor bör vara tillgänglig vid behov."
         }
       }
     },
