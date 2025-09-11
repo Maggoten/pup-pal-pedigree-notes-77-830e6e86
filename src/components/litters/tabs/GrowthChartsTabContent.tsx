@@ -51,13 +51,13 @@ const GrowthChartsTabContent: React.FC<GrowthChartsTabContentProps> = ({
   return (
     <Card className="shadow-sm">
       <CardHeader className="bg-primary/5 pb-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <ChartBar className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg font-semibold">{t('tabs.growthCharts')}</CardTitle>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 self-start sm:self-auto">
             <LogTypeToggle logType={logType} setLogType={setLogType} />
           </div>
         </div>
