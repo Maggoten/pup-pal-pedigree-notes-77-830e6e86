@@ -81,7 +81,13 @@ const WeeklyPhotosSection: React.FC<WeeklyPhotosSectionProps> = ({
     setShowEditor(true);
   };
 
-  const handleUpdatePhoto = async (photoId: string, updates: { notes?: string; weight?: number; height?: number }) => {
+  const handleUpdatePhoto = async (photoId: string, updates: { 
+    notes?: string; 
+    weight?: number; 
+    height?: number; 
+    date_taken?: string; 
+    new_image?: File 
+  }) => {
     try {
       await updateWeeklyPhoto({ photoId, updates });
       setShowEditor(false);

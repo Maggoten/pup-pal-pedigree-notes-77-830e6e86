@@ -182,11 +182,47 @@ export const useWeeklyPhotos = (puppyId: string) => {
   const updateMutation = useMutation({
     mutationFn: async ({ photoId, updates }: { 
       photoId: string; 
-      updates: Partial<Pick<PuppyWeeklyPhoto, 'notes' | 'weight' | 'height'>> 
+      updates: Partial<Pick<PuppyWeeklyPhoto, 'notes' | 'weight' | 'height' | 'date_taken' | 'image_url'>> & { new_image?: File } 
     }) => {
+      let finalUpdates: Partial<Pick<PuppyWeeklyPhoto, 'notes' | 'weight' | 'height' | 'date_taken' | 'image_url'>> = { ...updates };
+      
+      // Handle image upload if new image provided
+      if (updates.new_image) {
+        if (!user?.id) throw new Error('User not authenticated');
+        
+        // Get current photo data to find puppy_id and week_number
+        const { data: currentPhoto } = await supabase
+          .from('puppy_weekly_photos')
+          .select('puppy_id, week_number')
+          .eq('id', photoId)
+          .single();
+          
+        if (!currentPhoto) throw new Error('Photo not found');
+
+        // Generate unique filename for new image
+        const fileExtension = updates.new_image.name.split('.').pop();
+        const fileName = `${user.id}/puppies/${currentPhoto.puppy_id}/weekly/${currentPhoto.week_number}-${uuidv4()}.${fileExtension}`;
+
+        // Upload new image to storage
+        const uploadResult = await uploadToStorage(fileName, updates.new_image);
+        
+        if (uploadResult && typeof uploadResult === 'object' && 'error' in uploadResult && uploadResult.error) {
+          throw new Error((uploadResult.error as any).message || 'Upload failed');
+        }
+
+        // Get public URL for new image
+        const { data: { publicUrl } } = supabase.storage
+          .from('dog-photos')
+          .getPublicUrl(fileName);
+          
+        finalUpdates.image_url = publicUrl;
+        delete (finalUpdates as any).new_image;
+      }
+
+      // Update database
       const { data, error } = await supabase
         .from('puppy_weekly_photos')
-        .update(updates)
+        .update(finalUpdates)
         .eq('id', photoId)
         .select()
         .single();
@@ -194,6 +230,50 @@ export const useWeeklyPhotos = (puppyId: string) => {
       if (error) {
         console.error('Error updating weekly photo:', error);
         throw error;
+      }
+
+      // If weight/height was updated and date_taken was changed, update corresponding logs
+      if ((updates.weight || updates.height) && updates.date_taken) {
+        try {
+          const updateDate = updates.date_taken;
+          
+          if (updates.weight) {
+            // Find and update existing weight log or create new one
+            const { data: existingWeight } = await supabase
+              .from('puppy_weight_logs')
+              .select('id')
+              .eq('puppy_id', data.puppy_id)
+              .eq('date', data.date_taken)
+              .single();
+              
+            if (existingWeight) {
+              await supabase
+                .from('puppy_weight_logs')
+                .update({ date: updateDate, weight: updates.weight })
+                .eq('id', existingWeight.id);
+            }
+          }
+          
+          if (updates.height) {
+            // Find and update existing height log or create new one
+            const { data: existingHeight } = await supabase
+              .from('puppy_height_logs')
+              .select('id')
+              .eq('puppy_id', data.puppy_id)
+              .eq('date', data.date_taken)
+              .single();
+              
+            if (existingHeight) {
+              await supabase
+                .from('puppy_height_logs')
+                .update({ date: updateDate, height: updates.height })
+                .eq('id', existingHeight.id);
+            }
+          }
+        } catch (logError) {
+          console.error('Error updating measurement logs:', logError);
+          // Don't throw here - photo was updated successfully
+        }
       }
 
       return data;
