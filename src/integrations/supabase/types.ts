@@ -511,6 +511,36 @@ export type Database = {
           },
         ]
       }
+      pre_breeding_checklists: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: string
+          item_id: string
+          planned_litter_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          item_id: string
+          planned_litter_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          item_id?: string
+          planned_litter_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pregnancies: {
         Row: {
           created_at: string

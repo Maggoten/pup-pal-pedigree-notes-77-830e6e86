@@ -120,7 +120,8 @@
   },
   "preBreeding": {
     "checklist": {
-      "title": "Checklista",
+      "title": "Checklista för Avelförberedelser",
+      "description": "Slutför dessa viktiga uppgifter innan avel",
       "progress": "{{completed}} av {{total}} slutförda",
       "allComplete": "Alla punkter slutförda!",
       "breedingPreparationChecklist": "Checklista för Avelförberedelser",
@@ -128,7 +129,83 @@
       "overallProgress": "Övergripande Progress",
       "allPreparationsComplete": "Alla förberedelser klara!",
       "readyToProceed": "Du är redo att fortsätta med parningen.",
-      "loadingChecklist": "Laddar checklista..."
+      "loadingChecklist": "Laddar checklista...",
+      "completed": "Avelförberedelser klara!",
+      "completedDescription": "Du har slutfört alla föraveluppgifter. Du är redo för nästa steg!",
+      "groups": {
+        "health": {
+          "title": "Hälsokontroller",
+          "items": {
+            "health-1": {
+              "text": "Slutför hälsoscreening för tik",
+              "description": "Säkerställ att alla rasspecifika hälsotester är slutförda"
+            },
+            "health-2": {
+              "text": "Slutför hälsoscreening för hane",
+              "description": "Säkerställ att alla rasspecifika hälsotester är slutförda"
+            },
+            "health-3": {
+              "text": "Kontrollera vaccinationsstatus",
+              "description": "Säkerställ att alla vaccinationer är aktuella"
+            },
+            "health-4": {
+              "text": "Verifiera att tiken har optimal vikt",
+              "description": "Varken underviktig eller överviktig för avel"
+            }
+          }
+        },
+        "genetic": {
+          "title": "Genetiska överväganden",
+          "items": {
+            "genetic-1": {
+              "text": "Undersök kompatibla blodlinjer",
+              "description": "Säkerställ genetisk mångfald och kompletterande egenskaper"
+            },
+            "genetic-2": {
+              "text": "Kontrollera genetiska störningar i släktleden",
+              "description": "Undersök familjehistoria för båda hundarna"
+            }
+          }
+        },
+        "practical": {
+          "title": "Praktiska förberedelser",
+          "items": {
+            "practical-1": {
+              "text": "Förbered valpningsområde",
+              "description": "Skapa ett rent, lugnt utrymme med lämplig bäddning"
+            },
+            "practical-2": {
+              "text": "Montera valpningskit",
+              "description": "Inkludera rena handdukar, värmekudde, sax, tandtråd, etc."
+            },
+            "practical-3": {
+              "text": "Boka konsultation med veterinär",
+              "description": "Diskutera avelsplanen med din veterinär"
+            },
+            "practical-4": {
+              "text": "Planera för potentiella akuta veterinärbesök",
+              "description": "Vet var du ska vända dig för akutsjukvård under icke-arbetstid"
+            }
+          }
+        },
+        "admin": {
+          "title": "Administrativa uppgifter",
+          "items": {
+            "admin-1": {
+              "text": "Kontrollera rasklubbs regler",
+              "description": "Säkerställ efterlevnad av rasspecifika krav"
+            },
+            "admin-2": {
+              "text": "Förbered valpkontrakt",
+              "description": "Utforma försäljningsavtal och hälsogarantier"
+            },
+            "admin-3": {
+              "text": "Undersök potentiella köpare/hem",
+              "description": "Börja bygga en väntelista över godkända hem"
+            }
+          }
+        }
+      }
     }
   },
   "matingSection": {

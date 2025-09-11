@@ -121,6 +121,7 @@
   "preBreeding": {
     "checklist": {
       "title": "Pre-Breeding Checklist",
+      "description": "Complete these essential tasks before breeding",
       "progress": "{{completed}} of {{total}} completed",
       "allComplete": "All checklist items completed! Ready for breeding.",
       "breedingPreparationChecklist": "Breeding Preparation Checklist",
@@ -128,7 +129,83 @@
       "overallProgress": "Overall Progress",
       "allPreparationsComplete": "All preparations complete!",
       "readyToProceed": "You're ready to proceed with the breeding.",
-      "loadingChecklist": "Loading checklist..."
+      "loadingChecklist": "Loading checklist...",
+      "completed": "Breeding preparation complete!",
+      "completedDescription": "You've completed all pre-breeding tasks. You're ready for the next step!",
+      "groups": {
+        "health": {
+          "title": "Health Checks",
+          "items": {
+            "health-1": {
+              "text": "Complete health screenings for female",
+              "description": "Ensure all breed-specific health tests are completed"
+            },
+            "health-2": {
+              "text": "Complete health screenings for male", 
+              "description": "Ensure all breed-specific health tests are completed"
+            },
+            "health-3": {
+              "text": "Check vaccination status",
+              "description": "Ensure all vaccinations are up to date"
+            },
+            "health-4": {
+              "text": "Verify female is at optimal weight",
+              "description": "Neither underweight nor overweight for breeding"
+            }
+          }
+        },
+        "genetic": {
+          "title": "Genetic Considerations",
+          "items": {
+            "genetic-1": {
+              "text": "Research compatible bloodlines",
+              "description": "Ensure genetic diversity and complementary traits"
+            },
+            "genetic-2": {
+              "text": "Check for genetic disorders in the lineage",
+              "description": "Research family history for both dogs"
+            }
+          }
+        },
+        "practical": {
+          "title": "Practical Preparations",
+          "items": {
+            "practical-1": {
+              "text": "Prepare whelping area",
+              "description": "Set up a clean, quiet space with appropriate bedding"
+            },
+            "practical-2": {
+              "text": "Assemble whelping kit",
+              "description": "Include clean towels, heating pad, scissors, dental floss, etc."
+            },
+            "practical-3": {
+              "text": "Schedule consultation with veterinarian",
+              "description": "Discuss the breeding plan with your vet"
+            },
+            "practical-4": {
+              "text": "Plan for potential emergency vet visits",
+              "description": "Know where to go for emergency care during off-hours"
+            }
+          }
+        },
+        "admin": {
+          "title": "Administrative Tasks",
+          "items": {
+            "admin-1": {
+              "text": "Check breed club regulations",
+              "description": "Ensure compliance with breed-specific requirements"
+            },
+            "admin-2": {
+              "text": "Prepare puppy contracts",
+              "description": "Draft sales agreements and health guarantees"
+            },
+            "admin-3": {
+              "text": "Research potential buyers/homes",
+              "description": "Start building a waiting list of approved homes"
+            }
+          }
+        }
+      }
     }
   },
   "matingSection": {

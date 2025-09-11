@@ -4,7 +4,7 @@ import { usePreBreedingChecklist } from '@/hooks/usePreBreedingChecklist';
 import ChecklistGroup from '@/components/checklist/ChecklistGroup';
 import ChecklistProgress from '@/components/checklist/ChecklistProgress';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ClipboardCheck } from 'lucide-react';
+import { ClipboardCheck, Loader2 } from 'lucide-react';
 import { PlannedLitter } from '@/types/breeding';
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +14,18 @@ interface PreBreedingChecklistProps {
 
 const PreBreedingChecklist: React.FC<PreBreedingChecklistProps> = ({ litter }) => {
   const { t } = useTranslation('plannedLitters');
-  const { checklist, toggleItemCompletion } = usePreBreedingChecklist(litter.id);
+  const { checklist, toggleItemCompletion, isLoading } = usePreBreedingChecklist(litter.id);
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+          <p className="text-muted-foreground">{t('preBreeding.checklist.loadingChecklist')}</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!checklist) {
     return <div>{t('preBreeding.checklist.loadingChecklist')}</div>;
@@ -26,11 +37,11 @@ const PreBreedingChecklist: React.FC<PreBreedingChecklistProps> = ({ litter }) =
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <ClipboardCheck className="h-5 w-5 text-purple-500 mr-2" />
-            <CardTitle>{t('preBreeding.checklist.breedingPreparationChecklist')}</CardTitle>
+            <CardTitle>{t('preBreeding.checklist.title')}</CardTitle>
           </div>
         </div>
         <CardDescription>
-          {t('preBreeding.checklist.completeTasks', { femaleName: litter.femaleName, maleName: litter.maleName })}
+          {t('preBreeding.checklist.description')}
         </CardDescription>
         
         <ChecklistProgress 
