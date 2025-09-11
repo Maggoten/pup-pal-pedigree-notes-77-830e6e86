@@ -273,19 +273,21 @@ const PuppyProfile: React.FC = () => {
           </Tabs>
         </CardContent>
 
-        <CardFooter className="flex justify-between items-center">
-          <Button 
-            variant="destructive" 
-            onClick={() => setShowDeleteDialog(true)}
-          >
-             <Trash2 className="h-4 w-4 mr-2" />
-             {t('actions.delete')}
-          </Button>
-          <Button onClick={() => setShowEditDialog(true)}>
-             <Edit className="h-4 w-4 mr-2" />
-             {t('actions.edit')}
-          </Button>
-        </CardFooter>
+        {activeTab === 'overview' && (
+          <CardFooter className="flex justify-between items-center">
+            <Button 
+              variant="destructive" 
+              onClick={() => setShowDeleteDialog(true)}
+            >
+               <Trash2 className="h-4 w-4 mr-2" />
+               {t('actions.delete')}
+            </Button>
+            <Button onClick={() => setShowEditDialog(true)}>
+               <Edit className="h-4 w-4 mr-2" />
+               {t('actions.edit')}
+            </Button>
+          </CardFooter>
+        )}
       </Card>
 
       {/* Edit Dialog */}
