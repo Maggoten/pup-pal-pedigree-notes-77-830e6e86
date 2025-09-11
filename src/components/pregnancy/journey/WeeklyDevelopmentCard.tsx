@@ -19,7 +19,7 @@ const WeeklyDevelopmentCard: React.FC<WeeklyDevelopmentCardProps> = ({
   
   if (!ready) {
     return (
-      <Card className="h-full">
+      <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <PawPrint className="h-5 w-5 text-primary" />
@@ -47,7 +47,7 @@ const WeeklyDevelopmentCard: React.FC<WeeklyDevelopmentCardProps> = ({
     : development.keyPoints || [];
   
   return (
-    <Card className="h-full">
+    <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
           <PawPrint className="h-5 w-5 text-primary" />

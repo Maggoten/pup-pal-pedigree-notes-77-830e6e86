@@ -33,7 +33,7 @@ const WeeklyChecklist: React.FC<WeeklyChecklistProps> = ({
   // Loading state or translations not ready
   if (!ready || isLoading) {
     return (
-      <Card className="h-full">
+      <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <ClipboardList className="h-5 w-5 text-primary" />
@@ -51,7 +51,7 @@ const WeeklyChecklist: React.FC<WeeklyChecklistProps> = ({
   // No items
   if (!checklistItems || checklistItems.length === 0) {
     return (
-      <Card className="h-full">
+      <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <ClipboardList className="h-5 w-5 text-primary" />
@@ -67,7 +67,7 @@ const WeeklyChecklist: React.FC<WeeklyChecklistProps> = ({
 
   // Render checklist
   return (
-    <Card className="h-full">
+    <Card>
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
           <ClipboardList className="h-5 w-5 text-primary" />
