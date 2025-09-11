@@ -32,22 +32,23 @@ const TemperatureLog: React.FC<TemperatureLogProps> = ({ pregnancyId, femaleName
   }
   
   return (
-    <Card className="bg-white border-sage-200">
-      <CardHeader className="border-b border-sage-100">
-        <CardTitle className="font-le-jour">{t('temperature.log.title')}</CardTitle>
-        <CardDescription>{t('temperature.log.description', { femaleName })}</CardDescription>
-      </CardHeader>
-      <CardContent className="pt-6">
-        <div className="grid gap-6">
-          <TemperatureLogForm onAddTemperature={addTemperature} />
-          <TemperatureHistory 
-            temperatures={temperatures} 
-            onDeleteTemperature={deleteTemperature}
-            onUpdateTemperature={updateTemperature}
-          />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <h3 className="text-2xl font-semibold font-le-jour text-foreground">
+          {t('temperature.log.title')}
+        </h3>
+        <p className="text-muted-foreground">
+          {t('temperature.log.description', { femaleName })}
+        </p>
+      </div>
+      
+      <TemperatureLogForm onAddTemperature={addTemperature} />
+      <TemperatureHistory 
+        temperatures={temperatures} 
+        onDeleteTemperature={deleteTemperature}
+        onUpdateTemperature={updateTemperature}
+      />
+    </div>
   );
 };
 

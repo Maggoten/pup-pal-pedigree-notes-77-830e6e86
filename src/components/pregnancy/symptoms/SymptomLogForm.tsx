@@ -52,8 +52,8 @@ const SymptomLogForm: React.FC<SymptomLogFormProps> = ({ onAddSymptom }) => {
   };
 
   return (
-    <div className="grid gap-4 py-4 border rounded-lg p-4 bg-greige-50">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="space-y-4 border border-border rounded-lg p-4 bg-muted/30">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="date">{t('symptoms.form.dateLabel')}</Label>
           <DatePicker 
@@ -87,7 +87,7 @@ const SymptomLogForm: React.FC<SymptomLogFormProps> = ({ onAddSymptom }) => {
       
       <Button 
         onClick={handleSubmit} 
-        className="w-full md:w-auto justify-center bg-sage-600 hover:bg-sage-700 text-white"
+        className="w-full sm:w-auto"
       >
         <Plus className="mr-2 h-4 w-4" /> {t('actions.addSymptom')}
       </Button>

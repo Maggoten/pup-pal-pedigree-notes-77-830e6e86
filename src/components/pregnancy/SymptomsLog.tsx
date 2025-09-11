@@ -32,23 +32,24 @@ const SymptomsLog: React.FC<SymptomsLogProps> = ({ pregnancyId, femaleName }) =>
   }
   
   return (
-    <Card className="bg-white border-sage-200">
-      <CardHeader className="border-b border-sage-100">
-        <CardTitle className="font-le-jour">{t('symptoms.log.title')}</CardTitle>
-        <CardDescription>{t('symptoms.log.description', { femaleName })}</CardDescription>
-      </CardHeader>
-      <CardContent className="pt-6">
-        <div className="grid gap-6">
-          <SymptomLogForm onAddSymptom={addSymptom} />
-          <SymptomHistory 
-            symptoms={symptoms}
-            onDeleteSymptom={deleteSymptom}
-            onUpdateSymptom={updateSymptom}
-            femaleName={femaleName}
-          />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <h3 className="text-2xl font-semibold font-le-jour text-foreground">
+          {t('symptoms.log.title')}
+        </h3>
+        <p className="text-muted-foreground">
+          {t('symptoms.log.description', { femaleName })}
+        </p>
+      </div>
+      
+      <SymptomLogForm onAddSymptom={addSymptom} />
+      <SymptomHistory 
+        symptoms={symptoms}
+        onDeleteSymptom={deleteSymptom}
+        onUpdateSymptom={updateSymptom}
+        femaleName={femaleName}
+      />
+    </div>
   );
 };
 
