@@ -29,9 +29,11 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({
       )}
       <div className="flex-1 min-w-0">
         {showWeekBadge ? (
-          <div className="flex justify-between items-start gap-2 mb-1">
-            <div className="font-medium break-words">{item.title}</div>
-            <Badge variant="outline" className="text-xs whitespace-nowrap flex-shrink-0">{t('checklist.units.week')} {item.weekNumber}</Badge>
+          <div className="mb-1">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2">
+              <div className="font-medium break-words">{item.title}</div>
+              <Badge variant="outline" className="text-xs self-start">{t('checklist.units.week')} {item.weekNumber}</Badge>
+            </div>
           </div>
         ) : (
           <div className="font-medium break-words mb-1">{item.title}</div>
