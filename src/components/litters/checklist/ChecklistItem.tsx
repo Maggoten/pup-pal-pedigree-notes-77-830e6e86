@@ -27,16 +27,16 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({
       ) : (
         <Circle className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
       )}
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         {showWeekBadge ? (
-          <div className="flex justify-between">
-            <div className="font-medium">{item.title}</div>
-            <Badge variant="outline" className="text-xs">{t('checklist.units.week')} {item.weekNumber}</Badge>
+          <div className="flex justify-between items-start gap-2 mb-1">
+            <div className="font-medium break-words">{item.title}</div>
+            <Badge variant="outline" className="text-xs whitespace-nowrap flex-shrink-0">{t('checklist.units.week')} {item.weekNumber}</Badge>
           </div>
         ) : (
-          <div className="font-medium">{item.title}</div>
+          <div className="font-medium break-words mb-1">{item.title}</div>
         )}
-        <div className="text-sm text-muted-foreground mt-1">{item.description}</div>
+        <div className="text-sm text-muted-foreground break-words leading-relaxed">{item.description}</div>
       </div>
     </div>
   );
