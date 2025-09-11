@@ -11,7 +11,7 @@ const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ username }) => {
 
   return (
     <div className="flex flex-col space-y-1">
-      <h2 className="text-2xl font-bold text-warmgreen-700">
+      <h2 className="text-xl font-bold text-warmgreen-700">
         {t('welcome.title', { username })}
       </h2>
       <p className="text-warmgreen-600 text-sm">
