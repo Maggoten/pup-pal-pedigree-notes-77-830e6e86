@@ -830,6 +830,45 @@ export type Database = {
           },
         ]
       }
+      puppy_weekly_photos: {
+        Row: {
+          created_at: string
+          date_taken: string
+          height: number | null
+          id: string
+          image_url: string
+          notes: string | null
+          puppy_id: string
+          updated_at: string
+          week_number: number
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          date_taken?: string
+          height?: number | null
+          id?: string
+          image_url: string
+          notes?: string | null
+          puppy_id: string
+          updated_at?: string
+          week_number: number
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          date_taken?: string
+          height?: number | null
+          id?: string
+          image_url?: string
+          notes?: string | null
+          puppy_id?: string
+          updated_at?: string
+          week_number?: number
+          weight?: number | null
+        }
+        Relationships: []
+      }
       puppy_weight_logs: {
         Row: {
           created_at: string | null

@@ -33,6 +33,19 @@ export interface PuppyNote {
   content: string;
 }
 
+export interface PuppyWeeklyPhoto {
+  id: string;
+  puppy_id: string;
+  week_number: number;
+  image_url: string;
+  notes?: string;
+  weight?: number;
+  height?: number;
+  date_taken: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Puppy {
   id: string;
   name: string;
@@ -59,6 +72,7 @@ export interface Puppy {
   status?: 'Available' | 'Reserved' | 'Sold';
   buyer_name?: string;
   buyer_phone?: string;
+  weeklyPhotos?: PuppyWeeklyPhoto[];
 }
 
 export interface Litter {
