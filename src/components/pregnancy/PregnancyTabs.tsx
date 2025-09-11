@@ -39,21 +39,24 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
         <TabsList className="grid grid-cols-3 mb-6 bg-warmbeige-100 p-1 rounded-lg">
           <TabsTrigger 
             value="journey" 
-            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-warmgreen-700 data-[state=active]:shadow-sm"
+            className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 data-[state=active]:bg-white data-[state=active]:text-warmgreen-700 data-[state=active]:shadow-sm"
           >
-            <ClipboardList className="h-4 w-4" /> {t('tabs.journey')}
+            <ClipboardList className="h-4 w-4 flex-shrink-0" /> 
+            <span className="text-xs sm:text-sm font-medium truncate">{t('tabs.journey')}</span>
           </TabsTrigger>
           <TabsTrigger 
             value="temperature" 
-            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-warmgreen-700 data-[state=active]:shadow-sm"
+            className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 data-[state=active]:bg-white data-[state=active]:text-warmgreen-700 data-[state=active]:shadow-sm"
           >
-            <Thermometer className="h-4 w-4" /> {t('tabs.temperature')}
+            <Thermometer className="h-4 w-4 flex-shrink-0" /> 
+            <span className="text-xs sm:text-sm font-medium truncate">{t('tabs.temperature')}</span>
           </TabsTrigger>
           <TabsTrigger 
             value="symptoms" 
-            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-warmgreen-700 data-[state=active]:shadow-sm"
+            className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 data-[state=active]:bg-white data-[state=active]:text-warmgreen-700 data-[state=active]:shadow-sm"
           >
-            <MessageSquare className="h-4 w-4" /> {t('tabs.notes')}
+            <MessageSquare className="h-4 w-4 flex-shrink-0" /> 
+            <span className="text-xs sm:text-sm font-medium truncate">{t('tabs.notes')}</span>
           </TabsTrigger>
         </TabsList>
         
