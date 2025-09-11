@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +21,9 @@ const PuppyProfile: React.FC = () => {
   const { litterId, puppyId } = useParams<{ litterId: string; puppyId: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation('litters');
+  
+  // Ensure users start at the top of the page
+  useScrollToTop();
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showMeasurementsDialog, setShowMeasurementsDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
