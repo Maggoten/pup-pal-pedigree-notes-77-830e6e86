@@ -130,9 +130,12 @@ export const useWeeklyPhotos = (puppyId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['puppy-weekly-photos', puppyId] });
-      // Also invalidate puppy queries to update growth charts
+      // Invalidate all relevant queries to update growth charts and litter data
       queryClient.invalidateQueries({ queryKey: ['puppies'] });
       queryClient.invalidateQueries({ queryKey: ['puppy', puppyId] });
+      queryClient.invalidateQueries({ queryKey: ['litter'] });
+      queryClient.invalidateQueries({ queryKey: ['puppy-weight-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['puppy-height-logs'] });
       toast({
         title: "Foto uppladdad",
         description: "Det veckovisa fotot har sparats och mätningar lagts till i tillväxtdata"
