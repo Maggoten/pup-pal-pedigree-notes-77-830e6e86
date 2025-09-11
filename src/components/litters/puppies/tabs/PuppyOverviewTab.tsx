@@ -1,10 +1,11 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Circle, Calendar, Weight, Ruler, FileText } from 'lucide-react';
+import { Circle, Calendar, Weight, Ruler, FileText, TrendingUp } from 'lucide-react';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 import { Puppy, Litter } from '@/types/breeding';
 import { useTranslation } from 'react-i18next';
+import PuppyMeasurementsChart from '../PuppyMeasurementsChart';
 
 interface PuppyOverviewTabProps {
   puppy: Puppy;
@@ -142,6 +143,15 @@ const PuppyOverviewTab: React.FC<PuppyOverviewTabProps> = ({ puppy, litter }) =>
             </div>
           )}
         </div>
+      </div>
+
+      {/* Growth Charts Section */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <TrendingUp className="h-5 w-5" />
+          {t('puppies.titles.growthCharts')}
+        </h3>
+        <PuppyMeasurementsChart puppy={puppy} />
       </div>
 
       {/* Notes Section */}

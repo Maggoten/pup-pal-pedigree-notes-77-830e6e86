@@ -251,7 +251,7 @@ const PuppyProfile: React.FC = () => {
                 Översikt
               </TabsTrigger>
               <TabsTrigger value="development" className="text-sm">
-                Utveckling
+                Foton
               </TabsTrigger>
             </TabsList>
 
