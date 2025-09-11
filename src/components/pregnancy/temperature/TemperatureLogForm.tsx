@@ -52,7 +52,7 @@ const TemperatureLogForm: React.FC<TemperatureLogFormProps> = ({ onAddTemperatur
   };
 
   return (
-    <div className="grid gap-4 py-4 border rounded-lg p-4 bg-greige-50">
+    <div className="space-y-4 border rounded-lg p-3 sm:p-4 bg-greige-50">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="date">{t('temperature.form.dateLabel')}</Label>
