@@ -50,11 +50,51 @@
     },
     "password": {
       "title": "Byt Lösenord",
-      "description": "Uppdatera ditt kontolösenord",
-      "currentPassword": "Nuvarande Lösenord",
-      "newPassword": "Nytt Lösenord",
-      "confirmPassword": "Bekräfta Nytt Lösenord",
-      "changePassword": "Byt Lösenord"
+      "description": "Uppdatera ditt kontolösenord. Du behöver ange ditt nuvarande lösenord av säkerhetsskäl.",
+      "fields": {
+        "currentPassword": "Nuvarande Lösenord",
+        "newPassword": "Nytt Lösenord", 
+        "confirmPassword": "Bekräfta Nytt Lösenord",
+        "currentPasswordPlaceholder": "Ange ditt nuvarande lösenord",
+        "newPasswordPlaceholder": "Ange ditt nya lösenord",
+        "confirmPasswordPlaceholder": "Bekräfta ditt nya lösenord"
+      },
+      "strength": {
+        "label": "Lösenordsstyrka",
+        "requirementsMet": "Alla krav uppfyllda",
+        "labels": {
+          "weak": "Svagt",
+          "fair": "Okej",
+          "good": "Bra", 
+          "strong": "Starkt"
+        },
+        "feedback": {
+          "minLength": "Använd minst 8 tecken",
+          "addUppercase": "Lägg till versaler",
+          "addLowercase": "Lägg till gemener",
+          "addNumbers": "Lägg till siffror", 
+          "addSpecialChars": "Lägg till specialtecken"
+        }
+      },
+      "securityNotice": {
+        "title": "Säkerhetsnotis",
+        "description": "Ditt lösenord kommer att uppdateras säkert. Du förblir inloggad på denna enhet."
+      },
+      "buttons": {
+        "updating": "Uppdaterar...",
+        "updatePassword": "Uppdatera Lösenord",
+        "cancel": "Avbryt",
+        "yesChange": "Ja, Byt Lösenord"
+      },
+      "confirmDialog": {
+        "title": "Bekräfta Lösenordsbyte",
+        "description": "Är du säker på att du vill ändra ditt lösenord? Ditt nya lösenord träder i kraft omedelbart."
+      },
+      "messages": {
+        "success": "Lösenord uppdaterat framgångsrikt",
+        "failed": "Misslyckades med att uppdatera lösenord. Kontrollera ditt nuvarande lösenord.",
+        "error": "Ett oväntat fel inträffade när lösenordet skulle uppdateras"
+      }
     },
     "sharing": {
       "title": "Kontodelning",

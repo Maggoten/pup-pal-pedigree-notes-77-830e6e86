@@ -22,7 +22,7 @@ export const passwordSchema = z.object({
 
 export type PasswordFormData = z.infer<typeof passwordSchema>;
 
-export const validatePasswordStrength = (password: string): PasswordStrength => {
+export const validatePasswordStrength = (password: string, t?: (key: string) => string): PasswordStrength => {
   const feedback: string[] = [];
   let score = 0;
 
@@ -30,35 +30,35 @@ export const validatePasswordStrength = (password: string): PasswordStrength => 
   if (password.length >= 8) {
     score += 1;
   } else {
-    feedback.push("Use at least 8 characters");
+    feedback.push(t ? t('account.password.strength.feedback.minLength') : "Use at least 8 characters");
   }
 
   // Check for uppercase
   if (/[A-Z]/.test(password)) {
     score += 1;
   } else {
-    feedback.push("Add uppercase letters");
+    feedback.push(t ? t('account.password.strength.feedback.addUppercase') : "Add uppercase letters");
   }
 
   // Check for lowercase
   if (/[a-z]/.test(password)) {
     score += 1;
   } else {
-    feedback.push("Add lowercase letters");
+    feedback.push(t ? t('account.password.strength.feedback.addLowercase') : "Add lowercase letters");
   }
 
   // Check for numbers
   if (/\d/.test(password)) {
     score += 1;
   } else {
-    feedback.push("Add numbers");
+    feedback.push(t ? t('account.password.strength.feedback.addNumbers') : "Add numbers");
   }
 
   // Check for special characters
   if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
     score += 1;
   } else {
-    feedback.push("Add special characters");
+    feedback.push(t ? t('account.password.strength.feedback.addSpecialChars') : "Add special characters");
   }
 
   // Bonus points for length
@@ -82,9 +82,16 @@ export const getPasswordStrengthColor = (score: number): string => {
   return "text-green-600";
 };
 
-export const getPasswordStrengthLabel = (score: number): string => {
-  if (score < 2) return "Weak";
-  if (score < 3) return "Fair";
-  if (score < 4) return "Good";
-  return "Strong";
+export const getPasswordStrengthLabel = (score: number, t?: (key: string) => string): string => {
+  if (!t) {
+    if (score < 2) return "Weak";
+    if (score < 3) return "Fair";
+    if (score < 4) return "Good";
+    return "Strong";
+  }
+  
+  if (score < 2) return t('account.password.strength.labels.weak');
+  if (score < 3) return t('account.password.strength.labels.fair');
+  if (score < 4) return t('account.password.strength.labels.good');
+  return t('account.password.strength.labels.strong');
 };

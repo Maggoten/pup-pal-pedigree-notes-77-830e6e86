@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { Eye, EyeOff, Lock, Shield, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { 
   passwordSchema, 
   type PasswordFormData, 
@@ -20,6 +21,7 @@ import {
 
 const ChangePasswordForm: React.FC = () => {
   const { updatePassword } = useAuth();
+  const { t } = useTranslation('settings');
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -37,7 +39,7 @@ const ChangePasswordForm: React.FC = () => {
   });
 
   const newPassword = watch('newPassword', '');
-  const passwordStrength = validatePasswordStrength(newPassword);
+  const passwordStrength = validatePasswordStrength(newPassword, t);
 
   const onSubmit = async (data: PasswordFormData) => {
     setIsLoading(true);
@@ -45,15 +47,15 @@ const ChangePasswordForm: React.FC = () => {
       const success = await updatePassword(data.currentPassword, data.newPassword);
       
       if (success) {
-        toast.success('Password updated successfully');
+        toast.success(t('account.password.messages.success'));
         reset();
         setIsDialogOpen(false); // Close dialog on success
       } else {
-        toast.error('Failed to update password. Please check your current password.');
+        toast.error(t('account.password.messages.failed'));
       }
     } catch (error) {
       console.error('Password update error:', error);
-      toast.error('An unexpected error occurred while updating your password');
+      toast.error(t('account.password.messages.error'));
     } finally {
       setIsLoading(false);
       setIsDialogOpen(false); // Close dialog on error too
@@ -65,12 +67,12 @@ const ChangePasswordForm: React.FC = () => {
 
     const progressValue = (passwordStrength.score / 4) * 100;
     const colorClass = getPasswordStrengthColor(passwordStrength.score);
-    const strengthLabel = getPasswordStrengthLabel(passwordStrength.score);
+    const strengthLabel = getPasswordStrengthLabel(passwordStrength.score, t);
 
     return (
       <div className="space-y-2 mt-2">
         <div className="flex items-center justify-between">
-          <Label className="text-xs text-muted-foreground">Password strength</Label>
+          <Label className="text-xs text-muted-foreground">{t('account.password.strength.label')}</Label>
           <span className={`text-xs font-medium ${colorClass}`}>
             {strengthLabel}
           </span>
@@ -89,7 +91,7 @@ const ChangePasswordForm: React.FC = () => {
         {passwordStrength.meetsRequirements && (
           <div className="flex items-center gap-1 text-xs text-green-600">
             <CheckCircle className="w-3 h-3" />
-            All requirements met
+            {t('account.password.strength.requirementsMet')}
           </div>
         )}
       </div>
@@ -101,22 +103,22 @@ const ChangePasswordForm: React.FC = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Lock className="w-5 h-5" />
-          Change Password
+          {t('account.password.title')}
         </CardTitle>
         <CardDescription>
-          Update your account password. You'll need to provide your current password for security.
+          {t('account.password.description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Current Password */}
           <div className="space-y-2">
-            <Label htmlFor="currentPassword">Current Password</Label>
+            <Label htmlFor="currentPassword">{t('account.password.fields.currentPassword')}</Label>
             <div className="relative">
               <Input
                 id="currentPassword"
                 type={showCurrentPassword ? 'text' : 'password'}
-                placeholder="Enter your current password"
+                placeholder={t('account.password.fields.currentPasswordPlaceholder')}
                 {...register('currentPassword')}
                 className="pr-10"
               />
@@ -135,12 +137,12 @@ const ChangePasswordForm: React.FC = () => {
 
           {/* New Password */}
           <div className="space-y-2">
-            <Label htmlFor="newPassword">New Password</Label>
+            <Label htmlFor="newPassword">{t('account.password.fields.newPassword')}</Label>
             <div className="relative">
               <Input
                 id="newPassword"
                 type={showNewPassword ? 'text' : 'password'}
-                placeholder="Enter your new password"
+                placeholder={t('account.password.fields.newPasswordPlaceholder')}
                 {...register('newPassword')}
                 className="pr-10"
               />
@@ -160,12 +162,12 @@ const ChangePasswordForm: React.FC = () => {
 
           {/* Confirm Password */}
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+            <Label htmlFor="confirmPassword">{t('account.password.fields.confirmPassword')}</Label>
             <div className="relative">
               <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="Confirm your new password"
+                placeholder={t('account.password.fields.confirmPasswordPlaceholder')}
                 {...register('confirmPassword')}
                 className="pr-10"
               />
@@ -187,9 +189,9 @@ const ChangePasswordForm: React.FC = () => {
             <div className="flex items-start gap-2">
               <Shield className="w-4 h-4 text-blue-600 mt-0.5" />
               <div className="text-sm text-blue-800">
-                <p className="font-medium">Security Notice</p>
+                <p className="font-medium">{t('account.password.securityNotice.title')}</p>
                 <p className="text-xs mt-1">
-                  Your password will be updated securely. You'll remain logged in on this device.
+                  {t('account.password.securityNotice.description')}
                 </p>
               </div>
             </div>
@@ -203,25 +205,25 @@ const ChangePasswordForm: React.FC = () => {
               className="bg-warmgreen-600 hover:bg-warmgreen-700 text-white"
               onClick={() => setIsDialogOpen(true)}
             >
-              {isLoading ? "Updating..." : "Update Password"}
+              {isLoading ? t('account.password.buttons.updating') : t('account.password.buttons.updatePassword')}
             </Button>
             
             <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Confirm Password Change</AlertDialogTitle>
+                  <AlertDialogTitle>{t('account.password.confirmDialog.title')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to change your password? Your new password will take effect immediately.
+                    {t('account.password.confirmDialog.description')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t('account.password.buttons.cancel')}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleSubmit(onSubmit)}
                     className="bg-warmgreen-600 hover:bg-warmgreen-700"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Updating..." : "Yes, Change Password"}
+                    {isLoading ? t('account.password.buttons.updating') : t('account.password.buttons.yesChange')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -233,7 +235,7 @@ const ChangePasswordForm: React.FC = () => {
               onClick={() => reset()}
               disabled={isLoading}
             >
-              Cancel
+              {t('account.password.buttons.cancel')}
             </Button>
           </div>
         </form>
