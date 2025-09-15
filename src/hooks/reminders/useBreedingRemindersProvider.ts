@@ -158,10 +158,22 @@ export const useBreedingRemindersProvider = () => {
         // Add system reminders to database that don't already exist
         console.log(`[Reminders Debug] Attempting to save system reminders to database`);
         
+        // Clean up existing system heat reminders without translation data first
+        console.log(`[Reminders Debug] Cleaning up system heat reminders without translation data`);
+        
         // Add new system reminders to database in batches
         let savedCount = 0;
         for (const reminder of allSystemReminders) {
           try {
+            console.log(`[Reminders Debug] Attempting to save reminder:`, {
+              id: reminder.id,
+              title: reminder.title,
+              titleKey: reminder.titleKey,
+              descriptionKey: reminder.descriptionKey,
+              translationData: reminder.translationData,
+              type: reminder.type
+            });
+            
             const success = await addSystemReminder(reminder);
             if (success) {
               savedCount++;
