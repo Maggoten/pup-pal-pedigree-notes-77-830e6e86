@@ -10,7 +10,7 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 import { getDisplayUsername } from '@/utils/userDisplayUtils';
 import { getActivePregnancies } from '@/services/PregnancyService';
 import { toast } from '@/components/ui/use-toast';
-import ForceRemindersRefresh from '@/components/debug/ForceRemindersRefresh';
+
 
 interface DashboardLayoutProps {
   user: User | null;
@@ -102,9 +102,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           isLoadingPregnancies={isLoadingPregnancies}
           onRemindersClick={handleOpenRemindersDialog}
         />
-        
-        {/* Temporary debug component to fix translation issues */}
-        <ForceRemindersRefresh />
         
         <DashboardContent
           isDataReady={dashboardData.isDataReady}
