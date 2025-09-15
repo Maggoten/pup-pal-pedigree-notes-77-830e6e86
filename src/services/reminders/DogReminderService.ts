@@ -53,7 +53,7 @@ export const generateDogReminders = async (dogs: Dog[]): Promise<Reminder[]> => 
         
         reminders.push({
           id: generateSystemReminderId(dog.id, 'vaccination', nextVaccination),
-          title: t('events.vaccination.title', { dogName: dog.name }) + (isOverdue ? ' (Overdue)' : ''),
+          title: t('events.vaccination.title', { dogName: dog.name }),
           description: isOverdue 
             ? t('events.vaccination.overdue', { days })
             : t('events.vaccination.upcoming', { days }),

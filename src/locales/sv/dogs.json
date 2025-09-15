@@ -215,39 +215,6 @@
     "confirm": "Ta bort Hund",
     "cancel": "Avbryt"
   },
-  "events": {
-    "birthday": {
-      "title": "{{dogName}}s födelsedag",
-      "reminder": "Förbered {{dogName}}s födelsedag",
-      "description": "Födelsedagsfirande för {{dogName}}",
-      "reminderDescription": "Påminnelse att förbereda {{dogName}}s födelsedag om 1 vecka",
-      "upcoming": "{{dogName}} fyller {{age}} år om {{days}} dagar",
-      "today": "{{dogName}} fyller {{age}} år idag!",
-      "past": "{{dogName}} fyllde {{age}} år för {{days}} dag{{plural}} sedan"
-    },
-    "vaccination": {
-      "title": "{{dogName}}s vaccination förfaller",
-      "reminder": "Vaccinationspåminnelse för {{dogName}}",
-      "description": "Årlig vaccination förfaller för {{dogName}}",
-      "reminderDescription": "Påminnelse att boka vaccination för {{dogName}} om 1 vecka",
-      "upcoming": "Vaccination förfaller om {{days}} dagar",
-      "overdue": "Vaccination försenad med {{days}} dagar"
-    },
-    "heat": {
-      "title": "{{dogName}}s löp",
-      "reminder": "Kommande löp för {{dogName}}",
-      "description": "Förväntat löp för {{dogName}}",
-      "reminderDescription": "Påminnelse om {{dogName}}s kommande löptid om 30 dagar",
-      "approaching": "{{dogName}}s löptid närmar sig",
-      "expected": "Förväntad löptid om {{days}} dagar",
-      "expectedSingle": "Löptid förväntad om {{days}} dag",
-      "expectedPlural": "Löptid förväntad om {{days}} dagar"
-    },
-    "dueDate": {
-      "title": "Förlossning - {{femaleName}}",
-      "description": "Förväntad förlossningsdag för {{femaleName}} (parad med {{maleName}})"
-    }
-  },
   "reminders": {
     "heatTracking": {
       "title": "Börja spåra löp för {{dogName}}",

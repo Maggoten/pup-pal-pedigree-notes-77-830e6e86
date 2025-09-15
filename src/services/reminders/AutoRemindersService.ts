@@ -5,16 +5,11 @@ import { Reminder } from '@/types/reminders';
 import { differenceInDays, addYears, isAfter, isBefore, parseISO } from 'date-fns';
 import { createCalendarClockIcon, createPawPrintIcon } from '@/utils/iconUtils';
 import { v5 as uuidv5 } from 'uuid';
-// Helper function to get translation with fallback
+import i18n from '@/i18n';
+
+// Helper method to get translation with fallback
 const t = (key: string, options?: any): string => {
-  try {
-    // Use the global i18n instance from react-i18next if available
-    const i18nModule = require('react-i18next');
-    return i18nModule.i18next.t(key, { ...options, ns: 'home' }) as string;
-  } catch {
-    // Fallback for when i18n is not available
-    return key;
-  }
+  return i18n.t(key, { ...options, ns: 'home' }) as string;
 };
 
 // Namespace UUID for deterministic reminder IDs (prevents collisions)
@@ -91,8 +86,8 @@ export const generateEnhancedBirthdayReminders = (dogs: Dog[]): Reminder[] => {
       
       reminders.push({
         id: generateSystemReminderId(dog.id, 'enhanced-birthday', nextBirthday),
-        title: `${dog.name}'s Birthday Coming Up!`,
-        description: `${dog.name} will turn ${age} in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`,
+        title: t('events.birthday.title', { dogName: dog.name }),
+        description: t('events.birthday.upcoming', { dogName: dog.name, age, days: daysUntil }),
         dueDate: nextBirthday,
         priority: 'medium',
         type: 'birthday',
@@ -124,12 +119,14 @@ export const generateVaccinationReminders = (dogs: Dog[]): Reminder[] => {
     if (daysUntil >= -30 && daysUntil <= 14) {
       const isOverdue = daysUntil < 0;
       
+      const days = Math.abs(daysUntil);
+      
       reminders.push({
         id: generateSystemReminderId(dog.id, 'enhanced-vaccination', nextVaccination),
-        title: `${dog.name}'s Vaccination ${isOverdue ? 'Overdue' : 'Due Soon'}`,
+        title: t('events.vaccination.title', { dogName: dog.name }),
         description: isOverdue 
-          ? `Vaccination overdue by ${Math.abs(daysUntil)} day${Math.abs(daysUntil) !== 1 ? 's' : ''}`
-          : `Vaccination due in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`,
+          ? t('events.vaccination.overdue', { days })
+          : t('events.vaccination.upcoming', { days }),
         dueDate: nextVaccination,
         priority: 'high',
         type: 'vaccination',

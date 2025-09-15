@@ -215,39 +215,6 @@
     "confirm": "Delete Dog",
     "cancel": "Cancel"
   },
-  "events": {
-    "birthday": {
-      "title": "{{dogName}}'s Birthday",
-      "reminder": "Prepare for {{dogName}}'s Birthday",
-      "description": "Birthday celebration for {{dogName}}",
-      "reminderDescription": "Reminder to prepare for {{dogName}}'s birthday in 1 week",
-      "upcoming": "{{dogName}} turns {{age}} in {{days}} days",
-      "today": "{{dogName}} turns {{age}} today!",
-      "past": "{{dogName}} turned {{age}} {{days}} day{{plural}} ago"
-    },
-    "vaccination": {
-      "title": "{{dogName}}'s Vaccination Due",
-      "reminder": "Vaccination Reminder for {{dogName}}",
-      "description": "Annual vaccination due for {{dogName}}",
-      "reminderDescription": "Reminder to schedule vaccination for {{dogName}} in 1 week",
-      "upcoming": "Vaccination due in {{days}} days",
-      "overdue": "Vaccination overdue by {{days}} days"
-    },
-    "heat": {
-      "title": "{{dogName}}'s Heat Cycle",
-      "reminder": "Upcoming Heat for {{dogName}}",
-      "description": "Expected heat cycle for {{dogName}}",
-      "reminderDescription": "Reminder about {{dogName}}'s upcoming heat cycle in 30 days",
-      "approaching": "{{dogName}}'s Heat Approaching",
-      "expected": "Expected heat cycle in {{days}} days",
-      "expectedSingle": "Heat expected in {{days}} day",
-      "expectedPlural": "Heat expected in {{days}} days"
-    },
-    "dueDate": {
-      "title": "Due Date - {{femaleName}}",
-      "description": "Expected delivery date for {{femaleName}} (mated with {{maleName}})"
-    }
-  },
   "reminders": {
     "heatTracking": {
       "title": "Start Heat Tracking for {{dogName}}",
