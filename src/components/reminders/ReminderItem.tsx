@@ -120,7 +120,7 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
               {icon}
             </div>
             
-            {/* Title */}
+             {/* Title */}
             <div
               className={cn(
                 "flex-grow text-sm font-medium truncate",
@@ -128,21 +128,23 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
                 isOverdue ? "text-rose-700" : ""
               )}
             >
-              {title}
+              {/* Handle potential untranslated keys as fallback */}
+              {title.startsWith('events.') ? t(title) : title}
             </div>
           </div>
           
-          {/* Description - hidden in compact view */}
-          {!compact && (
-            <div
-              className={cn(
-                "mt-1 text-xs text-muted-foreground",
-                isCompleted ? "line-through" : ""
-              )}
-            >
-              {description}
-            </div>
-          )}
+           {/* Description - hidden in compact view */}
+           {!compact && (
+             <div
+               className={cn(
+                 "mt-1 text-xs text-muted-foreground",
+                 isCompleted ? "line-through" : ""
+               )}
+             >
+               {/* Handle potential untranslated keys as fallback */}
+               {description.startsWith('events.') ? t(description) : description}
+             </div>
+           )}
           
           {/* Due date */}
           <div
