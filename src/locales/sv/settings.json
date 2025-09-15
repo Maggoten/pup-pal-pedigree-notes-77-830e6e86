@@ -118,9 +118,16 @@
       }
     },
     "support": {
-      "title": "Behöver Mer Hjälp?",
-      "description": "Kontakta vårt supportteam för ytterligare hjälp",
-      "email": "support@breedingapp.com"
+      "title": "Support & Kontakt",
+      "description": "Få hjälp och kontaktinformation",
+      "needHelp": "Behöver du hjälp?",
+      "contactDescription": "Om du har några frågor eller behöver hjälp, tveka inte att kontakta vårt supportteam.",
+      "email": "support@breedingjourney.com"
+    },
+    "about": {
+      "title": "Om",
+      "description": "Applikationsinformation", 
+      "copyright": "© 2024 Breeding Journey. Alla rättigheter förbehållna."
     }
   },
   "language": {
@@ -133,8 +140,8 @@
   "validation": {
     "firstNameRequired": "Förnamn krävs",
     "lastNameRequired": "Efternamn krävs",
-    "kennelNameRequired": "Kennelnamn krävs",
-    "invalidWebsite": "Ogiltig webbsida-URL",
+    "kennelNameRequired": "Kennelnamn krävs", 
+    "websiteInvalid": "Ogiltig webbsida-URL",
     "emailRequired": "E-postadress krävs",
     "invalidEmail": "Vänligen ange en giltig e-postadress",
     "passwordRequired": "Lösenord krävs",

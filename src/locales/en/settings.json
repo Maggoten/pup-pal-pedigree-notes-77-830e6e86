@@ -118,9 +118,16 @@
       }
     },
     "support": {
-      "title": "Need More Help?",
-      "description": "Contact our support team for additional assistance",
-      "email": "support@breedingapp.com"
+      "title": "Support & Contact",
+      "description": "Get help and contact information",
+      "needHelp": "Need help?",
+      "contactDescription": "If you have any questions or need assistance, feel free to contact our support team.",
+      "email": "support@breedingjourney.com"
+    },
+    "about": {
+      "title": "About",
+      "description": "Application information",
+      "copyright": "© 2024 Breeding Journey. All rights reserved."
     }
   },
   "language": {
@@ -132,9 +139,9 @@
   },
   "validation": {
     "firstNameRequired": "First name is required",
-    "lastNameRequired": "Last name is required",
+    "lastNameRequired": "Last name is required", 
     "kennelNameRequired": "Kennel name is required",
-    "invalidWebsite": "Invalid website URL",
+    "websiteInvalid": "Invalid website URL",
     "emailRequired": "Email address is required",
     "invalidEmail": "Please enter a valid email address",
     "passwordRequired": "Password is required",
