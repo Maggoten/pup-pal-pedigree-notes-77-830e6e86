@@ -935,6 +935,7 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string
+          description_key: string | null
           due_date: string
           id: string
           is_completed: boolean | null
@@ -943,6 +944,8 @@ export type Database = {
           related_id: string | null
           source: string | null
           title: string
+          title_key: string | null
+          translation_data: Json | null
           type: string
           updated_at: string | null
           user_id: string
@@ -950,6 +953,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description: string
+          description_key?: string | null
           due_date: string
           id?: string
           is_completed?: boolean | null
@@ -958,6 +962,8 @@ export type Database = {
           related_id?: string | null
           source?: string | null
           title: string
+          title_key?: string | null
+          translation_data?: Json | null
           type: string
           updated_at?: string | null
           user_id: string
@@ -965,6 +971,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string
+          description_key?: string | null
           due_date?: string
           id?: string
           is_completed?: boolean | null
@@ -973,6 +980,8 @@ export type Database = {
           related_id?: string | null
           source?: string | null
           title?: string
+          title_key?: string | null
+          translation_data?: Json | null
           type?: string
           updated_at?: string | null
           user_id?: string

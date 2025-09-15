@@ -20,7 +20,7 @@ export const fetchReminders = async (): Promise<Reminder[]> => {
     
     const { data: reminders, error } = await supabase
       .from('reminders')
-      .select('*')
+      .select('*, title_key, description_key, translation_data')
       .eq('is_deleted', false)
       .eq('user_id', userId)
       .order('due_date', { ascending: true });
@@ -44,6 +44,10 @@ export const fetchReminders = async (): Promise<Reminder[]> => {
       type: reminder.type as any,
       relatedId: reminder.related_id,
       isCompleted: reminder.is_completed,
+      // Map translation fields from database
+      titleKey: reminder.title_key,
+      descriptionKey: reminder.description_key,
+      translationData: reminder.translation_data as Record<string, any> || undefined,
       // Generate the icon based on priority
       icon: createCalendarClockIcon(
         reminder.priority === 'high' ? 'rose-500' : 
@@ -159,7 +163,11 @@ export const addSystemReminder = async (reminder: Reminder): Promise<boolean> =>
         user_id: userId,
         source: 'system',
         is_completed: reminder.isCompleted || false,
-        is_deleted: false
+        is_deleted: false,
+        // Include translation fields
+        title_key: reminder.titleKey || null,
+        description_key: reminder.descriptionKey || null,
+        translation_data: reminder.translationData || null
       });
     
     if (error) {

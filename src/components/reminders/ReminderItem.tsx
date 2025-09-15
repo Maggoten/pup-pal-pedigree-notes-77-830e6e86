@@ -44,18 +44,9 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Handle lazy translation - translate in component where i18n is ready
-  console.log(`[ReminderItem] Debug for ${id}:`, {
-    titleKey,
-    translationData,
-    title,
-    hasTranslationKey: !!titleKey,
-    hasTranslationData: !!translationData,
-    translationResult: titleKey && translationData ? t(titleKey, translationData) : 'N/A'
-  });
-  
   const displayTitle = titleKey && translationData 
     ? String(t(titleKey, translationData))
-    : title;
+    : title.startsWith('events.') ? String(t(title, {})) : title;
   
   const displayDescription = descriptionKey && translationData 
     ? String(t(descriptionKey, translationData))
