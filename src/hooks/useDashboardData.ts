@@ -9,6 +9,8 @@ import { litterService } from '@/services/LitterService';
 import { getEventColor } from '@/services/CalendarEventService';
 
 export const useDashboardData = () => {
+  console.log(`[useDashboardData] Hook called`);
+  
   // State for data tracking
   const [isDataReady, setIsDataReady] = useState<boolean>(false);
   const [plannedLittersData, setPlannedLittersData] = useState({ count: 0, nextDate: null as Date | null });
@@ -18,6 +20,7 @@ export const useDashboardData = () => {
   
   // Centralized data fetching for calendar and reminders
   const { dogs } = useDogs();
+  console.log(`[useDashboardData] Dogs available: ${dogs.length}`);
   
   // Single instances of these hooks to prevent duplicate fetching
   const { 
@@ -28,6 +31,13 @@ export const useDashboardData = () => {
     addCustomReminder,
     deleteReminder
   } = useBreedingReminders();
+  
+  console.log(`[useDashboardData] Reminders data:`, {
+    remindersCount: reminders.length,
+    isLoading: remindersLoading,
+    hasError: remindersError,
+    sampleReminders: reminders.slice(0, 2).map(r => ({ id: r.id, title: r.title, titleKey: r.titleKey }))
+  });
   
   // Use the Supabase-based calendar hook
   const {
