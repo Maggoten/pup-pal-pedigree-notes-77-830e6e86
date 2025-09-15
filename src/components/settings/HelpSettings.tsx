@@ -2,33 +2,35 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, HelpCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const HelpSettings: React.FC = () => {
+  const { t } = useTranslation('settings');
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <HelpCircle className="h-5 w-5" />
-            Support & Contact
+            {t('help.support.title')}
           </CardTitle>
           <CardDescription>
-            Get help and contact information
+            {t('help.support.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <p className="text-sm font-medium">Need help?</p>
+            <p className="text-sm font-medium">{t('help.support.needHelp')}</p>
             <p className="text-sm text-muted-foreground">
-              If you have any questions or need assistance, feel free to contact our support team.
+              {t('help.support.contactDescription')}
             </p>
             <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-md">
               <Mail className="h-4 w-4 text-primary" />
               <a 
-                href="mailto:support@breedingjourney.com" 
+                href={`mailto:${t('help.support.email')}`}
                 className="text-sm text-primary hover:underline"
               >
-                support@breedingjourney.com
+                {t('help.support.email')}
               </a>
             </div>
           </div>
@@ -37,15 +39,15 @@ const HelpSettings: React.FC = () => {
       
       <Card>
         <CardHeader>
-          <CardTitle>About</CardTitle>
+          <CardTitle>{t('help.about.title')}</CardTitle>
           <CardDescription>
-            Application information
+            {t('help.about.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-4">
             <p className="text-sm text-muted-foreground">
-              © 2024 Breeding Journey. All rights reserved.
+              {t('help.about.copyright')}
             </p>
           </div>
         </CardContent>

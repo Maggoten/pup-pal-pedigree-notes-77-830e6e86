@@ -11,6 +11,7 @@ import PersonalSettings from './PersonalSettings';
 import AccountSettings from './AccountSettings';
 import HelpSettings from './HelpSettings';
 import { useSettings } from '@/hooks/useSettings';
+import { useTranslation } from 'react-i18next';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -19,12 +20,13 @@ interface SettingsDialogProps {
 
 const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onOpenChange }) => {
   const { settings, isLoading } = useSettings();
+  const { t } = useTranslation('settings');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Settings</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">{t('dialog.title')}</DialogTitle>
         </DialogHeader>
         
         {isLoading ? (
@@ -34,9 +36,9 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onOpenChange }) =
         ) : settings ? (
           <Tabs defaultValue="personal" className="w-full">
             <TabsList className="grid grid-cols-3 mb-6">
-              <TabsTrigger value="personal">Personal</TabsTrigger>
-              <TabsTrigger value="account">Account</TabsTrigger>
-              <TabsTrigger value="help">Help</TabsTrigger>
+              <TabsTrigger value="personal">{t('tabs.personal')}</TabsTrigger>
+              <TabsTrigger value="account">{t('tabs.account')}</TabsTrigger>
+              <TabsTrigger value="help">{t('tabs.help')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="personal" className="space-y-4">
@@ -53,7 +55,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onOpenChange }) =
           </Tabs>
         ) : (
           <div className="p-6 text-center text-muted-foreground">
-            Settings could not be loaded. Please try again later.
+            {t('dialog.loadingError')}
           </div>
         )}
       </DialogContent>

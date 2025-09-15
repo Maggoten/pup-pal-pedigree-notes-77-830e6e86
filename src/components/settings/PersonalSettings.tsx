@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -16,17 +15,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { UserSettings } from '@/types/settings';
 import { useSettings } from '@/hooks/useSettings';
+import { useTranslation } from 'react-i18next';
 
-const personalFormSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  kennelName: z.string().min(1, 'Kennel name is required'),
+// Validation schema - will be created with translations
+const createPersonalFormSchema = (t: (key: string) => string) => z.object({
+  firstName: z.string().min(1, t('validation.firstNameRequired')),
+  lastName: z.string().min(1, t('validation.lastNameRequired')),
+  kennelName: z.string().min(1, t('validation.kennelNameRequired')),
   address: z.string().optional(),
-  website: z.string().url('Invalid website URL').optional().or(z.literal('')),
+  website: z.string().url(t('validation.websiteInvalid')).optional().or(z.literal('')),
   phone: z.string().optional(),
 });
 
-type PersonalFormValues = z.infer<typeof personalFormSchema>;
+type PersonalFormValues = z.infer<ReturnType<typeof createPersonalFormSchema>>;
 
 interface PersonalSettingsProps {
   settings: UserSettings;
@@ -34,6 +35,9 @@ interface PersonalSettingsProps {
 
 const PersonalSettings: React.FC<PersonalSettingsProps> = ({ settings }) => {
   const { updatePersonalInfo, updateKennelInfo, isUpdatingPersonal, isUpdatingKennel } = useSettings();
+  const { t } = useTranslation('settings');
+  
+  const personalFormSchema = createPersonalFormSchema(t);
   
   const defaultValues: PersonalFormValues = {
     firstName: settings.profile.first_name || '',
@@ -70,9 +74,9 @@ const PersonalSettings: React.FC<PersonalSettingsProps> = ({ settings }) => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
+            <CardTitle>{t('personal.title')}</CardTitle>
             <CardDescription>
-              Update your personal information and contact details
+              {t('personal.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -82,9 +86,9 @@ const PersonalSettings: React.FC<PersonalSettingsProps> = ({ settings }) => {
                 name="firstName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name</FormLabel>
+                    <FormLabel>{t('personal.fields.firstName')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="First name" {...field} />
+                      <Input placeholder={t('personal.fields.firstNamePlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -96,9 +100,9 @@ const PersonalSettings: React.FC<PersonalSettingsProps> = ({ settings }) => {
                 name="lastName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Last Name</FormLabel>
+                    <FormLabel>{t('personal.fields.lastName')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Last name" {...field} />
+                      <Input placeholder={t('personal.fields.lastNamePlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -110,9 +114,9 @@ const PersonalSettings: React.FC<PersonalSettingsProps> = ({ settings }) => {
         
         <Card>
           <CardHeader>
-            <CardTitle>Kennel Information</CardTitle>
+            <CardTitle>{t('personal.kennel.title')}</CardTitle>
             <CardDescription>
-              Set your kennel name and other business details
+              {t('personal.kennel.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -121,9 +125,9 @@ const PersonalSettings: React.FC<PersonalSettingsProps> = ({ settings }) => {
               name="kennelName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Kennel Name</FormLabel>
+                  <FormLabel>{t('personal.fields.kennelName')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Kennel name" {...field} />
+                    <Input placeholder={t('personal.fields.kennelNamePlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -135,9 +139,9 @@ const PersonalSettings: React.FC<PersonalSettingsProps> = ({ settings }) => {
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address</FormLabel>
+                  <FormLabel>{t('personal.fields.address')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Address" {...field} />
+                    <Input placeholder={t('personal.fields.addressPlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -150,9 +154,9 @@ const PersonalSettings: React.FC<PersonalSettingsProps> = ({ settings }) => {
                 name="website"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Website</FormLabel>
+                    <FormLabel>{t('personal.fields.website')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://..." {...field} />
+                      <Input placeholder={t('personal.fields.websitePlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -164,9 +168,9 @@ const PersonalSettings: React.FC<PersonalSettingsProps> = ({ settings }) => {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone</FormLabel>
+                    <FormLabel>{t('personal.fields.phone')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Phone number" {...field} />
+                      <Input placeholder={t('personal.fields.phonePlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -185,9 +189,9 @@ const PersonalSettings: React.FC<PersonalSettingsProps> = ({ settings }) => {
             {(isUpdatingPersonal || isUpdatingKennel) ? (
               <span className="flex items-center gap-2">
                 <span className="animate-spin h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
-                Saving...
+                {t('personal.actions.saving')}
               </span>
-            ) : 'Save Changes'}
+            ) : t('personal.actions.saveChanges')}
           </Button>
         </div>
       </form>

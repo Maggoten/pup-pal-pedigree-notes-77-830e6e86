@@ -13,7 +13,7 @@ import { useSettings } from '@/hooks/useSettings';
 
 const AccountSettings: React.FC = () => {
   const { user, logout } = useAuth();
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('settings');
   const { settings } = useSettings();
 
   const handleLogout = async () => {
@@ -24,31 +24,31 @@ const AccountSettings: React.FC = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Account</CardTitle>
+          <CardTitle>{t('account.title')}</CardTitle>
           <CardDescription>
-            Manage your account settings and user preferences
+            {t('account.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-1">
-            <p className="text-sm font-medium">Email</p>
+            <p className="text-sm font-medium">{t('account.fields.email')}</p>
             <p className="text-sm text-muted-foreground">{user?.email}</p>
           </div>
           
           <div className="space-y-1">
-            <p className="text-sm font-medium">Name</p>
+            <p className="text-sm font-medium">{t('account.fields.name')}</p>
             <p className="text-sm text-muted-foreground">
               {user?.firstName} {user?.lastName}
             </p>
           </div>
           
           <div className="space-y-2">
-            <p className="text-sm font-medium">{t('language')}</p>
+            <p className="text-sm font-medium">{t('account.fields.language')}</p>
             <LanguageSwitcher />
           </div>
           
           <Button variant="outline" onClick={handleLogout}>
-            {t('logout')}
+            {t('account.actions.logout')}
           </Button>
         </CardContent>
       </Card>
