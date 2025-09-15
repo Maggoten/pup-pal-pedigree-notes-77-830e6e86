@@ -44,15 +44,16 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from 'react-i18next';
 
-const inviteFormSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+const createInviteFormSchema = (t: (key: string) => string) => z.object({
+  email: z.string().email(t('account.sharing.validation.invalidEmail')),
   role: z.enum(['admin', 'editor', 'viewer'], {
-    required_error: "Please select a user role",
+    required_error: t('account.sharing.validation.roleRequired'),
   }),
 });
 
-type InviteFormValues = z.infer<typeof inviteFormSchema>;
+type InviteFormValues = z.infer<ReturnType<typeof createInviteFormSchema>>;
 
 interface SharingSettingsProps {
   settings: UserSettings;
@@ -60,8 +61,11 @@ interface SharingSettingsProps {
 
 const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
   const { addSharedUser, removeSharedUser, isAddingSharedUser, isRemovingSharedUser } = useSettings();
+  const { t } = useTranslation('settings');
   const [userToRemove, setUserToRemove] = useState<SharedUser | null>(null);
   const [sharedUserEmails, setSharedUserEmails] = useState<Record<string, string>>({});
+  
+  const inviteFormSchema = createInviteFormSchema(t);
   
   const form = useForm<InviteFormValues>({
     resolver: zodResolver(inviteFormSchema),
@@ -137,10 +141,15 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
     }
   };
   
-  const roleDescriptions = {
-    admin: "Can manage all aspects of the account, including adding/removing users",
-    editor: "Can edit breeding records and manage dogs but cannot change account settings",
-    viewer: "Can view all information but cannot make changes"
+  const getRoleDescription = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return t('account.sharing.roleDescriptions.admin');
+      case 'editor':
+        return t('account.sharing.roleDescriptions.editor');
+      default:
+        return t('account.sharing.roleDescriptions.viewer');
+    }
   };
   
   return (
@@ -149,13 +158,13 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Share Your Account</CardTitle>
+              <CardTitle>{t('account.sharing.title')}</CardTitle>
               <CardDescription>
-                Invite others to collaborate on your breeding records
+                {t('account.sharing.description')}
               </CardDescription>
             </div>
             <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-200">
-              Coming Soon
+              {t('account.sharing.comingSoon')}
             </Badge>
           </div>
         </CardHeader>
@@ -163,10 +172,9 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
           <div className="p-6 border border-dashed rounded-md bg-muted/30">
             <div className="text-center">
               <UserPlus className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-              <h3 className="text-lg font-medium">Account Sharing Coming Soon</h3>
+              <h3 className="text-lg font-medium">{t('account.sharing.comingSoonTitle')}</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                We're working on a secure way for you to share your breeding records with collaborators. 
-                This feature is currently in development and will be available soon.
+                {t('account.sharing.comingSoonDescription')}
               </p>
             </div>
           </div>
@@ -175,9 +183,9 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
       
       <Card>
         <CardHeader>
-          <CardTitle>Shared Users</CardTitle>
+          <CardTitle>{t('account.sharing.sharedUsersTitle')}</CardTitle>
           <CardDescription>
-            People who have access to your breeding records
+            {t('account.sharing.sharedUsersDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -197,7 +205,7 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
                           {user.role}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {user.status === 'pending' ? 'Invitation sent' : 'Active'}
+                          {user.status === 'pending' ? t('account.sharing.status.pending') : t('account.sharing.status.active')}
                         </span>
                       </div>
                     </div>
@@ -217,9 +225,9 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
           ) : (
             <div className="text-center p-6 border border-dashed rounded-md">
               <UserPlus className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-              <h3 className="text-lg font-medium">No shared users yet</h3>
+              <h3 className="text-lg font-medium">{t('account.sharing.emptyState.title')}</h3>
               <p className="text-sm text-muted-foreground mt-1 mb-4">
-                Invite collaborators to work together on your breeding records
+                {t('account.sharing.emptyState.description')}
               </p>
             </div>
           )}
@@ -230,19 +238,20 @@ const SharingSettings: React.FC<SharingSettingsProps> = ({ settings }) => {
       <AlertDialog open={!!userToRemove} onOpenChange={(open) => !open && setUserToRemove(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove Shared User</AlertDialogTitle>
+            <AlertDialogTitle>{t('account.sharing.removeDialog.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove {sharedUserEmails[userToRemove?.shared_with_id || ''] || userToRemove?.shared_with_id} from your shared users?
-              They will no longer have access to your breeding records.
+              {t('account.sharing.removeDialog.description', {
+                email: sharedUserEmails[userToRemove?.shared_with_id || ''] || userToRemove?.shared_with_id
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('account.sharing.removeDialog.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleRemoveUser}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Remove User
+              {t('account.sharing.removeDialog.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

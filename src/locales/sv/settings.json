@@ -97,24 +97,45 @@
       }
     },
     "sharing": {
-      "title": "Kontodelning",
-      "description": "Dela åtkomst till dina avelregister med andra användare",
+      "title": "Dela Ditt Konto",
+      "description": "Bjud in andra att samarbeta på dina avelregister",
+      "comingSoon": "Kommer Snart",
+      "comingSoonTitle": "Kontodelning Kommer Snart",
+      "comingSoonDescription": "Vi arbetar på ett säkert sätt för dig att dela dina avelregister med medarbetare. Den här funktionen är för närvarande under utveckling och kommer att vara tillgänglig snart.",
+      "sharedUsersTitle": "Delade Användare",
+      "sharedUsersDescription": "Personer som har åtkomst till dina avelregister",
       "addUser": "Lägg till Användare",
       "removeUser": "Ta bort Användare",
       "email": "E-postadress",
       "role": "Roll",
       "dateAdded": "Datum Tillagd",
       "roles": {
-        "viewer": "Tittare",
-        "editor": "Redigerare"
+        "admin": "Admin",
+        "editor": "Redigerare",
+        "viewer": "Tittare"
       },
       "roleDescriptions": {
-        "viewer": "Kan visa avelregister och hundinformation men kan inte göra ändringar",
-        "editor": "Kan redigera avelregister och hantera hundar men kan inte ändra kontoinställningar"
+        "admin": "Kan hantera alla aspekter av kontot, inklusive att lägga till/ta bort användare",
+        "editor": "Kan redigera avelregister och hantera hundar men kan inte ändra kontoinställningar",
+        "viewer": "Kan visa all information men kan inte göra ändringar"
+      },
+      "status": {
+        "pending": "Inbjudan skickad",
+        "active": "Aktiv"
       },
       "emptyState": {
-        "title": "Inga delade användare",
-        "description": "Du har inte delat åtkomst med någon ännu"
+        "title": "Inga delade användare ännu",
+        "description": "Bjud in medarbetare att arbeta tillsammans på dina avelregister"
+      },
+      "removeDialog": {
+        "title": "Ta bort Delad Användare",
+        "description": "Är du säker på att du vill ta bort {{email}} från dina delade användare? De kommer inte längre ha åtkomst till dina avelregister.",
+        "cancel": "Avbryt",
+        "confirm": "Ta bort Användare"
+      },
+      "validation": {
+        "invalidEmail": "Vänligen ange en giltig e-postadress",
+        "roleRequired": "Vänligen välj en användarroll"
       }
     },
     "deleteAccount": {

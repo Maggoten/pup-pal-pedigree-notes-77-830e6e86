@@ -97,24 +97,45 @@
       }
     },
     "sharing": {
-      "title": "Account Sharing",
-      "description": "Share access to your breeding records with other users",
+      "title": "Share Your Account",
+      "description": "Invite others to collaborate on your breeding records",
+      "comingSoon": "Coming Soon",
+      "comingSoonTitle": "Account Sharing Coming Soon",
+      "comingSoonDescription": "We're working on a secure way for you to share your breeding records with collaborators. This feature is currently in development and will be available soon.",
+      "sharedUsersTitle": "Shared Users",
+      "sharedUsersDescription": "People who have access to your breeding records",
       "addUser": "Add User",
       "removeUser": "Remove User",
       "email": "Email Address",
       "role": "Role",
       "dateAdded": "Date Added",
       "roles": {
-        "viewer": "Viewer",
-        "editor": "Editor"
+        "admin": "Admin",
+        "editor": "Editor",
+        "viewer": "Viewer"
       },
       "roleDescriptions": {
-        "viewer": "Can view breeding records and dog information but cannot make changes",
-        "editor": "Can edit breeding records and manage dogs but cannot change account settings"
+        "admin": "Can manage all aspects of the account, including adding/removing users",
+        "editor": "Can edit breeding records and manage dogs but cannot change account settings",
+        "viewer": "Can view all information but cannot make changes"
+      },
+      "status": {
+        "pending": "Invitation sent",
+        "active": "Active"
       },
       "emptyState": {
-        "title": "No shared users",
-        "description": "You haven't shared access with anyone yet"
+        "title": "No shared users yet",
+        "description": "Invite collaborators to work together on your breeding records"
+      },
+      "removeDialog": {
+        "title": "Remove Shared User",
+        "description": "Are you sure you want to remove {{email}} from your shared users? They will no longer have access to your breeding records.",
+        "cancel": "Cancel",
+        "confirm": "Remove User"
+      },
+      "validation": {
+        "invalidEmail": "Please enter a valid email address",
+        "roleRequired": "Please select a user role"
       }
     },
     "deleteAccount": {
