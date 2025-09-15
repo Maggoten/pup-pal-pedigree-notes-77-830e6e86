@@ -9,9 +9,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import SubscriptionDebugPanel from './SubscriptionDebugPanel';
+import { useTranslation } from 'react-i18next';
 
 const SubscriptionSettings: React.FC = () => {
   const { checkSubscription } = useAuth();
+  const { t } = useTranslation('settings');
   
   // Refresh subscription status when component mounts to ensure accuracy
   React.useEffect(() => {
@@ -228,49 +230,49 @@ const SubscriptionSettings: React.FC = () => {
 
   const getStatusBadge = () => {
     if (friend) {
-      return <Badge className="bg-purple-100 text-purple-800">Friend Access</Badge>;
+      return <Badge className="bg-purple-100 text-purple-800">{t('subscription.status.friendAccess')}</Badge>;
     }
     if (subscriptionStatus === 'active_until_period_end') {
-      return <Badge className="bg-red-100 text-red-800">Cancelled - Expires Soon</Badge>;
+      return <Badge className="bg-red-100 text-red-800">{t('subscription.status.cancelledExpiresSoon')}</Badge>;
     }
     // Handle trialing status specifically
     if (subscriptionStatus === 'trialing' || isTrialActive) {
-      return <Badge className="bg-blue-100 text-blue-800">Active Trial</Badge>;
+      return <Badge className="bg-blue-100 text-blue-800">{t('subscription.status.activeTrial')}</Badge>;
     }
     if (hasPaid || subscriptionStatus === 'active') {
-      return <Badge className="bg-green-100 text-green-800">Active Subscription</Badge>;
+      return <Badge className="bg-green-100 text-green-800">{t('subscription.status.activeSubscription')}</Badge>;
     }
     if (isExpired) {
-      return <Badge className="bg-red-100 text-red-800">Expired</Badge>;
+      return <Badge className="bg-red-100 text-red-800">{t('subscription.status.expired')}</Badge>;
     }
-    return <Badge className="bg-gray-100 text-gray-800">Inactive</Badge>;
+    return <Badge className="bg-gray-100 text-gray-800">{t('subscription.status.inactive')}</Badge>;
   };
 
   const getStatusDescription = () => {
     if (friend) {
-      return 'You have special friend access to Breeding Journey.';
+      return t('subscription.statusDescriptions.friendAccess');
     }
     if (subscriptionStatus === 'active_until_period_end') {
-      return 'Your subscription is cancelled and will end at the current billing period. You can reactivate it anytime.';
+      return t('subscription.statusDescriptions.activeUntilPeriodEnd');
     }
     if (subscriptionStatus === 'canceled' && hasPaid) {
-      return 'Your subscription is cancelled and will end at the current billing period.';
+      return t('subscription.statusDescriptions.cancelledWithPaid');
     }
     // Handle trialing status specifically
     if (subscriptionStatus === 'trialing' || (isTrialActive && !hasPaid)) {
       if (daysRemaining !== null) {
-        const daysText = daysRemaining === 1 ? 'day' : 'days';
-        return `Your free trial is active and expires in ${daysRemaining} ${daysText}.`;
+        const daysText = daysRemaining === 1 ? t('subscription.timeUnits.day') : t('subscription.timeUnits.days');
+        return t('subscription.statusDescriptions.trialActive', { days: daysRemaining, daysText });
       }
-      return 'Your free trial is currently active.';
+      return t('subscription.statusDescriptions.trialActiveCurrent');
     }
     if (hasPaid || subscriptionStatus === 'active') {
-      return 'You have an active paid subscription to Breeding Journey.';
+      return t('subscription.statusDescriptions.paidActive');
     }
     if (isExpired) {
-      return 'Your free trial has expired. Activate your subscription to continue.';
+      return t('subscription.statusDescriptions.expired');
     }
-    return 'No active subscription found.';
+    return t('subscription.statusDescriptions.noSubscription');
   };
 
   const getSubscriptionDates = () => {
@@ -278,7 +280,7 @@ const SubscriptionSettings: React.FC = () => {
     
     if (isTrialActive && trialEndDate) {
       dates.push({
-        label: 'Trial End Date',
+        label: t('subscription.dates.trialEndDate'),
         date: new Date(trialEndDate),
         type: 'trial'
       });
@@ -287,7 +289,7 @@ const SubscriptionSettings: React.FC = () => {
     // Show period end date for cancelled subscriptions
     if (subscriptionStatus === 'active_until_period_end' && currentPeriodEnd) {
       dates.push({
-        label: 'Subscription End Date',
+        label: t('subscription.dates.subscriptionEndDate'),
         date: new Date(currentPeriodEnd),
         type: 'cancelled'
       });
@@ -304,115 +306,115 @@ const SubscriptionSettings: React.FC = () => {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Subscription</CardTitle>
+          <CardTitle>{t('subscription.title')}</CardTitle>
           <CardDescription>
-            Manage your Breeding Journey subscription
+            {t('subscription.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium">Status</p>
-                {getStatusBadge()}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">{t('subscription.status.label')}</p>
+                  {getStatusBadge()}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {getStatusDescription()}
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {getStatusDescription()}
-              </p>
+
+              {/* Subscription Dates */}
+              {getSubscriptionDates().length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">{t('subscription.dates.importantDates')}</p>
+                  {getSubscriptionDates().map((dateInfo) => (
+                    <div key={dateInfo.label} className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">{dateInfo.label}:</span>
+                      <span className={
+                        dateInfo.type === 'trial' ? 'text-blue-600' : 
+                        dateInfo.type === 'cancelled' ? 'text-orange-600 font-medium' : 
+                        'text-foreground'
+                      }>
+                        {format(dateInfo.date, 'MMM dd, yyyy')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Subscription Dates */}
-            {getSubscriptionDates().length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Important Dates</p>
-                {getSubscriptionDates().map((dateInfo) => (
-                  <div key={dateInfo.label} className="flex items-center gap-2 text-sm">
-                    <span className="text-muted-foreground">{dateInfo.label}:</span>
-                    <span className={
-                      dateInfo.type === 'trial' ? 'text-blue-600' : 
-                      dateInfo.type === 'cancelled' ? 'text-orange-600 font-medium' : 
-                      'text-foreground'
-                    }>
-                      {format(dateInfo.date, 'MMM dd, yyyy')}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              {/* Manage Subscription Button */}
+              {(hasPaid || isTrialActive || isExpired || isCancelled) && !friend && (
+                <Button 
+                  onClick={handleManageSubscription}
+                  disabled={isLoading}
+                  className="w-full bg-warmgreen-600 hover:bg-warmgreen-700 text-white"
+                >
+                  {isLoading ? t('subscription.buttons.opening') : (isExpired ? t('subscription.buttons.activateSubscription') : t('subscription.buttons.manageSubscription'))}
+                </Button>
+              )}
 
-          {/* Action Buttons */}
-          <div className="space-y-3">
-            {/* Manage Subscription Button */}
-            {(hasPaid || isTrialActive || isExpired || isCancelled) && !friend && (
-              <Button 
-                onClick={handleManageSubscription}
-                disabled={isLoading}
-                className="w-full bg-warmgreen-600 hover:bg-warmgreen-700 text-white"
-              >
-                {isLoading ? "Opening..." : (isExpired ? 'Activate Subscription' : 'Manage Subscription')}
-              </Button>
-            )}
-
-            {/* Cancel Button (for active subscriptions) */}
-            {showCancelButton && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="outline"
-                    className="w-full border-red-300 text-red-700 hover:bg-red-50"
-                    disabled={isCancelling}
-                  >
-                    {isCancelling ? "Cancelling..." : "Cancel Subscription"}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Cancel Subscription</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to cancel your subscription? Your access will continue until the end of your current billing period, and you can reactivate anytime before then.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleCancelSubscription}
-                      className="bg-red-600 hover:bg-red-700"
+              {/* Cancel Button (for active subscriptions) */}
+              {showCancelButton && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="outline"
+                      className="w-full border-red-300 text-red-700 hover:bg-red-50"
                       disabled={isCancelling}
                     >
-                      {isCancelling ? "Cancelling..." : "Yes, Cancel"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                      {isCancelling ? t('subscription.buttons.cancelling') : t('subscription.buttons.cancelSubscription')}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t('subscription.cancelDialog.title')}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t('subscription.cancelDialog.description')}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t('subscription.buttons.keepSubscription')}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleCancelSubscription}
+                        className="bg-red-600 hover:bg-red-700"
+                        disabled={isCancelling}
+                      >
+                        {isCancelling ? t('subscription.buttons.cancelling') : t('subscription.buttons.yesCancel')}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
+
+            {/* Trial Warning */}
+            {isTrialActive && daysRemaining !== null && daysRemaining <= 7 && (
+              <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
+                <p className="text-sm text-orange-800">
+                  {t('subscription.warnings.trialExpiring')}
+                </p>
+              </div>
             )}
-          </div>
 
-          {/* Trial Warning */}
-          {isTrialActive && daysRemaining !== null && daysRemaining <= 7 && (
-            <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
-              <p className="text-sm text-orange-800">
-                Your trial expires soon. Consider activating your subscription to avoid interruption.
-              </p>
-            </div>
-          )}
-
-          {/* Cancelled Subscription Info */}
-          {subscriptionStatus === 'active_until_period_end' && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-              <p className="text-sm text-green-800">
-                <strong>Subscription Cancelled:</strong> Your access continues until your current billing period ends. You can reactivate anytime before then.
-              </p>
-            </div>
-          )}
-          
-          {isCancelled && subscriptionStatus === 'canceled' && (
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-sm text-yellow-800">
-                Your subscription is cancelled but remains active until the end of your current billing period. You can reactivate it anytime.
-              </p>
-            </div>
-          )}
+            {/* Cancelled Subscription Info */}
+            {subscriptionStatus === 'active_until_period_end' && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                <p className="text-sm text-green-800">
+                  <strong>{t('subscription.warnings.subscriptionCancelled')}</strong>
+                </p>
+              </div>
+            )}
+            
+            {isCancelled && subscriptionStatus === 'canceled' && (
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                <p className="text-sm text-yellow-800">
+                  {t('subscription.warnings.cancelledActive')}
+                </p>
+              </div>
+            )}
         </CardContent>
       </Card>
       

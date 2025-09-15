@@ -50,7 +50,53 @@
     },
     "subscription": {
       "title": "Prenumeration",
-      "description": "Hantera din prenumeration och fakturering"
+      "description": "Hantera din Breeding Journey-prenumeration",
+      "status": {
+        "label": "Status",
+        "friendAccess": "Vänåtkomst",
+        "cancelledExpiresSoon": "Uppsagd - Löper ut snart",
+        "activeTrial": "Aktiv provperiod",
+        "activeSubscription": "Aktiv prenumeration",
+        "expired": "Utgången",
+        "inactive": "Inaktiv"
+      },
+      "statusDescriptions": {
+        "friendAccess": "Du har särskild vänåtkomst till Breeding Journey.",
+        "activeUntilPeriodEnd": "Din prenumeration är uppsagd och upphör vid slutet av nuvarande faktureringsperiod. Du kan återaktivera den när som helst.",
+        "cancelledWithPaid": "Din prenumeration är uppsagd och upphör vid slutet av nuvarande faktureringsperiod.",
+        "trialActive": "Din kostnadsfria provperiod är aktiv och löper ut om {{days}} {{daysText}}.",
+        "trialActiveCurrent": "Din kostnadsfria provperiod är för närvarande aktiv.",
+        "paidActive": "Du har en aktiv betald prenumeration på Breeding Journey.",
+        "expired": "Din kostnadsfria provperiod har löpt ut. Aktivera din prenumeration för att fortsätta.",
+        "noSubscription": "Ingen aktiv prenumeration hittades."
+      },
+      "dates": {
+        "importantDates": "Viktiga datum",
+        "trialEndDate": "Slutdatum för provperiod",
+        "subscriptionEndDate": "Slutdatum för prenumeration"
+      },
+      "buttons": {
+        "opening": "Öppnar...",
+        "activateSubscription": "Aktivera prenumeration",
+        "manageSubscription": "Hantera prenumeration",
+        "cancelling": "Säger upp...",
+        "cancelSubscription": "Säg upp prenumeration",
+        "keepSubscription": "Behåll prenumeration",
+        "yesCancel": "Ja, säg upp"
+      },
+      "cancelDialog": {
+        "title": "Säg upp prenumeration",
+        "description": "Är du säker på att du vill säga upp din prenumeration? Din åtkomst fortsätter till slutet av din nuvarande faktureringsperiod, och du kan återaktivera när som helst innan dess."
+      },
+      "warnings": {
+        "trialExpiring": "Din provperiod löper ut snart. Överväg att aktivera din prenumeration för att undvika avbrott.",
+        "subscriptionCancelled": "Prenumeration uppsagd: Din åtkomst fortsätter tills din nuvarande faktureringsperiod slutar. Du kan återaktivera när som helst innan dess.",
+        "cancelledActive": "Din prenumeration är uppsagd men förblir aktiv till slutet av din nuvarande faktureringsperiod. Du kan återaktivera den när som helst."
+      },
+      "timeUnits": {
+        "day": "dag",
+        "days": "dagar"
+      }
     },
     "password": {
       "title": "Byt Lösenord",
