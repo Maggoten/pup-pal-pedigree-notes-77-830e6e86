@@ -15,21 +15,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const DeleteAccountSection: React.FC = () => {
   const { user, deleteAccount } = useAuth();
+  const { t } = useTranslation('settings');
   const [isOpen, setIsOpen] = useState(false);
   const [confirmEmail, setConfirmEmail] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDeleteAccount = async () => {
     if (!user) {
-      toast.error("You must be logged in to delete your account");
+      toast.error(t('account.deleteAccount.errors.notLoggedIn'));
       return;
     }
 
     if (confirmEmail.toLowerCase() !== user.email.toLowerCase()) {
-      toast.error("Email address doesn't match your account email");
+      toast.error(t('account.deleteAccount.errors.emailMismatch'));
       return;
     }
 
@@ -41,7 +43,7 @@ const DeleteAccountSection: React.FC = () => {
         // The user will be redirected to login page by AuthProvider's signOut
       }
     } catch (error) {
-      toast.error("Failed to delete account. Please try again later.");
+      toast.error(t('account.deleteAccount.errors.deletionFailed'));
       console.error("Account deletion error:", error);
     } finally {
       setIsDeleting(false);
@@ -53,11 +55,11 @@ const DeleteAccountSection: React.FC = () => {
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2 text-destructive">
           <Trash2 className="h-5 w-5" />
-          <h3 className="text-lg font-medium">Delete Account</h3>
+          <h3 className="text-lg font-medium">{t('account.deleteAccount.title')}</h3>
         </div>
         
         <p className="text-sm text-muted-foreground">
-          Permanently delete your account and all associated data. This action cannot be undone.
+          {t('account.deleteAccount.description')}
         </p>
         
         <Button 
@@ -65,43 +67,42 @@ const DeleteAccountSection: React.FC = () => {
           onClick={() => setIsOpen(true)}
           className="w-full sm:w-auto"
         >
-          Delete My Account
+          {t('account.deleteAccount.button')}
         </Button>
       </div>
 
       <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('account.deleteAccount.confirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your account
-              and remove all of your data from our servers.
+              {t('account.deleteAccount.confirmDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <div className="py-4">
             <Label htmlFor="confirmEmail" className="text-sm font-medium">
-              Type your email <span className="font-mono">{user?.email}</span> to confirm:
+              {t('account.deleteAccount.emailConfirmLabel')} <span className="font-mono">{user?.email}</span>:
             </Label>
             <Input 
               id="confirmEmail"
               type="email" 
               value={confirmEmail} 
               onChange={(e) => setConfirmEmail(e.target.value)}
-              placeholder="your.email@example.com"
+              placeholder={t('account.deleteAccount.emailPlaceholder')}
               className="mt-2"
             />
           </div>
 
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>{t('account.deleteAccount.cancelButton')}</AlertDialogCancel>
             <Button 
               variant="destructive" 
               onClick={handleDeleteAccount}
               disabled={isDeleting || confirmEmail.toLowerCase() !== (user?.email || '').toLowerCase()}
               className="gap-2"
             >
-              {isDeleting ? "Deleting..." : "Delete My Account"}
+              {isDeleting ? t('account.deleteAccount.deleting') : t('account.deleteAccount.confirmButton')}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

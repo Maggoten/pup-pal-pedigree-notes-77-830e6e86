@@ -140,13 +140,21 @@
     },
     "deleteAccount": {
       "title": "Ta bort Konto",
-      "description": "Ta bort ditt konto och all associerad data permanent",
+      "description": "Ta bort ditt konto och all associerad data permanent. Denna åtgärd kan inte ångras.",
       "warning": "Denna åtgärd kan inte ångras",
-      "button": "Ta bort Konto",
-      "confirmTitle": "Är du säker?",
-      "confirmDescription": "Detta kommer permanent ta bort ditt konto och all din data. Denna åtgärd kan inte ångras.",
-      "confirmButton": "Ja, ta bort mitt konto",
-      "cancelButton": "Avbryt"
+      "button": "Ta bort Mitt Konto",
+      "confirmTitle": "Är du helt säker?",
+      "confirmDescription": "Denna åtgärd kan inte ångras. Detta kommer permanent ta bort ditt konto och ta bort all din data från våra servrar.",
+      "emailConfirmLabel": "Skriv din e-post",
+      "emailPlaceholder": "din.epost@exempel.com",
+      "confirmButton": "Ta bort Mitt Konto",
+      "cancelButton": "Avbryt",
+      "deleting": "Tar bort...",
+      "errors": {
+        "notLoggedIn": "Du måste vara inloggad för att ta bort ditt konto",
+        "emailMismatch": "E-postadressen stämmer inte överens med din kontos e-post",
+        "deletionFailed": "Misslyckades med att ta bort kontot. Vänligen försök igen senare."
+      }
     }
   },
   "subscription": {

@@ -140,13 +140,21 @@
     },
     "deleteAccount": {
       "title": "Delete Account",
-      "description": "Permanently delete your account and all associated data",
+      "description": "Permanently delete your account and all associated data. This action cannot be undone.",
       "warning": "This action cannot be undone",
-      "button": "Delete Account",
-      "confirmTitle": "Are you sure?",
-      "confirmDescription": "This will permanently delete your account and all your data. This action cannot be undone.",
-      "confirmButton": "Yes, delete my account",
-      "cancelButton": "Cancel"
+      "button": "Delete My Account",
+      "confirmTitle": "Are you absolutely sure?",
+      "confirmDescription": "This action cannot be undone. This will permanently delete your account and remove all of your data from our servers.",
+      "emailConfirmLabel": "Type your email",
+      "emailPlaceholder": "your.email@example.com",
+      "confirmButton": "Delete My Account",
+      "cancelButton": "Cancel",
+      "deleting": "Deleting...",
+      "errors": {
+        "notLoggedIn": "You must be logged in to delete your account",
+        "emailMismatch": "Email address doesn't match your account email",
+        "deletionFailed": "Failed to delete account. Please try again later."
+      }
     }
   },
   "subscription": {
