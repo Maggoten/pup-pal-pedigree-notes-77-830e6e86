@@ -30,33 +30,52 @@ export const generatePlannedHeatReminders = (plannedLitters: PlannedLitter[]): R
   const reminders: Reminder[] = [];
   const today = new Date();
   
+  console.log(`[AutoRemindersService] Processing ${plannedLitters.length} planned litters for heat reminders`);
+  
   // Filter litters with upcoming heat dates within the next 30 days
   const upcomingHeats = plannedLitters.filter(litter => {
     const heatDate = new Date(litter.expectedHeatDate);
     const daysUntil = differenceInDays(heatDate, today);
-    return daysUntil >= 0 && daysUntil <= 30;
+    const isUpcoming = daysUntil >= 0 && daysUntil <= 30;
+    
+    console.log(`[AutoRemindersService] Litter ${litter.femaleName}: heat in ${daysUntil} days, upcoming: ${isUpcoming}`);
+    return isUpcoming;
   });
+  
+  console.log(`[AutoRemindersService] Found ${upcomingHeats.length} upcoming heats`);
   
   // Create reminders for upcoming heats
   upcomingHeats.forEach(litter => {
     const heatDate = new Date(litter.expectedHeatDate);
     const daysUntil = differenceInDays(heatDate, today);
     
-    reminders.push({
+    const reminder = {
       id: generateSystemReminderId(litter.femaleId, 'planned-heat', heatDate),
       title: '',
       description: '',
       titleKey: 'events.heat.approaching',
-      descriptionKey: 'events.heat.expected',
+      descriptionKey: 'events.heat.expected', 
       translationData: { dogName: litter.femaleName, days: daysUntil },
       dueDate: heatDate,
-      priority: 'high',
-      type: 'heat',
+      priority: 'high' as const,
+      type: 'heat' as const,
       icon: createPawPrintIcon("rose-500"),
       relatedId: litter.femaleId
+    };
+    
+    console.log(`[AutoRemindersService] Created heat reminder:`, {
+      femaleId: litter.femaleId,
+      femaleName: litter.femaleName,
+      titleKey: reminder.titleKey,
+      descriptionKey: reminder.descriptionKey,
+      translationData: reminder.translationData,
+      daysUntil
     });
+    
+    reminders.push(reminder);
   });
   
+  console.log(`[AutoRemindersService] Returning ${reminders.length} heat reminders`);
   return reminders;
 };
 

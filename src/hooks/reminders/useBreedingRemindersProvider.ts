@@ -131,9 +131,29 @@ export const useBreedingRemindersProvider = () => {
         console.log(`[Reminders Debug] Generated ${generalReminders.length} general reminders`);
         
         // Generate the new automatic reminders
-        console.log(`[Reminders Debug] Generating planned heat reminders`);
+        console.log(`[Reminders Debug] Generating planned heat reminders from ${plannedLitters.length} planned litters`);
+        plannedLitters.forEach((litter, index) => {
+          console.log(`[Reminders Debug] Planned litter ${index + 1}:`, {
+            femaleId: litter.femaleId,
+            femaleName: litter.femaleName,
+            expectedHeatDate: litter.expectedHeatDate
+          });
+        });
+        
         const plannedHeatReminders = generatePlannedHeatReminders(plannedLitters);
         console.log(`[Reminders Debug] Generated ${plannedHeatReminders.length} planned heat reminders`);
+        
+        // Log details of generated heat reminders
+        plannedHeatReminders.forEach((reminder, index) => {
+          console.log(`[Reminders Debug] Heat reminder ${index + 1}:`, {
+            id: reminder.id,
+            title: reminder.title,
+            titleKey: reminder.titleKey,
+            descriptionKey: reminder.descriptionKey,
+            translationData: reminder.translationData,
+            dueDate: reminder.dueDate
+          });
+        });
         
         console.log(`[Reminders Debug] Generating enhanced birthday reminders`);
         const birthdayReminders = generateEnhancedBirthdayReminders(userDogs);
@@ -377,8 +397,18 @@ export const useBreedingRemindersProvider = () => {
   
   // Force refetch function for manual refresh
   const refreshReminderData = () => {
+    console.log(`[Reminders Debug] Force refreshing reminder data for user ${user?.id}`);
     queryClient.invalidateQueries({ queryKey: ['reminders', user?.id, dogs.length, plannedLitters.length] });
+    queryClient.invalidateQueries({ queryKey: ['planned-litters', user?.id] });
   };
+
+  // Trigger automatic refresh when component mounts to force regeneration
+  useEffect(() => {
+    if (user) {
+      console.log(`[Reminders Debug] Component mounted, triggering immediate refresh for user ${user.id}`);
+      refreshReminderData();
+    }
+  }, [user?.id]);
   
   return {
     reminders: sortedReminders,
