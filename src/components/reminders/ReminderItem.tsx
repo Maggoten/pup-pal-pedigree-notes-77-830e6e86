@@ -36,6 +36,14 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
   const { t } = useTranslation('home');
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Debug log to see what data is received
+  console.log(`[ReminderItem Debug] Rendering reminder:`, {
+    id: id.substring(0, 8),
+    title,
+    description,
+    type: title.includes('Vaccinering') ? 'vaccination' : title.includes('Födelsedag') ? 'birthday' : 'other'
+  });
+
   // Determine if overdue (due date is before now and not completed)
   const isOverdue = !isCompleted && isBefore(new Date(dueDate), new Date());
   
@@ -128,8 +136,7 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
                 isOverdue ? "text-rose-700" : ""
               )}
             >
-              {/* Handle potential untranslated keys as fallback */}
-              {title.startsWith('events.') ? t(title) : title}
+              {title}
             </div>
           </div>
           
@@ -141,8 +148,7 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
                  isCompleted ? "line-through" : ""
                )}
              >
-               {/* Handle potential untranslated keys as fallback */}
-               {description.startsWith('events.') ? t(description) : description}
+               {description}
              </div>
            )}
           
