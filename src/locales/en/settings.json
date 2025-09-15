@@ -47,57 +47,58 @@
     },
     "actions": {
       "logout": "Logout"
+    }
+  },
+  "subscription": {
+    "title": "Subscription",
+    "description": "Manage your Breeding Journey subscription",
+    "status": {
+      "label": "Status",
+      "friendAccess": "Friend Access",
+      "cancelledExpiresSoon": "Cancelled - Expires Soon",
+      "activeTrial": "Active Trial",
+      "activeSubscription": "Active Subscription",
+      "expired": "Expired",
+      "inactive": "Inactive"
     },
-    "subscription": {
-      "title": "Subscription",
-      "description": "Manage your Breeding Journey subscription",
-      "status": {
-        "label": "Status",
-        "friendAccess": "Friend Access",
-        "cancelledExpiresSoon": "Cancelled - Expires Soon",
-        "activeTrial": "Active Trial",
-        "activeSubscription": "Active Subscription",
-        "expired": "Expired",
-        "inactive": "Inactive"
-      },
-      "statusDescriptions": {
-        "friendAccess": "You have special friend access to Breeding Journey.",
-        "activeUntilPeriodEnd": "Your subscription is cancelled and will end at the current billing period. You can reactivate it anytime.",
-        "cancelledWithPaid": "Your subscription is cancelled and will end at the current billing period.",
-        "trialActive": "Your free trial is active and expires in {{days}} {{daysText}}.",
-        "trialActiveCurrent": "Your free trial is currently active.",
-        "paidActive": "You have an active paid subscription to Breeding Journey.",
-        "expired": "Your free trial has expired. Activate your subscription to continue.",
-        "noSubscription": "No active subscription found."
-      },
-      "dates": {
-        "importantDates": "Important Dates",
-        "trialEndDate": "Trial End Date",
-        "subscriptionEndDate": "Subscription End Date"
-      },
-      "buttons": {
-        "opening": "Opening...",
-        "activateSubscription": "Activate Subscription",
-        "manageSubscription": "Manage Subscription",
-        "cancelling": "Cancelling...",
-        "cancelSubscription": "Cancel Subscription",
-        "keepSubscription": "Keep Subscription",
-        "yesCancel": "Yes, Cancel"
-      },
-      "cancelDialog": {
-        "title": "Cancel Subscription",
-        "description": "Are you sure you want to cancel your subscription? Your access will continue until the end of your current billing period, and you can reactivate anytime before then."
-      },
-      "warnings": {
-        "trialExpiring": "Your trial expires soon. Consider activating your subscription to avoid interruption.",
-        "subscriptionCancelled": "Subscription Cancelled: Your access continues until your current billing period ends. You can reactivate anytime before then.",
-        "cancelledActive": "Your subscription is cancelled but remains active until the end of your current billing period. You can reactivate it anytime."
-      },
-      "timeUnits": {
-        "day": "day",
-        "days": "days"
-      }
+    "statusDescriptions": {
+      "friendAccess": "You have special friend access to Breeding Journey.",
+      "activeUntilPeriodEnd": "Your subscription is cancelled and will end at the current billing period. You can reactivate it anytime.",
+      "cancelledWithPaid": "Your subscription is cancelled and will end at the current billing period.",
+      "trialActive": "Your free trial is active and expires in {{days}} {{daysText}}.",
+      "trialActiveCurrent": "Your free trial is currently active.",
+      "paidActive": "You have an active paid subscription to Breeding Journey.",
+      "expired": "Your free trial has expired. Activate your subscription to continue.",
+      "noSubscription": "No active subscription found."
     },
+    "dates": {
+      "importantDates": "Important Dates",
+      "trialEndDate": "Trial End Date",
+      "subscriptionEndDate": "Subscription End Date"
+    },
+    "buttons": {
+      "opening": "Opening...",
+      "activateSubscription": "Activate Subscription",
+      "manageSubscription": "Manage Subscription",
+      "cancelling": "Cancelling...",
+      "cancelSubscription": "Cancel Subscription",
+      "keepSubscription": "Keep Subscription",
+      "yesCancel": "Yes, Cancel"
+    },
+    "cancelDialog": {
+      "title": "Cancel Subscription",
+      "description": "Are you sure you want to cancel your subscription? Your access will continue until the end of your current billing period, and you can reactivate anytime before then."
+    },
+    "warnings": {
+      "trialExpiring": "Your trial expires soon. Consider activating your subscription to avoid interruption.",
+      "subscriptionCancelled": "Subscription Cancelled: Your access continues until your current billing period ends. You can reactivate anytime before then.",
+      "cancelledActive": "Your subscription is cancelled but remains active until the end of your current billing period. You can reactivate it anytime."
+    },
+    "timeUnits": {
+      "day": "day",
+      "days": "days"
+    }
+  },
     "password": {
       "title": "Change Password",
       "description": "Update your account password",
