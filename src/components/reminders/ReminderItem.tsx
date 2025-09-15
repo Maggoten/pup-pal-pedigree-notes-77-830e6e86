@@ -9,15 +9,19 @@ interface ReminderItemProps {
   id: string;
   title: string;
   description: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   priority: 'high' | 'medium' | 'low';
   dueDate: Date;
-  type: string;
+  type: 'pregnancy' | 'litter' | 'breeding' | 'health' | 'heat' | 'vaccination' | 'birthday' | 'other';
   relatedId?: string;
   isCompleted?: boolean;
-  onComplete: (id: string) => void;
+  onComplete?: (id: string) => void;
   onDelete?: (id: string) => void;
   compact?: boolean;
+  // Lazy translation support
+  titleKey?: string;
+  descriptionKey?: string;
+  translationData?: Record<string, any>;
 }
 
 // Use memo to prevent unnecessary re-renders
@@ -31,18 +35,22 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
   isCompleted = false,
   onComplete,
   onDelete,
-  compact = false
+  compact = false,
+  titleKey,
+  descriptionKey,
+  translationData
 }) => {
   const { t } = useTranslation('home');
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Debug log to see what data is received
-  console.log(`[ReminderItem Debug] Rendering reminder:`, {
-    id: id.substring(0, 8),
-    title,
-    description,
-    type: title.includes('Vaccinering') ? 'vaccination' : title.includes('Födelsedag') ? 'birthday' : 'other'
-  });
+  // Handle lazy translation - translate in component where i18n is ready
+  const displayTitle = titleKey && translationData 
+    ? String(t(titleKey, translationData))
+    : title;
+  
+  const displayDescription = descriptionKey && translationData 
+    ? String(t(descriptionKey, translationData))
+    : description;
 
   // Determine if overdue (due date is before now and not completed)
   const isOverdue = !isCompleted && isBefore(new Date(dueDate), new Date());
@@ -65,7 +73,7 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
     setIsUpdating(true);
     
     try {
-      onComplete(id);
+      onComplete?.(id);
       // Add a small delay to prevent rapid clicking
       setTimeout(() => setIsUpdating(false), 500);
     } catch (error) {
@@ -136,21 +144,21 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
                 isOverdue ? "text-rose-700" : ""
               )}
             >
-              {title}
+              {displayTitle}
             </div>
           </div>
           
            {/* Description - hidden in compact view */}
-           {!compact && (
-             <div
-               className={cn(
-                 "mt-1 text-xs text-muted-foreground",
-                 isCompleted ? "line-through" : ""
-               )}
-             >
-               {description}
-             </div>
-           )}
+           {!compact && (displayDescription || description) && (
+              <div
+                className={cn(
+                  "mt-1 text-xs text-muted-foreground",
+                  isCompleted ? "line-through" : ""
+                )}
+              >
+                {displayDescription}
+              </div>
+            )}
           
           {/* Due date */}
           <div

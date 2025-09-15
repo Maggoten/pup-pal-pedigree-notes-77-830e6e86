@@ -11,6 +11,10 @@ export interface Reminder {
   icon?: React.ReactNode;
   relatedId?: string;
   isCompleted?: boolean;
+  // Lazy translation support
+  titleKey?: string;
+  descriptionKey?: string;
+  translationData?: Record<string, any>;
 }
 
 export interface UpcomingHeat {

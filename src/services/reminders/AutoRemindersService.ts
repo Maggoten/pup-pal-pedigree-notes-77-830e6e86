@@ -44,8 +44,11 @@ export const generatePlannedHeatReminders = (plannedLitters: PlannedLitter[]): R
     
     reminders.push({
       id: generateSystemReminderId(litter.femaleId, 'planned-heat', heatDate),
-      title: t('events.heat.approaching', { dogName: litter.femaleName }),
-      description: t('events.heat.expected', { days: daysUntil }),
+      title: '',
+      description: '',
+      titleKey: 'events.heat.approaching',
+      descriptionKey: 'events.heat.expected',
+      translationData: { dogName: litter.femaleName, days: daysUntil },
       dueDate: heatDate,
       priority: 'high',
       type: 'heat',
@@ -86,8 +89,11 @@ export const generateEnhancedBirthdayReminders = (dogs: Dog[]): Reminder[] => {
       
       reminders.push({
         id: generateSystemReminderId(dog.id, 'enhanced-birthday', nextBirthday),
-        title: t('events.birthday.title', { dogName: dog.name }),
-        description: t('events.birthday.upcoming', { dogName: dog.name, age, days: daysUntil }),
+        title: '',
+        description: '',
+        titleKey: 'events.birthday.title',
+        descriptionKey: 'events.birthday.upcoming',
+        translationData: { dogName: dog.name, age, days: daysUntil },
         dueDate: nextBirthday,
         priority: 'medium',
         type: 'birthday',
@@ -123,10 +129,11 @@ export const generateVaccinationReminders = (dogs: Dog[]): Reminder[] => {
       
       reminders.push({
         id: generateSystemReminderId(dog.id, 'enhanced-vaccination', nextVaccination),
-        title: t('events.vaccination.title', { dogName: dog.name }),
-        description: isOverdue 
-          ? t('events.vaccination.overdue', { days })
-          : t('events.vaccination.upcoming', { days }),
+        title: '',
+        description: '',
+        titleKey: 'events.vaccination.title',
+        descriptionKey: isOverdue ? 'events.vaccination.overdue' : 'events.vaccination.upcoming',
+        translationData: { dogName: dog.name, days },
         dueDate: nextVaccination,
         priority: 'high',
         type: 'vaccination',

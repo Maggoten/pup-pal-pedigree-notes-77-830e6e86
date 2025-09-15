@@ -53,10 +53,11 @@ export const generateDogReminders = async (dogs: Dog[]): Promise<Reminder[]> => 
         
         reminders.push({
           id: generateSystemReminderId(dog.id, 'vaccination', nextVaccination),
-          title: t('events.vaccination.title', { dogName: dog.name }),
-          description: isOverdue 
-            ? t('events.vaccination.overdue', { days })
-            : t('events.vaccination.upcoming', { days }),
+          title: '',
+          description: '',
+          titleKey: 'events.vaccination.title',
+          descriptionKey: isOverdue ? 'events.vaccination.overdue' : 'events.vaccination.upcoming',
+          translationData: { dogName: dog.name, days },
           icon: createCalendarClockIcon("amber-500"),
           dueDate: nextVaccination,
           priority: isOverdue ? 'high' : 'medium',
@@ -89,20 +90,24 @@ export const generateDogReminders = async (dogs: Dog[]): Promise<Reminder[]> => 
           ? currentYear - birthdate.getFullYear() 
           : (currentYear + (isBefore(birthdateThisYear, today) ? 1 : 0)) - birthdate.getFullYear();
         
-        let description: string;
+        let days = daysUntilBirthday;
+        let descriptionKey: string;
         if (daysUntilBirthday === 0) {
-          description = t('events.birthday.today', { dogName: dog.name, age });
+          descriptionKey = 'events.birthday.today';
         } else if (daysUntilBirthday > 0) {
-          description = t('events.birthday.upcoming', { dogName: dog.name, age, days: daysUntilBirthday });
+          descriptionKey = 'events.birthday.upcoming';
         } else {
-          const daysAgo = Math.abs(daysUntilBirthday);
-          description = t('events.birthday.recent', { dogName: dog.name, age, days: daysAgo });
+          descriptionKey = 'events.birthday.recent';
+          days = Math.abs(daysUntilBirthday);
         }
         
         reminders.push({
           id: generateSystemReminderId(dog.id, 'birthday', nextBirthday),
-          title: t('events.birthday.title', { dogName: dog.name }),
-          description,
+          title: '',
+          description: '',
+          titleKey: 'events.birthday.title',
+          descriptionKey,
+          translationData: { dogName: dog.name, age, days },
           icon: createPawPrintIcon("blue-500"),
           dueDate: nextBirthday,
           priority: 'medium',
