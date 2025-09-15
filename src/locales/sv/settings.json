@@ -16,7 +16,7 @@
     "description": "Uppdatera din personliga information och kontaktuppgifter",
     "kennel": {
       "title": "Kennelinfo",
-      "description": "Ange ditt kennelnamn och andra affärsdetaljer"
+      "description": "Ange ditt kennelnamn och annan kennelinformation"
     },
     "fields": {
       "firstName": "Förnamn",
@@ -33,7 +33,7 @@
       "phonePlaceholder": "Telefonnummer"
     },
     "actions": {
-      "saveChanges": "Spara Ändringar",
+      "saveChanges": "Spara ändringar",
       "saving": "Sparar..."
     }
   },
@@ -49,12 +49,12 @@
       "logout": "Logga ut"
     },
     "password": {
-      "title": "Byt Lösenord",
+      "title": "Byt lösenord",
       "description": "Uppdatera ditt kontolösenord. Du behöver ange ditt nuvarande lösenord av säkerhetsskäl.",
       "fields": {
-        "currentPassword": "Nuvarande Lösenord",
-        "newPassword": "Nytt Lösenord", 
-        "confirmPassword": "Bekräfta Nytt Lösenord",
+        "currentPassword": "Nuvarande lösenord",
+        "newPassword": "Nytt lösenord", 
+        "confirmPassword": "Bekräfta nytt lösenord",
         "currentPasswordPlaceholder": "Ange ditt nuvarande lösenord",
         "newPasswordPlaceholder": "Ange ditt nya lösenord",
         "confirmPasswordPlaceholder": "Bekräfta ditt nya lösenord"
@@ -78,7 +78,7 @@
       },
       "securityNotice": {
         "title": "Säkerhetsnotis",
-        "description": "Ditt lösenord kommer att uppdateras säkert. Du förblir inloggad på denna enhet."
+        "description": "Ditt lösenord kommer att uppdateras. Du förblir inloggad på denna enhet."
       },
       "buttons": {
         "updating": "Uppdaterar...",
@@ -88,24 +88,24 @@
       },
       "confirmDialog": {
         "title": "Bekräfta Lösenordsbyte",
-        "description": "Är du säker på att du vill ändra ditt lösenord? Ditt nya lösenord träder i kraft omedelbart."
+        "description": "Är du säker på att du vill ändra ditt lösenord? Ditt nya lösenord börjar gälla omedelbart."
       },
       "messages": {
-        "success": "Lösenord uppdaterat framgångsrikt",
+        "success": "Lösenord uppdaterat",
         "failed": "Misslyckades med att uppdatera lösenord. Kontrollera ditt nuvarande lösenord.",
         "error": "Ett oväntat fel inträffade när lösenordet skulle uppdateras"
       }
     },
     "sharing": {
-      "title": "Dela Ditt Konto",
-      "description": "Bjud in andra att samarbeta på dina avelregister",
+      "title": "Dela ditt konto",
+      "description": "Bjud in andra att samarbeta med ditt avelsarbete",
       "comingSoon": "Kommer Snart",
-      "comingSoonTitle": "Kontodelning Kommer Snart",
-      "comingSoonDescription": "Vi arbetar på ett säkert sätt för dig att dela dina avelregister med medarbetare. Den här funktionen är för närvarande under utveckling och kommer att vara tillgänglig snart.",
+      "comingSoonTitle": "Kontodelning kommer snart",
+      "comingSoonDescription": "Vi arbetar på ett säkert sätt för dig att dela dina avelregister med dina samrbetspartners. Den här funktionen är för närvarande under utveckling och kommer att vara tillgänglig snart.",
       "sharedUsersTitle": "Delade Användare",
       "sharedUsersDescription": "Personer som har åtkomst till dina avelregister",
-      "addUser": "Lägg till Användare",
-      "removeUser": "Ta bort Användare",
+      "addUser": "Lägg till användare",
+      "removeUser": "Ta bort användare",
       "email": "E-postadress",
       "role": "Roll",
       "dateAdded": "Datum Tillagd",
@@ -162,7 +162,7 @@
     "description": "Hantera din Breeding Journey-prenumeration",
     "status": {
       "label": "Status",
-      "friendAccess": "Vänåtkomst",
+      "friendAccess": "Vänskapskonto",
       "cancelledExpiresSoon": "Uppsagd - Löper ut snart",
       "activeTrial": "Aktiv provperiod",
       "activeSubscription": "Aktiv prenumeration",
@@ -170,12 +170,12 @@
       "inactive": "Inaktiv"
     },
     "statusDescriptions": {
-      "friendAccess": "Du har särskild vänåtkomst till Breeding Journey.",
+      "friendAccess": "Du har ett särskilt vänskapskonto hos Breeding Journey.",
       "activeUntilPeriodEnd": "Din prenumeration är uppsagd och upphör vid slutet av nuvarande faktureringsperiod. Du kan återaktivera den när som helst.",
       "cancelledWithPaid": "Din prenumeration är uppsagd och upphör vid slutet av nuvarande faktureringsperiod.",
       "trialActive": "Din kostnadsfria provperiod är aktiv och löper ut om {{days}} {{daysText}}.",
       "trialActiveCurrent": "Din kostnadsfria provperiod är för närvarande aktiv.",
-      "paidActive": "Du har en aktiv betald prenumeration på Breeding Journey.",
+      "paidActive": "Du har en aktiv prenumeration på Breeding Journey.",
       "expired": "Din kostnadsfria provperiod har löpt ut. Aktivera din prenumeration för att fortsätta.",
       "noSubscription": "Ingen aktiv prenumeration hittades."
     },
@@ -247,7 +247,7 @@
   },
   "language": {
     "title": "Språkinställningar",
-    "description": "Välj ditt föredragna språk",
+    "description": "Välj ditt språk",
     "english": "English",
     "swedish": "Svenska",
     "changeLanguage": "Byt Språk"
