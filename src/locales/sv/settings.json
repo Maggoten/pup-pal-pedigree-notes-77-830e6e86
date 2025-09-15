@@ -47,6 +47,45 @@
     },
     "actions": {
       "logout": "Logga ut"
+    },
+    "password": {
+      "title": "Byt Lösenord",
+      "description": "Uppdatera ditt kontolösenord",
+      "currentPassword": "Nuvarande Lösenord",
+      "newPassword": "Nytt Lösenord",
+      "confirmPassword": "Bekräfta Nytt Lösenord",
+      "changePassword": "Byt Lösenord"
+    },
+    "sharing": {
+      "title": "Kontodelning",
+      "description": "Dela åtkomst till dina avelregister med andra användare",
+      "addUser": "Lägg till Användare",
+      "removeUser": "Ta bort Användare",
+      "email": "E-postadress",
+      "role": "Roll",
+      "dateAdded": "Datum Tillagd",
+      "roles": {
+        "viewer": "Tittare",
+        "editor": "Redigerare"
+      },
+      "roleDescriptions": {
+        "viewer": "Kan visa avelregister och hundinformation men kan inte göra ändringar",
+        "editor": "Kan redigera avelregister och hantera hundar men kan inte ändra kontoinställningar"
+      },
+      "emptyState": {
+        "title": "Inga delade användare",
+        "description": "Du har inte delat åtkomst med någon ännu"
+      }
+    },
+    "deleteAccount": {
+      "title": "Ta bort Konto",
+      "description": "Ta bort ditt konto och all associerad data permanent",
+      "warning": "Denna åtgärd kan inte ångras",
+      "button": "Ta bort Konto",
+      "confirmTitle": "Är du säker?",
+      "confirmDescription": "Detta kommer permanent ta bort ditt konto och all din data. Denna åtgärd kan inte ångras.",
+      "confirmButton": "Ja, ta bort mitt konto",
+      "cancelButton": "Avbryt"
     }
   },
   "subscription": {
@@ -97,46 +136,6 @@
     "timeUnits": {
       "day": "dag",
       "days": "dagar"
-    }
-  },
-    "password": {
-      "title": "Byt Lösenord",
-      "description": "Uppdatera ditt kontolösenord",
-      "currentPassword": "Nuvarande Lösenord",
-      "newPassword": "Nytt Lösenord",
-      "confirmPassword": "Bekräfta Nytt Lösenord",
-      "changePassword": "Byt Lösenord"
-    },
-    "sharing": {
-      "title": "Kontodelning",
-      "description": "Dela åtkomst till dina avelregister med andra användare",
-      "addUser": "Lägg till Användare",
-      "removeUser": "Ta bort Användare",
-      "email": "E-postadress",
-      "role": "Roll",
-      "dateAdded": "Datum Tillagd",
-      "roles": {
-        "viewer": "Tittare",
-        "editor": "Redigerare"
-      },
-      "roleDescriptions": {
-        "viewer": "Kan visa avelregister och hundinformation men kan inte göra ändringar",
-        "editor": "Kan redigera avelregister och hantera hundar men kan inte ändra kontoinställningar"
-      },
-      "emptyState": {
-        "title": "Inga delade användare",
-        "description": "Du har inte delat åtkomst med någon ännu"
-      }
-    },
-    "deleteAccount": {
-      "title": "Ta bort Konto",
-      "description": "Ta bort ditt konto och all associerad data permanent",
-      "warning": "Denna åtgärd kan inte ångras",
-      "button": "Ta bort Konto",
-      "confirmTitle": "Är du säker?",
-      "confirmDescription": "Detta kommer permanent ta bort ditt konto och all din data. Denna åtgärd kan inte ångras.",
-      "confirmButton": "Ja, ta bort mitt konto",
-      "cancelButton": "Avbryt"
     }
   },
   "help": {

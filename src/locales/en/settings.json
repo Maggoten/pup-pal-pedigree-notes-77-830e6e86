@@ -47,6 +47,45 @@
     },
     "actions": {
       "logout": "Logout"
+    },
+    "password": {
+      "title": "Change Password",
+      "description": "Update your account password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "changePassword": "Change Password"
+    },
+    "sharing": {
+      "title": "Account Sharing",
+      "description": "Share access to your breeding records with other users",
+      "addUser": "Add User",
+      "removeUser": "Remove User",
+      "email": "Email Address",
+      "role": "Role",
+      "dateAdded": "Date Added",
+      "roles": {
+        "viewer": "Viewer",
+        "editor": "Editor"
+      },
+      "roleDescriptions": {
+        "viewer": "Can view breeding records and dog information but cannot make changes",
+        "editor": "Can edit breeding records and manage dogs but cannot change account settings"
+      },
+      "emptyState": {
+        "title": "No shared users",
+        "description": "You haven't shared access with anyone yet"
+      }
+    },
+    "deleteAccount": {
+      "title": "Delete Account",
+      "description": "Permanently delete your account and all associated data",
+      "warning": "This action cannot be undone",
+      "button": "Delete Account",
+      "confirmTitle": "Are you sure?",
+      "confirmDescription": "This will permanently delete your account and all your data. This action cannot be undone.",
+      "confirmButton": "Yes, delete my account",
+      "cancelButton": "Cancel"
     }
   },
   "subscription": {
@@ -97,46 +136,6 @@
     "timeUnits": {
       "day": "day",
       "days": "days"
-    }
-  },
-    "password": {
-      "title": "Change Password",
-      "description": "Update your account password",
-      "currentPassword": "Current Password",
-      "newPassword": "New Password",
-      "confirmPassword": "Confirm New Password",
-      "changePassword": "Change Password"
-    },
-    "sharing": {
-      "title": "Account Sharing",
-      "description": "Share access to your breeding records with other users",
-      "addUser": "Add User",
-      "removeUser": "Remove User",
-      "email": "Email Address",
-      "role": "Role",
-      "dateAdded": "Date Added",
-      "roles": {
-        "viewer": "Viewer",
-        "editor": "Editor"
-      },
-      "roleDescriptions": {
-        "viewer": "Can view breeding records and dog information but cannot make changes",
-        "editor": "Can edit breeding records and manage dogs but cannot change account settings"
-      },
-      "emptyState": {
-        "title": "No shared users",
-        "description": "You haven't shared access with anyone yet"
-      }
-    },
-    "deleteAccount": {
-      "title": "Delete Account",
-      "description": "Permanently delete your account and all associated data",
-      "warning": "This action cannot be undone",
-      "button": "Delete Account",
-      "confirmTitle": "Are you sure?",
-      "confirmDescription": "This will permanently delete your account and all your data. This action cannot be undone.",
-      "confirmButton": "Yes, delete my account",
-      "cancelButton": "Cancel"
     }
   },
   "help": {
