@@ -18,7 +18,15 @@ export const calculateOptimalHeatInterval = (heatDates: Date[]): number => {
   const intervals: number[] = [];
   for (let i = 0; i < sortedDates.length - 1; i++) {
     const daysBetween = differenceInDays(sortedDates[i], sortedDates[i + 1]);
-    intervals.push(daysBetween);
+    // Only add positive intervals (safety check for duplicate dates)
+    if (daysBetween > 0) {
+      intervals.push(daysBetween);
+    }
+  }
+
+  // If no valid intervals found (e.g., all duplicate dates), use 365 days
+  if (intervals.length === 0) {
+    return 365;
   }
 
   // Return average interval, rounded to nearest day

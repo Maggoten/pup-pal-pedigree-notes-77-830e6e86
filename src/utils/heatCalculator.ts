@@ -123,12 +123,18 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
 
       // Get unified heat data to calculate intelligent interval
       const unifiedData = await HeatService.getUnifiedHeatData(dog.id);
-      const allHeatDates = [
+      const allHeatDatesRaw = [
         ...unifiedData.heatCycles.map(cycle => new Date(cycle.start_date)),
         ...unifiedData.heatHistory.map(h => new Date(h.date))
-      ].sort((a, b) => a.getTime() - b.getTime());
+      ];
 
-      console.log(`Found ${allHeatDates.length} total heat dates for ${dog.name}`);
+      // Deduplicate heat dates by converting to timestamps and back
+      const uniqueTimestamps = [...new Set(allHeatDatesRaw.map(date => date.getTime()))];
+      const allHeatDates = uniqueTimestamps
+        .map(timestamp => new Date(timestamp))
+        .sort((a, b) => a.getTime() - b.getTime());
+
+      console.log(`Found ${allHeatDatesRaw.length} total heat dates, ${allHeatDates.length} unique dates for ${dog.name}`);
 
       // Use intelligent interval calculation: history-based for 2+ heats, 365 days for 0-1 heats
       const intervalDays = calculateOptimalHeatInterval(allHeatDates);
