@@ -74,8 +74,15 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
       const latestDate = await HeatService.getLatestHeatDate(dog.id);
       if (!latestDate) continue;
 
-      // Use dog's heat interval or default to 365 days (1 year)
-      const intervalDays = dog.heatInterval || 365;
+      // Get unified heat data to calculate intelligent interval
+      const unifiedData = await HeatService.getUnifiedHeatData(dog.id);
+      const allHeatDates = [
+        ...unifiedData.heatCycles.map(cycle => new Date(cycle.start_date)),
+        ...unifiedData.heatHistory.map(h => new Date(h.date))
+      ].sort((a, b) => a.getTime() - b.getTime());
+
+      // Use intelligent interval calculation: history-based for 2+ heats, 365 days for 0-1 heats
+      const intervalDays = calculateOptimalHeatInterval(allHeatDates);
       let nextHeatDate = addDays(latestDate, intervalDays);
       
       // Handle overdue heats in unified calculation
@@ -106,7 +113,9 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
         );
         
         const lastHeatDate = parseISO(sortedHeatDates[0].date);
-        const intervalDays = dog.heatInterval || 365;
+        // Use same intelligent calculation for fallback
+        const heatDatesForFallback = dog.heatHistory?.map(h => parseISO(h.date)) || [];
+        const intervalDays = calculateOptimalHeatInterval(heatDatesForFallback);
         let nextHeatDate = addDays(lastHeatDate, intervalDays);
         
         // Handle overdue heats in fallback logic too

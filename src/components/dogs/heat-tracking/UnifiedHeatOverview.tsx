@@ -34,6 +34,7 @@ interface SummaryStats {
   currentDayInCycle: number | null;
   predictedEndDate: Date | null;
   isBasedOnOngoing: boolean;
+  intervalSource: 'calculated' | 'standard';
 }
 
 const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({ 
@@ -103,6 +104,9 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
     // Use the intelligent heat interval calculator
     const heatDatesAsDate = allHeatDates.map(date => parseISO(date));
     const averageInterval = calculateOptimalHeatInterval(heatDatesAsDate);
+    
+    // Determine if interval is calculated from history or standard estimate
+    const intervalSource = allHeatDates.length >= 2 ? 'calculated' : 'standard';
 
     // Calculate next heat date and days until
     let nextHeatDate: Date | null = null;
@@ -157,7 +161,8 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
       lastCycleLength,
       currentDayInCycle,
       predictedEndDate,
-      isBasedOnOngoing
+      isBasedOnOngoing,
+      intervalSource
     };
   };
 
@@ -325,6 +330,12 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
             </div>
             <div className="text-xs text-muted-foreground">
               {t('heatTracking.analytics.nextHeat')}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {stats.intervalSource === 'calculated' 
+                ? t('heatTracking.analytics.calculatedFromHistory', 'Beräknat från tidigare löp')
+                : t('heatTracking.analytics.standardEstimate', 'Uppskattning (1 år standard)')
+              }
             </div>
           </div>
           
