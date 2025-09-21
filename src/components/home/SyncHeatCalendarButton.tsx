@@ -59,7 +59,7 @@ const SyncHeatCalendarButton: React.FC<SyncHeatCalendarButtonProps> = ({
       // Dynamic imports to avoid circular dependency
       const { HeatCalendarSyncService } = await import('@/services/HeatCalendarSyncService');
       const { ReminderCalendarSyncService } = await import('@/services/ReminderCalendarSyncService');
-      const { calculateUpcomingHeatsSafe } = await import('@/utils/heatCalculatorSafe');
+      const { calculateUpcomingHeatsUnified } = await import('@/utils/heatCalculator');
       
       let syncedActive = 0;
       let syncedUpcoming = 0;

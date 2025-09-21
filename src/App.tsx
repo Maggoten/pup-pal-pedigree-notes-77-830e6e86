@@ -18,6 +18,7 @@ import ResetPassword from "./pages/ResetPassword";
 import AuthGuard from "./components/AuthGuard";
 import { AuthProvider } from "./providers/AuthProvider";
 import { DogsProvider } from "./context/DogsContext";
+import { UpcomingHeatsProvider } from "./providers/UpcomingHeatsProvider";
 import { getFirstActivePregnancy } from "./services/PregnancyService";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Pregnancy from "./pages/Pregnancy";
@@ -145,32 +146,34 @@ const App = () => {
                   <AuthGuard>
                 <ProtectedApp>
                   <DogsProvider>
-                    <RouteChangeTracker />
-                    <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
-                    <Route path="/registration-success" element={<RegistrationSuccess />} />
-                    <Route path="/" element={<Index />} />
-                    <Route path="/my-dogs" element={<MyDogs />} />
-                    <Route path="/my-dogs/:dogId" element={<MyDogs />} />
-                    <Route path="/my-dogs/:dogId/:tab" element={<MyDogs />} />
-                    <Route path="/planned-litters" element={<PlannedLitters />} />
-                    {/* Handle pregnancy routes with loading state */}
-                    <Route path="/pregnancy" element={loading ? <div>Loading...</div> : 
-                      firstPregnancyId ? 
-                        <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
-                        <Pregnancy />
-                    } />
-                    <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
-                    <Route path="/my-litters" element={<MyLitters />} />
-                    <Route path="/my-litters/:litterId/puppy/:puppyId" element={<PuppyProfile />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                    </Routes>
-                    {/* Debug panel - moved back inside DogsProvider with conditional rendering */}
-                    <ErrorBoundary fallback={<div />}>
-                      <MobileDebugPanel />
-                    </ErrorBoundary>
+                    <UpcomingHeatsProvider>
+                      <RouteChangeTracker />
+                      <Routes>
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/reset-password" element={<ResetPassword />} />
+                      <Route path="/registration-success" element={<RegistrationSuccess />} />
+                      <Route path="/" element={<Index />} />
+                      <Route path="/my-dogs" element={<MyDogs />} />
+                      <Route path="/my-dogs/:dogId" element={<MyDogs />} />
+                      <Route path="/my-dogs/:dogId/:tab" element={<MyDogs />} />
+                      <Route path="/planned-litters" element={<PlannedLitters />} />
+                      {/* Handle pregnancy routes with loading state */}
+                      <Route path="/pregnancy" element={loading ? <div>Loading...</div> : 
+                        firstPregnancyId ? 
+                          <Navigate to={`/pregnancy/${firstPregnancyId}`} replace /> : 
+                          <Pregnancy />
+                      } />
+                      <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
+                      <Route path="/my-litters" element={<MyLitters />} />
+                      <Route path="/my-litters/:litterId/puppy/:puppyId" element={<PuppyProfile />} />
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                      </Routes>
+                      {/* Debug panel - moved back inside DogsProvider with conditional rendering */}
+                      <ErrorBoundary fallback={<div />}>
+                        <MobileDebugPanel />
+                      </ErrorBoundary>
+                    </UpcomingHeatsProvider>
                   </DogsProvider>
               </ProtectedApp>
             </AuthGuard>

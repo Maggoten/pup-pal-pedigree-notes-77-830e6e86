@@ -476,9 +476,9 @@ export class ReminderCalendarSyncService {
    * @returns Array of upcoming heat objects
    */
   private static async getUpcomingHeats(dogs: Dog[]): Promise<UpcomingHeat[]> {
-    // Import the safe calculator wrapper to support migration
-    const { calculateUpcomingHeatsSafe } = await import('@/utils/heatCalculatorSafe');
-    return calculateUpcomingHeatsSafe(dogs, 'reminderSync');
+    // Use unified calculation directly
+    const { calculateUpcomingHeatsUnified } = await import('@/utils/heatCalculator');
+    return calculateUpcomingHeatsUnified(dogs);
   }
 
   /**

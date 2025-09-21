@@ -1,61 +1,11 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { UpcomingHeat } from '@/types/reminders';
-import { calculateUpcomingHeatsSafe } from '@/utils/heatCalculatorSafe';
-import { useDogs } from '@/context/DogsContext';
-import { Dog } from '@/types/dogs';
-import { ReminderCalendarSyncService } from '@/services/ReminderCalendarSyncService';
+import { useUpcomingHeatsContext } from '@/providers/UpcomingHeatsProvider';
 
 export const useUpcomingHeats = () => {
-  const { dogs } = useDogs();
-  const [upcomingHeats, setUpcomingHeats] = useState<UpcomingHeat[]>([]);
-  const [loading, setLoading] = useState(true);
-  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isCalculatingRef = useRef(false);
-
-  const loadHeats = useCallback(async () => {
-    // Prevent multiple concurrent calculations
-    if (isCalculatingRef.current) {
-      return;
-    }
-    
-    isCalculatingRef.current = true;
-    setLoading(true);
-    
-    // Clear any existing loading timeout
-    if (loadingTimeoutRef.current) {
-      clearTimeout(loadingTimeoutRef.current);
-    }
-    
-    try {
-      // Use the safe wrapper that can gradually migrate to unified method
-      const heats = await calculateUpcomingHeatsSafe(dogs, 'upcomingHeats');
-      setUpcomingHeats(heats);
-      
-    } catch (error) {
-      console.error('Error calculating upcoming heats:', error);
-      setUpcomingHeats([]); // Fallback to empty array
-    } finally {
-      // Set loading to false immediately for faster UI response
-      setLoading(false);
-      isCalculatingRef.current = false;
-    }
-  }, [dogs]);
-
-  useEffect(() => {
-    loadHeats();
-    
-    return () => {
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
-      }
-      isCalculatingRef.current = false;
-    };
-  }, [loadHeats]);
-
-  const refreshHeats = useCallback(async () => {
-    await loadHeats();
-  }, [loadHeats]);
+  // Use the centralized provider instead of local state
+  const { upcomingHeats, loading, refreshHeats } = useUpcomingHeatsContext();
 
   return { upcomingHeats, loading, refreshHeats };
 };

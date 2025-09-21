@@ -3,6 +3,7 @@ import { Dog, Heat } from '@/types/dogs';
 import { UpcomingHeat } from '@/types/reminders';
 import { addDays, parseISO, differenceInDays } from 'date-fns';
 import { HeatService } from '@/services/HeatService';
+import { HeatBatchService } from '@/services/HeatService.batch';
 import { calculateOptimalHeatInterval } from '@/utils/heatIntervalCalculator';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -157,8 +158,8 @@ export const calculateUpcomingHeats = (dogs: Dog[]): UpcomingHeat[] => {
 };
 
 /**
- * Calculate upcoming heats using unified data from both systems
- * This will be the preferred method in Step 5
+ * Calculate upcoming heats using unified data from both systems (optimized)
+ * Uses batch fetching for better performance
  */
 export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<UpcomingHeat[]> => {
   const upcomingHeats: UpcomingHeat[] = [];
@@ -167,78 +168,65 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
   // Filter for female dogs
   const femaleDogs = dogs.filter(dog => dog.gender === 'female');
   
-  for (const dog of femaleDogs) {
-    console.log(`Processing dog ${dog.name} (${dog.id})...`);
+  if (femaleDogs.length === 0) {
+    return [];
+  }
+
+  try {
+    console.log(`Processing ${femaleDogs.length} female dogs using batch fetch...`);
     
-    try {
-      const latestDate = await HeatService.getLatestHeatDate(dog.id);
-      
-      // If HeatService can't find a latest date, try legacy method immediately
-      if (!latestDate) {
-        console.log(`No latest date found via HeatService for ${dog.name}, trying legacy method...`);
-        
-        // Try legacy fallback for dogs with old heat history
-        if (dog.heatHistory && dog.heatHistory.length > 0) {
-          console.log(`Found ${dog.heatHistory.length} heat records in legacy format for ${dog.name}`);
+    // Use batch service for optimal performance
+    const batchData = await HeatBatchService.getBatchHeatData(femaleDogs.map(dog => dog.id));
+    
+    for (const dog of femaleDogs) {
+      try {
+        const data = batchData.get(dog.id);
+        if (!data) {
+          console.log(`No batch data found for ${dog.name}, trying legacy method...`);
           
-          const sortedHeatDates = [...dog.heatHistory].sort((a, b) => 
-            new Date(b.date).getTime() - new Date(a.date).getTime()
-          );
-          
-          const lastHeatDate = parseISO(sortedHeatDates[0].date);
-          const heatDatesForLegacy = dog.heatHistory?.map(h => parseISO(h.date)) || [];
-          const intervalDays = calculateOptimalHeatInterval(heatDatesForLegacy);
-          let nextHeatDate = addDays(lastHeatDate, intervalDays);
-          
-          // Handle overdue heats
-          if (nextHeatDate <= today) {
-            const daysPassed = Math.ceil((today.getTime() - nextHeatDate.getTime()) / (1000 * 60 * 60 * 24));
-            const intervalsPassed = Math.floor(daysPassed / intervalDays) + 1;
-            nextHeatDate = addDays(nextHeatDate, intervalsPassed * intervalDays);
+          // Try legacy fallback for dogs with old heat history
+          if (dog.heatHistory && dog.heatHistory.length > 0) {
+            const sortedHeatDates = [...dog.heatHistory].sort((a, b) => 
+              new Date(b.date).getTime() - new Date(a.date).getTime()
+            );
+            
+            const lastHeatDate = parseISO(sortedHeatDates[0].date);
+            const heatDatesForLegacy = dog.heatHistory?.map(h => parseISO(h.date)) || [];
+            const intervalDays = calculateOptimalHeatInterval(heatDatesForLegacy);
+            let nextHeatDate = addDays(lastHeatDate, intervalDays);
+            
+            // Handle overdue heats
+            if (nextHeatDate <= today) {
+              const daysPassed = Math.ceil((today.getTime() - nextHeatDate.getTime()) / (1000 * 60 * 60 * 24));
+              const intervalsPassed = Math.floor(daysPassed / intervalDays) + 1;
+              nextHeatDate = addDays(nextHeatDate, intervalsPassed * intervalDays);
+            }
+            
+            if (nextHeatDate > today) {
+              upcomingHeats.push({
+                dogId: dog.id,
+                dogName: dog.name,
+                dogImageUrl: dog.image,
+                date: nextHeatDate,
+                lastHeatDate: lastHeatDate,
+                source: 'predicted' as const,
+                heatIndex: dog.heatHistory.findIndex(h => h.date === sortedHeatDates[0].date)
+              });
+            }
           }
-          
-          if (nextHeatDate > today) {
-            console.log(`Successfully calculated upcoming heat for ${dog.name} using legacy method`);
-            upcomingHeats.push({
-              dogId: dog.id,
-              dogName: dog.name,
-              dogImageUrl: dog.image,
-              date: nextHeatDate,
-              lastHeatDate: lastHeatDate,
-              source: 'predicted' as const,
-              heatIndex: dog.heatHistory.findIndex(h => h.date === sortedHeatDates[0].date)
-            });
-          } else {
-            console.log(`Calculated date for ${dog.name} is not in future, skipping`);
-          }
-        } else {
-          console.log(`No heat history found for ${dog.name}, skipping`);
+          continue;
         }
-        continue;
-      }
 
-      console.log(`Found latest heat date for ${dog.name}: ${latestDate}`);
+        const { heatCycles, heatHistory } = data;
 
-      // Get unified heat data to calculate intelligent interval
-      const unifiedData = await HeatService.getUnifiedHeatData(dog.id);
-      
-      // Use the central calculation function
-      const heatResult = calculateNextHeatDate(
-        unifiedData.heatCycles,
-        unifiedData.heatHistory,
-        dog.id
-      );
+        // Use the central calculation function
+        const heatResult = calculateNextHeatDate(heatCycles, heatHistory, dog.id);
 
-      // Skip dogs with no heat dates
-      if (!heatResult.nextHeatDate) {
-        continue;
-      }
+        // Skip dogs with no heat dates
+        if (!heatResult.nextHeatDate || heatResult.nextHeatDate <= today) {
+          continue;
+        }
 
-      const nextHeatDate = heatResult.nextHeatDate;
-      
-      // Only include if the next heat date is in the future
-      if (nextHeatDate > today) {
-        console.log(`Successfully calculated upcoming heat for ${dog.name} using unified method`);
         upcomingHeats.push({
           dogId: dog.id,
           dogName: dog.name,
@@ -248,48 +236,80 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
           source: 'predicted' as const,
           heatIndex: -1 // Not used in unified system
         });
-      } else {
-        console.log(`Calculated date for ${dog.name} is not in future, skipping`);
+      } catch (dogError) {
+        console.error(`Error processing dog ${dog.name}:`, dogError);
       }
-    } catch (error) {
-      console.error(`Error with unified calculation for dog ${dog.name} (${dog.id}):`, error);
-      
-      // Fall back to legacy calculation for this dog
-      if (dog.heatHistory && dog.heatHistory.length > 0) {
-        console.log(`Falling back to legacy method for ${dog.name} due to error`);
+    }
+    
+    console.log(`Successfully calculated ${upcomingHeats.length} upcoming heats using batch method`);
+  } catch (batchError) {
+    console.error('Batch processing failed, falling back to individual calls:', batchError);
+    
+    // Fallback to individual calls if batch fails
+    for (const dog of femaleDogs) {
+      try {
+        const latestDate = await HeatService.getLatestHeatDate(dog.id);
         
-        const sortedHeatDates = [...dog.heatHistory].sort((a, b) => 
-          new Date(b.date).getTime() - new Date(a.date).getTime()
+        if (!latestDate) {
+          // Try legacy method for dogs with old heat history
+          if (dog.heatHistory && dog.heatHistory.length > 0) {
+            const sortedHeatDates = [...dog.heatHistory].sort((a, b) => 
+              new Date(b.date).getTime() - new Date(a.date).getTime()
+            );
+            
+            const lastHeatDate = parseISO(sortedHeatDates[0].date);
+            const heatDatesForLegacy = dog.heatHistory?.map(h => parseISO(h.date)) || [];
+            const intervalDays = calculateOptimalHeatInterval(heatDatesForLegacy);
+            let nextHeatDate = addDays(lastHeatDate, intervalDays);
+            
+            // Handle overdue heats
+            if (nextHeatDate <= today) {
+              const daysPassed = Math.ceil((today.getTime() - nextHeatDate.getTime()) / (1000 * 60 * 60 * 24));
+              const intervalsPassed = Math.floor(daysPassed / intervalDays) + 1;
+              nextHeatDate = addDays(nextHeatDate, intervalsPassed * intervalDays);
+            }
+            
+            if (nextHeatDate > today) {
+              upcomingHeats.push({
+                dogId: dog.id,
+                dogName: dog.name,
+                dogImageUrl: dog.image,
+                date: nextHeatDate,
+                lastHeatDate: lastHeatDate,
+                source: 'predicted' as const,
+                heatIndex: dog.heatHistory.findIndex(h => h.date === sortedHeatDates[0].date)
+              });
+            }
+          }
+          continue;
+        }
+
+        // Get unified heat data to calculate intelligent interval
+        const unifiedData = await HeatService.getUnifiedHeatData(dog.id);
+        
+        // Use the central calculation function
+        const heatResult = calculateNextHeatDate(
+          unifiedData.heatCycles,
+          unifiedData.heatHistory,
+          dog.id
         );
-        
-        const lastHeatDate = parseISO(sortedHeatDates[0].date);
-        const heatDatesForFallback = dog.heatHistory?.map(h => parseISO(h.date)) || [];
-        const intervalDays = calculateOptimalHeatInterval(heatDatesForFallback);
-        let nextHeatDate = addDays(lastHeatDate, intervalDays);
-        
-        // Handle overdue heats in fallback logic too
-        if (nextHeatDate <= today) {
-          const daysPassed = Math.ceil((today.getTime() - nextHeatDate.getTime()) / (1000 * 60 * 60 * 24));
-          const intervalsPassed = Math.floor(daysPassed / intervalDays) + 1;
-          nextHeatDate = addDays(nextHeatDate, intervalsPassed * intervalDays);
+
+        // Skip dogs with no heat dates
+        if (!heatResult.nextHeatDate || heatResult.nextHeatDate <= today) {
+          continue;
         }
-        
-        if (nextHeatDate > today) {
-          console.log(`Successfully calculated upcoming heat for ${dog.name} using fallback method`);
-          upcomingHeats.push({
-            dogId: dog.id,
-            dogName: dog.name,
-            dogImageUrl: dog.image,
-            date: nextHeatDate,
-            lastHeatDate: lastHeatDate,
-            source: 'predicted' as const,
-            heatIndex: dog.heatHistory.findIndex(h => h.date === sortedHeatDates[0].date)
-          });
-        } else {
-          console.log(`Fallback calculated date for ${dog.name} is not in future, skipping`);
-        }
-      } else {
-        console.log(`No fallback heat history available for ${dog.name}, skipping`);
+
+        upcomingHeats.push({
+          dogId: dog.id,
+          dogName: dog.name,
+          dogImageUrl: dog.image,
+          date: heatResult.nextHeatDate,
+          lastHeatDate: heatResult.lastHeatDate,
+          source: 'predicted' as const,
+          heatIndex: -1 // Not used in unified system
+        });
+      } catch (dogError) {
+        console.error(`Error processing dog ${dog.name} in fallback:`, dogError);
       }
     }
   }

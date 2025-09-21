@@ -6,7 +6,6 @@ import { createPawPrintIcon, createCalendarClockIcon } from '@/utils/iconUtils';
 import { v5 as uuidv5 } from 'uuid';
 import i18n from '@/i18n';
 import { HeatService } from '@/services/HeatService';
-import { shouldUseUnified, logMigration } from '@/config/heatMigration';
 
 // Namespace UUID for deterministic reminder IDs (prevents collisions)
 const REMINDER_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';

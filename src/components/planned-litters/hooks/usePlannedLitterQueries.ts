@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useDogs } from '@/context/DogsContext';
 import { PlannedLitter } from '@/types/breeding';
 import { plannedLittersService } from '@/services/PlannedLitterService';
-import { useUpcomingHeats } from '@/hooks/useUpcomingHeats';
+import { useUpcomingHeatsContext } from '@/providers/UpcomingHeatsProvider';
 import { useRecentMatings } from './useRecentMatings';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchWithRetry } from '@/utils/fetchUtils';
@@ -20,8 +20,8 @@ export const usePlannedLitterQueries = () => {
   const males = dogs.filter(dog => dog.gender === 'male');
   const females = dogs.filter(dog => dog.gender === 'female');
   
-  // Use centralized upcoming heats hook instead of calculating here
-  const { upcomingHeats } = useUpcomingHeats();
+  // Use centralized upcoming heats context instead of calculating here
+  const { upcomingHeats } = useUpcomingHeatsContext();
   const { recentMatings, setRecentMatings } = useRecentMatings(plannedLitters);
   
   // Function to handle visibility change for reloading
