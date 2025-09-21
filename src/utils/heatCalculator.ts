@@ -1,9 +1,107 @@
 
-import { Dog } from '@/types/dogs';
+import { Dog, Heat } from '@/types/dogs';
 import { UpcomingHeat } from '@/types/reminders';
-import { addDays, parseISO } from 'date-fns';
+import { addDays, parseISO, differenceInDays } from 'date-fns';
 import { HeatService } from '@/services/HeatService';
 import { calculateOptimalHeatInterval } from '@/utils/heatIntervalCalculator';
+import type { Database } from '@/integrations/supabase/types';
+
+type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
+
+interface NextHeatResult {
+  nextHeatDate: Date | null;
+  daysUntilNextHeat: number | null;
+  intervalDays: number;
+  intervalSource: 'calculated' | 'standard';
+  lastHeatDate: Date | null;
+  totalHeatDates: number;
+}
+
+/**
+ * Deduplicate heat dates by normalizing to YYYY-MM-DD format
+ */
+const deduplicateHeatDates = (heatCycles: HeatCycle[], heatHistory: Heat[]): Date[] => {
+  const normalizedDates = new Set<string>();
+  
+  // Helper function to normalize dates to YYYY-MM-DD format
+  const normalizeDate = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    return date.toISOString().split('T')[0];
+  };
+  
+  // Add heat cycle start dates
+  heatCycles.forEach(cycle => {
+    if (cycle.start_date) {
+      const normalized = normalizeDate(cycle.start_date);
+      normalizedDates.add(normalized);
+    }
+  });
+  
+  // Add legacy heat history dates (only if not already present)
+  heatHistory.forEach(heat => {
+    if (heat.date) {
+      const normalized = normalizeDate(heat.date);
+      if (!normalizedDates.has(normalized)) {
+        normalizedDates.add(normalized);
+      }
+    }
+  });
+  
+  const uniqueDates = Array.from(normalizedDates)
+    .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+    .map(dateStr => new Date(dateStr));
+  
+  return uniqueDates;
+};
+
+/**
+ * Central function to calculate next heat date with unified logic
+ */
+export const calculateNextHeatDate = (
+  heatCycles: HeatCycle[] = [],
+  heatHistory: Heat[] = [],
+  dogId?: string
+): NextHeatResult => {
+  // Deduplicate heat dates from both sources
+  const allHeatDates = deduplicateHeatDates(heatCycles, heatHistory);
+  
+  console.log(`Found ${heatCycles.length + heatHistory.length} total heat dates, ${allHeatDates.length} unique dates for dog ${dogId || 'unknown'}`);
+  
+  // Use intelligent interval calculation
+  const intervalDays = calculateOptimalHeatInterval(allHeatDates);
+  const intervalSource = allHeatDates.length >= 2 ? 'calculated' : 'standard';
+  
+  let nextHeatDate: Date | null = null;
+  let daysUntilNextHeat: number | null = null;
+  let lastHeatDate: Date | null = null;
+  
+  if (allHeatDates.length > 0) {
+    // Get the most recent heat date
+    lastHeatDate = allHeatDates[allHeatDates.length - 1];
+    
+    // Calculate next heat date by adding interval
+    nextHeatDate = addDays(lastHeatDate, intervalDays);
+    
+    // Handle overdue heats - recalculate to next future cycle
+    const today = new Date();
+    if (nextHeatDate <= today) {
+      const daysPassed = differenceInDays(today, nextHeatDate);
+      const intervalsPassed = Math.floor(daysPassed / intervalDays) + 1;
+      nextHeatDate = addDays(nextHeatDate, intervalsPassed * intervalDays);
+    }
+    
+    daysUntilNextHeat = differenceInDays(nextHeatDate, today);
+  }
+  
+  return {
+    nextHeatDate,
+    daysUntilNextHeat,
+    intervalDays,
+    intervalSource,
+    lastHeatDate,
+    totalHeatDates: allHeatDates.length
+  };
+};
 
 /**
  * Calculate upcoming heats based on dogs' heat histories (legacy version)
@@ -123,29 +221,20 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
 
       // Get unified heat data to calculate intelligent interval
       const unifiedData = await HeatService.getUnifiedHeatData(dog.id);
-      const allHeatDatesRaw = [
-        ...unifiedData.heatCycles.map(cycle => new Date(cycle.start_date)),
-        ...unifiedData.heatHistory.map(h => new Date(h.date))
-      ];
-
-      // Deduplicate heat dates by converting to timestamps and back
-      const uniqueTimestamps = [...new Set(allHeatDatesRaw.map(date => date.getTime()))];
-      const allHeatDates = uniqueTimestamps
-        .map(timestamp => new Date(timestamp))
-        .sort((a, b) => a.getTime() - b.getTime());
-
-      console.log(`Found ${allHeatDatesRaw.length} total heat dates, ${allHeatDates.length} unique dates for ${dog.name}`);
-
-      // Use intelligent interval calculation: history-based for 2+ heats, 365 days for 0-1 heats
-      const intervalDays = calculateOptimalHeatInterval(allHeatDates);
-      let nextHeatDate = addDays(latestDate, intervalDays);
       
-      // Handle overdue heats in unified calculation
-      if (nextHeatDate <= today) {
-        const daysPassed = Math.ceil((today.getTime() - nextHeatDate.getTime()) / (1000 * 60 * 60 * 24));
-        const intervalsPassed = Math.floor(daysPassed / intervalDays) + 1;
-        nextHeatDate = addDays(nextHeatDate, intervalsPassed * intervalDays);
+      // Use the central calculation function
+      const heatResult = calculateNextHeatDate(
+        unifiedData.heatCycles,
+        unifiedData.heatHistory,
+        dog.id
+      );
+
+      // Skip dogs with no heat dates
+      if (!heatResult.nextHeatDate) {
+        continue;
       }
+
+      const nextHeatDate = heatResult.nextHeatDate;
       
       // Only include if the next heat date is in the future
       if (nextHeatDate > today) {
@@ -154,8 +243,8 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
           dogId: dog.id,
           dogName: dog.name,
           dogImageUrl: dog.image,
-          date: nextHeatDate,
-          lastHeatDate: latestDate,
+          date: heatResult.nextHeatDate,
+          lastHeatDate: heatResult.lastHeatDate,
           source: 'predicted' as const,
           heatIndex: -1 // Not used in unified system
         });
