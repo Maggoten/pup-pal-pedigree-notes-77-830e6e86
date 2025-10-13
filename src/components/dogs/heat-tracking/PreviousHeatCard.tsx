@@ -75,16 +75,16 @@ const PreviousHeatCard: React.FC<PreviousHeatCardProps> = ({
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
-              {/* Data indicators */}
+            <div className="flex items-center gap-1.5">
+              {/* Data indicators - hidden on mobile */}
               {temperatureCount > 0 && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs hidden sm:flex">
                   <Thermometer className="h-3 w-3 mr-1" />
                   {temperatureCount}
                 </Badge>
               )}
               {progesteroneCount > 0 && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs hidden sm:flex">
                   <TestTube className="h-3 w-3 mr-1" />
                   {progesteroneCount}
                 </Badge>
