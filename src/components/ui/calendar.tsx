@@ -69,7 +69,7 @@ function Calendar({
       }}
       captionLayout="dropdown"
       fromYear={1950}
-      toYear={currentYear}
+      toYear={currentYear + 5}
       {...props}
     />
   );

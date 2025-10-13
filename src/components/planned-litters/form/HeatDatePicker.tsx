@@ -63,7 +63,7 @@ const HeatDatePicker: React.FC<HeatDatePickerProps> = ({ form }) => {
             </PopoverContent>
           </Popover>
           <FormDescription className="text-xs text-muted-foreground">
-            Date may be automatically calculated based on heat history.
+            Automatically calculated from the female's heat history. You can adjust it manually if needed.
           </FormDescription>
           <FormMessage />
         </FormItem>
