@@ -1,7 +1,6 @@
 
 import React from 'react';
 import PlannedLittersList from '@/components/planned-litters/PlannedLittersList';
-import EnhancedMatingSection from '@/components/planned-litters/mating/EnhancedMatingSection';
 import PlannedLittersLoadingSkeleton from './PlannedLittersLoadingSkeleton';
 import { HeatPlanningSection } from '@/components/heat-planning/HeatPlanningSection';
 import { usePlannedLitters } from '../hooks/usePlannedLitters';
@@ -11,8 +10,6 @@ const PlannedLittersContent: React.FC = () => {
   const { dogs } = useDogs();
   const {
     plannedLitters,
-    upcomingHeats,
-    recentMatings,
     males,
     females,
     isLoading,
@@ -21,15 +18,8 @@ const PlannedLittersContent: React.FC = () => {
     handleAddMatingDate,
     handleEditMatingDate,
     handleDeleteMatingDate,
-    handleDeleteLitter,
-    refreshLitters
+    handleDeleteLitter
   } = usePlannedLitters();
-
-
-  const handleHeatDeleted = () => {
-    // Refresh data after a heat entry is deleted
-    refreshLitters();
-  };
 
   // Show loading skeleton while initial data is loading
   if (isLoading) {
@@ -55,13 +45,6 @@ const PlannedLittersContent: React.FC = () => {
       <HeatPlanningSection 
         dogs={dogs}
         plannedLitters={plannedLitters}
-      />
-      
-      {/* Enhanced Mating Section */}
-      <EnhancedMatingSection 
-        upcomingHeats={upcomingHeats}
-        recentMatings={recentMatings}
-        onHeatDeleted={handleHeatDeleted}
       />
     </div>
   );
