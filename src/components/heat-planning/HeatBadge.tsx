@@ -4,8 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale/en-US';
-import { CheckCircle, Calendar, AlertCircle, Clock } from 'lucide-react';
+import { Circle, Heart, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { cn } from '@/lib/utils';
 
 interface HeatBadgeProps {
   prediction: HeatPrediction;
@@ -17,23 +18,27 @@ export const HeatBadge: React.FC<HeatBadgeProps> = ({ prediction }) => {
   
   const statusConfig = {
     confirmed: {
-      variant: 'success' as const,
-      icon: CheckCircle,
+      className: 'bg-rose-500 text-white hover:bg-rose-600',
+      icon: Circle,
+      filled: true,
       label: t('heatPlanner.status.confirmed'),
     },
     planned: {
-      variant: 'default' as const,
-      icon: Calendar,
+      className: 'bg-emerald-500 text-white hover:bg-emerald-600',
+      icon: Heart,
+      filled: true,
       label: t('heatPlanner.status.planned'),
     },
     predicted: {
-      variant: 'secondary' as const,
-      icon: Clock,
+      className: 'bg-pink-200 text-foreground hover:bg-pink-300 border-pink-300',
+      icon: Circle,
+      filled: false,
       label: t('heatPlanner.status.predicted'),
     },
     overdue: {
-      variant: 'destructive' as const,
+      className: 'bg-amber-500 text-white hover:bg-amber-600',
       icon: AlertCircle,
+      filled: true,
       label: t('heatPlanner.status.overdue'),
     },
   };
@@ -42,14 +47,15 @@ export const HeatBadge: React.FC<HeatBadgeProps> = ({ prediction }) => {
   const Icon = config.icon;
 
   return (
-    <Badge variant={config.variant} className="gap-1.5 py-1.5 px-3">
-      <Icon className="h-3 w-3" />
+    <Badge className={cn('gap-1.5 py-1.5 px-3 border-transparent', config.className)}>
+      {config.filled ? (
+        <Icon className="h-3 w-3" fill="currentColor" />
+      ) : (
+        <Icon className="h-3 w-3" />
+      )}
       <span className="text-xs font-medium">
         {format(prediction.date, 'MMM', { locale })}
       </span>
-      {prediction.hasPlannedLitter && (
-        <Calendar className="h-3 w-3 ml-1" />
-      )}
     </Badge>
   );
 };

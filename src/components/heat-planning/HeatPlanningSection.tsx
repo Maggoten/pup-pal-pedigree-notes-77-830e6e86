@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { HeatPlanningListView } from './HeatPlanningListView';
 import { HeatPlanningControls } from './HeatPlanningControls';
@@ -20,29 +20,36 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
   plannedLitters 
 }) => {
   const { t } = useTranslation('plannedLitters');
-  const [selectedDogIds, setSelectedDogIds] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
   
   const { predictions, fertileDogs, isLoading, error } = useMultiYearHeatPredictions(
     dogs,
     plannedLitters
   );
 
-  const handleDogSelection = (dogIds: string[]) => {
-    setSelectedDogIds(dogIds);
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
   };
 
-  // Filter predictions based on selection
-  const filteredPredictions = selectedDogIds.length > 0
+  const handleRefresh = useCallback(() => {
+    setRefreshKey(prev => prev + 1);
+  }, []);
+
+  // Filter predictions based on search
+  const filteredFertileDogs = searchQuery
+    ? fertileDogs.filter(dog => 
+        dog.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : fertileDogs;
+
+  const filteredPredictions = searchQuery
     ? new Map(
         Array.from(predictions.entries()).filter(([dogId]) => 
-          selectedDogIds.includes(dogId)
+          filteredFertileDogs.some(dog => dog.id === dogId)
         )
       )
     : predictions;
-
-  const filteredFertileDogs = selectedDogIds.length > 0
-    ? fertileDogs.filter(dog => selectedDogIds.includes(dog.id))
-    : fertileDogs;
 
   return (
     <Card className="border-border shadow-sm">
@@ -57,11 +64,11 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
       </CardHeader>
       
       <CardContent className="space-y-6">
-        {/* Filter Controls */}
+        {/* Search Controls */}
         <HeatPlanningControls
           fertileDogs={fertileDogs}
-          selectedDogIds={selectedDogIds}
-          onSelectionChange={handleDogSelection}
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
         />
 
         {/* Loading State */}
@@ -76,7 +83,10 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
 
         {/* Empty State */}
         {!isLoading && !error && filteredFertileDogs.length === 0 && (
-          <HeatPlanningEmptyState hasFilters={selectedDogIds.length > 0} />
+          <HeatPlanningEmptyState 
+            hasFilters={!!searchQuery}
+            onClearFilters={() => setSearchQuery('')}
+          />
         )}
 
         {/* List View */}
@@ -84,6 +94,7 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
           <HeatPlanningListView
             predictions={filteredPredictions}
             fertileDogs={filteredFertileDogs}
+            onRefresh={handleRefresh}
           />
         )}
       </CardContent>

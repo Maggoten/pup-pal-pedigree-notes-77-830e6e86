@@ -109,6 +109,7 @@
       "failedToLoad": "Failed to load planned litters",
       "failedToDeletePlannedLitter": "Failed to delete planned litter",
       "failedToUpdateLitter": "Failed to update planned litter",
+      "failedToConfirmHeat": "Failed to confirm heat",
       "authenticationRequired": "You need to be logged in to perform this action",
       "pleaseWait": "Preparing your account. Please try again in a moment."
     }
@@ -348,6 +349,7 @@
       "viewDetails": "View details"
     },
     "status": {
+      "status": "Status",
       "confirmed": "Confirmed heat",
       "planned": "Planned litter",
       "predicted": "Expected heat",
@@ -357,23 +359,50 @@
       "planLitter": "Plan litter",
       "viewJournal": "View heat journal",
       "addNote": "Add note",
-      "setReminder": "Set reminder"
+      "setReminder": "Set reminder",
+      "confirmHeat": "Confirm heat",
+      "heatConfirmed": "Heat has been confirmed"
     },
     "tooltip": {
+      "date": "Date",
+      "month": "Month",
+      "age": "Age",
       "interval": "Interval",
+      "months": "months",
+      "days": "days",
+      "confidence": "Confidence",
+      "plannedMating": "💚 Planned mating",
       "ageAtHeat": "Age at heat",
       "years": "years"
+    },
+    "confidence": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
     },
     "warning": {
       "oldDog": "⚠️ Female is over 8 years old – veterinary certificate may be required according to kennel club rules"
     },
+    "search": {
+      "placeholder": "Search by female's name...",
+      "results": "{{count}} females found"
+    },
+    "dialog": {
+      "title": "Manage Heat",
+      "notes": "Notes",
+      "notesPlaceholder": "Add notes about this heat..."
+    },
     "filters": {
       "showAll": "Show all",
-      "selectedDogs": "Selected females"
+      "selectedDogs": "Selected females",
+      "clearAll": "Clear filters",
+      "filterDogs": "Filter females"
     },
     "empty": {
       "title": "No fertile females",
-      "description": "You have no females suitable for breeding at this time."
+      "description": "You have no females suitable for breeding at this time.",
+      "noMatch": "No females match your search",
+      "adjustFilters": "Try adjusting your search"
     }
   }
 }

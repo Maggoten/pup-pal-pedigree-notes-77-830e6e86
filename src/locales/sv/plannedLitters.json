@@ -109,6 +109,7 @@
       "failedToLoad": "Misslyckades med att ladda planerade kullar",
       "failedToDeletePlannedLitter": "Misslyckades med att ta bort planerad kull",
       "failedToUpdateLitter": "Misslyckades med att uppdatera planerad kull",
+      "failedToConfirmHeat": "Misslyckades med att bekräfta löp",
       "authenticationRequired": "Du måste vara inloggad för att utföra denna åtgärd",
       "pleaseWait": "Förbereder ditt konto. Försök igen om ett ögonblick."
     }
@@ -348,6 +349,7 @@
       "viewDetails": "Visa detaljer"
     },
     "status": {
+      "status": "Status",
       "confirmed": "Bekräftat löp",
       "planned": "Planerad kull",
       "predicted": "Förväntat löp",
@@ -357,23 +359,50 @@
       "planLitter": "Planera kull",
       "viewJournal": "Visa löpjournal",
       "addNote": "Lägg till anteckning",
-      "setReminder": "Skapa påminnelse"
+      "setReminder": "Skapa påminnelse",
+      "confirmHeat": "Bekräfta löp",
+      "heatConfirmed": "Löpet har bekräftats"
     },
     "tooltip": {
+      "date": "Datum",
+      "month": "Månad",
+      "age": "Ålder",
       "interval": "Intervall",
+      "months": "månader",
+      "days": "dagar",
+      "confidence": "Säkerhet",
+      "plannedMating": "💚 Planerad parning",
       "ageAtHeat": "Ålder vid löp",
       "years": "år"
+    },
+    "confidence": {
+      "high": "Hög",
+      "medium": "Medel",
+      "low": "Låg"
     },
     "warning": {
       "oldDog": "⚠️ Tiken är över 8 år – veterinärintyg kan krävas enligt kennelklubbens regler"
     },
+    "search": {
+      "placeholder": "Sök på tikens namn...",
+      "results": "{{count}} tikar hittade"
+    },
+    "dialog": {
+      "title": "Hantera löp",
+      "notes": "Anteckningar",
+      "notesPlaceholder": "Lägg till anteckningar om detta löp..."
+    },
     "filters": {
       "showAll": "Visa alla",
-      "selectedDogs": "Valda tikar"
+      "selectedDogs": "Valda tikar",
+      "clearAll": "Rensa filter",
+      "filterDogs": "Filtrera tikar"
     },
     "empty": {
       "title": "Inga fertila tikar",
-      "description": "Du har inga tikar som är lämpliga för avel just nu."
+      "description": "Du har inga tikar som är lämpliga för avel just nu.",
+      "noMatch": "Inga tikar matchar sökningen",
+      "adjustFilters": "Försök justera din sökning"
     }
   }
 }

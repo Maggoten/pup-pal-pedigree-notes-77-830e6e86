@@ -13,21 +13,25 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { HeatCell } from './HeatCell';
 import { HeatBadge } from './HeatBadge';
 import { FertileDog, HeatPrediction, YEARS_TO_DISPLAY } from '@/types/heatPlanning';
 import { AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from 'react-i18next';
+import { formatAge } from '@/utils/formatAge';
 
 interface HeatPlanningListViewProps {
   predictions: Map<string, HeatPrediction[]>;
   fertileDogs: FertileDog[];
+  onRefresh?: () => void;
 }
 
 export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
   predictions,
   fertileDogs,
+  onRefresh,
 }) => {
   const { t } = useTranslation('plannedLitters');
   const currentYear = new Date().getFullYear();
@@ -58,17 +62,21 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
             {fertileDogs.map((dog) => (
               <TableRow key={dog.id} className="border-border hover:bg-muted/50">
                 <TableCell className="font-medium">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={dog.imageUrl} alt={dog.name} />
+                      <AvatarFallback>{dog.name[0]}</AvatarFallback>
+                    </Avatar>
                     <div className="flex flex-col">
                       <span className="text-foreground">{dog.name}</span>
                       <span className="text-xs text-muted-foreground">
-                        {dog.age} {t('heatPlanner.tooltip.years')}
+                        {formatAge(dog.age)} {t('heatPlanner.tooltip.years')}
                       </span>
                     </div>
                     {dog.needsWarning && (
                       <Badge variant="warning" className="ml-2">
                         <AlertTriangle className="h-3 w-3 mr-1" />
-                        {dog.age} {t('heatPlanner.tooltip.years')}
+                        {formatAge(dog.age)} {t('heatPlanner.tooltip.years')}
                       </Badge>
                     )}
                   </div>
@@ -79,7 +87,11 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
                     <TableCell key={year} className="text-center">
                       <div className="flex justify-center gap-2 flex-wrap">
                         {yearPredictions.map(prediction => (
-                          <HeatCell key={prediction.id} prediction={prediction} />
+                          <HeatCell 
+                            key={prediction.id} 
+                            prediction={prediction}
+                            onHeatConfirmed={onRefresh}
+                          />
                         ))}
                         {yearPredictions.length === 0 && (
                           <span className="text-muted-foreground text-sm">{t('heatPlanner.table.noHeats')}</span>
@@ -107,14 +119,20 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
               >
                 <AccordionTrigger className="hover:no-underline py-4">
                   <div className="flex items-center justify-between w-full pr-2">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium text-foreground">{dog.name}</span>
-                      <span className="text-xs text-muted-foreground">{dog.age} {t('heatPlanner.tooltip.years')}</span>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={dog.imageUrl} alt={dog.name} />
+                        <AvatarFallback>{dog.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium text-foreground">{dog.name}</span>
+                        <span className="text-xs text-muted-foreground">{formatAge(dog.age)} {t('heatPlanner.tooltip.years')}</span>
+                      </div>
                     </div>
                     {dog.needsWarning && (
                       <Badge variant="warning" className="mr-2">
                         <AlertTriangle className="h-3 w-3 mr-1" />
-                        {dog.age} {t('heatPlanner.tooltip.years')}
+                        {formatAge(dog.age)} {t('heatPlanner.tooltip.years')}
                       </Badge>
                     )}
                   </div>
