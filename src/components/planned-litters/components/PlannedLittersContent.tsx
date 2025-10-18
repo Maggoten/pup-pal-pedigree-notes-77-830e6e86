@@ -3,9 +3,12 @@ import React from 'react';
 import PlannedLittersList from '@/components/planned-litters/PlannedLittersList';
 import EnhancedMatingSection from '@/components/planned-litters/mating/EnhancedMatingSection';
 import PlannedLittersLoadingSkeleton from './PlannedLittersLoadingSkeleton';
+import { HeatPlanningSection } from '@/components/heat-planning/HeatPlanningSection';
 import { usePlannedLitters } from '../hooks/usePlannedLitters';
+import { useDogs } from '@/hooks/dogs';
 
 const PlannedLittersContent: React.FC = () => {
+  const { dogs } = useDogs();
   const {
     plannedLitters,
     upcomingHeats,
@@ -35,6 +38,12 @@ const PlannedLittersContent: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      {/* Heat Planning Section */}
+      <HeatPlanningSection 
+        dogs={dogs}
+        plannedLitters={plannedLitters}
+      />
+      
       {/* Planned Litters Section */}
       <PlannedLittersList 
         plannedLitters={plannedLitters}
