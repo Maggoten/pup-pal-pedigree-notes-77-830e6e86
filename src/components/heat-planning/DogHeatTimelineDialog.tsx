@@ -93,15 +93,17 @@ export const DogHeatTimelineDialog: React.FC<DogHeatTimelineDialogProps> = ({
                     <div className="flex items-center gap-4 flex-1">
                       <div className="text-center min-w-[80px]">
                         <div className="font-bold text-lg">
-                          {format(prediction.date, 'd MMM', { locale })}
+                          {format(prediction.date, 'd', { locale })}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {prediction.year}
+                          {t(`heatPlanner.badge.${prediction.status}`)}
                         </div>
                       </div>
                       
                       <div className="flex flex-col gap-1 flex-1">
-                        <HeatBadge prediction={prediction} />
+                        <div className="text-sm font-medium text-foreground">
+                          {format(prediction.date, 'MMMM yyyy', { locale })}
+                        </div>
                         <div className="text-sm text-muted-foreground">
                           {t('heatPlanner.timeline.age')}: {formatAge(prediction.ageAtHeat)} {t('heatPlanner.tooltip.years')}
                         </div>
