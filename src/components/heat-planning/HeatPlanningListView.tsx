@@ -71,7 +71,7 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-3">
                     <Avatar 
-                      className="h-12 w-12 cursor-pointer"
+                      className="h-10 w-10 cursor-pointer"
                       onClick={() => setSelectedDogId(dog.id)}
                     >
                       <AvatarImage src={dog.imageUrl} alt={dog.name} />
