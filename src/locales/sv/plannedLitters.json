@@ -336,5 +336,44 @@
   "recent": {
     "matedOn": "Parades",
     "id": "ID"
+  },
+  "heatPlanner": {
+    "title": "Löpplanerare",
+    "description": "Översikt över kommande löp för dina tikar de närmaste 3 åren",
+    "table": {
+      "dog": "Tik",
+      "age": "Ålder",
+      "year": "År",
+      "noHeats": "Inga kommande löp",
+      "viewDetails": "Visa detaljer"
+    },
+    "status": {
+      "confirmed": "Bekräftat löp",
+      "planned": "Planerad kull",
+      "predicted": "Förväntat löp",
+      "overdue": "Försenat"
+    },
+    "actions": {
+      "planLitter": "Planera kull",
+      "viewJournal": "Visa löpjournal",
+      "addNote": "Lägg till anteckning",
+      "setReminder": "Skapa påminnelse"
+    },
+    "tooltip": {
+      "interval": "Intervall",
+      "ageAtHeat": "Ålder vid löp",
+      "years": "år"
+    },
+    "warning": {
+      "oldDog": "⚠️ Tiken är över 8 år – veterinärintyg kan krävas enligt kennelklubbens regler"
+    },
+    "filters": {
+      "showAll": "Visa alla",
+      "selectedDogs": "Valda tikar"
+    },
+    "empty": {
+      "title": "Inga fertila tikar",
+      "description": "Du har inga tikar som är lämpliga för avel just nu."
+    }
   }
 }

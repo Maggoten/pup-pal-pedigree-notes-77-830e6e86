@@ -336,5 +336,44 @@
   "recent": {
     "matedOn": "Mated on",
     "id": "ID"
+  },
+  "heatPlanner": {
+    "title": "Heat Planner",
+    "description": "Overview of upcoming heats for your females over the next 3 years",
+    "table": {
+      "dog": "Female",
+      "age": "Age",
+      "year": "Year",
+      "noHeats": "No upcoming heats",
+      "viewDetails": "View details"
+    },
+    "status": {
+      "confirmed": "Confirmed heat",
+      "planned": "Planned litter",
+      "predicted": "Expected heat",
+      "overdue": "Overdue"
+    },
+    "actions": {
+      "planLitter": "Plan litter",
+      "viewJournal": "View heat journal",
+      "addNote": "Add note",
+      "setReminder": "Set reminder"
+    },
+    "tooltip": {
+      "interval": "Interval",
+      "ageAtHeat": "Age at heat",
+      "years": "years"
+    },
+    "warning": {
+      "oldDog": "⚠️ Female is over 8 years old – veterinary certificate may be required according to kennel club rules"
+    },
+    "filters": {
+      "showAll": "Show all",
+      "selectedDogs": "Selected females"
+    },
+    "empty": {
+      "title": "No fertile females",
+      "description": "You have no females suitable for breeding at this time."
+    }
   }
 }
