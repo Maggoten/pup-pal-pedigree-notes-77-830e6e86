@@ -206,8 +206,8 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
         )}
         
         {/* Action Icons Row */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t">
-          <div className="flex flex-wrap gap-2">
+        <div className="flex items-center justify-between pt-2 border-t">
+          <div className="flex gap-2">
             <Popover open={calendarOpen} onOpenChange={onCalendarOpenChange}>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2">
@@ -231,7 +231,7 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
                   <Button 
                     variant="outline" 
                     size="icon" 
-                    className="h-9 w-9 shrink-0"
+                    className="h-9 w-9"
                     onClick={() => setShowChecklist(true)}
                   >
                     <ClipboardCheck className="h-4 w-4" />
@@ -251,7 +251,7 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
                   <Button 
                     variant="outline" 
                     size="icon" 
-                    className="h-9 w-9 shrink-0"
+                    className="h-9 w-9"
                     onClick={() => onEditLitter(litter)}
                   >
                     <PenLine className="h-4 w-4" />
@@ -269,7 +269,7 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-9 w-9 shrink-0 text-destructive"
+                    className="h-9 w-9 text-destructive"
                     onClick={() => onDeleteLitter(litter.id)}
                   >
                     <Trash2 className="h-4 w-4" />
