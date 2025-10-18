@@ -51,36 +51,6 @@ export const defaultPreBreedingChecklist: ChecklistGroup[] = [
     ]
   },
   {
-    id: "practical",
-    title: "preBreeding.checklist.groups.practical.title",
-    items: [
-      {
-        id: "practical-1",
-        text: "preBreeding.checklist.groups.practical.items.practical-1.text",
-        description: "preBreeding.checklist.groups.practical.items.practical-1.description",
-        isCompleted: false
-      },
-      {
-        id: "practical-2",
-        text: "preBreeding.checklist.groups.practical.items.practical-2.text",
-        description: "preBreeding.checklist.groups.practical.items.practical-2.description",
-        isCompleted: false
-      },
-      {
-        id: "practical-3",
-        text: "preBreeding.checklist.groups.practical.items.practical-3.text",
-        description: "preBreeding.checklist.groups.practical.items.practical-3.description",
-        isCompleted: false
-      },
-      {
-        id: "practical-4",
-        text: "preBreeding.checklist.groups.practical.items.practical-4.text",
-        description: "preBreeding.checklist.groups.practical.items.practical-4.description",
-        isCompleted: false
-      }
-    ]
-  },
-  {
     id: "admin",
     title: "preBreeding.checklist.groups.admin.title",
     items: [
