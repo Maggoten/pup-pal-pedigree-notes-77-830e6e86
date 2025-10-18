@@ -21,13 +21,13 @@ export const HeatBadge: React.FC<HeatBadgeProps> = ({ prediction, onHeatConfirme
   
   const statusConfig = {
     confirmed: {
-      className: 'bg-rose-500 text-white hover:bg-rose-600',
+      className: 'bg-red-500 text-white hover:bg-red-600',
       icon: Circle,
       filled: true,
       label: t('heatPlanner.status.confirmed'),
     },
     planned: {
-      className: 'bg-rose-600 text-white hover:bg-rose-700',
+      className: 'bg-pink-500 text-white hover:bg-pink-600',
       icon: Heart,
       filled: true,
       label: t('heatPlanner.status.planned'),
