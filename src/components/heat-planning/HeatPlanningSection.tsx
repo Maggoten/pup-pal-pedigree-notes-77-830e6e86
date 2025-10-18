@@ -78,10 +78,10 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
           <Button 
             variant="outline" 
             onClick={() => setTipsDialogOpen(true)}
-            className="gap-2"
+            className="md:gap-2 px-2 md:px-4"
           >
             <Lightbulb className="h-4 w-4" />
-            Mating tips
+            <span className="hidden md:inline">Mating tips</span>
           </Button>
         </div>
         <CardDescription>
