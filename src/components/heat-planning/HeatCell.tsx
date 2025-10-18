@@ -44,8 +44,8 @@ export const HeatCell: React.FC<HeatCellProps> = ({ prediction, onHeatConfirmed 
       label: t('heatPlanner.status.planned'),
     },
     predicted: {
-      bg: 'bg-white dark:bg-background',
-      border: 'border-pink-400',
+      bg: 'bg-pink-100 dark:bg-pink-950',
+      border: 'border-pink-300 dark:border-pink-700',
       text: 'text-pink-500',
       icon: Heart,
       filled: false,
@@ -78,7 +78,14 @@ export const HeatCell: React.FC<HeatCellProps> = ({ prediction, onHeatConfirmed 
                 config.text
               )}
             >
-              {config.filled ? (
+              {prediction.status === 'predicted' ? (
+                <Heart 
+                  className="h-4 w-4" 
+                  fill="white" 
+                  stroke="rgb(244, 114, 182)"
+                  strokeWidth={2}
+                />
+              ) : config.filled ? (
                 <Icon className="h-4 w-4" fill="currentColor" />
               ) : (
                 <Icon className="h-4 w-4" />

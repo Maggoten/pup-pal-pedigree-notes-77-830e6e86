@@ -30,7 +30,7 @@ export const HeatBadge: React.FC<HeatBadgeProps> = ({ prediction }) => {
       label: t('heatPlanner.status.planned'),
     },
     predicted: {
-      className: 'bg-white dark:bg-background text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-950 border-2 border-pink-400',
+      className: 'bg-pink-100 dark:bg-pink-950 text-pink-500 hover:bg-pink-200 dark:hover:bg-pink-900 border-2 border-pink-300 dark:border-pink-700',
       icon: Heart,
       filled: false,
       label: t('heatPlanner.status.predicted'),
@@ -48,7 +48,14 @@ export const HeatBadge: React.FC<HeatBadgeProps> = ({ prediction }) => {
 
   return (
     <Badge className={cn('gap-1.5 py-1.5 px-3 border-transparent', config.className)}>
-      {config.filled ? (
+      {prediction.status === 'predicted' ? (
+        <Heart 
+          className="h-3 w-3" 
+          fill="white" 
+          stroke="rgb(244, 114, 182)"
+          strokeWidth={2}
+        />
+      ) : config.filled ? (
         <Icon className="h-3 w-3" fill="currentColor" />
       ) : (
         <Icon className="h-3 w-3" />
