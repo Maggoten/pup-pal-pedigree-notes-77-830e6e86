@@ -81,7 +81,7 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
             className="gap-2"
           >
             <Lightbulb className="h-4 w-4" />
-            {t('matingTips.title')}
+            Mating tips
           </Button>
         </div>
         <CardDescription>
