@@ -402,6 +402,7 @@
     },
     "filters": {
       "showAll": "Show all",
+      "showPlannedOnly": "Show only planned",
       "selectedDogs": "Selected females",
       "clearAll": "Clear filters",
       "filterDogs": "Filter females"
@@ -410,7 +411,9 @@
       "title": "No fertile females",
       "description": "You have no females suitable for breeding at this time.",
       "noMatch": "No females match your search",
-      "adjustFilters": "Try adjusting your search"
+      "adjustFilters": "Try adjusting your search",
+      "noPlannedLitters": "No planned litters",
+      "noPlannedLittersDescription": "No females have planned litters at this time"
     },
     "timeline": {
       "title": "All Upcoming Heats",
@@ -422,6 +425,13 @@
       "reminderSet": "Reminder created",
       "reminderSetDescription": "A reminder has been created for {{date}}",
       "reminderFailed": "Could not create reminder"
+    },
+    "legend": {
+      "title": "Legend",
+      "confirmed": "Mated",
+      "planned": "Planned litter",
+      "predicted": "Predicted heat",
+      "overdue": "Overdue"
     }
   }
 }

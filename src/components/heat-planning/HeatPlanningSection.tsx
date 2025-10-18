@@ -4,6 +4,7 @@ import { HeatPlanningListView } from './HeatPlanningListView';
 import { HeatPlanningControls } from './HeatPlanningControls';
 import { HeatPlanningListSkeleton } from './HeatPlanningListSkeleton';
 import { HeatPlanningEmptyState } from './HeatPlanningEmptyState';
+import { HeatPlanningLegend } from './HeatPlanningLegend';
 import { useMultiYearHeatPredictions } from '@/hooks/heat/useMultiYearHeatPredictions';
 import { Dog } from '@/types/dogs';
 import { PlannedLitter } from '@/types/breeding';
@@ -21,6 +22,7 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
 }) => {
   const { t } = useTranslation('plannedLitters');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showPlannedOnly, setShowPlannedOnly] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   
   const { predictions, fertileDogs, isLoading, error } = useMultiYearHeatPredictions(
@@ -36,12 +38,23 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
     setRefreshKey(prev => prev + 1);
   }, []);
 
-  // Filter predictions based on search
-  const filteredFertileDogs = searchQuery
-    ? fertileDogs.filter(dog => 
-        dog.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : fertileDogs;
+  // Filter predictions based on search and planned filter
+  const filteredFertileDogs = fertileDogs.filter(dog => {
+    // Search filter
+    if (searchQuery && !dog.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    
+    // Planned filter
+    if (showPlannedOnly) {
+      const dogPredictions = predictions.get(dog.id) || [];
+      if (!dogPredictions.some(p => p.hasPlannedLitter)) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
 
   const filteredPredictions = searchQuery
     ? new Map(
@@ -69,6 +82,8 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
           fertileDogs={fertileDogs}
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
+          showPlannedOnly={showPlannedOnly}
+          onTogglePlannedFilter={() => setShowPlannedOnly(!showPlannedOnly)}
         />
 
         {/* Loading State */}
@@ -85,17 +100,24 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
         {!isLoading && !error && filteredFertileDogs.length === 0 && (
           <HeatPlanningEmptyState 
             hasFilters={!!searchQuery}
-            onClearFilters={() => setSearchQuery('')}
+            hasPlannedFilter={showPlannedOnly}
+            onClearFilters={() => {
+              setSearchQuery('');
+              setShowPlannedOnly(false);
+            }}
           />
         )}
 
         {/* List View */}
         {!isLoading && !error && filteredFertileDogs.length > 0 && (
-          <HeatPlanningListView
-            predictions={filteredPredictions}
-            fertileDogs={filteredFertileDogs}
-            onRefresh={handleRefresh}
-          />
+          <>
+            <HeatPlanningListView
+              predictions={filteredPredictions}
+              fertileDogs={filteredFertileDogs}
+              onRefresh={handleRefresh}
+            />
+            <HeatPlanningLegend />
+          </>
         )}
       </CardContent>
     </Card>

@@ -402,6 +402,7 @@
     },
     "filters": {
       "showAll": "Visa alla",
+      "showPlannedOnly": "Visa endast planerade",
       "selectedDogs": "Valda tikar",
       "clearAll": "Rensa filter",
       "filterDogs": "Filtrera tikar"
@@ -410,7 +411,9 @@
       "title": "Inga fertila tikar",
       "description": "Du har inga tikar som är lämpliga för avel just nu.",
       "noMatch": "Inga tikar matchar sökningen",
-      "adjustFilters": "Försök justera din sökning"
+      "adjustFilters": "Försök justera din sökning",
+      "noPlannedLitters": "Inga planerade kullor",
+      "noPlannedLittersDescription": "Inga tikar har planerade kullor just nu"
     },
     "timeline": {
       "title": "Alla kommande löp",
@@ -422,6 +425,13 @@
       "reminderSet": "Påminnelse skapad",
       "reminderSetDescription": "En påminnelse har skapats för {{date}}",
       "reminderFailed": "Kunde inte skapa påminnelse"
+    },
+    "legend": {
+      "title": "Förklaring",
+      "confirmed": "Parad",
+      "planned": "Planerad kull",
+      "predicted": "Förväntat löp",
+      "overdue": "Försenat"
     }
   }
 }
