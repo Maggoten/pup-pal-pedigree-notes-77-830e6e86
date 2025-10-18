@@ -12,11 +12,11 @@ export const HeatPlanningLegend: React.FC = () => {
       </h4>
       <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
         <div className="flex items-center gap-2">
-          <Badge variant="heatConfirmed" className="cursor-default">
-            15 jan
+          <Badge variant="heatPredicted" className="cursor-default">
+            10 feb
           </Badge>
           <span className="text-muted-foreground">
-            {t('heatPlanner.legend.confirmed')}
+            {t('heatPlanner.legend.predicted')}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -28,11 +28,11 @@ export const HeatPlanningLegend: React.FC = () => {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="heatPredicted" className="cursor-default">
-            10 feb
+          <Badge variant="heatConfirmed" className="cursor-default">
+            15 jan
           </Badge>
           <span className="text-muted-foreground">
-            {t('heatPlanner.legend.predicted')}
+            {t('heatPlanner.legend.confirmed')}
           </span>
         </div>
         <div className="flex items-center gap-2">
