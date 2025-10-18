@@ -1,6 +1,7 @@
 import React from 'react';
 import { CalendarX, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface HeatPlanningEmptyStateProps {
   hasFilters: boolean;
@@ -11,6 +12,8 @@ export const HeatPlanningEmptyState: React.FC<HeatPlanningEmptyStateProps> = ({
   hasFilters,
   onClearFilters,
 }) => {
+  const { t } = useTranslation('plannedLitters');
+  
   return (
     <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
       <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
@@ -22,18 +25,18 @@ export const HeatPlanningEmptyState: React.FC<HeatPlanningEmptyStateProps> = ({
       </div>
       
       <h3 className="text-lg font-semibold text-foreground mb-2">
-        {hasFilters ? 'Inga tikar matchar filtret' : 'Inga avelstikar hittades'}
+        {hasFilters ? t('heatPlanner.empty.noMatch') : t('heatPlanner.empty.title')}
       </h3>
       
       <p className="text-sm text-muted-foreground mb-6 max-w-md">
         {hasFilters
-          ? 'Prova att justera dina filterinställningar för att se fler tikar.'
-          : 'Det finns inga fertila tikar (under 9 år) i systemet för tillfället. Lägg till tikar för att se löpplanering.'}
+          ? t('heatPlanner.empty.adjustFilters')
+          : t('heatPlanner.empty.description')}
       </p>
 
       {hasFilters && onClearFilters && (
         <Button onClick={onClearFilters} variant="outline">
-          Rensa filter
+          {t('heatPlanner.filters.clearAll')}
         </Button>
       )}
     </div>

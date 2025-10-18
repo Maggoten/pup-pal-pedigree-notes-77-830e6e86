@@ -18,6 +18,7 @@ import { HeatBadge } from './HeatBadge';
 import { FertileDog, HeatPrediction, YEARS_TO_DISPLAY } from '@/types/heatPlanning';
 import { AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from 'react-i18next';
 
 interface HeatPlanningListViewProps {
   predictions: Map<string, HeatPrediction[]>;
@@ -28,6 +29,7 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
   predictions,
   fertileDogs,
 }) => {
+  const { t } = useTranslation('plannedLitters');
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: YEARS_TO_DISPLAY }, (_, i) => currentYear + i);
 
@@ -44,7 +46,7 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
         <Table>
           <TableHeader>
             <TableRow className="border-border">
-              <TableHead className="font-semibold text-foreground">Tik</TableHead>
+              <TableHead className="font-semibold text-foreground">{t('heatPlanner.table.dog')}</TableHead>
               {years.map(year => (
                 <TableHead key={year} className="text-center font-semibold text-foreground">
                   {year}
@@ -60,13 +62,13 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
                     <div className="flex flex-col">
                       <span className="text-foreground">{dog.name}</span>
                       <span className="text-xs text-muted-foreground">
-                        {dog.age} år
+                        {dog.age} {t('heatPlanner.tooltip.years')}
                       </span>
                     </div>
                     {dog.needsWarning && (
                       <Badge variant="warning" className="ml-2">
                         <AlertTriangle className="h-3 w-3 mr-1" />
-                        {dog.age} år
+                        {dog.age} {t('heatPlanner.tooltip.years')}
                       </Badge>
                     )}
                   </div>
@@ -80,7 +82,7 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
                           <HeatCell key={prediction.id} prediction={prediction} />
                         ))}
                         {yearPredictions.length === 0 && (
-                          <span className="text-muted-foreground text-sm">-</span>
+                          <span className="text-muted-foreground text-sm">{t('heatPlanner.table.noHeats')}</span>
                         )}
                       </div>
                     </TableCell>
@@ -107,12 +109,12 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
                   <div className="flex items-center justify-between w-full pr-2">
                     <div className="flex flex-col items-start">
                       <span className="font-medium text-foreground">{dog.name}</span>
-                      <span className="text-xs text-muted-foreground">{dog.age} år</span>
+                      <span className="text-xs text-muted-foreground">{dog.age} {t('heatPlanner.tooltip.years')}</span>
                     </div>
                     {dog.needsWarning && (
                       <Badge variant="warning" className="mr-2">
                         <AlertTriangle className="h-3 w-3 mr-1" />
-                        {dog.age} år
+                        {dog.age} {t('heatPlanner.tooltip.years')}
                       </Badge>
                     )}
                   </div>
@@ -130,7 +132,7 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
                             ))}
                             {yearPredictions.length === 0 && (
                               <span className="text-muted-foreground text-sm">
-                                Inga förutsedda löp
+                                {t('heatPlanner.table.noHeats')}
                               </span>
                             )}
                           </div>

@@ -38,12 +38,6 @@ const PlannedLittersContent: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      {/* Heat Planning Section */}
-      <HeatPlanningSection 
-        dogs={dogs}
-        plannedLitters={plannedLitters}
-      />
-      
       {/* Planned Litters Section */}
       <PlannedLittersList 
         plannedLitters={plannedLitters}
@@ -55,6 +49,12 @@ const PlannedLittersContent: React.FC = () => {
         onEditMatingDate={handleEditMatingDate}
         onDeleteMatingDate={handleDeleteMatingDate}
         onDeleteLitter={handleDeleteLitter}
+      />
+      
+      {/* Heat Planning Section */}
+      <HeatPlanningSection 
+        dogs={dogs}
+        plannedLitters={plannedLitters}
       />
       
       {/* Enhanced Mating Section */}

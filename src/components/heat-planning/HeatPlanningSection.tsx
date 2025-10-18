@@ -8,6 +8,7 @@ import { useMultiYearHeatPredictions } from '@/hooks/heat/useMultiYearHeatPredic
 import { Dog } from '@/types/dogs';
 import { PlannedLitter } from '@/types/breeding';
 import { CalendarHeart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface HeatPlanningSectionProps {
   dogs: Dog[];
@@ -18,6 +19,7 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
   dogs, 
   plannedLitters 
 }) => {
+  const { t } = useTranslation('plannedLitters');
   const [selectedDogIds, setSelectedDogIds] = useState<string[]>([]);
   
   const { predictions, fertileDogs, isLoading, error } = useMultiYearHeatPredictions(
@@ -47,10 +49,10 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
       <CardHeader className="space-y-1">
         <div className="flex items-center gap-2">
           <CalendarHeart className="h-6 w-6 text-primary" />
-          <CardTitle className="text-2xl">Löpplanering</CardTitle>
+          <CardTitle className="text-2xl">{t('heatPlanner.title')}</CardTitle>
         </div>
         <CardDescription>
-          Översikt över förväntade löp kommande 3 år
+          {t('heatPlanner.description')}
         </CardDescription>
       </CardHeader>
       
@@ -68,7 +70,7 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
         {/* Error State */}
         {error && (
           <div className="text-destructive text-sm p-4 bg-destructive/10 rounded-lg">
-            Ett fel uppstod: {error.message}
+            {t('heatPlanner.error')}: {error.message}
           </div>
         )}
 

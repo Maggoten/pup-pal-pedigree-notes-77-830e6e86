@@ -8,14 +8,19 @@ import {
 } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale/en-US';
 import { cn } from '@/lib/utils';
 import { CheckCircle, Calendar, AlertCircle, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface HeatCellProps {
   prediction: HeatPrediction;
 }
 
 export const HeatCell: React.FC<HeatCellProps> = ({ prediction }) => {
+  const { t, i18n } = useTranslation('plannedLitters');
+  const locale = i18n.language === 'sv' ? sv : enUS;
+  
   // Status styling
   const statusConfig = {
     confirmed: {
@@ -23,40 +28,33 @@ export const HeatCell: React.FC<HeatCellProps> = ({ prediction }) => {
       border: 'border-warmgreen-600',
       text: 'text-white',
       icon: CheckCircle,
-      label: 'Bekräftat',
+      label: t('heatPlanner.status.confirmed'),
     },
     planned: {
       bg: 'bg-accent',
       border: 'border-accent',
       text: 'text-white',
       icon: Calendar,
-      label: 'Planerad kull',
+      label: t('heatPlanner.status.planned'),
     },
     predicted: {
       bg: 'bg-warmbeige-400',
       border: 'border-warmbeige-500',
       text: 'text-foreground',
       icon: Clock,
-      label: 'Förväntat',
+      label: t('heatPlanner.status.predicted'),
     },
     overdue: {
       bg: 'bg-destructive',
       border: 'border-destructive',
       text: 'text-white',
       icon: AlertCircle,
-      label: 'Försenat',
+      label: t('heatPlanner.status.overdue'),
     },
   };
 
   const config = statusConfig[prediction.status];
   const Icon = config.icon;
-
-  // Confidence styling
-  const confidenceLabel = {
-    high: 'Hög säkerhet',
-    medium: 'Medel säkerhet',
-    low: 'Låg säkerhet',
-  };
 
   return (
     <TooltipProvider>
@@ -81,23 +79,23 @@ export const HeatCell: React.FC<HeatCellProps> = ({ prediction }) => {
             </div>
             <div className="text-sm space-y-1">
               <p className="text-foreground">
-                <strong>Datum:</strong> {format(prediction.date, 'PPP', { locale: sv })}
+                <strong>{t('heatPlanner.tooltip.date')}:</strong> {format(prediction.date, 'PPP', { locale })}
               </p>
               <p className="text-muted-foreground">
-                <strong>Månad:</strong> {format(prediction.date, 'MMMM', { locale: sv })}
+                <strong>{t('heatPlanner.tooltip.month')}:</strong> {format(prediction.date, 'MMMM', { locale })}
               </p>
               <p className="text-muted-foreground">
-                <strong>Ålder:</strong> {prediction.ageAtHeat.toFixed(1)} år
+                <strong>{t('heatPlanner.tooltip.age')}:</strong> {prediction.ageAtHeat.toFixed(1)} {t('heatPlanner.tooltip.years')}
               </p>
               <p className="text-muted-foreground">
-                <strong>Intervall:</strong> ~{Math.round(prediction.interval / 30)} månader ({prediction.interval} dagar)
+                <strong>{t('heatPlanner.tooltip.interval')}:</strong> ~{Math.round(prediction.interval / 30)} {t('heatPlanner.tooltip.months')} ({prediction.interval} {t('heatPlanner.tooltip.days')})
               </p>
               <p className="text-muted-foreground">
-                <strong>Säkerhet:</strong> {confidenceLabel[prediction.confidence]}
+                <strong>{t('heatPlanner.tooltip.confidence')}:</strong> {t(`heatPlanner.confidence.${prediction.confidence}`)}
               </p>
               {prediction.hasPlannedLitter && (
                 <p className="text-accent font-medium mt-2">
-                  Kopplad till planerad kull
+                  {t('heatPlanner.tooltip.plannedMating')}
                 </p>
               )}
               {prediction.notes && (

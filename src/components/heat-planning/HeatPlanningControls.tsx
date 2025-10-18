@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, Filter, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface HeatPlanningControlsProps {
   fertileDogs: FertileDog[];
@@ -23,6 +24,8 @@ export const HeatPlanningControls: React.FC<HeatPlanningControlsProps> = ({
   selectedDogIds,
   onSelectionChange,
 }) => {
+  const { t } = useTranslation('plannedLitters');
+  
   const handleDogToggle = (dogId: string) => {
     if (selectedDogIds.includes(dogId)) {
       onSelectionChange(selectedDogIds.filter(id => id !== dogId));
@@ -42,7 +45,7 @@ export const HeatPlanningControls: React.FC<HeatPlanningControlsProps> = ({
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium text-foreground">Filtrera tikar</span>
+          <span className="text-sm font-medium text-foreground">{t('heatPlanner.filters.filterDogs')}</span>
         </div>
         {hasFilters && (
           <Button
@@ -52,7 +55,7 @@ export const HeatPlanningControls: React.FC<HeatPlanningControlsProps> = ({
             className="h-8 text-xs"
           >
             <X className="h-3 w-3 mr-1" />
-            Rensa filter
+            {t('heatPlanner.filters.clearAll')}
           </Button>
         )}
       </div>
@@ -74,7 +77,7 @@ export const HeatPlanningControls: React.FC<HeatPlanningControlsProps> = ({
             >
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">{dog.name}</span>
-                <span className="text-xs opacity-70">({dog.age} år)</span>
+                <span className="text-xs opacity-70">({dog.age} {t('heatPlanner.tooltip.years')})</span>
                 {dog.needsWarning && (
                   <AlertTriangle className="h-3 w-3 text-amber-500" />
                 )}
@@ -88,7 +91,7 @@ export const HeatPlanningControls: React.FC<HeatPlanningControlsProps> = ({
       {hasFilters && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Badge variant="secondary" className="font-normal">
-            {selectedDogIds.length} av {fertileDogs.length} tikar valda
+            {t('heatPlanner.filters.selectedDogs', { count: selectedDogIds.length })}
           </Badge>
         </div>
       )}
