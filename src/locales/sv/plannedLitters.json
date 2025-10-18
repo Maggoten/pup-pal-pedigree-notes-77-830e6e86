@@ -355,6 +355,12 @@
       "predicted": "Förväntat löp",
       "overdue": "Försenat"
     },
+    "badge": {
+      "confirmed": "Parad",
+      "planned": "Planerad kull",
+      "predicted": "Förväntat löp",
+      "overdue": "Försenat"
+    },
     "actions": {
       "planLitter": "Planera kull",
       "viewJournal": "Visa löpjournal",

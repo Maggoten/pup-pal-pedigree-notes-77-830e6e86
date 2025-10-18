@@ -68,7 +68,7 @@ export const HeatBadge: React.FC<HeatBadgeProps> = ({ prediction, onHeatConfirme
           <Icon className="h-3 w-3" />
         )}
         <span className="text-xs font-medium">
-          {format(prediction.date, 'MMM', { locale })}
+          {t(`heatPlanner.badge.${prediction.status}`)}
         </span>
       </Badge>
 

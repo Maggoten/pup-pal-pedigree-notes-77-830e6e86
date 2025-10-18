@@ -355,6 +355,12 @@
       "predicted": "Expected heat",
       "overdue": "Overdue"
     },
+    "badge": {
+      "confirmed": "Mated",
+      "planned": "Planned litter",
+      "predicted": "Predicted heat",
+      "overdue": "Overdue"
+    },
     "actions": {
       "planLitter": "Plan litter",
       "viewJournal": "View heat journal",
