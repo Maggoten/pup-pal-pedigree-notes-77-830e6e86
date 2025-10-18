@@ -78,9 +78,11 @@ export const HeatActionDialog: React.FC<HeatActionDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{t('heatPlanner.dialog.title')}</DialogTitle>
+          <DialogTitle>
+            {prediction.dogName} - {t(`heatPlanner.status.${prediction.status}`)}
+          </DialogTitle>
           <DialogDescription>
-            {prediction.dogName} - {format(prediction.date, 'PPP', { locale })}
+            {format(prediction.date, 'PPP', { locale })}
           </DialogDescription>
         </DialogHeader>
 

@@ -180,6 +180,7 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
                               <HeatBadge 
                                 key={prediction.id} 
                                 prediction={prediction}
+                                onHeatConfirmed={onRefresh}
                               />
                             ))}
                           </div>
