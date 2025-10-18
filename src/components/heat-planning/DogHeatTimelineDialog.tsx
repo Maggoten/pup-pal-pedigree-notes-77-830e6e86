@@ -89,7 +89,7 @@ export const DogHeatTimelineDialog: React.FC<DogHeatTimelineDialogProps> = ({
               
               return (
                 <Card key={prediction.id} className="p-4 hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                     <div className="flex items-center gap-4 flex-1">
                       <div className="text-center min-w-[80px]">
                         <div className="font-bold text-lg">
@@ -117,7 +117,7 @@ export const DogHeatTimelineDialog: React.FC<DogHeatTimelineDialogProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => handleSetReminder(prediction)}
-                      className="shrink-0"
+                      className="shrink-0 w-full sm:w-auto"
                     >
                       <Bell className="h-4 w-4 mr-2" />
                       {t('heatPlanner.actions.setReminder')}
