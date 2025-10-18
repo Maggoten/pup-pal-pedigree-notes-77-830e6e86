@@ -22,6 +22,7 @@ import { AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from 'react-i18next';
 import { formatAge } from '@/utils/formatAge';
+import { formatDateWithLocale } from '@/utils/localizedDateFormat';
 
 interface HeatPlanningListViewProps {
   predictions: Map<string, HeatPrediction[]>;
@@ -34,7 +35,7 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
   fertileDogs,
   onRefresh,
 }) => {
-  const { t } = useTranslation('plannedLitters');
+  const { t, i18n } = useTranslation('plannedLitters');
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: YEARS_TO_DISPLAY }, (_, i) => currentYear + i);
   const [selectedDogId, setSelectedDogId] = useState<string | null>(null);
@@ -171,17 +172,21 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
                       if (yearPredictions.length === 0) return null;
                       
                       return (
-                        <div key={year} className="flex items-start gap-3 px-4">
-                          <div className="font-semibold text-sm text-foreground min-w-[50px] pt-0.5">
+                        <div key={year} className="space-y-2 px-4">
+                          <div className="font-semibold text-sm text-foreground mb-2">
                             {year}
                           </div>
-                          <div className="flex flex-wrap gap-2 flex-1">
+                          <div className="space-y-2">
                             {yearPredictions.map(prediction => (
-                              <HeatBadge 
-                                key={prediction.id} 
-                                prediction={prediction}
-                                onHeatConfirmed={onRefresh}
-                              />
+                              <div key={prediction.id} className="flex items-center gap-3">
+                                <span className="text-sm font-medium text-muted-foreground min-w-[60px]">
+                                  {formatDateWithLocale(prediction.date, 'd MMM', i18n.language)}
+                                </span>
+                                <HeatBadge 
+                                  prediction={prediction}
+                                  onHeatConfirmed={onRefresh}
+                                />
+                              </div>
                             ))}
                           </div>
                         </div>
