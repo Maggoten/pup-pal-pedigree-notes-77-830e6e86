@@ -339,7 +339,7 @@
     "id": "ID"
   },
   "heatPlanner": {
-    "title": "Heat Planner",
+    "title": "Litter Planner",
     "description": "Overview of upcoming heats for your females over the next 3 years",
     "table": {
       "dog": "Female",

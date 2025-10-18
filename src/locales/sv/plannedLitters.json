@@ -339,7 +339,7 @@
     "id": "ID"
   },
   "heatPlanner": {
-    "title": "Löpplanerare",
+    "title": "Valpkullsplanering",
     "description": "Översikt över kommande löp för dina tikar de närmaste 3 åren",
     "table": {
       "dog": "Tik",
