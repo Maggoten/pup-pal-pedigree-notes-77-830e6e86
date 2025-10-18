@@ -211,7 +211,7 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
             <Popover open={calendarOpen} onOpenChange={onCalendarOpenChange}>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm">
-                  + {t('buttons.matingDate')}
+                  + {t('display.matingDate')}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
