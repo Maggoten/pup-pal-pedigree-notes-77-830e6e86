@@ -109,7 +109,7 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
                           />
                         ))}
                         {yearPredictions.length === 0 && (
-                          <span className="text-muted-foreground text-sm">{t('heatPlanner.table.noHeats')}</span>
+                          <span className="text-muted-foreground text-xs">-</span>
                         )}
                       </div>
                     </TableCell>

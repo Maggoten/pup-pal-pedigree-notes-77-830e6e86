@@ -6,10 +6,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale/en-US';
-import { cn } from '@/lib/utils';
 import { Circle, Heart, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { HeatActionDialog } from './HeatActionDialog';
@@ -25,77 +25,53 @@ export const HeatCell: React.FC<HeatCellProps> = ({ prediction, onHeatConfirmed 
   const locale = i18n.language === 'sv' ? sv : enUS;
   const [dialogOpen, setDialogOpen] = useState(false);
   
-  // Status styling with new color scheme
+  // Status styling with badge variants
   const statusConfig = {
     confirmed: {
-      bg: 'bg-rose-500',
-      border: 'border-rose-600',
-      text: 'text-white',
+      variant: 'heatConfirmed' as const,
       icon: Circle,
-      filled: true,
       label: t('heatPlanner.status.confirmed'),
     },
     planned: {
-      bg: 'bg-rose-600',
-      border: 'border-rose-700',
-      text: 'text-white',
+      variant: 'heatPlanned' as const,
       icon: Heart,
-      filled: true,
       label: t('heatPlanner.status.planned'),
     },
     predicted: {
-      bg: 'bg-pink-100 dark:bg-pink-950',
-      border: 'border-pink-300 dark:border-pink-700',
-      text: 'text-pink-500',
+      variant: 'heatPredicted' as const,
       icon: Heart,
-      filled: false,
       label: t('heatPlanner.status.predicted'),
     },
     overdue: {
-      bg: 'bg-amber-500',
-      border: 'border-amber-600',
-      text: 'text-white',
+      variant: 'heatOverdue' as const,
       icon: AlertCircle,
-      filled: true,
       label: t('heatPlanner.status.overdue'),
     },
   };
 
   const config = statusConfig[prediction.status];
   const Icon = config.icon;
+  
+  // Format date as "5 Jan"
+  const dateLabel = format(prediction.date, 'd MMM', { locale });
 
   return (
     <>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div
+            <Badge
+              variant={config.variant}
               onClick={() => setDialogOpen(true)}
-              className={cn(
-                'w-8 h-8 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-md',
-                config.filled ? config.bg : 'bg-white dark:bg-background',
-                config.border,
-                config.text
-              )}
+              className="cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md font-medium text-xs px-2.5 py-1"
             >
-              {prediction.status === 'predicted' ? (
-                <Heart 
-                  className="h-4 w-4" 
-                  fill="white" 
-                  stroke="rgb(244, 114, 182)"
-                  strokeWidth={2}
-                />
-              ) : config.filled ? (
-                <Icon className="h-4 w-4" fill="currentColor" />
-              ) : (
-                <Icon className="h-4 w-4" />
-              )}
-            </div>
+              {dateLabel}
+            </Badge>
           </TooltipTrigger>
-          <TooltipContent className="bg-popover border-border p-3 max-w-xs">
+           <TooltipContent className="bg-popover border-border p-3 max-w-xs">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Icon className={cn('h-4 w-4', config.text)} />
+                <Icon className="h-4 w-4" />
                 <span className="font-semibold text-foreground">{config.label}</span>
               </div>
               <div className="text-sm space-y-1">
