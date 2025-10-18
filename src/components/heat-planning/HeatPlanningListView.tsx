@@ -69,7 +69,10 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
               <TableRow key={dog.id} className="border-border hover:bg-muted/50">
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
+                    <Avatar 
+                      className="h-10 w-10 cursor-pointer"
+                      onClick={() => setSelectedDogId(dog.id)}
+                    >
                       <AvatarImage src={dog.imageUrl} alt={dog.name} />
                       <AvatarFallback>{dog.name[0]}</AvatarFallback>
                     </Avatar>
@@ -126,52 +129,59 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
               <AccordionItem 
                 key={dog.id} 
                 value={dog.id}
-                className="border border-border rounded-lg bg-card px-4"
+                className={`border rounded-lg mb-2 bg-white dark:bg-gray-800 ${dog.needsWarning ? 'border-l-4 border-l-amber-400' : 'border-border'}`}
               >
-                <AccordionTrigger className="hover:no-underline py-4">
-                  <div className="flex items-center justify-between w-full pr-2">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={dog.imageUrl} alt={dog.name} />
-                        <AvatarFallback>{dog.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col items-start">
-                        <span 
-                          className="font-medium text-foreground cursor-pointer hover:underline underline-offset-4"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedDogId(dog.id);
-                          }}
-                        >
-                          {dog.name}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{formatAge(dog.age)} {t('heatPlanner.tooltip.years')}</span>
-                      </div>
-                    </div>
-                    {dog.needsWarning && (
-                      <Badge variant="warning" className="mr-2">
-                        <AlertTriangle className="h-3 w-3 mr-1" />
+                <AccordionTrigger className="px-4 hover:no-underline">
+                  <div className="flex items-center gap-3 w-full">
+                    <Avatar 
+                      className="h-12 w-12 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedDogId(dog.id);
+                      }}
+                    >
+                      <AvatarImage src={dog.imageUrl} alt={dog.name} />
+                      <AvatarFallback>{dog.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 text-left">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDogId(dog.id);
+                        }}
+                        className="font-semibold text-base hover:underline text-left"
+                      >
+                        {dog.name}
+                      </button>
+                      <div className="text-sm text-muted-foreground">
                         {formatAge(dog.age)} {t('heatPlanner.tooltip.years')}
-                      </Badge>
-                    )}
+                      </div>
+                      {dog.needsWarning && (
+                        <div className="text-xs text-amber-600 mt-1">
+                          {t('heatPlanner.warning.oldDog')}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="pb-4">
-                  <div className="space-y-4 pt-2">
+                  <div className="space-y-3 pt-2">
                     {years.map(year => {
                       const yearPredictions = getPredictionsForYear(dog.id, year);
+                      if (yearPredictions.length === 0) return null;
+                      
                       return (
-                        <div key={year} className="space-y-2">
-                          <h4 className="font-semibold text-sm text-foreground">{year}</h4>
-                          <div className="flex flex-wrap gap-2">
+                        <div key={year} className="flex items-start gap-3 px-4">
+                          <div className="font-semibold text-sm text-foreground min-w-[50px] pt-0.5">
+                            {year}
+                          </div>
+                          <div className="flex flex-wrap gap-2 flex-1">
                             {yearPredictions.map(prediction => (
-                              <HeatBadge key={prediction.id} prediction={prediction} />
+                              <HeatBadge 
+                                key={prediction.id} 
+                                prediction={prediction}
+                              />
                             ))}
-                            {yearPredictions.length === 0 && (
-                              <span className="text-muted-foreground text-sm">
-                                {t('heatPlanner.table.noHeats')}
-                              </span>
-                            )}
                           </div>
                         </div>
                       );

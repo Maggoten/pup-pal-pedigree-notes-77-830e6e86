@@ -24,7 +24,7 @@ export const HeatBadge: React.FC<HeatBadgeProps> = ({ prediction }) => {
       label: t('heatPlanner.status.confirmed'),
     },
     planned: {
-      className: 'bg-emerald-500 text-white hover:bg-emerald-600',
+      className: 'bg-rose-600 text-white hover:bg-rose-700',
       icon: Heart,
       filled: true,
       label: t('heatPlanner.status.planned'),

@@ -390,7 +390,9 @@
     "dialog": {
       "title": "Hantera löp",
       "notes": "Anteckningar",
-      "notesPlaceholder": "Lägg till anteckningar om detta löp..."
+      "notesPlaceholder": "Lägg till anteckningar om detta löp...",
+      "age": "Ålder vid löp",
+      "interval": "Intervall sedan förra"
     },
     "filters": {
       "showAll": "Visa alla",

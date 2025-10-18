@@ -36,8 +36,8 @@ export const HeatCell: React.FC<HeatCellProps> = ({ prediction, onHeatConfirmed 
       label: t('heatPlanner.status.confirmed'),
     },
     planned: {
-      bg: 'bg-emerald-500',
-      border: 'border-emerald-600',
+      bg: 'bg-rose-600',
+      border: 'border-rose-700',
       text: 'text-white',
       icon: Heart,
       filled: true,
@@ -111,11 +111,8 @@ export const HeatCell: React.FC<HeatCellProps> = ({ prediction, onHeatConfirmed 
                 <p className="text-muted-foreground">
                   <strong>{t('heatPlanner.tooltip.interval')}:</strong> ~{Math.round(prediction.interval / 30)} {t('heatPlanner.tooltip.months')} ({prediction.interval} {t('heatPlanner.tooltip.days')})
                 </p>
-                <p className="text-muted-foreground">
-                  <strong>{t('heatPlanner.tooltip.confidence')}:</strong> {t(`heatPlanner.confidence.${prediction.confidence}`)}
-                </p>
                 {prediction.hasPlannedLitter && (
-                  <p className="text-emerald-600 font-medium mt-2">
+                  <p className="text-rose-600 font-medium mt-2">
                     {t('heatPlanner.tooltip.plannedMating')}
                   </p>
                 )}

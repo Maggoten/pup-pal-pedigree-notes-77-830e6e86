@@ -390,7 +390,9 @@
     "dialog": {
       "title": "Manage Heat",
       "notes": "Notes",
-      "notesPlaceholder": "Add notes about this heat..."
+      "notesPlaceholder": "Add notes about this heat...",
+      "age": "Age at heat",
+      "interval": "Interval since last"
     },
     "filters": {
       "showAll": "Show all",

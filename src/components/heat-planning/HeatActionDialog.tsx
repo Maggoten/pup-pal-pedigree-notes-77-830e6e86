@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { HeatPrediction } from '@/types/heatPlanning';
 import { HeatService } from '@/services/HeatService';
+import { formatAge } from '@/utils/formatAge';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale/en-US';
@@ -84,7 +85,7 @@ export const HeatActionDialog: React.FC<HeatActionDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Status Info */}
+          {/* Heat Info */}
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <span className="font-medium">{t('heatPlanner.status.status')}:</span>
@@ -92,8 +93,22 @@ export const HeatActionDialog: React.FC<HeatActionDialogProps> = ({
                 {t(`heatPlanner.status.${prediction.status}`)}
               </span>
             </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-medium">{t('heatPlanner.dialog.age')}:</span>
+              <span className="text-muted-foreground">
+                {formatAge(prediction.ageAtHeat)} {t('heatPlanner.tooltip.years')}
+              </span>
+            </div>
+            {prediction.interval > 0 && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-medium">{t('heatPlanner.dialog.interval')}:</span>
+                <span className="text-muted-foreground">
+                  ~{Math.round(prediction.interval / 30)} {t('heatPlanner.tooltip.months')}
+                </span>
+              </div>
+            )}
             {prediction.hasPlannedLitter && (
-              <div className="flex items-center gap-2 text-sm text-emerald-600">
+              <div className="flex items-center gap-2 text-sm text-rose-600">
                 <Calendar className="h-4 w-4" />
                 <span>{t('heatPlanner.status.planned')}</span>
               </div>
