@@ -554,44 +554,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const checkSubscription = async (forceRefresh = false): Promise<void> => {
     const now = Date.now();
     
-    // Cache busting: invalidate cache when forceRefresh is true (e.g., after Stripe redirects)
-    if (forceRefresh) {
-      setLastSubscriptionCheck(0);
-      if (import.meta.env.DEV) {
-        console.log('[Auth] Force refresh requested - cache invalidated');
-      }
-    }
-    
-    // Use cached data if recent and not forcing refresh (optimized for returning users)
-    if (!forceRefresh && (now - lastSubscriptionCheck) < SUBSCRIPTION_CACHE_TIME) {
-      if (import.meta.env.DEV) {
-        console.log('[Auth] Using cached subscription data - immediate access granted');
-      }
-      // Ensure states are properly set for cached access
-      setAccessCheckComplete(true);
-      setIsAccessChecking(false);
-      setSubscriptionLoading(false);
-      return;
-    }
-
-    if (!session) {
-      if (import.meta.env.DEV) {
-        console.log('[Auth] No session available for subscription check');
-      }
-      // Properly handle no session state
-      setAccessCheckComplete(true);
-      setIsAccessChecking(false);
-      setSubscriptionLoading(false);
-      return;
-    }
-    
-    // Set access checking state immediately when starting the check
-    setIsAccessChecking(true);
-    setSubscriptionLoading(true);
-    setAccessCheckComplete(false); // Explicitly set to false
-    const timestamp = new Date().toISOString();
-    
     try {
+      // Cache busting: invalidate cache when forceRefresh is true (e.g., after Stripe redirects)
+      if (forceRefresh) {
+        setLastSubscriptionCheck(0);
+        if (import.meta.env.DEV) {
+          console.log('[Auth] Force refresh requested - cache invalidated');
+        }
+      }
+      
+      // Use cached data if recent and not forcing refresh (optimized for returning users)
+      if (!forceRefresh && (now - lastSubscriptionCheck) < SUBSCRIPTION_CACHE_TIME) {
+        if (import.meta.env.DEV) {
+          console.log('[Auth] Using cached subscription data - immediate access granted');
+        }
+        // Ensure states are properly set for cached access
+        setAccessCheckComplete(true);
+        setIsAccessChecking(false);
+        setSubscriptionLoading(false);
+        return;
+      }
+
+      if (!session) {
+        if (import.meta.env.DEV) {
+          console.log('[Auth] No session available for subscription check');
+        }
+        // Properly handle no session state
+        setAccessCheckComplete(true);
+        setIsAccessChecking(false);
+        setSubscriptionLoading(false);
+        return;
+      }
+      
+      // Set access checking state immediately when starting the check
+      setIsAccessChecking(true);
+      setSubscriptionLoading(true);
+      setAccessCheckComplete(false); // Explicitly set to false
+      const timestamp = new Date().toISOString();
+      
       if (import.meta.env.DEV) {
         console.log(`[Auth] ${timestamp} - Starting subscription check for user:`, user?.id);
       }
@@ -713,6 +713,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         }
       }
     } catch (error) {
+      const timestamp = new Date().toISOString();
       console.error(`[Auth] ${timestamp} - Error during subscription check:`, error);
       // Don't throw - use fallback data if available
     } finally {
@@ -722,6 +723,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       setSubscriptionLoading(false);
       
       if (import.meta.env.DEV) {
+        const timestamp = new Date().toISOString();
         console.log(`[Auth] ${timestamp} - Subscription check completed with final state:`, {
           hasAccess,
           friend,

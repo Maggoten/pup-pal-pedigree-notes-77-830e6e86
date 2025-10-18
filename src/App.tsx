@@ -133,11 +133,12 @@ const App = () => {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <I18nProvider>
-          <AuthProvider>
-            <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+          <ErrorBoundary>
+            <AuthProvider>
+              <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
               <Routes>
                 {/* Public routes - accessible to all */}
                 {/* About page is handled by separate optimized app */}
@@ -145,8 +146,9 @@ const App = () => {
                 <Route path="/*" element={
                   <AuthGuard>
                 <ProtectedApp>
-                  <DogsProvider>
-                    <UpcomingHeatsProvider>
+                  <ErrorBoundary>
+                    <DogsProvider>
+                      <UpcomingHeatsProvider>
                       <RouteChangeTracker />
                       <Routes>
                       <Route path="/login" element={<Login />} />
@@ -175,6 +177,7 @@ const App = () => {
                       </ErrorBoundary>
                     </UpcomingHeatsProvider>
                   </DogsProvider>
+                  </ErrorBoundary>
               </ProtectedApp>
             </AuthGuard>
                 } />
@@ -182,6 +185,7 @@ const App = () => {
             </BrowserRouter>
             </TooltipProvider>
           </AuthProvider>
+          </ErrorBoundary>
         </I18nProvider>
       </QueryClientProvider>
     </ErrorBoundary>

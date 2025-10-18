@@ -38,17 +38,17 @@ const ProtectedApp: React.FC<ProtectedAppProps> = ({ children }) => {
         setLoadingStep(stepIndex);
       }, 1500);
 
-      // Show skip button after 10 seconds
+      // Show skip button after 3 seconds (reduced from 10s)
       const skipTimer = setTimeout(() => {
         setShowSkipButton(true);
-      }, 10000);
+      }, 3000);
 
-      // Timeout protection - auto-complete after 15 seconds
+      // Timeout protection - auto-complete after 5 seconds (reduced from 15s)
       const timeoutTimer = setTimeout(() => {
         console.warn('[ProtectedApp] Access check timeout - forcing completion');
         setAccessCheckTimeout(true);
         setShowSkipButton(false);
-      }, 15000);
+      }, 5000);
 
       return () => {
         clearInterval(stepInterval);
