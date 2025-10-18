@@ -208,30 +208,22 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
         {/* Action Icons Row */}
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="flex gap-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Popover open={calendarOpen} onOpenChange={onCalendarOpenChange}>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="icon" className="h-9 w-9">
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        onSelect={(date) => date && onAddMatingDate(litter.id, date)}
-                        initialFocus
-                        className="p-3 pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t('buttons.addMatingDate')}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Popover open={calendarOpen} onOpenChange={onCalendarOpenChange}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Calendar className="h-4 w-4" />
+                  {t('buttons.addMatingDate')}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  onSelect={(date) => date && onAddMatingDate(litter.id, date)}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
             
             <TooltipProvider>
               <Tooltip>
