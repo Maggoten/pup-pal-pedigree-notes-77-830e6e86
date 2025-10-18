@@ -102,8 +102,8 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
   };
 
   return (
-    <Card className="dog-card overflow-hidden">
-      <CardHeader className="pb-4">        
+    <Card className="dog-card overflow-hidden cursor-pointer transition-all hover:shadow-lg" onClick={() => onEditLitter(litter)}>
+      <CardHeader className="pb-4">
         <div className="space-y-4">
           {/* Parent Dogs */}
           <div className="grid grid-cols-2 gap-3">
@@ -210,7 +210,12 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
           <div className="flex gap-2">
             <Popover open={calendarOpen} onOpenChange={onCalendarOpenChange}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Plus className="h-4 w-4" />
                   {t('buttons.addMatingDate')}
                 </Button>
@@ -232,7 +237,10 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
                     variant="outline" 
                     size="icon" 
                     className="h-9 w-9"
-                    onClick={() => setShowChecklist(true)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowChecklist(true);
+                    }}
                   >
                     <ClipboardCheck className="h-4 w-4" />
                   </Button>
@@ -249,28 +257,13 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button 
-                    variant="outline" 
-                    size="icon" 
-                    className="h-9 w-9"
-                    onClick={() => onEditLitter(litter)}
-                  >
-                    <PenLine className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t('buttons.editLitter')}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
                     variant="ghost" 
                     size="icon" 
                     className="h-9 w-9 text-destructive"
-                    onClick={() => onDeleteLitter(litter.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteLitter(litter.id);
+                    }}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
