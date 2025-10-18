@@ -403,6 +403,17 @@
       "description": "You have no females suitable for breeding at this time.",
       "noMatch": "No females match your search",
       "adjustFilters": "Try adjusting your search"
+    },
+    "timeline": {
+      "title": "All Upcoming Heats",
+      "subtitle": "{{count}} expected heats in the coming years",
+      "age": "Age",
+      "interval": "~{{months}} months since last",
+      "reminderTitle": "Heat for {{dogName}}",
+      "reminderDescription": "{{dogName}} has expected heat on {{date}}",
+      "reminderSet": "Reminder created",
+      "reminderSetDescription": "A reminder has been created for {{date}}",
+      "reminderFailed": "Could not create reminder"
     }
   }
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -16,6 +16,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { HeatCell } from './HeatCell';
 import { HeatBadge } from './HeatBadge';
+import { DogHeatTimelineDialog } from './DogHeatTimelineDialog';
 import { FertileDog, HeatPrediction, YEARS_TO_DISPLAY } from '@/types/heatPlanning';
 import { AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -36,12 +37,17 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
   const { t } = useTranslation('plannedLitters');
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: YEARS_TO_DISPLAY }, (_, i) => currentYear + i);
+  const [selectedDogId, setSelectedDogId] = useState<string | null>(null);
 
   // Helper to get predictions for a dog in a specific year
   const getPredictionsForYear = (dogId: string, year: number): HeatPrediction[] => {
     const dogPredictions = predictions.get(dogId) || [];
     return dogPredictions.filter(p => p.year === year);
   };
+
+  // Get selected dog info for dialog
+  const selectedDog = fertileDogs.find(dog => dog.id === selectedDogId);
+  const selectedDogPredictions = selectedDogId ? (predictions.get(selectedDogId) || []) : [];
 
   return (
     <div>
@@ -68,7 +74,12 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
                       <AvatarFallback>{dog.name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
-                      <span className="text-foreground">{dog.name}</span>
+                      <span 
+                        className="text-foreground cursor-pointer hover:underline underline-offset-4"
+                        onClick={() => setSelectedDogId(dog.id)}
+                      >
+                        {dog.name}
+                      </span>
                       <span className="text-xs text-muted-foreground">
                         {formatAge(dog.age)} {t('heatPlanner.tooltip.years')}
                       </span>
@@ -125,7 +136,15 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
                         <AvatarFallback>{dog.name[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col items-start">
-                        <span className="font-medium text-foreground">{dog.name}</span>
+                        <span 
+                          className="font-medium text-foreground cursor-pointer hover:underline underline-offset-4"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDogId(dog.id);
+                          }}
+                        >
+                          {dog.name}
+                        </span>
                         <span className="text-xs text-muted-foreground">{formatAge(dog.age)} {t('heatPlanner.tooltip.years')}</span>
                       </div>
                     </div>
@@ -164,6 +183,17 @@ export const HeatPlanningListView: React.FC<HeatPlanningListViewProps> = ({
           })}
         </Accordion>
       </div>
+
+      {/* Heat Timeline Dialog */}
+      {selectedDog && (
+        <DogHeatTimelineDialog
+          dogId={selectedDogId}
+          dogName={selectedDog.name}
+          predictions={selectedDogPredictions}
+          open={!!selectedDogId}
+          onOpenChange={(open) => !open && setSelectedDogId(null)}
+        />
+      )}
     </div>
   );
 };
