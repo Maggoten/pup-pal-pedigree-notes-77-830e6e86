@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { HeatPlanningListView } from './HeatPlanningListView';
 import { HeatPlanningControls } from './HeatPlanningControls';
 import { HeatPlanningListSkeleton } from './HeatPlanningListSkeleton';
@@ -10,7 +9,7 @@ import MatingTipsDialog from '@/components/planned-litters/MatingTipsDialog';
 import { useMultiYearHeatPredictions } from '@/hooks/heat/useMultiYearHeatPredictions';
 import { Dog } from '@/types/dogs';
 import { PlannedLitter } from '@/types/breeding';
-import { CalendarHeart, Lightbulb } from 'lucide-react';
+import { CalendarHeart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface HeatPlanningSectionProps {
@@ -70,19 +69,9 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
   return (
     <Card className="border-border shadow-sm">
       <CardHeader className="space-y-1">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CalendarHeart className="h-6 w-6 text-primary" />
-            <CardTitle className="text-2xl">{t('heatPlanner.title')}</CardTitle>
-          </div>
-          <Button 
-            variant="outline" 
-            onClick={() => setTipsDialogOpen(true)}
-            className="gap-2"
-          >
-            <Lightbulb className="h-4 w-4" />
-            Mating tips
-          </Button>
+        <div className="flex items-center gap-2">
+          <CalendarHeart className="h-6 w-6 text-primary" />
+          <CardTitle className="text-2xl">{t('heatPlanner.title')}</CardTitle>
         </div>
         <CardDescription>
           {t('heatPlanner.description')}
@@ -129,7 +118,7 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
               fertileDogs={filteredFertileDogs}
               onRefresh={handleRefresh}
             />
-            <HeatPlanningLegend />
+            <HeatPlanningLegend onOpenTips={() => setTipsDialogOpen(true)} />
           </>
         )}
       </CardContent>
