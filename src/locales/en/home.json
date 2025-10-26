@@ -116,6 +116,8 @@
     "birthday": {
       "title": "{{dogName}}'s Birthday",
       "description": "{{dogName}}'s Birthday",
+      "reminder": "Birthday Reminder",
+      "reminderDescription": "Reminder for {{dogName}}'s birthday",
       "today": "{{dogName}} turns {{age}} today!",
       "upcoming": "{{dogName}} turns {{age}} in {{days}} days",
       "recent": "{{dogName}} turned {{age}} {{days}} days ago"

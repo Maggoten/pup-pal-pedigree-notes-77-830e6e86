@@ -116,6 +116,8 @@
     "birthday": {
       "title": "{{dogName}}s Födelsedag",
       "description": "{{dogName}}s Födelsedag",
+      "reminder": "Födelsedagspåminnelse",
+      "reminderDescription": "Påminnelse för {{dogName}}s födelsedag",
       "today": "{{dogName}} fyller {{age}} år idag!",
       "upcoming": "{{dogName}} fyller {{age}} år om {{days}} dagar",
       "recent": "{{dogName}} fyllde {{age}} år för {{days}} dagar sedan"
