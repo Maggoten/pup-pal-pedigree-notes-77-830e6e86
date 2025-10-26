@@ -144,7 +144,7 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
                   {editingDateIndex === index ? (
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
                           {date.toLocaleDateString()}
                         </Button>
                       </PopoverTrigger>
@@ -170,7 +170,10 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
                             variant="ghost" 
                             size="icon" 
                             className="h-6 w-6"
-                            onClick={() => setEditingDateIndex(index)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingDateIndex(index);
+                            }}
                           >
                             <PenLine className="h-3 w-3" />
                           </Button>
@@ -188,7 +191,10 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
                             variant="ghost" 
                             size="icon" 
                             className="h-6 w-6 text-destructive"
-                            onClick={() => onDeleteMatingDate && onDeleteMatingDate(litter.id, index)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteMatingDate && onDeleteMatingDate(litter.id, index);
+                            }}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
