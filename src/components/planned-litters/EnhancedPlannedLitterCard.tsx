@@ -148,7 +148,7 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
                           {date.toLocaleDateString()}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0" align="start" onClick={(e) => e.stopPropagation()}>
                         <CalendarComponent
                           mode="single"
                           selected={date}
@@ -226,7 +226,7 @@ const EnhancedPlannedLitterCard: React.FC<EnhancedPlannedLitterCardProps> = ({
                   {t('buttons.addMatingDate')}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0" align="start" onClick={(e) => e.stopPropagation()}>
                 <CalendarComponent
                   mode="single"
                   onSelect={(date) => date && onAddMatingDate(litter.id, date)}
