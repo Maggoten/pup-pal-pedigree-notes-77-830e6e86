@@ -8,7 +8,7 @@ import i18n from '@/i18n';
 
 // Helper method to get translation with fallback
 const t = (key: string, options?: any): string => {
-  return i18n.t(key, { ...options, ns: 'dogs' }) as string;
+  return i18n.t(key, { ...options, ns: 'home' }) as string;
 };
 
 // Generate deterministic UUID for system reminders

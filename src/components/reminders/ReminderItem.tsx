@@ -44,13 +44,45 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Handle lazy translation - translate in component where i18n is ready
-  const displayTitle = titleKey && translationData 
-    ? String(t(titleKey, translationData))
-    : title.startsWith('events.') ? String(t(title, {})) : title;
+  const displayTitle = (() => {
+    // If we have translation keys and data, use them
+    if (titleKey && translationData && Object.keys(translationData).length > 0) {
+      return String(t(titleKey, translationData));
+    }
+    // If title starts with 'events.' it's a translation key itself
+    if (title && title.startsWith('events.')) {
+      return String(t(title, translationData || {}));
+    }
+    // Otherwise use the title as-is
+    return title;
+  })();
   
-  const displayDescription = descriptionKey && translationData 
-    ? String(t(descriptionKey, translationData))
-    : description;
+  const displayDescription = (() => {
+    // If we have translation keys and data, use them
+    if (descriptionKey && translationData && Object.keys(translationData).length > 0) {
+      return String(t(descriptionKey, translationData));
+    }
+    // If description starts with 'events.' it's a translation key itself
+    if (description && description.startsWith('events.')) {
+      return String(t(description, translationData || {}));
+    }
+    // Otherwise use the description as-is
+    return description;
+  })();
+
+  // Debug logging for translation issues (only in development)
+  if (process.env.NODE_ENV === 'development') {
+    if ((titleKey || descriptionKey) && !displayTitle && !displayDescription) {
+      console.warn('[ReminderItem] Translation failed:', {
+        id,
+        titleKey,
+        descriptionKey,
+        translationData,
+        title,
+        description
+      });
+    }
+  }
 
   // Determine if overdue (due date is before now and not completed)
   const isOverdue = !isCompleted && isBefore(new Date(dueDate), new Date());
