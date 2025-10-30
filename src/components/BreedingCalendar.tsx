@@ -48,14 +48,11 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
         // Clean up old pregnancy-period events
         await ReminderCalendarSyncService.cleanupOldPregnancyPeriodEvents();
         
-        // Sync new mating date events
-        await ReminderCalendarSyncService.syncMatingDateEvents();
-        
-        // Refresh events to show the new mating dates
-        if (eventsData?.refreshEvents) {
-          eventsData.refreshEvents();
-        }
-      } catch (error) {
+      // Sync new mating date events
+      await ReminderCalendarSyncService.syncMatingDateEvents();
+      
+      // Events will refresh automatically via useSupabaseCalendarEvents dogs dependency
+    } catch (error) {
         console.error('Error initializing pregnancy events:', error);
       }
     };
