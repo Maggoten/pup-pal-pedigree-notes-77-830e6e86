@@ -140,7 +140,7 @@
       "week": "Vecka"
     },
     "checklist": {
-      "title": "Vecka {{weekNumber}} Symptom",
+      "title": "Vecka {{weekNumber}}",
       "noSymptoms": "Inga symptom att följa upp denna vecka"
     },
     "development": {

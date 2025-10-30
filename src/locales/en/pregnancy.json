@@ -140,7 +140,7 @@
       "week": "Week"
     },
     "checklist": {
-      "title": "Week {{weekNumber}} Symptoms",
+      "title": "Week {{weekNumber}}",
       "noSymptoms": "No symptoms to track for this week"
     },
     "development": {
