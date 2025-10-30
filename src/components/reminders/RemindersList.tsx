@@ -57,6 +57,9 @@ const RemindersList: React.FC<RemindersListProps> = memo(({
             onComplete={onComplete}
             onDelete={showDelete && onDelete ? onDelete : undefined}
             compact={compact}
+            titleKey={reminder.titleKey}
+            descriptionKey={reminder.descriptionKey}
+            translationData={reminder.translationData}
           />
         ))}
       </div>
