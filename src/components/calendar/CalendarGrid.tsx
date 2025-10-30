@@ -16,6 +16,21 @@ interface CalendarGridProps {
   compact?: boolean;
 }
 
+// Helper function to get consistent color for each dog's pregnancy
+const getDogPregnancyColor = (dogId?: string) => {
+  const colors = [
+    { bg: 'bg-pink-50/90', border: 'border-pink-200/70', shadow: 'shadow-pink-100/20', dot: 'bg-pink-400', text: 'text-pink-700' },
+    { bg: 'bg-purple-50/90', border: 'border-purple-200/70', shadow: 'shadow-purple-100/20', dot: 'bg-purple-400', text: 'text-purple-700' },
+    { bg: 'bg-blue-50/90', border: 'border-blue-200/70', shadow: 'shadow-blue-100/20', dot: 'bg-blue-400', text: 'text-blue-700' },
+    { bg: 'bg-orange-50/90', border: 'border-orange-200/70', shadow: 'shadow-orange-100/20', dot: 'bg-orange-400', text: 'text-orange-700' },
+    { bg: 'bg-emerald-50/90', border: 'border-emerald-200/70', shadow: 'shadow-emerald-100/20', dot: 'bg-emerald-400', text: 'text-emerald-700' },
+  ];
+  
+  if (!dogId) return colors[0];
+  const hash = dogId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colors[hash % colors.length];
+};
+
 const CalendarGrid: React.FC<CalendarGridProps> = ({ 
   weeks, 
   getEventsForDate, 
@@ -63,15 +78,23 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
               const isToday = isSameDay(day, today);
               const isCurrentMonth = isSameMonth(day, new Date());
               const events = getEventsForDate(day);
+              
+              // Separate pregnancy events from visible events
+              const pregnancyEvents = events.filter(event => event.type === 'pregnancy-period');
+              const visibleEvents = events.filter(event => event.type !== 'pregnancy-period');
               const maxEvents = compact ? 1 : 3;
-              const displayEvents = events.slice(0, maxEvents);
-              const hiddenEventsCount = events.length - maxEvents;
+              const displayEvents = visibleEvents.slice(0, maxEvents);
+              const hiddenEventsCount = visibleEvents.length - maxEvents;
               
               // Check for special fertility/ovulation/heat/pregnancy events
               const hasOvulation = events.some(event => event.type === 'ovulation-predicted');
               const hasFertility = events.some(event => event.type === 'fertility-window');
               const hasHeat = events.some(event => event.type === 'heat' || event.type === 'heat-active');
-              const hasPregnancy = events.some(event => event.type === 'pregnancy-period');
+              const hasPregnancy = pregnancyEvents.length > 0;
+              
+              // Get pregnancy colors for this day
+              const pregnancyColors = pregnancyEvents.map(e => getDogPregnancyColor(e.dogId));
+              const primaryPregnancyColor = pregnancyColors[0] || getDogPregnancyColor('');
               
               return (
                 <ContextMenu key={day.toISOString()}>
@@ -85,7 +108,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                           : hasFertility 
                           ? 'bg-purple-100/90 border-purple-300/70 shadow-purple-200/30 shadow-lg'
                           : hasPregnancy
-                          ? 'bg-pink-50/90 border-pink-200/70 shadow-pink-100/20 shadow-sm'
+                          ? `${primaryPregnancyColor.bg} ${primaryPregnancyColor.border} ${primaryPregnancyColor.shadow} shadow-sm`
                           : hasHeat
                           ? 'bg-rose-50/90 border-rose-200/70 shadow-rose-100/20 shadow-sm'
                           : isToday 
@@ -97,7 +120,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     >
                       <div className={`
                         text-xs py-1 px-2 flex justify-between items-center
-                        ${hasOvulation ? 'font-bold text-purple-800' : hasFertility ? 'font-bold text-purple-800' : hasPregnancy ? 'font-semibold text-pink-700' : hasHeat ? 'font-semibold text-rose-700' : isToday ? 'font-bold text-primary' : ''}
+                        ${hasOvulation ? 'font-bold text-purple-800' : hasFertility ? 'font-bold text-purple-800' : hasPregnancy ? `font-semibold ${primaryPregnancyColor.text}` : hasHeat ? 'font-semibold text-rose-700' : isToday ? 'font-bold text-primary' : ''}
                       `}>
                         <span>
                           {format(day, 'd')}
@@ -110,7 +133,11 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                             <div className="w-1.5 h-1.5 bg-violet-400 rounded-full shadow-sm"></div>
                           )}
                           {hasPregnancy && !hasOvulation && !hasFertility && (
-                            <div className="w-1.5 h-1.5 bg-pink-400 rounded-full shadow-sm"></div>
+                            <div className="flex gap-0.5">
+                              {pregnancyColors.map((color, idx) => (
+                                <div key={idx} className={`w-1.5 h-1.5 ${color.dot} rounded-full shadow-sm`}></div>
+                              ))}
+                            </div>
                           )}
                           {hasHeat && !hasOvulation && !hasFertility && !hasPregnancy && (
                             <div className="w-1.5 h-1.5 bg-rose-400 rounded-full shadow-sm"></div>
