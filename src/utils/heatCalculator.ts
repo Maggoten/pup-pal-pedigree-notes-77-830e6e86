@@ -1,7 +1,7 @@
 
 import { Dog, Heat } from '@/types/dogs';
 import { UpcomingHeat } from '@/types/reminders';
-import { addDays, parseISO, differenceInDays } from 'date-fns';
+import { addDays, parseISO, differenceInDays, startOfYear } from 'date-fns';
 import { HeatService } from '@/services/HeatService';
 import { HeatBatchService } from '@/services/HeatService.batch';
 import { calculateOptimalHeatInterval } from '@/utils/heatIntervalCalculator';
@@ -110,6 +110,7 @@ export const calculateNextHeatDate = (
 export const calculateUpcomingHeats = (dogs: Dog[]): UpcomingHeat[] => {
   const upcomingHeats: UpcomingHeat[] = [];
   const today = new Date();
+  const yearStart = startOfYear(today);
   
   // Filter for female dogs with heat history
   const femaleDogs = dogs.filter(dog => 
@@ -139,7 +140,7 @@ export const calculateUpcomingHeats = (dogs: Dog[]): UpcomingHeat[] => {
       }
       
       // Now we always include since we've ensured the date is in the future
-      if (nextHeatDate > today) {
+      if (nextHeatDate >= yearStart) {
         upcomingHeats.push({
           dogId: dog.id,
           dogName: dog.name,
@@ -164,6 +165,7 @@ export const calculateUpcomingHeats = (dogs: Dog[]): UpcomingHeat[] => {
 export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<UpcomingHeat[]> => {
   const upcomingHeats: UpcomingHeat[] = [];
   const today = new Date();
+  const yearStart = startOfYear(today);
   
   // Filter for female dogs
   const femaleDogs = dogs.filter(dog => dog.gender === 'female');
@@ -202,7 +204,7 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
               nextHeatDate = addDays(nextHeatDate, intervalsPassed * intervalDays);
             }
             
-            if (nextHeatDate > today) {
+            if (nextHeatDate >= yearStart) {
               upcomingHeats.push({
                 dogId: dog.id,
                 dogName: dog.name,
@@ -223,7 +225,7 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
         const heatResult = calculateNextHeatDate(heatCycles, heatHistory, dog.id);
 
         // Skip dogs with no heat dates
-        if (!heatResult.nextHeatDate || heatResult.nextHeatDate <= today) {
+        if (!heatResult.nextHeatDate || heatResult.nextHeatDate < yearStart) {
           continue;
         }
 
@@ -269,7 +271,7 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
               nextHeatDate = addDays(nextHeatDate, intervalsPassed * intervalDays);
             }
             
-            if (nextHeatDate > today) {
+            if (nextHeatDate >= yearStart) {
               upcomingHeats.push({
                 dogId: dog.id,
                 dogName: dog.name,
@@ -295,7 +297,7 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
         );
 
         // Skip dogs with no heat dates
-        if (!heatResult.nextHeatDate || heatResult.nextHeatDate <= today) {
+        if (!heatResult.nextHeatDate || heatResult.nextHeatDate < yearStart) {
           continue;
         }
 
