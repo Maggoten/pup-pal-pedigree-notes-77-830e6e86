@@ -281,6 +281,9 @@ export class ReminderCalendarSyncService {
       // Sync due date events for active pregnancies
       await this.syncDueDateEvents();
       
+      // Sync pregnancy period events for active pregnancies
+      await this.syncPregnancyPeriodEvents();
+      
       // Sync predicted heat events for upcoming heats
       await this.syncPredictedHeatEvents(dogs);
       
@@ -359,18 +362,17 @@ export class ReminderCalendarSyncService {
 
       // Create due date events for each active pregnancy
       for (const pregnancy of activePregnancies) {
+        const dueDate = pregnancy.expectedDueDate instanceof Date ? 
+          pregnancy.expectedDueDate : 
+          new Date(pregnancy.expectedDueDate);
+        
         const eventData = {
-          title: this.t('events.dueDate.title', { femaleName: pregnancy.femaleName }),
-          date: pregnancy.expectedDueDate instanceof Date ? 
-            pregnancy.expectedDueDate.toISOString() : 
-            new Date(pregnancy.expectedDueDate).toISOString(),
+          title: `Planerad förlossning - ${pregnancy.femaleName}`,
+          date: dueDate.toISOString(),
           type: 'due-date',
           dog_name: pregnancy.femaleName,
           pregnancy_id: pregnancy.id, // Link calendar event to pregnancy
-          notes: this.t('events.dueDate.description', { 
-            femaleName: pregnancy.femaleName, 
-            maleName: pregnancy.maleName 
-          }),
+          notes: `${pregnancy.femaleName} parad med ${pregnancy.maleName}. Beräknad valpning.`,
           user_id: userId
         };
 
@@ -390,6 +392,86 @@ export class ReminderCalendarSyncService {
     } catch (error) {
       const elapsed = Date.now() - startTime;
       console.error(`[ReminderCalendarSyncService] Unexpected error in syncDueDateEvents after ${elapsed}ms:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Creates calendar events for pregnancy periods (63-day multi-day events)
+   * @returns A boolean indicating whether the operation was successful
+   */
+  static async syncPregnancyPeriodEvents(): Promise<boolean> {
+    const startTime = Date.now();
+    console.log('[ReminderCalendarSyncService] Starting syncPregnancyPeriodEvents...');
+    
+    try {
+      // Get current user ID
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !authData.user) {
+        console.error('[ReminderCalendarSyncService] Error getting user for pregnancy period events:', authError);
+        return false;
+      }
+      
+      const userId = authData.user.id;
+
+      // Get active pregnancies
+      const activePregnancies = await getActivePregnancies();
+      
+      if (!activePregnancies || activePregnancies.length === 0) {
+        console.log('[ReminderCalendarSyncService] No active pregnancies found for pregnancy period events');
+        return true;
+      }
+
+      // Clean up existing pregnancy-period events to prevent duplicates
+      const { error: cleanupError } = await supabase
+        .from('calendar_events')
+        .delete()
+        .eq('user_id', userId)
+        .eq('type', 'pregnancy-period');
+
+      if (cleanupError) {
+        console.error('[ReminderCalendarSyncService] Error cleaning up existing pregnancy-period events:', cleanupError);
+        return false;
+      }
+
+      // Create pregnancy period events for each active pregnancy
+      for (const pregnancy of activePregnancies) {
+        const matingDate = pregnancy.matingDate instanceof Date ? 
+          pregnancy.matingDate : 
+          new Date(pregnancy.matingDate);
+        
+        const dueDate = pregnancy.expectedDueDate instanceof Date ? 
+          pregnancy.expectedDueDate : 
+          new Date(pregnancy.expectedDueDate);
+        
+        const eventData = {
+          title: `${pregnancy.femaleName} dräktig`,
+          date: matingDate.toISOString(),
+          end_date: dueDate.toISOString(),
+          type: 'pregnancy-period',
+          dog_name: pregnancy.femaleName,
+          pregnancy_id: pregnancy.id,
+          notes: `Dräktighetsperiod för ${pregnancy.femaleName}. Beräknad förlossning: ${format(dueDate, 'yyyy-MM-dd')}`,
+          user_id: userId
+        };
+
+        const { error: insertError } = await supabase
+          .from('calendar_events')
+          .insert(eventData);
+
+        if (insertError) {
+          console.error('[ReminderCalendarSyncService] Error creating pregnancy period calendar event:', insertError);
+          return false;
+        }
+      }
+
+      const elapsed = Date.now() - startTime;
+      console.log(`[ReminderCalendarSyncService] Successfully synced ${activePregnancies.length} pregnancy period events in ${elapsed}ms`);
+      return true;
+    } catch (error) {
+      const elapsed = Date.now() - startTime;
+      console.error(`[ReminderCalendarSyncService] Unexpected error in syncPregnancyPeriodEvents after ${elapsed}ms:`, error);
       return false;
     }
   }
