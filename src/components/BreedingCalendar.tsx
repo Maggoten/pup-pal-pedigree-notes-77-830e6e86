@@ -1,5 +1,5 @@
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { useDogs } from '@/context/DogsContext';
 import { Loader2 } from 'lucide-react';
@@ -8,6 +8,7 @@ import { AddEventFormValues } from './calendar/types';
 import CalendarContent from './calendar/CalendarContent';
 import { useComprehensiveCalendarSync } from '@/hooks/useComprehensiveCalendarSync';
 import { useTranslation } from 'react-i18next';
+import { CalendarCleanupService } from '@/services/CalendarCleanupService';
 
 // Define props interface for calendar events data
 interface CalendarEventsData {
@@ -91,6 +92,11 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
       refreshEvents();
     }
   };
+
+  // Run periodic cleanup on calendar load (once per session)
+  useEffect(() => {
+    CalendarCleanupService.runCleanup();
+  }, []);
   
   return (
     <Card className="border-warmbeige-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 bg-warmbeige-50 flex flex-col">

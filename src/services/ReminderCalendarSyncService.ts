@@ -76,7 +76,129 @@ export class ReminderCalendarSyncService {
   }
 
   /**
+   * Smart cleanup that respects event retention policies
+   * - PERMANENT events (mating, due-date, birthday, heat-active, vaccination) are NEVER deleted
+   * - MEDIUM retention events (predictions, reminders) are kept for 12 months
+   * - SHORT retention events (custom) are kept for 6 months
+   * 
+   * This ensures breeding history is preserved while cleaning up old predictions
+   * 
+   * @param userId The user ID
+   * @param eventTypes Array of event types to clean up
+   * @returns A boolean indicating whether the operation was successful
+   */
+  static async smartCleanupEventTypes(
+    userId: string, 
+    eventTypes: string[]
+  ): Promise<boolean> {
+    try {
+      // Import config
+      const { CalendarConfigHelpers } = await import('@/config/calendarConfig');
+      
+      // Separate permanent events from temporary ones
+      const permanentTypes: string[] = [];
+      const temporaryTypes: { type: string; cutoffDate: Date }[] = [];
+      
+      for (const eventType of eventTypes) {
+        const cutoffDate = CalendarConfigHelpers.getCutoffDate(eventType);
+        
+        if (cutoffDate === null) {
+          // This is a permanent event type - DO NOT DELETE
+          permanentTypes.push(eventType);
+          console.log(`⚠️ Skipping cleanup for permanent event type: ${eventType}`);
+        } else {
+          // This is a temporary event type - clean up old ones
+          temporaryTypes.push({ type: eventType, cutoffDate });
+          console.log(`🧹 Will cleanup ${eventType} events older than ${cutoffDate.toISOString()}`);
+        }
+      }
+      
+      // Log permanent types that won't be cleaned
+      if (permanentTypes.length > 0) {
+        console.log(`✅ Preserving permanent event types: ${permanentTypes.join(', ')}`);
+      }
+      
+      // Clean up each temporary event type based on its retention policy
+      let cleanupCount = 0;
+      for (const { type, cutoffDate } of temporaryTypes) {
+        const { error, count } = await supabase
+          .from('calendar_events')
+          .delete()
+          .eq('user_id', userId)
+          .eq('type', type)
+          .lt('date', cutoffDate.toISOString())
+          .select();
+
+        if (error) {
+          console.error(`Error cleaning up ${type} events:`, error);
+          continue;
+        }
+        
+        if (count && count > 0) {
+          cleanupCount += count;
+          console.log(`✅ Cleaned up ${count} old ${type} event(s)`);
+        }
+      }
+      
+      if (cleanupCount > 0) {
+        console.log(`🎯 Smart cleanup complete: Removed ${cleanupCount} old event(s), preserved all permanent events`);
+      } else {
+        console.log(`✅ Smart cleanup complete: No old events to remove`);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Unexpected error in smartCleanupEventTypes:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Smart cleanup for specific dog events with retention policies
+   * @param dogId The ID of the dog
+   * @param eventTypes Array of event types to clean up
+   * @returns A boolean indicating whether the operation was successful
+   */
+  static async smartCleanupDogEventTypes(
+    dogId: string,
+    eventTypes: string[]
+  ): Promise<boolean> {
+    try {
+      const { CalendarConfigHelpers } = await import('@/config/calendarConfig');
+      
+      const permanentTypes: string[] = [];
+      const temporaryTypes: { type: string; cutoffDate: Date }[] = [];
+      
+      for (const eventType of eventTypes) {
+        const cutoffDate = CalendarConfigHelpers.getCutoffDate(eventType);
+        
+        if (cutoffDate === null) {
+          permanentTypes.push(eventType);
+        } else {
+          temporaryTypes.push({ type: eventType, cutoffDate });
+        }
+      }
+      
+      // Clean up temporary events only
+      for (const { type, cutoffDate } of temporaryTypes) {
+        await supabase
+          .from('calendar_events')
+          .delete()
+          .eq('dog_id', dogId)
+          .eq('type', type)
+          .lt('date', cutoffDate.toISOString());
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Unexpected error in smartCleanupDogEventTypes:', error);
+      return false;
+    }
+  }
+
+  /**
    * Creates calendar events for dog birthday reminders with cleanup
+   * IMPORTANT: Birthdays are PERMANENT events and never deleted
    * @param dog The dog for which to create birthday calendar events
    * @returns A boolean indicating whether the operation was successful
    */
@@ -101,66 +223,146 @@ export class ReminderCalendarSyncService {
       
       const userId = authData.user.id;
 
-      // Clean up existing birthday events first
-      await this.cleanupSpecificEventTypes(dog.id, ['birthday', 'birthday-reminder']);
+      // IMPORTANT: Birthdays are PERMANENT events and should never be deleted
+      // We only remove duplicate birthday events for the same dog/year combination
+      // This preserves historical birthday data while preventing duplicates
 
       const birthDate = typeof dog.dateOfBirth === 'string' ? 
         new Date(dog.dateOfBirth) : dog.dateOfBirth;
 
-      // Get current year's birthday (keep month and day, update year)
       const currentYear = new Date().getFullYear();
       const birthMonth = birthDate.getMonth();
       const birthDay = birthDate.getDate();
+      const currentDate = new Date();
+
+      // Calculate this year's birthday
       const thisYearBirthday = new Date(currentYear, birthMonth, birthDay);
-      
-      // If the birthday already passed this year, use next year
-      const targetDate = thisYearBirthday < new Date() ? 
-        new Date(currentYear + 1, birthMonth, birthDay) : 
-        thisYearBirthday;
 
-      // Create main birthday event
-      const eventData = {
-        title: this.t('events.birthday.title', { dogName: dog.name }),
-        date: targetDate.toISOString(),
-        type: 'birthday',
-        dog_id: dog.id,
-        dog_name: dog.name,
-        notes: this.t('events.birthday.description', { dogName: dog.name }),
-        user_id: userId
-      };
+      // Calculate next year's birthday
+      const nextYearBirthday = new Date(currentYear + 1, birthMonth, birthDay);
 
-      const { error: insertError } = await supabase
-        .from('calendar_events')
-        .insert(eventData);
+      // Grace period: Show recent birthdays (within 3 days)
+      const gracePeriod = new Date();
+      gracePeriod.setDate(gracePeriod.getDate() - 3);
 
-      if (insertError) {
-        console.error('Error creating birthday calendar event:', insertError);
-        return false;
+      // Always create current year's birthday if:
+      // 1. It's in the future, OR
+      // 2. It happened within the grace period (last 3 days)
+      const shouldCreateCurrentYear = thisYearBirthday >= gracePeriod;
+
+      if (shouldCreateCurrentYear) {
+        // Check if current year event already exists
+        const { data: existingCurrentYear } = await supabase
+          .from('calendar_events')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('dog_id', dog.id)
+          .eq('type', 'birthday')
+          .gte('date', thisYearBirthday.toISOString())
+          .lt('date', new Date(thisYearBirthday.getTime() + 24 * 60 * 60 * 1000).toISOString())
+          .maybeSingle();
+
+        if (!existingCurrentYear) {
+          const currentYearEventData = {
+            title: this.t('events.birthday.title', { dogName: dog.name }),
+            date: thisYearBirthday.toISOString(),
+            type: 'birthday',
+            dog_id: dog.id,
+            dog_name: dog.name,
+            notes: this.t('events.birthday.description', { dogName: dog.name }),
+            user_id: userId
+          };
+
+          await supabase.from('calendar_events').insert(currentYearEventData);
+          console.log(`✅ Created current year birthday for ${dog.name}: ${thisYearBirthday.toISOString()}`);
+        }
+        
+        // Create reminder 7 days before current year birthday
+        const currentYearReminder = addDays(thisYearBirthday, -7);
+        if (currentYearReminder >= currentDate) {
+          const { data: existingReminder } = await supabase
+            .from('calendar_events')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('dog_id', dog.id)
+            .eq('type', 'birthday-reminder')
+            .gte('date', currentYearReminder.toISOString())
+            .lt('date', new Date(currentYearReminder.getTime() + 24 * 60 * 60 * 1000).toISOString())
+            .maybeSingle();
+
+          if (!existingReminder) {
+            const reminderEventData = {
+              title: this.t('events.birthday.reminder', { dogName: dog.name }),
+              date: currentYearReminder.toISOString(),
+              type: 'birthday-reminder',
+              dog_id: dog.id,
+              dog_name: dog.name,
+              notes: this.t('events.birthday.reminderDescription', { dogName: dog.name }),
+              user_id: userId
+            };
+
+            await supabase.from('calendar_events').insert(reminderEventData);
+          }
+        }
       }
 
-      // Create reminder event 7 days before
-      const reminderDate = addDays(targetDate, -7);
-      
-      const reminderEventData = {
-        title: this.t('events.birthday.reminder', { dogName: dog.name }),
-        date: reminderDate.toISOString(),
-        type: 'birthday-reminder',
-        dog_id: dog.id,
-        dog_name: dog.name,
-        notes: this.t('events.birthday.reminderDescription', { dogName: dog.name }),
-        user_id: userId
-      };
-
-      const { error: reminderInsertError } = await supabase
+      // Always create next year's birthday event
+      const { data: existingNextYear } = await supabase
         .from('calendar_events')
-        .insert(reminderEventData);
+        .select('id')
+        .eq('user_id', userId)
+        .eq('dog_id', dog.id)
+        .eq('type', 'birthday')
+        .gte('date', nextYearBirthday.toISOString())
+        .lt('date', new Date(nextYearBirthday.getTime() + 24 * 60 * 60 * 1000).toISOString())
+        .maybeSingle();
 
-      if (reminderInsertError) {
-        console.error('Error creating birthday reminder calendar event:', reminderInsertError);
-        return false;
+      if (!existingNextYear) {
+        const nextYearEventData = {
+          title: this.t('events.birthday.title', { dogName: dog.name }),
+          date: nextYearBirthday.toISOString(),
+          type: 'birthday',
+          dog_id: dog.id,
+          dog_name: dog.name,
+          notes: this.t('events.birthday.description', { dogName: dog.name }),
+          user_id: userId
+        };
+
+        await supabase.from('calendar_events').insert(nextYearEventData);
+        console.log(`✅ Created next year birthday for ${dog.name}: ${nextYearBirthday.toISOString()}`);
+        
+        // Create reminder 7 days before next year birthday
+        const nextYearReminder = addDays(nextYearBirthday, -7);
+        
+        const { data: existingNextReminder } = await supabase
+          .from('calendar_events')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('dog_id', dog.id)
+          .eq('type', 'birthday-reminder')
+          .gte('date', nextYearReminder.toISOString())
+          .lt('date', new Date(nextYearReminder.getTime() + 24 * 60 * 60 * 1000).toISOString())
+          .maybeSingle();
+
+        if (!existingNextReminder) {
+          const nextYearReminderData = {
+            title: this.t('events.birthday.reminder', { dogName: dog.name }),
+            date: nextYearReminder.toISOString(),
+            type: 'birthday-reminder',
+            dog_id: dog.id,
+            dog_name: dog.name,
+            notes: this.t('events.birthday.reminderDescription', { dogName: dog.name }),
+            user_id: userId
+          };
+
+          await supabase.from('calendar_events').insert(nextYearReminderData);
+        }
       }
 
-      console.log(`Successfully synced birthday events for ${dog.name}`);
+      // Smart cleanup: Remove old birthday REMINDERS (but keep actual birthdays forever)
+      await this.smartCleanupDogEventTypes(dog.id, ['birthday-reminder']);
+
+      console.log(`✅ Birthday events synced for ${dog.name} (permanent storage)`);
       return true;
     } catch (error) {
       console.error('Unexpected error in syncBirthdayEvents:', error);
@@ -194,8 +396,9 @@ export class ReminderCalendarSyncService {
       
       const userId = authData.user.id;
 
-      // Clean up existing vaccination events first
-      await this.cleanupSpecificEventTypes(dog.id, ['vaccination', 'vaccination-reminder']);
+      // IMPORTANT: Vaccination events are PERMANENT (often legally required records)
+      // Only clean up old reminders, never actual vaccination events
+      await this.smartCleanupDogEventTypes(dog.id, ['vaccination-reminder']);
 
       const vaccinationDate = typeof dog.vaccinationDate === 'string' ? 
         new Date(dog.vaccinationDate) : dog.vaccinationDate;
@@ -251,7 +454,7 @@ export class ReminderCalendarSyncService {
         return false;
       }
 
-      console.log(`Successfully synced vaccination events for ${dog.name}`);
+      console.log(`✅ Vaccination events for ${dog.name} are stored permanently`);
       return true;
     } catch (error) {
       console.error('Unexpected error in syncVaccinationEvents:', error);
@@ -351,28 +554,41 @@ export class ReminderCalendarSyncService {
         return true;
       }
 
-      // Clean up existing due-date events to prevent duplicates
-      const { error: cleanupError } = await supabase
-        .from('calendar_events')
-        .delete()
-        .eq('user_id', userId)
-        .eq('type', 'due-date');
+      // IMPORTANT: Due-date events are PERMANENT and represent birth/production records
+      // We do NOT delete existing due-date events, only check for duplicates
+      console.log('[ReminderCalendarSyncService] Due-date events are stored permanently - checking for new pregnancies...');
 
-      if (cleanupError) {
-        console.error('[ReminderCalendarSyncService] Error cleaning up existing due-date events:', cleanupError);
-        return false;
-      }
+      // Create due date events for each active pregnancy (check for duplicates)
+      let newEventCount = 0;
+      let skippedCount = 0;
 
-      // Create due date events for each active pregnancy
       for (const pregnancy of activePregnancies) {
+        const dueDateISO = pregnancy.expectedDueDate instanceof Date ? 
+          pregnancy.expectedDueDate.toISOString() : 
+          new Date(pregnancy.expectedDueDate).toISOString();
+        
+        // Check if event already exists for this pregnancy
+        const { data: existing } = await supabase
+          .from('calendar_events')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('type', 'due-date')
+          .eq('pregnancy_id', pregnancy.id)
+          .maybeSingle();
+        
+        if (existing) {
+          skippedCount++;
+          console.log(`[ReminderCalendarSyncService] ⏭️  Due-date event already exists for pregnancy ${pregnancy.id}`);
+          continue;
+        }
+        
+        // Create new due-date event
         const eventData = {
           title: this.t('events.dueDate.title', { femaleName: pregnancy.femaleName }),
-          date: pregnancy.expectedDueDate instanceof Date ? 
-            pregnancy.expectedDueDate.toISOString() : 
-            new Date(pregnancy.expectedDueDate).toISOString(),
+          date: dueDateISO,
           type: 'due-date',
           dog_name: pregnancy.femaleName,
-          pregnancy_id: pregnancy.id, // Link calendar event to pregnancy
+          pregnancy_id: pregnancy.id,
           notes: this.t('events.dueDate.description', { 
             femaleName: pregnancy.femaleName, 
             maleName: pregnancy.maleName 
@@ -385,13 +601,18 @@ export class ReminderCalendarSyncService {
           .insert(eventData);
 
         if (insertError) {
-          console.error('[ReminderCalendarSyncService] Error creating due date calendar event:', insertError);
-          return false;
+          console.error(`[ReminderCalendarSyncService] Error creating due date event for ${pregnancy.femaleName}:`, insertError);
+          continue;
         }
+        
+        newEventCount++;
+        console.log(`[ReminderCalendarSyncService] ✅ Created due-date event for ${pregnancy.femaleName}: ${dueDateISO}`);
       }
 
+      console.log(`[ReminderCalendarSyncService] ✅ Due-date sync complete: ${newEventCount} new event(s), ${skippedCount} existing (permanent storage)`);
+
       const elapsed = Date.now() - startTime;
-      console.log(`[ReminderCalendarSyncService] Successfully synced ${activePregnancies.length} due date events in ${elapsed}ms`);
+      console.log(`[ReminderCalendarSyncService] Due-date sync completed in ${elapsed}ms`);
       return true;
     } catch (error) {
       const elapsed = Date.now() - startTime;
@@ -419,17 +640,9 @@ export class ReminderCalendarSyncService {
       
       const userId = authData.user.id;
 
-      // Clean up existing mating events to prevent duplicates
-      const { error: cleanupError } = await supabase
-        .from('calendar_events')
-        .delete()
-        .eq('user_id', userId)
-        .eq('type', 'mating');
-
-      if (cleanupError) {
-        console.error('Error cleaning up existing mating events:', cleanupError);
-        return false;
-      }
+      // IMPORTANT: Mating events are PERMANENT and represent critical breeding history
+      // We do NOT delete existing mating events, only check for duplicates
+      console.log('📝 Mating events are stored permanently - checking for new dates to add...');
 
       // Fetch all mating dates for this user
       const { data: matingDates, error: fetchError } = await supabase
@@ -459,18 +672,39 @@ export class ReminderCalendarSyncService {
 
       console.log(`📊 Found ${matingDates.length} mating date(s) to sync`);
 
-      // Create calendar events for each mating date
-      const eventsToInsert = matingDates.map(matingDate => {
+      // Create calendar events for each mating date (check for duplicates)
+      let newEventCount = 0;
+      let skippedCount = 0;
+
+      for (const matingDate of matingDates) {
         const plannedLitter = matingDate.planned_litters as any;
         const femaleName = plannedLitter.female_name;
         const maleName = plannedLitter.male_name;
+        const matingDateISO = new Date(matingDate.mating_date).toISOString();
         
-        return {
+        // Check if this exact mating event already exists
+        const { data: existing } = await supabase
+          .from('calendar_events')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('type', 'mating')
+          .eq('date', matingDateISO)
+          .eq('dog_name', femaleName)
+          .maybeSingle();
+        
+        if (existing) {
+          skippedCount++;
+          console.log(`⏭️  Mating event already exists: ${femaleName} × ${maleName} on ${matingDateISO}`);
+          continue;
+        }
+        
+        // Create new mating event
+        const eventData = {
           title: this.t('events.mating.title', { 
             femaleName, 
             maleName 
           }),
-          date: new Date(matingDate.mating_date).toISOString(),
+          date: matingDateISO,
           type: 'mating',
           dog_id: plannedLitter.female_id || undefined,
           dog_name: femaleName,
@@ -480,19 +714,21 @@ export class ReminderCalendarSyncService {
           }),
           user_id: userId
         };
-      });
+        
+        const { error: insertError } = await supabase
+          .from('calendar_events')
+          .insert(eventData);
 
-      // Bulk insert all mating events
-      const { error: insertError } = await supabase
-        .from('calendar_events')
-        .insert(eventsToInsert);
-
-      if (insertError) {
-        console.error('Error creating mating date calendar events:', insertError);
-        return false;
+        if (insertError) {
+          console.error(`Error creating mating event for ${femaleName}:`, insertError);
+          continue;
+        }
+        
+        newEventCount++;
+        console.log(`✅ Created mating event: ${femaleName} × ${maleName} on ${matingDateISO}`);
       }
 
-      console.log(`✅ Successfully synced ${matingDates.length} mating date event(s)`);
+      console.log(`✅ Mating sync complete: ${newEventCount} new event(s), ${skippedCount} existing (permanent storage)`);
       return true;
     } catch (error) {
       console.error('Unexpected error in syncMatingDateEvents:', error);
@@ -616,18 +852,11 @@ export class ReminderCalendarSyncService {
       
       const userId = authData.user.id;
 
-      // Clean up existing predicted heat events to prevent duplicates
-      const { error: cleanupError } = await supabase
-        .from('calendar_events')
-        .delete()
-        .eq('user_id', userId)
-        .eq('type', 'heat')
-        .eq('status', 'predicted');
+      // Clean up old predicted heat events using smart cleanup (12 month retention)
+      // Note: Actual heat-active events are permanent and won't be touched
+      await this.smartCleanupEventTypes(userId, ['heat']);
 
-      if (cleanupError) {
-        console.error('Error cleaning up existing predicted heat events:', cleanupError);
-        return false;
-      }
+      console.log('🧹 Cleaned up old predicted heat events (>12 months), preserved all heat-active events');
 
       // Get upcoming heats using the safe calculator
       const upcomingHeats = await this.getUpcomingHeats(dogs);
