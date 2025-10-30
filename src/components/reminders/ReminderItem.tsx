@@ -4,6 +4,7 @@ import { format, isBefore, addDays } from 'date-fns';
 import { Check, X, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 
 interface ReminderItemProps {
   id: string;
@@ -45,42 +46,80 @@ const ReminderItem: React.FC<ReminderItemProps> = memo(({
 
   // Handle lazy translation - translate in component where i18n is ready
   const displayTitle = (() => {
-    // If we have translation keys and data, use them
-    if (titleKey && translationData && Object.keys(translationData).length > 0) {
-      return String(t(titleKey, translationData));
+    // Priority 1: If we have a titleKey, ALWAYS try to translate it
+    if (titleKey) {
+      const translated = String(t(titleKey, translationData || {}));
+      // If translation worked (didn't return the key itself), use it
+      if (translated && translated !== titleKey) {
+        return translated;
+      }
     }
-    // If title starts with 'events.' it's a translation key itself
+    
+    // Priority 2: If title looks like a translation key, try to translate it
     if (title && title.startsWith('events.')) {
-      return String(t(title, translationData || {}));
+      const translated = String(t(title, translationData || {}));
+      if (translated && translated !== title) {
+        return translated;
+      }
     }
-    // Otherwise use the title as-is
-    return title;
+    
+    // Priority 3: Use title as-is if it's not empty
+    if (title && title !== '') {
+      return title;
+    }
+    
+    // Fallback: Return empty string or a debug message in dev mode
+    if (process.env.NODE_ENV === 'development') {
+      return '[Translation missing]';
+    }
+    return '';
   })();
   
   const displayDescription = (() => {
-    // If we have translation keys and data, use them
-    if (descriptionKey && translationData && Object.keys(translationData).length > 0) {
-      return String(t(descriptionKey, translationData));
+    // Priority 1: If we have a descriptionKey, ALWAYS try to translate it
+    if (descriptionKey) {
+      const translated = String(t(descriptionKey, translationData || {}));
+      if (translated && translated !== descriptionKey) {
+        return translated;
+      }
     }
-    // If description starts with 'events.' it's a translation key itself
+    
+    // Priority 2: If description looks like a translation key, try to translate it
     if (description && description.startsWith('events.')) {
-      return String(t(description, translationData || {}));
+      const translated = String(t(description, translationData || {}));
+      if (translated && translated !== description) {
+        return translated;
+      }
     }
-    // Otherwise use the description as-is
-    return description;
+    
+    // Priority 3: Use description as-is if it's not empty
+    if (description && description !== '') {
+      return description;
+    }
+    
+    // Fallback: Return empty string
+    return '';
   })();
 
-  // Debug logging for translation issues (only in development)
+  // Enhanced debug logging for translation issues (only in development)
   if (process.env.NODE_ENV === 'development') {
-    if ((titleKey || descriptionKey) && !displayTitle && !displayDescription) {
-      console.warn('[ReminderItem] Translation failed:', {
-        id,
-        titleKey,
-        descriptionKey,
-        translationData,
-        title,
-        description
-      });
+    if (titleKey || descriptionKey) {
+      const titleFailed = titleKey && (!displayTitle || displayTitle === '[Translation missing]');
+      const descFailed = descriptionKey && !displayDescription;
+      
+      if (titleFailed || descFailed) {
+        console.warn('[ReminderItem] Translation issue detected:', {
+          id,
+          titleKey,
+          descriptionKey,
+          translationData,
+          title,
+          description,
+          displayTitle,
+          displayDescription,
+          currentLanguage: i18n.language
+        });
+      }
     }
   }
 
