@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { CalendarEvent } from './types';
+import { getEventIcon } from '@/utils/eventIconUtils';
 
 interface EventCardProps {
   event: CalendarEvent;
@@ -10,6 +10,8 @@ interface EventCardProps {
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event, colorClass, onClick, compact = false }) => {
+  const IconComponent = getEventIcon(event.type);
+  
   return (
     <div
       className={`
@@ -20,14 +22,24 @@ const EventCard: React.FC<EventCardProps> = ({ event, colorClass, onClick, compa
       `}
       onClick={onClick}
     >
-      <div className="font-medium truncate">
-        {event.title}
-      </div>
-      {event.dogName && !compact && (
-        <div className="text-[8px] font-semibold truncate opacity-90">
-          {event.dogName}
+      <div className="flex items-center gap-1">
+        {IconComponent && (
+          <IconComponent 
+            className={`shrink-0 ${compact ? 'w-2.5 h-2.5' : 'w-3 h-3'}`}
+            strokeWidth={2.5}
+          />
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="font-medium truncate">
+            {event.title}
+          </div>
+          {event.dogName && !compact && (
+            <div className="text-[8px] font-semibold truncate opacity-90">
+              {event.dogName}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
