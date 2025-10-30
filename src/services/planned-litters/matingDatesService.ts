@@ -14,6 +14,16 @@ class MatingDatesService {
     try {
       console.log(`Starting to add mating date for litter ID: ${litterId}, date: ${date.toISOString()}`);
       
+      // Check if there are existing mating dates for this litter
+      const { data: existingMatingDates } = await supabase
+        .from('mating_dates')
+        .select('id, mating_date, pregnancy_id')
+        .eq('planned_litter_id', litterId)
+        .order('mating_date', { ascending: true });
+
+      const isFirstMating = !existingMatingDates || existingMatingDates.length === 0;
+      console.log(`Is first mating: ${isFirstMating}, existing mating dates: ${existingMatingDates?.length || 0}`);
+      
       // Get detailed information about the planned litter with a more specific query
       const { data: litter, error: litterError } = await supabase
         .from('planned_litters')
@@ -76,21 +86,12 @@ class MatingDatesService {
       // Calculate expected due date (63 days from mating)
       const expectedDueDate = addDays(date, 63);
 
-      console.log("Creating pregnancy with the following data:");
-      console.log({
-        mating_date: date.toISOString(),
-        expected_due_date: expectedDueDate.toISOString(),
-        status: 'active',
-        user_id: userId,
-        female_dog_id: litter.female_id,
-        male_dog_id: litter.external_male ? null : litter.male_id,
-        external_male_name: litter.external_male ? maleName : null
-      });
+      let pregnancyId: string;
 
-      // Create a new pregnancy record with explicit active status
-      const { data: pregnancy, error: pregnancyError } = await supabase
-        .from('pregnancies')
-        .insert({
+      if (isFirstMating) {
+        // First mating - create new pregnancy
+        console.log("Creating new pregnancy with the following data:");
+        console.log({
           mating_date: date.toISOString(),
           expected_due_date: expectedDueDate.toISOString(),
           status: 'active',
@@ -98,16 +99,53 @@ class MatingDatesService {
           female_dog_id: litter.female_id,
           male_dog_id: litter.external_male ? null : litter.male_id,
           external_male_name: litter.external_male ? maleName : null
-        })
-        .select()
-        .single();
+        });
 
-      if (pregnancyError) {
-        console.error('Error creating pregnancy:', pregnancyError);
-        throw new Error('Failed to create pregnancy');
+        const { data: pregnancy, error: pregnancyError } = await supabase
+          .from('pregnancies')
+          .insert({
+            mating_date: date.toISOString(),
+            expected_due_date: expectedDueDate.toISOString(),
+            status: 'active',
+            user_id: userId,
+            female_dog_id: litter.female_id,
+            male_dog_id: litter.external_male ? null : litter.male_id,
+            external_male_name: litter.external_male ? maleName : null
+          })
+          .select()
+          .single();
+
+        if (pregnancyError) {
+          console.error('Error creating pregnancy:', pregnancyError);
+          throw new Error('Failed to create pregnancy');
+        }
+        
+        pregnancyId = pregnancy.id;
+        console.log("Successfully created new pregnancy:", pregnancy);
+      } else {
+        // Subsequent mating - use existing pregnancy
+        pregnancyId = existingMatingDates[0].pregnancy_id;
+        console.log("Using existing pregnancy:", pregnancyId);
+        
+        // Update pregnancy if this is an earlier mating date
+        const firstMatingDate = new Date(existingMatingDates[0].mating_date);
+        if (date < firstMatingDate) {
+          const newExpectedDueDate = addDays(date, 63);
+          const { error: updateError } = await supabase
+            .from('pregnancies')
+            .update({
+              mating_date: date.toISOString(),
+              expected_due_date: newExpectedDueDate.toISOString()
+            })
+            .eq('id', pregnancyId);
+            
+          if (updateError) {
+            console.error('Error updating pregnancy with earlier date:', updateError);
+          } else {
+            console.log("Updated pregnancy with earlier mating date");
+          }
+        }
       }
-
-      console.log("Successfully created pregnancy:", pregnancy);
 
       // Add the mating date and link it to the pregnancy
       const { error: matingError } = await supabase
@@ -115,7 +153,7 @@ class MatingDatesService {
         .insert({
           planned_litter_id: litterId,
           mating_date: date.toISOString(),
-          pregnancy_id: pregnancy.id,
+          pregnancy_id: pregnancyId,
           user_id: userId
         });
 
@@ -124,7 +162,7 @@ class MatingDatesService {
         throw new Error('Failed to add mating date');
       }
 
-      console.log(`Successfully added mating date (${date.toISOString()}) and linked to pregnancy ${pregnancy.id} for female ${femaleName} and male ${maleName}`);
+      console.log(`Successfully added mating date (${date.toISOString()}) and linked to pregnancy ${pregnancyId} for female ${femaleName} and male ${maleName}`);
     } catch (error) {
       console.error("Error in addMatingDate:", error);
       throw error;
