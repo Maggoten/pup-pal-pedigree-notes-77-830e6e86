@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,12 +13,16 @@ interface AddPlannedLitterDialogProps {
   males: Dog[];
   females: Dog[];
   onSubmit: (values: PlannedLitterFormValues) => void;
+  prefilledFemaleId?: string;
+  prefilledHeatDate?: Date;
 }
 
 const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
   males,
   females,
-  onSubmit
+  onSubmit,
+  prefilledFemaleId,
+  prefilledHeatDate
 }) => {
   const { t } = useTranslation('plannedLitters');
   const { toast } = useToast();
@@ -26,15 +30,25 @@ const AddPlannedLitterDialog: React.FC<AddPlannedLitterDialogProps> = ({
     resolver: zodResolver(plannedLitterFormSchema),
     defaultValues: {
       maleId: "",
-      femaleId: "",
+      femaleId: prefilledFemaleId || "",
       notes: "",
       externalMale: false,
       externalMaleName: "",
       externalMaleBreed: "",
       externalMaleRegistration: "",
-      expectedHeatDate: new Date()
+      expectedHeatDate: prefilledHeatDate || new Date()
     }
   });
+
+  // Update form when prefilled values change
+  useEffect(() => {
+    if (prefilledFemaleId) {
+      form.setValue('femaleId', prefilledFemaleId);
+    }
+    if (prefilledHeatDate) {
+      form.setValue('expectedHeatDate', prefilledHeatDate);
+    }
+  }, [prefilledFemaleId, prefilledHeatDate, form]);
 
   const handleSubmit = async (values: PlannedLitterFormValues) => {
     try {

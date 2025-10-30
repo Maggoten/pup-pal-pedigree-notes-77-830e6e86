@@ -18,7 +18,10 @@ import { sv } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale/en-US';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, Calendar, Loader2 } from 'lucide-react';
+import { CheckCircle, Calendar, Loader2, Heart } from 'lucide-react';
+import AddPlannedLitterDialog from '@/components/planned-litters/AddPlannedLitterDialog';
+import { useDogs } from '@/hooks/dogs';
+import { usePlannedLitters } from '@/components/planned-litters/hooks/usePlannedLitters';
 
 interface HeatActionDialogProps {
   prediction: HeatPrediction | null;
@@ -38,6 +41,10 @@ export const HeatActionDialog: React.FC<HeatActionDialogProps> = ({
   const locale = i18n.language === 'sv' ? sv : enUS;
   const [notes, setNotes] = useState(prediction?.notes || '');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPlannedLitterDialog, setShowPlannedLitterDialog] = useState(false);
+  
+  const { dogs } = useDogs();
+  const { males, females, handleAddPlannedLitter } = usePlannedLitters();
 
   if (!prediction) return null;
 
@@ -72,9 +79,17 @@ export const HeatActionDialog: React.FC<HeatActionDialogProps> = ({
     }
   };
 
+  const handlePlanLitter = () => {
+    onOpenChange(false);
+    setTimeout(() => {
+      setShowPlannedLitterDialog(true);
+    }, 100);
+  };
+
   const canConfirm = prediction.status === 'predicted' || prediction.status === 'overdue';
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -138,6 +153,15 @@ export const HeatActionDialog: React.FC<HeatActionDialogProps> = ({
           >
             {t('actions.cancel')}
           </Button>
+          <Button
+            variant="secondary"
+            onClick={handlePlanLitter}
+            disabled={isLoading}
+            className="gap-2"
+          >
+            <Heart className="h-4 w-4" />
+            {t('heatPlanner.actions.planLitter')}
+          </Button>
           {canConfirm && (
             <Button
               onClick={handleConfirmHeat}
@@ -155,5 +179,20 @@ export const HeatActionDialog: React.FC<HeatActionDialogProps> = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    {/* Planned Litter Dialog */}
+    <Dialog open={showPlannedLitterDialog} onOpenChange={setShowPlannedLitterDialog}>
+      <AddPlannedLitterDialog
+        males={males}
+        females={females}
+        onSubmit={(values) => {
+          handleAddPlannedLitter(values);
+          setShowPlannedLitterDialog(false);
+        }}
+        prefilledFemaleId={prediction.dogId}
+        prefilledHeatDate={prediction.date}
+      />
+    </Dialog>
+    </>
   );
 };
