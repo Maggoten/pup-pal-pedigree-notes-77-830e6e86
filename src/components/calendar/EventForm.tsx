@@ -34,8 +34,14 @@ const EventForm: React.FC<EventFormProps> = ({
   defaultValues, 
   submitLabel 
 }) => {
-  const { t } = useTranslation('home');
+  const { t } = useTranslation(['home', 'dogs']);
   const finalSubmitLabel = submitLabel || t('forms.event.addEvent');
+  
+  const translateGender = (gender: string) => {
+    return gender === 'male' 
+      ? t('dogs:form.fields.gender.male')
+      : t('dogs:form.fields.gender.female');
+  };
   
   const form = useForm<AddEventFormValues>({
     defaultValues: defaultValues || {
@@ -138,7 +144,7 @@ const EventForm: React.FC<EventFormProps> = ({
                 <SelectContent>
                   {dogs.map((dog) => (
                     <SelectItem key={dog.id} value={dog.id}>
-                      {dog.name} ({dog.gender})
+                      {dog.name} ({translateGender(dog.gender)})
                     </SelectItem>
                   ))}
                 </SelectContent>
