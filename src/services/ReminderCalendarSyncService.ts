@@ -278,11 +278,11 @@ export class ReminderCalendarSyncService {
         }
       }
       
+      // Sync mating date events for active pregnancies
+      await this.syncMatingDateEvents();
+      
       // Sync due date events for active pregnancies
       await this.syncDueDateEvents();
-      
-      // Sync pregnancy period events for active pregnancies
-      await this.syncPregnancyPeriodEvents();
       
       // Sync predicted heat events for upcoming heats
       await this.syncPredictedHeatEvents(dogs);
@@ -397,19 +397,19 @@ export class ReminderCalendarSyncService {
   }
 
   /**
-   * Creates calendar events for pregnancy periods (63-day multi-day events)
+   * Creates calendar events for mating dates from active pregnancies
    * @returns A boolean indicating whether the operation was successful
    */
-  static async syncPregnancyPeriodEvents(): Promise<boolean> {
+  static async syncMatingDateEvents(): Promise<boolean> {
     const startTime = Date.now();
-    console.log('[ReminderCalendarSyncService] Starting syncPregnancyPeriodEvents...');
+    console.log('[ReminderCalendarSyncService] Starting syncMatingDateEvents...');
     
     try {
       // Get current user ID
       const { data: authData, error: authError } = await supabase.auth.getUser();
       
       if (authError || !authData.user) {
-        console.error('[ReminderCalendarSyncService] Error getting user for pregnancy period events:', authError);
+        console.error('[ReminderCalendarSyncService] Error getting user for mating date events:', authError);
         return false;
       }
       
@@ -419,40 +419,35 @@ export class ReminderCalendarSyncService {
       const activePregnancies = await getActivePregnancies();
       
       if (!activePregnancies || activePregnancies.length === 0) {
-        console.log('[ReminderCalendarSyncService] No active pregnancies found for pregnancy period events');
+        console.log('[ReminderCalendarSyncService] No active pregnancies found for mating date events');
         return true;
       }
 
-      // Clean up existing pregnancy-period events to prevent duplicates
+      // Clean up existing mating events to prevent duplicates
       const { error: cleanupError } = await supabase
         .from('calendar_events')
         .delete()
         .eq('user_id', userId)
-        .eq('type', 'pregnancy-period');
+        .eq('type', 'mating');
 
       if (cleanupError) {
-        console.error('[ReminderCalendarSyncService] Error cleaning up existing pregnancy-period events:', cleanupError);
+        console.error('[ReminderCalendarSyncService] Error cleaning up existing mating events:', cleanupError);
         return false;
       }
 
-      // Create pregnancy period events for each active pregnancy
+      // Create mating date events for each active pregnancy
       for (const pregnancy of activePregnancies) {
         const matingDate = pregnancy.matingDate instanceof Date ? 
           pregnancy.matingDate : 
           new Date(pregnancy.matingDate);
         
-        const dueDate = pregnancy.expectedDueDate instanceof Date ? 
-          pregnancy.expectedDueDate : 
-          new Date(pregnancy.expectedDueDate);
-        
         const eventData = {
-          title: `${pregnancy.femaleName} dräktig`,
+          title: `${pregnancy.femaleName} parad`,
           date: matingDate.toISOString(),
-          end_date: dueDate.toISOString(),
-          type: 'pregnancy-period',
+          type: 'mating',
           dog_name: pregnancy.femaleName,
           pregnancy_id: pregnancy.id,
-          notes: `Dräktighetsperiod för ${pregnancy.femaleName}. Beräknad förlossning: ${format(dueDate, 'yyyy-MM-dd')}`,
+          notes: `${pregnancy.femaleName} parad med ${pregnancy.maleName}. Beräknad förlossning: ${format(pregnancy.expectedDueDate, 'yyyy-MM-dd')}`,
           user_id: userId
         };
 
@@ -461,17 +456,54 @@ export class ReminderCalendarSyncService {
           .insert(eventData);
 
         if (insertError) {
-          console.error('[ReminderCalendarSyncService] Error creating pregnancy period calendar event:', insertError);
+          console.error('[ReminderCalendarSyncService] Error creating mating date event:', insertError);
           return false;
         }
       }
 
       const elapsed = Date.now() - startTime;
-      console.log(`[ReminderCalendarSyncService] Successfully synced ${activePregnancies.length} pregnancy period events in ${elapsed}ms`);
+      console.log(`[ReminderCalendarSyncService] Successfully synced ${activePregnancies.length} mating date events in ${elapsed}ms`);
       return true;
     } catch (error) {
       const elapsed = Date.now() - startTime;
-      console.error(`[ReminderCalendarSyncService] Unexpected error in syncPregnancyPeriodEvents after ${elapsed}ms:`, error);
+      console.error(`[ReminderCalendarSyncService] Unexpected error in syncMatingDateEvents after ${elapsed}ms:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * One-time cleanup: Remove all pregnancy-period events
+   * Call this once to clean up old multi-day pregnancy events
+   * @returns A boolean indicating whether the operation was successful
+   */
+  static async cleanupOldPregnancyPeriodEvents(): Promise<boolean> {
+    try {
+      console.log('[ReminderCalendarSyncService] Cleaning up old pregnancy-period events...');
+      
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !authData.user) {
+        console.error('[ReminderCalendarSyncService] Error getting user:', authError);
+        return false;
+      }
+      
+      const userId = authData.user.id;
+
+      const { error } = await supabase
+        .from('calendar_events')
+        .delete()
+        .eq('user_id', userId)
+        .eq('type', 'pregnancy-period');
+
+      if (error) {
+        console.error('[ReminderCalendarSyncService] Error cleaning up pregnancy-period events:', error);
+        return false;
+      }
+
+      console.log('[ReminderCalendarSyncService] Successfully cleaned up pregnancy-period events');
+      return true;
+    } catch (error) {
+      console.error('[ReminderCalendarSyncService] Unexpected error in cleanup:', error);
       return false;
     }
   }

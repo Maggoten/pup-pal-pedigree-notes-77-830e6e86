@@ -39,6 +39,30 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) 
   const { syncCalendar, isSyncing } = useComprehensiveCalendarSync();
   const { t } = useTranslation('home');
   
+  // One-time cleanup of old pregnancy-period events on mount
+  React.useEffect(() => {
+    const initializePregnancyEvents = async () => {
+      try {
+        const { ReminderCalendarSyncService } = await import('@/services/ReminderCalendarSyncService');
+        
+        // Clean up old pregnancy-period events
+        await ReminderCalendarSyncService.cleanupOldPregnancyPeriodEvents();
+        
+        // Sync new mating date events
+        await ReminderCalendarSyncService.syncMatingDateEvents();
+        
+        // Refresh events to show the new mating dates
+        if (eventsData?.refreshEvents) {
+          eventsData.refreshEvents();
+        }
+      } catch (error) {
+        console.error('Error initializing pregnancy events:', error);
+      }
+    };
+    
+    initializePregnancyEvents();
+  }, []); // Run once on mount
+  
   // If no events data is provided, we need to fetch it - for backward compatibility
   // We'll use the provided eventsData directly from props if available
   const { 
