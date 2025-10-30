@@ -22,7 +22,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Archive, Trash } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { completePregnancy, deletePregnancy } from '@/services/PregnancyService';
+import { completePregnancy, deletePregnancy, getFirstActivePregnancy } from '@/services/PregnancyService';
 import { useTranslation } from 'react-i18next';
 
 interface ManagePregnancyDialogProps {
@@ -56,7 +56,17 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
           description: t('toasts.success.pregnancyUpdated'),
         });
         onClose();
-        navigate('/pregnancy');
+        
+        // Smart navigation: Check if there are other active pregnancies
+        const firstActiveId = await getFirstActivePregnancy();
+        
+        if (firstActiveId) {
+          // Navigate to first active pregnancy if exists
+          navigate(`/pregnancy/${firstActiveId}`);
+        } else {
+          // Navigate to main pregnancy page if no active pregnancies
+          navigate('/pregnancy');
+        }
       } else {
         toast({
           title: t('toasts.error.failedToCompletePregnancy'),
@@ -87,7 +97,17 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
           description: t('toasts.success.pregnancyDeleted'),
         });
         onClose();
-        navigate('/pregnancy');
+        
+        // Smart navigation: Check if there are other active pregnancies
+        const firstActiveId = await getFirstActivePregnancy();
+        
+        if (firstActiveId) {
+          // Navigate to first active pregnancy if exists
+          navigate(`/pregnancy/${firstActiveId}`);
+        } else {
+          // Navigate to main pregnancy page if no active pregnancies
+          navigate('/pregnancy');
+        }
       } else {
         toast({
           title: t('toasts.error.failedToDeletePregnancy'),
