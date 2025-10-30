@@ -126,6 +126,12 @@
       "title": "{{dogName}} Vaccination Due",
       "upcoming": "Vaccination due in {{days}} days",
       "overdue": "Vaccination overdue by {{days}} days"
+    },
+    "pregnancy": {
+      "approaching": "Pregnancy Due Date Approaching",
+      "todayOrPassed": "Pregnancy Due Date Today/Passed",
+      "dueInDays": "Due in {{days}} days",
+      "dueTodayOrPassed": "Due date is today or has passed"
     }
   },
   "reminderTypes": {

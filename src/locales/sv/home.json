@@ -126,6 +126,12 @@
       "title": "{{dogName}} Vaccinering förfaller",
       "upcoming": "Vaccinering förfaller om {{days}} dagar",
       "overdue": "Vaccinering försenad med {{days}} dagar"
+    },
+    "pregnancy": {
+      "approaching": "Dräktighet - Förväntat Födelsedatum Närmar Sig",
+      "todayOrPassed": "Dräktighet - Förväntat Födelsedatum Idag/Passerat",
+      "dueInDays": "Förväntas om {{days}} dagar",
+      "dueTodayOrPassed": "Förväntat födelsedatum är idag eller har passerat"
     }
   },
   "reminderTypes": {

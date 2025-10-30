@@ -32,15 +32,18 @@ export const generateLitterReminders = async (userId: string): Promise<Reminder[
         
         // Add due date reminder starting 14 days before
         if (daysUntilBirth >= -2 && daysUntilBirth <= 14) {
+          const isOverdueOrToday = daysUntilBirth <= 0;
+          
           reminders.push({
             id: `pregnancy-due-${pregnancy.id}`,
-            title: `Pregnancy Due Date ${daysUntilBirth <= 0 ? 'Today/Passed' : 'Approaching'}`,
-            description: daysUntilBirth <= 0 
-              ? `Due date is today or has passed` 
-              : `Due in ${daysUntilBirth} days`,
+            title: '', // Will be translated via titleKey
+            titleKey: isOverdueOrToday ? 'events.pregnancy.todayOrPassed' : 'events.pregnancy.approaching',
+            description: '', // Will be translated via descriptionKey
+            descriptionKey: isOverdueOrToday ? 'events.pregnancy.dueTodayOrPassed' : 'events.pregnancy.dueInDays',
+            translationData: { days: Math.abs(daysUntilBirth) },
             dueDate,
             priority: 'high',
-            type: 'pregnancy', // Changed from 'other' to 'pregnancy'
+            type: 'pregnancy',
             icon: createPawPrintIcon('rose-500'),
             relatedId: pregnancy.id
           });
