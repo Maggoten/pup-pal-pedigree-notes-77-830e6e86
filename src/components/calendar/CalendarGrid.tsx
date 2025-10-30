@@ -107,6 +107,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                 ...(birthdayEvents.length > 0 ? [{ icon: '🎂', priority: 3, class: 'bg-sky-500' }] : []),
               ].sort((a, b) => a.priority - b.priority);
               
+              // Show "+N" chip if more than 3 pregnancies overlap
+              const excessPregnancyCount = pregnancyEvents.length > 3 ? pregnancyEvents.length - 3 : 0;
+              
               return (
                 <ContextMenu key={day.toISOString()}>
                   <ContextMenuTrigger>
@@ -158,6 +161,13 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                               {chip.icon}
                             </span>
                           ))}
+                          
+                          {/* Excess pregnancy count chip */}
+                          {excessPregnancyCount > 0 && (
+                            <span className="text-[9px] bg-gray-400 text-white px-1 rounded shadow-sm">
+                              +{excessPregnancyCount}
+                            </span>
+                          )}
                           
                           {/* Indicators */}
                           {hasOvulation && (
@@ -239,11 +249,6 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         <PregnancyBandOverlay
           weeks={weeks}
           getEventsForDate={getEventsForDate}
-          onPregnancyClick={(pregnancy) => {
-            // Find correct day and open modal
-            const matingDate = normalizeDate(pregnancy.startDate);
-            setSelectedDateForModal(matingDate);
-          }}
         />
       </div>
       

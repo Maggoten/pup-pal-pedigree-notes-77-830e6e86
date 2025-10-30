@@ -4,6 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { CalendarEvent } from './types';
 import { getDogPregnancyColor } from '@/utils/dogColorUtils';
 import { getEventCategory } from '@/utils/eventCategories';
+import { calculateDaysPregnant, calculateDueDate, normalizeDate } from '@/utils/pregnancyCalculations';
 
 interface DayDetailsModalProps {
   date: Date | null;
@@ -65,13 +66,24 @@ export const DayDetailsModal = ({
             <EventSection title="Dräktigheter">
               {pregnancies.map(event => {
                 const color = getDogPregnancyColor(event.dogId || '');
+                const daysSinceMating = calculateDaysPregnant(normalizeDate(event.startDate));
+                const dueDate = calculateDueDate(normalizeDate(event.startDate));
+                
                 return (
-                  <EventItem 
-                    key={event.id} 
-                    event={event} 
-                    icon="▬" 
-                    color={color.chip}
-                  />
+                  <div key={event.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                    <span className={`text-lg ${color.chip} text-white px-2 py-0.5 rounded`}>
+                      ▬
+                    </span>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{event.dogName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        D+{daysSinceMating} • Due {format(dueDate, 'd MMM')} (±2d)
+                      </p>
+                      {event.notes && (
+                        <p className="text-xs text-muted-foreground mt-1">{event.notes}</p>
+                      )}
+                    </div>
+                  </div>
                 );
               })}
             </EventSection>

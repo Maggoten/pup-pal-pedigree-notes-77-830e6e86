@@ -7,7 +7,7 @@ import { startOfWeek, endOfWeek } from 'date-fns';
 interface PregnancyBandOverlayProps {
   weeks: Date[][];
   getEventsForDate: (date: Date) => CalendarEvent[];
-  onPregnancyClick: (pregnancy: CalendarEvent) => void;
+  showUnderlay?: boolean;
 }
 
 interface BandWithPosition {
@@ -19,8 +19,11 @@ interface BandWithPosition {
 export const PregnancyBandOverlay = ({
   weeks,
   getEventsForDate,
-  onPregnancyClick,
+  showUnderlay = true,
 }: PregnancyBandOverlayProps) => {
+  
+  // If showUnderlay is false, don't render anything
+  if (!showUnderlay) return null;
   
   // Collect all pregnancy-period events and calculate band positions
   const bandsWithPositions = useMemo(() => {
@@ -51,23 +54,26 @@ export const PregnancyBandOverlay = ({
         return dateA - dateB;
       });
       
-      // Collision handling: assign bandIndex per week
+      // Collision handling: assign bandIndex per week (max 3 visible)
       const occupiedSlots: boolean[] = []; // Track which band indices are occupied
       
       pregnanciesInWeek.forEach(pregnancy => {
-        // Find first available slot
+        // Find first available slot (max 3 lines)
         let bandIndex = 0;
-        while (occupiedSlots[bandIndex]) {
+        while (occupiedSlots[bandIndex] && bandIndex < 3) {
           bandIndex++;
         }
         
-        occupiedSlots[bandIndex] = true;
-        
-        bands.push({
-          pregnancy,
-          rowIndex: weekIndex,
-          bandIndex,
-        });
+        // Only render if within max 3 lines
+        if (bandIndex < 3) {
+          occupiedSlots[bandIndex] = true;
+          
+          bands.push({
+            pregnancy,
+            rowIndex: weekIndex,
+            bandIndex,
+          });
+        }
       });
     });
     
@@ -89,11 +95,10 @@ export const PregnancyBandOverlay = ({
           weekEnd={weekEnd}
           rowIndex={band.rowIndex}
           bandIndex={band.bandIndex}
-          onClick={onPregnancyClick}
         />
       );
     });
-  }, [bandsWithPositions, weeks, onPregnancyClick]);
+  }, [bandsWithPositions, weeks]);
   
   return (
     <div
@@ -103,7 +108,7 @@ export const PregnancyBandOverlay = ({
         gridTemplateColumns: 'repeat(7, 1fr)',
         gridAutoRows: 'minmax(100px, auto)',
         gap: '4px',
-        zIndex: 10,
+        zIndex: 1, // Low z-index - under events but over background
       }}
     >
       {memoizedBands}

@@ -1,5 +1,8 @@
 import { differenceInDays, addDays, startOfDay } from 'date-fns';
 
+// Re-export addDays for convenience
+export { addDays };
+
 /**
  * Normalize date to UTC midnight for consistent comparison
  */
@@ -51,4 +54,17 @@ export const isWithinDueDateUncertainty = (date: Date, dueDate: Date): boolean =
   const due = normalizeDate(dueDate);
   const diff = Math.abs(differenceInDays(normalized, due));
   return diff >= 1 && diff <= 2;
+};
+
+/**
+ * Check if a date is in the due week (D61-D65)
+ */
+export const isInDueWeek = (date: Date, matingDate: Date): boolean => {
+  const current = normalizeDate(date);
+  const mating = normalizeDate(matingDate);
+  const dueDate = calculateDueDate(mating);
+  const startDueWeek = addDays(dueDate, -2); // D61
+  const endDueWeek = addDays(dueDate, 2);     // D65
+  
+  return current >= startDueWeek && current <= endDueWeek;
 };

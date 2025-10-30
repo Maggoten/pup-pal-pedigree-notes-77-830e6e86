@@ -1,12 +1,10 @@
 import { useMemo } from 'react';
-import { format, isSameDay, differenceInDays } from 'date-fns';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { isSameDay, differenceInDays } from 'date-fns';
 import { CalendarEvent } from './types';
 import { 
-  calculateProgress, 
-  formatDayLabel,
-  normalizeDate 
+  normalizeDate,
+  isInDueWeek,
+  addDays
 } from '@/utils/pregnancyCalculations';
 import { getDogPregnancyColor } from '@/utils/dogColorUtils';
 
@@ -16,7 +14,6 @@ interface PregnancyBandProps {
   weekEnd: Date;
   rowIndex: number;
   bandIndex: number;
-  onClick: (pregnancy: CalendarEvent) => void;
 }
 
 export const PregnancyBand = ({
@@ -25,9 +22,7 @@ export const PregnancyBand = ({
   weekEnd,
   rowIndex,
   bandIndex,
-  onClick,
 }: PregnancyBandProps) => {
-  const isMobile = useIsMobile();
   const color = getDogPregnancyColor(pregnancy.dogId || '');
   
   // Segmentation: clamp to current week
@@ -58,84 +53,72 @@ export const PregnancyBand = ({
   const showLeftCap = isSameDay(segmentStart, normalizeDate(pregnancy.startDate));
   const showRightCap = isSameDay(segmentEnd, normalizeDate(pregnancy.endDate));
   
-  // Progress based on ENTIRE period, not segment
-  const progressPercent = calculateProgress(
-    normalizeDate(pregnancy.startDate),
-    new Date()
-  );
+  // Check if any part of this segment is in the due week (D61-D65)
+  const isSegmentInDueWeek = useMemo(() => {
+    const matingDate = normalizeDate(pregnancy.startDate);
+    // Check if any day in the segment is in due week
+    const dayCount = differenceInDays(segmentEnd, segmentStart);
+    for (let i = 0; i <= dayCount; i++) {
+      const checkDate = addDays(segmentStart, i);
+      if (isInDueWeek(checkDate, matingDate)) {
+        return true;
+      }
+    }
+    return false;
+  }, [pregnancy.startDate, segmentStart, segmentEnd]);
   
-  const dayLabel = formatDayLabel(normalizeDate(pregnancy.startDate));
+  // Line styling: 2px normal, 3px in due week
+  const lineHeight = isSegmentInDueWeek ? '3px' : '2px';
+  const lineOpacity = isSegmentInDueWeek ? 'opacity-25' : 'opacity-[0.15]';
   
-  // Band height: mobile 6-8px, desktop 10-12px
-  const bandHeight = isMobile ? '7px' : '10px';
-  
-  // Minimum click height on mobile: 24px (invisible click area)
-  const clickHeight = isMobile ? '24px' : '12px';
-  
-  // Tooltip content
-  const dueDate = format(normalizeDate(pregnancy.endDate), 'd MMM');
-  const tooltipText = `${pregnancy.dogName} • ${dayLabel} • Due ${dueDate} (±2d)`;
+  // Render week ticks (every 7 days from mating date)
+  const renderWeekTicks = () => {
+    const ticks: JSX.Element[] = [];
+    const matingDate = normalizeDate(pregnancy.startDate);
+    const segmentDays = differenceInDays(segmentEnd, segmentStart) + 1;
+    
+    for (let i = 0; i < segmentDays; i++) {
+      const currentDate = addDays(segmentStart, i);
+      const daysSinceMating = differenceInDays(currentDate, matingDate);
+      
+      // Tick every 7 days (D+7, D+14, D+21, etc.)
+      if (daysSinceMating > 0 && daysSinceMating % 7 === 0) {
+        const position = (i / segmentDays) * 100;
+        ticks.push(
+          <div
+            key={`tick-${i}`}
+            className="absolute w-[1px] h-1 bg-current opacity-20"
+            style={{
+              left: `${position}%`,
+              top: '-2px'
+            }}
+          />
+        );
+      }
+    }
+    
+    return ticks;
+  };
   
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div
-            className={`
-              relative cursor-pointer transition-all
-              ${color.band} ${color.border}
-              border-b-2
-              ${showLeftCap ? 'rounded-l-full' : ''}
-              ${showRightCap ? 'rounded-r-full' : ''}
-              hover:brightness-110
-            `}
-            style={{
-              gridColumn: `${startColumn} / ${endColumn}`,
-              gridRow: rowIndex + 1,
-              height: bandHeight,
-              minHeight: clickHeight,
-              marginTop: `${24 + (bandIndex * 14)}px`, // 24px under date + 4px gap between bands
-              zIndex: 10 + bandIndex,
-              pointerEvents: 'auto',
-            }}
-            onClick={() => onClick(pregnancy)}
-            aria-label={tooltipText}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onClick(pregnancy);
-              }
-            }}
-          >
-            {/* Progress fill - based on entire period */}
-            <div
-              className="absolute inset-0 bg-white/30 transition-all"
-              style={{
-                width: `${progressPercent}%`,
-                borderRadius: 'inherit',
-              }}
-            />
-            
-            {/* Day label - desktop only, show on hover */}
-            {!isMobile && (
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                <span className={`text-[9px] font-semibold ${color.text} drop-shadow`}>
-                  {dayLabel}
-                </span>
-              </div>
-            )}
-          </div>
-        </TooltipTrigger>
-        
-        {!isMobile && (
-          <TooltipContent>
-            <p className="font-semibold">{pregnancy.dogName}</p>
-            <p className="text-xs">{dayLabel} • Due {dueDate} (±2d)</p>
-          </TooltipContent>
-        )}
-      </Tooltip>
-    </TooltipProvider>
+    <div
+      className={`
+        relative
+        ${color.band} ${lineOpacity}
+        ${showLeftCap ? 'rounded-l-sm' : ''}
+        ${showRightCap ? 'rounded-r-sm' : ''}
+      `}
+      style={{
+        gridColumn: `${startColumn} / ${endColumn}`,
+        gridRow: rowIndex + 1,
+        height: lineHeight,
+        marginTop: `${26 + (bandIndex * 5)}px`, // 26px from top + 3px gap between lines
+        zIndex: 5 + bandIndex,
+        pointerEvents: 'none', // Not clickable - entire day cell is clickable
+      }}
+    >
+      {/* Week ticks */}
+      {renderWeekTicks()}
+    </div>
   );
 };
