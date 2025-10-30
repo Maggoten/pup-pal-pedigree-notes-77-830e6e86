@@ -178,6 +178,13 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
         weekNumber: 8
       },
       {
+        id: "week8-7",
+        text: "checklist.items.week8.item7.text",
+        description: "checklist.items.week8.item7.description",
+        isCompleted: false,
+        weekNumber: 8
+      },
+      {
         id: "week8-2",
         text: "checklist.items.week8.item2.text",
         description: "checklist.items.week8.item2.description",
@@ -209,13 +216,6 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
         id: "week8-6",
         text: "checklist.items.week8.item6.text",
         description: "checklist.items.week8.item6.description",
-        isCompleted: false,
-        weekNumber: 8
-      },
-      {
-        id: "week8-7",
-        text: "checklist.items.week8.item7.text",
-        description: "checklist.items.week8.item7.description",
         isCompleted: false,
         weekNumber: 8
       }
