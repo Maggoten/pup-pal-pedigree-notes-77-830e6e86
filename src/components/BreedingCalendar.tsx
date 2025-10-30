@@ -34,9 +34,7 @@ const CalendarSkeleton = ({ t }: { t: any }) => (
 );
 
 // Use memo to prevent unnecessary re-renders
-const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ 
-  eventsData
-}) => {
+const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ eventsData }) => {
   const { dogs } = useDogs();
   const { syncCalendar, isSyncing } = useComprehensiveCalendarSync();
   const { t } = useTranslation('home');
