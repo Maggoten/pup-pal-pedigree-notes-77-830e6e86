@@ -153,7 +153,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             ) : (
               <BreedingCalendar 
                 eventsData={calendarProps}
-                showPregnancyUnderlay={!showPregnancyFocus}
               />
             )}
           </div>

@@ -68,3 +68,33 @@ export const isInDueWeek = (date: Date, matingDate: Date): boolean => {
   
   return current >= startDueWeek && current <= endDueWeek;
 };
+
+/**
+ * Check if a pregnancy is active during a specific week
+ */
+export const isPregnancyActiveInWeek = (
+  pregnancy: { startDate: Date | string; endDate?: Date | string },
+  weekStart: Date,
+  weekEnd: Date
+): boolean => {
+  const matingDate = normalizeDate(pregnancy.startDate);
+  const dueDate = pregnancy.endDate 
+    ? normalizeDate(pregnancy.endDate)
+    : addDays(matingDate, 63);
+  
+  const normalizedWeekStart = normalizeDate(weekStart);
+  const normalizedWeekEnd = normalizeDate(weekEnd);
+  
+  // Check if pregnancy period overlaps with this week
+  return !(dueDate < normalizedWeekStart || matingDate > normalizedWeekEnd);
+};
+
+/**
+ * Check if any day in the week is in due week for any pregnancy
+ */
+export const isInDueWeekForAnyPregnancy = (
+  date: Date,
+  pregnancies: Array<{ startDate: Date | string }>
+): boolean => {
+  return pregnancies.some(p => isInDueWeek(date, normalizeDate(p.startDate)));
+};

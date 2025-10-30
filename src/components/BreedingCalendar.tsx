@@ -23,7 +23,6 @@ interface CalendarEventsData {
 
 interface BreedingCalendarProps {
   eventsData?: CalendarEventsData; // Optional because we might fetch data here
-  showPregnancyUnderlay?: boolean; // Control pregnancy band visibility
 }
 
 // Skeleton loader for calendar content
@@ -36,8 +35,7 @@ const CalendarSkeleton = ({ t }: { t: any }) => (
 
 // Use memo to prevent unnecessary re-renders
 const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({ 
-  eventsData,
-  showPregnancyUnderlay = true 
+  eventsData
 }) => {
   const { dogs } = useDogs();
   const { syncCalendar, isSyncing } = useComprehensiveCalendarSync();
@@ -121,7 +119,6 @@ const BreedingCalendar: React.FC<BreedingCalendarProps> = memo(({
             onSyncCalendar={handleSyncCalendar}
             isSyncing={isSyncing}
             onEventUpdate={refreshEvents}
-            showPregnancyUnderlay={showPregnancyUnderlay}
           />
         )}
       </div>

@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { X } from 'lucide-react';
+import { X, Heart, Star, Cake } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { CalendarEvent } from './types';
 import { getDogPregnancyColor } from '@/utils/dogColorUtils';
@@ -45,18 +45,11 @@ export const DayDetailsModal = ({
         </SheetHeader>
         
         <div className="mt-6 space-y-6">
-          {/* Legend */}
-          <div className="flex gap-4 text-xs text-muted-foreground border-b pb-3">
-            <span>♥ = Parning</span>
-            <span>▬ = Dräktighet</span>
-            <span>★ = Valpning</span>
-          </div>
-          
           {/* Mating events */}
           {matings.length > 0 && (
             <EventSection title="Parningar">
               {matings.map(event => (
-                <EventItem key={event.id} event={event} icon="♥" />
+                <EventItem key={event.id} event={event} icon={<Heart className="w-4 h-4" />} />
               ))}
             </EventSection>
           )}
@@ -71,9 +64,9 @@ export const DayDetailsModal = ({
                 
                 return (
                   <div key={event.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                    <span className={`text-lg ${color.chip} text-white px-2 py-0.5 rounded`}>
-                      ▬
-                    </span>
+                    <div className={`${color.chip} text-white px-2 py-1 rounded flex items-center`}>
+                      <Star className="w-4 h-4" />
+                    </div>
                     <div className="flex-1">
                       <p className="font-medium text-sm">{event.dogName}</p>
                       <p className="text-xs text-muted-foreground">
@@ -93,7 +86,7 @@ export const DayDetailsModal = ({
           {dueDates.length > 0 && (
             <EventSection title="Beräknade valpningar">
               {dueDates.map(event => (
-                <EventItem key={event.id} event={event} icon="★" />
+                <EventItem key={event.id} event={event} icon={<Star className="w-4 h-4" />} />
               ))}
             </EventSection>
           )}
@@ -102,7 +95,7 @@ export const DayDetailsModal = ({
           {birthdays.length > 0 && (
             <EventSection title="Födelsedagar">
               {birthdays.map(event => (
-                <EventItem key={event.id} event={event} icon="🎂" />
+                <EventItem key={event.id} event={event} icon={<Cake className="w-4 h-4" />} />
               ))}
             </EventSection>
           )}
@@ -161,7 +154,7 @@ const EventItem = ({
   color 
 }: { 
   event: CalendarEvent; 
-  icon?: string;
+  icon?: React.ReactNode;
   color?: string;
 }) => {
   const category = getEventCategory(event.type);
@@ -169,7 +162,7 @@ const EventItem = ({
   
   return (
     <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-      <span className={`text-lg ${color ? `${color} text-white px-2 py-0.5 rounded` : ''}`}>
+      <span className={`${color ? `${color} text-white px-2 py-0.5 rounded flex items-center` : ''}`}>
         {displayIcon}
       </span>
       <div className="flex-1">

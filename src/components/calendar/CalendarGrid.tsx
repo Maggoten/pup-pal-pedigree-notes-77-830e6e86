@@ -1,15 +1,22 @@
 
 import React, { useState } from 'react';
-import { format, isSameMonth, isSameDay } from 'date-fns';
+import { format, isSameMonth, isSameDay, addDays, startOfWeek } from 'date-fns';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { CompactEventPill } from './CompactEventPill';
 import MobileEventCard from './MobileEventCard';
-import { PregnancyBandOverlay } from './PregnancyBandOverlay';
 import { DayDetailsModal } from './DayDetailsModal';
+import { PregnancyWeekBadge } from './PregnancyWeekBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CalendarEvent } from './types';
-import { isWithinDueDateUncertainty, calculateDueDate, normalizeDate } from '@/utils/pregnancyCalculations';
+import { 
+  isWithinDueDateUncertainty, 
+  calculateDueDate, 
+  normalizeDate,
+  isPregnancyActiveInWeek,
+  isInDueWeekForAnyPregnancy
+} from '@/utils/pregnancyCalculations';
 import { getEventCategory } from '@/utils/eventCategories';
+import { Heart, Star, Cake } from 'lucide-react';
 
 interface CalendarGridProps {
   weeks: Date[][];
@@ -18,7 +25,6 @@ interface CalendarGridProps {
   onDeleteEvent: (eventId: string) => void;
   onEventClick: (event: CalendarEvent) => void;
   compact?: boolean;
-  showPregnancyUnderlay?: boolean;
 }
 
 const CalendarGrid: React.FC<CalendarGridProps> = ({ 
@@ -27,11 +33,11 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   getEventColor, 
   onDeleteEvent,
   onEventClick,
-  compact = false,
-  showPregnancyUnderlay = true
+  compact = false
 }) => {
   const [selectedDateForModal, setSelectedDateForModal] = useState<Date | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [highlightedWeek, setHighlightedWeek] = useState<number | null>(null);
   const isMobile = useIsMobile();
   
   const today = new Date();
@@ -72,6 +78,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
               const isCurrentMonth = isSameMonth(day, new Date());
               const events = getEventsForDate(day);
               
+              // Check if this is the first day of the week (Monday)
+              const isFirstDayOfWeek = day.getDay() === 1;
+              
               // Filter events by type
               const pregnancyEvents = events.filter(e => e.type === 'pregnancy-period');
               const matingEvents = events.filter(e => e.type === 'mating');
@@ -80,6 +89,15 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
               const otherEvents = events.filter(e => 
                 !['pregnancy-period', 'mating', 'due-date', 'birthday', 'birthday-reminder'].includes(e.type || '')
               );
+              
+              // Get pregnancies for this entire week (only for first day)
+              const weekPregnancies = isFirstDayOfWeek && isCurrentMonth
+                ? pregnancyEvents.filter(p => {
+                    if (!p.startDate) return false;
+                    const weekEnd = addDays(day, 6);
+                    return isPregnancyActiveInWeek(p as { startDate: Date | string; endDate?: Date | string }, day, weekEnd);
+                  })
+                : [];
               
               // Combine displayable events: birthdays + others
               const displayableEvents = [...birthdayEvents, ...otherEvents];
@@ -102,15 +120,30 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
               const hasDueDate = dueDateEvents.length > 0;
               const hasBirthday = birthdayEvents.length > 0;
               
-              // Prepare chips in priority order
-              const chips = [
-                ...(dueDateEvents.length > 0 ? [{ icon: '★', priority: 1, class: 'bg-rose-500' }] : []),
-                ...(matingEvents.length > 0 ? [{ icon: '♥', priority: 2, class: 'bg-rose-500' }] : []),
-                ...(birthdayEvents.length > 0 ? [{ icon: '🎂', priority: 3, class: 'bg-sky-500' }] : []),
-              ].sort((a, b) => a.priority - b.priority);
+              // Check if in due week for ring styling
+              const isInDueWeekCell = isInDueWeekForAnyPregnancy(
+                day, 
+                pregnancyEvents.filter(p => p.startDate) as Array<{ startDate: Date | string }>
+              );
               
-              // Show "+N" chip if more than 3 pregnancies overlap
-              const excessPregnancyCount = pregnancyEvents.length > 3 ? pregnancyEvents.length - 3 : 0;
+              // Prepare chips in priority order with Lucide icons
+              const chips = [
+                ...(dueDateEvents.length > 0 ? [{ 
+                  icon: <Star className="w-3 h-3" />, 
+                  priority: 1, 
+                  class: 'bg-rose-500 text-white' 
+                }] : []),
+                ...(matingEvents.length > 0 ? [{ 
+                  icon: <Heart className="w-3 h-3" />, 
+                  priority: 2, 
+                  class: 'bg-rose-400 text-white' 
+                }] : []),
+                ...(birthdayEvents.length > 0 ? [{ 
+                  icon: <Cake className="w-3 h-3" />, 
+                  priority: 3, 
+                  class: 'bg-sky-500 text-white' 
+                }] : []),
+              ].sort((a, b) => a.priority - b.priority);
               
               return (
                 <ContextMenu key={day.toISOString()}>
@@ -118,11 +151,13 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     <div 
                       className={`
                         rounded-lg border h-full ${compact ? 'min-h-[80px]' : 'min-h-[100px]'}
-                        flex flex-col transition-colors duration-200 cursor-pointer
+                        flex flex-col transition-colors duration-200 cursor-pointer relative
                         ${hasDueDate 
                           ? 'ring-2 ring-rose-400/50 ring-offset-1' 
                           : hasBirthday 
                           ? 'ring-2 ring-sky-400/35 ring-offset-1'
+                          : isInDueWeekCell
+                          ? 'ring-1 ring-rose-300/40 bg-rose-50/5'
                           : ''
                         }
                         ${hasOvulation 
@@ -158,18 +193,11 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                           {chips.map((chip, idx) => (
                             <span 
                               key={idx}
-                              className={`text-[10px] text-white px-1 rounded shadow-sm ${chip.class}`}
+                              className={`p-0.5 rounded shadow-sm flex items-center ${chip.class}`}
                             >
                               {chip.icon}
                             </span>
                           ))}
-                          
-                          {/* Excess pregnancy count chip */}
-                          {excessPregnancyCount > 0 && (
-                            <span className="text-[9px] bg-gray-400 text-white px-1 rounded shadow-sm">
-                              +{excessPregnancyCount}
-                            </span>
-                          )}
                           
                           {/* Indicators */}
                           {hasOvulation && (
@@ -188,8 +216,34 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                         </div>
                       </div>
                       
+                      {/* Pregnancy week badges */}
+                      {isFirstDayOfWeek && weekPregnancies.length > 0 && (
+                        <div className="absolute top-7 left-1 space-y-1 z-10 pointer-events-auto">
+                          {weekPregnancies.slice(0, 3).map((pregnancy) => (
+                            <PregnancyWeekBadge
+                              key={pregnancy.id}
+                              pregnancy={pregnancy}
+                              weekStart={day}
+                              weekEnd={addDays(day, 6)}
+                              onBadgeClick={() => {
+                                setHighlightedWeek(weekIndex);
+                                setSelectedDateForModal(day);
+                              }}
+                            />
+                          ))}
+                          {weekPregnancies.length > 3 && (
+                            <div className="text-[9px] bg-gray-300 text-white px-1.5 py-0.5 rounded-md">
+                              +{weekPregnancies.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
                       {/* Event list - compact pills */}
-                      <div className="flex-1 p-1.5 space-y-1 overflow-y-auto scrollbar-thin">
+                      <div className={`
+                        flex-1 p-1.5 space-y-1 overflow-y-auto scrollbar-thin
+                        ${isFirstDayOfWeek && weekPregnancies.length > 0 ? 'pt-16' : ''}
+                      `}>
                         {displayEvents.map((event) => (
                           <CompactEventPill
                             key={event.id}
@@ -246,13 +300,6 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           </div>
           ))}
         </div>
-        
-        {/* Pregnancy band overlay */}
-        <PregnancyBandOverlay
-          weeks={weeks}
-          getEventsForDate={getEventsForDate}
-          showUnderlay={showPregnancyUnderlay}
-        />
       </div>
       
       {/* Day details modal */}
