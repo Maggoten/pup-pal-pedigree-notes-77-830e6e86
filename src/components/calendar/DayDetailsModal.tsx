@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { CalendarEvent } from './types';
 import { getDogPregnancyColor } from '@/utils/dogColorUtils';
+import { getEventCategory } from '@/utils/eventCategories';
 
 interface DayDetailsModalProps {
   date: Date | null;
@@ -21,8 +22,13 @@ export const DayDetailsModal = ({
   const pregnancies = events.filter(e => e.type === 'pregnancy-period');
   const matings = events.filter(e => e.type === 'mating');
   const dueDates = events.filter(e => e.type === 'due-date');
+  const birthdays = events.filter(e => e.type === 'birthday' || e.type === 'birthday-reminder');
+  const healthEvents = events.filter(e => ['vaccination', 'health', 'vet-appointment'].includes(e.type || ''));
+  const heatEvents = events.filter(e => ['heat', 'heat-start', 'ovulation-predicted', 'fertility-window'].includes(e.type || ''));
   const others = events.filter(e => 
-    !['pregnancy-period', 'mating', 'due-date'].includes(e.type || '')
+    !['pregnancy-period', 'mating', 'due-date', 'birthday', 'birthday-reminder', 
+      'vaccination', 'health', 'vet-appointment', 'heat', 'heat-start', 
+      'ovulation-predicted', 'fertility-window'].includes(e.type || '')
   );
   
   return (
@@ -80,6 +86,33 @@ export const DayDetailsModal = ({
             </EventSection>
           )}
           
+          {/* Birthday events */}
+          {birthdays.length > 0 && (
+            <EventSection title="Födelsedagar">
+              {birthdays.map(event => (
+                <EventItem key={event.id} event={event} icon="🎂" />
+              ))}
+            </EventSection>
+          )}
+          
+          {/* Health events */}
+          {healthEvents.length > 0 && (
+            <EventSection title="Hälsa">
+              {healthEvents.map(event => (
+                <EventItem key={event.id} event={event} />
+              ))}
+            </EventSection>
+          )}
+          
+          {/* Heat events */}
+          {heatEvents.length > 0 && (
+            <EventSection title="Brunst & Fertilitet">
+              {heatEvents.map(event => (
+                <EventItem key={event.id} event={event} />
+              ))}
+            </EventSection>
+          )}
+          
           {/* Other events */}
           {others.length > 0 && (
             <EventSection title="Övriga händelser">
@@ -118,21 +151,27 @@ const EventItem = ({
   event: CalendarEvent; 
   icon?: string;
   color?: string;
-}) => (
-  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-    {icon && (
+}) => {
+  const category = getEventCategory(event.type);
+  const displayIcon = icon || category.icon;
+  
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
       <span className={`text-lg ${color ? `${color} text-white px-2 py-0.5 rounded` : ''}`}>
-        {icon}
+        {displayIcon}
       </span>
-    )}
-    <div className="flex-1">
-      <p className="font-medium text-sm">{event.title}</p>
-      {event.dogName && (
-        <p className="text-xs text-muted-foreground">{event.dogName}</p>
-      )}
-      {event.notes && (
-        <p className="text-xs text-muted-foreground mt-1">{event.notes}</p>
-      )}
+      <div className="flex-1">
+        <p className="font-medium text-sm">{event.title}</p>
+        {event.dogName && (
+          <p className="text-xs text-muted-foreground">{event.dogName}</p>
+        )}
+        {event.notes && (
+          <p className="text-xs text-muted-foreground mt-1">{event.notes}</p>
+        )}
+        {event.time && (
+          <p className="text-xs text-muted-foreground">⏰ {event.time}</p>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};

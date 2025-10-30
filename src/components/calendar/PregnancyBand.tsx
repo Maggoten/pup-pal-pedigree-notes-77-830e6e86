@@ -67,10 +67,10 @@ export const PregnancyBand = ({
   const dayLabel = formatDayLabel(normalizeDate(pregnancy.startDate));
   
   // Band height: mobile 6-8px, desktop 10-12px
-  const bandHeight = isMobile ? '6px' : '10px';
+  const bandHeight = isMobile ? '7px' : '10px';
   
-  // Minimum click height on mobile: 24px
-  const clickHeight = isMobile ? '24px' : bandHeight;
+  // Minimum click height on mobile: 24px (invisible click area)
+  const clickHeight = isMobile ? '24px' : '12px';
   
   // Tooltip content
   const dueDate = format(normalizeDate(pregnancy.endDate), 'd MMM');

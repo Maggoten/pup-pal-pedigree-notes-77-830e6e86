@@ -2,14 +2,14 @@
 import React, { useState } from 'react';
 import { format, isSameMonth, isSameDay } from 'date-fns';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { Badge } from '@/components/ui/badge';
-import EventCard from './EventCard';
+import { CompactEventPill } from './CompactEventPill';
 import MobileEventCard from './MobileEventCard';
 import { PregnancyBandOverlay } from './PregnancyBandOverlay';
 import { DayDetailsModal } from './DayDetailsModal';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CalendarEvent } from './types';
 import { isWithinDueDateUncertainty, calculateDueDate, normalizeDate } from '@/utils/pregnancyCalculations';
+import { getEventCategory } from '@/utils/eventCategories';
 
 interface CalendarGridProps {
   weeks: Date[][];
@@ -74,13 +74,16 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
               const pregnancyEvents = events.filter(e => e.type === 'pregnancy-period');
               const matingEvents = events.filter(e => e.type === 'mating');
               const dueDateEvents = events.filter(e => e.type === 'due-date');
+              const birthdayEvents = events.filter(e => e.type === 'birthday' || e.type === 'birthday-reminder');
               const otherEvents = events.filter(e => 
-                !['pregnancy-period', 'mating', 'due-date'].includes(e.type || '')
+                !['pregnancy-period', 'mating', 'due-date', 'birthday', 'birthday-reminder'].includes(e.type || '')
               );
               
-              const maxEvents = compact ? 1 : 3;
-              const displayEvents = otherEvents.slice(0, maxEvents);
-              const hiddenEventsCount = otherEvents.length - maxEvents;
+              // Combine displayable events: birthdays + others
+              const displayableEvents = [...birthdayEvents, ...otherEvents];
+              const maxEvents = compact ? 2 : 3;
+              const displayEvents = displayableEvents.slice(0, maxEvents);
+              const hiddenEventsCount = displayableEvents.length - maxEvents;
               
               // Check for special fertility/ovulation/heat events
               const hasOvulation = events.some(event => event.type === 'ovulation-predicted');
@@ -93,6 +96,17 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                 return isWithinDueDateUncertainty(day, dueDate);
               });
               
+              // Check for highlight rings
+              const hasDueDate = dueDateEvents.length > 0;
+              const hasBirthday = birthdayEvents.length > 0;
+              
+              // Prepare chips in priority order
+              const chips = [
+                ...(dueDateEvents.length > 0 ? [{ icon: '★', priority: 1, class: 'bg-rose-500' }] : []),
+                ...(matingEvents.length > 0 ? [{ icon: '♥', priority: 2, class: 'bg-rose-500' }] : []),
+                ...(birthdayEvents.length > 0 ? [{ icon: '🎂', priority: 3, class: 'bg-sky-500' }] : []),
+              ].sort((a, b) => a.priority - b.priority);
+              
               return (
                 <ContextMenu key={day.toISOString()}>
                   <ContextMenuTrigger>
@@ -100,12 +114,18 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                       className={`
                         rounded-lg border h-full ${compact ? 'min-h-[80px]' : 'min-h-[100px]'}
                         flex flex-col transition-colors duration-200 cursor-pointer
+                        ${hasDueDate 
+                          ? 'ring-2 ring-rose-400/50 ring-offset-1' 
+                          : hasBirthday 
+                          ? 'ring-2 ring-sky-400/35 ring-offset-1'
+                          : ''
+                        }
                         ${hasOvulation 
                           ? 'bg-purple-100/90 border-purple-300/70 shadow-purple-200/30 shadow-lg' 
                           : hasFertility 
                           ? 'bg-purple-100/90 border-purple-300/70 shadow-purple-200/30 shadow-lg'
                           : hasDueDateUncertainty
-                          ? 'bg-pink-50/15 border-warmbeige-100'
+                          ? 'bg-rose-50/10 border-warmbeige-100'
                           : hasHeat
                           ? 'bg-rose-50/90 border-rose-200/70 shadow-rose-100/20 shadow-sm'
                           : isToday 
@@ -116,65 +136,73 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                       `}
                       onClick={() => setSelectedDateForModal(day)}
                     >
-                      <div className={`
-                        text-xs py-1 px-2 flex justify-between items-center
-                        ${hasOvulation ? 'font-bold text-purple-800' : hasFertility ? 'font-bold text-purple-800' : hasHeat ? 'font-semibold text-rose-700' : isToday ? 'font-bold text-primary' : ''}
-                      `}>
-                        <span>
+                      {/* Date header - fixed 24px height */}
+                      <div 
+                        className="px-2 flex justify-between items-center border-b border-warmbeige-200/50"
+                        style={{ height: '24px', minHeight: '24px', maxHeight: '24px' }}
+                      >
+                        <span className={`
+                          text-xs font-medium
+                          ${isToday ? 'font-bold text-primary' : ''}
+                        `}>
                           {format(day, 'd')}
                         </span>
-                        <div className="flex items-center gap-1">
-                          {/* Mating chip */}
-                          {matingEvents.map(mating => (
-                            <Badge 
-                              key={mating.id}
-                              variant="heatConfirmed" 
-                              className="text-[9px] px-1 py-0 h-4"
+                        
+                        <div className="flex items-center gap-0.5">
+                          {/* Priority chips */}
+                          {chips.map((chip, idx) => (
+                            <span 
+                              key={idx}
+                              className={`text-[10px] text-white px-1 rounded shadow-sm ${chip.class}`}
                             >
-                              ♥
-                            </Badge>
+                              {chip.icon}
+                            </span>
                           ))}
                           
-                          {/* Due date chip */}
-                          {dueDateEvents.map(due => (
-                            <Badge 
-                              key={due.id}
-                              variant="heatConfirmed" 
-                              className="text-[9px] px-1 py-0 h-4"
-                            >
-                              ★
-                            </Badge>
-                          ))}
-                          
+                          {/* Indicators */}
                           {hasOvulation && (
-                            <div className="w-2 h-2 bg-purple-500 rounded-full shadow-sm"></div>
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-500 ml-1" title="Ovulation predicted" />
                           )}
                           {hasFertility && !hasOvulation && (
-                            <div className="w-1.5 h-1.5 bg-violet-400 rounded-full shadow-sm"></div>
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-400" title="Fertility window" />
                           )}
                           {hasHeat && !hasOvulation && !hasFertility && (
-                            <div className="w-1.5 h-1.5 bg-rose-400 rounded-full shadow-sm"></div>
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" title="Heat cycle" />
                           )}
-                          <span className="text-[10px] text-muted-foreground">
+                          
+                          <span className="text-[9px] text-muted-foreground ml-1">
                             {format(day, 'EEE')}
                           </span>
                         </div>
                       </div>
                       
-                      <div className="flex-1 p-1 space-y-1 overflow-y-auto scrollbar-thin">
+                      {/* Event list - compact pills */}
+                      <div className="flex-1 p-1.5 space-y-1 overflow-y-auto scrollbar-thin">
                         {displayEvents.map((event) => (
-                          <EventCard
+                          <CompactEventPill
                             key={event.id}
                             event={event}
-                            colorClass={getEventColor(event.type)}
                             onClick={() => handleEventClick(event)}
-                            compact={compact}
                           />
                         ))}
-                        
                         {hiddenEventsCount > 0 && (
-                          <div className="text-[10px] text-center p-1 bg-warmbeige-200 text-darkgray-600 rounded-lg">
-                            +{hiddenEventsCount} more
+                          <div 
+                            className="text-[9px] text-center py-0.5 px-2 bg-gray-200/70 text-gray-600 rounded-full cursor-pointer hover:bg-gray-300 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedDateForModal(day);
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                setSelectedDateForModal(day);
+                              }
+                            }}
+                            aria-label={`Show ${hiddenEventsCount} more events`}
+                          >
+                            +{hiddenEventsCount}
                           </div>
                         )}
                       </div>
