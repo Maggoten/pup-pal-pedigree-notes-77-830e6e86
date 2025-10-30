@@ -67,9 +67,9 @@ export const PregnancyBand = ({
     return false;
   }, [pregnancy.startDate, segmentStart, segmentEnd]);
   
-  // Line styling: 2px normal, 3px in due week
-  const lineHeight = isSegmentInDueWeek ? '3px' : '2px';
-  const lineOpacity = isSegmentInDueWeek ? 'opacity-25' : 'opacity-[0.15]';
+  // Line styling: 2px normal, 4px in due week
+  const lineHeight = isSegmentInDueWeek ? '4px' : '2px';
+  const lineOpacity = isSegmentInDueWeek ? 'opacity-50' : 'opacity-35';
   
   // Render week ticks (every 7 days from mating date)
   const renderWeekTicks = () => {
@@ -117,6 +117,20 @@ export const PregnancyBand = ({
         pointerEvents: 'none', // Not clickable - entire day cell is clickable
       }}
     >
+      {/* Dog name label at start */}
+      {showLeftCap && pregnancy.dogName && (
+        <div 
+          className="absolute left-0 text-[9px] font-medium whitespace-nowrap"
+          style={{
+            top: '-14px',
+            color: 'inherit',
+            opacity: 0.8
+          }}
+        >
+          {pregnancy.dogName}
+        </div>
+      )}
+      
       {/* Week ticks */}
       {renderWeekTicks()}
     </div>

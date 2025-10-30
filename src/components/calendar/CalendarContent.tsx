@@ -24,6 +24,7 @@ interface CalendarContentProps {
   onSyncCalendar?: () => void;
   isSyncing?: boolean;
   onEventUpdate?: () => void;
+  showPregnancyUnderlay?: boolean;
 }
 
 const CalendarContent: React.FC<CalendarContentProps> = ({ 
@@ -36,7 +37,8 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
   compact = false, 
   onSyncCalendar, 
   isSyncing = false,
-  onEventUpdate
+  onEventUpdate,
+  showPregnancyUnderlay = true
 }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -141,6 +143,7 @@ const CalendarContent: React.FC<CalendarContentProps> = ({
             onDeleteEvent={onDeleteEvent}
             onEventClick={handleEventClick}
             compact={compact}
+            showPregnancyUnderlay={showPregnancyUnderlay}
           />
         </div>
       </CardContent>

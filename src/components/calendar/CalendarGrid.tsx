@@ -18,6 +18,7 @@ interface CalendarGridProps {
   onDeleteEvent: (eventId: string) => void;
   onEventClick: (event: CalendarEvent) => void;
   compact?: boolean;
+  showPregnancyUnderlay?: boolean;
 }
 
 const CalendarGrid: React.FC<CalendarGridProps> = ({ 
@@ -26,7 +27,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   getEventColor, 
   onDeleteEvent,
   onEventClick,
-  compact = false 
+  compact = false,
+  showPregnancyUnderlay = true
 }) => {
   const [selectedDateForModal, setSelectedDateForModal] = useState<Date | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -249,6 +251,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         <PregnancyBandOverlay
           weeks={weeks}
           getEventsForDate={getEventsForDate}
+          showUnderlay={showPregnancyUnderlay}
         />
       </div>
       

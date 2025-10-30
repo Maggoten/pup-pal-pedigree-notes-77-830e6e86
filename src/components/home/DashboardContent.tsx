@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddEventFormValues } from '@/components/calendar/types';
 
@@ -8,6 +8,9 @@ import BreedingCalendar from '@/components/BreedingCalendar';
 import BreedingReminders from '@/components/BreedingReminders';
 import { HomeOfferCarousel } from '@/components/home/HomeOfferCarousel';
 import UpcomingHeatsCard from '@/components/home/UpcomingHeatsCard';
+import { PregnancySwimLanes } from '@/components/calendar/PregnancySwimLanes';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface DashboardContentProps {
   isDataReady: boolean;
@@ -80,6 +83,43 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   const showCalendarSkeleton = !isDataReady || calendarProps.isLoading;
   const showRemindersSkeleton = !isDataReady || remindersProps.isLoading;
   const showCarouselSkeleton = !isDataReady;
+  
+  // Pregnancy Focus toggle state
+  const [showPregnancyFocus, setShowPregnancyFocus] = useState(() => {
+    const saved = localStorage.getItem('pregnancyFocus');
+    return saved === 'true';
+  });
+  
+  // Get all pregnancy events for swimlanes
+  const allPregnancies = React.useMemo(() => {
+    if (!calendarProps.getEventsForDate || showCalendarSkeleton) return [];
+    
+    // Collect all unique pregnancy events from the calendar
+    const pregnancies: any[] = [];
+    const seenIds = new Set<string>();
+    
+    // Check dates for next 90 days to capture all pregnancies
+    const today = new Date();
+    for (let i = 0; i < 90; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      const events = calendarProps.getEventsForDate(date);
+      
+      events.forEach(event => {
+        if (event.type === 'pregnancy-period' && !seenIds.has(event.id)) {
+          seenIds.add(event.id);
+          pregnancies.push(event);
+        }
+      });
+    }
+    
+    return pregnancies;
+  }, [calendarProps, showCalendarSkeleton]);
+  
+  const handleTogglePregnancyFocus = (checked: boolean) => {
+    setShowPregnancyFocus(checked);
+    localStorage.setItem('pregnancyFocus', String(checked));
+  };
 
   return (
     <div className="space-y-6 pb-12">
@@ -87,11 +127,34 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       <section>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendar taking 2/3 of the width */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-4">
+            {/* Pregnancy Focus Toggle */}
+            {!showCalendarSkeleton && allPregnancies.length > 0 && (
+              <div className="flex items-center justify-end gap-2 px-1">
+                <Label htmlFor="pregnancy-focus" className="text-sm text-muted-foreground cursor-pointer">
+                  Visa dräktighetsöversikt
+                </Label>
+                <Switch 
+                  id="pregnancy-focus"
+                  checked={showPregnancyFocus}
+                  onCheckedChange={handleTogglePregnancyFocus}
+                />
+              </div>
+            )}
+            
+            {/* Pregnancy Swimlanes */}
+            {showPregnancyFocus && !showCalendarSkeleton && (
+              <PregnancySwimLanes pregnancies={allPregnancies} />
+            )}
+            
+            {/* Calendar */}
             {showCalendarSkeleton ? (
               <CalendarSkeleton />
             ) : (
-              <BreedingCalendar eventsData={calendarProps} />
+              <BreedingCalendar 
+                eventsData={calendarProps}
+                showPregnancyUnderlay={!showPregnancyFocus}
+              />
             )}
           </div>
           
