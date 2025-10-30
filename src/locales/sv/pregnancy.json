@@ -279,6 +279,10 @@
         "item2": {
           "text": "Märkbar viktökning",
           "description": "Lätt ökning av kroppsvikt när dräktigheten utvecklas."
+        },
+        "item3": {
+          "text": "Dräktighetsultraljud",
+          "description": "Ultraljudsundersökning för att bekräfta dräktighet, räkna foster och kontrollera hjärtslag (dag 25-35)."
         }
       },
       "week5": {
@@ -343,6 +347,10 @@
         "item6": {
           "text": "Tvätta och förbered rena filtar/lakan",
           "description": "Förbered rena, tvättade textilier för valplådan och valpningen."
+        },
+        "item7": {
+          "text": "Dräktighetsröntgen",
+          "description": "Röntgenundersökning för att räkna antal valpar och bedöma storlek (dag 55-58)."
         }
       },
       "week9": {

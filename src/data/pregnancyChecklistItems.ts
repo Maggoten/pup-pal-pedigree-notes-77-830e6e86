@@ -57,6 +57,13 @@ export const getWeek4Items = (): ChecklistItem[] => [
     description: "checklist.items.week4.item2.description",
     isCompleted: false,
     weekNumber: 4
+  },
+  {
+    id: uuidv4(),
+    text: "checklist.items.week4.item3.text",
+    description: "checklist.items.week4.item3.description",
+    isCompleted: false,
+    weekNumber: 4
   }
 ];
 
@@ -113,6 +120,13 @@ export const getWeek8Items = (): ChecklistItem[] => [
     id: uuidv4(),
     text: "checklist.items.week8.item1.text",
     description: "checklist.items.week8.item1.description",
+    isCompleted: false,
+    weekNumber: 8
+  },
+  {
+    id: uuidv4(),
+    text: "checklist.items.week8.item7.text",
+    description: "checklist.items.week8.item7.description",
     isCompleted: false,
     weekNumber: 8
   }

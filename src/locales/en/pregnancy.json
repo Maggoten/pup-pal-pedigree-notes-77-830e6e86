@@ -279,6 +279,10 @@
         "item2": {
           "text": "Noticeable weight gain",
           "description": "Slight increase in body weight as pregnancy progresses."
+        },
+        "item3": {
+          "text": "Pregnancy ultrasound",
+          "description": "Ultrasound examination to confirm pregnancy, count fetuses and check heartbeats (day 25-35)."
         }
       },
       "week5": {
@@ -343,6 +347,10 @@
         "item6": {
           "text": "Wash and prepare clean blankets/sheets",
           "description": "Prepare clean, washed textiles for the whelping box and birthing."
+        },
+        "item7": {
+          "text": "Pregnancy X-ray",
+          "description": "X-ray examination to count number of puppies and assess size (day 55-58)."
         }
       },
       "week9": {
