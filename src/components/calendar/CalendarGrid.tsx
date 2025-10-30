@@ -122,7 +122,6 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                             event={event}
                             colorClass={getEventColor(event.type)}
                             onClick={() => handleEventClick(event)}
-                            onDelete={onDeleteEvent}
                             compact={compact}
                           />
                         ))}
