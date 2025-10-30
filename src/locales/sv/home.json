@@ -109,6 +109,26 @@
     }
   },
   "events": {
+    "mating": {
+      "title": "{{femaleName}} parad med {{maleName}}",
+      "description": "Parningsdatum för {{femaleName}} och {{maleName}}"
+    },
+    "dueDate": {
+      "title": "{{femaleName}} - Väntad förlossning",
+      "description": "Förlossningsdatum för {{femaleName}} (parad med {{maleName}})"
+    },
+    "heatActive": {
+      "title": "{{dogName}} - Pågående löp",
+      "description": "Aktivt löpcykel för {{dogName}}"
+    },
+    "ovulation": {
+      "title": "{{dogName}} - Förväntat ägglossning",
+      "description": "Topp fertilitetsfönster (dag 12-14)"
+    },
+    "fertility": {
+      "title": "{{dogName}} - Fertilitetsfönster",
+      "description": "Optimalt parningstid (dag 10-16)"
+    },
     "heat": {
       "approaching": "{{dogName}}s Löp Närmar Sig",
       "expected": "Förväntas om {{days}} dagar"
@@ -124,6 +144,9 @@
     },
     "vaccination": {
       "title": "{{dogName}} Vaccinering förfaller",
+      "description": "{{dogName}}s Vaccinering",
+      "reminder": "Vaccineringspåminnelse",
+      "reminderDescription": "Påminnelse för {{dogName}}s vaccinering",
       "upcoming": "Vaccinering förfaller om {{days}} dagar",
       "overdue": "Vaccinering försenad med {{days}} dagar"
     },
