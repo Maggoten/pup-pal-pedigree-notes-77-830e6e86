@@ -2,7 +2,7 @@
 import { ChecklistGroup } from "@/types/checklist";
 
 // Add a constant for the current checklist version
-export const CURRENT_CHECKLIST_VERSION = 3;
+export const CURRENT_CHECKLIST_VERSION = 4;
 
 export const defaultPregnancyChecklist: ChecklistGroup[] = [
   {
@@ -80,6 +80,13 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
         id: "week4-2",
         text: "checklist.items.week4.item2.text",
         description: "checklist.items.week4.item2.description",
+        isCompleted: false,
+        weekNumber: 4
+      },
+      {
+        id: "week4-3",
+        text: "checklist.items.week4.item3.text",
+        description: "checklist.items.week4.item3.description",
         isCompleted: false,
         weekNumber: 4
       }
@@ -202,6 +209,13 @@ export const defaultPregnancyChecklist: ChecklistGroup[] = [
         id: "week8-6",
         text: "checklist.items.week8.item6.text",
         description: "checklist.items.week8.item6.description",
+        isCompleted: false,
+        weekNumber: 8
+      },
+      {
+        id: "week8-7",
+        text: "checklist.items.week8.item7.text",
+        description: "checklist.items.week8.item7.description",
         isCompleted: false,
         weekNumber: 8
       }
