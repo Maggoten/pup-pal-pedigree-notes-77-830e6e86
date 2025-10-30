@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { addDays, format } from 'date-fns';
+import { addDays } from 'date-fns';
 
 class MatingDatesService {
   async addMatingDate(litterId: string, date: Date): Promise<void> {
@@ -162,53 +162,6 @@ class MatingDatesService {
         throw new Error('Failed to add mating date');
       }
 
-      // Create mating calendar event
-      const matingEventData = {
-        title: `Parning: ${femaleName} × ${maleName}`,
-        date: date.toISOString(),
-        type: 'mating',
-        dog_id: litter.female_id,
-        dog_name: femaleName,
-        notes: `Parning mellan ${femaleName} och ${maleName}`,
-        pregnancy_id: pregnancyId,
-        user_id: userId
-      };
-
-      const { error: matingEventError } = await supabase
-        .from('calendar_events')
-        .insert(matingEventData);
-
-      if (matingEventError) {
-        console.error('Error creating mating calendar event:', matingEventError);
-        // Don't throw - mating date was added successfully
-      } else {
-        console.log(`Created mating calendar event for ${femaleName} × ${maleName}`);
-      }
-
-      // Create pregnancy period event (63-day multi-day event)
-      const pregnancyPeriodData = {
-        title: `${femaleName} dräktig`,
-        date: date.toISOString(),
-        end_date: expectedDueDate.toISOString(),
-        type: 'pregnancy-period',
-        dog_id: litter.female_id,
-        dog_name: femaleName,
-        notes: `Dräktighetsperiod för ${femaleName}. Beräknad förlossning: ${format(expectedDueDate, 'yyyy-MM-dd')}`,
-        pregnancy_id: pregnancyId,
-        user_id: userId
-      };
-
-      const { error: pregnancyPeriodError } = await supabase
-        .from('calendar_events')
-        .insert(pregnancyPeriodData);
-
-      if (pregnancyPeriodError) {
-        console.error('Error creating pregnancy period calendar event:', pregnancyPeriodError);
-        // Don't throw - mating date was added successfully
-      } else {
-        console.log(`Created pregnancy period calendar event for ${femaleName}`);
-      }
-
       console.log(`Successfully added mating date (${date.toISOString()}) and linked to pregnancy ${pregnancyId} for female ${femaleName} and male ${maleName}`);
     } catch (error) {
       console.error("Error in addMatingDate:", error);
@@ -240,20 +193,7 @@ class MatingDatesService {
 
     const matingDateToDelete = matingDates[dateIndex];
 
-    // Delete associated calendar events first
-    if (matingDateToDelete.pregnancy_id) {
-      const { error: calendarError } = await supabase
-        .from('calendar_events')
-        .delete()
-        .eq('pregnancy_id', matingDateToDelete.pregnancy_id);
-
-      if (calendarError) {
-        console.error('Error deleting calendar events for pregnancy:', calendarError);
-        // Continue with deletion even if calendar cleanup fails
-      }
-    }
-
-    // Delete mating_date to avoid foreign key constraint violation
+    // Delete mating_date first to avoid foreign key constraint violation
     const { error: deleteError } = await supabase
       .from('mating_dates')
       .delete()
@@ -316,7 +256,6 @@ class MatingDatesService {
     }
 
     if (matingDateToUpdate.pregnancy_id) {
-      // Update pregnancy
       const { error: pregnancyError } = await supabase
         .from('pregnancies')
         .update({
@@ -328,43 +267,6 @@ class MatingDatesService {
       if (pregnancyError) {
         console.error('Error updating pregnancy:', pregnancyError);
         throw new Error('Failed to update related pregnancy');
-      }
-
-      // Update associated calendar events
-      // Update mating event date
-      const { error: matingEventError } = await supabase
-        .from('calendar_events')
-        .update({ date: newDate.toISOString() })
-        .eq('pregnancy_id', matingDateToUpdate.pregnancy_id)
-        .eq('type', 'mating');
-
-      if (matingEventError) {
-        console.error('Error updating mating calendar event:', matingEventError);
-      }
-
-      // Update pregnancy period event dates
-      const { error: pregnancyPeriodError } = await supabase
-        .from('calendar_events')
-        .update({
-          date: newDate.toISOString(),
-          end_date: expectedDueDate.toISOString()
-        })
-        .eq('pregnancy_id', matingDateToUpdate.pregnancy_id)
-        .eq('type', 'pregnancy-period');
-
-      if (pregnancyPeriodError) {
-        console.error('Error updating pregnancy period calendar event:', pregnancyPeriodError);
-      }
-
-      // Update due date event
-      const { error: dueDateError } = await supabase
-        .from('calendar_events')
-        .update({ date: expectedDueDate.toISOString() })
-        .eq('pregnancy_id', matingDateToUpdate.pregnancy_id)
-        .eq('type', 'due-date');
-
-      if (dueDateError) {
-        console.error('Error updating due date calendar event:', dueDateError);
       }
     }
 

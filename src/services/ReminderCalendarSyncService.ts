@@ -278,17 +278,11 @@ export class ReminderCalendarSyncService {
         }
       }
       
-      // Sync mating date events for active pregnancies
-      await this.syncMatingDateEvents();
-      
       // Sync due date events for active pregnancies
       await this.syncDueDateEvents();
       
       // Sync predicted heat events for upcoming heats
       await this.syncPredictedHeatEvents(dogs);
-      
-      // Sync active heat cycles to calendar
-      await this.syncActiveHeatCyclesToCalendar();
       
       return true;
     } catch (error) {
@@ -365,17 +359,18 @@ export class ReminderCalendarSyncService {
 
       // Create due date events for each active pregnancy
       for (const pregnancy of activePregnancies) {
-        const dueDate = pregnancy.expectedDueDate instanceof Date ? 
-          pregnancy.expectedDueDate : 
-          new Date(pregnancy.expectedDueDate);
-        
         const eventData = {
-          title: `Planerad förlossning - ${pregnancy.femaleName}`,
-          date: dueDate.toISOString(),
+          title: this.t('events.dueDate.title', { femaleName: pregnancy.femaleName }),
+          date: pregnancy.expectedDueDate instanceof Date ? 
+            pregnancy.expectedDueDate.toISOString() : 
+            new Date(pregnancy.expectedDueDate).toISOString(),
           type: 'due-date',
           dog_name: pregnancy.femaleName,
           pregnancy_id: pregnancy.id, // Link calendar event to pregnancy
-          notes: `${pregnancy.femaleName} parad med ${pregnancy.maleName}. Beräknad valpning.`,
+          notes: this.t('events.dueDate.description', { 
+            femaleName: pregnancy.femaleName, 
+            maleName: pregnancy.maleName 
+          }),
           user_id: userId
         };
 
@@ -395,118 +390,6 @@ export class ReminderCalendarSyncService {
     } catch (error) {
       const elapsed = Date.now() - startTime;
       console.error(`[ReminderCalendarSyncService] Unexpected error in syncDueDateEvents after ${elapsed}ms:`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Creates calendar events for mating dates from active pregnancies
-   * @returns A boolean indicating whether the operation was successful
-   */
-  static async syncMatingDateEvents(): Promise<boolean> {
-    const startTime = Date.now();
-    console.log('[ReminderCalendarSyncService] Starting syncMatingDateEvents...');
-    
-    try {
-      // Get current user ID
-      const { data: authData, error: authError } = await supabase.auth.getUser();
-      
-      if (authError || !authData.user) {
-        console.error('[ReminderCalendarSyncService] Error getting user for mating date events:', authError);
-        return false;
-      }
-      
-      const userId = authData.user.id;
-
-      // Get active pregnancies
-      const activePregnancies = await getActivePregnancies();
-      
-      if (!activePregnancies || activePregnancies.length === 0) {
-        console.log('[ReminderCalendarSyncService] No active pregnancies found for mating date events');
-        return true;
-      }
-
-      // Clean up existing mating events to prevent duplicates
-      const { error: cleanupError } = await supabase
-        .from('calendar_events')
-        .delete()
-        .eq('user_id', userId)
-        .eq('type', 'mating');
-
-      if (cleanupError) {
-        console.error('[ReminderCalendarSyncService] Error cleaning up existing mating events:', cleanupError);
-        return false;
-      }
-
-      // Create mating date events for each active pregnancy
-      for (const pregnancy of activePregnancies) {
-        const matingDate = pregnancy.matingDate instanceof Date ? 
-          pregnancy.matingDate : 
-          new Date(pregnancy.matingDate);
-        
-        const eventData = {
-          title: `${pregnancy.femaleName} parad`,
-          date: matingDate.toISOString(),
-          type: 'mating',
-          dog_name: pregnancy.femaleName,
-          pregnancy_id: pregnancy.id,
-          notes: `${pregnancy.femaleName} parad med ${pregnancy.maleName}. Beräknad förlossning: ${format(pregnancy.expectedDueDate, 'yyyy-MM-dd')}`,
-          user_id: userId
-        };
-
-        const { error: insertError } = await supabase
-          .from('calendar_events')
-          .insert(eventData);
-
-        if (insertError) {
-          console.error('[ReminderCalendarSyncService] Error creating mating date event:', insertError);
-          return false;
-        }
-      }
-
-      const elapsed = Date.now() - startTime;
-      console.log(`[ReminderCalendarSyncService] Successfully synced ${activePregnancies.length} mating date events in ${elapsed}ms`);
-      return true;
-    } catch (error) {
-      const elapsed = Date.now() - startTime;
-      console.error(`[ReminderCalendarSyncService] Unexpected error in syncMatingDateEvents after ${elapsed}ms:`, error);
-      return false;
-    }
-  }
-
-  /**
-   * One-time cleanup: Remove all pregnancy-period events
-   * Call this once to clean up old multi-day pregnancy events
-   * @returns A boolean indicating whether the operation was successful
-   */
-  static async cleanupOldPregnancyPeriodEvents(): Promise<boolean> {
-    try {
-      console.log('[ReminderCalendarSyncService] Cleaning up old pregnancy-period events...');
-      
-      const { data: authData, error: authError } = await supabase.auth.getUser();
-      
-      if (authError || !authData.user) {
-        console.error('[ReminderCalendarSyncService] Error getting user:', authError);
-        return false;
-      }
-      
-      const userId = authData.user.id;
-
-      const { error } = await supabase
-        .from('calendar_events')
-        .delete()
-        .eq('user_id', userId)
-        .eq('type', 'pregnancy-period');
-
-      if (error) {
-        console.error('[ReminderCalendarSyncService] Error cleaning up pregnancy-period events:', error);
-        return false;
-      }
-
-      console.log('[ReminderCalendarSyncService] Successfully cleaned up pregnancy-period events');
-      return true;
-    } catch (error) {
-      console.error('[ReminderCalendarSyncService] Unexpected error in cleanup:', error);
       return false;
     }
   }
@@ -583,92 +466,6 @@ export class ReminderCalendarSyncService {
       return true;
     } catch (error) {
       console.error('Unexpected error in syncPredictedHeatEvents:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Syncs active heat cycles from heat_cycles table to calendar
-   * Creates heat-active calendar events for ongoing heat cycles
-   * @returns A boolean indicating whether the operation was successful
-   */
-  static async syncActiveHeatCyclesToCalendar(): Promise<boolean> {
-    try {
-      console.log('🔥 Starting sync of active heat cycles to calendar...');
-      
-      // Get current user ID
-      const { data: authData, error: authError } = await supabase.auth.getUser();
-      
-      if (authError || !authData.user) {
-        console.error('Error getting user for active heat cycle sync:', authError);
-        return false;
-      }
-      
-      const userId = authData.user.id;
-
-      // Get all active heat cycles for this user (end_date is null)
-      const { data: activeHeatCycles, error: fetchError } = await supabase
-        .from('heat_cycles')
-        .select('*')
-        .eq('user_id', userId)
-        .is('end_date', null);
-
-      if (fetchError) {
-        console.error('Error fetching active heat cycles:', fetchError);
-        return false;
-      }
-
-      if (!activeHeatCycles || activeHeatCycles.length === 0) {
-        console.log('✅ No active heat cycles found');
-        return true;
-      }
-
-      console.log(`📊 Found ${activeHeatCycles.length} active heat cycle(s) to sync`);
-
-      // Import HeatCalendarSyncService for syncing
-      const { HeatCalendarSyncService } = await import('./HeatCalendarSyncService');
-
-      // Sync each active heat cycle to calendar
-      let successCount = 0;
-      for (const heatCycle of activeHeatCycles) {
-        try {
-          // Get dog name
-          const { data: dog, error: dogError } = await supabase
-            .from('dogs')
-            .select('name')
-            .eq('id', heatCycle.dog_id)
-            .single();
-
-          if (dogError || !dog) {
-            console.error(`Error fetching dog for heat cycle ${heatCycle.id}:`, dogError);
-            continue;
-          }
-
-          const dogName = dog.name;
-          console.log(`⏳ Syncing active heat cycle for ${dogName}...`);
-
-          // Use existing sync function to create calendar events
-          const success = await HeatCalendarSyncService.syncHeatCycleToCalendar(
-            heatCycle,
-            dogName
-          );
-
-          if (success) {
-            successCount++;
-            console.log(`✅ Successfully synced active heat cycle for ${dogName}`);
-          } else {
-            console.error(`❌ Failed to sync heat cycle for ${dogName}`);
-          }
-        } catch (error) {
-          console.error(`Error processing heat cycle ${heatCycle.id}:`, error);
-          // Continue with next heat cycle
-        }
-      }
-
-      console.log(`🎯 Active heat cycle sync complete: ${successCount}/${activeHeatCycles.length} synced successfully`);
-      return successCount === activeHeatCycles.length;
-    } catch (error) {
-      console.error('Unexpected error in syncActiveHeatCyclesToCalendar:', error);
       return false;
     }
   }

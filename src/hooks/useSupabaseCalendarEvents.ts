@@ -165,26 +165,13 @@ const useSupabaseCalendarEvents = () => {
   // Get events for a specific day
   const getEventsForDay = (day: Date): CalendarEvent[] => {
     return events.filter(event => {
-      const eventStartDate = new Date(event.startDate || event.date);
+      // Use startDate if available, fall back to date for compatibility
+      const eventDate = new Date(event.startDate || event.date);
       
-      // For multi-day events (with endDate), check if day is within range
-      if (event.endDate) {
-        const eventEndDate = new Date(event.endDate);
-        
-        // Normalize dates to start of day for comparison
-        const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate());
-        const startDate = new Date(eventStartDate.getFullYear(), eventStartDate.getMonth(), eventStartDate.getDate());
-        const endDate = new Date(eventEndDate.getFullYear(), eventEndDate.getMonth(), eventEndDate.getDate());
-        
-        // Check if day is between start and end (inclusive)
-        return dayStart >= startDate && dayStart <= endDate;
-      }
-      
-      // For single-day events, check exact date match
       return (
-        eventStartDate.getDate() === day.getDate() &&
-        eventStartDate.getMonth() === day.getMonth() &&
-        eventStartDate.getFullYear() === day.getFullYear()
+        eventDate.getDate() === day.getDate() &&
+        eventDate.getMonth() === day.getMonth() &&
+        eventDate.getFullYear() === day.getFullYear()
       );
     });
   };
