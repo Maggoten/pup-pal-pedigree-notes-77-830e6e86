@@ -287,6 +287,9 @@ export class ReminderCalendarSyncService {
       // Sync predicted heat events for upcoming heats
       await this.syncPredictedHeatEvents(dogs);
       
+      // Sync active heat cycles to calendar
+      await this.syncActiveHeatCyclesToCalendar();
+      
       return true;
     } catch (error) {
       console.error('Error in bulkSyncCalendarEvents:', error);
@@ -580,6 +583,92 @@ export class ReminderCalendarSyncService {
       return true;
     } catch (error) {
       console.error('Unexpected error in syncPredictedHeatEvents:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Syncs active heat cycles from heat_cycles table to calendar
+   * Creates heat-active calendar events for ongoing heat cycles
+   * @returns A boolean indicating whether the operation was successful
+   */
+  static async syncActiveHeatCyclesToCalendar(): Promise<boolean> {
+    try {
+      console.log('🔥 Starting sync of active heat cycles to calendar...');
+      
+      // Get current user ID
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !authData.user) {
+        console.error('Error getting user for active heat cycle sync:', authError);
+        return false;
+      }
+      
+      const userId = authData.user.id;
+
+      // Get all active heat cycles for this user (end_date is null)
+      const { data: activeHeatCycles, error: fetchError } = await supabase
+        .from('heat_cycles')
+        .select('*')
+        .eq('user_id', userId)
+        .is('end_date', null);
+
+      if (fetchError) {
+        console.error('Error fetching active heat cycles:', fetchError);
+        return false;
+      }
+
+      if (!activeHeatCycles || activeHeatCycles.length === 0) {
+        console.log('✅ No active heat cycles found');
+        return true;
+      }
+
+      console.log(`📊 Found ${activeHeatCycles.length} active heat cycle(s) to sync`);
+
+      // Import HeatCalendarSyncService for syncing
+      const { HeatCalendarSyncService } = await import('./HeatCalendarSyncService');
+
+      // Sync each active heat cycle to calendar
+      let successCount = 0;
+      for (const heatCycle of activeHeatCycles) {
+        try {
+          // Get dog name
+          const { data: dog, error: dogError } = await supabase
+            .from('dogs')
+            .select('name')
+            .eq('id', heatCycle.dog_id)
+            .single();
+
+          if (dogError || !dog) {
+            console.error(`Error fetching dog for heat cycle ${heatCycle.id}:`, dogError);
+            continue;
+          }
+
+          const dogName = dog.name;
+          console.log(`⏳ Syncing active heat cycle for ${dogName}...`);
+
+          // Use existing sync function to create calendar events
+          const success = await HeatCalendarSyncService.syncHeatCycleToCalendar(
+            heatCycle,
+            dogName
+          );
+
+          if (success) {
+            successCount++;
+            console.log(`✅ Successfully synced active heat cycle for ${dogName}`);
+          } else {
+            console.error(`❌ Failed to sync heat cycle for ${dogName}`);
+          }
+        } catch (error) {
+          console.error(`Error processing heat cycle ${heatCycle.id}:`, error);
+          // Continue with next heat cycle
+        }
+      }
+
+      console.log(`🎯 Active heat cycle sync complete: ${successCount}/${activeHeatCycles.length} synced successfully`);
+      return successCount === activeHeatCycles.length;
+    } catch (error) {
+      console.error('Unexpected error in syncActiveHeatCyclesToCalendar:', error);
       return false;
     }
   }
