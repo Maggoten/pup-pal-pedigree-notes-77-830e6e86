@@ -94,6 +94,11 @@ const PuppyTableRow = memo(({
     }
   };
 
+  // Get gender translation
+  const getGenderTranslation = useCallback((gender: string) => {
+    return t(`puppies.labels.${gender.toLowerCase()}`);
+  }, [t]);
+
   return (
     <TableRow 
       className={`cursor-pointer ${selectedPuppyId === puppy.id ? 'bg-primary/5' : ''}`} 
@@ -112,13 +117,13 @@ const PuppyTableRow = memo(({
           <div className="min-w-0 flex-1">
             <span className={`font-medium block truncate ${isMobile ? 'text-sm' : ''}`}>{puppy.name}</span>
             {isMobile && (
-              <span className="text-xs text-muted-foreground capitalize">{puppy.gender}</span>
+              <span className="text-xs text-muted-foreground">{getGenderTranslation(puppy.gender)}</span>
             )}
           </div>
         </div>
       </TableCell>
       
-      {!isMobile && <TableCell className="capitalize text-sm">{puppy.gender}</TableCell>}
+      {!isMobile && <TableCell className="text-sm">{getGenderTranslation(puppy.gender)}</TableCell>}
       
       <TableCell className={`${isMobile ? 'text-xs' : 'text-sm'}`}>
         {puppy.color || t('puppies.labels.unknown')}
