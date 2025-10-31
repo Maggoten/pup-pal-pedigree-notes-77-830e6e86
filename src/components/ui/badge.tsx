@@ -22,7 +22,7 @@ const badgeVariants = cva(
         active: "border-transparent bg-warmgreen-50 text-warmgreen-700 border-warmgreen-200",
         archived: "border-transparent bg-warmbeige-50 text-warmbeige-700 border-warmbeige-200",
         heatActive: "border-transparent bg-orange-500 text-white hover:bg-orange-600",
-        heatConfirmed: "border-transparent bg-stone-500 text-white hover:bg-stone-600",
+        heatConfirmed: "border-transparent bg-stone-300 text-stone-700 hover:bg-stone-400",
         heatPlanned: "border-transparent bg-warmgreen-500 text-white hover:bg-warmgreen-600",
         heatPredicted: "bg-white dark:bg-background border-pink-300 dark:border-pink-700 text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-950/50",
       },
