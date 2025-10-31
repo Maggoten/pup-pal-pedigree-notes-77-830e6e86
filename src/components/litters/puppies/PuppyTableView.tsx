@@ -124,18 +124,16 @@ const PuppyTableRow = memo(({
         {puppy.color || t('puppies.labels.unknown')}
       </TableCell>
       
-      <TableCell className={`${isMobile ? 'text-xs' : 'text-sm'}`}>
-        {formatBirthdate()}
-      </TableCell>
-      
       {!isMobile && (
         <>
+          <TableCell className={`text-sm`}>
+            {formatBirthdate()}
+          </TableCell>
           <TableCell className="text-sm">{getLatestMeasurement(puppy, 'weight')}</TableCell>
           <TableCell className="text-sm">{getLatestMeasurement(puppy, 'height')}</TableCell>
+          <TableCell>{getStatusBadge()}</TableCell>
         </>
       )}
-      
-      <TableCell>{getStatusBadge()}</TableCell>
       
       <TableCell className="p-2">
         {isMobile ? (
@@ -261,14 +259,14 @@ const PuppyTableView: React.FC<PuppyTableViewProps> = ({
             <TableHead className={isMobile ? 'text-xs p-2' : ''}>{t('puppies.labels.name')}</TableHead>
             {!isMobile && <TableHead className="text-xs">{t('puppies.labels.gender')}</TableHead>}
             <TableHead className={isMobile ? 'text-xs p-2' : ''}>{t('puppies.labels.color')}</TableHead>
-            <TableHead className={isMobile ? 'text-xs p-2' : ''}>{t('puppies.labels.dateOfBirth')}</TableHead>
             {!isMobile && (
               <>
+                <TableHead>{t('puppies.labels.dateOfBirth')}</TableHead>
                 <TableHead>{t('puppies.labels.weight')}</TableHead>
                 <TableHead>{t('puppies.labels.height')}</TableHead>
+                <TableHead>{t('puppies.labels.status')}</TableHead>
               </>
             )}
-            <TableHead className={isMobile ? 'text-xs p-2' : ''}>{t('puppies.labels.status')}</TableHead>
             <TableHead className={`text-right ${isMobile ? 'text-xs p-2' : ''}`}>{t('puppies.actions.actions')}</TableHead>
           </TableRow>
         </TableHeader>
