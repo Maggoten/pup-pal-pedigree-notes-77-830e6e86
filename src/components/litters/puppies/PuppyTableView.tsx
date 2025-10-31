@@ -269,7 +269,7 @@ const PuppyTableView: React.FC<PuppyTableViewProps> = ({
               </>
             )}
             <TableHead className={isMobile ? 'text-xs p-2' : ''}>{t('puppies.labels.status')}</TableHead>
-            <TableHead className={`text-right ${isMobile ? 'text-xs p-2' : ''}`}>{t('actions.actions')}</TableHead>
+            <TableHead className={`text-right ${isMobile ? 'text-xs p-2' : ''}`}>{t('puppies.actions.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

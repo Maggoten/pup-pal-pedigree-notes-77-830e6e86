@@ -187,6 +187,7 @@
       "sold": "Såld"
     },
     "actions": {
+      "actions": "Åtgärder",
       "addPuppy": "Lägg till valp",
       "editPuppy": "Redigera Valp",
       "deletePuppy": "Ta bort Valp",

@@ -187,6 +187,7 @@
       "sold": "Sold"
     },
     "actions": {
+      "actions": "Actions",
       "addPuppy": "Add Puppy",
       "editPuppy": "Edit Puppy",
       "deletePuppy": "Delete Puppy",
