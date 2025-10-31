@@ -60,6 +60,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
     // Use both update functions to maintain compatibility
     onUpdate(updatedLitter);
     onUpdateLitter(updatedLitter);
+    onClose();
   };
   
   return (
