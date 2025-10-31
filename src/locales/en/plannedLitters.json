@@ -430,10 +430,10 @@
     },
     "legend": {
       "title": "Legend",
-      "confirmed": "Mated",
-      "planned": "Planned litter",
+      "active": "Active heat",
+      "planned": "Mated",
       "predicted": "Predicted heat",
-      "overdue": "Overdue"
+      "confirmed": "Past heat"
     }
   }
 }

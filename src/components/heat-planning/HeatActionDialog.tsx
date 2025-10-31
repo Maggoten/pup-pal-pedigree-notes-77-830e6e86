@@ -86,7 +86,7 @@ export const HeatActionDialog: React.FC<HeatActionDialogProps> = ({
     }, 100);
   };
 
-  const canConfirm = prediction.status === 'predicted' || prediction.status === 'overdue';
+  const canConfirm = prediction.status === 'predicted';
 
   return (
     <>

@@ -430,10 +430,10 @@
     },
     "legend": {
       "title": "Förklaring",
-      "confirmed": "Parad",
-      "planned": "Planerad kull",
+      "active": "Pågående löp",
+      "planned": "Parad",
       "predicted": "Förväntat löp",
-      "overdue": "Försenat"
+      "confirmed": "Passerat löp"
     }
   }
 }

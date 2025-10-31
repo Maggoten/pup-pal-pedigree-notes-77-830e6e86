@@ -27,13 +27,13 @@ export const HeatBadge: React.FC<HeatBadgeProps> = ({ prediction, onHeatConfirme
       label: t('heatPlanner.status.active'),
     },
     confirmed: {
-      className: 'bg-red-500 text-white hover:bg-red-600',
+      className: 'bg-stone-500 text-white hover:bg-stone-600',
       icon: Circle,
       filled: true,
       label: t('heatPlanner.status.confirmed'),
     },
     planned: {
-      className: 'bg-pink-500 text-white hover:bg-pink-600',
+      className: 'bg-warmgreen-500 text-white hover:bg-warmgreen-600',
       icon: Heart,
       filled: true,
       label: t('heatPlanner.status.planned'),
@@ -43,12 +43,6 @@ export const HeatBadge: React.FC<HeatBadgeProps> = ({ prediction, onHeatConfirme
       icon: Heart,
       filled: false,
       label: t('heatPlanner.status.predicted'),
-    },
-    overdue: {
-      className: 'bg-amber-500 text-white hover:bg-amber-600',
-      icon: AlertCircle,
-      filled: true,
-      label: t('heatPlanner.status.overdue'),
     },
   };
 
