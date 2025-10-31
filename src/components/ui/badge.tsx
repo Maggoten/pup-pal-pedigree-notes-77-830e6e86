@@ -21,6 +21,7 @@ const badgeVariants = cva(
         info: "border-transparent bg-blue-400 text-white hover:bg-blue-500",
         active: "border-transparent bg-warmgreen-50 text-warmgreen-700 border-warmgreen-200",
         archived: "border-transparent bg-warmbeige-50 text-warmbeige-700 border-warmbeige-200",
+        heatActive: "border-transparent bg-orange-500 text-white hover:bg-orange-600",
         heatConfirmed: "border-transparent bg-red-500 text-white hover:bg-red-600",
         heatPlanned: "border-transparent bg-pink-500 text-white hover:bg-pink-600",
         heatPredicted: "bg-white dark:bg-background border-pink-300 dark:border-pink-700 text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-950/50",

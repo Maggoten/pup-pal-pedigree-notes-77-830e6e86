@@ -97,12 +97,61 @@ export const useMultiYearHeatPredictions = (dogs: Dog[], plannedLitters: Planned
               dog.id
             );
 
+            const dogPredictions: HeatPrediction[] = [];
+
+            // First, add confirmed heats from current year
+            const currentYear = new Date().getFullYear();
+            const confirmedHeatsThisYear = (unifiedData.heatCycles || [])
+              .filter(cycle => {
+                const startDate = new Date(cycle.start_date);
+                return startDate.getFullYear() === currentYear;
+              })
+              .map(cycle => {
+                const startDate = new Date(cycle.start_date);
+                const endDate = cycle.end_date ? new Date(cycle.end_date) : null;
+                const daysSinceStart = differenceInDays(new Date(), startDate);
+                
+                // Determine status: active if no end_date AND < 21 days since start
+                const status: HeatPrediction['status'] = 
+                  (!endDate && daysSinceStart <= 21) ? 'active' : 'confirmed';
+                
+                return {
+                  id: `${dog.id}-confirmed-${cycle.id}`,
+                  dogId: dog.id,
+                  dogName: dog.name,
+                  dogImageUrl: dog.image_url || dog.image,
+                  dogBirthdate: birthdate,
+                  date: startDate,
+                  year: startDate.getFullYear(),
+                  month: startDate.getMonth() + 1,
+                  status,
+                  interval: 0, // Not relevant for confirmed heats
+                  ageAtHeat: calculateAge(birthdate, startDate),
+                  hasPlannedLitter: false,
+                  confidence: 'high' as const,
+                  notes: cycle.notes || undefined
+                } as HeatPrediction;
+              });
+
+            // Add confirmed heats to predictions
+            dogPredictions.push(...confirmedHeatsThisYear);
+
             if (!nextHeatResult.nextHeatDate) {
-              // No heat data available - skip this dog
+              // No future prediction available, but we may have confirmed heats
+              // Sort predictions and add to map
+              dogPredictions.sort((a, b) => {
+                const statusOrder = { active: 0, confirmed: 1, planned: 2, predicted: 3, overdue: 4 };
+                if (a.status !== b.status) {
+                  return statusOrder[a.status] - statusOrder[b.status];
+                }
+                return a.date.getTime() - b.date.getTime();
+              });
+              
+              if (dogPredictions.length > 0) {
+                predictionsMap.set(dog.id, dogPredictions);
+              }
               continue;
             }
-
-            const dogPredictions: HeatPrediction[] = [];
             let currentDate = nextHeatResult.nextHeatDate;
             const endDate = addYears(new Date(), YEARS_TO_DISPLAY);
 
@@ -148,6 +197,15 @@ export const useMultiYearHeatPredictions = (dogs: Dog[], plannedLitters: Planned
               currentDate = addDays(currentDate, nextHeatResult.intervalDays);
               predictionCount++;
             }
+
+            // Sort all predictions: active, confirmed, planned, predicted, overdue
+            dogPredictions.sort((a, b) => {
+              const statusOrder = { active: 0, confirmed: 1, planned: 2, predicted: 3, overdue: 4 };
+              if (a.status !== b.status) {
+                return statusOrder[a.status] - statusOrder[b.status];
+              }
+              return a.date.getTime() - b.date.getTime();
+            });
 
             predictionsMap.set(dog.id, dogPredictions);
           } catch (err) {

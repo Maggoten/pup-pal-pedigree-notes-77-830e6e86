@@ -350,12 +350,14 @@
     },
     "status": {
       "status": "Status",
+      "active": "Pågående löp",
       "confirmed": "Bekräftat löp",
       "planned": "Planerad kull",
       "predicted": "Förväntat löp",
       "overdue": "Försenat"
     },
     "badge": {
+      "active": "Pågående",
       "confirmed": "Parad",
       "planned": "Planerad kull",
       "predicted": "Förväntat löp",

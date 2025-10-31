@@ -350,12 +350,14 @@
     },
     "status": {
       "status": "Status",
+      "active": "Ongoing heat",
       "confirmed": "Confirmed heat",
       "planned": "Planned litter",
       "predicted": "Expected heat",
       "overdue": "Overdue"
     },
     "badge": {
+      "active": "Ongoing",
       "confirmed": "Mated",
       "planned": "Planned litter",
       "predicted": "Predicted heat",

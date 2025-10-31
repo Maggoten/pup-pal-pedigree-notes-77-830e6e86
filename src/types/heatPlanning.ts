@@ -7,7 +7,7 @@ export interface HeatPrediction {
   date: Date;
   year: number;
   month: number;
-  status: 'confirmed' | 'planned' | 'predicted' | 'overdue';
+  status: 'active' | 'confirmed' | 'planned' | 'predicted' | 'overdue';
   interval: number; // dagar sedan senaste löp
   ageAtHeat: number; // ålder i år (decimal)
   hasPlannedLitter: boolean;

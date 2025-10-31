@@ -27,6 +27,11 @@ export const HeatCell: React.FC<HeatCellProps> = ({ prediction, onHeatConfirmed 
   
   // Status styling with badge variants
   const statusConfig = {
+    active: {
+      variant: 'heatActive' as const,
+      icon: Circle,
+      label: t('heatPlanner.status.active'),
+    },
     confirmed: {
       variant: 'heatConfirmed' as const,
       icon: Circle,

@@ -20,6 +20,12 @@ export const HeatBadge: React.FC<HeatBadgeProps> = ({ prediction, onHeatConfirme
   const [dialogOpen, setDialogOpen] = useState(false);
   
   const statusConfig = {
+    active: {
+      className: 'bg-orange-500 text-white hover:bg-orange-600',
+      icon: Circle,
+      filled: true,
+      label: t('heatPlanner.status.active'),
+    },
     confirmed: {
       className: 'bg-red-500 text-white hover:bg-red-600',
       icon: Circle,
