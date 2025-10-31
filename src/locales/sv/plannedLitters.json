@@ -353,15 +353,15 @@
       "active": "Pågående löp",
       "confirmed": "Bekräftat löp",
       "planned": "Planerad kull",
-      "predicted": "Förväntat löp",
-      "overdue": "Försenat"
+      "mated": "Parad",
+      "predicted": "Förväntat löp"
     },
     "badge": {
       "active": "Pågående",
-      "confirmed": "Parad",
+      "confirmed": "Passerat",
       "planned": "Planerad kull",
-      "predicted": "Förväntat löp",
-      "overdue": "Försenat"
+      "mated": "Parad",
+      "predicted": "Förväntat löp"
     },
     "actions": {
       "planLitter": "Planera kull",
@@ -431,7 +431,8 @@
     "legend": {
       "title": "Förklaring",
       "active": "Pågående löp",
-      "planned": "Parad",
+      "planned": "Planerad kull",
+      "mated": "Parad",
       "predicted": "Förväntat löp",
       "confirmed": "Passerat löp"
     }

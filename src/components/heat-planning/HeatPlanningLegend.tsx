@@ -28,6 +28,14 @@ export const HeatPlanningLegend: React.FC = () => {
           </span>
         </div>
         <div className="flex items-center gap-2">
+          <Badge variant="heatMated" className="cursor-default">
+            15 aug
+          </Badge>
+          <span className="text-muted-foreground">
+            {t('heatPlanner.legend.mated')}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
           <Badge variant="heatPredicted" className="cursor-default">
             10 feb
           </Badge>

@@ -42,15 +42,15 @@ export const HeatCell: React.FC<HeatCellProps> = ({ prediction, onHeatConfirmed 
       icon: Heart,
       label: t('heatPlanner.status.planned'),
     },
+    mated: {
+      variant: 'heatMated' as const,
+      icon: Heart,
+      label: t('heatPlanner.status.mated'),
+    },
     predicted: {
       variant: 'heatPredicted' as const,
       icon: Heart,
       label: t('heatPlanner.status.predicted'),
-    },
-    overdue: {
-      variant: 'heatOverdue' as const,
-      icon: AlertCircle,
-      label: t('heatPlanner.status.overdue'),
     },
   };
 

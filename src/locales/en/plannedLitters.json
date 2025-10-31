@@ -353,15 +353,15 @@
       "active": "Ongoing heat",
       "confirmed": "Confirmed heat",
       "planned": "Planned litter",
-      "predicted": "Expected heat",
-      "overdue": "Overdue"
+      "mated": "Mated",
+      "predicted": "Expected heat"
     },
     "badge": {
       "active": "Ongoing",
-      "confirmed": "Mated",
+      "confirmed": "Past",
       "planned": "Planned litter",
-      "predicted": "Predicted heat",
-      "overdue": "Overdue"
+      "mated": "Mated",
+      "predicted": "Predicted heat"
     },
     "actions": {
       "planLitter": "Plan litter",
@@ -431,7 +431,8 @@
     "legend": {
       "title": "Legend",
       "active": "Active heat",
-      "planned": "Mated",
+      "planned": "Planned litter",
+      "mated": "Mated",
       "predicted": "Predicted heat",
       "confirmed": "Past heat"
     }

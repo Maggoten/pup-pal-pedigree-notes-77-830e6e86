@@ -140,7 +140,7 @@ export const useMultiYearHeatPredictions = (dogs: Dog[], plannedLitters: Planned
               // No future prediction available, but we may have confirmed heats
               // Sort predictions and add to map
               dogPredictions.sort((a, b) => {
-                const statusOrder = { active: 0, confirmed: 1, planned: 2, predicted: 3 };
+                const statusOrder = { active: 0, confirmed: 1, planned: 2, mated: 3, predicted: 4 };
                 if (a.status !== b.status) {
                   return statusOrder[a.status] - statusOrder[b.status];
                 }
@@ -170,7 +170,10 @@ export const useMultiYearHeatPredictions = (dogs: Dog[], plannedLitters: Planned
               // Determine status
               let status: HeatPrediction['status'] = 'predicted';
               if (matchingLitter) {
-                status = 'planned';
+                // If the litter has mating dates, it's 'mated' (green), otherwise 'planned' (pink)
+                status = matchingLitter.matingDates && matchingLitter.matingDates.length > 0 
+                  ? 'mated' 
+                  : 'planned';
               }
 
               dogPredictions.push({
@@ -196,9 +199,9 @@ export const useMultiYearHeatPredictions = (dogs: Dog[], plannedLitters: Planned
               predictionCount++;
             }
 
-            // Sort all predictions: active, confirmed, planned, predicted
+            // Sort all predictions: active, confirmed, planned, mated, predicted
             dogPredictions.sort((a, b) => {
-              const statusOrder = { active: 0, confirmed: 1, planned: 2, predicted: 3 };
+              const statusOrder = { active: 0, confirmed: 1, planned: 2, mated: 3, predicted: 4 };
               if (a.status !== b.status) {
                 return statusOrder[a.status] - statusOrder[b.status];
               }
