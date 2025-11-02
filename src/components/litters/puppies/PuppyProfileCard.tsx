@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 
 interface PuppyProfileCardProps {
   puppy: Puppy;
-  onPuppyClick: (puppy: Puppy) => void;
   onAddMeasurement: (puppy: Puppy) => void;
   onUpdatePuppy: (puppy: Puppy) => void;
   onDeletePuppy: (puppyId: string) => void;
@@ -23,7 +22,6 @@ interface PuppyProfileCardProps {
 
 const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
   puppy,
-  onPuppyClick,
   onAddMeasurement,
   onUpdatePuppy,
   onDeletePuppy,

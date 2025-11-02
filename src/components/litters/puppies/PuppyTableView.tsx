@@ -1,6 +1,7 @@
 import React, { useCallback, memo } from 'react';
 import { format, parseISO } from 'date-fns';
 import { Edit, Trash2, BarChart2, MoreVertical } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -18,6 +19,7 @@ interface PuppyTableViewProps {
   onDeletePuppy: (puppyId: string) => void;
   selectedPuppyId?: string | null;
   litterDob: string;
+  litterId: string;
 }
 
 // Type guards to properly handle PuppyWeightRecord and PuppyHeightRecord
@@ -37,7 +39,8 @@ const PuppyTableRow = memo(({
   onAddMeasurement,
   onUpdatePuppy,
   onDeletePuppy,
-  litterDob
+  litterDob,
+  litterId
 }: { 
   puppy: Puppy; 
   selectedPuppyId?: string | null;
@@ -47,9 +50,11 @@ const PuppyTableRow = memo(({
   onUpdatePuppy: (puppy: Puppy) => void;
   onDeletePuppy: (puppyId: string) => void;
   litterDob: string;
+  litterId: string;
 }) => {
   const isMobile = useIsMobile();
   const { t } = useTranslation('litters');
+  const navigate = useNavigate();
 
   const handleDeletePuppy = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -60,8 +65,8 @@ const PuppyTableRow = memo(({
 
   const handleEditClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onPuppyClick) onPuppyClick(puppy);
-  }, [puppy, onPuppyClick]);
+    navigate(`/my-litters/${litterId}/puppy/${puppy.id}`);
+  }, [puppy.id, litterId, navigate]);
   
   const handleAddMeasurement = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -69,8 +74,8 @@ const PuppyTableRow = memo(({
   }, [puppy, onAddMeasurement]);
 
   const handleRowClick = useCallback(() => {
-    if (onPuppyClick) onPuppyClick(puppy);
-  }, [puppy, onPuppyClick]);
+    navigate(`/my-litters/${litterId}/puppy/${puppy.id}`);
+  }, [puppy.id, litterId, navigate]);
 
   // Get status badge color
   const getStatusBadge = () => {
@@ -215,7 +220,8 @@ const PuppyTableView: React.FC<PuppyTableViewProps> = ({
   onUpdatePuppy,
   onDeletePuppy,
   selectedPuppyId,
-  litterDob
+  litterDob,
+  litterId
 }) => {
   const isMobile = useIsMobile();
   const { t } = useTranslation('litters');
@@ -287,6 +293,7 @@ const PuppyTableView: React.FC<PuppyTableViewProps> = ({
               onUpdatePuppy={onUpdatePuppy}
               onDeletePuppy={onDeletePuppy}
               litterDob={litterDob}
+              litterId={litterId}
             />
           ))}
         </TableBody>

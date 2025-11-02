@@ -44,7 +44,6 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   const { t } = useTranslation('litters');
   const [measurementDialogOpen, setMeasurementDialogOpen] = useState(false);
   const [addPuppyDialogOpen, setAddPuppyDialogOpen] = useState(false);
-  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [activePuppy, setActivePuppy] = useState<Puppy | null>(null);
   const [localPuppies, setLocalPuppies] = useState<Puppy[]>([]);
   const [view, setView] = useState<'grid' | 'list'>('grid');
@@ -71,12 +70,6 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
     console.log("Dam breed:", damBreed);
   }, [puppies, damBreed]);
   
-  const handlePuppyClick = (puppy: Puppy) => {
-    setActivePuppy(puppy);
-    setDetailsDialogOpen(true);
-    onSelectPuppy(puppy === selectedPuppy ? null : puppy);
-  };
-  
   const handleAddMeasurement = (puppy: Puppy) => {
     setActivePuppy(puppy);
     setMeasurementDialogOpen(true);
@@ -88,7 +81,6 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
   
   const handleDeletePuppy = (puppyId: string) => {
     onDeletePuppy(puppyId);
-    setDetailsDialogOpen(false);
     
     // Update local state immediately for responsive UI
     setLocalPuppies(prev => prev.filter(p => p.id !== puppyId));
@@ -172,7 +164,6 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
                 <PuppyProfileCard
                   key={puppy.id}
                   puppy={puppy}
-                  onPuppyClick={handlePuppyClick}
                   onAddMeasurement={handleAddMeasurement}
                   onUpdatePuppy={updatePuppyNames}
                   onDeletePuppy={handleDeletePuppy}
@@ -186,12 +177,12 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
             <div className={isMobile ? 'overflow-x-auto -mx-4 px-4' : ''}>
               <PuppyTableView
                 puppies={localPuppies}
-                onPuppyClick={handlePuppyClick}
                 onAddMeasurement={handleAddMeasurement}
                 onUpdatePuppy={updatePuppyNames}
                 onDeletePuppy={handleDeletePuppy}
                 selectedPuppyId={selectedPuppy?.id}
                 litterDob={litterDob}
+                litterId={litter.id}
               />
             </div>
           )
@@ -214,17 +205,6 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
             puppy={activePuppy} 
             onClose={() => setMeasurementDialogOpen(false)} 
             onUpdate={updatePuppyNames}
-          />
-        )}
-      </Dialog>
-
-      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
-        {activePuppy && (
-          <PuppyDetailsDialog
-            puppy={activePuppy}
-            onClose={() => setDetailsDialogOpen(false)}
-            onUpdatePuppy={updatePuppyNames}
-            onDeletePuppy={handleDeletePuppy}
           />
         )}
       </Dialog>
