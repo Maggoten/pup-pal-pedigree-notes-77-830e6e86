@@ -7,6 +7,7 @@ import { Litter, PlannedLitter } from '@/types/breeding';
 import PlannedLitterForm from './PlannedLitterForm';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface PlannedLitterTabContentProps {
   onClose: () => void;
@@ -22,6 +23,7 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
   const { toast } = useToast();
   const { user, isAuthReady } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useTranslation('litters');
   
   // Planned litter form state
   const [selectedPlannedLitterId, setSelectedPlannedLitterId] = useState('');
@@ -87,8 +89,8 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
       // Validation checks
       if (!selectedPlannedLitterId) {
         toast({
-          title: "Missing Information",
-          description: "Please select a planned litter",
+          title: t('dialog.toasts.missingInfo.title'),
+          description: t('dialog.toasts.missingInfo.plannedLitter'),
           variant: "destructive"
         });
         return;
@@ -96,8 +98,8 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
       
       if (!plannedLitterName) {
         toast({
-          title: "Missing Information",
-          description: "Please provide a name for the litter",
+          title: t('dialog.toasts.missingInfo.title'),
+          description: t('dialog.toasts.missingInfo.plannedLitterName'),
           variant: "destructive"
         });
         return;
@@ -107,8 +109,8 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
       if (!isAuthReady || !user) {
         console.log('[PlannedLitter] Auth not ready yet, delaying litter creation');
         toast({
-          title: "Please wait",
-          description: "Preparing your account. Please try again in a moment.",
+          title: t('dialog.toasts.auth.pleaseWait'),
+          description: t('dialog.toasts.auth.preparing'),
         });
         return;
       }
@@ -150,8 +152,8 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
       onLitterAdded(newLitter);
       
       toast({
-        title: "Success",
-        description: `Litter "${plannedLitterName}" has been created from planned litter`
+        title: t('dialog.toasts.success.title'),
+        description: t('dialog.toasts.success.createdFromPlanned', { name: plannedLitterName })
       });
       
       onClose();
@@ -164,7 +166,7 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
       }
       
       toast({
-        title: "Error",
+        title: t('dialog.toasts.error.title'),
         description: errorMessage,
         variant: "destructive"
       });
@@ -177,13 +179,13 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
   if (!plannedLitters || plannedLitters.length === 0) {
     return (
       <div className="text-center py-6">
-        <h3 className="text-lg font-medium mb-2">No planned litters found</h3>
+        <h3 className="text-lg font-medium mb-2">{t('dialog.plannedLitterForm.empty.title')}</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Create planned litters first in the Planned Litters section.
+          {t('dialog.plannedLitterForm.empty.description')}
         </p>
         <DialogFooter className="mt-6 justify-center">
           <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
-            Close
+            {t('dialog.buttons.close')}
           </Button>
         </DialogFooter>
       </div>
@@ -215,7 +217,7 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
       
       <DialogFooter className="mt-6">
         <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
-          Cancel
+          {t('dialog.buttons.cancel')}
         </Button>
         <Button 
           type="button" 
@@ -225,10 +227,10 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating...
+              {t('dialog.buttons.creating')}
             </>
           ) : (
-            "Create From Planned Litter"
+            t('dialog.buttons.createFromPlanned')
           )}
         </Button>
       </DialogFooter>

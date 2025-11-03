@@ -464,5 +464,80 @@
         }
       }
     }
+  },
+  "dialog": {
+    "addLitter": {
+      "description": "Create a new litter record for your breeding program",
+      "tabs": {
+        "newLitter": "New Litter",
+        "fromPlanned": "From Planned Litter"
+      }
+    },
+    "newLitterForm": {
+      "labels": {
+        "litterName": "Litter Name",
+        "dateOfBirth": "Date of Birth",
+        "externalSire": "External Sire",
+        "externalSireDescription": "Use a sire from outside your kennel",
+        "sire": "Sire (Male)",
+        "dam": "Dam (Female)"
+      },
+      "placeholders": {
+        "litterName": "Enter litter name",
+        "selectMale": "Select male dog",
+        "selectFemale": "Select female dog",
+        "sireName": "Enter sire name",
+        "sireBreed": "Enter sire breed",
+        "registrationOptional": "Enter registration number (optional)"
+      }
+    },
+    "plannedLitterForm": {
+      "labels": {
+        "selectPlanned": "Select Planned Litter",
+        "litterName": "Litter Name",
+        "dateOfBirth": "Date of Birth"
+      },
+      "placeholders": {
+        "selectPlanned": "Select a planned litter",
+        "litterName": "Spring Litter 2025"
+      },
+      "empty": {
+        "title": "No planned litters found",
+        "description": "Create planned litters first in the Planned Litters section."
+      }
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "createLitter": "Create Litter",
+      "createFromPlanned": "Create From Planned Litter",
+      "creating": "Creating...",
+      "close": "Close"
+    },
+    "toasts": {
+      "missingInfo": {
+        "title": "Missing Information",
+        "litterName": "Please enter a litter name",
+        "sire": "Please select a sire or enable external sire",
+        "externalSireName": "Please enter the external sire's name",
+        "dam": "Please select a dam",
+        "plannedLitter": "Please select a planned litter",
+        "plannedLitterName": "Please provide a name for the litter"
+      },
+      "auth": {
+        "title": "Authentication Error",
+        "sessionError": "Could not verify your login session",
+        "notLoggedIn": "You must be logged in to create a litter",
+        "pleaseWait": "Please wait",
+        "preparing": "Preparing your account. Please try again in a moment."
+      },
+      "success": {
+        "title": "Success",
+        "created": "Litter \"{{name}}\" has been created",
+        "createdFromPlanned": "Litter \"{{name}}\" has been created from planned litter"
+      },
+      "error": {
+        "title": "Error"
+      }
+    }
   }
 }

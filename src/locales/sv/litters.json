@@ -464,5 +464,80 @@
         }
       }
     }
+  },
+  "dialog": {
+    "addLitter": {
+      "description": "Skapa en ny kullregistrering för ditt uppfödningsprogram",
+      "tabs": {
+        "newLitter": "Ny Kull",
+        "fromPlanned": "Från Planerad Kull"
+      }
+    },
+    "newLitterForm": {
+      "labels": {
+        "litterName": "Kullnamn",
+        "dateOfBirth": "Födelsedatum",
+        "externalSire": "Extern Hanhund",
+        "externalSireDescription": "Använd en hanhund utanför ditt kennel",
+        "sire": "Hanhund (Hane)",
+        "dam": "Tik (Hona)"
+      },
+      "placeholders": {
+        "litterName": "Ange kullnamn",
+        "selectMale": "Välj hanhund",
+        "selectFemale": "Välj tik",
+        "sireName": "Ange hanhundens namn",
+        "sireBreed": "Ange hanhundens ras",
+        "registrationOptional": "Ange registreringsnummer (valfritt)"
+      }
+    },
+    "plannedLitterForm": {
+      "labels": {
+        "selectPlanned": "Välj Planerad Kull",
+        "litterName": "Kullnamn",
+        "dateOfBirth": "Födelsedatum"
+      },
+      "placeholders": {
+        "selectPlanned": "Välj en planerad kull",
+        "litterName": "Vårkull 2025"
+      },
+      "empty": {
+        "title": "Inga planerade kullar hittades",
+        "description": "Skapa planerade kullar först i sektionen Planerade Kullar."
+      }
+    },
+    "buttons": {
+      "cancel": "Avbryt",
+      "createLitter": "Skapa Kull",
+      "createFromPlanned": "Skapa Från Planerad Kull",
+      "creating": "Skapar...",
+      "close": "Stäng"
+    },
+    "toasts": {
+      "missingInfo": {
+        "title": "Information Saknas",
+        "litterName": "Ange ett kullnamn",
+        "sire": "Välj en hanhund eller aktivera extern hanhund",
+        "externalSireName": "Ange den externa hanhundens namn",
+        "dam": "Välj en tik",
+        "plannedLitter": "Välj en planerad kull",
+        "plannedLitterName": "Ange ett namn för kullen"
+      },
+      "auth": {
+        "title": "Autentiseringsfel",
+        "sessionError": "Kunde inte verifiera din inloggningssession",
+        "notLoggedIn": "Du måste vara inloggad för att skapa en kull",
+        "pleaseWait": "Vänligen vänta",
+        "preparing": "Förbereder ditt konto. Försök igen om ett ögonblick."
+      },
+      "success": {
+        "title": "Lyckades",
+        "created": "Kull \"{{name}}\" har skapats",
+        "createdFromPlanned": "Kull \"{{name}}\" har skapats från planerad kull"
+      },
+      "error": {
+        "title": "Fel"
+      }
+    }
   }
 }

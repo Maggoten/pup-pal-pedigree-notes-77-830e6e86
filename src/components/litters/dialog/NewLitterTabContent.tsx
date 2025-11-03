@@ -12,6 +12,7 @@ import { litterService } from '@/services/LitterService';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { littersQueryKey } from '@/hooks/litters/queries/useAddLitterMutation';
+import { useTranslation } from 'react-i18next';
 
 interface NewLitterTabContentProps {
   onClose: () => void;
@@ -34,6 +35,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
   const { toast } = useToast();
   const { user, isAuthReady } = useAuth();
   const queryClient = useQueryClient();
+  const { t } = useTranslation('litters');
   
   // Set up React Hook Form with typed form values
   const methods = useForm<LitterFormValues>({
@@ -67,8 +69,8 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       // Validation checks
       if (!values.litterName) {
         toast({
-          title: "Missing Information",
-          description: "Please enter a litter name",
+          title: t('dialog.toasts.missingInfo.title'),
+          description: t('dialog.toasts.missingInfo.litterName'),
           variant: "destructive"
         });
         return;
@@ -76,8 +78,8 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       
       if (!values.isExternalSire && !values.sireId) {
         toast({
-          title: "Missing Information",
-          description: "Please select a sire or enable external sire",
+          title: t('dialog.toasts.missingInfo.title'),
+          description: t('dialog.toasts.missingInfo.sire'),
           variant: "destructive"
         });
         return;
@@ -85,8 +87,8 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       
       if (values.isExternalSire && !values.externalSireName) {
         toast({
-          title: "Missing Information",
-          description: "Please enter the external sire's name",
+          title: t('dialog.toasts.missingInfo.title'),
+          description: t('dialog.toasts.missingInfo.externalSireName'),
           variant: "destructive"
         });
         return;
@@ -94,8 +96,8 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       
       if (!values.damId) {
         toast({
-          title: "Missing Information",
-          description: "Please select a dam",
+          title: t('dialog.toasts.missingInfo.title'),
+          description: t('dialog.toasts.missingInfo.dam'),
           variant: "destructive"
         });
         return;
@@ -106,8 +108,8 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       if (sessionError) {
         console.error("Session error:", sessionError);
         toast({
-          title: "Authentication Error",
-          description: "Could not verify your login session",
+          title: t('dialog.toasts.auth.title'),
+          description: t('dialog.toasts.auth.sessionError'),
           variant: "destructive"
         });
         return;
@@ -116,8 +118,8 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       if (!sessionData.session || !sessionData.session.user) {
         console.error("No active user session found");
         toast({
-          title: "Authentication Error",
-          description: "You must be logged in to create a litter",
+          title: t('dialog.toasts.auth.title'),
+          description: t('dialog.toasts.auth.notLoggedIn'),
           variant: "destructive"
         });
         return;
@@ -190,8 +192,8 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       onClose();
       
       toast({
-        title: "Success",
-        description: `Litter "${values.litterName}" has been created`
+        title: t('dialog.toasts.success.title'),
+        description: t('dialog.toasts.success.created', { name: values.litterName })
       });
     } catch (error) {
       console.error("Error creating litter:", error);
@@ -213,7 +215,7 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       }
       
       toast({
-        title: "Error",
+        title: t('dialog.toasts.error.title'),
         description: errorMessage,
         variant: "destructive"
       });
@@ -226,10 +228,10 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       
       <DialogFooter className="mt-6">
         <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
-          Cancel
+          {t('dialog.buttons.cancel')}
         </Button>
         <Button type="button" onClick={methods.handleSubmit(handleNewLitterSubmit)}>
-          Create Litter
+          {t('dialog.buttons.createLitter')}
         </Button>
       </DialogFooter>
     </FormProvider>

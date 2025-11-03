@@ -7,6 +7,7 @@ import { Dog } from '@/context/DogsContext';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFormContext } from 'react-hook-form';
 import DatePicker from '@/components/common/DatePicker';
+import { useTranslation } from 'react-i18next';
 
 interface NewLitterFormProps {
   dogs: Dog[];
@@ -14,6 +15,7 @@ interface NewLitterFormProps {
 
 const NewLitterForm: React.FC<NewLitterFormProps> = ({ dogs }) => {
   const { watch, setValue, register } = useFormContext();
+  const { t } = useTranslation('litters');
   
   const isExternalSire = watch("isExternalSire");
   const selectedDamId = watch("damId");
@@ -61,16 +63,16 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({ dogs }) => {
   return (
     <div className="space-y-4">
       <FormItem>
-        <FormLabel>Litter Name</FormLabel>
+        <FormLabel>{t('dialog.newLitterForm.labels.litterName')}</FormLabel>
         <Input 
           {...register("litterName")}
-          placeholder="Enter litter name"
+          placeholder={t('dialog.newLitterForm.placeholders.litterName')}
           className="bg-white border-greige-300"
         />
       </FormItem>
       
       <FormItem>
-        <FormLabel>Date of Birth</FormLabel>
+        <FormLabel>{t('dialog.newLitterForm.labels.dateOfBirth')}</FormLabel>
         <DatePicker
           date={dateOfBirth}
           setDate={handleDateChange}
@@ -81,9 +83,9 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({ dogs }) => {
       
       <FormItem className="flex flex-row items-center justify-between rounded-lg border border-greige-300 p-4 bg-white">
         <div className="space-y-0.5">
-          <FormLabel>External Sire</FormLabel>
+          <FormLabel>{t('dialog.newLitterForm.labels.externalSire')}</FormLabel>
           <div className="text-sm text-muted-foreground">
-            Use a sire from outside your kennel
+            {t('dialog.newLitterForm.labels.externalSireDescription')}
           </div>
         </div>
         <Switch
@@ -95,41 +97,41 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({ dogs }) => {
       {isExternalSire ? (
         <>
           <FormItem>
-            <FormLabel>External Sire Name</FormLabel>
+            <FormLabel>{t('external.labels.sireName')}</FormLabel>
             <Input 
               {...register("externalSireName")}
-              placeholder="Enter sire name"
+              placeholder={t('dialog.newLitterForm.placeholders.sireName')}
               className="bg-white border-greige-300"
             />
           </FormItem>
           
           <FormItem>
-            <FormLabel>External Sire Breed</FormLabel>
+            <FormLabel>{t('external.labels.sireBreed')}</FormLabel>
             <Input 
               {...register("externalSireBreed")}
-              placeholder="Enter sire breed"
+              placeholder={t('dialog.newLitterForm.placeholders.sireBreed')}
               className="bg-white border-greige-300"
             />
           </FormItem>
           
           <FormItem>
-            <FormLabel>External Sire Registration</FormLabel>
+            <FormLabel>{t('external.labels.registrationNumber')}</FormLabel>
             <Input 
               {...register("externalSireRegistration")}
-              placeholder="Enter registration number (optional)"
+              placeholder={t('dialog.newLitterForm.placeholders.registrationOptional')}
               className="bg-white border-greige-300"
             />
           </FormItem>
         </>
       ) : (
         <FormItem>
-          <FormLabel>Sire (Male)</FormLabel>
+          <FormLabel>{t('dialog.newLitterForm.labels.sire')}</FormLabel>
           <Select 
             onValueChange={handleSireChange} 
             value={selectedSireId || ""}
           >
             <SelectTrigger className="bg-white border-greige-300">
-              <SelectValue placeholder="Select male dog" />
+              <SelectValue placeholder={t('dialog.newLitterForm.placeholders.selectMale')} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -145,13 +147,13 @@ const NewLitterForm: React.FC<NewLitterFormProps> = ({ dogs }) => {
       )}
       
       <FormItem>
-        <FormLabel>Dam (Female)</FormLabel>
+        <FormLabel>{t('dialog.newLitterForm.labels.dam')}</FormLabel>
         <Select 
           onValueChange={handleDamChange} 
           value={selectedDamId || ""}
         >
           <SelectTrigger className="bg-white border-greige-300">
-            <SelectValue placeholder="Select female dog" />
+            <SelectValue placeholder={t('dialog.newLitterForm.placeholders.selectFemale')} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>

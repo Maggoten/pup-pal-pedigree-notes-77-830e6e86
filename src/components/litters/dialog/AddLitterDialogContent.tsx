@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NewLitterTabContent from './NewLitterTabContent';
 import PlannedLitterTabContent from './PlannedLitterTabContent';
 import { Litter, PlannedLitter } from '@/types/breeding';
+import { useTranslation } from 'react-i18next';
 
 interface AddLitterDialogContentProps {
   onClose: () => void;
@@ -18,17 +19,18 @@ const AddLitterDialogContent: React.FC<AddLitterDialogContentProps> = ({
   plannedLitters 
 }) => {
   const [activeTab, setActiveTab] = useState('newLitter');
+  const { t } = useTranslation('litters');
 
   return (
     <>
       <DialogDescription>
-        Create a new litter record for your breeding program
+        {t('dialog.addLitter.description')}
       </DialogDescription>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
         <TabsList className="grid grid-cols-2 bg-greige-200">
-          <TabsTrigger value="newLitter">New Litter</TabsTrigger>
-          <TabsTrigger value="plannedLitter">From Planned Litter</TabsTrigger>
+          <TabsTrigger value="newLitter">{t('dialog.addLitter.tabs.newLitter')}</TabsTrigger>
+          <TabsTrigger value="plannedLitter">{t('dialog.addLitter.tabs.fromPlanned')}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="newLitter" className="space-y-4 mt-4">
