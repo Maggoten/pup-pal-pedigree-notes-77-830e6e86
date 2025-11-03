@@ -53,7 +53,7 @@
     "daysRemaining": "Dagar Kvar",
     "currentWeek": "Vecka {{week}}",
     "weekOf": "Vecka {{week}} av {{total}}",
-    "progressComplete": "{{percent}}% klart",
+    "progressComplete": "Dag {{currentDay}} av {{totalDays}}",
     "femaleName": "Tik",
     "maleName": "Hane",
     "breedingPair": "{{femaleName}} × {{maleName}}"

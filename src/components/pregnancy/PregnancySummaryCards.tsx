@@ -79,7 +79,7 @@ const PregnancySummaryCards: React.FC<PregnancySummaryCardsProps> = ({
               ></div>
             </div>
             <p className="text-xs text-warmbeige-600 mt-1 w-full text-center">
-              {t('display.progressComplete', { percent: Math.floor((63-daysLeft)/63*100) })}
+              {t('display.progressComplete', { currentDay: 63 - daysLeft, totalDays: 63 })}
             </p>
           </div>
         </div>

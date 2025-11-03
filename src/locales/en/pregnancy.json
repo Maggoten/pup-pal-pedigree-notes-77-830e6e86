@@ -53,7 +53,7 @@
     "daysRemaining": "Days Remaining",
     "currentWeek": "Week {{week}}",
     "weekOf": "Week {{week}} of {{total}}",
-    "progressComplete": "{{percent}}% complete",
+    "progressComplete": "Day {{currentDay}} of {{totalDays}}",
     "femaleName": "Female",
     "maleName": "Male",
     "breedingPair": "{{femaleName}} × {{maleName}}"
