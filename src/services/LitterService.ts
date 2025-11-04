@@ -844,7 +844,42 @@ export class LitterService {
         return null;
       }
 
-      return data ? this.transformPuppyFromDB(data) : null;
+      if (!data) {
+        console.error('No data returned after adding puppy');
+        return null;
+      }
+
+      // Save weight logs if provided (e.g., birth weight as initial log)
+      if (puppy.weightLog && puppy.weightLog.length > 0) {
+        try {
+          await this.savePuppyWeightLogs(data.id, puppy.weightLog);
+          console.log(`Successfully saved ${puppy.weightLog.length} weight logs for new puppy`);
+        } catch (error) {
+          console.error('Failed to save initial weight logs:', error);
+        }
+      }
+
+      // Save height logs if provided
+      if (puppy.heightLog && puppy.heightLog.length > 0) {
+        try {
+          await this.savePuppyHeightLogs(data.id, puppy.heightLog);
+          console.log(`Successfully saved ${puppy.heightLog.length} height logs for new puppy`);
+        } catch (error) {
+          console.error('Failed to save initial height logs:', error);
+        }
+      }
+
+      // Save notes if provided
+      if (puppy.notes && puppy.notes.length > 0) {
+        try {
+          await this.savePuppyNotes(data.id, puppy.notes);
+          console.log(`Successfully saved ${puppy.notes.length} notes for new puppy`);
+        } catch (error) {
+          console.error('Failed to save initial notes:', error);
+        }
+      }
+
+      return this.transformPuppyFromDB(data, puppy.weightLog, puppy.heightLog, puppy.notes);
     } catch (error) {
       console.error('Error adding puppy:', error);
       return null;
