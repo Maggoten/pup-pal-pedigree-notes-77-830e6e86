@@ -17,12 +17,22 @@ const TemperatureItem: React.FC<TemperatureItemProps> = ({ record, onDelete, onU
   const [isEditing, setIsEditing] = useState(false);
   const [editTemperature, setEditTemperature] = useState(record.temperature.toString());
   const [editNotes, setEditNotes] = useState(record.notes || '');
+  const [editDate, setEditDate] = useState(record.date);
+  const [editTime, setEditTime] = useState(
+    format(record.date, 'HH:mm')
+  );
 
   const handleSave = () => {
     const tempValue = parseFloat(editTemperature);
     if (isNaN(tempValue)) return;
     
+    // Combine date and time
+    const combinedDate = new Date(editDate);
+    const [hours, minutes] = editTime.split(':');
+    combinedDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    
     onUpdate(record.id, { 
+      date: combinedDate,
       temperature: tempValue, 
       notes: editNotes || undefined 
     });
@@ -32,6 +42,8 @@ const TemperatureItem: React.FC<TemperatureItemProps> = ({ record, onDelete, onU
   const handleCancel = () => {
     setEditTemperature(record.temperature.toString());
     setEditNotes(record.notes || '');
+    setEditDate(record.date);
+    setEditTime(format(record.date, 'HH:mm'));
     setIsEditing(false);
   };
 
@@ -50,9 +62,9 @@ const TemperatureItem: React.FC<TemperatureItemProps> = ({ record, onDelete, onU
           <Thermometer className="h-5 w-5 text-rose-500" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            {isEditing ? (
-              <div className="flex items-center gap-1">
+          {isEditing ? (
+            <div className="space-y-2 mb-2">
+              <div className="flex items-center gap-2">
                 <Input
                   type="number"
                   step="0.1"
@@ -64,13 +76,29 @@ const TemperatureItem: React.FC<TemperatureItemProps> = ({ record, onDelete, onU
                 />
                 <span className="font-medium">°C</span>
               </div>
-            ) : (
+              <div className="flex gap-2">
+                <Input
+                  type="date"
+                  value={format(editDate, 'yyyy-MM-dd')}
+                  onChange={(e) => setEditDate(new Date(e.target.value))}
+                  className="text-sm h-8"
+                />
+                <Input
+                  type="time"
+                  value={editTime}
+                  onChange={(e) => setEditTime(e.target.value)}
+                  className="text-sm h-8 w-28"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mb-1">
               <span className="font-medium">{record.temperature}°C</span>
-            )}
-            <span className="text-sm text-muted-foreground">
-              {format(record.date, 'PPP')}
-            </span>
-          </div>
+              <span className="text-sm text-muted-foreground">
+                {format(record.date, 'PPP HH:mm')}
+              </span>
+            </div>
+          )}
           {isEditing ? (
             <Textarea
               value={editNotes}

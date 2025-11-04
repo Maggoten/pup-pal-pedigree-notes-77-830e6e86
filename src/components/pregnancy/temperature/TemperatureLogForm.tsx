@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { Plus } from 'lucide-react';
 import { TemperatureRecord } from '../temperature/types';
-import DatePicker from '@/components/common/DatePicker';
+import DateTimeInput from './DateTimeInput';
 import { useTranslation } from 'react-i18next';
 
 interface TemperatureLogFormProps {
@@ -16,6 +16,9 @@ interface TemperatureLogFormProps {
 const TemperatureLogForm: React.FC<TemperatureLogFormProps> = ({ onAddTemperature }) => {
   const { t } = useTranslation('pregnancy');
   const [date, setDate] = useState<Date>(new Date());
+  const [time, setTime] = useState<string>(
+    new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })
+  );
   const [temperature, setTemperature] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
 
@@ -39,8 +42,13 @@ const TemperatureLogForm: React.FC<TemperatureLogFormProps> = ({ onAddTemperatur
       return;
     }
     
+    // Combine date and time
+    const combinedDate = new Date(date);
+    const [hours, minutes] = time.split(':');
+    combinedDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    
     onAddTemperature({
-      date,
+      date: combinedDate,
       temperature: tempFloat,
       notes: notes.trim() || undefined
     });
@@ -49,31 +57,28 @@ const TemperatureLogForm: React.FC<TemperatureLogFormProps> = ({ onAddTemperatur
     setTemperature('');
     setNotes('');
     setDate(new Date());
+    setTime(new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }));
   };
 
   return (
     <div className="space-y-4 border border-border rounded-lg p-4 bg-muted/30">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="date">{t('temperature.form.dateLabel')}</Label>
-          <DatePicker 
-            date={date} 
-            setDate={setDate} 
-            label="" 
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="temperature">{t('temperature.form.temperatureLabel')}</Label>
-          <Input
-            id="temperature"
-            type="number"
-            step="0.1"
-            value={temperature}
-            onChange={(e) => setTemperature(e.target.value)}
-            placeholder={t('temperature.form.temperaturePlaceholder')}
-          />
-        </div>
+      <DateTimeInput 
+        date={date}
+        setDate={setDate}
+        time={time}
+        setTime={setTime}
+      />
+      
+      <div className="space-y-2">
+        <Label htmlFor="temperature">{t('temperature.form.temperatureLabel')}</Label>
+        <Input
+          id="temperature"
+          type="number"
+          step="0.1"
+          value={temperature}
+          onChange={(e) => setTemperature(e.target.value)}
+          placeholder={t('temperature.form.temperaturePlaceholder')}
+        />
       </div>
       
       <div className="space-y-2">
