@@ -492,6 +492,7 @@
       "pregnancyUpdated": "Dräktighet uppdaterad",
       "pregnancyDeleted": "Dräktighet borttagen",
       "pregnancyCompleted": "Dräktighet markerad som avslutad",
+      "pregnancyCompletedWithDate": "Dräktighet slutförd. Födelsedatum: {{date}}",
       "temperatureAdded": "Temperatur registrerad",
       "temperatureDeleted": "Temperatur borttagen",
       "symptomAdded": "Anteckning tillagd",
@@ -537,7 +538,12 @@
       },
       "complete": {
         "title": "Slutför Dräktighet",
-        "description": "Är du säker på att du vill markera denna dräktighet som slutförd?\n\nSlutförda dräktigheter kommer att tas bort från din lista över aktiva dräktigheter, men kan hämtas senare om det behövs. Detta kommer också att frigöra tiken för en ny dräktighet.",
+        "description": "Är du säker på att du vill markera denna dräktighet som slutförd?",
+        "birthDateInfo": "Du kan ange när valparna föddes (valfritt). Detta kan vara användbart för framtida referens.",
+        "birthDateLabel": "Födelsedatum",
+        "selectBirthDate": "Välj födelsedatum",
+        "optional": "valfritt",
+        "clearDate": "Rensa datum",
         "processing": "Slutför...",
         "confirm": "Slutför Dräktighet"
       },

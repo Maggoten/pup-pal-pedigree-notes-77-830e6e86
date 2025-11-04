@@ -543,6 +543,7 @@ export type Database = {
       }
       pregnancies: {
         Row: {
+          actual_birth_date: string | null
           created_at: string
           expected_due_date: string
           external_male_name: string | null
@@ -555,6 +556,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          actual_birth_date?: string | null
           created_at?: string
           expected_due_date: string
           external_male_name?: string | null
@@ -567,6 +569,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          actual_birth_date?: string | null
           created_at?: string
           expected_due_date?: string
           external_male_name?: string | null
@@ -1083,18 +1086,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      check_dog_dependencies: {
-        Args: { dog_id: string }
-        Returns: Json
-      }
-      cleanup_old_system_reminders: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      delete_user: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      check_dog_dependencies: { Args: { dog_id: string }; Returns: Json }
+      cleanup_old_system_reminders: { Args: never; Returns: undefined }
+      delete_user: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

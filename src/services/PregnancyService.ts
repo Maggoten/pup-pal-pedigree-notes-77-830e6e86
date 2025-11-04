@@ -10,6 +10,7 @@ export interface PregnancyDetails {
   matingDate: Date;
   expectedDueDate: Date;
   daysLeft: number;
+  actualBirthDate?: Date;
 }
 
 export interface CreatePregnancyParams {
@@ -177,6 +178,7 @@ export const getPregnancyDetails = async (pregnancyId: string): Promise<Pregnanc
         id,
         mating_date,
         expected_due_date,
+        actual_birth_date,
         external_male_name,
         female_dog_id,
         male_dog_id,
@@ -232,7 +234,8 @@ export const getPregnancyDetails = async (pregnancyId: string): Promise<Pregnanc
       femaleName,
       matingDate,
       expectedDueDate,
-      daysLeft: daysLeft > 0 ? daysLeft : 0
+      daysLeft: daysLeft > 0 ? daysLeft : 0,
+      actualBirthDate: pregnancy.actual_birth_date ? new Date(pregnancy.actual_birth_date) : undefined
     };
   } catch (err) {
     console.error('Error in getPregnancyDetails:', err);
@@ -391,7 +394,10 @@ export const getFirstActivePregnancy = async (): Promise<string | null> => {
   }
 };
 
-export const completePregnancy = async (pregnancyId: string): Promise<boolean> => {
+export const completePregnancy = async (
+  pregnancyId: string, 
+  actualBirthDate?: Date
+): Promise<boolean> => {
   try {
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
@@ -401,9 +407,16 @@ export const completePregnancy = async (pregnancyId: string): Promise<boolean> =
 
     console.log(`Completing pregnancy with ID: ${pregnancyId}`);
     
+    const updateData: any = { status: 'completed' };
+    
+    // Add birth date if provided
+    if (actualBirthDate) {
+      updateData.actual_birth_date = actualBirthDate.toISOString();
+    }
+    
     const { error } = await supabase
       .from('pregnancies')
-      .update({ status: 'completed' })
+      .update(updateData)
       .eq('id', pregnancyId)
       .eq('user_id', sessionData.session.user.id);
     
@@ -416,6 +429,40 @@ export const completePregnancy = async (pregnancyId: string): Promise<boolean> =
     return true;
   } catch (err) {
     console.error('Error in completePregnancy:', err);
+    return false;
+  }
+};
+
+export const updateActualBirthDate = async (
+  pregnancyId: string, 
+  actualBirthDate: Date | null
+): Promise<boolean> => {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.log("No active session found");
+      return false;
+    }
+
+    console.log(`Updating birth date for pregnancy ${pregnancyId}`);
+    
+    const { error } = await supabase
+      .from('pregnancies')
+      .update({ 
+        actual_birth_date: actualBirthDate ? actualBirthDate.toISOString() : null 
+      })
+      .eq('id', pregnancyId)
+      .eq('user_id', sessionData.session.user.id);
+    
+    if (error) {
+      console.error("Error updating birth date:", error);
+      throw error;
+    }
+    
+    console.log("Successfully updated birth date");
+    return true;
+  } catch (err) {
+    console.error('Error in updateActualBirthDate:', err);
     return false;
   }
 };

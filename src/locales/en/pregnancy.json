@@ -492,6 +492,7 @@
       "pregnancyUpdated": "Pregnancy updated successfully",
       "pregnancyDeleted": "Pregnancy deleted successfully",
       "pregnancyCompleted": "Pregnancy marked as completed",
+      "pregnancyCompletedWithDate": "Pregnancy completed. Birth date: {{date}}",
       "temperatureAdded": "Temperature recorded successfully",
       "temperatureDeleted": "Temperature deleted successfully",
       "symptomAdded": "Note added successfully",
@@ -537,7 +538,12 @@
       },
       "complete": {
         "title": "Complete Pregnancy",
-        "description": "Are you sure you want to mark this pregnancy as completed?\n\nCompleted pregnancies will be removed from your active pregnancies list, but can be retrieved later if needed. This will also free up the female dog for a new pregnancy.",
+        "description": "Are you sure you want to mark this pregnancy as completed?",
+        "birthDateInfo": "You can specify when the puppies were born (optional). This can be useful for future reference.",
+        "birthDateLabel": "Birth Date",
+        "selectBirthDate": "Select birth date",
+        "optional": "optional",
+        "clearDate": "Clear date",
         "processing": "Completing...",
         "confirm": "Complete Pregnancy"
       },
