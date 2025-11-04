@@ -56,7 +56,9 @@ const TemperatureItem: React.FC<TemperatureItemProps> = ({ record, onDelete, onU
   };
 
   return (
-    <div className="flex items-start justify-between rounded-lg border p-3 bg-white">
+    <div className={`rounded-lg border p-3 bg-white ${
+      isEditing ? 'flex flex-col' : 'flex items-start justify-between'
+    }`}>
       <div className="flex items-start gap-3 flex-1">
         <div className="mt-0.5">
           <Thermometer className="h-5 w-5 text-rose-500" />
@@ -116,7 +118,9 @@ const TemperatureItem: React.FC<TemperatureItemProps> = ({ record, onDelete, onU
           )}
         </div>
       </div>
-      <div className="flex items-center gap-1 ml-2">
+      <div className={`flex items-center gap-1 ${
+        isEditing ? 'mt-2 justify-end' : 'ml-2'
+      }`}>
         {isEditing ? (
           <>
             <Button
