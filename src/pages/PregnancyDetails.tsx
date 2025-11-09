@@ -21,7 +21,7 @@ import ArchivedPregnancySummary from '@/components/pregnancy/archived/ArchivedPr
 const PregnancyDetails = () => {
   const { t, ready } = useTranslation('pregnancy');
   const { id } = useParams<{ id: string }>();
-  const { pregnancy, loading } = usePregnancyDetails(id);
+  const { pregnancy, loading, refetch } = usePregnancyDetails(id);
   const { scrollToTop } = useScrollToTop();
   const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
   const [completedPregnancies, setCompletedPregnancies] = useState<ActivePregnancy[]>([]);
@@ -81,8 +81,20 @@ const PregnancyDetails = () => {
     fetchPregnancies();
   };
 
-  const handleManagePregnancyDialogClose = () => {
+  const handleManagePregnancyDialogClose = async () => {
     setManagePregnancyDialogOpen(false);
+    
+    // Refetch pregnancy details to get updated status after reactivation/completion
+    await refetch();
+    
+    // Also refresh the pregnancies dropdown list
+    try {
+      const { active, completed } = await getAllPregnancies();
+      setActivePregnancies(active);
+      setCompletedPregnancies(completed);
+    } catch (error) {
+      console.error("Error refreshing pregnancies:", error);
+    }
   };
 
   const handleShowAllCompleted = () => {

@@ -10,53 +10,53 @@ export const usePregnancyDetails = (id: string | undefined) => {
   const [pregnancy, setPregnancy] = useState<PregnancyDetails | null>(null);
   const [loading, setLoading] = useState(true);
   
-  useEffect(() => {
-    const fetchPregnancyDetails = async () => {
-      setLoading(true);
+  const fetchPregnancyDetails = async () => {
+    setLoading(true);
+    
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      console.log(`Fetching pregnancy details for ID: ${id}`);
+      const details = await getPregnancyDetails(id);
       
-      if (!id) {
-        setLoading(false);
-        return;
-      }
-      
-      try {
-        console.log(`Fetching pregnancy details for ID: ${id}`);
-        const details = await getPregnancyDetails(id);
-        
-        if (details) {
-          console.log("Successfully loaded pregnancy details:", {
-            id: details.id,
-            femaleName: details.femaleName,
-            maleName: details.maleName,
-            matingDate: details.matingDate,
-            daysLeft: details.daysLeft
-          });
-          setPregnancy(details);
-        } else {
-          // Handle case where pregnancy is not found
-          console.error(`Pregnancy with ID ${id} not found`);
-          toast({
-            title: "Pregnancy not found",
-            description: "The pregnancy details could not be loaded.",
-            variant: "destructive"
-          });
-          navigate('/pregnancy');
-        }
-      } catch (error) {
-        console.error("Error fetching pregnancy details:", error);
+      if (details) {
+        console.log("Successfully loaded pregnancy details:", {
+          id: details.id,
+          femaleName: details.femaleName,
+          maleName: details.maleName,
+          matingDate: details.matingDate,
+          daysLeft: details.daysLeft
+        });
+        setPregnancy(details);
+      } else {
+        // Handle case where pregnancy is not found
+        console.error(`Pregnancy with ID ${id} not found`);
         toast({
-          title: "Error",
-          description: "Failed to load pregnancy details.",
+          title: "Pregnancy not found",
+          description: "The pregnancy details could not be loaded.",
           variant: "destructive"
         });
         navigate('/pregnancy');
-      } finally {
-        setLoading(false);
       }
-    };
-    
+    } catch (error) {
+      console.error("Error fetching pregnancy details:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load pregnancy details.",
+        variant: "destructive"
+      });
+      navigate('/pregnancy');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
     fetchPregnancyDetails();
   }, [id, navigate]);
   
-  return { pregnancy, loading };
+  return { pregnancy, loading, refetch: fetchPregnancyDetails };
 };
