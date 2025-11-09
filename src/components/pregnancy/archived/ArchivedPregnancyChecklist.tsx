@@ -112,7 +112,7 @@ const ArchivedPregnancyChecklist: React.FC<ArchivedPregnancyChecklistProps> = ({
               <AccordionItem key={group.id} value={group.id}>
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center justify-between w-full pr-4">
-                    <span className="font-medium">{group.title}</span>
+                    <span className="font-medium">{t(group.title)}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">
                         {t('archived.checklist.completedItems', '{{completed}} of {{total}} completed', { 
@@ -155,11 +155,11 @@ const ArchivedPregnancyChecklist: React.FC<ArchivedPregnancyChecklistProps> = ({
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className={`text-sm ${item.isCompleted ? 'text-foreground' : 'text-muted-foreground'}`}>
-                            {item.text}
+                            {t(item.text)}
                           </p>
                           {item.description && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              {item.description}
+                              {t(item.description)}
                             </p>
                           )}
                         </div>
