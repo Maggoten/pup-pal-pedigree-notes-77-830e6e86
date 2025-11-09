@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { DialogClose } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface PuppyDetailsFormProps {
   puppy: Puppy;
@@ -45,6 +46,12 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
   // Microchip and collar
   const [microchip, setMicrochip] = useState(puppy.microchip || '');
   const [collar, setCollar] = useState(puppy.collar || '');
+  
+  // Deceased state
+  const [isDeceased, setIsDeceased] = useState(!!puppy.deathDate);
+  const [deathDate, setDeathDate] = useState<Date | undefined>(
+    puppy.deathDate ? new Date(puppy.deathDate) : undefined
+  );
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,6 +87,7 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
         buyer_phone: (status === 'Reserved' || status === 'Sold') ? buyerPhone : null,
         microchip,
         collar,
+        deathDate: isDeceased && deathDate ? deathDate.toISOString() : undefined,
         // Update compatibility fields for backward compatibility
         reserved: status === 'Reserved',
         sold: status === 'Sold',
@@ -283,6 +291,36 @@ const PuppyDetailsForm: React.FC<PuppyDetailsFormProps> = ({ puppy, onSubmit }) 
             </div>
           </div>
         )}
+
+        {/* Deceased Section */}
+        <div className="space-y-4 pt-4 border-t border-border">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="is_deceased" 
+              checked={isDeceased}
+              onCheckedChange={(checked) => {
+                setIsDeceased(checked as boolean);
+                if (!checked) setDeathDate(undefined);
+              }}
+            />
+            <Label htmlFor="is_deceased" className="text-sm font-medium cursor-pointer">
+              {t('puppies.labels.deceased')}
+            </Label>
+          </div>
+          
+          {isDeceased && (
+            <div className="animate-in fade-in-50 duration-300">
+              <Label htmlFor="death_date" className="text-muted-foreground">
+                {t('puppies.labels.deathDate')}
+              </Label>
+              <DatePicker 
+                date={deathDate} 
+                setDate={setDeathDate}
+                className="bg-white border-greige-300 mt-1"
+              />
+            </div>
+          )}
+        </div>
       </div>
     </form>
   );

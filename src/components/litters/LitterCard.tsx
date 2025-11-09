@@ -34,8 +34,10 @@ const LitterCard: React.FC<LitterCardProps> = ({
   
   // Get count of puppies, 0 if none
   const puppyCount = litter.puppies?.length || 0;
-  const maleCount = litter.puppies?.filter(p => p.gender === 'male').length || 0;
-  const femaleCount = litter.puppies?.filter(p => p.gender === 'female').length || 0;
+  const deadCount = litter.puppies?.filter(p => p.deathDate).length || 0;
+  const aliveCount = puppyCount - deadCount;
+  const maleCount = litter.puppies?.filter(p => p.gender === 'male' && !p.deathDate).length || 0;
+  const femaleCount = litter.puppies?.filter(p => p.gender === 'female' && !p.deathDate).length || 0;
 
   return (
     <Card 
@@ -94,10 +96,15 @@ const LitterCard: React.FC<LitterCardProps> = ({
           {puppyCount > 0 && (
             <div className="flex items-center gap-1.5">
               <Users className="h-3.5 w-3.5 text-primary opacity-70" />
-              <div className="flex gap-2">
-                <span>{t('litter.labels.totalCount', { count: puppyCount })}</span>
+              <div className="flex gap-2 flex-wrap">
+                <span>{t('litter.labels.totalCount', { count: aliveCount })}</span>
                 <span className="text-blue-500 font-medium">{maleCount} ♂</span>
                 <span className="text-pink-500 font-medium">{femaleCount} ♀</span>
+                {deadCount > 0 && (
+                  <span className="text-muted-foreground font-medium">
+                    † {deadCount}
+                  </span>
+                )}
               </div>
             </div>
           )}

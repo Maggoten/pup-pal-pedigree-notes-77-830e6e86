@@ -79,6 +79,10 @@ const PuppyTableRow = memo(({
 
   // Get status badge color
   const getStatusBadge = () => {
+    if (puppy.deathDate) {
+      return <Badge variant="secondary" className="bg-muted text-muted-foreground text-xs">† {t('puppies.statuses.deceased')}</Badge>;
+    }
+    
     const status = puppy.status || 'Available';
     switch (status) {
       case 'Reserved':
@@ -106,7 +110,7 @@ const PuppyTableRow = memo(({
 
   return (
     <TableRow 
-      className={`cursor-pointer ${selectedPuppyId === puppy.id ? 'bg-primary/5' : ''}`} 
+      className={`cursor-pointer ${selectedPuppyId === puppy.id ? 'bg-primary/5' : ''} ${puppy.deathDate ? 'opacity-70 bg-muted/20' : ''}`} 
       onClick={handleRowClick}
     >
       <TableCell className="p-2">

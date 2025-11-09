@@ -185,7 +185,9 @@
       "baseColor": "Base Color",
       "noMarkingsRecorded": "No markings recorded",
       "markingsGuide": "Markings Guide",
-      "markingsDescription": "Describe any distinctive markings, spots, or color patterns that help identify this puppy."
+      "markingsDescription": "Describe any distinctive markings, spots, or color patterns that help identify this puppy.",
+      "deceased": "Mark puppy as deceased",
+      "deathDate": "Date of Death"
     },
     "placeholders": {
       "puppyName": "Puppy name",
@@ -209,7 +211,8 @@
     "statuses": {
       "available": "Available",
       "reserved": "Reserved", 
-      "sold": "Sold"
+      "sold": "Sold",
+      "deceased": "Deceased"
     },
     "actions": {
       "actions": "Actions",

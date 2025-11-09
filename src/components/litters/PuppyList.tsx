@@ -6,6 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { useTranslation } from 'react-i18next';
 
 interface PuppyListProps {
   puppies: Puppy[];
@@ -44,6 +45,8 @@ const PuppyCard = memo(({
   onUpdatePuppy: (puppy: Puppy) => void;
   onDeletePuppy: (puppyId: string) => void;
 }) => {
+  const { t } = useTranslation('litters');
+  
   const handleDeletePuppy = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm(`Do you want to delete "${puppy.name}"?`)) {
@@ -67,6 +70,10 @@ const PuppyCard = memo(({
 
   // Get status badge color
   const getStatusBadge = () => {
+    if (puppy.deathDate) {
+      return <Badge variant="secondary" className="bg-muted text-muted-foreground">† {t('puppies.statuses.deceased')}</Badge>;
+    }
+    
     const status = puppy.status || 'Available';
     switch (status) {
       case 'Reserved':
@@ -82,7 +89,7 @@ const PuppyCard = memo(({
     <Card 
       className={`w-full h-full flex flex-col overflow-hidden cursor-pointer ${
         selectedPuppyId === puppy.id ? 'bg-primary/10 border-primary/30' : ''
-      }`}
+      } ${puppy.deathDate ? 'opacity-70 bg-muted/30' : ''}`}
       onClick={handleCardClick}
     >
       {/* Photo section - edge to edge with no padding */}
@@ -184,6 +191,8 @@ const PuppyRow = memo(({
   onUpdatePuppy: (puppy: Puppy) => void;
   onDeletePuppy: (puppyId: string) => void;
 }) => {
+  const { t } = useTranslation('litters');
+  
   const handleDeletePuppy = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm(`Do you want to delete "${puppy.name}"?`)) {
@@ -207,6 +216,10 @@ const PuppyRow = memo(({
 
   // Get status badge color
   const getStatusBadge = () => {
+    if (puppy.deathDate) {
+      return <Badge variant="secondary" className="bg-muted text-muted-foreground">† {t('puppies.statuses.deceased')}</Badge>;
+    }
+    
     const status = puppy.status || 'Available';
     switch (status) {
       case 'Reserved':
@@ -220,7 +233,7 @@ const PuppyRow = memo(({
 
   return (
     <tr 
-      className={`border-b hover:bg-muted/50 cursor-pointer ${selectedPuppyId === puppy.id ? 'bg-primary/5' : ''}`} 
+      className={`border-b hover:bg-muted/50 cursor-pointer ${selectedPuppyId === puppy.id ? 'bg-primary/5' : ''} ${puppy.deathDate ? 'opacity-70 bg-muted/20' : ''}`} 
       onClick={handleRowClick}
     >
       <td className="px-4 py-3">

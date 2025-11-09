@@ -185,7 +185,9 @@
       "baseColor": "Grundfärg",
       "noMarkingsRecorded": "Inga teckningar registrerade",
       "markingsGuide": "Teckningsguide",
-      "markingsDescription": "Beskriv eventuella karakteristiska teckningar, fläckar eller färgmönster som hjälper till att identifiera denna valp."
+      "markingsDescription": "Beskriv eventuella karakteristiska teckningar, fläckar eller färgmönster som hjälper till att identifiera denna valp.",
+      "deceased": "Markera valp som avliden",
+      "deathDate": "Dödsdatum"
     },
     "placeholders": {
       "puppyName": "Valpens namn",
@@ -209,7 +211,8 @@
     "statuses": {
       "available": "Tillgänglig",
       "reserved": "Reserverad", 
-      "sold": "Såld"
+      "sold": "Såld",
+      "deceased": "Avliden"
     },
     "actions": {
       "actions": "Åtgärder",
