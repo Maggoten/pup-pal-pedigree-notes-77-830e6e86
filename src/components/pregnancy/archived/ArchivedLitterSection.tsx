@@ -58,7 +58,7 @@ const ArchivedLitterSection: React.FC<ArchivedLitterSectionProps> = ({ linkedLit
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(`/litters/${linkedLitter.id}`)}
+              onClick={() => navigate(`/my-litters?selected=${linkedLitter.id}`)}
               className="flex items-center gap-2"
             >
               {t('archived.litter.viewLitter')}
