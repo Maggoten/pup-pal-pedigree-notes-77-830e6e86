@@ -225,8 +225,6 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
 
           {/* Deceased Section */}
           <div className="space-y-4 pt-4 border-t border-border">
-            <h3 className="text-lg font-semibold">{t('puppies.titles.deceasedInformation')}</h3>
-            
             <div className="flex items-center space-x-2">
               <Checkbox id="is_deceased" checked={!!formData.deathDate} onCheckedChange={checked => {
               if (!checked) {
