@@ -8,6 +8,7 @@ import PlannedLitterForm from './PlannedLitterForm';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PlannedLitterTabContentProps {
   onClose: () => void;
@@ -125,6 +126,28 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
       
       console.log("Creating litter from planned litter:", selectedLitter);
       
+      // Try to automatically link to pregnancy via mating_dates
+      let pregnancyId: string | undefined;
+      try {
+        const { data: matingDates, error: matingError } = await supabase
+          .from('mating_dates')
+          .select('pregnancy_id, pregnancies!inner(status)')
+          .eq('planned_litter_id', selectedPlannedLitterId)
+          .limit(1);
+
+        if (!matingError && matingDates && matingDates.length > 0) {
+          const matingDate = matingDates[0];
+          // Verify pregnancy is completed
+          if (matingDate.pregnancy_id && matingDate.pregnancies?.status === 'completed') {
+            pregnancyId = matingDate.pregnancy_id;
+            console.log('Automatically linked to pregnancy:', pregnancyId);
+          }
+        }
+      } catch (linkError) {
+        console.warn('Could not automatically link to pregnancy:', linkError);
+        // Continue without pregnancy link
+      }
+      
       // Generate a proper UUID for the new litter ID
       const newLitterId = crypto.randomUUID();
       console.log("Generated new litter ID:", newLitterId);
@@ -138,7 +161,8 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
         sireName: selectedLitter.maleName,
         damName: selectedLitter.femaleName,
         puppies: [],
-        user_id: user.id
+        user_id: user.id,
+        pregnancyId
       };
       
       // Add external sire information if needed

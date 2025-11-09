@@ -473,6 +473,91 @@ export const updateActualBirthDate = async (
 // Legacy function name for backwards compatibility
 export const archivePregnancy = completePregnancy;
 
+/**
+ * Get archived pregnancies for a specific female dog
+ * Used for linking litters to pregnancies
+ */
+export const getArchivedPregnanciesForDog = async (femaleId: string): Promise<Array<{
+  id: string;
+  matingDate: Date;
+  femaleName: string;
+  maleName: string;
+}>> => {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.log("No active session found for archived pregnancies");
+      return [];
+    }
+
+    console.log(`Fetching archived pregnancies for female dog: ${femaleId}`);
+
+    const { data: pregnancies, error } = await supabase
+      .from('pregnancies')
+      .select(`
+        id,
+        mating_date,
+        external_male_name,
+        female_dog_id,
+        male_dog_id,
+        status,
+        femaleDog:dogs!fk_pregnancies_female_dog_id(id, name),
+        maleDog:dogs!pregnancies_female_dog_id_fkey(id, name)
+      `)
+      .eq('status', 'completed')
+      .eq('female_dog_id', femaleId)
+      .eq('user_id', sessionData.session.user.id)
+      .order('mating_date', { ascending: false });
+
+    if (error) {
+      console.error("Error fetching archived pregnancies:", error);
+      throw error;
+    }
+
+    if (!pregnancies || pregnancies.length === 0) {
+      console.log("No archived pregnancies found for this dog");
+      return [];
+    }
+
+    const archivedPregnancies = pregnancies.map((pregnancy) => {
+      const matingDate = new Date(pregnancy.mating_date);
+      
+      const femaleDog = pregnancy.femaleDog;
+      const maleDog = pregnancy.maleDog;
+      
+      let femaleName = "Unknown Female";
+      if (femaleDog && Array.isArray(femaleDog) && femaleDog.length > 0) {
+        femaleName = femaleDog[0]?.name || "Unknown Female";
+      } else if (femaleDog && typeof femaleDog === 'object' && 'name' in femaleDog) {
+        femaleName = femaleDog.name;
+      }
+      
+      let maleName = pregnancy.external_male_name || "Unknown Male";
+      if (pregnancy.male_dog_id) {
+        if (maleDog && Array.isArray(maleDog) && maleDog.length > 0) {
+          maleName = maleDog[0]?.name || "Unknown Male";
+        } else if (maleDog && typeof maleDog === 'object' && 'name' in maleDog) {
+          maleName = maleDog.name;
+        }
+      }
+
+      return {
+        id: pregnancy.id,
+        matingDate,
+        femaleName,
+        maleName
+      };
+    });
+
+    console.log("Processed archived pregnancies:", archivedPregnancies);
+    return archivedPregnancies;
+
+  } catch (err) {
+    console.error('Error in getArchivedPregnanciesForDog:', err);
+    return [];
+  }
+};
+
 export const deletePregnancy = async (pregnancyId: string): Promise<boolean> => {
   try {
     const { data: sessionData } = await supabase.auth.getSession();

@@ -12,6 +12,7 @@ import { Litter } from '@/types/breeding';
 import { format } from 'date-fns';
 import { parseISODate } from '@/utils/dateUtils';
 import { useTranslation } from 'react-i18next';
+import { PregnancySelector } from './dialog/PregnancySelector';
 
 interface LitterEditDialogProps {
   litter: Litter;
@@ -34,6 +35,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
   const [litterName, setLitterName] = useState(litter.name);
   const [sireName, setSireName] = useState(litter.sireName);
   const [damName, setDamName] = useState(litter.damName);
+  const [pregnancyId, setPregnancyId] = useState<string | null>(litter.pregnancyId || null);
   
   // Parse the birth date correctly to avoid timezone issues
   const [birthDate, setBirthDate] = useState<Date>(
@@ -54,7 +56,8 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
       name: litterName,
       sireName: sireName,
       damName: damName,
-      dateOfBirth: safeBirthDate.toISOString().split('T')[0]
+      dateOfBirth: safeBirthDate.toISOString().split('T')[0],
+      pregnancyId: pregnancyId || undefined
     };
     
     // Use both update functions to maintain compatibility
@@ -136,6 +139,12 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
               </PopoverContent>
             </Popover>
           </div>
+          
+          <PregnancySelector
+            femaleId={litter.damId}
+            selectedPregnancyId={pregnancyId}
+            onPregnancyChange={setPregnancyId}
+          />
           
           {onArchive && (
             <div className="mt-2">
