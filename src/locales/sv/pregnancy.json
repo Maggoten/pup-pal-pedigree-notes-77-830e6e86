@@ -559,5 +559,111 @@
     "pregnancyName": "{{femaleName}}'s Dräktighet",
     "completedPregnancies": "Avslutade Dräktigheter",
     "viewAllCompleted": "Visa Alla Avslutade Dräktigheter"
+  },
+  "archived": {
+    "title": "Arkiverad Dräktighet",
+    "hero": {
+      "title": "{{femaleName}} × {{maleName}}",
+      "matingDate": "Parningsdatum",
+      "birthDate": "Förlossningsdatum",
+      "editBirthDate": "Redigera Födelsedatum",
+      "noBirthDate": "Inget födelsedatum registrerat",
+      "gestationLength": "Dräktighetslängd",
+      "days": "dagar",
+      "puppies": "Valpar",
+      "puppiesCount": "Födda: {{total}} ({{alive}} överlevande, {{dead}} döda)",
+      "noPuppies": "Inga valpar registrerade"
+    },
+    "temperature": {
+      "title": "Temperaturkurva",
+      "lowestDrop": "Lägsta temperaturfallet"
+    },
+    "litter": {
+      "title": "Kull",
+      "linked": "Kopplad kull",
+      "notLinked": "Ingen kull registrerad för denna dräktighet",
+      "viewLitter": "Visa kull",
+      "total": "Totalt",
+      "alive": "Överlevande",
+      "dead": "Döda"
+    },
+    "timeline": {
+      "title": "Symptom & Anteckningar",
+      "viewEntries": "Visa {{count}} händelser"
+    }
+  },
+  "toasts": {
+    "success": {
+      "pregnancyAdded": "Dräktighet tillagd",
+      "pregnancyAddedDescription": "Dräktigheten har lagts till",
+      "pregnancyUpdated": "Dräktighet uppdaterad",
+      "pregnancyDeleted": "Dräktighet borttagen",
+      "pregnancyCompleted": "Dräktighet markerad som avslutad",
+      "pregnancyCompletedWithDate": "Dräktighet slutförd. Födelsedatum: {{date}}",
+      "temperatureAdded": "Temperatur registrerad",
+      "temperatureDeleted": "Temperatur borttagen",
+      "symptomAdded": "Anteckning tillagd",
+      "symptomDeleted": "Anteckning borttagen",
+      "birthDateUpdated": "Födelsedatum uppdaterat",
+      "birthDateUpdatedDescription": "Födelsedatumet har uppdaterats"
+    },
+    "error": {
+      "failedToAddPregnancy": "Fel",
+      "failedToAddPregnancyDescription": "Det uppstod ett problem med att lägga till dräktigheten",
+      "missingInformation": "Saknar information",
+      "selectFemaleDog": "Välj en tik",
+      "selectMaleDog": "Välj en hane",
+      "enterExternalMaleName": "Ange ett namn för den externa hanhunden",
+      "failedToUpdatePregnancy": "Misslyckades med att uppdatera dräktighet",
+      "failedToDeletePregnancy": "Misslyckades med att ta bort dräktighet",
+      "failedToCompletePregnancy": "Misslyckades med att avsluta dräktighet",
+      "failedToAddTemperature": "Misslyckades med att registrera temperatur",
+      "failedToDeleteTemperature": "Misslyckades med att ta bort temperatur",
+      "failedToAddSymptom": "Misslyckades med att lägga till anteckning",
+      "failedToDeleteSymptom": "Misslyckades med att ta bort anteckning",
+      "failedToLoad": "Misslyckades med att ladda dräktighetsdata",
+      "pregnancyNotFound": "Dräktighet hittades inte",
+      "failedToUpdate": "Misslyckades med att uppdatera",
+      "failedToUpdateDescription": "Det gick inte att spara ändringarna"
+    }
+  },
+  "loading": {
+    "pregnancies": "Laddar dräktigheter...",
+    "temperatures": "Laddar temperaturlogg...",
+    "symptoms": "Laddar anteckningar...",
+    "saving": "Sparar...",
+    "deleting": "Tar bort...",
+    "completing": "Avslutar...",
+    "pregnancyDetails": "Laddar dräktighetsdetaljer...",
+    "title": "Laddar Dräktighetsdetaljer",
+    "message": "Vänligen vänta..."
+  },
+  "management": {
+    "dialog": {
+      "title": "Hantera Dräktighet",
+      "description": "Vad vill du göra med {{femaleName}}s dräktighet?",
+      "actions": {
+        "complete": "Slutför Dräktighet",
+        "delete": "Ta Bort Dräktighet",
+        "cancel": "Avbryt"
+      },
+      "complete": {
+        "title": "Slutför Dräktighet",
+        "description": "Är du säker på att du vill markera denna dräktighet som slutförd?",
+        "birthDateInfo": "Du kan ange när valparna föddes (valfritt). Detta kan vara användbart för framtida referens.",
+        "birthDateLabel": "Födelsedatum",
+        "selectBirthDate": "Välj födelsedatum",
+        "optional": "valfritt",
+        "clearDate": "Rensa datum",
+        "processing": "Slutför...",
+        "confirm": "Slutför Dräktighet"
+      },
+      "delete": {
+        "title": "Ta Bort Dräktighet",
+        "description": "Är du säker på att du vill ta bort denna dräktighet? Denna åtgärd kan inte ångras och all dräktighetsdata inklusive temperaturloggar och symptomuppgifter kommer att tas bort permanent.",
+        "processing": "Tar bort...",
+        "confirm": "Ta Bort Permanent"
+      }
+    }
   }
 }

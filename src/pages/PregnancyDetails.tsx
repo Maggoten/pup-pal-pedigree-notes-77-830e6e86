@@ -16,6 +16,7 @@ import AllCompletedPregnanciesDialog from '@/components/pregnancy/AllCompletedPr
 import { Button } from '@/components/ui/button';
 import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
 import { useIsMobile } from '@/hooks/use-mobile';
+import ArchivedPregnancySummary from '@/components/pregnancy/archived/ArchivedPregnancySummary';
 
 const PregnancyDetails = () => {
   const { t, ready } = useTranslation('pregnancy');
@@ -159,22 +160,29 @@ const PregnancyDetails = () => {
       </div>
 
       <div className="space-y-8">
-        {/* Hero Section with Pregnancy Summary Cards */}
-        <PregnancySummaryCards
-          matingDate={pregnancy.matingDate}
-          expectedDueDate={pregnancy.expectedDueDate}
-          daysLeft={pregnancy.daysLeft}
-        />
-        
-        {/* Full Width Pregnancy Journey Tabs */}
-        <div className="w-full">
-          <PregnancyTabs 
-            pregnancyId={pregnancy.id}
-            femaleName={pregnancy.femaleName}
-            matingDate={pregnancy.matingDate}
-            expectedDueDate={pregnancy.expectedDueDate}
-          />
-        </div>
+        {/* Check if pregnancy is completed - show archived view */}
+        {pregnancy.status === 'completed' ? (
+          <ArchivedPregnancySummary pregnancyId={pregnancy.id} />
+        ) : (
+          <>
+            {/* Hero Section with Pregnancy Summary Cards */}
+            <PregnancySummaryCards
+              matingDate={pregnancy.matingDate}
+              expectedDueDate={pregnancy.expectedDueDate}
+              daysLeft={pregnancy.daysLeft}
+            />
+            
+            {/* Full Width Pregnancy Journey Tabs */}
+            <div className="w-full">
+              <PregnancyTabs 
+                pregnancyId={pregnancy.id}
+                femaleName={pregnancy.femaleName}
+                matingDate={pregnancy.matingDate}
+                expectedDueDate={pregnancy.expectedDueDate}
+              />
+            </div>
+          </>
+        )}
       </div>
 
       <AddPregnancyDialog 

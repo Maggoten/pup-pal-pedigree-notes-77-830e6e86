@@ -90,6 +90,11 @@
     "refreshing": "Uppdaterar..."
   },
   "puppies": {
+    "filter": {
+      "all": "Alla valpar: {{count}}",
+      "alive": "Överlevande: {{count}}",
+      "dead": "Döda: {{count}}"
+    },
     "titles": {
       "addPuppy": "Lägg till ny Valp",
       "editPuppy": "Redigera Valp",

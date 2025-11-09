@@ -90,6 +90,11 @@
     "refreshing": "Refreshing..."
   },
   "puppies": {
+    "filter": {
+      "all": "All puppies: {{count}}",
+      "alive": "Surviving: {{count}}",
+      "dead": "Deceased: {{count}}"
+    },
     "titles": {
       "addPuppy": "Add New Puppy",
       "editPuppy": "Edit Puppy",

@@ -31,7 +31,8 @@ export class LitterService {
       damName: dbLitter.dam_name,
       puppies: transformedPuppies,
       archived: dbLitter.archived,
-      user_id: dbLitter.user_id
+      user_id: dbLitter.user_id,
+      pregnancyId: dbLitter.pregnancy_id
     };
   }
 
@@ -45,7 +46,8 @@ export class LitterService {
       sire_name: litter.sireName,
       dam_name: litter.damName,
       archived: litter.archived,
-      user_id: litter.user_id
+      user_id: litter.user_id,
+      pregnancy_id: 'pregnancyId' in litter ? litter.pregnancyId : undefined
     };
   }
 
@@ -84,6 +86,7 @@ export class LitterService {
       status: dbPuppy.status,
       buyer_name: dbPuppy.buyer_name,
       buyer_phone: dbPuppy.buyer_phone,
+      deathDate: dbPuppy.death_date,
       weightLog: weightLogArray,
       heightLog: heightLogArray,
       notes: notesArray
@@ -125,7 +128,8 @@ export class LitterService {
       registration_number: puppy.registration_number,
       status: puppy.status,
       buyer_name: puppy.buyer_name,
-      buyer_phone: puppy.buyer_phone
+      buyer_phone: puppy.buyer_phone,
+      death_date: puppy.deathDate
     };
   }
 

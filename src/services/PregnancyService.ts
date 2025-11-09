@@ -11,6 +11,7 @@ export interface PregnancyDetails {
   expectedDueDate: Date;
   daysLeft: number;
   actualBirthDate?: Date;
+  status: string;
 }
 
 export interface CreatePregnancyParams {
@@ -182,6 +183,7 @@ export const getPregnancyDetails = async (pregnancyId: string): Promise<Pregnanc
         external_male_name,
         female_dog_id,
         male_dog_id,
+        status,
         femaleDog:dogs!fk_pregnancies_female_dog_id(id, name),
         maleDog:dogs!pregnancies_female_dog_id_fkey(id, name)
       `)
@@ -235,7 +237,8 @@ export const getPregnancyDetails = async (pregnancyId: string): Promise<Pregnanc
       matingDate,
       expectedDueDate,
       daysLeft: daysLeft > 0 ? daysLeft : 0,
-      actualBirthDate: pregnancy.actual_birth_date ? new Date(pregnancy.actual_birth_date) : undefined
+      actualBirthDate: pregnancy.actual_birth_date ? new Date(pregnancy.actual_birth_date) : undefined,
+      status: pregnancy.status
     };
   } catch (err) {
     console.error('Error in getPregnancyDetails:', err);

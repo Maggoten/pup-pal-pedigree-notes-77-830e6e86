@@ -281,6 +281,7 @@ export type Database = {
           date_of_birth: string
           id: string
           name: string
+          pregnancy_id: string | null
           sire_id: string | null
           sire_name: string
           updated_at: string | null
@@ -294,6 +295,7 @@ export type Database = {
           date_of_birth: string
           id?: string
           name: string
+          pregnancy_id?: string | null
           sire_id?: string | null
           sire_name: string
           updated_at?: string | null
@@ -307,12 +309,21 @@ export type Database = {
           date_of_birth?: string
           id?: string
           name?: string
+          pregnancy_id?: string | null
           sire_id?: string | null
           sire_name?: string
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "litters_pregnancy_id_fkey"
+            columns: ["pregnancy_id"]
+            isOneToOne: false
+            referencedRelation: "pregnancies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mating_dates: {
         Row: {
@@ -724,6 +735,7 @@ export type Database = {
           color: string | null
           created_at: string | null
           current_weight: number | null
+          death_date: string | null
           gender: string
           id: string
           image_url: string | null
@@ -749,6 +761,7 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           current_weight?: number | null
+          death_date?: string | null
           gender: string
           id?: string
           image_url?: string | null
@@ -774,6 +787,7 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           current_weight?: number | null
+          death_date?: string | null
           gender?: string
           id?: string
           image_url?: string | null

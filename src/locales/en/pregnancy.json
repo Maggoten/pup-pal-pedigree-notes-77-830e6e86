@@ -557,7 +557,39 @@
   },
   "dropdown": {
     "pregnancyName": "{{femaleName}}'s Pregnancy",
-    "completedPregnancies": "Completed Pregnancies", 
+    "completedPregnancies": "Completed Pregnancies",
     "viewAllCompleted": "View All Completed Pregnancies"
+  },
+  "archived": {
+    "title": "Archived Pregnancy",
+    "hero": {
+      "title": "{{femaleName}} × {{maleName}}",
+      "matingDate": "Mating Date",
+      "birthDate": "Birth Date",
+      "editBirthDate": "Edit Birth Date",
+      "noBirthDate": "No birth date recorded",
+      "gestationLength": "Gestation Length",
+      "days": "days",
+      "puppies": "Puppies",
+      "puppiesCount": "Born: {{total}} ({{alive}} surviving, {{dead}} deceased)",
+      "noPuppies": "No puppies registered"
+    },
+    "temperature": {
+      "title": "Temperature Curve",
+      "lowestDrop": "Lowest temperature drop"
+    },
+    "litter": {
+      "title": "Litter",
+      "linked": "Linked litter",
+      "notLinked": "No litter registered for this pregnancy",
+      "viewLitter": "View litter",
+      "total": "Total",
+      "alive": "Surviving",
+      "dead": "Deceased"
+    },
+    "timeline": {
+      "title": "Symptoms & Notes",
+      "viewEntries": "View {{count}} entries"
+    }
   }
 }

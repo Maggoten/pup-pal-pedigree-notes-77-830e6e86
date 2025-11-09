@@ -73,6 +73,7 @@ export interface Puppy {
   buyer_name?: string;
   buyer_phone?: string;
   weeklyPhotos?: PuppyWeeklyPhoto[];
+  deathDate?: string;
 }
 
 export interface Litter {
@@ -85,5 +86,6 @@ export interface Litter {
   damName: string;
   puppies: Puppy[];
   archived?: boolean;
-  user_id: string; // Added user_id property to match the database schema
+  user_id: string;
+  pregnancyId?: string;
 }
