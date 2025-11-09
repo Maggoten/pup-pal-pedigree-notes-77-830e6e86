@@ -90,9 +90,15 @@ export const getArchivedPregnancyDetails = async (
       if (femaleDog) femaleName = femaleDog.name;
     }
 
-    // Fetch male dog name - prioritize external_male_name, then lookup male_dog_id
-    let maleName = pregnancy.external_male_name || 'Unknown Male';
-    if (pregnancy.male_dog_id && !pregnancy.external_male_name) {
+    // Fetch male dog name with fallback strategy
+    let maleName = 'Unknown Male';
+    
+    // Strategy 1: Check external_male_name
+    if (pregnancy.external_male_name) {
+      maleName = pregnancy.external_male_name;
+    } 
+    // Strategy 2: Check male_dog_id
+    else if (pregnancy.male_dog_id) {
       const { data: maleDog } = await supabase
         .from('dogs')
         .select('name')
@@ -100,6 +106,26 @@ export const getArchivedPregnancyDetails = async (
         .single();
       
       if (maleDog) maleName = maleDog.name;
+    }
+    // Strategy 3: Fallback to mating_dates -> planned_litters
+    else {
+      const { data: matingDate } = await supabase
+        .from('mating_dates')
+        .select('planned_litter_id')
+        .eq('pregnancy_id', pregnancyId)
+        .maybeSingle();
+      
+      if (matingDate?.planned_litter_id) {
+        const { data: plannedLitter } = await supabase
+          .from('planned_litters')
+          .select('male_name, external_male_name')
+          .eq('id', matingDate.planned_litter_id)
+          .single();
+        
+        if (plannedLitter) {
+          maleName = plannedLitter.male_name || plannedLitter.external_male_name || 'Unknown Male';
+        }
+      }
     }
 
     const matingDate = new Date(pregnancy.mating_date);
