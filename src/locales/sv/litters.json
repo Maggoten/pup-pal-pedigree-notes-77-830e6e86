@@ -73,12 +73,32 @@
   "toasts": {
     "success": {
       "litterArchived": "Kull arkiverad",
-      "litterUnarchived": "Kull aktiverad"
+      "litterUnarchived": "Kull aktiverad",
+      "litterAdded": "Kull tillagd",
+      "litterUpdated": "Kull uppdaterad",
+      "litterDeleted": "Kull raderad",
+      "puppyAdded": "Valp tillagd",
+      "puppyUpdated": "Valp uppdaterad",
+      "puppyDeleted": "Valp raderad",
+      "photoUploaded": "Foto uppladdat",
+      "photoDeleted": "Foto raderat",
+      "birthDateUpdated": "Födelsedatum uppdaterat"
     },
     "error": {
       "failedToArchiveLitter": "Misslyckades med att arkivera kull",
       "failedToLoad": "Misslyckades med att ladda kullar",
-      "networkConnection": "Problem med nätverksanslutningen. Kontrollera din internetanslutning och försök igen."
+      "networkConnection": "Problem med nätverksanslutningen. Kontrollera din internetanslutning och försök igen.",
+      "failedToAddLitter": "Kunde inte lägga till kull",
+      "failedToUpdateLitter": "Kunde inte uppdatera kull",
+      "failedToDeleteLitter": "Kunde inte radera kull",
+      "failedToAddPuppy": "Kunde inte lägga till valp",
+      "failedToUpdatePuppy": "Kunde inte uppdatera valp",
+      "failedToDeletePuppy": "Kunde inte radera valp",
+      "failedToUploadPhoto": "Kunde inte ladda upp foto",
+      "failedToDeletePhoto": "Kunde inte radera foto",
+      "invalidDate": "Ogiltigt datum",
+      "futureDateNotAllowed": "Framtida datum är inte tillåtet",
+      "failedToUpdate": "Kunde inte uppdatera"
     }
   },
   "loading": {
@@ -493,7 +513,14 @@
         "selectFemale": "Välj tik",
         "sireName": "Ange hanhundens namn",
         "sireBreed": "Ange hanhundens ras",
-        "registrationOptional": "Ange registreringsnummer (valfritt)"
+        "registrationOptional": "Ange registreringsnummer (valfritt)",
+        "selectPregnancy": "Välj dräktighet (valfritt)"
+      },
+      "pregnancy": {
+        "linkToPregnancy": "Koppla till dräktighet",
+        "selectPregnancy": "Välj dräktighet",
+        "noPregnancySelected": "Ingen dräktighet vald",
+        "linkDescription": "Koppla denna kull till en arkiverad dräktighet för att se temperaturkurva och symptom"
       }
     },
     "plannedLitterForm": {

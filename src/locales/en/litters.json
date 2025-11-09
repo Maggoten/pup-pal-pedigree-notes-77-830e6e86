@@ -73,12 +73,32 @@
   "toasts": {
     "success": {
       "litterArchived": "Litter archived successfully",
-      "litterUnarchived": "Litter unarchived successfully"
+      "litterUnarchived": "Litter unarchived successfully",
+      "litterAdded": "Litter added",
+      "litterUpdated": "Litter updated",
+      "litterDeleted": "Litter deleted",
+      "puppyAdded": "Puppy added",
+      "puppyUpdated": "Puppy updated",
+      "puppyDeleted": "Puppy deleted",
+      "photoUploaded": "Photo uploaded",
+      "photoDeleted": "Photo deleted",
+      "birthDateUpdated": "Birth date updated"
     },
     "error": {
       "failedToArchiveLitter": "Failed to archive litter",
       "failedToLoad": "Failed to load litters",
-      "networkConnection": "Network connection problem. Please check your internet connection and try again."
+      "networkConnection": "Network connection problem. Please check your internet connection and try again.",
+      "failedToAddLitter": "Failed to add litter",
+      "failedToUpdateLitter": "Failed to update litter",
+      "failedToDeleteLitter": "Failed to delete litter",
+      "failedToAddPuppy": "Failed to add puppy",
+      "failedToUpdatePuppy": "Failed to update puppy",
+      "failedToDeletePuppy": "Failed to delete puppy",
+      "failedToUploadPhoto": "Failed to upload photo",
+      "failedToDeletePhoto": "Failed to delete photo",
+      "invalidDate": "Invalid date",
+      "futureDateNotAllowed": "Future date is not allowed",
+      "failedToUpdate": "Failed to update"
     }
   },
   "loading": {
@@ -493,7 +513,14 @@
         "selectFemale": "Select female dog",
         "sireName": "Enter sire name",
         "sireBreed": "Enter sire breed",
-        "registrationOptional": "Enter registration number (optional)"
+        "registrationOptional": "Enter registration number (optional)",
+        "selectPregnancy": "Select pregnancy (optional)"
+      },
+      "pregnancy": {
+        "linkToPregnancy": "Link to pregnancy",
+        "selectPregnancy": "Select pregnancy",
+        "noPregnancySelected": "No pregnancy selected",
+        "linkDescription": "Link this litter to an archived pregnancy to view temperature curve and symptoms"
       }
     },
     "plannedLitterForm": {
