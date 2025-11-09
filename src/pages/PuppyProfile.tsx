@@ -11,7 +11,7 @@ import { Puppy } from '@/types/breeding';
 import { usePuppyQueries } from '@/hooks/usePuppyQueries';
 import { toast } from '@/components/ui/use-toast';
 import { useTranslation } from 'react-i18next';
-import PuppyDetailsDialog from '@/components/litters/PuppyDetailsDialog';
+import EditPuppyDialog from '@/components/litters/puppies/EditPuppyDialog';
 import PuppyMeasurementsDialog from '@/components/litters/puppies/PuppyMeasurementsDialog';
 import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
 import PuppyOverviewTab from '@/components/litters/puppies/tabs/PuppyOverviewTab';
@@ -292,11 +292,11 @@ const PuppyProfile: React.FC = () => {
 
       {/* Edit Dialog */}
       {showEditDialog && (
-        <PuppyDetailsDialog
+        <EditPuppyDialog
           puppy={selectedPuppy}
-          onClose={() => setShowEditDialog(false)}
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
           onUpdatePuppy={handleEditPuppy}
-          onDeletePuppy={handleDeletePuppy}
         />
       )}
 
