@@ -29,13 +29,14 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Archive, Trash } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { completePregnancy, deletePregnancy, getFirstActivePregnancy } from '@/services/PregnancyService';
+import { completePregnancy, deletePregnancy, reactivatePregnancy, getFirstActivePregnancy } from '@/services/PregnancyService';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 interface ManagePregnancyDialogProps {
   pregnancyId: string;
   femaleName: string;
+  pregnancyStatus: 'active' | 'completed';
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onClose: () => void;
@@ -44,6 +45,7 @@ interface ManagePregnancyDialogProps {
 const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
   pregnancyId,
   femaleName,
+  pregnancyStatus,
   open,
   onOpenChange,
   onClose,
@@ -96,6 +98,38 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
       setIsProcessing(false);
       setIsCompleteDialogOpen(false);
       setBirthDate(undefined);
+    }
+  };
+
+  const handleReactivate = async () => {
+    setIsProcessing(true);
+    try {
+      const success = await reactivatePregnancy(pregnancyId);
+      if (success) {
+        toast({
+          title: t('toasts.success.pregnancyReactivated'),
+          description: t('toasts.success.pregnancyReactivatedDescription'),
+        });
+        onClose();
+        
+        // Navigate to the reactivated pregnancy
+        navigate(`/pregnancy/${pregnancyId}`);
+      } else {
+        toast({
+          title: t('toasts.error.failedToReactivatePregnancy'),
+          description: t('toasts.error.failedToReactivatePregnancy'),
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error reactivating pregnancy:", error);
+      toast({
+        title: t('toasts.error.failedToReactivatePregnancy'),
+        description: t('toasts.error.failedToReactivatePregnancy'),
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -152,15 +186,28 @@ const ManagePregnancyDialog: React.FC<ManagePregnancyDialogProps> = ({
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            <Button 
-              variant="outline" 
-              className="flex items-center justify-start gap-2"
-              onClick={() => setIsCompleteDialogOpen(true)}
-              disabled={isProcessing}
-            >
-              <Archive className="h-4 w-4" />
-              {t('management.dialog.actions.complete')}
-            </Button>
+            {pregnancyStatus === 'active' ? (
+              <Button 
+                variant="outline" 
+                className="flex items-center justify-start gap-2"
+                onClick={() => setIsCompleteDialogOpen(true)}
+                disabled={isProcessing}
+              >
+                <Archive className="h-4 w-4" />
+                {t('management.dialog.actions.complete')}
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                className="flex items-center justify-start gap-2"
+                onClick={handleReactivate}
+                disabled={isProcessing}
+              >
+                <Archive className="h-4 w-4" />
+                {t('management.dialog.actions.reactivate')}
+              </Button>
+            )}
+            
             <Button 
               variant="destructive" 
               className="flex items-center justify-start gap-2"

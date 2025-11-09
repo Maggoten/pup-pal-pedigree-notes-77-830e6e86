@@ -495,6 +495,8 @@
       "pregnancyDeleted": "Pregnancy deleted successfully",
       "pregnancyCompleted": "Pregnancy marked as completed",
       "pregnancyCompletedWithDate": "Pregnancy completed. Birth date: {{date}}",
+      "pregnancyReactivated": "Pregnancy has been reactivated",
+      "pregnancyReactivatedDescription": "You can now continue tracking this pregnancy",
       "temperatureAdded": "Temperature recorded successfully",
       "temperatureDeleted": "Temperature deleted successfully",
       "symptomAdded": "Note added successfully",
@@ -510,6 +512,7 @@
       "failedToUpdatePregnancy": "Failed to update pregnancy",
       "failedToDeletePregnancy": "Failed to delete pregnancy",
       "failedToCompletePregnancy": "Failed to complete pregnancy",
+      "failedToReactivatePregnancy": "Failed to reactivate pregnancy",
       "failedToAddTemperature": "Failed to record temperature",
       "failedToDeleteTemperature": "Failed to delete temperature",
       "failedToAddSymptom": "Failed to add note",
@@ -535,6 +538,7 @@
       "description": "What would you like to do with {{femaleName}}'s pregnancy?",
       "actions": {
         "complete": "Complete Pregnancy",
+        "reactivate": "Reactivate Pregnancy",
         "delete": "Delete Pregnancy",
         "cancel": "Cancel"
       },

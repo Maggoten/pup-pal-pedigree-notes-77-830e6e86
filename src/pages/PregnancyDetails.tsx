@@ -195,6 +195,7 @@ const PregnancyDetails = () => {
         <ManagePregnancyDialog
           pregnancyId={pregnancy.id}
           femaleName={pregnancy.femaleName}
+          pregnancyStatus={pregnancy.status as 'active' | 'completed'}
           open={managePregnancyDialogOpen}
           onOpenChange={setManagePregnancyDialogOpen}
           onClose={handleManagePregnancyDialogClose}

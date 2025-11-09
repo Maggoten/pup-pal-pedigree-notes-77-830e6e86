@@ -495,6 +495,8 @@
       "pregnancyDeleted": "Dräktighet borttagen",
       "pregnancyCompleted": "Dräktighet markerad som avslutad",
       "pregnancyCompletedWithDate": "Dräktighet slutförd. Födelsedatum: {{date}}",
+      "pregnancyReactivated": "Dräktigheten har återaktiverats",
+      "pregnancyReactivatedDescription": "Du kan nu fortsätta spåra denna dräktighet",
       "temperatureAdded": "Temperatur registrerad",
       "temperatureDeleted": "Temperatur borttagen",
       "symptomAdded": "Anteckning tillagd",
@@ -510,6 +512,7 @@
       "failedToUpdatePregnancy": "Misslyckades med att uppdatera dräktighet",
       "failedToDeletePregnancy": "Misslyckades med att ta bort dräktighet",
       "failedToCompletePregnancy": "Misslyckades med att avsluta dräktighet",
+      "failedToReactivatePregnancy": "Kunde inte återaktivera dräktigheten",
       "failedToAddTemperature": "Misslyckades med att registrera temperatur",
       "failedToDeleteTemperature": "Misslyckades med att ta bort temperatur",
       "failedToAddSymptom": "Misslyckades med att lägga till anteckning",
@@ -535,6 +538,7 @@
       "description": "Vad vill du göra med {{femaleName}}s dräktighet?",
       "actions": {
         "complete": "Slutför Dräktighet",
+        "reactivate": "Återaktivera Dräktighet",
         "delete": "Ta Bort Dräktighet",
         "cancel": "Avbryt"
       },
