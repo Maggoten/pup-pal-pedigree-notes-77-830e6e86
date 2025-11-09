@@ -67,9 +67,7 @@ export const getArchivedPregnancyDetails = async (
         actual_birth_date,
         external_male_name,
         female_dog_id,
-        male_dog_id,
-        femaleDog:dogs!fk_pregnancies_female_dog_id(id, name),
-        maleDog:dogs!pregnancies_female_dog_id_fkey(id, name)
+        male_dog_id
       `)
       .eq('id', pregnancyId)
       .eq('user_id', sessionData.session.user.id)
@@ -80,23 +78,28 @@ export const getArchivedPregnancyDetails = async (
       return null;
     }
 
-    // Process dog names
-    const femaleDog = pregnancy.femaleDog;
+    // Fetch female dog name
     let femaleName = 'Unknown Female';
-    if (femaleDog && Array.isArray(femaleDog) && femaleDog.length > 0) {
-      femaleName = femaleDog[0]?.name || 'Unknown Female';
-    } else if (femaleDog && typeof femaleDog === 'object' && 'name' in femaleDog) {
-      femaleName = femaleDog.name;
+    if (pregnancy.female_dog_id) {
+      const { data: femaleDog } = await supabase
+        .from('dogs')
+        .select('name')
+        .eq('id', pregnancy.female_dog_id)
+        .single();
+      
+      if (femaleDog) femaleName = femaleDog.name;
     }
 
-    const maleDog = pregnancy.maleDog;
+    // Fetch male dog name - prioritize external_male_name, then lookup male_dog_id
     let maleName = pregnancy.external_male_name || 'Unknown Male';
-    if (pregnancy.male_dog_id) {
-      if (maleDog && Array.isArray(maleDog) && maleDog.length > 0) {
-        maleName = maleDog[0]?.name || 'Unknown Male';
-      } else if (maleDog && typeof maleDog === 'object' && 'name' in maleDog) {
-        maleName = maleDog.name;
-      }
+    if (pregnancy.male_dog_id && !pregnancy.external_male_name) {
+      const { data: maleDog } = await supabase
+        .from('dogs')
+        .select('name')
+        .eq('id', pregnancy.male_dog_id)
+        .single();
+      
+      if (maleDog) maleName = maleDog.name;
     }
 
     const matingDate = new Date(pregnancy.mating_date);
