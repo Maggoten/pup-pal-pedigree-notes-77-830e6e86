@@ -498,6 +498,17 @@
         "fromPlanned": "From Planned Litter"
       }
     },
+    "form": {
+      "pregnancy": {
+        "linkToPregnancy": "Link to pregnancy",
+        "selectPregnancy": "Select pregnancy",
+        "noPregnancySelected": "No pregnancy selected",
+        "linkDescription": "Link this litter to an archived pregnancy to view temperature curve and symptoms"
+      },
+      "placeholders": {
+        "selectPregnancy": "Select pregnancy (optional)"
+      }
+    },
     "newLitterForm": {
       "labels": {
         "litterName": "Litter Name",

@@ -498,6 +498,17 @@
         "fromPlanned": "Från Planerad Kull"
       }
     },
+    "form": {
+      "pregnancy": {
+        "linkToPregnancy": "Koppla till dräktighet",
+        "selectPregnancy": "Välj dräktighet",
+        "noPregnancySelected": "Ingen dräktighet vald",
+        "linkDescription": "Koppla denna kull till en arkiverad dräktighet för att se temperaturkurva och symptom"
+      },
+      "placeholders": {
+        "selectPregnancy": "Välj dräktighet (valfritt)"
+      }
+    },
     "newLitterForm": {
       "labels": {
         "litterName": "Kullnamn",
