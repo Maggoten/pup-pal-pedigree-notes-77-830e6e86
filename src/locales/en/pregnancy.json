@@ -596,6 +596,14 @@
     "timeline": {
       "title": "Symptoms & Notes",
       "viewEntries": "View {{count}} entries"
+    },
+    "checklist": {
+      "title": "Pregnancy Checklist",
+      "description": "Overview of completed activities during pregnancy",
+      "weekProgress": "Week {{week}} Progress",
+      "completedItems": "{{completed}} of {{total}} completed",
+      "overallProgress": "Overall Progress",
+      "noData": "No checklist data available for this pregnancy"
     }
   }
 }

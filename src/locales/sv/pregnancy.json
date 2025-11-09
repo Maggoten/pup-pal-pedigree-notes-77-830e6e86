@@ -596,6 +596,14 @@
     "timeline": {
       "title": "Symptom & Anteckningar",
       "viewEntries": "Visa {{count}} händelser"
+    },
+    "checklist": {
+      "title": "Dräktighetschecklist",
+      "description": "Översikt över genomförda aktiviteter under dräktigheten",
+      "weekProgress": "Vecka {{week}} Progress",
+      "completedItems": "{{completed}} av {{total}} genomförda",
+      "overallProgress": "Total Progress",
+      "noData": "Ingen checklistdata tillgänglig för denna dräktighet"
     }
   },
   "toasts": {

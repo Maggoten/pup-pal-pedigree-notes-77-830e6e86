@@ -6,6 +6,7 @@ import ArchivedPregnancyHero from './ArchivedPregnancyHero';
 import ArchivedTemperatureCurve from './ArchivedTemperatureCurve';
 import ArchivedLitterSection from './ArchivedLitterSection';
 import ArchivedSymptomsTimeline from './ArchivedSymptomsTimeline';
+import ArchivedPregnancyChecklist from './ArchivedPregnancyChecklist';
 
 interface ArchivedPregnancySummaryProps {
   pregnancyId: string;
@@ -62,6 +63,9 @@ const ArchivedPregnancySummary: React.FC<ArchivedPregnancySummaryProps> = ({ pre
       {(data.symptoms.length > 0 || data.notes.length > 0) && (
         <ArchivedSymptomsTimeline symptoms={data.symptoms} notes={data.notes} />
       )}
+
+      {/* Pregnancy Checklist */}
+      <ArchivedPregnancyChecklist pregnancyId={pregnancyId} />
     </div>
   );
 };
