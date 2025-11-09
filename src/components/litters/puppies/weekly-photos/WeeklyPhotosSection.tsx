@@ -108,7 +108,7 @@ const WeeklyPhotosSection: React.FC<WeeklyPhotosSectionProps> = ({
         {weeks.map((week) => {
           const photo = getPhotoForWeek(week);
           const isCurrentWeek = week === currentWeek;
-          const isFutureWeek = week > currentWeek;
+          const isFutureWeek = week > Math.max(1, currentWeek);
           
           return (
             <div key={week} className={`relative ${isCurrentWeek ? 'ring-2 ring-primary rounded-2xl' : ''}`}>
