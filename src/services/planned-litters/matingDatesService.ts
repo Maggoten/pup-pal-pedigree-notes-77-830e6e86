@@ -109,7 +109,7 @@ class MatingDatesService {
             user_id: userId,
             female_dog_id: litter.female_id,
             male_dog_id: litter.external_male ? null : litter.male_id,
-            external_male_name: litter.external_male ? maleName : null
+            external_male_name: maleName || null
           })
           .select()
           .single();

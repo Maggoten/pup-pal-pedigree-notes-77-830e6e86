@@ -93,19 +93,24 @@ export const getArchivedPregnancyDetails = async (
     // Fetch male dog name with fallback strategy
     let maleName = 'Unknown Male';
     
-    // Strategy 1: Check external_male_name
-    if (pregnancy.external_male_name) {
-      maleName = pregnancy.external_male_name;
-    } 
-    // Strategy 2: Check male_dog_id
-    else if (pregnancy.male_dog_id) {
+    // Strategy 1: Check male_dog_id first (for internal males)
+    if (pregnancy.male_dog_id) {
       const { data: maleDog } = await supabase
         .from('dogs')
         .select('name')
         .eq('id', pregnancy.male_dog_id)
-        .single();
+        .maybeSingle();
       
-      if (maleDog) maleName = maleDog.name;
+      if (maleDog) {
+        maleName = maleDog.name;
+      } else if (pregnancy.external_male_name) {
+        // Fallback to external_male_name if dog no longer exists
+        maleName = pregnancy.external_male_name;
+      }
+    } 
+    // Strategy 2: Check external_male_name (for external males or fallback)
+    else if (pregnancy.external_male_name) {
+      maleName = pregnancy.external_male_name;
     }
     // Strategy 3: Fallback to mating_dates -> planned_litters
     else {
