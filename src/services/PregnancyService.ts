@@ -502,7 +502,8 @@ export const getArchivedPregnanciesForDog = async (femaleId: string): Promise<Ar
         male_dog_id,
         status,
         femaleDog:dogs!fk_pregnancies_female_dog_id(id, name),
-        maleDog:dogs!pregnancies_female_dog_id_fkey(id, name)
+        maleDog:dogs!pregnancies_female_dog_id_fkey(id, name),
+        mating_dates(planned_litter_id)
       `)
       .eq('status', 'completed')
       .eq('female_dog_id', femaleId)
@@ -519,6 +520,27 @@ export const getArchivedPregnanciesForDog = async (femaleId: string): Promise<Ar
       return [];
     }
 
+    // Extract all unique planned_litter_ids that need fallback
+    const plannedLitterIds = pregnancies
+      .filter(p => !p.external_male_name && !p.male_dog_id && p.mating_dates?.length > 0)
+      .map(p => p.mating_dates[0].planned_litter_id)
+      .filter(Boolean);
+
+    // Fetch all needed planned_litters in one query
+    let plannedLittersMap = new Map();
+    if (plannedLitterIds.length > 0) {
+      const { data: plannedLitters } = await supabase
+        .from('planned_litters')
+        .select('id, male_name, external_male_name')
+        .in('id', plannedLitterIds);
+      
+      if (plannedLitters) {
+        plannedLitters.forEach(pl => {
+          plannedLittersMap.set(pl.id, pl.male_name || pl.external_male_name);
+        });
+      }
+    }
+
     const archivedPregnancies = pregnancies.map((pregnancy) => {
       const matingDate = new Date(pregnancy.mating_date);
       
@@ -532,13 +554,29 @@ export const getArchivedPregnanciesForDog = async (femaleId: string): Promise<Ar
         femaleName = femaleDog.name;
       }
       
-      let maleName = pregnancy.external_male_name || "Unknown Male";
-      if (pregnancy.male_dog_id) {
+      // Male name with fallback strategy
+      let maleName = pregnancy.external_male_name || null;
+      
+      // Strategy 1: Try getting from male_dog_id
+      if (!maleName && pregnancy.male_dog_id) {
         if (maleDog && Array.isArray(maleDog) && maleDog.length > 0) {
-          maleName = maleDog[0]?.name || "Unknown Male";
+          maleName = maleDog[0]?.name || null;
         } else if (maleDog && typeof maleDog === 'object' && 'name' in maleDog) {
           maleName = maleDog.name;
         }
+      }
+      
+      // Strategy 2: Fallback to planned_litters via mating_dates
+      if (!maleName && pregnancy.mating_dates && pregnancy.mating_dates.length > 0) {
+        const plannedLitterId = pregnancy.mating_dates[0].planned_litter_id;
+        if (plannedLitterId && plannedLittersMap.has(plannedLitterId)) {
+          maleName = plannedLittersMap.get(plannedLitterId);
+        }
+      }
+      
+      // Final fallback
+      if (!maleName) {
+        maleName = "Unknown Male";
       }
 
       return {
