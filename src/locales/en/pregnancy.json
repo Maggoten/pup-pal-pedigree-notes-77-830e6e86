@@ -56,7 +56,9 @@
     "progressComplete": "Day {{currentDay}} of {{totalDays}}",
     "femaleName": "Female",
     "maleName": "Male",
-    "breedingPair": "{{femaleName}} × {{maleName}}"
+    "breedingPair": "{{femaleName}} × {{maleName}}",
+    "unknownMale": "Unknown Male",
+    "unknownFemale": "Unknown Female"
   },
   "summary": {
     "cards": {

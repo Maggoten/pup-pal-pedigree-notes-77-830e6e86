@@ -33,8 +33,7 @@ class MatingDatesService {
           male_id, 
           female_name, 
           male_name, 
-          external_male, 
-          external_male_name,
+          external_male,
           external_male_breed
         `)
         .eq('id', litterId)
@@ -68,8 +67,8 @@ class MatingDatesService {
         femaleName = femaleDog?.name || litter.female_name;
       }
 
-      // Get male dog details if it's an internal male
-      let maleName = litter.external_male ? litter.external_male_name : litter.male_name;
+      // Get the male name from male_name column (works for both internal and external males)
+      let maleName = litter.male_name || '';
       if (!litter.external_male && litter.male_id) {
         const { data: maleDog, error: maleDogError } = await supabase
           .from('dogs')

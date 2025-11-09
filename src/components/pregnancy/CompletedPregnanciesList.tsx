@@ -23,6 +23,13 @@ const CompletedPregnanciesList: React.FC<CompletedPregnanciesListProps> = ({
   const { t, ready } = useTranslation('pregnancy');
   const [reactivatingIds, setReactivatingIds] = React.useState<Set<string>>(new Set());
 
+  // Helper function to translate dog names
+  const translateDogName = (name: string): string => {
+    if (name === "Unknown Male") return t('display.unknownMale');
+    if (name === "Unknown Female") return t('display.unknownFemale');
+    return name;
+  };
+
   // Don't render until translations are ready
   if (!ready) {
     return (
@@ -119,7 +126,7 @@ const CompletedPregnanciesList: React.FC<CompletedPregnanciesListProps> = ({
             <div className="flex items-start justify-between">
               <div className="space-y-1">
                 <CardTitle className="text-xl font-semibold text-foreground">
-                  {pregnancy.femaleName} × {pregnancy.maleName}
+                  {translateDogName(pregnancy.femaleName)} × {translateDogName(pregnancy.maleName)}
                 </CardTitle>
                 <CardDescription className="flex items-center gap-2">
                   <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">

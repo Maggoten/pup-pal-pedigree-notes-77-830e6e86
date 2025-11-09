@@ -29,6 +29,13 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
   } = useTranslation('pregnancy');
   const navigate = useNavigate();
 
+  // Helper function to translate dog names
+  const translateDogName = (name: string): string => {
+    if (name === "Unknown Male") return t('display.unknownMale');
+    if (name === "Unknown Female") return t('display.unknownFemale');
+    return name;
+  };
+
   // Don't render until translations are ready
   if (!ready) {
     return <Card className="h-full">
@@ -73,7 +80,7 @@ const ActivePregnanciesList: React.FC<ActivePregnanciesListProps> = ({
             {pregnancies.map(pregnancy => <div key={pregnancy.id} className="border rounded-lg p-4 hover:bg-accent cursor-pointer transition-colors" onClick={() => handleViewPregnancyDetails(pregnancy.id)}>
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium text-lg">
-                    {pregnancy.femaleName} × {pregnancy.maleName}
+                    {translateDogName(pregnancy.femaleName)} × {translateDogName(pregnancy.maleName)}
                   </h3>
                   <span className="bg-primary/20 text-primary text-sm font-medium rounded-full px-2 py-0.5">
                     {pregnancy.daysLeft} {t('display.daysLeft')}

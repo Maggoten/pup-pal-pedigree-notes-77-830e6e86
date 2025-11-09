@@ -25,6 +25,13 @@ const ArchivedPregnancyHero: React.FC<ArchivedPregnancyHeroProps> = ({ data, pre
 
   const locale = i18n.language === 'sv' ? sv : undefined;
 
+  // Helper function to translate dog names
+  const translateDogName = (name: string): string => {
+    if (name === "Unknown Male") return t('display.unknownMale');
+    if (name === "Unknown Female") return t('display.unknownFemale');
+    return name;
+  };
+
   const handleSaveBirthDate = async () => {
     setSaving(true);
     const success = await updateActualBirthDate(pregnancyId, birthDate);
@@ -52,13 +59,16 @@ const ArchivedPregnancyHero: React.FC<ArchivedPregnancyHeroProps> = ({ data, pre
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl">
             <Heart className="h-6 w-6 text-pink-500" />
-            {t('archived.hero.title', { femaleName: data.femaleName, maleName: data.maleName })}
+            {t('archived.hero.title', { 
+              femaleName: translateDogName(data.femaleName), 
+              maleName: translateDogName(data.maleName) 
+            })}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Breeding Pair */}
           <div className="text-lg font-medium text-greige-800">
-            {data.femaleName} × {data.maleName}
+            {translateDogName(data.femaleName)} × {translateDogName(data.maleName)}
           </div>
 
           {/* Date Information Grid */}

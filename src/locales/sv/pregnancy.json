@@ -56,7 +56,9 @@
     "progressComplete": "Dag {{currentDay}} av {{totalDays}}",
     "femaleName": "Tik",
     "maleName": "Hane",
-    "breedingPair": "{{femaleName}} × {{maleName}}"
+    "breedingPair": "{{femaleName}} × {{maleName}}",
+    "unknownMale": "Okänd Hane",
+    "unknownFemale": "Okänd Tik"
   },
   "summary": {
     "cards": {
