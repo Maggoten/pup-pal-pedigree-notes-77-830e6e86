@@ -9,7 +9,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { PlusCircle, PawPrint } from 'lucide-react';
 import AddPuppyDialog from '../AddPuppyDialog';
 import PuppyMeasurementsDialog from '../puppies/PuppyMeasurementsDialog';
-import PuppyDetailsDialog from '../PuppyDetailsDialog';
 import PuppyProfileCard from '../puppies/PuppyProfileCard';
 import PuppyTableView from '../puppies/PuppyTableView';
 import ViewToggle from '../ViewToggle';

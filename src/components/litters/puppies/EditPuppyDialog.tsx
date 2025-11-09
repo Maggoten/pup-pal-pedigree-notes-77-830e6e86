@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
@@ -37,7 +38,8 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
     birthDateTime: puppy.birthDateTime ? format(new Date(puppy.birthDateTime), "yyyy-MM-dd'T'HH:mm") : '',
     currentWeight: puppy.currentWeight?.toString() || '',
     birthWeight: puppy.birthWeight?.toString() || '',
-    imageUrl: puppy.imageUrl || ''
+    imageUrl: puppy.imageUrl || '',
+    deathDate: puppy.deathDate ? format(new Date(puppy.deathDate), "yyyy-MM-dd") : ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,7 +59,8 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
       birthDateTime: formData.birthDateTime ? new Date(formData.birthDateTime).toISOString() : puppy.birthDateTime,
       currentWeight: formData.currentWeight ? parseFloat(formData.currentWeight) : puppy.currentWeight,
       birthWeight: formData.birthWeight ? parseFloat(formData.birthWeight) : puppy.birthWeight,
-      imageUrl: formData.imageUrl
+      imageUrl: formData.imageUrl,
+      deathDate: formData.deathDate ? new Date(formData.deathDate).toISOString() : undefined
     };
 
     await onUpdatePuppy(updatedPuppy);
@@ -236,6 +239,38 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
                   onChange={(e) => setFormData({ ...formData, newOwner: e.target.value })}
                   placeholder={t('puppies.placeholders.enterOwnerInfo')}
                   rows={3}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Deceased Section */}
+          <div className="space-y-4 pt-4 border-t border-border">
+            <h3 className="text-lg font-semibold">{t('puppies.titles.deceasedInformation')}</h3>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="is_deceased" 
+                checked={!!formData.deathDate}
+                onCheckedChange={(checked) => {
+                  if (!checked) {
+                    setFormData({ ...formData, deathDate: '' });
+                  }
+                }}
+              />
+              <Label htmlFor="is_deceased" className="text-sm font-medium cursor-pointer">
+                {t('puppies.labels.deceased')}
+              </Label>
+            </div>
+            
+            {formData.deathDate && (
+              <div className="space-y-2 animate-in fade-in-50 duration-300">
+                <Label htmlFor="death_date">{t('puppies.labels.deathDate')}</Label>
+                <Input
+                  id="death_date"
+                  type="date"
+                  value={formData.deathDate}
+                  onChange={(e) => setFormData({ ...formData, deathDate: e.target.value })}
                 />
               </div>
             )}
