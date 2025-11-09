@@ -141,7 +141,8 @@
       "recentNotes": "Senaste Anteckningar",
       "recentHeightRecords": "Senaste Höjdregisteringar",
       "recentWeightRecords": "Viktregistreringar",
-      "markings": "Teckningar & Identifiering"
+      "markings": "Teckningar & Identifiering",
+      "deceasedInformation": "Avliden Information"
     },
     "labels": {
       "age": "Ålder",

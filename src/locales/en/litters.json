@@ -141,7 +141,8 @@
       "recentNotes": "Recent Notes",
       "recentHeightRecords": "Recent Height Records",
       "recentWeightRecords": "Recent Weight Records",
-      "markings": "Markings & Identification"
+      "markings": "Markings & Identification",
+      "deceasedInformation": "Deceased Information"
     },
     "labels": {
       "age": "Age",
