@@ -2,48 +2,27 @@
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
-import { Heart, AlertCircle, Loader2, PawPrint } from 'lucide-react';
+import { Heart, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useScrollToTop } from '@/hooks/useScrollToTop';
-import { useDogs } from '@/context/DogsContext';
-import { getActivePregnancies, getCompletedPregnancies, getFirstActivePregnancy } from '@/services/PregnancyService';
-import { ActivePregnancy } from '@/components/pregnancy/ActivePregnanciesList';
+import { useNavigate } from 'react-router-dom';
+import { getAllPregnancies } from '@/services/PregnancyService';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/providers/AuthProvider';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
-
-import ActivePregnanciesList from '@/components/pregnancy/ActivePregnanciesList';
-import CompletedPregnanciesList from '@/components/pregnancy/CompletedPregnanciesList';
-import PregnancyDropdownSelector from '@/components/pregnancy/PregnancyDropdownSelector';
-import PregnancySummaryCards from '@/components/pregnancy/PregnancySummaryCards';
-import PregnancyTabs from '@/components/pregnancy/PregnancyTabs';
 import AddPregnancyDialog from '@/components/pregnancy/AddPregnancyDialog';
-import { PregnancyDetails } from '@/services/PregnancyService';
 
 const Pregnancy: React.FC = () => {
   const { t, ready } = useTranslation('pregnancy');
   const navigate = useNavigate();
-  const { pregnancyId } = useParams();
-  const { dogs } = useDogs();
   const { user } = useAuth();
-  const { scrollToTop } = useScrollToTop();
   
-  const [activePregnancies, setActivePregnancies] = useState<ActivePregnancy[]>([]);
-  const [completedPregnancies, setCompletedPregnancies] = useState<ActivePregnancy[]>([]);
-  const [selectedPregnancy, setSelectedPregnancy] = useState<PregnancyDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [dataFetched, setDataFetched] = useState(false);
+  const [hasPregnancies, setHasPregnancies] = useState(false);
   const [addPregnancyDialogOpen, setAddPregnancyDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('active');
 
   useEffect(() => {
-    // Skip refetching if we've already loaded data
-    if (dataFetched) return;
-    
-    const fetchPregnancies = async () => {
+    const fetchAndRedirect = async () => {
       if (!user) {
         setIsLoading(false);
         return;
@@ -53,66 +32,31 @@ const Pregnancy: React.FC = () => {
         setIsLoading(true);
         setHasError(false);
         
-        console.log("Fetching active pregnancies...");
-        const [activeData, completedData] = await Promise.all([
-          getActivePregnancies(),
-          getCompletedPregnancies()
-        ]);
-        console.log("Fetched active pregnancies count:", activeData.length);
-        console.log("Fetched completed pregnancies count:", completedData.length);
-        setActivePregnancies(activeData);
-        setCompletedPregnancies(completedData);
+        const { active, completed } = await getAllPregnancies();
+        const allPregnancies = [...active, ...completed];
         
-        // If no pregnancies found
-        if (activeData.length === 0) {
-          console.log("No active pregnancies found");
+        if (allPregnancies.length > 0) {
+          setHasPregnancies(true);
+          // Redirect to first pregnancy's detail page
+          navigate(`/pregnancy/${allPregnancies[0].id}`, { replace: true });
+        } else {
+          setHasPregnancies(false);
           setIsLoading(false);
-          setDataFetched(true);
-          return;
         }
-        
-        let targetPregnancyId = pregnancyId;
-        
-        // If no pregnancy ID in URL, redirect to the first pregnancy detail page
-        if (!targetPregnancyId && activeData.length > 0) {
-          console.log("No ID in URL, redirecting to first pregnancy");
-          navigate(`/pregnancy/${activeData[0].id}`, { replace: true });
-          return;
-        }
-        
-        setDataFetched(true);
       } catch (error) {
         console.error("Error fetching pregnancies:", error);
         setHasError(true);
         toast({
           title: t('toasts.error.failedToLoad'),
-          description: t('toasts.error.failedToLoad')
+          description: t('toasts.error.failedToLoad'),
+          variant: "destructive"
         });
-      } finally {
         setIsLoading(false);
       }
     };
     
-    fetchPregnancies();
-  }, [dogs, user, pregnancyId, navigate, dataFetched]);
-
-  // Scroll to top when data loading is complete or when pregnancyId changes
-  useEffect(() => {
-    if (!isLoading && dataFetched && ready) {
-      setTimeout(() => {
-        scrollToTop();
-      }, 50);
-    }
-  }, [pregnancyId, isLoading, dataFetched, ready, scrollToTop]);
-
-  // Scroll to top when switching tabs
-  useEffect(() => {
-    if (!isLoading && dataFetched) {
-      setTimeout(() => {
-        scrollToTop();
-      }, 50);
-    }
-  }, [activeTab, isLoading, dataFetched, scrollToTop]);
+    fetchAndRedirect();
+  }, [user, navigate, t]);
 
   const handleAddPregnancyClick = () => {
     setAddPregnancyDialogOpen(true);
@@ -120,12 +64,8 @@ const Pregnancy: React.FC = () => {
 
   const handleAddPregnancyDialogClose = () => {
     setAddPregnancyDialogOpen(false);
-    // Refresh data after adding a pregnancy
-    setDataFetched(false);
-  };
-
-  const handleRefreshData = () => {
-    setDataFetched(false);
+    // Refresh by reloading
+    window.location.reload();
   };
 
   if (!ready) {
@@ -165,40 +105,20 @@ const Pregnancy: React.FC = () => {
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <span className="ml-2 text-lg">{t('loading.pregnancies')}</span>
         </div>
-      ) : (
-        <div className="bg-greige-50 border border-greige-200 rounded-lg shadow-sm overflow-y-visible">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="p-6 border-b border-greige-200">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="active" className="flex items-center gap-2">
-                  <Heart className="h-4 w-4" />
-                  {t('tabs.active')} ({activePregnancies.length})
-                </TabsTrigger>
-                <TabsTrigger value="completed" className="flex items-center gap-2">
-                  <PawPrint className="h-4 w-4" />
-                  {t('tabs.completed')} ({completedPregnancies.length})
-                </TabsTrigger>
-              </TabsList>
-            </div>
-            
-            <TabsContent value="active" className="p-6 pt-4">
-              <ActivePregnanciesList 
-                pregnancies={activePregnancies} 
-                onAddPregnancy={handleAddPregnancyClick}
-                isLoading={false}
-              />
-            </TabsContent>
-            
-            <TabsContent value="completed" className="p-6 pt-4">
-              <CompletedPregnanciesList 
-                pregnancies={completedPregnancies}
-                isLoading={false}
-                onRefresh={handleRefreshData}
-              />
-            </TabsContent>
-          </Tabs>
+      ) : !hasPregnancies ? (
+        <div className="text-center py-12 bg-greige-50 border border-greige-200 rounded-lg">
+          <Heart className="h-16 w-16 text-greige-300 mx-auto mb-4" />
+          <h3 className="text-xl font-medium text-greige-700 mb-2">
+            {t('pages.pregnancy.empty.title')}
+          </h3>
+          <p className="text-greige-500 mb-6">
+            {t('pages.pregnancy.empty.description')}
+          </p>
+          <Button onClick={handleAddPregnancyClick}>
+            {t('actions.addPregnancy')}
+          </Button>
         </div>
-      )}
+      ) : null}
       
       <AddPregnancyDialog 
         open={addPregnancyDialogOpen} 
