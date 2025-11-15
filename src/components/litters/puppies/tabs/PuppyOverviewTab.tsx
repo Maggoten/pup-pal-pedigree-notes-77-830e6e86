@@ -120,8 +120,8 @@ const PuppyOverviewTab: React.FC<PuppyOverviewTabProps> = ({ puppy, litter }) =>
               <h3 className="text-lg font-semibold mb-3">{t('puppies.titles.registration')}</h3>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">{t('puppies.labels.microchip')}:</span>
-                  <span className="text-sm">{puppy.microchip || t('puppies.labels.notSet')}</span>
+                  <span className="text-sm text-muted-foreground">{t('puppies.labels.registrationNumber')}:</span>
+                  <span className="text-sm">{puppy.registration_number || t('puppies.labels.notSet')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">{t('puppies.labels.collar')}:</span>
