@@ -585,6 +585,35 @@
       "error": {
         "title": "Error"
       }
+    },
+    "archivedLitters": {
+      "hero": {
+        "archived": "Archived",
+        "bornOn": "Born on",
+        "archivedOn": "Archived on"
+      },
+      "summary": {
+        "title": "Puppy Summary",
+        "totalBorn": "Total Born",
+        "living": "Living",
+        "deceased": "Deceased",
+        "males": "Males",
+        "females": "Females"
+      },
+      "statistics": {
+        "title": "Statistics & Growth",
+        "avgBirthWeight": "Average Birth Weight",
+        "avgFinalWeight": "Average Final Weight",
+        "litterGrowthChart": "Litter Growth Chart"
+      },
+      "puppies": {
+        "title": "Puppies",
+        "registrationNumber": "Reg. No.",
+        "buyerInfo": "Buyer"
+      },
+      "actions": {
+        "viewFullDetails": "View Full Details"
+      }
     }
   }
 }
