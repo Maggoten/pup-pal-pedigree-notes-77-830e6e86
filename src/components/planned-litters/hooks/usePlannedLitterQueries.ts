@@ -73,8 +73,13 @@ export const usePlannedLitterQueries = () => {
         }
       );
       
-      setPlannedLitters(litters);
-      console.log("Planned litters loaded successfully:", litters.length);
+      // Filter to show only 'planned' and 'active' planned litters in main view
+      const activeLitters = litters.filter(litter => 
+        litter.status === 'planned' || litter.status === 'active'
+      );
+      
+      setPlannedLitters(activeLitters);
+      console.log("Planned litters loaded successfully:", activeLitters.length, "(filtered from", litters.length, "total)");
     } catch (error) {
       console.error('Error loading planned litters:', error);
       

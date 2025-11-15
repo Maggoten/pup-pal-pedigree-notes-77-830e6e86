@@ -175,6 +175,28 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
       console.log("Submitting new litter:", newLitter);
       onLitterAdded(newLitter);
       
+      // Mark planned litter as 'completed' and link to the created litter
+      const { error: updateError } = await supabase
+        .from('planned_litters')
+        .update({
+          status: 'completed',
+          litter_id: newLitter.id,
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', selectedPlannedLitterId);
+
+      if (updateError) {
+        console.error('Error marking planned litter as completed:', updateError);
+        // Show warning but let process continue
+        toast({
+          title: t('dialog.toasts.warning.title'),
+          description: 'Kullen skapades men kunde inte markeras som genomförd automatiskt.',
+          variant: 'default'
+        });
+      } else {
+        console.log('Planned litter marked as completed:', selectedPlannedLitterId);
+      }
+      
       toast({
         title: t('dialog.toasts.success.title'),
         description: t('dialog.toasts.success.createdFromPlanned', { name: plannedLitterName })

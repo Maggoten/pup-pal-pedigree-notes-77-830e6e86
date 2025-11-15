@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { PlannedLitter } from '@/types/breeding';
+import { PlannedLitter, PlannedLitterStatus } from '@/types/breeding';
 import { PlannedLitterFormValues } from './types';
 import { matingDatesService } from './matingDatesService';
 
@@ -37,7 +37,10 @@ class PlannedLittersService {
       externalMale: litter.external_male || false,
       externalMaleBreed: litter.external_male_breed || '',
       externalMaleRegistration: litter.external_male_registration || '',
-      externalMaleImageUrl: litter.external_male_image_url || ''
+      externalMaleImageUrl: litter.external_male_image_url || '',
+      status: (litter.status || 'planned') as PlannedLitterStatus,
+      litterId: litter.litter_id,
+      completedAt: litter.completed_at
     }));
   }
 
@@ -82,7 +85,10 @@ class PlannedLittersService {
       externalMale: litter.external_male || false,
       externalMaleBreed: litter.external_male_breed || '',
       externalMaleRegistration: litter.external_male_registration || '',
-      externalMaleImageUrl: litter.external_male_image_url || ''
+      externalMaleImageUrl: litter.external_male_image_url || '',
+      status: (litter.status || 'planned') as PlannedLitterStatus,
+      litterId: litter.litter_id,
+      completedAt: litter.completed_at
     };
   }
 
@@ -131,7 +137,10 @@ class PlannedLittersService {
       externalMale: litter.external_male || false,
       externalMaleBreed: litter.external_male_breed || '',
       externalMaleRegistration: litter.external_male_registration || '',
-      externalMaleImageUrl: litter.external_male_image_url || ''
+      externalMaleImageUrl: litter.external_male_image_url || '',
+      status: (litter.status || 'planned') as PlannedLitterStatus,
+      litterId: litter.litter_id,
+      completedAt: litter.completed_at
     };
   }
 

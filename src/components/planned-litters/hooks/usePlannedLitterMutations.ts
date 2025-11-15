@@ -72,6 +72,18 @@ export const usePlannedLitterMutations = (
     try {
       console.log("Adding mating date:", date, "for litter:", litterId);
       await plannedLittersService.addMatingDate(litterId, date);
+      
+      // Update status to 'active' when first mating date is added
+      const { error: statusError } = await supabase
+        .from('planned_litters')
+        .update({ status: 'active' })
+        .eq('id', litterId)
+        .eq('status', 'planned');
+      
+      if (statusError) {
+        console.error('Error updating planned litter status:', statusError);
+      }
+      
       await refreshLitters();
       
       toast({

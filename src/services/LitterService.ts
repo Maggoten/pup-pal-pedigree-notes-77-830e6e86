@@ -588,7 +588,10 @@ export class LitterService {
       notes: dbLitter.notes,
       externalMale: dbLitter.external_male,
       externalMaleBreed: dbLitter.external_male_breed,
-      externalMaleRegistration: dbLitter.external_male_registration
+      externalMaleRegistration: dbLitter.external_male_registration,
+      status: dbLitter.status || 'planned',
+      litterId: dbLitter.litter_id,
+      completedAt: dbLitter.completed_at
     };
   }
 

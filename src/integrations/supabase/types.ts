@@ -441,6 +441,7 @@ export type Database = {
       }
       planned_litters: {
         Row: {
+          completed_at: string | null
           created_at: string
           expected_heat_date: string
           external_male: boolean | null
@@ -451,13 +452,16 @@ export type Database = {
           female_id: string
           female_name: string
           id: string
+          litter_id: string | null
           male_id: string | null
           male_name: string | null
           notes: string | null
+          status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string
           expected_heat_date: string
           external_male?: boolean | null
@@ -468,13 +472,16 @@ export type Database = {
           female_id: string
           female_name: string
           id?: string
+          litter_id?: string | null
           male_id?: string | null
           male_name?: string | null
           notes?: string | null
+          status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          completed_at?: string | null
           created_at?: string
           expected_heat_date?: string
           external_male?: boolean | null
@@ -485,9 +492,11 @@ export type Database = {
           female_id?: string
           female_name?: string
           id?: string
+          litter_id?: string | null
           male_id?: string | null
           male_name?: string | null
           notes?: string | null
+          status?: string
           updated_at?: string
           user_id?: string
         }
@@ -511,6 +520,13 @@ export type Database = {
             columns: ["female_id"]
             isOneToOne: false
             referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planned_litters_litter_id_fkey"
+            columns: ["litter_id"]
+            isOneToOne: false
+            referencedRelation: "litters"
             referencedColumns: ["id"]
           },
           {
