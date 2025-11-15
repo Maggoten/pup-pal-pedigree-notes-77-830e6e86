@@ -108,20 +108,6 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
         return;
       }
     }
-    
-    // Validate date is not more than 1 year old
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    
-    if (measurementDate < oneYearAgo) {
-      toast({
-        title: "Invalid Date",
-        description: "Measurement date seems too old (more than 1 year ago). Please check the date.",
-        variant: "destructive"
-      });
-      isUpdating.current = false;
-      return;
-    }
 
     const weightValue = parseFloat(weight);
     const newWeightRecord = { 
@@ -209,20 +195,6 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
         isUpdating.current = false;
         return;
       }
-    }
-    
-    // Validate date is not more than 1 year old
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    
-    if (measurementDate < oneYearAgo) {
-      toast({
-        title: "Invalid Date",
-        description: "Measurement date seems too old (more than 1 year ago). Please check the date.",
-        variant: "destructive"
-      });
-      isUpdating.current = false;
-      return;
     }
 
     const heightValue = parseFloat(height);
