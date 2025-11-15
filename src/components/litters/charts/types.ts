@@ -30,6 +30,7 @@ export interface PuppyGrowthChartProps {
   logType: 'weight' | 'height';
   setLogType: (type: 'weight' | 'height') => void;
   onSelectPuppy: (puppy: Puppy | null) => void;
+  litterDateOfBirth?: string;
 }
 
 export interface GrowthLineChartProps {

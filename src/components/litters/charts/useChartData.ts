@@ -13,7 +13,8 @@ const useChartData = (
   puppies: Puppy[],
   selectedPuppy: Puppy | null,
   viewMode: 'single' | 'litter',
-  logType: 'weight' | 'height'
+  logType: 'weight' | 'height',
+  litterDateOfBirth?: string
 ): UseChartDataResult => {
   // Debug logging to track data flow
   console.log('useChartData - Input data:', {
@@ -79,6 +80,11 @@ const useChartData = (
   const puppyDataMap = useMemo(() => {
     const dataMap = new Map<string, Map<string, number>>();
     
+    // Calculate birth date threshold for filtering outliers
+    const birthDateThreshold = litterDateOfBirth 
+      ? new Date(new Date(litterDateOfBirth).getTime() - 7 * 24 * 60 * 60 * 1000) 
+      : null;
+    
     puppies.forEach(puppy => {
       const dateValueMap = new Map<string, number>();
       const logData = logType === 'weight' ? puppy.weightLog : puppy.heightLog;
@@ -90,7 +96,15 @@ const useChartData = (
       
       if (logData && logData.length > 0) {
         logData.forEach(entry => {
-          const dateKey = new Date(entry.date).toLocaleDateString();
+          const entryDate = new Date(entry.date);
+          
+          // Filter out dates that are more than 7 days before birth
+          if (birthDateThreshold && entryDate < birthDateThreshold) {
+            console.warn(`Filtering out outlier date ${entry.date} for puppy ${puppy.name} (more than 7 days before birth)`);
+            return;
+          }
+          
+          const dateKey = entryDate.toLocaleDateString();
           const value = logType === 'weight' 
             ? 'weight' in entry ? entry.weight : null
             : 'height' in entry ? entry.height : null;
@@ -112,7 +126,7 @@ const useChartData = (
     ));
     
     return dataMap;
-  }, [puppies, logType]);
+  }, [puppies, logType, litterDateOfBirth]);
 
   // Generate chart data for a single puppy - optimized with cached data
   const getChartDataForSinglePuppy = useMemo(() => {

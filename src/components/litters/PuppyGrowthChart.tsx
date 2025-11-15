@@ -11,7 +11,8 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
   puppies,
   logType,
   setLogType,
-  onSelectPuppy
+  onSelectPuppy,
+  litterDateOfBirth
 }) => {
   const [viewMode, setViewMode] = React.useState<'single' | 'litter'>(
     selectedPuppy ? 'single' : 'litter'
@@ -31,7 +32,8 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
     puppies,
     selectedPuppy,
     viewMode,
-    logType
+    logType,
+    litterDateOfBirth
   );
 
   // If single view mode is selected but no puppy is selected, show select puppy state
