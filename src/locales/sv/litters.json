@@ -585,6 +585,35 @@
       "error": {
         "title": "Fel"
       }
+    },
+    "archivedLitters": {
+      "hero": {
+        "archived": "Arkiverad",
+        "bornOn": "Född",
+        "archivedOn": "Arkiverad"
+      },
+      "summary": {
+        "title": "Valpöversikt",
+        "totalBorn": "Totalt födda",
+        "living": "Levande",
+        "deceased": "Döda",
+        "males": "Hanar",
+        "females": "Tikar"
+      },
+      "statistics": {
+        "title": "Statistik & Tillväxt",
+        "avgBirthWeight": "Genomsnittlig födelsevikt",
+        "avgFinalWeight": "Genomsnittlig slutvikt",
+        "litterGrowthChart": "Kullens tillväxt"
+      },
+      "puppies": {
+        "title": "Valpar",
+        "registrationNumber": "Reg.nr",
+        "buyerInfo": "Köpare"
+      },
+      "actions": {
+        "viewFullDetails": "Se fullständiga detaljer"
+      }
     }
   }
 }

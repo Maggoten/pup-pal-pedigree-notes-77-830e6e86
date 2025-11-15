@@ -94,6 +94,7 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
         birthWeight: weightValue,
         birthDateTime: birthDateTime.toISOString(),
         imageUrl: imageUrl, // Add the image URL
+        registration_number: '', // Initialize as empty
         weightLog: initialWeightLog,
         heightLog: [],
         notes: []

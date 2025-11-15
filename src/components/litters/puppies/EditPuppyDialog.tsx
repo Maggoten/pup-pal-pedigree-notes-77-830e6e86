@@ -28,6 +28,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
   const [formData, setFormData] = useState({
     name: puppy.name || '',
     registered_name: puppy.registered_name || '',
+    registration_number: puppy.registration_number || '',
     gender: puppy.gender || 'male',
     color: puppy.color || '',
     markings: puppy.markings || '',
@@ -47,6 +48,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
       ...puppy,
       name: formData.name,
       registered_name: formData.registered_name,
+      registration_number: formData.registration_number,
       gender: formData.gender as 'male' | 'female',
       color: formData.color,
       markings: formData.markings || null,
@@ -175,6 +177,14 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
             <h3 className="text-lg font-semibold">{t('puppies.titles.identification')}</h3>
             
             <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="registrationNumber">{t('puppies.labels.registrationNumber')}</Label>
+                <Input id="registrationNumber" value={formData.registration_number} onChange={e => setFormData({
+                ...formData,
+                registration_number: e.target.value
+              })} placeholder={t('puppies.placeholders.registrationNumber')} />
+              </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="microchip">{t('puppies.labels.microchipNumber')}</Label>
                 <Input id="microchip" value={formData.microchip} onChange={e => setFormData({

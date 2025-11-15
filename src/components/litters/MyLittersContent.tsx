@@ -16,6 +16,7 @@ import LitterTabContent from './tabs/LitterTabContent';
 import SelectedLitterSection from './SelectedLitterSection';
 import SelectedLitterHeader from './SelectedLitterHeader';
 import { dogImageService } from '@/services/dogImageService';
+import ArchivedLitterSummary from './archived/ArchivedLitterSummary';
 
 const MyLittersContent: React.FC = () => {
   const { t } = useTranslation('litters');
@@ -135,22 +136,29 @@ const MyLittersContent: React.FC = () => {
       {/* Selected Litter Section */}
       {selectedLitter && (
         <div className="space-y-4">
-          <SelectedLitterHeader 
-            litter={selectedLitter} 
-            damImageUrl={selectedLitterDamImage}
-            onUpdateLitter={handleUpdateLitter}
-            onDeleteLitter={handleDeleteLitter}
-            onArchiveLitter={handleArchiveLitter}
-          />
-          <SelectedLitterSection 
-            litter={selectedLitter} 
-            onUpdateLitter={handleUpdateLitter}
-            onAddPuppy={handleAddPuppy}
-            onUpdatePuppy={handleUpdatePuppy}
-            onDeletePuppy={handleDeletePuppy}
-            onDeleteLitter={handleDeleteLitter}
-            onArchiveLitter={handleArchiveLitter}
-          />
+          {/* Show archived summary for archived litters */}
+          {selectedLitter.archived ? (
+            <ArchivedLitterSummary litterId={selectedLitter.id} />
+          ) : (
+            <>
+              <SelectedLitterHeader 
+                litter={selectedLitter} 
+                damImageUrl={selectedLitterDamImage}
+                onUpdateLitter={handleUpdateLitter}
+                onDeleteLitter={handleDeleteLitter}
+                onArchiveLitter={handleArchiveLitter}
+              />
+              <SelectedLitterSection 
+                litter={selectedLitter} 
+                onUpdateLitter={handleUpdateLitter}
+                onAddPuppy={handleAddPuppy}
+                onUpdatePuppy={handleUpdatePuppy}
+                onDeletePuppy={handleDeletePuppy}
+                onDeleteLitter={handleDeleteLitter}
+                onArchiveLitter={handleArchiveLitter}
+              />
+            </>
+          )}
         </div>
       )}
 
