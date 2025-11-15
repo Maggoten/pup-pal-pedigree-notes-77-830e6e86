@@ -8,6 +8,22 @@
       "description": "Plan your future litters, track heat cycles, and manage breeding activities"
     }
   },
+  "status": {
+    "planned": "Planned",
+    "active": "Active",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "tabs": {
+    "active": "Active Plans",
+    "history": "History"
+  },
+  "history": {
+    "title": "History",
+    "description": "View completed and cancelled planned litters",
+    "completedOn": "Completed {{date}}",
+    "linkedLitter": "Linked to litter: {{name}}"
+  },
   "actions": {
     "addPlannedLitter": "Add Planned Litter",
     "addFirstPlannedLitter": "Add Your First Planned Litter",
@@ -15,6 +31,8 @@
     "editMatingDate": "Edit Mating Date",
     "deleteMatingDate": "Delete Mating Date",
     "deleteLitter": "Delete Litter",
+    "cancelLitter": "Cancel Planned Litter",
+    "cancelConfirm": "Are you sure you want to cancel this planned litter?",
     "save": "Save",
     "cancel": "Cancel",
     "addLitter": "Add Litter"

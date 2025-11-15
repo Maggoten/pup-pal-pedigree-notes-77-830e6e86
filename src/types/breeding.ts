@@ -1,3 +1,5 @@
+export type PlannedLitterStatus = 'planned' | 'active' | 'completed' | 'cancelled';
+
 export interface PlannedLitter {
   id: string;
   maleId: string;
@@ -11,6 +13,9 @@ export interface PlannedLitter {
   externalMaleBreed?: string;
   externalMaleRegistration?: string;
   externalMaleImageUrl?: string;
+  status: PlannedLitterStatus;
+  litterId?: string;
+  completedAt?: string;
 }
 
 export interface Mating {

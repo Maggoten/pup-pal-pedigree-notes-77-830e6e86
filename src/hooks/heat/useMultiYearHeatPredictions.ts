@@ -27,6 +27,9 @@ const findMatchingPlannedLitter = (
   return plannedLitters.find(litter => {
     if (litter.femaleId !== dogId) return false;
     
+    // Include all statuses except 'cancelled'
+    if (litter.status === 'cancelled') return false;
+    
     const expectedDate = new Date(litter.expectedHeatDate);
     const daysDiff = Math.abs(differenceInDays(expectedDate, heatDate));
     
@@ -170,10 +173,13 @@ export const useMultiYearHeatPredictions = (dogs: Dog[], plannedLitters: Planned
               // Determine status
               let status: HeatPrediction['status'] = 'predicted';
               if (matchingLitter) {
-                // If the litter has mating dates, it's 'mated' (green), otherwise 'planned' (pink)
-                status = matchingLitter.matingDates && matchingLitter.matingDates.length > 0 
-                  ? 'mated' 
-                  : 'planned';
+                if (matchingLitter.status === 'completed') {
+                  status = 'mated'; // Green - completed mating
+                } else if (matchingLitter.matingDates && matchingLitter.matingDates.length > 0) {
+                  status = 'mated'; // Green - has mating dates
+                } else if (matchingLitter.status === 'active' || matchingLitter.status === 'planned') {
+                  status = 'planned'; // Pink - planned but not mated yet
+                }
               }
 
               dogPredictions.push({

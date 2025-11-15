@@ -8,6 +8,22 @@
       "description": "Planera dina framtida kullar, spåra löpcykler och följ upp aktiviteter"
     }
   },
+  "status": {
+    "planned": "Planerad",
+    "active": "Aktiv",
+    "completed": "Genomförd",
+    "cancelled": "Avbruten"
+  },
+  "tabs": {
+    "active": "Aktiva Planer",
+    "history": "Historik"
+  },
+  "history": {
+    "title": "Historik",
+    "description": "Visa genomförda och avbrutna planerade kullar",
+    "completedOn": "Genomförd {{date}}",
+    "linkedLitter": "Kopplad till kull: {{name}}"
+  },
   "actions": {
     "addPlannedLitter": "Lägg till en Planerad Kull",
     "addFirstPlannedLitter": "Lägg till Din Första Planerade Kull",
@@ -15,6 +31,8 @@
     "editMatingDate": "Redigera Parningsdatum",
     "deleteMatingDate": "Ta bort Parningsdatum",
     "deleteLitter": "Ta bort Kull",
+    "cancelLitter": "Avbryt Planerad Kull",
+    "cancelConfirm": "Är du säker på att du vill avbryta denna planerade kull?",
     "save": "Spara",
     "cancel": "Avbryt",
     "addLitter": "Lägg till Kull"
