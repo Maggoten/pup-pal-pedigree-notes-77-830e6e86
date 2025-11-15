@@ -19,12 +19,14 @@ interface PuppyMeasurementsDialogProps {
   puppy: Puppy;
   onClose: () => void;
   onUpdate: (updatedPuppy: Puppy) => void;
+  litterDateOfBirth?: string;
 }
 
 const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({ 
   puppy, 
   onClose, 
-  onUpdate 
+  onUpdate,
+  litterDateOfBirth
 }) => {
   const { t } = useTranslation('litters');
   const [activeTab, setActiveTab] = useState('weight');
@@ -90,6 +92,36 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     const measurementDate = new Date(selectedDate);
     const [hours, minutes] = selectedTime.split(':').map(Number);
     measurementDate.setHours(hours, minutes);
+
+    // Validate date is not too old
+    if (litterDateOfBirth) {
+      const birthDate = new Date(litterDateOfBirth);
+      const sevenDaysBeforeBirth = new Date(birthDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+      
+      if (measurementDate < sevenDaysBeforeBirth) {
+        toast({
+          title: "Invalid Date",
+          description: "Measurement date cannot be more than 7 days before the litter's birth date",
+          variant: "destructive"
+        });
+        isUpdating.current = false;
+        return;
+      }
+    }
+    
+    // Validate date is not more than 1 year old
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    
+    if (measurementDate < oneYearAgo) {
+      toast({
+        title: "Invalid Date",
+        description: "Measurement date seems too old (more than 1 year ago). Please check the date.",
+        variant: "destructive"
+      });
+      isUpdating.current = false;
+      return;
+    }
 
     const weightValue = parseFloat(weight);
     const newWeightRecord = { 
@@ -158,10 +190,40 @@ const PuppyMeasurementsDialog: React.FC<PuppyMeasurementsDialogProps> = ({
     }
 
     isUpdating.current = true;
-    
+
     const measurementDate = new Date(selectedDate);
     const [hours, minutes] = selectedTime.split(':').map(Number);
     measurementDate.setHours(hours, minutes);
+
+    // Validate date is not too old
+    if (litterDateOfBirth) {
+      const birthDate = new Date(litterDateOfBirth);
+      const sevenDaysBeforeBirth = new Date(birthDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+      
+      if (measurementDate < sevenDaysBeforeBirth) {
+        toast({
+          title: "Invalid Date",
+          description: "Measurement date cannot be more than 7 days before the litter's birth date",
+          variant: "destructive"
+        });
+        isUpdating.current = false;
+        return;
+      }
+    }
+    
+    // Validate date is not more than 1 year old
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    
+    if (measurementDate < oneYearAgo) {
+      toast({
+        title: "Invalid Date",
+        description: "Measurement date seems too old (more than 1 year ago). Please check the date.",
+        variant: "destructive"
+      });
+      isUpdating.current = false;
+      return;
+    }
 
     const heightValue = parseFloat(height);
     const newHeightRecord = { 

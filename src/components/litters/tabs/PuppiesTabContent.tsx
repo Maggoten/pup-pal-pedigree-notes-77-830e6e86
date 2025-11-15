@@ -204,6 +204,7 @@ const PuppiesTabContent: React.FC<PuppiesTabContentProps> = ({
             puppy={activePuppy} 
             onClose={() => setMeasurementDialogOpen(false)} 
             onUpdate={updatePuppyNames}
+            litterDateOfBirth={litterDob}
           />
         )}
       </Dialog>

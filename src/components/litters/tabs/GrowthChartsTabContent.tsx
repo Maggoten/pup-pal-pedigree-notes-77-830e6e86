@@ -12,12 +12,14 @@ interface GrowthChartsTabContentProps {
   selectedPuppy: Puppy | null;
   puppies: Puppy[];
   onSelectPuppy: (puppy: Puppy | null) => void;
+  litterDateOfBirth?: string;
 }
 
 const GrowthChartsTabContent: React.FC<GrowthChartsTabContentProps> = ({
   selectedPuppy,
   puppies,
-  onSelectPuppy
+  onSelectPuppy,
+  litterDateOfBirth
 }) => {
   const [logType, setLogType] = useState<'weight' | 'height'>('weight');
   const { t } = useTranslation('litters');
@@ -69,6 +71,7 @@ const GrowthChartsTabContent: React.FC<GrowthChartsTabContentProps> = ({
           logType={logType}
           setLogType={setLogType}
           onSelectPuppy={onSelectPuppy}
+          litterDateOfBirth={litterDateOfBirth}
         />
       </CardContent>
     </Card>

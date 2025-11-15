@@ -306,6 +306,7 @@ const PuppyProfile: React.FC = () => {
           puppy={selectedPuppy}
           onClose={() => setShowMeasurementsDialog(false)}
           onUpdate={handleUpdateMeasurements}
+          litterDateOfBirth={litter?.dateOfBirth}
         />
       )}
 
