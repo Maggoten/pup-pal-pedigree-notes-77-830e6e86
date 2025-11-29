@@ -79,6 +79,8 @@ const PuppyProfileCard: React.FC<PuppyProfileCardProps> = ({
         return <Badge variant="warning" className="text-xs px-3 py-0.5">{t('puppies.statuses.reserved')}</Badge>;
       case 'Sold':
         return <Badge variant="success" className="text-xs px-3 py-0.5">{t('puppies.statuses.sold')}</Badge>;
+      case 'Kept':
+        return <Badge className="bg-purple-100 text-purple-800 text-xs px-3 py-0.5">{t('puppies.statuses.kept')}</Badge>;
       default:
         return <Badge variant="info" className="text-xs px-3 py-0.5">{t('puppies.statuses.available')}</Badge>;
     }

@@ -183,6 +183,8 @@ const PuppyProfile: React.FC = () => {
         return <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">{t('puppies.statuses.reserved')}</Badge>;
       case 'Sold':
         return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">{t('puppies.statuses.sold')}</Badge>;
+      case 'Kept':
+        return <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">{t('puppies.statuses.kept')}</Badge>;
       default:
         return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">{t('puppies.statuses.available')}</Badge>;
     }

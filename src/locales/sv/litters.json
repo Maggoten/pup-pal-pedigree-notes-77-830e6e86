@@ -230,6 +230,7 @@
       "available": "Tillgänglig",
       "reserved": "Reserverad", 
       "sold": "Såld",
+      "kept": "Behållen",
       "deceased": "Avliden"
     },
     "actions": {

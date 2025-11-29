@@ -230,6 +230,7 @@
       "available": "Available",
       "reserved": "Reserved", 
       "sold": "Sold",
+      "kept": "Kept",
       "deceased": "Deceased"
     },
     "actions": {
