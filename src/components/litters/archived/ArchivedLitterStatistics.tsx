@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, TrendingUp, Users, Activity } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import LogTypeToggle from '../charts/LogTypeToggle';
 
 interface ArchivedLitterStatisticsProps {
   statistics: {
@@ -24,6 +25,14 @@ const ArchivedLitterStatistics: React.FC<ArchivedLitterStatisticsProps> = ({
   averageHeightLog 
 }) => {
   const { t } = useTranslation('litters');
+  const [logType, setLogType] = useState<'weight' | 'height'>('weight');
+
+  const currentData = logType === 'weight' ? averageWeightLog : averageHeightLog;
+  const dataKey = logType === 'weight' ? 'weight' : 'height';
+  const yAxisLabel = logType === 'weight' ? 'Weight (kg)' : 'Height (cm)';
+  const tooltipLabel = logType === 'weight' ? t('puppies.labels.weight') : t('puppies.labels.height');
+  const tooltipFormatter = (value: number) => logType === 'weight' ? `${value.toFixed(3)} kg` : `${value.toFixed(1)} cm`;
+  const lineName = logType === 'weight' ? t('puppies.labels.averageWeight') : t('puppies.labels.averageHeight');
 
   return (
     <div className="space-y-6">
@@ -99,38 +108,47 @@ const ArchivedLitterStatistics: React.FC<ArchivedLitterStatisticsProps> = ({
             </div>
           </div>
 
-          {/* Weight Chart */}
-          {averageWeightLog.length > 0 && (
+          {/* Growth Chart with Toggle */}
+          {(averageWeightLog.length > 0 || averageHeightLog.length > 0) && (
             <div className="mt-6">
-              <h4 className="text-sm font-medium mb-4">
-                {t('archivedLitters.statistics.litterGrowthChart')}
-              </h4>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={averageWeightLog}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fontSize: 12 }}
-                    tickFormatter={(value) => new Date(value).toLocaleDateString()}
-                  />
-                  <YAxis 
-                    label={{ value: 'Weight (kg)', angle: -90, position: 'insideLeft' }}
-                    tick={{ fontSize: 12 }}
-                  />
-                  <Tooltip 
-                    labelFormatter={(value) => new Date(value).toLocaleDateString()}
-                    formatter={(value: number) => [`${value.toFixed(3)} kg`, t('puppies.labels.weight')]}
-                  />
-                  <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="weight" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth={2}
-                    name={t('puppies.labels.averageWeight')}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-sm font-medium">
+                  {t('archivedLitters.statistics.litterGrowthChart')}
+                </h4>
+                <LogTypeToggle logType={logType} setLogType={setLogType} />
+              </div>
+              {currentData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={currentData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={(value) => new Date(value).toLocaleDateString()}
+                    />
+                    <YAxis 
+                      label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }}
+                      tick={{ fontSize: 12 }}
+                    />
+                    <Tooltip 
+                      labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                      formatter={(value: number) => [tooltipFormatter(value), tooltipLabel]}
+                    />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey={dataKey}
+                      stroke="hsl(var(--primary))" 
+                      strokeWidth={2}
+                      name={lineName}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  {t('archivedLitters.statistics.noDataAvailable')}
+                </p>
+              )}
             </div>
           )}
         </CardContent>

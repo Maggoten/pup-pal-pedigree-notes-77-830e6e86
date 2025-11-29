@@ -11,6 +11,7 @@ import MyDogs from "./pages/MyDogs";
 import PlannedLitters from "./pages/PlannedLitters";
 import PregnancyDetails from "./pages/PregnancyDetails";
 import MyLitters from "./pages/MyLitters";
+import LitterDetailsPage from "./pages/LitterDetailsPage";
 import PuppyProfile from "./pages/PuppyProfile";
 import Login from "./pages/Login";
 import RegistrationSuccess from "./pages/RegistrationSuccess";
@@ -167,6 +168,7 @@ const App = () => {
                       } />
                       <Route path="/pregnancy/:id" element={<PregnancyDetails />} />
                       <Route path="/my-litters" element={<MyLitters />} />
+                      <Route path="/my-litters/:litterId" element={<LitterDetailsPage />} />
                       <Route path="/my-litters/:litterId/puppy/:puppyId" element={<PuppyProfile />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
