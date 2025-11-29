@@ -52,7 +52,9 @@
       "title": "Inga kullar ännu",
       "description": "Dina registrerade kullar kommer att visas här när du börjar följa upp dina kullar"
     },
-    "noPuppies": "Inga valpar i denna kull"
+    "noPuppies": "Inga valpar i denna kull",
+    "noLitterFound": "Kullen hittades inte",
+    "noLitterFoundDescription": "Denna kull kunde inte hittas eller så har du inte tillgång till den"
   },
   "filters": {
     "all": "Alla",
@@ -117,8 +119,10 @@
     "saving": "Sparar...",
     "deleting": "Tar bort...",
     "archiving": "Arkiverar...",
+    "unarchiving": "Återaktiverar...",
     "preparing": "Förbereder anslutning...",
-    "refreshing": "Uppdaterar..."
+    "refreshing": "Uppdaterar...",
+    "litterDetails": "Laddar kulldetaljer..."
   },
   "puppies": {
     "filter": {
@@ -608,28 +612,33 @@
       "bornOn": "Född",
       "archivedOn": "Arkiverad"
     },
-      "summary": {
-        "title": "Kullöversikt",
-        "totalBorn": "Totalt födda",
-        "living": "Levande",
-        "deceased": "Döda",
-        "males": "Hanar",
-        "females": "Tikar"
-      },
-      "statistics": {
-        "title": "Statistik & Tillväxt",
-        "avgBirthWeight": "Genomsnittlig födelsevikt",
-        "avgFinalWeight": "Genomsnittlig slutvikt",
-        "litterGrowthChart": "Kullens tillväxt",
-        "noDataAvailable": "Ingen data tillgänglig för detta diagram"
-      },
-      "puppies": {
-        "title": "Valpar",
-        "registrationNumber": "Reg.nr",
-        "buyerInfo": "Köpare"
-      },
+    "summary": {
+      "title": "Kullöversikt",
+      "totalBorn": "Totalt födda",
+      "living": "Levande",
+      "deceased": "Döda",
+      "males": "Hanar",
+      "females": "Tikar"
+    },
+    "statistics": {
+      "title": "Statistik & Tillväxt",
+      "avgBirthWeight": "Genomsnittlig födelsevikt",
+      "avgFinalWeight": "Genomsnittlig slutvikt",
+      "litterGrowthChart": "Kullens tillväxt",
+      "noDataAvailable": "Ingen data tillgänglig för detta diagram"
+    },
+    "puppies": {
+      "title": "Valpar",
+      "registrationNumber": "Reg.nr",
+      "buyerInfo": "Köpare"
+    },
     "actions": {
       "viewFullDetails": "Se fullständiga detaljer"
+    },
+    "checklist": {
+      "description": "Översikt över slutförda utvecklingsaktiviteter",
+      "overallProgress": "Övergripande Framsteg",
+      "timelineProgress": "Tidslinjeframsteg"
     }
   }
 }

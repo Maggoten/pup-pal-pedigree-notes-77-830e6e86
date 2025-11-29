@@ -1,22 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Loader2, FileText } from 'lucide-react';
+import { Archive } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { getArchivedLitterDetails, ArchivedLitterData } from '@/services/ArchivedLitterService';
 import ArchivedLitterHero from './ArchivedLitterHero';
 import ArchivedLitterStatistics from './ArchivedLitterStatistics';
 import ArchivedPuppyList from './ArchivedPuppyList';
+import ArchivedDevelopmentChecklist from './ArchivedDevelopmentChecklist';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useLitterQueries } from '@/hooks/litters/queries';
+import { toast } from '@/hooks/use-toast';
 
 interface ArchivedLitterSummaryProps {
   litterId: string;
+  onUnarchive?: () => void;
 }
 
-const ArchivedLitterSummary: React.FC<ArchivedLitterSummaryProps> = ({ litterId }) => {
+const ArchivedLitterSummary: React.FC<ArchivedLitterSummaryProps> = ({ litterId, onUnarchive }) => {
   const { t } = useTranslation('litters');
-  const navigate = useNavigate();
+  const { archiveLitter } = useLitterQueries();
   const [data, setData] = useState<ArchivedLitterData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isUnarchiving, setIsUnarchiving] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,11 +34,39 @@ const ArchivedLitterSummary: React.FC<ArchivedLitterSummaryProps> = ({ litterId 
     fetchData();
   }, [litterId]);
 
+  const handleUnarchive = async () => {
+    if (!data) return;
+    
+    setIsUnarchiving(true);
+    try {
+      archiveLitter(litterId, false);
+      toast({
+        title: t('toast.success'),
+        description: t('toasts.success.litterUnarchived')
+      });
+      
+      // Call parent callback if provided
+      if (onUnarchive) {
+        onUnarchive();
+      }
+    } catch (error) {
+      console.error('Error unarchiving litter:', error);
+      toast({
+        title: t('toast.error'),
+        description: t('toasts.error.failedToArchiveLitter'),
+        variant: 'destructive'
+      });
+    } finally {
+      setIsUnarchiving(false);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2 text-lg">{t('loading.litterDetails')}</span>
+      <div className="space-y-6">
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-96 w-full" />
       </div>
     );
   }
@@ -47,12 +80,20 @@ const ArchivedLitterSummary: React.FC<ArchivedLitterSummaryProps> = ({ litterId 
     );
   }
 
-  const handleViewFullDetails = () => {
-    navigate(`/my-litters/${litterId}`);
-  };
-
   return (
     <div className="space-y-8">
+      {/* Unarchive Button */}
+      <div className="flex justify-end">
+        <Button 
+          variant="outline" 
+          onClick={handleUnarchive}
+          disabled={isUnarchiving}
+        >
+          <Archive className="mr-2 h-4 w-4" />
+          {isUnarchiving ? t('loading.unarchiving') : t('actions.unarchive')}
+        </Button>
+      </div>
+
       {/* Hero Section */}
       <ArchivedLitterHero 
         litter={data.litter}
@@ -67,16 +108,11 @@ const ArchivedLitterSummary: React.FC<ArchivedLitterSummaryProps> = ({ litterId 
         averageHeightLog={data.averageHeightLog}
       />
 
+      {/* Development Checklist */}
+      <ArchivedDevelopmentChecklist litter={data.litter} />
+
       {/* Puppy List */}
       <ArchivedPuppyList puppies={data.litter.puppies || []} />
-
-      {/* View Full Details Button */}
-      <div className="flex justify-center pt-4">
-        <Button variant="outline" size="lg" onClick={handleViewFullDetails}>
-          <FileText className="mr-2 h-4 w-4" />
-          {t('archivedLitters.actions.viewFullDetails')}
-        </Button>
-      </div>
     </div>
   );
 };
