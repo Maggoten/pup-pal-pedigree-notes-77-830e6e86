@@ -43,13 +43,16 @@
     "age": "Ålder",
     "weekOld": "vecka gammal",
     "weeksOld": "veckor gammal",
-    "total": "totalt"
+    "total": "totalt",
+    "dam": "Tik (Mamma)",
+    "sire": "Hane (Pappa)"
   },
   "empty": {
     "myLitters": {
       "title": "Inga kullar ännu",
       "description": "Dina registrerade kullar kommer att visas här när du börjar följa upp dina kullar"
-    }
+    },
+    "noPuppies": "Inga valpar i denna kull"
   },
   "filters": {
     "all": "Alla",
@@ -62,7 +65,11 @@
   "status": {
     "born": "Födda",
     "weaning": "Avvänjning",
-    "ready": "Redo för Nya Hem"
+    "ready": "Redo för Nya Hem",
+    "available": "Tillgänglig",
+    "reserved": "Reserverad",
+    "sold": "Såld",
+    "deceased": "Avliden"
   },
   "validation": {
     "damRequired": "Tik krävs",
@@ -594,14 +601,14 @@
         "title": "Fel"
       }
     },
-    "archivedLitters": {
+      "archivedLitters": {
       "hero": {
         "archived": "Arkiverad",
         "bornOn": "Född",
         "archivedOn": "Arkiverad"
       },
       "summary": {
-        "title": "Valpöversikt",
+        "title": "Kullöversikt",
         "totalBorn": "Totalt födda",
         "living": "Levande",
         "deceased": "Döda",

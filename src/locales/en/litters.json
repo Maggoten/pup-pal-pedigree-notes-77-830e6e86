@@ -43,13 +43,16 @@
     "age": "Age",
     "weekOld": "week old",
     "weeksOld": "weeks old",
-    "total": "total"
+    "total": "total",
+    "dam": "Dam (Mother)",
+    "sire": "Sire (Father)"
   },
   "empty": {
     "myLitters": {
       "title": "No Litters Yet",
       "description": "Your recorded litters will appear here once you start tracking births"
-    }
+    },
+    "noPuppies": "No puppies in this litter"
   },
   "filters": {
     "all": "All",
@@ -62,7 +65,11 @@
   "status": {
     "born": "Born",
     "weaning": "Weaning",
-    "ready": "Ready for New Homes"
+    "ready": "Ready for New Homes",
+    "available": "Available",
+    "reserved": "Reserved",
+    "sold": "Sold",
+    "deceased": "Deceased"
   },
   "validation": {
     "damRequired": "Dam (female dog) is required",
@@ -594,14 +601,14 @@
         "title": "Error"
       }
     },
-    "archivedLitters": {
+      "archivedLitters": {
       "hero": {
         "archived": "Archived",
         "bornOn": "Born on",
         "archivedOn": "Archived on"
       },
       "summary": {
-        "title": "Puppy Summary",
+        "title": "Litter Summary",
         "totalBorn": "Total Born",
         "living": "Living",
         "deceased": "Deceased",
