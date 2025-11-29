@@ -600,13 +600,14 @@
       "error": {
         "title": "Fel"
       }
+    }
+  },
+  "archivedLitters": {
+    "hero": {
+      "archived": "Arkiverad",
+      "bornOn": "Född",
+      "archivedOn": "Arkiverad"
     },
-      "archivedLitters": {
-      "hero": {
-        "archived": "Arkiverad",
-        "bornOn": "Född",
-        "archivedOn": "Arkiverad"
-      },
       "summary": {
         "title": "Kullöversikt",
         "totalBorn": "Totalt födda",
@@ -627,9 +628,8 @@
         "registrationNumber": "Reg.nr",
         "buyerInfo": "Köpare"
       },
-      "actions": {
-        "viewFullDetails": "Se fullständiga detaljer"
-      }
+    "actions": {
+      "viewFullDetails": "Se fullständiga detaljer"
     }
   }
 }

@@ -600,13 +600,14 @@
       "error": {
         "title": "Error"
       }
+    }
+  },
+  "archivedLitters": {
+    "hero": {
+      "archived": "Archived",
+      "bornOn": "Born on",
+      "archivedOn": "Archived on"
     },
-      "archivedLitters": {
-      "hero": {
-        "archived": "Archived",
-        "bornOn": "Born on",
-        "archivedOn": "Archived on"
-      },
       "summary": {
         "title": "Litter Summary",
         "totalBorn": "Total Born",
@@ -627,9 +628,8 @@
         "registrationNumber": "Reg. No.",
         "buyerInfo": "Buyer"
       },
-      "actions": {
-        "viewFullDetails": "View Full Details"
-      }
+    "actions": {
+      "viewFullDetails": "View Full Details"
     }
   }
 }
