@@ -70,6 +70,10 @@
     "dateRequired": "Datum krävs",
     "invalidDate": "Vänligen ange ett giltigt datum"
   },
+  "toast": {
+    "success": "Lyckades",
+    "error": "Fel"
+  },
   "toasts": {
     "success": {
       "litterArchived": "Kull arkiverad",
@@ -177,6 +181,8 @@
       "height": "Höjd",
       "weightKg": "Vikt (kg)",
       "heightCm": "Höjd (cm)",
+      "averageWeight": "Genomsnittlig vikt",
+      "averageHeight": "Genomsnittlig höjd",
       "date": "Datum",
       "time": "Tid",
       "notSet": "Ej angett",
@@ -313,7 +319,8 @@
       "unarchive": "Aktivera", 
       "delete": "Ta bort",
       "viewDetails": "Visa Detaljer",
-      "addLitter": "Lägg till Kull"
+      "addLitter": "Lägg till Kull",
+      "backToLitters": "Tillbaka till Kullar"
     },
     "confirmations": {
       "deleteLitter": "Är du säker på att du vill ta bort {{name}}? Denna åtgärd kan inte ångras.",
@@ -321,6 +328,7 @@
       "archiveLitter": "Arkivera kull",
       "unarchiveLitter": "Aktivera kull"
     },
+    "notFound": "Kullen hittades inte",
     "edit": {
       "description": "Uppdatera information för {{litterName}}",
       "archiveButton": "Arkivera Kull",
@@ -604,7 +612,8 @@
         "title": "Statistik & Tillväxt",
         "avgBirthWeight": "Genomsnittlig födelsevikt",
         "avgFinalWeight": "Genomsnittlig slutvikt",
-        "litterGrowthChart": "Kullens tillväxt"
+        "litterGrowthChart": "Kullens tillväxt",
+        "noDataAvailable": "Ingen data tillgänglig för detta diagram"
       },
       "puppies": {
         "title": "Valpar",

@@ -70,6 +70,10 @@
     "dateRequired": "Date is required",
     "invalidDate": "Please enter a valid date"
   },
+  "toast": {
+    "success": "Success",
+    "error": "Error"
+  },
   "toasts": {
     "success": {
       "litterArchived": "Litter archived successfully",
@@ -177,6 +181,8 @@
       "height": "Height",
       "weightKg": "Weight (kg)",
       "heightCm": "Height (cm)",
+      "averageWeight": "Average Weight",
+      "averageHeight": "Average Height",
       "date": "Date",
       "time": "Time",
       "notSet": "Not set",
@@ -313,7 +319,8 @@
       "unarchive": "Unarchive", 
       "delete": "Delete",
       "viewDetails": "View Details",
-      "addLitter": "Add Litter"
+      "addLitter": "Add Litter",
+      "backToLitters": "Back to Litters"
     },
     "confirmations": {
       "deleteLitter": "Are you sure you want to delete {{name}}? This action cannot be undone.",
@@ -321,6 +328,7 @@
       "archiveLitter": "Archive litter",
       "unarchiveLitter": "Unarchive litter"
     },
+    "notFound": "Litter not found",
     "edit": {
       "description": "Update information for {{litterName}}",
       "archiveButton": "Archive Litter",
@@ -604,7 +612,8 @@
         "title": "Statistics & Growth",
         "avgBirthWeight": "Average Birth Weight",
         "avgFinalWeight": "Average Final Weight",
-        "litterGrowthChart": "Litter Growth Chart"
+        "litterGrowthChart": "Litter Growth Chart",
+        "noDataAvailable": "No data available for this chart"
       },
       "puppies": {
         "title": "Puppies",
