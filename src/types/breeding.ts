@@ -74,7 +74,7 @@ export interface Puppy {
   heightLog: PuppyHeightRecord[];
   registered_name?: string;
   registration_number?: string;
-  status?: 'Available' | 'Reserved' | 'Sold';
+  status?: 'Available' | 'Reserved' | 'Sold' | 'Kept';
   buyer_name?: string;
   buyer_phone?: string;
   weeklyPhotos?: PuppyWeeklyPhoto[];

@@ -89,6 +89,8 @@ const PuppyTableRow = memo(({
         return <Badge variant="outline" className="bg-rustbrown-100 text-xs">{t('puppies.statuses.reserved')}</Badge>;
       case 'Sold':
         return <Badge variant="outline" className="bg-warmgreen-100 text-xs">{t('puppies.statuses.sold')}</Badge>;
+      case 'Kept':
+        return <Badge variant="outline" className="bg-purple-100 text-purple-800 text-xs">{t('puppies.statuses.kept')}</Badge>;
       default:
         return <Badge variant="outline" className="text-xs">{t('puppies.statuses.available')}</Badge>;
     }

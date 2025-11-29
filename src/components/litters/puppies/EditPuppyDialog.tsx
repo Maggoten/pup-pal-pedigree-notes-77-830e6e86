@@ -54,7 +54,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
       markings: formData.markings || null,
       microchip: formData.microchip || '',
       collar: formData.collar || '',
-      status: formData.status as 'Available' | 'Reserved' | 'Sold',
+      status: formData.status as 'Available' | 'Reserved' | 'Sold' | 'Kept',
       newOwner: formData.newOwner || null,
       birthDateTime: formData.birthDateTime ? new Date(formData.birthDateTime).toISOString() : puppy.birthDateTime,
       currentWeight: formData.currentWeight ? parseFloat(formData.currentWeight) : puppy.currentWeight,
@@ -209,7 +209,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
             
             <div className="space-y-2">
               <Label htmlFor="status">{t('puppies.labels.status')}</Label>
-              <Select value={formData.status} onValueChange={(value: 'Available' | 'Reserved' | 'Sold') => setFormData({
+              <Select value={formData.status} onValueChange={(value: 'Available' | 'Reserved' | 'Sold' | 'Kept') => setFormData({
               ...formData,
               status: value
             })}>
@@ -220,6 +220,7 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
                   <SelectItem value="Available">{t('puppies.statuses.available')}</SelectItem>
                   <SelectItem value="Reserved">{t('puppies.statuses.reserved')}</SelectItem>
                   <SelectItem value="Sold">{t('puppies.statuses.sold')}</SelectItem>
+                  <SelectItem value="Kept">{t('puppies.statuses.kept')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
