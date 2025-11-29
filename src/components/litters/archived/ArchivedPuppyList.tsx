@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -8,10 +9,12 @@ import { Puppy } from '@/types/breeding';
 
 interface ArchivedPuppyListProps {
   puppies: Puppy[];
+  litterId: string;
 }
 
-const ArchivedPuppyList: React.FC<ArchivedPuppyListProps> = ({ puppies }) => {
+const ArchivedPuppyList: React.FC<ArchivedPuppyListProps> = ({ puppies, litterId }) => {
   const { t } = useTranslation('litters');
+  const navigate = useNavigate();
 
   const getStatusVariant = (status?: string) => {
     switch (status) {
@@ -35,7 +38,11 @@ const ArchivedPuppyList: React.FC<ArchivedPuppyListProps> = ({ puppies }) => {
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {puppies.map((puppy) => (
-            <Card key={puppy.id} className="overflow-hidden">
+            <Card 
+              key={puppy.id} 
+              className="overflow-hidden cursor-pointer transition-all hover:shadow-md hover:border-primary/50"
+              onClick={() => navigate(`/my-litters/${litterId}/puppy/${puppy.id}`)}
+            >
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   <Avatar className="h-16 w-16">

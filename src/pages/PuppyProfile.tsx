@@ -42,6 +42,9 @@ const PuppyProfile: React.FC = () => {
 
   // Find the puppy in the litter
   const selectedPuppy = litter?.puppies?.find(p => p.id === puppyId);
+  
+  // Check if litter is archived for read-only mode
+  const isArchived = litter?.archived || false;
 
   // Add logging to track when puppy data changes
   useEffect(() => {
@@ -214,15 +217,17 @@ const PuppyProfile: React.FC = () => {
           <ArrowLeft className="h-4 w-4 mr-2" />
           {t('puppies.actions.backToLitters')}
         </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {t('actions.refresh')}
-        </Button>
+        {!isArchived && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {t('actions.refresh')}
+          </Button>
+        )}
       </div>
 
       {/* Main Profile Card */}
@@ -244,6 +249,11 @@ const PuppyProfile: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {isArchived && (
+              <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
+                Arkiverad kull
+              </Badge>
+            )}
             {getStatusBadge(selectedPuppy)}
           </div>
         </CardHeader>
@@ -273,7 +283,7 @@ const PuppyProfile: React.FC = () => {
           </Tabs>
         </CardContent>
 
-        {activeTab === 'overview' && (
+        {activeTab === 'overview' && !isArchived && (
           <CardFooter className="flex justify-between items-center">
             <Button 
               variant="destructive" 
