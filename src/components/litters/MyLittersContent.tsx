@@ -138,7 +138,13 @@ const MyLittersContent: React.FC = () => {
         <div className="space-y-4">
           {/* Show archived summary for archived litters */}
           {selectedLitter.archived ? (
-            <ArchivedLitterSummary litterId={selectedLitter.id} />
+            <ArchivedLitterSummary 
+              litterId={selectedLitter.id}
+              onUnarchive={() => {
+                // After unarchiving, refresh the litters data
+                refreshLitters();
+              }}
+            />
           ) : (
             <>
               <SelectedLitterHeader 

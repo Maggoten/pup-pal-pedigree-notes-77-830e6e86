@@ -52,7 +52,9 @@
       "title": "No Litters Yet",
       "description": "Your recorded litters will appear here once you start tracking births"
     },
-    "noPuppies": "No puppies in this litter"
+    "noPuppies": "No puppies in this litter",
+    "noLitterFound": "Litter not found",
+    "noLitterFoundDescription": "This litter could not be found or you don't have access to it"
   },
   "filters": {
     "all": "All",
@@ -117,8 +119,10 @@
     "saving": "Saving...",
     "deleting": "Deleting...",
     "archiving": "Archiving...",
+    "unarchiving": "Unarchiving...",
     "preparing": "Preparing connection...",
-    "refreshing": "Refreshing..."
+    "refreshing": "Refreshing...",
+    "litterDetails": "Loading litter details..."
   },
   "puppies": {
     "filter": {
@@ -608,28 +612,33 @@
       "bornOn": "Born on",
       "archivedOn": "Archived on"
     },
-      "summary": {
-        "title": "Litter Summary",
-        "totalBorn": "Total Born",
-        "living": "Living",
-        "deceased": "Deceased",
-        "males": "Males",
-        "females": "Females"
-      },
-      "statistics": {
-        "title": "Statistics & Growth",
-        "avgBirthWeight": "Average Birth Weight",
-        "avgFinalWeight": "Average Final Weight",
-        "litterGrowthChart": "Litter Growth Chart",
-        "noDataAvailable": "No data available for this chart"
-      },
-      "puppies": {
-        "title": "Puppies",
-        "registrationNumber": "Reg. No.",
-        "buyerInfo": "Buyer"
-      },
+    "summary": {
+      "title": "Litter Summary",
+      "totalBorn": "Total Born",
+      "living": "Living",
+      "deceased": "Deceased",
+      "males": "Males",
+      "females": "Females"
+    },
+    "statistics": {
+      "title": "Statistics & Growth",
+      "avgBirthWeight": "Average Birth Weight",
+      "avgFinalWeight": "Average Final Weight",
+      "litterGrowthChart": "Litter Growth Chart",
+      "noDataAvailable": "No data available for this chart"
+    },
+    "puppies": {
+      "title": "Puppies",
+      "registrationNumber": "Reg. No.",
+      "buyerInfo": "Buyer"
+    },
     "actions": {
       "viewFullDetails": "View Full Details"
+    },
+    "checklist": {
+      "description": "Overview of completed development activities",
+      "overallProgress": "Overall Progress",
+      "timelineProgress": "Timeline Progress"
     }
   }
 }
