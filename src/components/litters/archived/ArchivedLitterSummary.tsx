@@ -101,15 +101,15 @@ const ArchivedLitterSummary: React.FC<ArchivedLitterSummaryProps> = ({ litterId,
         sireImageUrl={data.sireImageUrl}
       />
 
-      {/* Puppy List */}
-      <ArchivedPuppyList puppies={data.litter.puppies || []} />
-
       {/* Statistics & Growth Charts */}
       <ArchivedLitterStatistics 
         statistics={data.statistics}
         averageWeightLog={data.averageWeightLog}
         averageHeightLog={data.averageHeightLog}
       />
+
+      {/* Puppy List */}
+      <ArchivedPuppyList puppies={data.litter.puppies || []} />
 
       {/* Development Checklist */}
       <ArchivedDevelopmentChecklist litter={data.litter} />
