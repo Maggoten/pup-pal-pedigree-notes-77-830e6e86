@@ -339,7 +339,19 @@ export async function markHeatAsStarted(eventId: string, dogs: Dog[]): Promise<b
           );
           console.log('Heat cycle created in journal from calendar');
         } else {
-          console.log('Active heat cycle already exists for dog:', event.dog_id);
+          // Update the existing cycle's start date to match the calendar event
+          console.log('Active heat cycle already exists, updating start date to match calendar event');
+          await HeatService.updateHeatCycle(existingCycle.id, {
+            start_date: startDate.toISOString(),
+            notes: event.notes || existingCycle.notes
+          });
+          
+          // Re-sync to calendar to update predictive events with new dates
+          await HeatCalendarSyncService.syncHeatCycleToCalendar(
+            { ...existingCycle, start_date: startDate.toISOString() },
+            event.dog_name || 'Unknown'
+          );
+          console.log('Existing heat cycle start date updated to:', startDate.toISOString());
         }
       } catch (syncError) {
         console.error('Error creating heat cycle in journal:', syncError);
