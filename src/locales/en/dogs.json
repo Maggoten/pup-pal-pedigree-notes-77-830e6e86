@@ -10,6 +10,11 @@
     "edit": "Edit",
     "add": "Add",
     "close": "Close",
+    "imageUploader": {
+      "uploading": "Uploading...",
+      "change": "Change",
+      "upload": "Upload"
+    },
     "confirm": "Confirm",
     "yes": "Yes",
     "no": "No",

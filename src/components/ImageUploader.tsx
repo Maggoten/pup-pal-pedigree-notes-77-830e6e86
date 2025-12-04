@@ -9,6 +9,7 @@ import { toast } from '@/components/ui/use-toast';
 import { getPlatformInfo } from '@/utils/storage/mobileUpload';
 import { uploadStateManager } from '@/components/AuthGuard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useTranslation } from 'react-i18next';
 
 interface ImageUploaderProps {
   currentImage?: string;
@@ -22,6 +23,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   className = ''
 }) => {
   const { user, isAuthReady } = useAuth();
+  const { t } = useTranslation('dogs');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isInitialRender, setIsInitialRender] = useState(true);
   const [visibleError, setVisibleError] = useState<string | null>(null);
@@ -228,12 +230,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           {isUploading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Uploading...
+              {t('common.imageUploader.uploading')}
             </>
           ) : (
             <>
               <UploadIcon className="mr-2 h-4 w-4" />
-              {currentImage && !isPlaceholder ? 'Change' : 'Upload'}
+              {currentImage && !isPlaceholder ? t('common.imageUploader.change') : t('common.imageUploader.upload')}
             </>
           )}
         </Button>
