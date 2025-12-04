@@ -558,6 +558,25 @@
         "linkDescription": "Koppla denna kull till en arkiverad dräktighet för att se temperaturkurva och symptom"
       }
     },
+    "pregnancyForm": {
+      "labels": {
+        "selectPregnancy": "Välj dräktighet",
+        "matingDate": "Parningsdatum",
+        "expectedDueDate": "Beräknat födelsedatum",
+        "externalSire": "Extern hane"
+      },
+      "placeholders": {
+        "selectPregnancy": "Välj dräktighet...",
+        "litterName": "T.ex. Bellas kull 2024"
+      },
+      "empty": {
+        "title": "Inga aktiva dräktigheter",
+        "description": "Du har inga aktiva dräktigheter att skapa en kull från."
+      },
+      "unknownDam": "Okänd tik",
+      "unknownSire": "Okänd hane",
+      "litterNameTemplate": "{{name}}s kull"
+    },
     "plannedLitterForm": {
       "labels": {
         "selectPlanned": "Välj Planerad Kull",
