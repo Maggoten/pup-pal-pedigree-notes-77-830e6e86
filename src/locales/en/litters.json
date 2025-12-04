@@ -519,7 +519,7 @@
       "description": "Create a new litter record for your breeding program",
       "tabs": {
         "newLitter": "New Litter",
-        "fromPlanned": "From Planned Litter"
+        "fromPregnancy": "From Pregnancy"
       }
     },
     "form": {

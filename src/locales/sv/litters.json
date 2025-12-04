@@ -519,7 +519,7 @@
       "description": "Skapa en ny kullregistrering för ditt uppfödningsprogram",
       "tabs": {
         "newLitter": "Ny Kull",
-        "fromPlanned": "Från Planerad Kull"
+        "fromPregnancy": "Från dräktighet"
       }
     },
     "form": {
