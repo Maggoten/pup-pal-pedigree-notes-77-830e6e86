@@ -173,7 +173,6 @@ const MyLittersContent: React.FC = () => {
         open={showAddLitterDialog}
         onOpenChange={setShowAddLitterDialog}
         onAddLitter={handleAddLitter}
-        plannedLitters={plannedLitters}
       />
     </div>
   );
