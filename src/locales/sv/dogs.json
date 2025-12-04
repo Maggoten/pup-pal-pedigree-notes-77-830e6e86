@@ -13,7 +13,12 @@
     "confirm": "Bekräfta",
     "yes": "Ja",
     "no": "Nej",
-    "days": "dagar"
+    "days": "dagar",
+    "imageUploader": {
+      "uploading": "Laddar upp...",
+      "change": "Ändra",
+      "upload": "Ladda upp"
+    }
   },
   "page": {
     "title": "Mina Hundar",
