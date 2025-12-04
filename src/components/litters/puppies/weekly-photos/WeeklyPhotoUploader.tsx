@@ -43,8 +43,8 @@ const WeeklyPhotoUploader: React.FC<WeeklyPhotoUploaderProps> = ({
         setPreviewUrl(url);
       } else {
         toast({
-          title: "Fel filtyp",
-          description: "Endast bildfiler är tillåtna",
+          title: t('puppies.weeklyPhotos.dialog.invalidFileType'),
+          description: t('puppies.weeklyPhotos.dialog.onlyImagesAllowed'),
           variant: "destructive"
         });
       }
@@ -73,15 +73,15 @@ const WeeklyPhotoUploader: React.FC<WeeklyPhotoUploaderProps> = ({
       await onUpload(weekNumber, selectedFile, notes || undefined, weightNum, heightNum);
       
       toast({
-        title: "Uppladdning lyckades",
-        description: `Foto för vecka ${weekNumber} har sparats`
+        title: t('puppies.weeklyPhotos.dialog.uploadSuccess'),
+        description: t('puppies.weeklyPhotos.dialog.uploadSuccessDescription', { week: weekNumber })
       });
       
       handleClose();
     } catch (error) {
       toast({
-        title: "Uppladdning misslyckades",
-        description: "Kunde inte ladda upp fotot",
+        title: t('puppies.weeklyPhotos.dialog.uploadFailed'),
+        description: t('puppies.weeklyPhotos.dialog.uploadFailedDescription'),
         variant: "destructive"
       });
     } finally {
@@ -102,14 +102,14 @@ const WeeklyPhotoUploader: React.FC<WeeklyPhotoUploaderProps> = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            Lägg till foto - Vecka {weekNumber}
+            {t('puppies.weeklyPhotos.dialog.title', { week: weekNumber })}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* File Upload */}
           <div className="space-y-2">
-            <Label>Foto</Label>
+            <Label>{t('puppies.weeklyPhotos.dialog.photoLabel')}</Label>
             {!selectedFile ? (
               <div
                 onClick={() => fileInputRef.current?.click()}
@@ -117,7 +117,7 @@ const WeeklyPhotoUploader: React.FC<WeeklyPhotoUploaderProps> = ({
               >
                 <Camera className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  Klicka för att välja foto
+                  {t('puppies.weeklyPhotos.dialog.clickToSelect')}
                 </p>
               </div>
             ) : (
@@ -126,7 +126,7 @@ const WeeklyPhotoUploader: React.FC<WeeklyPhotoUploaderProps> = ({
                   <div className="relative">
                     <img
                       src={previewUrl!}
-                      alt="Preview"
+                      alt={t('puppies.weeklyPhotos.dialog.preview')}
                       className="w-full h-48 object-cover rounded-lg"
                     />
                     <Button
@@ -156,7 +156,7 @@ const WeeklyPhotoUploader: React.FC<WeeklyPhotoUploaderProps> = ({
           {/* Measurements */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="weight">Vikt (kg)</Label>
+              <Label htmlFor="weight">{t('puppies.weeklyPhotos.dialog.weightLabel')}</Label>
               <Input
                 id="weight"
                 type="number"
@@ -167,7 +167,7 @@ const WeeklyPhotoUploader: React.FC<WeeklyPhotoUploaderProps> = ({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="height">Höjd (cm)</Label>
+              <Label htmlFor="height">{t('puppies.weeklyPhotos.dialog.heightLabel')}</Label>
               <Input
                 id="height"
                 type="number"
@@ -181,12 +181,12 @@ const WeeklyPhotoUploader: React.FC<WeeklyPhotoUploaderProps> = ({
 
           {/* Notes */}
           <div className="space-y-2">
-            <Label htmlFor="notes">Anteckningar</Label>
+            <Label htmlFor="notes">{t('puppies.weeklyPhotos.dialog.notesLabel')}</Label>
             <Textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Lägg till anteckningar om valpens utveckling denna vecka..."
+              placeholder={t('puppies.weeklyPhotos.dialog.notesPlaceholder')}
               rows={3}
             />
           </div>
@@ -194,13 +194,13 @@ const WeeklyPhotoUploader: React.FC<WeeklyPhotoUploaderProps> = ({
           {/* Actions */}
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={handleClose}>
-              Avbryt
+              {t('puppies.weeklyPhotos.dialog.cancel')}
             </Button>
             <Button 
               onClick={handleUpload} 
               disabled={!selectedFile || isUploading}
             >
-              {isUploading ? "Laddar upp..." : "Spara"}
+              {isUploading ? t('puppies.weeklyPhotos.dialog.uploading') : t('puppies.weeklyPhotos.dialog.save')}
             </Button>
           </div>
         </div>

@@ -305,7 +305,26 @@
       "current": "Aktuell",
       "addPhoto": "Lägg till foto",
       "photoAlt": "Vecka {{week}}",
-      "addPhotoAriaLabel": "Lägg till foto för vecka {{week}}"
+      "addPhotoAriaLabel": "Lägg till foto för vecka {{week}}",
+      "dialog": {
+        "title": "Lägg till foto - Vecka {{week}}",
+        "photoLabel": "Foto",
+        "clickToSelect": "Klicka för att välja foto",
+        "preview": "Förhandsgranskning",
+        "weightLabel": "Vikt (kg)",
+        "heightLabel": "Höjd (cm)",
+        "notesLabel": "Anteckningar",
+        "notesPlaceholder": "Lägg till anteckningar om valpens utveckling denna vecka...",
+        "cancel": "Avbryt",
+        "save": "Spara",
+        "uploading": "Laddar upp...",
+        "uploadSuccess": "Uppladdning lyckades",
+        "uploadSuccessDescription": "Foto för vecka {{week}} har sparats",
+        "uploadFailed": "Uppladdning misslyckades",
+        "uploadFailedDescription": "Kunde inte ladda upp fotot",
+        "invalidFileType": "Fel filtyp",
+        "onlyImagesAllowed": "Endast bildfiler är tillåtna"
+      }
     },
     "tabs": {
       "overview": "Översikt",

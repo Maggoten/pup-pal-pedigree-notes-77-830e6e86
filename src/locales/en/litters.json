@@ -305,7 +305,26 @@
       "current": "Current",
       "addPhoto": "Add photo",
       "photoAlt": "Week {{week}}",
-      "addPhotoAriaLabel": "Add photo for week {{week}}"
+      "addPhotoAriaLabel": "Add photo for week {{week}}",
+      "dialog": {
+        "title": "Add photo - Week {{week}}",
+        "photoLabel": "Photo",
+        "clickToSelect": "Click to select photo",
+        "preview": "Preview",
+        "weightLabel": "Weight (kg)",
+        "heightLabel": "Height (cm)",
+        "notesLabel": "Notes",
+        "notesPlaceholder": "Add notes about the puppy's development this week...",
+        "cancel": "Cancel",
+        "save": "Save",
+        "uploading": "Uploading...",
+        "uploadSuccess": "Upload successful",
+        "uploadSuccessDescription": "Photo for week {{week}} has been saved",
+        "uploadFailed": "Upload failed",
+        "uploadFailedDescription": "Could not upload the photo",
+        "invalidFileType": "Invalid file type",
+        "onlyImagesAllowed": "Only image files are allowed"
+      }
     },
     "tabs": {
       "overview": "Overview",
