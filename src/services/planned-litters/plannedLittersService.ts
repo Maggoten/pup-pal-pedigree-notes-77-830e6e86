@@ -145,9 +145,10 @@ class PlannedLittersService {
   }
 
   // Re-export mating dates methods for backward compatibility
-  addMatingDate = matingDatesService.addMatingDate;
-  deleteMatingDate = matingDatesService.deleteMatingDate;
-  editMatingDate = matingDatesService.editMatingDate;
+  // Using .bind() to preserve the correct 'this' context
+  addMatingDate = matingDatesService.addMatingDate.bind(matingDatesService);
+  deleteMatingDate = matingDatesService.deleteMatingDate.bind(matingDatesService);
+  editMatingDate = matingDatesService.editMatingDate.bind(matingDatesService);
 }
 
 export const plannedLittersService = new PlannedLittersService();
