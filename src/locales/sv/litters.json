@@ -346,8 +346,7 @@
       "bornLabel": "Född: {{date}}",
       "totalCount": "{{count}} totalt",
       "archivedOn": "Arkiverad den {{date}}",
-      "ageWeeks": "{{weeks}} veckor gammal",
-      "litterName": "{{damName}}'s kull"
+      "ageWeeks": "{{weeks}} veckor gammal"
     },
     "placeholders": {
       "litterName": "Ange kullnamn",
