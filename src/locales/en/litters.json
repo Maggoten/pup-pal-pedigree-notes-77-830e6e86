@@ -346,8 +346,7 @@
       "bornLabel": "Born: {{date}}",
       "totalCount": "{{count}} total",
       "archivedOn": "Archived on {{date}}",
-      "ageWeeks": "{{weeks}} weeks old",
-      "litterName": "{{damName}}'s litter"
+      "ageWeeks": "{{weeks}} weeks old"
     },
     "placeholders": {
       "litterName": "Enter litter name",
