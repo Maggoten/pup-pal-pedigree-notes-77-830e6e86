@@ -299,6 +299,17 @@
         "kg": "kg",
         "cm": "cm"
       }
+    },
+    "weeklyPhotos": {
+      "week": "Week {{week}}",
+      "current": "Current",
+      "addPhoto": "Add photo",
+      "photoAlt": "Week {{week}}",
+      "addPhotoAriaLabel": "Add photo for week {{week}}"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "photos": "Photos"
     }
   },
   "litter": {

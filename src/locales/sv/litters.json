@@ -299,6 +299,17 @@
         "kg": "kg",
         "cm": "cm"
       }
+    },
+    "weeklyPhotos": {
+      "week": "Vecka {{week}}",
+      "current": "Aktuell",
+      "addPhoto": "Lägg till foto",
+      "photoAlt": "Vecka {{week}}",
+      "addPhotoAriaLabel": "Lägg till foto för vecka {{week}}"
+    },
+    "tabs": {
+      "overview": "Översikt",
+      "photos": "Foton"
     }
   },
   "litter": {
