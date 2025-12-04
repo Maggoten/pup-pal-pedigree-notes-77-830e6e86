@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Litter } from '@/types/breeding';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Baby, Heart, Calendar } from 'lucide-react';
+import { Loader2, PawPrint, Heart, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import DatePicker from '@/components/common/DatePicker';
@@ -274,7 +274,7 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
   if (pregnancies.length === 0) {
     return (
       <div className="text-center py-6">
-        <Baby className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
+        <PawPrint className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
         <h3 className="text-lg font-medium mb-2">{t('dialog.pregnancyForm.empty.title')}</h3>
         <p className="text-sm text-muted-foreground mb-4">
           {t('dialog.pregnancyForm.empty.description')}
@@ -327,7 +327,7 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
               </span>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <Baby className="h-4 w-4 text-purple-600" />
+              <PawPrint className="h-4 w-4 text-purple-600" />
               <span className="text-muted-foreground">{t('dialog.pregnancyForm.labels.expectedDueDate')}:</span>
               <span className="font-medium">
                 {format(new Date(selectedPregnancy.expected_due_date), 'dd MMMM yyyy')}
