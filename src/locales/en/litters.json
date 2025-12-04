@@ -558,6 +558,25 @@
         "linkDescription": "Link this litter to an archived pregnancy to view temperature curve and symptoms"
       }
     },
+    "pregnancyForm": {
+      "labels": {
+        "selectPregnancy": "Select pregnancy",
+        "matingDate": "Mating date",
+        "expectedDueDate": "Expected due date",
+        "externalSire": "External sire"
+      },
+      "placeholders": {
+        "selectPregnancy": "Select pregnancy...",
+        "litterName": "E.g. Bella's litter 2024"
+      },
+      "empty": {
+        "title": "No active pregnancies",
+        "description": "You have no active pregnancies to create a litter from."
+      },
+      "unknownDam": "Unknown dam",
+      "unknownSire": "Unknown sire",
+      "litterNameTemplate": "{{name}}'s litter"
+    },
     "plannedLitterForm": {
       "labels": {
         "selectPlanned": "Select Planned Litter",

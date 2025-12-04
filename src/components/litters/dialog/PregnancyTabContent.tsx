@@ -79,8 +79,8 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
         // Fetch dog names for each pregnancy
         const enrichedPregnancies: Pregnancy[] = await Promise.all(
           (pregnancyData || []).map(async (pregnancy) => {
-            let femaleName = 'Okänd tik';
-            let maleName = pregnancy.external_male_name || 'Okänd hane';
+            let femaleName = t('dialog.pregnancyForm.unknownDam');
+            let maleName = pregnancy.external_male_name || t('dialog.pregnancyForm.unknownSire');
 
             if (pregnancy.female_dog_id) {
               const { data: femaleDog } = await supabase
@@ -114,13 +114,13 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
         if (enrichedPregnancies.length > 0) {
           const first = enrichedPregnancies[0];
           setSelectedPregnancyId(first.id);
-          setLitterName(`${first.femaleName}s kull`);
+          setLitterName(t('dialog.pregnancyForm.litterNameTemplate', { name: first.femaleName }));
         }
       } catch (error) {
         console.error('Error fetching pregnancies:', error);
         toast({
           title: t('dialog.toasts.error.title'),
-          description: 'Kunde inte hämta dräktigheter',
+          description: t('toasts.error.failedToLoad'),
           variant: 'destructive'
         });
       } finally {
@@ -136,10 +136,10 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
     if (selectedPregnancyId) {
       const selected = pregnancies.find(p => p.id === selectedPregnancyId);
       if (selected) {
-        setLitterName(`${selected.femaleName}s kull`);
+        setLitterName(t('dialog.pregnancyForm.litterNameTemplate', { name: selected.femaleName }));
       }
     }
-  }, [selectedPregnancyId, pregnancies]);
+  }, [selectedPregnancyId, pregnancies, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,7 +150,7 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
       if (!selectedPregnancyId) {
         toast({
           title: t('dialog.toasts.missingInfo.title'),
-          description: 'Välj en dräktighet',
+          description: t('dialog.pregnancyForm.labels.selectPregnancy'),
           variant: "destructive"
         });
         return;
@@ -176,7 +176,7 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
       const selectedPregnancy = pregnancies.find(p => p.id === selectedPregnancyId);
       
       if (!selectedPregnancy) {
-        throw new Error("Vald dräktighet hittades inte");
+        throw new Error(t('dialog.pregnancyForm.labels.selectPregnancy'));
       }
       
       console.log("Creating litter from pregnancy:", selectedPregnancy);
@@ -196,8 +196,8 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
         dateOfBirth: dateOfBirth.toISOString(),
         sireId,
         damId: selectedPregnancy.female_dog_id || '',
-        sireName: selectedPregnancy.maleName || 'Okänd hane',
-        damName: selectedPregnancy.femaleName || 'Okänd tik',
+        sireName: selectedPregnancy.maleName || t('dialog.pregnancyForm.unknownSire'),
+        damName: selectedPregnancy.femaleName || t('dialog.pregnancyForm.unknownDam'),
         puppies: [],
         user_id: user.id,
         pregnancyId: selectedPregnancy.id
@@ -255,7 +255,7 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
       console.error("Error creating litter from pregnancy:", error);
       toast({
         title: t('dialog.toasts.error.title'),
-        description: "Kunde inte skapa kull från dräktighet",
+        description: t('toasts.error.failedToAddLitter'),
         variant: "destructive"
       });
     } finally {
@@ -275,9 +275,9 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
     return (
       <div className="text-center py-6">
         <Baby className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
-        <h3 className="text-lg font-medium mb-2">Inga aktiva dräktigheter</h3>
+        <h3 className="text-lg font-medium mb-2">{t('dialog.pregnancyForm.empty.title')}</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Du har inga aktiva dräktigheter att skapa en kull från.
+          {t('dialog.pregnancyForm.empty.description')}
         </p>
         <DialogFooter className="mt-6 justify-center">
           <Button type="button" variant="outline" onClick={onClose} className="border-greige-300">
@@ -295,10 +295,10 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Pregnancy Selection */}
         <div className="space-y-2">
-          <Label>{t('dialog.pregnancyForm.selectPregnancy', 'Välj dräktighet')}</Label>
+          <Label>{t('dialog.pregnancyForm.labels.selectPregnancy')}</Label>
           <Select value={selectedPregnancyId} onValueChange={setSelectedPregnancyId}>
             <SelectTrigger>
-              <SelectValue placeholder="Välj dräktighet..." />
+              <SelectValue placeholder={t('dialog.pregnancyForm.placeholders.selectPregnancy')} />
             </SelectTrigger>
             <SelectContent>
               {pregnancies.map(pregnancy => (
@@ -321,21 +321,21 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
           <div className="p-3 bg-pink-50 rounded-lg border border-pink-200 space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-pink-600" />
-              <span className="text-muted-foreground">Parningsdatum:</span>
+              <span className="text-muted-foreground">{t('dialog.pregnancyForm.labels.matingDate')}:</span>
               <span className="font-medium">
                 {format(new Date(selectedPregnancy.mating_date), 'dd MMMM yyyy')}
               </span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Baby className="h-4 w-4 text-purple-600" />
-              <span className="text-muted-foreground">Beräknat födelsedatum:</span>
+              <span className="text-muted-foreground">{t('dialog.pregnancyForm.labels.expectedDueDate')}:</span>
               <span className="font-medium">
                 {format(new Date(selectedPregnancy.expected_due_date), 'dd MMMM yyyy')}
               </span>
             </div>
             {selectedPregnancy.external_male_breed && (
               <div className="text-xs text-muted-foreground">
-                Extern hane: {selectedPregnancy.external_male_breed}
+                {t('dialog.pregnancyForm.labels.externalSire')}: {selectedPregnancy.external_male_breed}
                 {selectedPregnancy.external_male_registration && 
                   ` (${selectedPregnancy.external_male_registration})`}
               </div>
@@ -350,7 +350,7 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
             id="litterName"
             value={litterName}
             onChange={(e) => setLitterName(e.target.value)}
-            placeholder="T.ex. Bellas kull 2024"
+            placeholder={t('dialog.pregnancyForm.placeholders.litterName')}
           />
         </div>
 
