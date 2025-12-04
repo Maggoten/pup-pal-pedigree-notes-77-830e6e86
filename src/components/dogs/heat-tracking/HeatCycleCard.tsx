@@ -80,9 +80,6 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
       console.error('Error loading mating dates:', error);
     }
   };
-      setIsLoading(false);
-    }
-  };
 
   const handleLoggingSuccess = () => {
     loadHeatLogs();
