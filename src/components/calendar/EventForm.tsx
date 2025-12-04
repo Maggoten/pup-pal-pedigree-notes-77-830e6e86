@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { useForm } from 'react-hook-form';
-import { Clock } from 'lucide-react';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +9,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Dog } from '@/context/DogsContext';
 import { useTranslation } from 'react-i18next';
-
 export interface AddEventFormValues {
   title: string;
   date: Date;
@@ -20,29 +17,25 @@ export interface AddEventFormValues {
   dogId?: string;
   notes?: string;
 }
-
 interface EventFormProps {
   dogs: Dog[];
   onSubmit: (data: AddEventFormValues) => void;
   defaultValues?: Partial<AddEventFormValues>;
   submitLabel?: string;
 }
-
-const EventForm: React.FC<EventFormProps> = ({ 
-  dogs, 
-  onSubmit, 
-  defaultValues, 
-  submitLabel 
+const EventForm: React.FC<EventFormProps> = ({
+  dogs,
+  onSubmit,
+  defaultValues,
+  submitLabel
 }) => {
-  const { t } = useTranslation(['home', 'dogs']);
+  const {
+    t
+  } = useTranslation(['home', 'dogs']);
   const finalSubmitLabel = submitLabel || t('forms.event.addEvent');
-  
   const translateGender = (gender: string) => {
-    return gender === 'male' 
-      ? t('dogs:form.fields.gender.male')
-      : t('dogs:form.fields.gender.female');
+    return gender === 'male' ? t('dogs:form.fields.gender.male') : t('dogs:form.fields.gender.female');
   };
-  
   const form = useForm<AddEventFormValues>({
     defaultValues: defaultValues || {
       title: '',
@@ -52,88 +45,55 @@ const EventForm: React.FC<EventFormProps> = ({
       notes: ''
     }
   });
-  
-  return (
-    <Form {...form}>
+  return <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
+        <FormField control={form.control} name="title" render={({
+        field
+      }) => <FormItem>
               <FormLabel>{t('forms.event.eventTitle')}</FormLabel>
               <FormControl>
                 <Input placeholder={t('forms.event.eventTitlePlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
         
         <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem>
+          <FormField control={form.control} name="date" render={({
+          field
+        }) => <FormItem>
                 <FormLabel>{t('forms.event.date')}</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className="w-full justify-start text-left font-normal"
-                      >
-                        {field.value ? (
-                          format(field.value, "PP")
-                        ) : (
-                          <span>{t('forms.event.pickDate')}</span>
-                        )}
+                      <Button variant={"outline"} className="w-full justify-start text-left font-normal">
+                        {field.value ? format(field.value, "PP") : <span>{t('forms.event.pickDate')}</span>}
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                      className="p-3 pointer-events-auto"
-                    />
+                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus className="p-3 pointer-events-auto" />
                   </PopoverContent>
                 </Popover>
                 <FormMessage />
-              </FormItem>
-            )}
-          />
+              </FormItem>} />
           
-          <FormField
-            control={form.control}
-            name="time"
-            render={({ field }) => (
-              <FormItem>
+          <FormField control={form.control} name="time" render={({
+          field
+        }) => <FormItem>
                 <FormLabel>{t('forms.event.time')}</FormLabel>
                 <div className="flex items-center">
                   <FormControl>
-                    <Input
-                      type="time"
-                      {...field}
-                      className="flex-1"
-                    />
+                    <Input type="time" {...field} className="flex-1" />
                   </FormControl>
-                  <Clock className="ml-2 h-4 w-4 text-muted-foreground" />
+                  
                 </div>
                 <FormMessage />
-              </FormItem>
-            )}
-          />
+              </FormItem>} />
         </div>
         
-        <FormField
-          control={form.control}
-          name="dogId"
-          render={({ field }) => (
-            <FormItem>
+        <FormField control={form.control} name="dogId" render={({
+        field
+      }) => <FormItem>
               <FormLabel>{t('forms.event.associatedDog')}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
@@ -142,36 +102,26 @@ const EventForm: React.FC<EventFormProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {dogs.map((dog) => (
-                    <SelectItem key={dog.id} value={dog.id}>
+                  {dogs.map(dog => <SelectItem key={dog.id} value={dog.id}>
                       {dog.name} ({translateGender(dog.gender)})
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
         
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
+        <FormField control={form.control} name="notes" render={({
+        field
+      }) => <FormItem>
               <FormLabel>{t('forms.event.notes')}</FormLabel>
               <FormControl>
                 <Input placeholder={t('forms.event.notesPlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
         
         <Button type="submit" className="w-full">{finalSubmitLabel}</Button>
       </form>
-    </Form>
-  );
+    </Form>;
 };
-
 export default EventForm;
