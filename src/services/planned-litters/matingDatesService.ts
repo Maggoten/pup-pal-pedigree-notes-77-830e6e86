@@ -3,6 +3,48 @@ import { supabase } from '@/integrations/supabase/client';
 import { addDays } from 'date-fns';
 
 class MatingDatesService {
+  /**
+   * Find active heat cycle for a dog at a given date
+   * Returns null if no active heat cycle found (this is OK - mating can proceed without)
+   */
+  private async findActiveHeatCycle(femaleId: string, matingDate: Date): Promise<string | null> {
+    try {
+      const { data: heatCycles } = await supabase
+        .from('heat_cycles')
+        .select('id, start_date, end_date')
+        .eq('dog_id', femaleId)
+        .lte('start_date', matingDate.toISOString())
+        .order('start_date', { ascending: false })
+        .limit(5);
+
+      if (!heatCycles || heatCycles.length === 0) {
+        console.log('No heat cycles found for female:', femaleId);
+        return null;
+      }
+
+      // Find cycle where mating date falls within the cycle period
+      // Active cycle = no end_date OR end_date >= mating_date
+      for (const cycle of heatCycles) {
+        const startDate = new Date(cycle.start_date);
+        const endDate = cycle.end_date ? new Date(cycle.end_date) : null;
+        
+        // Check if mating date is within this cycle
+        if (matingDate >= startDate) {
+          if (!endDate || matingDate <= endDate) {
+            console.log('Found matching heat cycle:', cycle.id);
+            return cycle.id;
+          }
+        }
+      }
+
+      console.log('No matching heat cycle found for mating date:', matingDate);
+      return null;
+    } catch (error) {
+      console.error('Error finding heat cycle:', error);
+      return null;
+    }
+  }
+
   async addMatingDate(litterId: string, date: Date): Promise<void> {
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
@@ -24,7 +66,7 @@ class MatingDatesService {
       const isFirstMating = !existingMatingDates || existingMatingDates.length === 0;
       console.log(`Is first mating: ${isFirstMating}, existing mating dates: ${existingMatingDates?.length || 0}`);
       
-      // Get detailed information about the planned litter with a more specific query
+      // Get detailed information about the planned litter with all external male fields
       const { data: litter, error: litterError } = await supabase
         .from('planned_litters')
         .select(`
@@ -34,7 +76,9 @@ class MatingDatesService {
           female_name, 
           male_name, 
           external_male,
-          external_male_breed
+          external_male_breed,
+          external_male_registration,
+          external_male_image_url
         `)
         .eq('id', litterId)
         .single();
@@ -85,32 +129,37 @@ class MatingDatesService {
       // Calculate expected due date (63 days from mating)
       const expectedDueDate = addDays(date, 63);
 
+      // Try to find active heat cycle for this female (optional - can be null)
+      const heatCycleId = await this.findActiveHeatCycle(litter.female_id, date);
+      if (heatCycleId) {
+        console.log('Linking mating to heat cycle:', heatCycleId);
+      } else {
+        console.log('No active heat cycle found - mating will be saved without heat cycle link');
+      }
+
       let pregnancyId: string;
 
       if (isFirstMating) {
-        // First mating - create new pregnancy
+        // First mating - create new pregnancy with external male info
         console.log("Creating new pregnancy with the following data:");
-        console.log({
+        const pregnancyData = {
           mating_date: date.toISOString(),
           expected_due_date: expectedDueDate.toISOString(),
           status: 'active',
           user_id: userId,
           female_dog_id: litter.female_id,
           male_dog_id: litter.external_male ? null : litter.male_id,
-          external_male_name: litter.external_male ? maleName : null
-        });
+          external_male_name: litter.external_male ? maleName : null,
+          // Fas 2.2: Copy external male info to pregnancy
+          external_male_breed: litter.external_male ? litter.external_male_breed : null,
+          external_male_registration: litter.external_male ? litter.external_male_registration : null,
+          external_male_image_url: litter.external_male ? litter.external_male_image_url : null
+        };
+        console.log(pregnancyData);
 
         const { data: pregnancy, error: pregnancyError } = await supabase
           .from('pregnancies')
-          .insert({
-            mating_date: date.toISOString(),
-            expected_due_date: expectedDueDate.toISOString(),
-            status: 'active',
-            user_id: userId,
-            female_dog_id: litter.female_id,
-            male_dog_id: litter.external_male ? null : litter.male_id,
-            external_male_name: maleName || null
-          })
+          .insert(pregnancyData)
           .select()
           .single();
 
@@ -146,13 +195,14 @@ class MatingDatesService {
         }
       }
 
-      // Add the mating date and link it to the pregnancy
+      // Add the mating date and link it to the pregnancy AND heat cycle
       const { error: matingError } = await supabase
         .from('mating_dates')
         .insert({
           planned_litter_id: litterId,
           mating_date: date.toISOString(),
           pregnancy_id: pregnancyId,
+          heat_cycle_id: heatCycleId, // New: link to heat cycle (nullable)
           user_id: userId
         });
 
@@ -161,7 +211,7 @@ class MatingDatesService {
         throw new Error('Failed to add mating date');
       }
 
-      console.log(`Successfully added mating date (${date.toISOString()}) and linked to pregnancy ${pregnancyId} for female ${femaleName} and male ${maleName}`);
+      console.log(`Successfully added mating date (${date.toISOString()}) linked to pregnancy ${pregnancyId}${heatCycleId ? ` and heat cycle ${heatCycleId}` : ''} for female ${femaleName} and male ${maleName}`);
     } catch (error) {
       console.error("Error in addMatingDate:", error);
       throw error;

@@ -13,6 +13,13 @@ export interface ArchivedPregnancyData {
   symptoms: SymptomLog[];
   notes: NoteLog[];
   linkedLitter: LinkedLitter | null;
+  // Fas 6: Extended parent info
+  femaleBreed?: string;
+  femaleRegistration?: string;
+  femaleImageUrl?: string;
+  externalMaleBreed?: string;
+  externalMaleRegistration?: string;
+  externalMaleImageUrl?: string;
 }
 
 export interface TemperatureLog {
@@ -57,7 +64,7 @@ export const getArchivedPregnancyDetails = async (
       return null;
     }
 
-    // Fetch pregnancy details
+    // Fetch pregnancy details with external male info
     const { data: pregnancy, error: pregnancyError } = await supabase
       .from('pregnancies')
       .select(`
@@ -67,7 +74,10 @@ export const getArchivedPregnancyDetails = async (
         actual_birth_date,
         external_male_name,
         female_dog_id,
-        male_dog_id
+        male_dog_id,
+        external_male_breed,
+        external_male_registration,
+        external_male_image_url
       `)
       .eq('id', pregnancyId)
       .eq('user_id', sessionData.session.user.id)
@@ -78,16 +88,25 @@ export const getArchivedPregnancyDetails = async (
       return null;
     }
 
-    // Fetch female dog name
+    // Fetch female dog details (name, breed, registration, image)
     let femaleName = 'Unknown Female';
+    let femaleBreed: string | undefined;
+    let femaleRegistration: string | undefined;
+    let femaleImageUrl: string | undefined;
+    
     if (pregnancy.female_dog_id) {
       const { data: femaleDog } = await supabase
         .from('dogs')
-        .select('name')
+        .select('name, breed, registration_number, image_url')
         .eq('id', pregnancy.female_dog_id)
         .single();
       
-      if (femaleDog) femaleName = femaleDog.name;
+      if (femaleDog) {
+        femaleName = femaleDog.name;
+        femaleBreed = femaleDog.breed || undefined;
+        femaleRegistration = femaleDog.registration_number || undefined;
+        femaleImageUrl = femaleDog.image_url || undefined;
+      }
     }
 
     // Fetch male dog name with fallback strategy
@@ -213,7 +232,14 @@ export const getArchivedPregnancyDetails = async (
       temperatureLogs,
       symptoms,
       notes,
-      linkedLitter
+      linkedLitter,
+      // Fas 6: Extended parent info
+      femaleBreed,
+      femaleRegistration,
+      femaleImageUrl,
+      externalMaleBreed: pregnancy.external_male_breed || undefined,
+      externalMaleRegistration: pregnancy.external_male_registration || undefined,
+      externalMaleImageUrl: pregnancy.external_male_image_url || undefined
     };
   } catch (error) {
     console.error('Error in getArchivedPregnancyDetails:', error);

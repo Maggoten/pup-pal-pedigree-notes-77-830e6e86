@@ -328,6 +328,7 @@ export type Database = {
       mating_dates: {
         Row: {
           created_at: string
+          heat_cycle_id: string | null
           id: string
           mating_date: string
           planned_litter_id: string
@@ -337,6 +338,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          heat_cycle_id?: string | null
           id?: string
           mating_date: string
           planned_litter_id: string
@@ -346,6 +348,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          heat_cycle_id?: string | null
           id?: string
           mating_date?: string
           planned_litter_id?: string
@@ -354,6 +357,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "mating_dates_heat_cycle_id_fkey"
+            columns: ["heat_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "heat_cycles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "mating_dates_planned_litter_id_fkey"
             columns: ["planned_litter_id"]
@@ -573,7 +583,10 @@ export type Database = {
           actual_birth_date: string | null
           created_at: string
           expected_due_date: string
+          external_male_breed: string | null
+          external_male_image_url: string | null
           external_male_name: string | null
+          external_male_registration: string | null
           female_dog_id: string | null
           id: string
           male_dog_id: string | null
@@ -586,7 +599,10 @@ export type Database = {
           actual_birth_date?: string | null
           created_at?: string
           expected_due_date: string
+          external_male_breed?: string | null
+          external_male_image_url?: string | null
           external_male_name?: string | null
+          external_male_registration?: string | null
           female_dog_id?: string | null
           id?: string
           male_dog_id?: string | null
@@ -599,7 +615,10 @@ export type Database = {
           actual_birth_date?: string | null
           created_at?: string
           expected_due_date?: string
+          external_male_breed?: string | null
+          external_male_image_url?: string | null
           external_male_name?: string | null
+          external_male_registration?: string | null
           female_dog_id?: string | null
           id?: string
           male_dog_id?: string | null
