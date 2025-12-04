@@ -12,10 +12,12 @@ import EndHeatCycleDialog from './EndHeatCycleDialog';
 import EditHeatCycleDialog from './EditHeatCycleDialog';
 import ProgesteroneChart from './ProgesteroneChart';
 import OptimalMatingWindow from './OptimalMatingWindow';
+import MatingDatesSection from './MatingDatesSection';
 import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
 import { toast } from '@/hooks/use-toast';
 import { calculateOptimalMatingDays, getNextTestRecommendation } from '@/utils/progesteroneCalculator';
 import type { Database } from '@/integrations/supabase/types';
+import { supabase } from '@/integrations/supabase/client';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 type HeatLog = Database['public']['Tables']['heat_logs']['Row'];
@@ -28,6 +30,7 @@ interface HeatCycleCardProps {
 const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) => {
   const { t } = useTranslation('dogs');
   const [heatLogs, setHeatLogs] = useState<HeatLog[]>([]);
+  const [matingDates, setMatingDates] = useState<any[]>([]);
   const [showLoggingDialog, setShowLoggingDialog] = useState(false);
   const [showLogsDialog, setShowLogsDialog] = useState(false);
   const [showEndDialog, setShowEndDialog] = useState(false);
@@ -48,6 +51,7 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
 
   useEffect(() => {
     loadHeatLogs();
+    loadMatingDates();
   }, [heatCycle.id]);
 
   const loadHeatLogs = async () => {
@@ -58,6 +62,24 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
     } catch (error) {
       console.error('Error loading heat logs:', error);
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fas 3: Load mating dates linked to this heat cycle
+  const loadMatingDates = async () => {
+    try {
+      const { data } = await supabase
+        .from('mating_dates')
+        .select('id, mating_date, pregnancy_id')
+        .eq('heat_cycle_id', heatCycle.id)
+        .order('mating_date', { ascending: true });
+      
+      setMatingDates(data || []);
+    } catch (error) {
+      console.error('Error loading mating dates:', error);
+    }
+  };
       setIsLoading(false);
     }
   };
@@ -419,6 +441,15 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                 {t('heatTracking.cycles.viewAllLogs', { count: heatLogs.length })}
               </Button>
             </div>
+          )}
+
+          {/* Fas 3: Mating Dates Section */}
+          {matingDates.length > 0 && (
+            <MatingDatesSection
+              matingDates={matingDates}
+              heatLogs={heatLogs}
+              cycleStartDate={heatCycle.start_date}
+            />
           )}
 
           {/* Progesterone Chart */}

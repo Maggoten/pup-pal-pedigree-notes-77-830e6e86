@@ -5,6 +5,7 @@ import { HeatPrediction, FertileDog, YEARS_TO_DISPLAY, MAX_BREEDING_AGE, WARNING
 import { HeatService } from '@/services/HeatService';
 import { calculateNextHeatDate } from '@/utils/heatCalculator';
 import { addYears, addDays, differenceInDays, differenceInYears } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Helper: Calculate age in years with decimal precision
@@ -35,6 +36,54 @@ const findMatchingPlannedLitter = (
     
     return daysDiff <= 7;
   });
+};
+
+/**
+ * Fas 4: Check if there are mating dates linked to a heat cycle near a given date
+ * This persists even if planned litter is deleted
+ */
+const checkMatingForHeatCycle = async (
+  dogId: string, 
+  heatDate: Date,
+  heatCycleCache: Map<string, any[]>
+): Promise<boolean> => {
+  try {
+    // Check cache first
+    const cacheKey = dogId;
+    let heatCyclesWithMatings = heatCycleCache.get(cacheKey);
+    
+    if (!heatCyclesWithMatings) {
+      // Fetch heat cycles with mating dates for this dog
+      const { data } = await supabase
+        .from('heat_cycles')
+        .select(`
+          id,
+          start_date,
+          end_date,
+          mating_dates(id, mating_date)
+        `)
+        .eq('dog_id', dogId);
+      
+      heatCyclesWithMatings = data || [];
+      heatCycleCache.set(cacheKey, heatCyclesWithMatings);
+    }
+
+    // Check if any heat cycle near the given date has mating dates
+    for (const cycle of heatCyclesWithMatings) {
+      const cycleStart = new Date(cycle.start_date);
+      const daysDiff = Math.abs(differenceInDays(cycleStart, heatDate));
+      
+      // Match if heat cycle is within ±14 days of the predicted heat date
+      if (daysDiff <= 14 && cycle.mating_dates && cycle.mating_dates.length > 0) {
+        return true;
+      }
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error checking mating for heat cycle:', error);
+    return false;
+  }
 };
 
 /**
@@ -101,6 +150,9 @@ export const useMultiYearHeatPredictions = (dogs: Dog[], plannedLitters: Planned
             );
 
             const dogPredictions: HeatPrediction[] = [];
+
+            // Cache for heat cycles with matings (per dog)
+            const heatCycleCache = new Map<string, any[]>();
 
             // First, add confirmed heats from current year
             const currentYear = new Date().getFullYear();
@@ -170,8 +222,10 @@ export const useMultiYearHeatPredictions = (dogs: Dog[], plannedLitters: Planned
                 currentDate
               );
 
-              // Determine status
+              // Determine status - Fas 4: Also check mating_dates via heat_cycle_id
               let status: HeatPrediction['status'] = 'predicted';
+              
+              // First check planned litters (as before)
               if (matchingLitter) {
                 if (matchingLitter.status === 'completed') {
                   status = 'mated'; // Green - completed mating
@@ -179,6 +233,16 @@ export const useMultiYearHeatPredictions = (dogs: Dog[], plannedLitters: Planned
                   status = 'mated'; // Green - has mating dates
                 } else if (matchingLitter.status === 'active' || matchingLitter.status === 'planned') {
                   status = 'planned'; // Pink - planned but not mated yet
+                }
+              }
+              
+              // Fas 4: If not already marked as mated via planned litter,
+              // check if there are mating_dates linked via heat_cycle_id
+              // This ensures "Parad" status persists even after planned litter is deleted
+              if (status !== 'mated') {
+                const hasMatingViaHeatCycle = await checkMatingForHeatCycle(dog.id, currentDate, heatCycleCache);
+                if (hasMatingViaHeatCycle) {
+                  status = 'mated';
                 }
               }
 

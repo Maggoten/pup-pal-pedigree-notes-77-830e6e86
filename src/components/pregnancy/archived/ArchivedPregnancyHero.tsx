@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Heart, Edit } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Calendar, Heart, Edit, Dog, Award } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -66,9 +67,71 @@ const ArchivedPregnancyHero: React.FC<ArchivedPregnancyHeroProps> = ({ data, pre
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Breeding Pair */}
-          <div className="text-lg font-medium text-greige-800">
-            {translateDogName(data.femaleName)} × {translateDogName(data.maleName)}
+          {/* Fas 6: Parent Information Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Dam (Female) Card */}
+            <div className="bg-white/70 p-4 rounded-lg border border-pink-100">
+              <div className="flex items-center gap-3 mb-2">
+                <Avatar className="h-12 w-12 border-2 border-pink-200">
+                  <AvatarImage src={data.femaleImageUrl} alt={data.femaleName} />
+                  <AvatarFallback className="bg-pink-100 text-pink-700">
+                    <Dog className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                    {t('archived.hero.dam', 'Tik')}
+                  </p>
+                  <p className="font-semibold text-lg">{translateDogName(data.femaleName)}</p>
+                </div>
+              </div>
+              {(data.femaleBreed || data.femaleRegistration) && (
+                <div className="text-sm text-muted-foreground space-y-1 mt-2 pl-15">
+                  {data.femaleBreed && (
+                    <p className="flex items-center gap-1">
+                      <Dog className="h-3 w-3" /> {data.femaleBreed}
+                    </p>
+                  )}
+                  {data.femaleRegistration && (
+                    <p className="flex items-center gap-1">
+                      <Award className="h-3 w-3" /> {data.femaleRegistration}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Sire (Male) Card */}
+            <div className="bg-white/70 p-4 rounded-lg border border-blue-100">
+              <div className="flex items-center gap-3 mb-2">
+                <Avatar className="h-12 w-12 border-2 border-blue-200">
+                  <AvatarImage src={data.externalMaleImageUrl} alt={data.maleName} />
+                  <AvatarFallback className="bg-blue-100 text-blue-700">
+                    <Dog className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                    {t('archived.hero.sire', 'Hane')}
+                  </p>
+                  <p className="font-semibold text-lg">{translateDogName(data.maleName)}</p>
+                </div>
+              </div>
+              {(data.externalMaleBreed || data.externalMaleRegistration) && (
+                <div className="text-sm text-muted-foreground space-y-1 mt-2 pl-15">
+                  {data.externalMaleBreed && (
+                    <p className="flex items-center gap-1">
+                      <Dog className="h-3 w-3" /> {data.externalMaleBreed}
+                    </p>
+                  )}
+                  {data.externalMaleRegistration && (
+                    <p className="flex items-center gap-1">
+                      <Award className="h-3 w-3" /> {data.externalMaleRegistration}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Date Information Grid */}
