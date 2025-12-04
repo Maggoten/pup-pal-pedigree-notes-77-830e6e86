@@ -264,10 +264,10 @@ const PuppyProfile: React.FC = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 rounded-none border-b">
               <TabsTrigger value="overview" className="text-sm">
-                Översikt
+                {t('puppies.tabs.overview')}
               </TabsTrigger>
               <TabsTrigger value="development" className="text-sm">
-                Foton
+                {t('puppies.tabs.photos')}
               </TabsTrigger>
             </TabsList>
 

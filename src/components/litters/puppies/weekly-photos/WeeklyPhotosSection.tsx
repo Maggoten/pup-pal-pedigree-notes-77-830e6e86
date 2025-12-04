@@ -114,10 +114,10 @@ const WeeklyPhotosSection: React.FC<WeeklyPhotosSectionProps> = ({
             <div key={week} className={`relative ${isCurrentWeek ? 'ring-2 ring-primary rounded-2xl' : ''}`}>
               {/* Week Header */}
               <div className="mb-3 flex items-center justify-between">
-                <span className="text-sm font-medium">Vecka {week}</span>
+                <span className="text-sm font-medium">{t('puppies.weeklyPhotos.week', { week })}</span>
                 {isCurrentWeek && (
                   <Badge variant="secondary" className="text-xs">
-                    Aktuell
+                    {t('puppies.weeklyPhotos.current')}
                   </Badge>
                 )}
               </div>
@@ -128,7 +128,7 @@ const WeeklyPhotosSection: React.FC<WeeklyPhotosSectionProps> = ({
                   <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-muted shadow-md group">
                     <img
                       src={photo.image_url}
-                      alt={`Vecka ${week}`}
+                      alt={t('puppies.weeklyPhotos.photoAlt', { week })}
                       className="w-full h-full object-cover"
                     />
                     
@@ -178,10 +178,10 @@ const WeeklyPhotosSection: React.FC<WeeklyPhotosSectionProps> = ({
                   `}
                   onClick={() => handleAddPhoto(week)}
                   disabled={isFutureWeek}
-                  aria-label={`Lägg till foto för vecka ${week}`}
+                  aria-label={t('puppies.weeklyPhotos.addPhotoAriaLabel', { week })}
                 >
                   <Camera className="h-6 w-6" />
-                  <span className="text-sm font-medium">Lägg till foto</span>
+                  <span className="text-sm font-medium">{t('puppies.weeklyPhotos.addPhoto')}</span>
                 </button>
               )}
             </div>
