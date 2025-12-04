@@ -11,19 +11,24 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import DatePicker from '@/components/common/DatePicker';
 import { updateActualBirthDate } from '@/services/PregnancyService';
 import { useToast } from '@/hooks/use-toast';
-
 interface ArchivedPregnancyHeroProps {
   data: ArchivedPregnancyData;
   pregnancyId: string;
 }
-
-const ArchivedPregnancyHero: React.FC<ArchivedPregnancyHeroProps> = ({ data, pregnancyId }) => {
-  const { t, i18n } = useTranslation('pregnancy');
-  const { toast } = useToast();
+const ArchivedPregnancyHero: React.FC<ArchivedPregnancyHeroProps> = ({
+  data,
+  pregnancyId
+}) => {
+  const {
+    t,
+    i18n
+  } = useTranslation('pregnancy');
+  const {
+    toast
+  } = useToast();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [birthDate, setBirthDate] = useState<Date>(data.actualBirthDate || new Date());
   const [saving, setSaving] = useState(false);
-
   const locale = i18n.language === 'sv' ? sv : undefined;
 
   // Helper function to translate dog names
@@ -32,12 +37,10 @@ const ArchivedPregnancyHero: React.FC<ArchivedPregnancyHeroProps> = ({ data, pre
     if (name === "Unknown Female") return t('display.unknownFemale');
     return name;
   };
-
   const handleSaveBirthDate = async () => {
     setSaving(true);
     const success = await updateActualBirthDate(pregnancyId, birthDate);
     setSaving(false);
-
     if (success) {
       toast({
         title: t('toasts.success.birthDateUpdated'),
@@ -53,17 +56,15 @@ const ArchivedPregnancyHero: React.FC<ArchivedPregnancyHeroProps> = ({ data, pre
       });
     }
   };
-
-  return (
-    <>
+  return <>
       <Card className="bg-gradient-to-br from-pink-50 to-purple-50 border-pink-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl">
             <Heart className="h-6 w-6 text-pink-500" />
-            {t('archived.hero.title', { 
-              femaleName: translateDogName(data.femaleName), 
-              maleName: translateDogName(data.maleName) 
-            })}
+            {t('archived.hero.title', {
+            femaleName: translateDogName(data.femaleName),
+            maleName: translateDogName(data.maleName)
+          })}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -85,20 +86,14 @@ const ArchivedPregnancyHero: React.FC<ArchivedPregnancyHeroProps> = ({ data, pre
                   <p className="font-semibold text-lg">{translateDogName(data.femaleName)}</p>
                 </div>
               </div>
-              {(data.femaleBreed || data.femaleRegistration) && (
-                <div className="text-sm text-muted-foreground space-y-1 mt-2 pl-15">
-                  {data.femaleBreed && (
-                    <p className="flex items-center gap-1">
-                      <Dog className="h-3 w-3" /> {data.femaleBreed}
-                    </p>
-                  )}
-                  {data.femaleRegistration && (
-                    <p className="flex items-center gap-1">
+              {(data.femaleBreed || data.femaleRegistration) && <div className="text-sm text-muted-foreground space-y-1 mt-2 pl-15">
+                  {data.femaleBreed && <p className="flex items-center gap-1">
+                       {data.femaleBreed}
+                    </p>}
+                  {data.femaleRegistration && <p className="flex items-center gap-1">
                       <Award className="h-3 w-3" /> {data.femaleRegistration}
-                    </p>
-                  )}
-                </div>
-              )}
+                    </p>}
+                </div>}
             </div>
 
             {/* Sire (Male) Card */}
@@ -117,20 +112,14 @@ const ArchivedPregnancyHero: React.FC<ArchivedPregnancyHeroProps> = ({ data, pre
                   <p className="font-semibold text-lg">{translateDogName(data.maleName)}</p>
                 </div>
               </div>
-              {(data.externalMaleBreed || data.externalMaleRegistration) && (
-                <div className="text-sm text-muted-foreground space-y-1 mt-2 pl-15">
-                  {data.externalMaleBreed && (
-                    <p className="flex items-center gap-1">
+              {(data.externalMaleBreed || data.externalMaleRegistration) && <div className="text-sm text-muted-foreground space-y-1 mt-2 pl-15">
+                  {data.externalMaleBreed && <p className="flex items-center gap-1">
                       <Dog className="h-3 w-3" /> {data.externalMaleBreed}
-                    </p>
-                  )}
-                  {data.externalMaleRegistration && (
-                    <p className="flex items-center gap-1">
+                    </p>}
+                  {data.externalMaleRegistration && <p className="flex items-center gap-1">
                       <Award className="h-3 w-3" /> {data.externalMaleRegistration}
-                    </p>
-                  )}
-                </div>
-              )}
+                    </p>}
+                </div>}
             </div>
           </div>
 
@@ -141,7 +130,9 @@ const ArchivedPregnancyHero: React.FC<ArchivedPregnancyHeroProps> = ({ data, pre
               <Calendar className="h-5 w-5 text-pink-600" />
               <div>
                 <p className="text-sm text-muted-foreground">{t('archived.hero.matingDate')}</p>
-                <p className="font-medium">{format(data.matingDate, 'PPP', { locale })}</p>
+                <p className="font-medium">{format(data.matingDate, 'PPP', {
+                  locale
+                })}</p>
               </div>
             </div>
 
@@ -151,51 +142,40 @@ const ArchivedPregnancyHero: React.FC<ArchivedPregnancyHeroProps> = ({ data, pre
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground">{t('archived.hero.birthDate')}</p>
                 <p className="font-medium">
-                  {data.actualBirthDate 
-                    ? format(data.actualBirthDate, 'PPP', { locale })
-                    : t('archived.hero.noBirthDate')}
+                  {data.actualBirthDate ? format(data.actualBirthDate, 'PPP', {
+                  locale
+                }) : t('archived.hero.noBirthDate')}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setEditDialogOpen(true)}
-                className="ml-auto"
-              >
+              <Button variant="ghost" size="sm" onClick={() => setEditDialogOpen(true)} className="ml-auto">
                 <Edit className="h-4 w-4" />
               </Button>
             </div>
           </div>
 
           {/* Gestation Length */}
-          {data.gestationLength && (
-            <div className="bg-white/70 p-3 rounded-lg">
+          {data.gestationLength && <div className="bg-white/70 p-3 rounded-lg">
               <p className="text-sm text-muted-foreground">{t('archived.hero.gestationLength')}</p>
               <p className="text-lg font-semibold text-purple-700">
                 {data.gestationLength} {t('archived.hero.days')}
               </p>
-            </div>
-          )}
+            </div>}
 
           {/* Puppy Count */}
-          {data.linkedLitter && (
-            <div className="bg-white/70 p-3 rounded-lg">
+          {data.linkedLitter && <div className="bg-white/70 p-3 rounded-lg">
               <p className="text-sm text-muted-foreground">{t('archived.hero.puppies')}</p>
               <p className="text-lg font-semibold text-pink-700">
                 {t('archived.hero.puppiesCount', {
-                  total: data.linkedLitter.totalPuppies,
-                  alive: data.linkedLitter.alivePuppies,
-                  dead: data.linkedLitter.deadPuppies
-                })}
+              total: data.linkedLitter.totalPuppies,
+              alive: data.linkedLitter.alivePuppies,
+              dead: data.linkedLitter.deadPuppies
+            })}
               </p>
-            </div>
-          )}
+            </div>}
 
-          {!data.linkedLitter && (
-            <div className="bg-white/70 p-3 rounded-lg text-center text-muted-foreground">
+          {!data.linkedLitter && <div className="bg-white/70 p-3 rounded-lg text-center text-muted-foreground">
               {t('archived.hero.noPuppies')}
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
 
@@ -206,11 +186,7 @@ const ArchivedPregnancyHero: React.FC<ArchivedPregnancyHeroProps> = ({ data, pre
             <DialogTitle>{t('archived.hero.editBirthDate')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <DatePicker
-              date={birthDate}
-              setDate={setBirthDate}
-              label={t('archived.hero.birthDate')}
-            />
+            <DatePicker date={birthDate} setDate={setBirthDate} label={t('archived.hero.birthDate')} />
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
                 {t('actions.cancel')}
@@ -222,8 +198,6 @@ const ArchivedPregnancyHero: React.FC<ArchivedPregnancyHeroProps> = ({ data, pre
           </div>
         </DialogContent>
       </Dialog>
-    </>
-  );
+    </>;
 };
-
 export default ArchivedPregnancyHero;
