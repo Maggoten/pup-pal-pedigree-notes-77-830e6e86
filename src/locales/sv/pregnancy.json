@@ -591,7 +591,9 @@
       "viewLitter": "Visa kull",
       "total": "Totalt",
       "alive": "Överlevande",
-      "dead": "Döda"
+      "dead": "Döda",
+      "createLitter": "Skapa kull",
+      "createLitterDescription": "Skapa en kull från denna arkiverade dräktighet för att börja registrera valpar."
     },
     "timeline": {
       "title": "Symptom & Anteckningar",
