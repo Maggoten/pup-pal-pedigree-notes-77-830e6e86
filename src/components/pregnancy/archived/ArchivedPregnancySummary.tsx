@@ -17,14 +17,14 @@ const ArchivedPregnancySummary: React.FC<ArchivedPregnancySummaryProps> = ({ pre
   const [data, setData] = useState<ArchivedPregnancyData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const pregnancyData = await getArchivedPregnancyDetails(pregnancyId);
-      setData(pregnancyData);
-      setLoading(false);
-    };
+  const fetchData = async () => {
+    setLoading(true);
+    const pregnancyData = await getArchivedPregnancyDetails(pregnancyId);
+    setData(pregnancyData);
+    setLoading(false);
+  };
 
+  useEffect(() => {
     fetchData();
   }, [pregnancyId]);
 
@@ -57,7 +57,12 @@ const ArchivedPregnancySummary: React.FC<ArchivedPregnancySummaryProps> = ({ pre
       )}
 
       {/* Linked Litter Section */}
-      <ArchivedLitterSection linkedLitter={data.linkedLitter} />
+      <ArchivedLitterSection 
+        linkedLitter={data.linkedLitter} 
+        pregnancyData={data}
+        pregnancyId={pregnancyId}
+        onLitterCreated={fetchData}
+      />
 
       {/* Symptoms & Notes Timeline */}
       {(data.symptoms.length > 0 || data.notes.length > 0) && (

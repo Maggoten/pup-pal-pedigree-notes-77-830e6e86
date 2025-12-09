@@ -591,7 +591,9 @@
       "viewLitter": "View litter",
       "total": "Total",
       "alive": "Surviving",
-      "dead": "Deceased"
+      "dead": "Deceased",
+      "createLitter": "Create Litter",
+      "createLitterDescription": "Create a litter from this archived pregnancy to start registering puppies."
     },
     "timeline": {
       "title": "Symptoms & Notes",

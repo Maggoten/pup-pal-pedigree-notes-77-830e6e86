@@ -1,37 +1,70 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PawPrint, ExternalLink } from 'lucide-react';
+import { PawPrint, ExternalLink, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
-import { LinkedLitter } from '@/services/PregnancyArchivedService';
+import { LinkedLitter, ArchivedPregnancyData } from '@/services/PregnancyArchivedService';
+import CreateLitterFromArchivedDialog from './CreateLitterFromArchivedDialog';
 
 interface ArchivedLitterSectionProps {
   linkedLitter: LinkedLitter | null;
+  pregnancyData?: ArchivedPregnancyData;
+  pregnancyId?: string;
+  onLitterCreated?: () => void;
 }
 
-const ArchivedLitterSection: React.FC<ArchivedLitterSectionProps> = ({ linkedLitter }) => {
+const ArchivedLitterSection: React.FC<ArchivedLitterSectionProps> = ({ 
+  linkedLitter, 
+  pregnancyData,
+  pregnancyId,
+  onLitterCreated 
+}) => {
   const { t, i18n } = useTranslation('pregnancy');
   const navigate = useNavigate();
   const locale = i18n.language === 'sv' ? sv : undefined;
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   if (!linkedLitter) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <PawPrint className="h-5 w-5 text-amber-600" />
-            {t('archived.litter.title')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-center py-4">
-            {t('archived.litter.notLinked')}
-          </p>
-        </CardContent>
-      </Card>
+      <>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <PawPrint className="h-5 w-5 text-amber-600" />
+              {t('archived.litter.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-4 space-y-4">
+              <p className="text-muted-foreground">
+                {t('archived.litter.notLinked')}
+              </p>
+              {pregnancyData && pregnancyId && (
+                <Button 
+                  onClick={() => setCreateDialogOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  {t('archived.litter.createLitter')}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {pregnancyData && pregnancyId && (
+          <CreateLitterFromArchivedDialog
+            open={createDialogOpen}
+            onOpenChange={setCreateDialogOpen}
+            pregnancyData={pregnancyData}
+            pregnancyId={pregnancyId}
+            onLitterCreated={onLitterCreated}
+          />
+        )}
+      </>
     );
   }
 
