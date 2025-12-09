@@ -659,7 +659,9 @@
     "hero": {
       "archived": "Arkiverad",
       "bornOn": "Född",
-      "archivedOn": "Arkiverad"
+      "archivedOn": "Arkiverad",
+      "dam": "Tik",
+      "sire": "Hane"
     },
     "summary": {
       "title": "Kullöversikt",
