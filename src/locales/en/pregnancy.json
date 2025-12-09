@@ -29,6 +29,7 @@
     "active": "Active",
     "completed": "Completed",
     "journey": "Journey",
+    "health": "Health",
     "temperature": "Temperature", 
     "symptoms": "Notes",
     "notes": "Notes",
@@ -86,6 +87,42 @@
       "recorded": "Recorded on {{date}} at {{time}}",
       "noTemperatures": "No temperature readings recorded yet",
       "trend": "Temperature trend shows {{trend}}"
+    }
+  },
+  "health": {
+    "title": "Health & Measurements",
+    "description": "Track {{femaleName}}'s temperature and weight",
+    "segments": {
+      "temperature": "Temperature",
+      "weight": "Weight"
+    },
+    "showAll": "Show all",
+    "showLess": "Show less"
+  },
+  "weight": {
+    "log": {
+      "title": "Weight Log",
+      "description": "Track {{femaleName}}'s weight"
+    },
+    "form": {
+      "weightLabel": "Weight (kg)",
+      "weightPlaceholder": "12.5",
+      "notesLabel": "Notes (optional)",
+      "notesPlaceholder": "Any observations..."
+    },
+    "actions": {
+      "addWeight": "Add Weight"
+    },
+    "display": {
+      "noWeights": "No weight records yet",
+      "noWeightsDescription": "Start recording weight to track changes during pregnancy",
+      "historyTitle": "Weight History"
+    },
+    "validation": {
+      "weightRequired": "Weight required",
+      "weightRequiredDescription": "Please enter a weight value.",
+      "invalidWeight": "Invalid weight",
+      "invalidWeightDescription": "Please enter a valid weight value."
     }
   },
   "symptoms": {
@@ -583,6 +620,11 @@
     "temperature": {
       "title": "Temperature Curve",
       "lowestDrop": "Lowest temperature drop"
+    },
+    "weight": {
+      "title": "Weight Development",
+      "highest": "Highest weight",
+      "noData": "No weight data recorded"
     },
     "litter": {
       "title": "Litter",

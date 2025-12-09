@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Thermometer, MessageSquare, ClipboardList, Loader2 } from 'lucide-react';
-import TemperatureLog from '@/components/pregnancy/TemperatureLog';
+import { Activity, MessageSquare, ClipboardList, Loader2 } from 'lucide-react';
+import HealthLog from '@/components/pregnancy/HealthLog';
 import SymptomsLog from '@/components/pregnancy/SymptomsLog';
 import PregnancyJourney from '@/components/pregnancy/journey/PregnancyJourney';
 import { Separator } from '@/components/ui/separator';
@@ -45,11 +45,11 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
             <span className="text-xs sm:text-sm font-medium truncate">{t('tabs.journey')}</span>
           </TabsTrigger>
           <TabsTrigger 
-            value="temperature" 
+            value="health" 
             className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 data-[state=active]:bg-white data-[state=active]:text-warmgreen-700 data-[state=active]:shadow-sm"
           >
-            <Thermometer className="h-4 w-4 flex-shrink-0" /> 
-            <span className="text-xs sm:text-sm font-medium truncate">{t('tabs.temperature')}</span>
+            <Activity className="h-4 w-4 flex-shrink-0" /> 
+            <span className="text-xs sm:text-sm font-medium truncate">{t('tabs.health')}</span>
           </TabsTrigger>
           <TabsTrigger 
             value="symptoms" 
@@ -69,8 +69,8 @@ const PregnancyTabs: React.FC<PregnancyTabsProps> = ({
           />
         </TabsContent>
         
-        <TabsContent value="temperature" className="bg-white border border-warmbeige-200 rounded-xl p-6 shadow-sm">
-          <TemperatureLog 
+        <TabsContent value="health" className="bg-white border border-warmbeige-200 rounded-xl p-6 shadow-sm">
+          <HealthLog 
             pregnancyId={pregnancyId} 
             femaleName={femaleName} 
           />
