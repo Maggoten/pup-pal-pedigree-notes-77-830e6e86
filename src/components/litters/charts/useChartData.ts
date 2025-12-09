@@ -1,8 +1,7 @@
-
 import { useMemo } from 'react';
+import { format, parseISO } from 'date-fns';
 import { Puppy } from '@/types/breeding';
 import { GrowthLogType, ChartColorConfig } from './types';
-
 interface UseChartDataResult {
   chartData: GrowthLogType[];
   chartConfig: ChartColorConfig;
@@ -57,7 +56,7 @@ const useChartData = (
       
       if (logData && logData.length > 0) {
         logData.forEach(entry => {
-          const dateKey = new Date(entry.date).toLocaleDateString();
+          const dateKey = format(new Date(entry.date), 'yyyy-MM-dd');
           dateSet.add(dateKey);
           console.log(`Added date ${dateKey} from entry:`, entry);
         });
@@ -71,7 +70,7 @@ const useChartData = (
   // Convert dates to sorted array - done once and cached
   const allDates = useMemo(() => {
     const sortedDates = Array.from(allDatesSet)
-      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+      .sort((a, b) => parseISO(a).getTime() - parseISO(b).getTime());
     console.log('Sorted dates:', sortedDates);
     return sortedDates;
   }, [allDatesSet]);
@@ -104,7 +103,7 @@ const useChartData = (
             return;
           }
           
-          const dateKey = entryDate.toLocaleDateString();
+          const dateKey = format(entryDate, 'yyyy-MM-dd');
           const value = logType === 'weight' 
             ? 'weight' in entry ? entry.weight : null
             : 'height' in entry ? entry.height : null;
@@ -141,7 +140,7 @@ const useChartData = (
     
     // Filter to only include dates with data for this puppy
     const chartData = Array.from(puppyDateMap.entries())
-      .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
+      .sort((a, b) => parseISO(a[0]).getTime() - parseISO(b[0]).getTime())
       .map(([date, value]) => {
         // Use ID as the data key to ensure uniqueness
         const dataPoint: GrowthLogType = { date };
