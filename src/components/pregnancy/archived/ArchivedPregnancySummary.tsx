@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { getArchivedPregnancyDetails, ArchivedPregnancyData } from '@/services/PregnancyArchivedService';
 import ArchivedPregnancyHero from './ArchivedPregnancyHero';
 import ArchivedTemperatureCurve from './ArchivedTemperatureCurve';
+import ArchivedWeightCurve from './ArchivedWeightCurve';
 import ArchivedLitterSection from './ArchivedLitterSection';
 import ArchivedSymptomsTimeline from './ArchivedSymptomsTimeline';
 import ArchivedPregnancyChecklist from './ArchivedPregnancyChecklist';
@@ -54,6 +55,11 @@ const ArchivedPregnancySummary: React.FC<ArchivedPregnancySummaryProps> = ({ pre
       {/* Temperature Curve */}
       {data.temperatureLogs.length > 0 && (
         <ArchivedTemperatureCurve temperatureLogs={data.temperatureLogs} />
+      )}
+
+      {/* Weight Curve */}
+      {data.weightLogs.length > 0 && (
+        <ArchivedWeightCurve weightLogs={data.weightLogs} />
       )}
 
       {/* Linked Litter Section */}

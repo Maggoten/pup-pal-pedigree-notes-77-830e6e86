@@ -29,10 +29,47 @@
     "active": "Aktiva",
     "completed": "Avslutade",
     "journey": "Utveckling",
+    "health": "Hälsa",
     "temperature": "Temperatur",
     "symptoms": "Anteckningar",
     "notes": "Anteckningar",
     "sectionTitle": "Dräktighetshantering"
+  },
+  "health": {
+    "title": "Hälsa & Mätningar",
+    "description": "Följ {{femaleName}}s temperatur och vikt",
+    "segments": {
+      "temperature": "Temperatur",
+      "weight": "Vikt"
+    },
+    "showAll": "Visa alla",
+    "showLess": "Visa färre"
+  },
+  "weight": {
+    "log": {
+      "title": "Viktlogg",
+      "description": "Följ {{femaleName}}s vikt"
+    },
+    "form": {
+      "weightLabel": "Vikt (kg)",
+      "weightPlaceholder": "12.5",
+      "notesLabel": "Anteckningar (valfritt)",
+      "notesPlaceholder": "Eventuella observationer..."
+    },
+    "actions": {
+      "addWeight": "Lägg till vikt"
+    },
+    "display": {
+      "noWeights": "Inga vikter registrerade ännu",
+      "noWeightsDescription": "Börja registrera vikt för att följa förändringar under dräktigheten",
+      "historyTitle": "Vikthistorik"
+    },
+    "validation": {
+      "weightRequired": "Vikt krävs",
+      "weightRequiredDescription": "Ange ett viktvärde.",
+      "invalidWeight": "Ogiltig vikt",
+      "invalidWeightDescription": "Ange ett giltigt viktvärde."
+    }
   },
   "actions": {
     "addPregnancy": "Lägg till Dräktighet",
@@ -583,6 +620,11 @@
     "temperature": {
       "title": "Temperaturkurva",
       "lowestDrop": "Lägsta temperaturfallet"
+    },
+    "weight": {
+      "title": "Viktutveckling",
+      "highest": "Högsta vikt",
+      "noData": "Ingen viktdata registrerad"
     },
     "litter": {
       "title": "Kull",

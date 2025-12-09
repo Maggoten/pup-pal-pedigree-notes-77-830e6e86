@@ -10,6 +10,7 @@ export interface ArchivedPregnancyData {
   expectedDueDate: Date;
   gestationLength: number | null;
   temperatureLogs: TemperatureLog[];
+  weightLogs: WeightLog[];
   symptoms: SymptomLog[];
   notes: NoteLog[];
   linkedLitter: LinkedLitter | null;
@@ -26,6 +27,13 @@ export interface TemperatureLog {
   id: string;
   date: Date;
   temperature: number;
+  notes?: string;
+}
+
+export interface WeightLog {
+  id: string;
+  date: Date;
+  weight: number;
   notes?: string;
 }
 
@@ -173,6 +181,36 @@ export const getArchivedPregnancyDetails = async (
       notes: log.notes || undefined
     }));
 
+    // Fetch weight logs using REST API (table not in types.ts yet)
+    const SUPABASE_URL = "https://yqcgqriecxtppuvcguyj.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2dxcmllY3h0cHB1dmNndXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTI4NjksImV4cCI6MjA2MDI2ODg2OX0.PD0W-rLpQBHUGm9--nv4-3PVYQFMAsRujmExBDuP5oA";
+    
+    let weightLogs: WeightLog[] = [];
+    try {
+      const weightResponse = await fetch(
+        `${SUPABASE_URL}/rest/v1/pregnancy_weight_logs?pregnancy_id=eq.${pregnancyId}&order=date.asc`,
+        {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`
+          }
+        }
+      );
+      
+      if (weightResponse.ok) {
+        const weightData = await weightResponse.json();
+        weightLogs = (weightData || []).map((log: any) => ({
+          id: log.id,
+          date: new Date(log.date),
+          weight: Number(log.weight),
+          notes: log.notes || undefined
+        }));
+      }
+    } catch (err) {
+      console.error('Error fetching weight logs:', err);
+    }
+
     // Fetch symptom logs
     const { data: symptomLogs, error: symptomError } = await supabase
       .from('symptom_logs')
@@ -230,6 +268,7 @@ export const getArchivedPregnancyDetails = async (
       expectedDueDate,
       gestationLength,
       temperatureLogs,
+      weightLogs,
       symptoms,
       notes,
       linkedLitter,
