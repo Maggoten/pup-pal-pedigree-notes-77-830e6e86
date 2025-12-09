@@ -6,6 +6,10 @@ export interface ArchivedLitterData {
   litter: Litter;
   damImageUrl?: string;
   sireImageUrl?: string;
+  damBreed?: string;
+  damRegistration?: string;
+  sireBreed?: string;
+  sireRegistration?: string;
   statistics: {
     totalBorn: number;
     living: number;
@@ -67,28 +71,41 @@ export const getArchivedLitterDetails = async (litterId: string): Promise<Archiv
     let damImageUrl: string | undefined;
     let sireImageUrl: string | undefined;
 
+    let damBreed: string | undefined;
+    let damRegistration: string | undefined;
+    let sireBreed: string | undefined;
+    let sireRegistration: string | undefined;
+
     if (litter.damId) {
       const { data: damData } = await supabase
         .from('dogs')
-        .select('image_url')
+        .select('image_url, breed, registration_number')
         .eq('id', litter.damId)
         .single();
       damImageUrl = damData?.image_url || undefined;
+      damBreed = damData?.breed || undefined;
+      damRegistration = damData?.registration_number || undefined;
     }
 
     if (litter.sireId) {
       const { data: sireData } = await supabase
         .from('dogs')
-        .select('image_url')
+        .select('image_url, breed, registration_number')
         .eq('id', litter.sireId)
         .single();
       sireImageUrl = sireData?.image_url || undefined;
+      sireBreed = sireData?.breed || undefined;
+      sireRegistration = sireData?.registration_number || undefined;
     }
 
     return {
       litter,
       damImageUrl,
       sireImageUrl,
+      damBreed,
+      damRegistration,
+      sireBreed,
+      sireRegistration,
       statistics: {
         totalBorn,
         living,

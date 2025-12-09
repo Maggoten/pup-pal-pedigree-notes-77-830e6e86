@@ -659,7 +659,9 @@
     "hero": {
       "archived": "Archived",
       "bornOn": "Born on",
-      "archivedOn": "Archived on"
+      "archivedOn": "Archived on",
+      "dam": "Dam",
+      "sire": "Sire"
     },
     "summary": {
       "title": "Litter Summary",

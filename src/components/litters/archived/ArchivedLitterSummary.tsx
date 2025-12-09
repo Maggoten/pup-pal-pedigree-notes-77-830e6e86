@@ -99,6 +99,10 @@ const ArchivedLitterSummary: React.FC<ArchivedLitterSummaryProps> = ({ litterId,
         litter={data.litter}
         damImageUrl={data.damImageUrl}
         sireImageUrl={data.sireImageUrl}
+        damBreed={data.damBreed}
+        damRegistration={data.damRegistration}
+        sireBreed={data.sireBreed}
+        sireRegistration={data.sireRegistration}
       />
 
       {/* Puppy List */}
