@@ -1,5 +1,6 @@
 import React from 'react';
 import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Line } from 'recharts';
+import { format, parseISO } from 'date-fns';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { GrowthLineChartProps } from './types';
 
@@ -11,9 +12,9 @@ const GrowthLineChart: React.FC<GrowthLineChartProps> = ({
   selectedPuppy,
   puppies
 }) => {
-  // Transform data for line chart - keep most recent data point for each puppy
+  // Transform data for line chart - format dates for display
   const transformedChartData = chartData.map(dataPoint => {
-    const formattedDate = new Date(dataPoint.date).toLocaleDateString();
+    const formattedDate = format(parseISO(dataPoint.date), 'd MMM');
     const newDataPoint = { date: formattedDate };
     
     // Add data for each puppy to this date point
