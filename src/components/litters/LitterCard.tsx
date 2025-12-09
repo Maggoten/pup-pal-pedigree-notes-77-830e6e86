@@ -60,7 +60,7 @@ const LitterCard: React.FC<LitterCardProps> = ({
             </Avatar>
             
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg font-semibold truncate">{t('litter.labels.litterName', { damName: litter.damName })}</CardTitle>
+              <CardTitle className="text-lg font-semibold truncate">{litter.name}</CardTitle>
               <p className="text-sm text-muted-foreground truncate mt-1">
                 {litter.damName} × {litter.sireName}
               </p>
