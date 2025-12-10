@@ -1,0 +1,51 @@
+{
+  "title": "Privacy Policy",
+  "subtitle": "Your privacy is important to us",
+  "backToLogin": "Back to Login",
+  "lastUpdated": "Last updated: December 2024",
+  "sections": {
+    "dataCollection": {
+      "title": "Data We Collect",
+      "description": "We collect information that you provide directly to us:",
+      "items": [
+        "Account information (email, name, password)",
+        "Dog and breeding records you enter",
+        "Payment information (processed securely by Stripe)",
+        "Usage data to improve our service"
+      ]
+    },
+    "dataUsage": {
+      "title": "How We Use Your Data",
+      "description": "We use your information to:",
+      "items": [
+        "Provide and maintain the Breeding Journey service",
+        "Process payments and manage subscriptions",
+        "Send important updates about your account",
+        "Improve our platform based on usage patterns"
+      ]
+    },
+    "dataSecurity": {
+      "title": "Data Security",
+      "description": "We implement industry-standard security measures to protect your data. All data is encrypted in transit and at rest. We use secure authentication and role-based access controls to ensure only you can access your breeding records."
+    },
+    "yourRights": {
+      "title": "Your Rights (GDPR)",
+      "description": "Under GDPR, you have the following rights:",
+      "items": [
+        "Right to access your personal data",
+        "Right to correct inaccurate data",
+        "Right to delete your data",
+        "Right to data portability",
+        "Right to withdraw consent"
+      ]
+    },
+    "cookies": {
+      "title": "Cookies",
+      "description": "We use essential cookies to keep you logged in and remember your preferences. We do not use tracking cookies for advertising purposes."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "description": "If you have any questions about this Privacy Policy, please contact us at support@breedingjourney.com"
+    }
+  }
+}

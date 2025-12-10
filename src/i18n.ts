@@ -24,6 +24,14 @@ import enNavigation from './locales/en/navigation.json';
 import svNavigation from './locales/sv/navigation.json';
 import enAbout from './locales/en/about.json';
 import svAbout from './locales/sv/about.json';
+import enPrivacy from './locales/en/privacy.json';
+import svPrivacy from './locales/sv/privacy.json';
+import enTerms from './locales/en/terms.json';
+import svTerms from './locales/sv/terms.json';
+import enFaq from './locales/en/faq.json';
+import svFaq from './locales/sv/faq.json';
+import enContact from './locales/en/contact.json';
+import svContact from './locales/sv/contact.json';
 
 const resources = {
   en: {
@@ -36,7 +44,11 @@ const resources = {
     pregnancy: enPregnancy,
     settings: enSettings,
     navigation: enNavigation,
-    about: enAbout
+    about: enAbout,
+    privacy: enPrivacy,
+    terms: enTerms,
+    faq: enFaq,
+    contact: enContact
   },
   sv: {
     auth: svAuth,
@@ -48,7 +60,11 @@ const resources = {
     pregnancy: svPregnancy,
     settings: svSettings,
     navigation: svNavigation,
-    about: svAbout
+    about: svAbout,
+    privacy: svPrivacy,
+    terms: svTerms,
+    faq: svFaq,
+    contact: svContact
   }
 };
 
@@ -60,7 +76,7 @@ i18n
     fallbackLng: 'en',
     debug: process.env.NODE_ENV === 'development',
     
-    ns: ['common', 'auth', 'home', 'dogs', 'litters', 'plannedLitters', 'pregnancy', 'settings', 'navigation', 'about'],
+    ns: ['common', 'auth', 'home', 'dogs', 'litters', 'plannedLitters', 'pregnancy', 'settings', 'navigation', 'about', 'privacy', 'terms', 'faq', 'contact'],
     defaultNS: 'common',
     
     detection: {

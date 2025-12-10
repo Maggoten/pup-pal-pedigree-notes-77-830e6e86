@@ -1,0 +1,46 @@
+{
+  "title": "Terms of Service",
+  "subtitle": "Please read these terms carefully",
+  "backToLogin": "Back to Login",
+  "lastUpdated": "Last updated: December 2024",
+  "sections": {
+    "acceptance": {
+      "title": "Acceptance of Terms",
+      "description": "By accessing and using Breeding Journey, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our service."
+    },
+    "subscription": {
+      "title": "Subscription & Payment",
+      "description": "Breeding Journey offers subscription-based access to our platform:",
+      "items": [
+        "30-day free trial for new users",
+        "Monthly and yearly subscription options available",
+        "Payments are processed securely through Stripe",
+        "You can cancel your subscription at any time",
+        "Refunds are handled according to our refund policy"
+      ]
+    },
+    "userResponsibilities": {
+      "title": "User Responsibilities",
+      "description": "As a user of Breeding Journey, you agree to:",
+      "items": [
+        "Provide accurate information when registering",
+        "Keep your login credentials secure",
+        "Use the service only for lawful purposes",
+        "Not share your account with others",
+        "Respect the intellectual property of Breeding Journey"
+      ]
+    },
+    "liability": {
+      "title": "Limitation of Liability",
+      "description": "Breeding Journey is provided 'as is' without warranties of any kind. We are not liable for any breeding decisions made based on data in our platform. You are responsible for verifying all information and consulting with veterinary professionals when needed."
+    },
+    "termination": {
+      "title": "Termination",
+      "description": "We reserve the right to suspend or terminate your account if you violate these terms. You may also delete your account at any time through your account settings."
+    },
+    "changes": {
+      "title": "Changes to Terms",
+      "description": "We may update these terms from time to time. We will notify you of any significant changes via email or through the platform. Continued use of the service after changes constitutes acceptance of the new terms."
+    }
+  }
+}

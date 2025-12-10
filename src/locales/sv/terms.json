@@ -1,0 +1,46 @@
+{
+  "title": "Användarvillkor",
+  "subtitle": "Läs dessa villkor noggrant",
+  "backToLogin": "Tillbaka till Inloggning",
+  "lastUpdated": "Senast uppdaterad: December 2024",
+  "sections": {
+    "acceptance": {
+      "title": "Godkännande av villkor",
+      "description": "Genom att använda Breeding Journey godkänner du att vara bunden av dessa användarvillkor. Om du inte godkänner dessa villkor, vänligen använd inte vår tjänst."
+    },
+    "subscription": {
+      "title": "Prenumeration & Betalning",
+      "description": "Breeding Journey erbjuder prenumerationsbaserad tillgång till vår plattform:",
+      "items": [
+        "30 dagars gratis provperiod för nya användare",
+        "Månads- och årsprenumerationer tillgängliga",
+        "Betalningar hanteras säkert genom Stripe",
+        "Du kan avsluta din prenumeration när som helst",
+        "Återbetalningar hanteras enligt vår återbetalningspolicy"
+      ]
+    },
+    "userResponsibilities": {
+      "title": "Användaransvar",
+      "description": "Som användare av Breeding Journey godkänner du att:",
+      "items": [
+        "Ange korrekt information vid registrering",
+        "Hålla dina inloggningsuppgifter säkra",
+        "Endast använda tjänsten för lagliga ändamål",
+        "Inte dela ditt konto med andra",
+        "Respektera Breeding Journeys immateriella rättigheter"
+      ]
+    },
+    "liability": {
+      "title": "Ansvarsbegränsning",
+      "description": "Breeding Journey tillhandahålls 'i befintligt skick' utan garantier av något slag. Vi är inte ansvariga för några avelsbeslut som fattas baserat på data i vår plattform. Du ansvarar för att verifiera all information och konsultera veterinärer vid behov."
+    },
+    "termination": {
+      "title": "Uppsägning",
+      "description": "Vi förbehåller oss rätten att stänga av eller avsluta ditt konto om du bryter mot dessa villkor. Du kan också radera ditt konto när som helst via dina kontoinställningar."
+    },
+    "changes": {
+      "title": "Ändringar av villkor",
+      "description": "Vi kan uppdatera dessa villkor från tid till annan. Vi kommer att meddela dig om väsentliga ändringar via e-post eller genom plattformen. Fortsatt användning av tjänsten efter ändringar innebär godkännande av de nya villkoren."
+    }
+  }
+}

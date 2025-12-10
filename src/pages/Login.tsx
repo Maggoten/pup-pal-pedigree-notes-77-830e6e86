@@ -390,12 +390,21 @@ const Login: React.FC = () => {
 
           {/* Footer Links */}
           <div className="mt-6 pt-4 border-t border-warmbeige-200 text-center space-y-2">
-            <div className="flex justify-center gap-4 text-sm text-warmgreen-600">
-              <a
-                href="/about"
-                className="hover:text-warmgreen-700 underline"
-              >
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm text-warmgreen-600">
+              <a href="/about" className="hover:text-warmgreen-700 underline">
                 About
+              </a>
+              <a href="/privacy" className="hover:text-warmgreen-700 underline">
+                Privacy Policy
+              </a>
+              <a href="/terms" className="hover:text-warmgreen-700 underline">
+                Terms
+              </a>
+              <a href="/faq" className="hover:text-warmgreen-700 underline">
+                FAQ
+              </a>
+              <a href="/contact" className="hover:text-warmgreen-700 underline">
+                Contact
               </a>
             </div>
           </div>

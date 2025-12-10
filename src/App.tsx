@@ -29,6 +29,10 @@ import { queryClient, refreshOnVisibilityChange } from "./utils/reactQueryConfig
 import ProtectedApp from "./components/ProtectedApp";
 import I18nProvider from "./providers/I18nProvider";
 import About from "./pages/About";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Terms from "./pages/Terms";
+import FAQ from "./pages/FAQ";
+import Contact from "./pages/Contact";
 
 // RouteChangeTracker to detect navigation changes and refresh data
 const RouteChangeTracker = () => {
@@ -141,8 +145,12 @@ const App = () => {
               <Sonner />
               <BrowserRouter>
               <Routes>
-                {/* Public routes - accessible to all */}
-                {/* About page is handled by separate optimized app */}
+                {/* Public routes - accessible without auth */}
+                <Route path="/about" element={<About />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/contact" element={<Contact />} />
                 {/* All other routes are protected */}
                 <Route path="/*" element={
                   <AuthGuard>

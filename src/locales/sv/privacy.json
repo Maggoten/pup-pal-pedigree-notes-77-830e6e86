@@ -1,0 +1,51 @@
+{
+  "title": "Integritetspolicy",
+  "subtitle": "Din integritet är viktig för oss",
+  "backToLogin": "Tillbaka till Inloggning",
+  "lastUpdated": "Senast uppdaterad: December 2024",
+  "sections": {
+    "dataCollection": {
+      "title": "Data vi samlar in",
+      "description": "Vi samlar in information som du ger oss direkt:",
+      "items": [
+        "Kontoinformation (e-post, namn, lösenord)",
+        "Hund- och avelsuppgifter du registrerar",
+        "Betalningsinformation (hanteras säkert av Stripe)",
+        "Användningsdata för att förbättra vår tjänst"
+      ]
+    },
+    "dataUsage": {
+      "title": "Hur vi använder din data",
+      "description": "Vi använder din information för att:",
+      "items": [
+        "Tillhandahålla och underhålla Breeding Journey-tjänsten",
+        "Hantera betalningar och prenumerationer",
+        "Skicka viktiga uppdateringar om ditt konto",
+        "Förbättra vår plattform baserat på användningsmönster"
+      ]
+    },
+    "dataSecurity": {
+      "title": "Datasäkerhet",
+      "description": "Vi implementerar branschstandardiserade säkerhetsåtgärder för att skydda din data. All data krypteras under överföring och lagring. Vi använder säker autentisering och rollbaserade åtkomstkontroller för att säkerställa att endast du kan komma åt dina avelsuppgifter."
+    },
+    "yourRights": {
+      "title": "Dina rättigheter (GDPR)",
+      "description": "Enligt GDPR har du följande rättigheter:",
+      "items": [
+        "Rätt att få tillgång till dina personuppgifter",
+        "Rätt att korrigera felaktiga uppgifter",
+        "Rätt att radera din data",
+        "Rätt till dataportabilitet",
+        "Rätt att återkalla samtycke"
+      ]
+    },
+    "cookies": {
+      "title": "Cookies",
+      "description": "Vi använder nödvändiga cookies för att hålla dig inloggad och komma ihåg dina preferenser. Vi använder inte spårningscookies för reklamändamål."
+    },
+    "contact": {
+      "title": "Kontakta oss",
+      "description": "Om du har frågor om denna integritetspolicy, kontakta oss på support@breedingjourney.com"
+    }
+  }
+}

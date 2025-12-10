@@ -1,0 +1,44 @@
+{
+  "title": "Vanliga frågor",
+  "subtitle": "Hitta svar på vanliga frågor",
+  "backToLogin": "Tillbaka till Inloggning",
+  "questions": [
+    {
+      "question": "Vad är Breeding Journey?",
+      "answer": "Breeding Journey är en komplett digital plattform designad för hunduppfödare. Den hjälper dig att spåra löpcykler, planera parningar, följa dräktigheter, hantera kullar och valpar, och hålla alla dina avelsuppgifter organiserade på ett ställe."
+    },
+    {
+      "question": "Hur fungerar den kostnadsfria provperioden?",
+      "answer": "Nya användare får 30 dagars gratis provperiod med full tillgång till alla funktioner. Du behöver lägga till en betalningsmetod vid registrering, men du debiteras inte förrän provperioden är slut. Du kan avsluta när som helst under provperioden."
+    },
+    {
+      "question": "Vilka prenumerationsplaner finns?",
+      "answer": "Vi erbjuder månads- och årsprenumerationer. Årsprenumerationen ger en betydande rabatt jämfört med att betala månadsvis. Båda planerna inkluderar full tillgång till alla funktioner."
+    },
+    {
+      "question": "Kan jag avsluta min prenumeration?",
+      "answer": "Ja, du kan avsluta din prenumeration när som helst från dina kontoinställningar. Din tillgång fortsätter till slutet av din nuvarande faktureringsperiod."
+    },
+    {
+      "question": "Är min data säker?",
+      "answer": "Ja, vi tar datasäkerhet på allvar. All data krypteras och vi använder branschstandardiserade säkerhetspraxis. Dina avelsuppgifter är privata och endast tillgängliga för dig."
+    },
+    {
+      "question": "Kan jag exportera min data?",
+      "answer": "Ja, du kan exportera dina avelsuppgifter och data från dina kontoinställningar. Vi anser att du alltid ska ha tillgång till din egen data."
+    },
+    {
+      "question": "Vilka enheter kan jag använda?",
+      "answer": "Breeding Journey fungerar på alla enheter med en webbläsare - datorer, surfplattor och smartphones. Gränssnittet är mobilvänligt, perfekt för användning vid valplådan."
+    },
+    {
+      "question": "Erbjuder ni support?",
+      "answer": "Ja, vi erbjuder e-postsupport för alla användare. Premiumanvändare får prioriterad support med snabbare svarstider."
+    }
+  ],
+  "moreQuestions": {
+    "title": "Har du fler frågor?",
+    "description": "Vi finns här för att hjälpa! Kontakta vårt supportteam.",
+    "contactLink": "Kontakta Support"
+  }
+}

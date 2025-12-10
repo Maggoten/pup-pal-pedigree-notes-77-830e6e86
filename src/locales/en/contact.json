@@ -1,0 +1,19 @@
+{
+  "title": "Contact Us",
+  "subtitle": "We'd love to hear from you",
+  "backToLogin": "Back to Login",
+  "email": {
+    "title": "Email Support",
+    "description": "Send us an email and we'll get back to you as soon as possible."
+  },
+  "responseTime": {
+    "title": "Response Time",
+    "description": "We typically respond within 24-48 hours during business days. Premium subscribers receive priority support."
+  },
+  "company": {
+    "title": "About Us",
+    "description": "Breeding Journey is developed with passion for dog breeding and a mission to make breeders' lives easier.",
+    "name": "Breeding Journey",
+    "location": "Sweden"
+  }
+}
