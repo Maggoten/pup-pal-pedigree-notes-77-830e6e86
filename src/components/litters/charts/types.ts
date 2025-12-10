@@ -40,4 +40,5 @@ export interface GrowthLineChartProps {
   viewMode: 'single' | 'litter';
   selectedPuppy: Puppy | null;
   puppies: Puppy[];
+  litterDateOfBirth?: string;
 }

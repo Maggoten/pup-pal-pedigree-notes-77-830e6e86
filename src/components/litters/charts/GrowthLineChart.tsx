@@ -1,8 +1,10 @@
-import React from 'react';
-import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Line } from 'recharts';
-import { format, parseISO } from 'date-fns';
+import React, { useMemo } from 'react';
+import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Line, ReferenceLine } from 'recharts';
+import { format, parseISO, addDays } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { GrowthLineChartProps } from './types';
+import { puppyMilestones } from './milestoneConfig';
 
 const GrowthLineChart: React.FC<GrowthLineChartProps> = ({
   chartData,
@@ -10,22 +12,57 @@ const GrowthLineChart: React.FC<GrowthLineChartProps> = ({
   logType,
   viewMode,
   selectedPuppy,
-  puppies
+  puppies,
+  litterDateOfBirth
 }) => {
+  const { t, i18n } = useTranslation('litters');
+  
+  // Get week prefix based on language
+  const weekPrefix = i18n.language === 'sv' ? 'V' : 'W';
+
   // Transform data for line chart - format dates for display
-  const transformedChartData = chartData.map(dataPoint => {
-    const formattedDate = format(parseISO(dataPoint.date), 'd MMM');
-    const newDataPoint = { date: formattedDate };
-    
-    // Add data for each puppy to this date point
-    Object.keys(dataPoint).forEach(key => {
-      if (key !== 'date') {
-        newDataPoint[key] = dataPoint[key];
-      }
+  const transformedChartData = useMemo(() => {
+    return chartData.map(dataPoint => {
+      const formattedDate = format(parseISO(dataPoint.date), 'd MMM');
+      const newDataPoint: Record<string, any> = { date: formattedDate };
+      
+      Object.keys(dataPoint).forEach(key => {
+        if (key !== 'date') {
+          newDataPoint[key] = dataPoint[key];
+        }
+      });
+      
+      return newDataPoint;
     });
+  }, [chartData]);
+
+  // Calculate milestone dates that fall within the chart data range
+  const milestoneLines = useMemo(() => {
+    if (!litterDateOfBirth || chartData.length === 0) return [];
     
-    return newDataPoint;
-  });
+    const birthDate = parseISO(litterDateOfBirth);
+    const chartDates = chartData.map(d => d.date);
+    const firstChartDate = chartDates[0];
+    const lastChartDate = chartDates[chartDates.length - 1];
+    
+    return puppyMilestones
+      .map(milestone => {
+        const milestoneDate = addDays(birthDate, milestone.days);
+        const formattedDate = format(milestoneDate, 'd MMM');
+        const isoDate = format(milestoneDate, 'yyyy-MM-dd');
+        
+        // Check if milestone is within chart range
+        if (isoDate >= firstChartDate && isoDate <= lastChartDate) {
+          return {
+            date: formattedDate,
+            label: `${weekPrefix}${milestone.week}`,
+            week: milestone.week
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+  }, [litterDateOfBirth, chartData, weekPrefix]);
   
   return (
     <div className="w-full aspect-[16/9]">
@@ -51,6 +88,23 @@ const GrowthLineChart: React.FC<GrowthLineChartProps> = ({
           />
           <Tooltip content={<ChartTooltipContent />} />
           <Legend wrapperStyle={{ fontSize: 11, marginTop: 10 }} />
+          
+          {/* Week milestone reference lines */}
+          {milestoneLines.map((milestone) => (
+            <ReferenceLine
+              key={milestone!.week}
+              x={milestone!.date}
+              stroke="hsl(var(--muted-foreground))"
+              strokeDasharray="5 5"
+              strokeOpacity={0.5}
+              label={{
+                value: milestone!.label,
+                position: 'top',
+                fontSize: 10,
+                fill: 'hsl(var(--muted-foreground))'
+              }}
+            />
+          ))}
           
           {viewMode === 'single' && selectedPuppy ? (
             <Line
