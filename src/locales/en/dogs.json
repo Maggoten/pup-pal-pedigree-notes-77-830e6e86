@@ -422,6 +422,39 @@
         "failedDescription": "Please try again or contact support"
       }
     },
+    "editLog": {
+      "title": "Edit Heat Log Entry",
+      "description": "Update the details for this heat log entry",
+      "date": "Date",
+      "selectDate": "Select date",
+      "pickDate": "Pick a date",
+      "temperature": "Temperature (°C)",
+      "temperaturePlaceholder": "e.g., 38.5",
+      "phase": "Heat Phase",
+      "selectPhase": "Select heat phase",
+      "observations": "Observations",
+      "observationsPlaceholder": "Behavioral changes, physical signs, etc.",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes...",
+      "cancel": "Cancel",
+      "updateEntry": "Update Entry",
+      "validation": {
+        "dateRequired": "Date Required",
+        "dateRequiredDescription": "Please select a date for this log entry",
+        "invalidDate": "Invalid Date",
+        "futureDate": "Date cannot be in the future",
+        "invalidTemperature": "Invalid Temperature",
+        "invalidTemperatureDescription": "Please enter a valid temperature between 30°C and 45°C"
+      },
+      "success": {
+        "title": "Log Updated",
+        "description": "Heat log entry has been updated successfully"
+      },
+      "error": {
+        "title": "Update Failed",
+        "description": "Failed to update the heat log entry. Please try again."
+      }
+    },
     "phases": {
       "proestrus": "Proestrus",
       "estrus": "Estrus",
