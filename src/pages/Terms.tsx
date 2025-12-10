@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, FileText, CreditCard, AlertTriangle, Scale, XCircle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, FileText, CreditCard, AlertTriangle, Scale, XCircle, RefreshCw, User, Stethoscope, FileUp, Server, Shield, Gavel } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LightweightLanguageSwitcher from '@/components/LightweightLanguageSwitcher';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
@@ -67,6 +67,23 @@ const Terms: React.FC = () => {
           </CardContent>
         </AnimatedCard>
 
+        {/* Age Requirement Section */}
+        <AnimatedCard className="mb-8 bg-gradient-to-r from-card to-card/50 border-primary/20 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-primary flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-full">
+                <User className="h-6 w-6 text-primary" />
+              </div>
+              {t('sections.ageRequirement.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-foreground leading-relaxed text-lg">
+              {t('sections.ageRequirement.description')}
+            </p>
+          </CardContent>
+        </AnimatedCard>
+
         {/* Subscription Section */}
         <AnimatedCard className="mb-8 bg-gradient-to-br from-accent/5 to-accent/10 border-accent/20 shadow-lg">
           <CardHeader>
@@ -117,6 +134,48 @@ const Terms: React.FC = () => {
           </CardContent>
         </AnimatedCard>
 
+        {/* No Veterinary Advice Section */}
+        <AnimatedCard className="mb-8 bg-gradient-to-r from-secondary/30 to-secondary/50 border-secondary shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-secondary-foreground flex items-center gap-3">
+              <div className="p-2 bg-secondary-foreground/10 rounded-full">
+                <Stethoscope className="h-6 w-6 text-secondary-foreground" />
+              </div>
+              {t('sections.noVeterinaryAdvice.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-secondary-foreground leading-relaxed text-lg">
+              {t('sections.noVeterinaryAdvice.description')}
+            </p>
+          </CardContent>
+        </AnimatedCard>
+
+        {/* User Content Section */}
+        <AnimatedCard className="mb-8 bg-gradient-to-r from-card to-card/50 border-primary/20 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-primary flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-full">
+                <FileUp className="h-6 w-6 text-primary" />
+              </div>
+              {t('sections.userContent.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-foreground leading-relaxed text-lg mb-4">
+              {t('sections.userContent.description')}
+            </p>
+            <ul className="space-y-2">
+              {(t('sections.userContent.items', { returnObjects: true }) as string[]).map((item, index) => (
+                <li key={index} className="flex items-start gap-2 text-foreground">
+                  <span className="text-primary mt-1">•</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </AnimatedCard>
+
         {/* Limitation of Liability Section */}
         <AnimatedCard className="mb-8 bg-gradient-to-r from-secondary/30 to-secondary/50 border-secondary shadow-lg">
           <CardHeader>
@@ -130,6 +189,23 @@ const Terms: React.FC = () => {
           <CardContent>
             <p className="text-secondary-foreground leading-relaxed text-lg">
               {t('sections.liability.description')}
+            </p>
+          </CardContent>
+        </AnimatedCard>
+
+        {/* Service Availability Section */}
+        <AnimatedCard className="mb-8 bg-gradient-to-br from-accent/5 to-accent/10 border-accent/20 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-accent flex items-center gap-3">
+              <div className="p-2 bg-accent/10 rounded-full">
+                <Server className="h-6 w-6 text-accent" />
+              </div>
+              {t('sections.serviceAvailability.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-foreground leading-relaxed text-lg">
+              {t('sections.serviceAvailability.description')}
             </p>
           </CardContent>
         </AnimatedCard>
@@ -151,6 +227,23 @@ const Terms: React.FC = () => {
           </CardContent>
         </AnimatedCard>
 
+        {/* Privacy Reference Section */}
+        <AnimatedCard className="mb-8 bg-gradient-to-r from-card to-card/50 border-primary/20 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-primary flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-full">
+                <Shield className="h-6 w-6 text-primary" />
+              </div>
+              {t('sections.privacyReference.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-foreground leading-relaxed text-lg">
+              {t('sections.privacyReference.description')}
+            </p>
+          </CardContent>
+        </AnimatedCard>
+
         {/* Changes Section */}
         <AnimatedCard className="mb-8 bg-gradient-to-r from-accent/5 to-primary/5 border-accent/20 shadow-lg">
           <CardHeader>
@@ -164,6 +257,23 @@ const Terms: React.FC = () => {
           <CardContent>
             <p className="text-foreground leading-relaxed text-lg">
               {t('sections.changes.description')}
+            </p>
+          </CardContent>
+        </AnimatedCard>
+
+        {/* Governing Law Section */}
+        <AnimatedCard className="mb-8 bg-gradient-to-l from-primary/5 to-primary/10 border-primary/20 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-primary flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-full">
+                <Gavel className="h-6 w-6 text-primary" />
+              </div>
+              {t('sections.governingLaw.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-foreground leading-relaxed text-lg">
+              {t('sections.governingLaw.description')}
             </p>
           </CardContent>
         </AnimatedCard>
