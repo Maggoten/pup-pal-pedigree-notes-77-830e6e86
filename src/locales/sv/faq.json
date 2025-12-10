@@ -30,6 +30,30 @@
     {
       "question": "Erbjuder ni support?",
       "answer": "Ja, vi erbjuder e-postsupport för alla användare."
+    },
+    {
+      "question": "Finns det en mobilapp?",
+      "answer": "Ja! Breeding Journey finns som både webbapp och mobilapp för iOS och Android. Ditt konto fungerar på alla enheter."
+    },
+    {
+      "question": "Kan jag spåra flera hundar?",
+      "answer": "Ja! Du kan lägga till hur många hundar, kullar och dräktigheter du behöver. Breeding Journey är byggt för både små och stora avelsprogram."
+    },
+    {
+      "question": "Kan jag radera min data eller mitt konto?",
+      "answer": "Ja. Du kan radera ditt konto när som helst, och all tillhörande data tas bort permanent."
+    },
+    {
+      "question": "Hur lagras min data?",
+      "answer": "Din data lagras säkert i Supabase med krypterade anslutningar och branschstandard-autentisering. Endast du har tillgång till dina avelsuppgifter."
+    },
+    {
+      "question": "Fungerar Breeding Journey för alla raser?",
+      "answer": "Ja! Breeding Journey fungerar för alla hundraser. Oavsett om du föder upp små eller stora hundar anpassar sig appen efter dina behov."
+    },
+    {
+      "question": "Behöver jag tidigare avelserfarenhet?",
+      "answer": "Nej, Breeding Journey är utformat för både erfarna uppfödare och nybörjare. Appen guidar dig genom löpcykler, dräktigheter och valpvård steg för steg."
     }
   ],
   "moreQuestions": {
