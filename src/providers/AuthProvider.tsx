@@ -575,7 +575,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         return;
       }
 
-      if (!session) {
+      // Get fresh session to ensure we have a valid token
+      const { data: sessionData } = await supabase.auth.getSession();
+      const currentSession = sessionData?.session;
+      
+      if (!currentSession) {
         if (import.meta.env.DEV) {
           console.log('[Auth] No session available for subscription check');
         }
@@ -600,7 +604,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       // Add cache busting parameter when force refresh is requested
       const edgeFunctionPromise = supabase.functions.invoke('check-subscription', {
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${currentSession.access_token}`,
         },
         body: forceRefresh ? { cache_bust: now } : undefined
       });
