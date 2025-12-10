@@ -4,6 +4,10 @@
   "backToLogin": "Back to Login",
   "lastUpdated": "Last updated: December 2025",
   "sections": {
+    "dataController": {
+      "title": "Data Controller",
+      "description": "Breeding Journey is the Data Controller for all personal data processed within the service."
+    },
     "dataCollection": {
       "title": "Data We Collect",
       "description": "We collect information that you provide directly to us:",
@@ -12,6 +16,16 @@
         "Dog and breeding records you enter",
         "Payment information (processed securely by Stripe)",
         "Usage data to improve our service"
+      ]
+    },
+    "legalBasis": {
+      "title": "Legal Basis (GDPR)",
+      "description": "We process your data based on the following legal grounds:",
+      "items": [
+        "Contract – to provide the Breeding Journey service you signed up for",
+        "Consent – when you voluntarily add breeding data, receive emails, or use optional features",
+        "Legitimate Interest – for improving security, preventing misuse, and enhancing the user experience",
+        "Legal Obligation – when accounting or tax rules require limited data retention"
       ]
     },
     "dataUsage": {
@@ -26,7 +40,15 @@
     },
     "dataSecurity": {
       "title": "Data Security",
-      "description": "We implement industry-standard security measures to protect your data. All data is encrypted in transit and at rest. We use secure authentication and role-based access controls to ensure only you can access your breeding records."
+      "description": "We implement industry-standard security measures to protect your data. Breeding Journey uses encryption in transit (HTTPS) and at rest to protect your personal data. We never store plain-text passwords – all authentication is handled securely by Supabase using industry-standard hashing. We use role-based access controls to ensure only you can access your breeding records."
+    },
+    "dataTransfers": {
+      "title": "International Data Transfers",
+      "description": "Some of our service providers (such as Supabase, Stripe, and Resend) may process data outside the EU/EEA. When this happens, we ensure appropriate safeguards are in place, such as Standard Contractual Clauses (SCCs) and GDPR-compliant data processing agreements."
+    },
+    "dataRetention": {
+      "title": "Data Retention",
+      "description": "We retain your data only for as long as your account is active. If you delete your account, all personal and dog-related data is permanently removed. Some payment records may be retained for up to 7 years in accordance with accounting laws."
     },
     "yourRights": {
       "title": "Your Rights (GDPR)",
@@ -41,7 +63,7 @@
     },
     "cookies": {
       "title": "Cookies",
-      "description": "We use essential cookies to keep you logged in and remember your preferences. We do not use tracking cookies for advertising purposes."
+      "description": "We only use essential cookies required for login and secure authentication. We do not use tracking, advertising, or analytics cookies."
     },
     "contact": {
       "title": "Contact Us",

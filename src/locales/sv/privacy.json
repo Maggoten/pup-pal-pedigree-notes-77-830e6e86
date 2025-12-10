@@ -4,6 +4,10 @@
   "backToLogin": "Tillbaka till Inloggning",
   "lastUpdated": "Senast uppdaterad: December 2025",
   "sections": {
+    "dataController": {
+      "title": "Personuppgiftsansvarig",
+      "description": "Breeding Journey är personuppgiftsansvarig för all personlig data som behandlas inom tjänsten."
+    },
     "dataCollection": {
       "title": "Data vi samlar in",
       "description": "Vi samlar in information som du ger oss direkt:",
@@ -12,6 +16,16 @@
         "Hund- och avelsuppgifter du registrerar",
         "Betalningsinformation (hanteras säkert av Stripe)",
         "Användningsdata för att förbättra vår tjänst"
+      ]
+    },
+    "legalBasis": {
+      "title": "Rättslig grund (GDPR)",
+      "description": "Vi behandlar din data baserat på följande rättsliga grunder:",
+      "items": [
+        "Avtal – för att tillhandahålla Breeding Journey-tjänsten du registrerat dig för",
+        "Samtycke – när du frivilligt lägger till avelsdata, tar emot e-post eller använder valfria funktioner",
+        "Berättigat intresse – för att förbättra säkerheten, förhindra missbruk och förbättra användarupplevelsen",
+        "Rättslig förpliktelse – när bokförings- eller skatteregler kräver begränsad datalagring"
       ]
     },
     "dataUsage": {
@@ -26,7 +40,15 @@
     },
     "dataSecurity": {
       "title": "Datasäkerhet",
-      "description": "Vi implementerar branschstandardiserade säkerhetsåtgärder för att skydda din data. All data krypteras under överföring och lagring. Vi använder säker autentisering och rollbaserade åtkomstkontroller för att säkerställa att endast du kan komma åt dina avelsuppgifter."
+      "description": "Vi implementerar branschstandardiserade säkerhetsåtgärder för att skydda din data. Breeding Journey använder kryptering under överföring (HTTPS) och i vila för att skydda dina personuppgifter. Vi lagrar aldrig lösenord i klartext – all autentisering hanteras säkert av Supabase med branschstandard för hashning. Vi använder rollbaserade åtkomstkontroller för att säkerställa att endast du kan komma åt dina avelsuppgifter."
+    },
+    "dataTransfers": {
+      "title": "Internationell dataöverföring",
+      "description": "Vissa av våra tjänsteleverantörer (som Supabase, Stripe och Resend) kan behandla data utanför EU/EES. När detta sker säkerställer vi att lämpliga skyddsåtgärder finns på plats, såsom standardavtalsklausuler (SCCs) och GDPR-kompatibla databehandlingsavtal."
+    },
+    "dataRetention": {
+      "title": "Datalagring",
+      "description": "Vi behåller din data endast så länge ditt konto är aktivt. Om du raderar ditt konto tas all personlig och hundrelaterad data bort permanent. Vissa betalningsuppgifter kan behållas i upp till 7 år i enlighet med bokföringslagen."
     },
     "yourRights": {
       "title": "Dina rättigheter (GDPR)",
@@ -41,7 +63,7 @@
     },
     "cookies": {
       "title": "Cookies",
-      "description": "Vi använder nödvändiga cookies för att hålla dig inloggad och komma ihåg dina preferenser. Vi använder inte spårningscookies för reklamändamål."
+      "description": "Vi använder endast nödvändiga cookies som krävs för inloggning och säker autentisering. Vi använder inte spårnings-, reklam- eller analyticscookies."
     },
     "contact": {
       "title": "Kontakta oss",
