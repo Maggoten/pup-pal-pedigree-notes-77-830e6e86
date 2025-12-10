@@ -1,0 +1,19 @@
+{
+  "title": "Kontakta oss",
+  "subtitle": "Vi vill gärna höra från dig",
+  "backToLogin": "Tillbaka till Inloggning",
+  "email": {
+    "title": "E-postsupport",
+    "description": "Skicka ett mejl till oss så återkommer vi så snart som möjligt."
+  },
+  "responseTime": {
+    "title": "Svarstid",
+    "description": "Vi svarar vanligtvis inom 24-48 timmar under vardagar. Premiumanvändare får prioriterad support."
+  },
+  "company": {
+    "title": "Om oss",
+    "description": "Breeding Journey utvecklas med passion för hunduppfödning och ett uppdrag att göra uppfödarnas liv enklare.",
+    "name": "Breeding Journey",
+    "location": "Sverige"
+  }
+}
