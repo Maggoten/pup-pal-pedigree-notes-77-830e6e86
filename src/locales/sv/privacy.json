@@ -40,7 +40,7 @@
     },
     "dataSecurity": {
       "title": "Datasäkerhet",
-      "description": "Vi implementerar branschstandardiserade säkerhetsåtgärder för att skydda din data. Breeding Journey använder kryptering under överföring (HTTPS) och i vila för att skydda dina personuppgifter. Vi lagrar aldrig lösenord i klartext – all autentisering hanteras säkert av Supabase med branschstandard för hashning. Vi använder rollbaserade åtkomstkontroller för att säkerställa att endast du kan komma åt dina avelsuppgifter."
+      "description": "Vi implementerar branschstandardiserade säkerhetsåtgärder för att skydda din data. Breeding Journey använder kryptering under överföring (HTTPS) och vid lagring för att skydda dina personuppgifter. Vi lagrar aldrig lösenord i klartext – all autentisering hanteras säkert av Supabase med branschstandard för hashning. Vi använder rollbaserade åtkomstkontroller för att säkerställa att endast du kan komma åt dina avelsuppgifter."
     },
     "dataTransfers": {
       "title": "Internationell dataöverföring",
