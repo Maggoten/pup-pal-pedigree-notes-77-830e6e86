@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -32,6 +32,18 @@ const HEAT_PHASES = [
   { value: 'anestrus', key: 'anestrus' }
 ];
 
+// Calculate phase based on day in cycle
+const calculatePhaseFromStartDate = (startDate: string): string => {
+  const start = new Date(startDate);
+  const today = new Date();
+  const diffTime = today.getTime() - start.getTime();
+  const dayInCycle = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  
+  if (dayInCycle <= 9) return 'proestrus';
+  if (dayInCycle <= 16) return 'estrus';
+  return 'metestrus';
+};
+
 const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
   open,
   onOpenChange,
@@ -44,10 +56,17 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
   const [testType, setTestType] = useState<'temperature' | 'progesterone'>('temperature');
   const [temperature, setTemperature] = useState('');
   const [progesteroneValue, setProgesteroneValue] = useState('');
-  const [phase, setPhase] = useState('');
+  const [phase, setPhase] = useState(() => calculatePhaseFromStartDate(heatCycle.start_date));
   const [observations, setObservations] = useState('');
   const [notes, setNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update phase when dialog opens or heat cycle changes
+  useEffect(() => {
+    if (open) {
+      setPhase(calculatePhaseFromStartDate(heatCycle.start_date));
+    }
+  }, [open, heatCycle.start_date]);
 
   const handleSubmit = async () => {
     if (!date) {
@@ -124,7 +143,7 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
         setTestType('temperature');
         setTemperature('');
         setProgesteroneValue('');
-        setPhase('');
+        setPhase(calculatePhaseFromStartDate(heatCycle.start_date));
         setObservations('');
         setNotes('');
       } else {
