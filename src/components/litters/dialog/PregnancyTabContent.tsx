@@ -245,11 +245,6 @@ const PregnancyTabContent: React.FC<PregnancyTabContentProps> = ({
         }
       }
       
-      toast({
-        title: t('dialog.toasts.success.title'),
-        description: t('dialog.toasts.success.createdFromPlanned', { name: litterName })
-      });
-      
       onClose();
     } catch (error) {
       console.error("Error creating litter from pregnancy:", error);

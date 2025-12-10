@@ -79,10 +79,6 @@ const HeatLogsDialog: React.FC<HeatLogsDialogProps> = ({
     try {
       const success = await HeatService.deleteHeatLog(selectedLog.id);
       if (success) {
-        toast({
-          title: t('heatTracking.logs.deleteSuccess'),
-          description: t('heatTracking.logs.deleteSuccessDescription'),
-        });
         loadHeatLogs();
         onUpdate();
         setShowDeleteDialog(false);
