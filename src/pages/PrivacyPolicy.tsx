@@ -4,18 +4,17 @@ import { ArrowLeft, Shield, Eye, Database, Lock, UserCheck, Mail, Scale, Globe, 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LightweightLanguageSwitcher from '@/components/LightweightLanguageSwitcher';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
-
 const PrivacyPolicy: React.FC = () => {
-  const { t } = useTranslation('privacy');
-  
+  const {
+    t
+  } = useTranslation('privacy');
   const navigateToLogin = () => {
     window.location.href = '/login';
   };
-
-  const [heroRef, heroVisible] = useIntersectionObserver({ triggerOnce: true });
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-warmbeige-50 to-warmgreen-50">
+  const [heroRef, heroVisible] = useIntersectionObserver({
+    triggerOnce: true
+  });
+  return <div className="min-h-screen bg-gradient-to-br from-background via-warmbeige-50 to-warmgreen-50">
       {/* Decorative background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 right-10 w-32 h-32 bg-warmgreen-100/20 rounded-full blur-xl" />
@@ -24,10 +23,7 @@ const PrivacyPolicy: React.FC = () => {
 
       {/* Header with language switcher */}
       <header className="relative flex justify-between items-center p-4 border-b border-border bg-card/80 backdrop-blur-sm">
-        <button 
-          onClick={navigateToLogin}
-          className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors cursor-pointer group"
-        >
+        <button onClick={navigateToLogin} className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors cursor-pointer group">
           <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
           <span className="font-medium">{t('backToLogin')}</span>
         </button>
@@ -36,12 +32,7 @@ const PrivacyPolicy: React.FC = () => {
 
       <div className="container mx-auto px-4 py-12 max-w-4xl relative">
         {/* Hero Section */}
-        <div 
-          ref={heroRef}
-          className={`text-center mb-16 transition-all duration-700 ${
-            heroVisible ? 'animate-fade-in' : 'opacity-0 translate-y-8'
-          }`}
-        >
+        <div ref={heroRef} className={`text-center mb-16 transition-all duration-700 ${heroVisible ? 'animate-fade-in' : 'opacity-0 translate-y-8'}`}>
           <h1 className="text-4xl md:text-6xl font-bold text-primary mb-6 font-playfair leading-tight">
             {t('title')}
           </h1>
@@ -82,12 +73,12 @@ const PrivacyPolicy: React.FC = () => {
               {t('sections.dataCollection.description')}
             </p>
             <ul className="space-y-2">
-              {(t('sections.dataCollection.items', { returnObjects: true }) as string[]).map((item, index) => (
-                <li key={index} className="flex items-start gap-2 text-foreground">
-                  <span className="text-primary mt-1">•</span>
+              {(t('sections.dataCollection.items', {
+              returnObjects: true
+            }) as string[]).map((item, index) => <li key={index} className="flex items-start gap-2 text-foreground">
+                  <span className="text-primary mt-1 my-0">•</span>
                   {item}
-                </li>
-              ))}
+                </li>)}
             </ul>
           </CardContent>
         </AnimatedCard>
@@ -107,12 +98,12 @@ const PrivacyPolicy: React.FC = () => {
               {t('sections.legalBasis.description')}
             </p>
             <ul className="space-y-2">
-              {(t('sections.legalBasis.items', { returnObjects: true }) as string[]).map((item, index) => (
-                <li key={index} className="flex items-start gap-2 text-foreground">
+              {(t('sections.legalBasis.items', {
+              returnObjects: true
+            }) as string[]).map((item, index) => <li key={index} className="flex items-start gap-2 text-foreground">
                   <span className="text-accent mt-1">•</span>
                   {item}
-                </li>
-              ))}
+                </li>)}
             </ul>
           </CardContent>
         </AnimatedCard>
@@ -132,12 +123,12 @@ const PrivacyPolicy: React.FC = () => {
               {t('sections.dataUsage.description')}
             </p>
             <ul className="space-y-2">
-              {(t('sections.dataUsage.items', { returnObjects: true }) as string[]).map((item, index) => (
-                <li key={index} className="flex items-start gap-2 text-foreground">
+              {(t('sections.dataUsage.items', {
+              returnObjects: true
+            }) as string[]).map((item, index) => <li key={index} className="flex items-start gap-2 text-foreground">
                   <span className="text-accent mt-1">•</span>
                   {item}
-                </li>
-              ))}
+                </li>)}
             </ul>
           </CardContent>
         </AnimatedCard>
@@ -208,12 +199,12 @@ const PrivacyPolicy: React.FC = () => {
               {t('sections.yourRights.description')}
             </p>
             <ul className="space-y-2">
-              {(t('sections.yourRights.items', { returnObjects: true }) as string[]).map((item, index) => (
-                <li key={index} className="flex items-start gap-2 text-secondary-foreground">
+              {(t('sections.yourRights.items', {
+              returnObjects: true
+            }) as string[]).map((item, index) => <li key={index} className="flex items-start gap-2 text-secondary-foreground">
                   <span className="mt-1">•</span>
                   {item}
-                </li>
-              ))}
+                </li>)}
             </ul>
           </CardContent>
         </AnimatedCard>
@@ -260,27 +251,23 @@ const PrivacyPolicy: React.FC = () => {
           {t('lastUpdated')}
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
 
 // Animated Card Component
-const AnimatedCard: React.FC<{ 
-  children: React.ReactNode; 
-  className?: string; 
-}> = ({ children, className }) => {
-  const [ref, isVisible] = useIntersectionObserver({ triggerOnce: true, threshold: 0.1 });
-
-  return (
-    <Card 
-      ref={ref}
-      className={`transition-all duration-700 transform ${
-        isVisible ? 'animate-fade-in' : 'opacity-0 translate-y-8'
-      } hover:shadow-xl hover:-translate-y-1 ${className}`}
-    >
+const AnimatedCard: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+}> = ({
+  children,
+  className
+}) => {
+  const [ref, isVisible] = useIntersectionObserver({
+    triggerOnce: true,
+    threshold: 0.1
+  });
+  return <Card ref={ref} className={`transition-all duration-700 transform ${isVisible ? 'animate-fade-in' : 'opacity-0 translate-y-8'} hover:shadow-xl hover:-translate-y-1 ${className}`}>
       {children}
-    </Card>
-  );
+    </Card>;
 };
-
 export default PrivacyPolicy;
