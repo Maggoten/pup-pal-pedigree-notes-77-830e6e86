@@ -103,6 +103,10 @@
     "invalidDate": "Please enter a valid date"
   },
   "toasts": {
+    "warning": {
+      "noHeatCycleTitle": "Mating saved without heat link",
+      "noHeatCycleDescription": "No active heat cycle found. Register heat start to link mating to temperature/progesterone data."
+    },
     "success": {
       "title": "Success",
       "litterAdded": "Planned litter added successfully",

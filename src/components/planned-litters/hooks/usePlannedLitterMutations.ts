@@ -67,7 +67,7 @@ export const usePlannedLitterMutations = (
     
     try {
       console.log("Adding mating date:", date, "for litter:", litterId);
-      await plannedLittersService.addMatingDate(litterId, date);
+      const result = await plannedLittersService.addMatingDate(litterId, date);
       
       // Update status to 'active' when first mating date is added
       const { error: statusError } = await supabase
@@ -78,6 +78,14 @@ export const usePlannedLitterMutations = (
       
       if (statusError) {
         console.error('Error updating planned litter status:', statusError);
+      }
+      
+      // Show warning if no heat cycle was linked
+      if (result && !result.heatCycleLinked) {
+        toast({
+          title: t('toasts.warning.noHeatCycleTitle'),
+          description: t('toasts.warning.noHeatCycleDescription'),
+        });
       }
       
       await refreshLitters();

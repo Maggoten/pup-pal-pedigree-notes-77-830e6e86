@@ -13,9 +13,11 @@ import { Calendar, Thermometer, TestTube, FileText } from 'lucide-react';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { HeatService } from '@/services/HeatService';
+import { supabase } from '@/integrations/supabase/client';
 import ProgesteroneChart from './ProgesteroneChart';
 import TemperatureTrendChart from './TemperatureTrendChart';
 import OptimalMatingWindow from './OptimalMatingWindow';
+import MatingDatesSection from './MatingDatesSection';
 import { calculateOptimalMatingDays, getNextTestRecommendation } from '@/utils/progesteroneCalculator';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -28,6 +30,12 @@ interface HeatDetailsDialogProps {
   heatCycle: HeatCycle | null;
 }
 
+interface MatingDateData {
+  id: string;
+  mating_date: string;
+  pregnancy_id: string | null;
+}
+
 const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
   open,
   onOpenChange,
@@ -35,23 +43,34 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
 }) => {
   const { t } = useTranslation('dogs');
   const [heatLogs, setHeatLogs] = useState<HeatLog[]>([]);
+  const [matingDates, setMatingDates] = useState<MatingDateData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (open && heatCycle) {
-      loadHeatLogs();
+      loadHeatData();
     }
   }, [open, heatCycle?.id]);
 
-  const loadHeatLogs = async () => {
+  const loadHeatData = async () => {
     if (!heatCycle) return;
     
     setIsLoading(true);
     try {
+      // Load heat logs
       const logs = await HeatService.getHeatLogs(heatCycle.id);
       setHeatLogs(logs);
+      
+      // Load mating dates linked to this heat cycle
+      const { data: matingData } = await supabase
+        .from('mating_dates')
+        .select('id, mating_date, pregnancy_id')
+        .eq('heat_cycle_id', heatCycle.id)
+        .order('mating_date', { ascending: true });
+      
+      setMatingDates(matingData || []);
     } catch (error) {
-      console.error('Error loading heat logs:', error);
+      console.error('Error loading heat data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -223,6 +242,15 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
             <OptimalMatingWindow 
               matingWindow={matingWindow}
               nextTestDate={nextTestDate}
+            />
+          )}
+
+          {/* Mating Dates Section */}
+          {matingDates.length > 0 && (
+            <MatingDatesSection
+              matingDates={matingDates}
+              heatLogs={heatLogs}
+              cycleStartDate={heatCycle.start_date}
             />
           )}
 
