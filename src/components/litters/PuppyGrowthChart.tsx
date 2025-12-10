@@ -72,6 +72,7 @@ const PuppyGrowthChart: React.FC<PuppyGrowthChartProps> = ({
         viewMode={viewMode}
         selectedPuppy={selectedPuppy}
         puppies={puppies}
+        litterDateOfBirth={litterDateOfBirth}
       />
     </div>
   );
