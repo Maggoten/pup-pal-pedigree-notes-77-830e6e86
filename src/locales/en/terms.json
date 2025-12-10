@@ -8,15 +8,19 @@
       "title": "Acceptance of Terms",
       "description": "By accessing and using Breeding Journey, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our service."
     },
+    "ageRequirement": {
+      "title": "Age Requirement",
+      "description": "Users must be at least 16 years old to create an account and use Breeding Journey. By creating an account, you confirm that you meet this age requirement."
+    },
     "subscription": {
-      "title": "Subscription & Payment",
-      "description": "Breeding Journey offers subscription-based access to our platform:",
+      "title": "Subscriptions & Payments",
+      "description": "Breeding Journey offers subscription-based access to certain features. By subscribing, you agree to the following conditions:",
       "items": [
-        "30-day free trial for new users",
-        "Monthly and yearly subscription options available",
-        "Payments are processed securely through Stripe",
-        "You can cancel your subscription at any time",
-        "Refunds are handled according to our refund policy"
+        "Billing: Subscriptions are billed on a recurring monthly or yearly basis through Stripe.",
+        "Auto-Renewal: Your subscription will automatically renew unless cancelled before the renewal date.",
+        "Cancellation: You may cancel your subscription at any time. Your access will remain active until the end of the paid period.",
+        "Refunds: We do not provide refunds for unused subscription periods, except where required by law.",
+        "Payment Processing: All payments are handled securely by Stripe. We do not store credit card information."
       ]
     },
     "userResponsibilities": {
@@ -30,17 +34,42 @@
         "Respect the intellectual property of Breeding Journey"
       ]
     },
+    "noVeterinaryAdvice": {
+      "title": "No Veterinary or Professional Advice",
+      "description": "Breeding Journey provides tools and informational features to help breeders organize and track their breeding work. We do not provide veterinary, medical, legal, or professional advice. You are responsible for consulting qualified professionals when making decisions about your dogs' health or breeding plans."
+    },
+    "userContent": {
+      "title": "User-Generated Content",
+      "description": "You are responsible for any content you submit or upload to Breeding Journey. You confirm that:",
+      "items": [
+        "You have the right to upload the content",
+        "Your content does not violate the rights of others",
+        "We may remove content that violates these Terms"
+      ]
+    },
     "liability": {
       "title": "Limitation of Liability",
       "description": "Breeding Journey is provided 'as is' without warranties of any kind. We are not liable for any breeding decisions made based on data in our platform. You are responsible for verifying all information and consulting with veterinary professionals when needed."
+    },
+    "serviceAvailability": {
+      "title": "Service Availability",
+      "description": "We aim to keep Breeding Journey available at all times, but we do not guarantee uninterrupted service. We are not liable for downtime, data loss, or delays caused by third-party providers such as Supabase, Vercel, or Stripe."
     },
     "termination": {
       "title": "Termination",
       "description": "We reserve the right to suspend or terminate your account if you violate these terms. You may also delete your account at any time through your account settings."
     },
+    "privacyReference": {
+      "title": "Privacy Policy",
+      "description": "Your use of Breeding Journey is also governed by our Privacy Policy, which explains how your personal data is collected and processed. Please review our Privacy Policy for more information."
+    },
     "changes": {
       "title": "Changes to Terms",
       "description": "We may update these terms from time to time. We will notify you of any significant changes via email or through the platform. Continued use of the service after changes constitutes acceptance of the new terms."
+    },
+    "governingLaw": {
+      "title": "Governing Law",
+      "description": "These Terms are governed by the laws of Sweden, without regard to conflict of law principles. Any disputes arising from these Terms shall be resolved in the courts of Sweden."
     }
   }
 }

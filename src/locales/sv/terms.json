@@ -8,15 +8,19 @@
       "title": "Godkännande av villkor",
       "description": "Genom att använda Breeding Journey godkänner du att vara bunden av dessa användarvillkor. Om du inte godkänner dessa villkor, vänligen använd inte vår tjänst."
     },
+    "ageRequirement": {
+      "title": "Ålderskrav",
+      "description": "Användare måste vara minst 16 år gamla för att skapa ett konto och använda Breeding Journey. Genom att skapa ett konto bekräftar du att du uppfyller detta ålderskrav."
+    },
     "subscription": {
-      "title": "Prenumeration & Betalning",
-      "description": "Breeding Journey erbjuder prenumerationsbaserad tillgång till vår plattform:",
+      "title": "Prenumerationer & Betalningar",
+      "description": "Breeding Journey erbjuder prenumerationsbaserad tillgång till vissa funktioner. Genom att prenumerera godkänner du följande villkor:",
       "items": [
-        "30 dagars gratis provperiod för nya användare",
-        "Månads- och årsprenumerationer tillgängliga",
-        "Betalningar hanteras säkert genom Stripe",
-        "Du kan avsluta din prenumeration när som helst",
-        "Återbetalningar hanteras enligt vår återbetalningspolicy"
+        "Fakturering: Prenumerationer faktureras på återkommande månads- eller årsbasis genom Stripe.",
+        "Automatisk förnyelse: Din prenumeration förnyas automatiskt om den inte avbryts före förnyelsedatumet.",
+        "Avbokning: Du kan avsluta din prenumeration när som helst. Din åtkomst förblir aktiv till slutet av den betalda perioden.",
+        "Återbetalningar: Vi erbjuder inte återbetalningar för oanvända prenumerationsperioder, förutom där det krävs enligt lag.",
+        "Betalningshantering: Alla betalningar hanteras säkert av Stripe. Vi lagrar inte kreditkortsinformation."
       ]
     },
     "userResponsibilities": {
@@ -30,17 +34,42 @@
         "Respektera Breeding Journeys immateriella rättigheter"
       ]
     },
+    "noVeterinaryAdvice": {
+      "title": "Ingen veterinär- eller professionell rådgivning",
+      "description": "Breeding Journey tillhandahåller verktyg och informationsfunktioner för att hjälpa uppfödare att organisera och följa sitt avelsarbete. Vi erbjuder inte veterinär-, medicinsk-, juridisk- eller professionell rådgivning. Du ansvarar för att konsultera kvalificerade yrkespersoner när du fattar beslut om dina hundars hälsa eller avelsplaner."
+    },
+    "userContent": {
+      "title": "Användargenererat innehåll",
+      "description": "Du ansvarar för allt innehåll du skickar in eller laddar upp till Breeding Journey. Du bekräftar att:",
+      "items": [
+        "Du har rätt att ladda upp innehållet",
+        "Ditt innehåll inte kränker andras rättigheter",
+        "Vi kan ta bort innehåll som bryter mot dessa villkor"
+      ]
+    },
     "liability": {
       "title": "Ansvarsbegränsning",
       "description": "Breeding Journey tillhandahålls 'i befintligt skick' utan garantier av något slag. Vi är inte ansvariga för några avelsbeslut som fattas baserat på data i vår plattform. Du ansvarar för att verifiera all information och konsultera veterinärer vid behov."
+    },
+    "serviceAvailability": {
+      "title": "Tjänstetillgänglighet",
+      "description": "Vi strävar efter att hålla Breeding Journey tillgängligt hela tiden, men vi garanterar inte oavbruten tjänst. Vi är inte ansvariga för driftstopp, dataförlust eller förseningar orsakade av tredjepartsleverantörer som Supabase, Vercel eller Stripe."
     },
     "termination": {
       "title": "Uppsägning",
       "description": "Vi förbehåller oss rätten att stänga av eller avsluta ditt konto om du bryter mot dessa villkor. Du kan också radera ditt konto när som helst via dina kontoinställningar."
     },
+    "privacyReference": {
+      "title": "Integritetspolicy",
+      "description": "Din användning av Breeding Journey styrs även av vår Integritetspolicy, som förklarar hur dina personuppgifter samlas in och behandlas. Vänligen läs vår Integritetspolicy för mer information."
+    },
     "changes": {
       "title": "Ändringar av villkor",
       "description": "Vi kan uppdatera dessa villkor från tid till annan. Vi kommer att meddela dig om väsentliga ändringar via e-post eller genom plattformen. Fortsatt användning av tjänsten efter ändringar innebär godkännande av de nya villkoren."
+    },
+    "governingLaw": {
+      "title": "Tillämplig lag",
+      "description": "Dessa villkor styrs av svensk lag, utan hänsyn till lagvalsprinciper. Eventuella tvister som uppstår från dessa villkor ska avgöras i svenska domstolar."
     }
   }
 }
