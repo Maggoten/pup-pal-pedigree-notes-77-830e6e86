@@ -41,17 +41,18 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
   }, [heatCycles]);
 
   const loadTemperatureLogs = async () => {
-    if (!heatCycles.length) {
+    // Only load temperature logs from active (ongoing) heat cycles
+    const activeCycles = heatCycles.filter(cycle => !cycle.end_date);
+    
+    if (!activeCycles.length) {
       setAllTemperatureLogs([]);
       return;
     }
 
     try {
-      // Load all temperature logs from all cycles
       const allLogs: HeatLog[] = [];
-      for (const cycle of heatCycles) {
+      for (const cycle of activeCycles) {
         const logs = await HeatService.getHeatLogs(cycle.id);
-        // Filter only temperature logs
         const temperatureLogs = logs.filter(log => log.temperature !== null && log.temperature !== undefined);
         allLogs.push(...temperatureLogs);
       }
