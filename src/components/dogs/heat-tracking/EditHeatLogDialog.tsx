@@ -59,8 +59,8 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
   const handleSubmit = async () => {
     if (!date) {
       toast({
-        title: 'Date Required',
-        description: 'Please select a date for this log entry.',
+        title: t('heatTracking.editLog.validation.dateRequired'),
+        description: t('heatTracking.editLog.validation.dateRequiredDescription'),
         variant: 'destructive',
       });
       return;
@@ -69,8 +69,8 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
     // Validate date is not in the future
     if (date > new Date()) {
       toast({
-        title: 'Invalid Date',
-        description: 'Date cannot be in the future.',
+        title: t('heatTracking.editLog.validation.invalidDate'),
+        description: t('heatTracking.editLog.validation.futureDate'),
         variant: 'destructive',
       });
       return;
@@ -80,8 +80,8 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
     const tempValue = temperature ? parseFloat(temperature) : undefined;
     if (temperature && (isNaN(tempValue!) || tempValue! < 30 || tempValue! > 45)) {
       toast({
-        title: 'Invalid Temperature',
-        description: 'Please enter a valid temperature between 30°C and 45°C.',
+        title: t('heatTracking.editLog.validation.invalidTemperature'),
+        description: t('heatTracking.editLog.validation.invalidTemperatureDescription'),
         variant: 'destructive',
       });
       return;
@@ -99,8 +99,8 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
 
       if (updatedLog) {
         toast({
-          title: 'Log Updated',
-          description: 'Heat log entry has been updated successfully.',
+          title: t('heatTracking.editLog.success.title'),
+          description: t('heatTracking.editLog.success.description'),
         });
         onSuccess();
       } else {
@@ -109,8 +109,8 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
     } catch (error) {
       console.error('Error updating heat log:', error);
       toast({
-        title: 'Update Failed',
-        description: 'Failed to update the heat log entry. Please try again.',
+        title: t('heatTracking.editLog.error.title'),
+        description: t('heatTracking.editLog.error.description'),
         variant: 'destructive',
       });
     } finally {
@@ -122,15 +122,15 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Heat Log Entry</DialogTitle>
+          <DialogTitle>{t('heatTracking.editLog.title')}</DialogTitle>
           <DialogDescription>
-            Update the details for this heat log entry.
+            {t('heatTracking.editLog.description')}
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="date">Date *</Label>
+            <Label htmlFor="date">{t('heatTracking.editLog.date')} *</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -141,7 +141,7 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  {date ? format(date, "PPP") : <span>{t('heatTracking.editLog.pickDate')}</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -157,7 +157,7 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="temperature">Temperature (°C)</Label>
+            <Label htmlFor="temperature">{t('heatTracking.editLog.temperature')}</Label>
             <Input
               id="temperature"
               type="number"
@@ -166,20 +166,20 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
               max="45"
               value={temperature}
               onChange={(e) => setTemperature(e.target.value)}
-              placeholder="e.g., 38.5"
+              placeholder={t('heatTracking.editLog.temperaturePlaceholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phase">Heat Phase</Label>
+            <Label htmlFor="phase">{t('heatTracking.editLog.phase')}</Label>
             <Select value={phase} onValueChange={setPhase}>
               <SelectTrigger>
-                <SelectValue placeholder="Select heat phase" />
+                <SelectValue placeholder={t('heatTracking.editLog.selectPhase')} />
               </SelectTrigger>
               <SelectContent>
                 {HEAT_PHASES.map((p) => (
                   <SelectItem key={p.value} value={p.value}>
-                    {p.label}
+                    {t(`heatTracking.phases.${p.value}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -187,23 +187,23 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="observations">Observations</Label>
+            <Label htmlFor="observations">{t('heatTracking.editLog.observations')}</Label>
             <Textarea
               id="observations"
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
-              placeholder="Behavioral changes, physical signs, etc."
+              placeholder={t('heatTracking.editLog.observationsPlaceholder')}
               rows={3}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes">{t('heatTracking.editLog.notes')}</Label>
             <Textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Additional notes..."
+              placeholder={t('heatTracking.editLog.notesPlaceholder')}
               rows={2}
             />
           </div>
@@ -211,14 +211,14 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t('heatTracking.editLog.cancel')}
           </Button>
           <Button 
             onClick={handleSubmit} 
             disabled={isLoading || !date}
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Update Entry
+            {t('heatTracking.editLog.updateEntry')}
           </Button>
         </DialogFooter>
       </DialogContent>

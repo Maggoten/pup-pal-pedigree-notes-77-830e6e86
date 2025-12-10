@@ -422,6 +422,39 @@
         "failedDescription": "Försök igen eller kontakta support"
       }
     },
+    "editLog": {
+      "title": "Redigera Löppost",
+      "description": "Uppdatera detaljerna för denna löppost",
+      "date": "Datum",
+      "selectDate": "Välj datum",
+      "pickDate": "Välj ett datum",
+      "temperature": "Temperatur (°C)",
+      "temperaturePlaceholder": "t.ex. 38,5",
+      "phase": "Löpfas",
+      "selectPhase": "Välj löpfas",
+      "observations": "Observationer",
+      "observationsPlaceholder": "Beteendeförändringar, fysiska tecken, etc.",
+      "notes": "Anteckningar",
+      "notesPlaceholder": "Ytterligare anteckningar...",
+      "cancel": "Avbryt",
+      "updateEntry": "Uppdatera Post",
+      "validation": {
+        "dateRequired": "Datum krävs",
+        "dateRequiredDescription": "Välj ett datum för denna loggpost",
+        "invalidDate": "Ogiltigt Datum",
+        "futureDate": "Datum kan inte vara i framtiden",
+        "invalidTemperature": "Ogiltig Temperatur",
+        "invalidTemperatureDescription": "Ange en giltig temperatur mellan 30°C och 45°C"
+      },
+      "success": {
+        "title": "Post Uppdaterad",
+        "description": "Löpposten har uppdaterats framgångsrikt"
+      },
+      "error": {
+        "title": "Uppdatering Misslyckades",
+        "description": "Misslyckades med att uppdatera löpposten. Försök igen."
+      }
+    },
     "phases": {
       "proestrus": "Proöstrus",
       "estrus": "Östrus", 
