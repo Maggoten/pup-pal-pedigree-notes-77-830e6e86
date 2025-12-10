@@ -24,6 +24,7 @@ const Puppies: React.FC = () => {
         title="Loading..." 
         description="Loading..."
         icon={<PawPrint className="h-6 w-6" />}
+        showWelcomeHeader={false}
       >
         <div className="flex justify-center items-center h-32">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -37,6 +38,7 @@ const Puppies: React.FC = () => {
       title={t('pages.puppies.title')} 
       description={t('pages.puppies.description')}
       icon={<PawPrint className="h-6 w-6" />}
+      showWelcomeHeader={false}
     >
       <div className="bg-background min-h-[calc(100vh-6rem)]">
         <div className="beige-gradient rounded-lg border border-greige-300 p-4">

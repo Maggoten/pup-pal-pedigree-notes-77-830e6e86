@@ -75,6 +75,7 @@ const Pregnancy: React.FC = () => {
         description="Loading translations..."
         icon={<Heart className="h-6 w-6" />}
         className="overflow-y-auto"
+        showWelcomeHeader={false}
       >
         <div className="flex justify-center items-center h-40">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -89,6 +90,7 @@ const Pregnancy: React.FC = () => {
       description={t('pages.pregnancy.description')}
       icon={<Heart className="h-6 w-6" />}
       className="overflow-y-auto"
+      showWelcomeHeader={false}
     >
       {hasError && (
         <Alert variant="destructive" className="mb-6">

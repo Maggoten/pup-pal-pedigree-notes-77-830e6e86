@@ -104,6 +104,7 @@ const MyLitters: React.FC = () => {
         description="Loading..." 
         icon={<PawPrint className="h-6 w-6" />}
         className="bg-warmbeige-50/50 overflow-y-auto"
+        showWelcomeHeader={false}
       >
         <div className="flex justify-center items-center h-32">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -118,6 +119,7 @@ const MyLitters: React.FC = () => {
       description={t('pages.myLitters.description')} 
       icon={<PawPrint className="h-6 w-6" />}
       className="bg-warmbeige-50/50 overflow-y-auto"
+      showWelcomeHeader={false}
     >
       {isError && showError && (
         <Alert variant="destructive" className="mb-4">
