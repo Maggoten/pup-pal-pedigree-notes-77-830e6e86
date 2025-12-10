@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Trash2 } from 'lucide-react';
 
 interface SubscriptionBlockingModalProps {
   isOpen: boolean;
@@ -16,9 +20,14 @@ interface ModalMessage {
 }
 
 const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ isOpen }) => {
-  const { logout, user, subscriptionStatus, trialEndDate, stripeCustomerId, checkSubscription } = useAuth();
+  const { logout, user, deleteAccount, subscriptionStatus, trialEndDate, stripeCustomerId, checkSubscription } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [customerData, setCustomerData] = useState<any>(null);
+  
+  // Delete account state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Helper function to check if customer has default payment method
   const hasDefaultPaymentMethod = (customer: any) => {
@@ -202,6 +211,32 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
     await logout();
   };
 
+  const handleDeleteAccount = async () => {
+    if (!user?.email) {
+      toast.error('Unable to verify user email');
+      return;
+    }
+
+    if (confirmEmail.toLowerCase() !== user.email.toLowerCase()) {
+      toast.error('Email address does not match');
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const success = await deleteAccount();
+      if (success) {
+        setIsDeleteDialogOpen(false);
+        // User will be redirected after account deletion
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toast.error('Failed to delete account');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-md [&>button]:hidden">
@@ -234,9 +269,54 @@ const SubscriptionBlockingModal: React.FC<SubscriptionBlockingModalProps> = ({ i
             >
               Sign out
             </Button>
+            
+            <button
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="text-sm text-destructive hover:underline mt-4 inline-flex items-center gap-1"
+            >
+              <Trash2 className="h-3 w-3" />
+              Delete my account
+            </button>
           </div>
         </div>
       </DialogContent>
+
+      {/* Delete Account Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Account</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your account and all associated data.
+              <br /><br />
+              Please type your email address <strong>{user?.email}</strong> to confirm.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-2 py-4">
+            <Label htmlFor="confirm-email">Email address</Label>
+            <Input
+              id="confirm-email"
+              type="email"
+              placeholder="Enter your email to confirm"
+              value={confirmEmail}
+              onChange={(e) => setConfirmEmail(e.target.value)}
+              disabled={isDeleting}
+            />
+          </div>
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={isDeleting || confirmEmail.toLowerCase() !== user?.email?.toLowerCase()}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Account'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };
