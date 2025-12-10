@@ -69,7 +69,7 @@ const GrowthLineChart: React.FC<GrowthLineChartProps> = ({
       <ChartContainer config={chartConfig}>
         <LineChart
           data={transformedChartData}
-          margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+          margin={{ top: 25, right: 10, left: 0, bottom: 20 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
