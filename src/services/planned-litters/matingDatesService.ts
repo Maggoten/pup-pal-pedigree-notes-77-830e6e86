@@ -2,6 +2,11 @@
 import { supabase } from '@/integrations/supabase/client';
 import { addDays } from 'date-fns';
 
+export interface AddMatingDateResult {
+  success: boolean;
+  heatCycleLinked: boolean;
+}
+
 class MatingDatesService {
   /**
    * Find active heat cycle for a dog at a given date
@@ -45,7 +50,7 @@ class MatingDatesService {
     }
   }
 
-  async addMatingDate(litterId: string, date: Date): Promise<void> {
+  async addMatingDate(litterId: string, date: Date): Promise<AddMatingDateResult> {
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
       throw new Error('No active session');
@@ -212,6 +217,11 @@ class MatingDatesService {
       }
 
       console.log(`Successfully added mating date (${date.toISOString()}) linked to pregnancy ${pregnancyId}${heatCycleId ? ` and heat cycle ${heatCycleId}` : ''} for female ${femaleName} and male ${maleName}`);
+      
+      return {
+        success: true,
+        heatCycleLinked: !!heatCycleId
+      };
     } catch (error) {
       console.error("Error in addMatingDate:", error);
       throw error;

@@ -103,6 +103,10 @@
     "invalidDate": "Vänligen ange ett giltigt datum"
   },
   "toasts": {
+    "warning": {
+      "noHeatCycleTitle": "Parningsdatum sparat utan löpkoppling",
+      "noHeatCycleDescription": "Ingen aktiv löpcykel hittades. Registrera löpstart för att koppla parningen till temperatur/progesteron-data."
+    },
     "success": {
       "title": "Framgång",
       "litterAdded": "Planerad kull tillagd",
