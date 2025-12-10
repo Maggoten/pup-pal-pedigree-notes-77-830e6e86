@@ -245,9 +245,12 @@ const PrivacyPolicy: React.FC = () => {
               {t('sections.contact.title')}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <p className="text-foreground leading-relaxed text-lg">
               {t('sections.contact.description')}
+            </p>
+            <p className="text-foreground leading-relaxed text-lg">
+              {t('sections.contact.subDescription')}
             </p>
           </CardContent>
         </AnimatedCard>
