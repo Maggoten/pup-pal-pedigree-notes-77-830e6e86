@@ -6,7 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 
 export function usePuppyOperations(
-  loadLittersData
+  loadLittersData: () => Promise<unknown>,
+  loadLitterDetails: (litterId: string) => Promise<void>
 ) {
   const { isAuthReady } = useAuth();
   const queryClient = useQueryClient();
@@ -31,8 +32,9 @@ export function usePuppyOperations(
       const litterQueryKey = ['litters', selectedLitterId];
       queryClient.invalidateQueries({ queryKey: litterQueryKey });
       
-      // Also reload the full data
+      // Reload the full data and then reload details to show the new puppy
       await loadLittersData();
+      await loadLitterDetails(selectedLitterId);
       
       toast({
         title: "Puppy Added",
@@ -71,8 +73,9 @@ export function usePuppyOperations(
       const litterQueryKey = ['litters', selectedLitterId];
       queryClient.invalidateQueries({ queryKey: litterQueryKey });
       
-      // Also reload the full data
+      // Reload the full data and details
       await loadLittersData();
+      await loadLitterDetails(selectedLitterId);
       
       return result;
     } catch (error) {
@@ -106,8 +109,9 @@ export function usePuppyOperations(
       const litterQueryKey = ['litters', selectedLitterId];
       queryClient.invalidateQueries({ queryKey: litterQueryKey });
       
-      // Also reload the full data
+      // Reload the full data and details
       await loadLittersData();
+      await loadLitterDetails(selectedLitterId);
       
       toast({
         title: "Puppy Deleted",

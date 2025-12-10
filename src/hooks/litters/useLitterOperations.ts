@@ -4,7 +4,8 @@ import { useAddLitter } from './operations/useAddLitter';
 import { usePuppyOperations } from './operations/usePuppyOperations';
 
 export function useLitterOperations(
-  loadLittersData,
+  loadLittersData: () => Promise<unknown>,
+  loadLitterDetails: (litterId: string) => Promise<void>,
   setActiveLitters,
   setArchivedLitters,
   setSelectedLitterId,
@@ -30,7 +31,8 @@ export function useLitterOperations(
   );
   
   const { addPuppy, updatePuppy, deletePuppy } = usePuppyOperations(
-    loadLittersData
+    loadLittersData,
+    loadLitterDetails
   );
 
   return {
