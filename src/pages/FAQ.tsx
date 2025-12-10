@@ -64,7 +64,7 @@ const FAQ: React.FC = () => {
         </div>
 
         {/* FAQ Accordion */}
-        <AnimatedCard className="mb-8 bg-gradient-to-r from-card to-card/50 border-primary/20 shadow-lg">
+        <AnimatedCard className="mb-8 bg-card/95 backdrop-blur-sm border-primary/20 shadow-lg">
           <CardContent className="pt-6">
             <Accordion type="single" collapsible className="w-full">
               {faqItems.map((item, index) => (
