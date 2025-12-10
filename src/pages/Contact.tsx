@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Mail, MessageCircle, Clock, MapPin, Facebook, Instagram } from 'lucide-react';
+import { ArrowLeft, Mail, MessageCircle, Clock, Facebook, Instagram } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LightweightLanguageSwitcher from '@/components/LightweightLanguageSwitcher';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
@@ -95,7 +95,7 @@ const Contact: React.FC = () => {
         </div>
 
         {/* Social Media Card */}
-        <div className="grid md:grid-cols-2 gap-6 mb-12">
+        <div className="mb-12">
           <AnimatedCard className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 shadow-lg">
             <CardHeader>
               <CardTitle className="text-xl text-primary flex items-center gap-3">
@@ -123,27 +123,6 @@ const Contact: React.FC = () => {
                 >
                   <Instagram className="h-6 w-6 text-primary" />
                 </a>
-              </div>
-            </CardContent>
-          </AnimatedCard>
-
-          {/* Company Info */}
-          <AnimatedCard className="bg-gradient-to-r from-secondary/30 to-secondary/50 border-secondary shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-xl text-secondary-foreground flex items-center gap-3">
-                <div className="p-2 bg-secondary-foreground/10 rounded-full">
-                  <MapPin className="h-5 w-5 text-secondary-foreground" />
-                </div>
-                {t('company.title')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-secondary-foreground leading-relaxed">
-                {t('company.description')}
-              </p>
-              <div className="mt-4 space-y-1 text-secondary-foreground/80">
-                <p>{t('company.name')}</p>
-                <p>{t('company.location')}</p>
               </div>
             </CardContent>
           </AnimatedCard>
