@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Shield, Eye, Database, Lock, UserCheck, Mail } from 'lucide-react';
+import { ArrowLeft, Shield, Eye, Database, Lock, UserCheck, Mail, Scale, Globe, Building, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LightweightLanguageSwitcher from '@/components/LightweightLanguageSwitcher';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
@@ -50,6 +50,23 @@ const PrivacyPolicy: React.FC = () => {
           </p>
         </div>
 
+        {/* Data Controller Section */}
+        <AnimatedCard className="mb-8 bg-gradient-to-r from-card to-card/50 border-primary/20 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-primary flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-full">
+                <Building className="h-6 w-6 text-primary" />
+              </div>
+              {t('sections.dataController.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-foreground leading-relaxed text-lg">
+              {t('sections.dataController.description')}
+            </p>
+          </CardContent>
+        </AnimatedCard>
+
         {/* Data Collection Section */}
         <AnimatedCard className="mb-8 bg-gradient-to-r from-card to-card/50 border-primary/20 shadow-lg">
           <CardHeader>
@@ -68,6 +85,31 @@ const PrivacyPolicy: React.FC = () => {
               {(t('sections.dataCollection.items', { returnObjects: true }) as string[]).map((item, index) => (
                 <li key={index} className="flex items-start gap-2 text-foreground">
                   <span className="text-primary mt-1">•</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </AnimatedCard>
+
+        {/* Legal Basis Section */}
+        <AnimatedCard className="mb-8 bg-gradient-to-br from-accent/5 to-accent/10 border-accent/20 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-accent flex items-center gap-3">
+              <div className="p-2 bg-accent/10 rounded-full">
+                <Scale className="h-6 w-6 text-accent" />
+              </div>
+              {t('sections.legalBasis.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-foreground leading-relaxed text-lg mb-4">
+              {t('sections.legalBasis.description')}
+            </p>
+            <ul className="space-y-2">
+              {(t('sections.legalBasis.items', { returnObjects: true }) as string[]).map((item, index) => (
+                <li key={index} className="flex items-start gap-2 text-foreground">
+                  <span className="text-accent mt-1">•</span>
                   {item}
                 </li>
               ))}
@@ -113,6 +155,40 @@ const PrivacyPolicy: React.FC = () => {
           <CardContent>
             <p className="text-foreground leading-relaxed text-lg">
               {t('sections.dataSecurity.description')}
+            </p>
+          </CardContent>
+        </AnimatedCard>
+
+        {/* International Data Transfers Section */}
+        <AnimatedCard className="mb-8 bg-gradient-to-r from-secondary/30 to-secondary/50 border-secondary shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-secondary-foreground flex items-center gap-3">
+              <div className="p-2 bg-secondary-foreground/10 rounded-full">
+                <Globe className="h-6 w-6 text-secondary-foreground" />
+              </div>
+              {t('sections.dataTransfers.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-secondary-foreground leading-relaxed text-lg">
+              {t('sections.dataTransfers.description')}
+            </p>
+          </CardContent>
+        </AnimatedCard>
+
+        {/* Data Retention Section */}
+        <AnimatedCard className="mb-8 bg-gradient-to-br from-primary/10 via-primary/5 to-accent/5 border-primary/30 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-primary flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-full">
+                <Clock className="h-6 w-6 text-primary" />
+              </div>
+              {t('sections.dataRetention.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-foreground leading-relaxed text-lg">
+              {t('sections.dataRetention.description')}
             </p>
           </CardContent>
         </AnimatedCard>
