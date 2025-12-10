@@ -202,7 +202,7 @@ const PrivacyPolicy: React.FC = () => {
               {(t('sections.yourRights.items', {
               returnObjects: true
             }) as string[]).map((item, index) => <li key={index} className="flex items-start gap-2 text-secondary-foreground">
-                  <span className="mt-1">•</span>
+                  <span className="mt-1 my-0">•</span>
                   {item}
                 </li>)}
             </ul>
