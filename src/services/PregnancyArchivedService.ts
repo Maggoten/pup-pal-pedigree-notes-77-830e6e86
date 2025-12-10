@@ -5,6 +5,8 @@ export interface ArchivedPregnancyData {
   id: string;
   femaleName: string;
   maleName: string;
+  femaleId?: string;
+  maleId?: string;
   matingDate: Date;
   actualBirthDate: Date | null;
   expectedDueDate: Date;
@@ -263,6 +265,8 @@ export const getArchivedPregnancyDetails = async (
       id: pregnancy.id,
       femaleName,
       maleName,
+      femaleId: pregnancy.female_dog_id || undefined,
+      maleId: pregnancy.male_dog_id || undefined,
       matingDate,
       actualBirthDate,
       expectedDueDate,

@@ -81,6 +81,8 @@ const CreateLitterFromArchivedDialog: React.FC<CreateLitterFromArchivedDialogPro
           name: litterName.trim(),
           dam_name: pregnancyData.femaleName,
           sire_name: pregnancyData.maleName,
+          dam_id: pregnancyData.femaleId || null,
+          sire_id: pregnancyData.maleId || null,
           date_of_birth: dateOfBirth.toISOString(),
           user_id: sessionData.session.user.id,
           pregnancy_id: pregnancyId
