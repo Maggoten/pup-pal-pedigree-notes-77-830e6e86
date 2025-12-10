@@ -2,6 +2,7 @@
 import React, { ReactNode, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import WelcomeHeader from '@/components/WelcomeHeader';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PageLayoutProps {
   title: string;
@@ -9,6 +10,7 @@ interface PageLayoutProps {
   icon?: ReactNode;
   children: ReactNode;
   className?: string;
+  showWelcomeHeader?: boolean;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
@@ -16,8 +18,13 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   description, 
   icon, 
   children,
-  className = ""
+  className = "",
+  showWelcomeHeader = true
 }) => {
+  const isMobile = useIsMobile();
+  
+  // Show banner if: desktop OR (mobile AND showWelcomeHeader is true)
+  const shouldShowBanner = !isMobile || showWelcomeHeader;
   // Add useEffect to force scrollability on mount
   useEffect(() => {
     // Force scrollability on HTML and body elements
@@ -37,7 +44,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   return (
     <div className={`min-h-screen flex flex-col bg-background overflow-y-auto ${className}`}>
       <Navbar />
-      <WelcomeHeader />
+      {shouldShowBanner && <WelcomeHeader />}
       
       <main className="flex-1 container py-4 space-y-4 overflow-y-auto">
         {(title || description) && (

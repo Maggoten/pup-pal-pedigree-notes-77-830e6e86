@@ -123,6 +123,7 @@ const MyDogsContent: React.FC = () => {
         title={t('page.title')} 
         description={t('page.description')}
         className="bg-warmbeige-50 overflow-y-auto"
+        showWelcomeHeader={false}
       >
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
@@ -137,6 +138,7 @@ const MyDogsContent: React.FC = () => {
       title={t('page.title')} 
       description={t('page.description')}
       className="bg-warmbeige-50 overflow-y-auto"
+      showWelcomeHeader={false}
     >
       {error && showError && (
         <Alert variant="destructive" className="mb-4">

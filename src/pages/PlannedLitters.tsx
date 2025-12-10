@@ -12,6 +12,7 @@ const PlannedLitters: React.FC = () => {
       title={t('pages.plannedLitters.title')} 
       description={t('pages.plannedLitters.description')}
       className="bg-warmbeige-50 overflow-y-auto"
+      showWelcomeHeader={false}
     >
       <PlannedLittersContent />
     </PageLayout>

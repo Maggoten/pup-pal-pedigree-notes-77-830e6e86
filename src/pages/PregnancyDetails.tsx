@@ -107,6 +107,7 @@ const PregnancyDetails = () => {
         title={t('pages.details.title')} 
         description={t('pages.details.loadingDescription')}
         icon={<Heart className="h-6 w-6" />}
+        showWelcomeHeader={false}
       >
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -122,6 +123,7 @@ const PregnancyDetails = () => {
         title={t('pages.details.notFound.title')} 
         description={t('pages.details.notFound.description')}
         icon={<Heart className="h-6 w-6" />}
+        showWelcomeHeader={false}
       >
         <div className="text-center py-12">
           <h3 className="text-xl font-medium text-greige-700">{t('pages.details.notFound.title')}</h3>
@@ -136,6 +138,7 @@ const PregnancyDetails = () => {
       title={ready ? t('journey.title', { femaleName: pregnancy.femaleName }) : 'Loading...'} 
       description={ready ? t('pages.details.description') : 'Loading...'}
       icon={<Heart className="h-6 w-6" />}
+      showWelcomeHeader={false}
     >
       {/* Updated vertically stacked action section */}
       <div className="flex flex-col gap-4 mb-6 max-w-xs">
