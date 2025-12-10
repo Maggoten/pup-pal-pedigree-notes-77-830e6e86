@@ -75,6 +75,7 @@ export function useLitterManagement() {
     archiveLitter
   } = useLitterOperations(
     loadLittersData,
+    loadLitterDetails,
     setActiveLitters,
     setArchivedLitters,
     setSelectedLitterId,
