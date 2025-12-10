@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Mail, MessageCircle, Clock, MapPin } from 'lucide-react';
+import { ArrowLeft, Mail, MessageCircle, Clock, MapPin, Facebook, Instagram } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LightweightLanguageSwitcher from '@/components/LightweightLanguageSwitcher';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
@@ -94,26 +94,60 @@ const Contact: React.FC = () => {
           </AnimatedCard>
         </div>
 
-        {/* Additional Info */}
-        <AnimatedCard className="bg-gradient-to-r from-secondary/30 to-secondary/50 border-secondary shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-xl text-secondary-foreground flex items-center gap-3">
-              <div className="p-2 bg-secondary-foreground/10 rounded-full">
-                <MapPin className="h-5 w-5 text-secondary-foreground" />
+        {/* Social Media Card */}
+        <div className="grid md:grid-cols-2 gap-6 mb-12">
+          <AnimatedCard className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-xl text-primary flex items-center gap-3">
+                {t('social.title')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">{t('social.description')}</p>
+              <div className="flex gap-4">
+                <a
+                  href="https://www.facebook.com/profile.php?id=61577076560899"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-primary/10 rounded-full hover:bg-primary/20 hover:scale-110 transition-all duration-200"
+                  aria-label="Facebook"
+                >
+                  <Facebook className="h-6 w-6 text-primary" />
+                </a>
+                <a
+                  href="https://www.instagram.com/breedingjourney"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-primary/10 rounded-full hover:bg-primary/20 hover:scale-110 transition-all duration-200"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="h-6 w-6 text-primary" />
+                </a>
               </div>
-              {t('company.title')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-secondary-foreground leading-relaxed">
-              {t('company.description')}
-            </p>
-            <div className="mt-4 space-y-1 text-secondary-foreground/80">
-              <p>{t('company.name')}</p>
-              <p>{t('company.location')}</p>
-            </div>
-          </CardContent>
-        </AnimatedCard>
+            </CardContent>
+          </AnimatedCard>
+
+          {/* Company Info */}
+          <AnimatedCard className="bg-gradient-to-r from-secondary/30 to-secondary/50 border-secondary shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-xl text-secondary-foreground flex items-center gap-3">
+                <div className="p-2 bg-secondary-foreground/10 rounded-full">
+                  <MapPin className="h-5 w-5 text-secondary-foreground" />
+                </div>
+                {t('company.title')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-secondary-foreground leading-relaxed">
+                {t('company.description')}
+              </p>
+              <div className="mt-4 space-y-1 text-secondary-foreground/80">
+                <p>{t('company.name')}</p>
+                <p>{t('company.location')}</p>
+              </div>
+            </CardContent>
+          </AnimatedCard>
+        </div>
       </div>
     </div>
   );

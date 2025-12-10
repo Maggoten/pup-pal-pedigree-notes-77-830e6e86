@@ -10,6 +10,10 @@
     "title": "Svarstid",
     "description": "Vi svarar vanligtvis inom 24-48 timmar under vardagar. Premiumanvändare får prioriterad support."
   },
+"social": {
+    "title": "Följ oss",
+    "description": "Håll dig uppdaterad med nyheter och tips"
+  },
   "company": {
     "title": "Om oss",
     "description": "Breeding Journey utvecklas med passion för hunduppfödning och ett uppdrag att göra uppfödarnas liv enklare.",
