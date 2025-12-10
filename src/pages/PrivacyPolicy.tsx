@@ -126,7 +126,7 @@ const PrivacyPolicy: React.FC = () => {
               {(t('sections.dataUsage.items', {
               returnObjects: true
             }) as string[]).map((item, index) => <li key={index} className="flex items-start gap-2 text-foreground">
-                  <span className="text-accent mt-1">•</span>
+                  <span className="text-accent mt-1 my-0">•</span>
                   {item}
                 </li>)}
             </ul>
