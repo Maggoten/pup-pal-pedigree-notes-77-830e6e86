@@ -41,23 +41,6 @@ const PrivacyPolicy: React.FC = () => {
           </p>
         </div>
 
-        {/* Data Controller Section */}
-        <AnimatedCard className="mb-8 bg-gradient-to-r from-card to-card/50 border-primary/20 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl text-primary flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-full">
-                <Building className="h-6 w-6 text-primary" />
-              </div>
-              {t('sections.dataController.title')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-foreground leading-relaxed text-lg">
-              {t('sections.dataController.description')}
-            </p>
-          </CardContent>
-        </AnimatedCard>
-
         {/* Data Collection Section */}
         <AnimatedCard className="mb-8 bg-gradient-to-r from-card to-card/50 border-primary/20 shadow-lg">
           <CardHeader>
