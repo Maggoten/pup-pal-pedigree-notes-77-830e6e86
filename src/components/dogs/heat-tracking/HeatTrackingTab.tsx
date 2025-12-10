@@ -117,14 +117,7 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
         </Card>
       )}
 
-      {/* Previous Heats - Unified List */}
-      <PreviousHeatsList 
-        dog={dog}
-        heatCycles={heatCycles}
-        onUpdate={refresh}
-      />
-
-      {/* Temperature Trend Chart - Always show when data exists */}
+      {/* Temperature Trend Chart - Show before previous heats for continuity */}
       {allTemperatureLogs.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold mb-4">{t('heatTracking.temperature.overallTrend')}</h2>
@@ -133,6 +126,13 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
           />
         </div>
       )}
+
+      {/* Previous Heats - Unified List */}
+      <PreviousHeatsList 
+        dog={dog}
+        heatCycles={heatCycles}
+        onUpdate={refresh}
+      />
 
 
       <CreateHeatCycleDialog
