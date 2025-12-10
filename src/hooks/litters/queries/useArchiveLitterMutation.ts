@@ -46,12 +46,6 @@ export const useArchiveLitterMutation = () => {
     },
     onSuccess: (_, { archive }) => {
       queryClient.invalidateQueries({ queryKey: littersQueryKey });
-      toast({
-        title: archive ? "Litter Archived" : "Litter Activated",
-        description: archive 
-          ? "The litter has been moved to the archive." 
-          : "The litter has been moved to active litters."
-      });
     },
     onError: (error, _, context) => {
       if (context?.previousActiveLitters) {

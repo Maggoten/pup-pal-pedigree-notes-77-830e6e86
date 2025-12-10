@@ -40,10 +40,6 @@ const ArchivedLitterSummary: React.FC<ArchivedLitterSummaryProps> = ({ litterId,
     setIsUnarchiving(true);
     try {
       archiveLitter(litterId, false);
-      toast({
-        title: t('toast.success'),
-        description: t('toasts.success.litterUnarchived')
-      });
       
       // Call parent callback if provided
       if (onUnarchive) {

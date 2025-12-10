@@ -197,11 +197,6 @@ const PlannedLitterTabContent: React.FC<PlannedLitterTabContentProps> = ({
         console.log('Planned litter marked as completed:', selectedPlannedLitterId);
       }
       
-      toast({
-        title: t('dialog.toasts.success.title'),
-        description: t('dialog.toasts.success.createdFromPlanned', { name: plannedLitterName })
-      });
-      
       onClose();
     } catch (error) {
       console.error("Error creating litter from planned litter:", error);

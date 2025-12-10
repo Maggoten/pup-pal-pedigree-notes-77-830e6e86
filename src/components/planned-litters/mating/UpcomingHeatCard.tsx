@@ -28,11 +28,6 @@ const UpcomingHeatCard: React.FC<UpcomingHeatCardProps> = ({ heat, onHeatDeleted
       setIsDeleting(true);
       
       if (await HeatService.deleteHeatEntry(heat.dogId, heat.heatIndex)) {
-        toast({
-          title: t('upcomingHeat.heatRecordDeleted'),
-          description: t('upcomingHeat.heatRecordRemoved')
-        });
-        
         // Also delete any corresponding calendar events
         try {
           const heatEventId = `event-heat-${heat.dogId}-${heat.date.getTime()}`;

@@ -190,11 +190,6 @@ const NewLitterTabContent: React.FC<NewLitterTabContentProps> = ({ onClose, onLi
       // Call the onLitterAdded callback with the new litter
       onLitterAdded(newLitter);
       onClose();
-      
-      toast({
-        title: t('dialog.toasts.success.title'),
-        description: t('dialog.toasts.success.created', { name: values.litterName })
-      });
     } catch (error) {
       console.error("Error creating litter:", error);
       

@@ -64,12 +64,7 @@ export const useChecklistData = (litter: Litter, onToggleItem: (itemId: string, 
       try {
         const success = await saveChecklistItemStatus(litter.id, itemId, newStatus);
         
-        if (success) {
-          toast({
-            title: t(newStatus ? 'checklist.toasts.success.itemCompleted' : 'checklist.toasts.success.itemUncompleted'),
-            description: t(newStatus ? 'checklist.toasts.success.itemCompleted' : 'checklist.toasts.success.itemUncompleted'),
-          });
-        } else {
+        if (!success) {
           toast({
             title: t('checklist.toasts.error.failedToUpdate'),
             description: t('checklist.toasts.error.failedToUpdate'),

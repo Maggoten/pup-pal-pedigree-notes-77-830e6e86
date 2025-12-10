@@ -69,11 +69,6 @@ const WeeklyPhotoEditor: React.FC<WeeklyPhotoEditorProps> = ({
         new_image: newImage || undefined
       });
       
-      toast({
-        title: "Uppdatering lyckades",
-        description: `Foto för vecka ${photo.week_number} har uppdaterats`
-      });
-      
       handleClose();
     } catch (error) {
       toast({

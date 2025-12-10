@@ -49,10 +49,6 @@ export const usePlannedLitterMutations = (
     try {
       const newLitter = await plannedLittersService.createPlannedLitter(values);
       if (newLitter) {
-        toast({
-          title: t('toasts.success.plannedLitterAdded'),
-          description: `${newLitter.maleName || values.externalMaleName || 'Male'} × ${newLitter.femaleName} ${t('toasts.success.litterAdded')}.`
-        });
         await refreshLitters();
       }
     } catch (error) {
@@ -85,11 +81,6 @@ export const usePlannedLitterMutations = (
       }
       
       await refreshLitters();
-      
-      toast({
-        title: t('toasts.success.matingDateAdded'),
-        description: t('toasts.success.matingDateCreated')
-      });
     } catch (error) {
       console.error('Error adding mating date:', error);
       toast({
@@ -108,11 +99,6 @@ export const usePlannedLitterMutations = (
       console.log("Editing mating date at index:", dateIndex, "to:", newDate, "for litter:", litterId);
       await plannedLittersService.editMatingDate(litterId, dateIndex, newDate);
       await refreshLitters();
-      
-      toast({
-        title: t('toasts.success.matingDateUpdated'),
-        description: t('toasts.success.matingDateUpdatedSuccess')
-      });
     } catch (error) {
       console.error('Error updating mating date:', error);
       toast({
@@ -131,11 +117,6 @@ export const usePlannedLitterMutations = (
       console.log("Deleting mating date at index:", dateIndex, "for litter:", litterId);
       await plannedLittersService.deleteMatingDate(litterId, dateIndex);
       await refreshLitters();
-      
-      toast({
-        title: t('toasts.success.matingDateDeleted'),
-        description: t('toasts.success.matingDateDeletedSuccess')
-      });
     } catch (error) {
       console.error('Error deleting mating date:', error);
       toast({
@@ -155,10 +136,6 @@ export const usePlannedLitterMutations = (
       const updatedLitter = await plannedLittersService.updatePlannedLitter(litterId, values);
       
       if (updatedLitter) {
-        toast({
-          title: t('toasts.success.litterUpdated'),
-          description: `${updatedLitter.maleName || values.externalMaleName || 'Male'} × ${updatedLitter.femaleName} ${t('toasts.success.litterUpdatedSuccess')}.`
-        });
         await refreshLitters();
       }
     } catch (error) {
@@ -185,11 +162,6 @@ export const usePlannedLitterMutations = (
       if (error) throw error;
       
       await refreshLitters();
-      
-      toast({
-        title: t('toasts.success.litterDeleted'),
-        description: t('toasts.success.plannedLitterDeleted')
-      });
     } catch (error) {
       console.error('Error deleting litter:', error);
       toast({
