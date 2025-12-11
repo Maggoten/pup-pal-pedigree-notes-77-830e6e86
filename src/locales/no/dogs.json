@@ -22,7 +22,7 @@
   "page": {
     "title": "Mine Hunder",
     "description": "Håndter hundene dine",
-    "backToList": "Tilbake"
+    "backToList": "Tilbake til liste"
   },
   "navigation": {
     "addNewDog": "Legg til Ny Hund",
@@ -234,7 +234,7 @@
     "loading": "Laster kull...",
     "error": "Feil ved lasting av kull: {{error}}",
     "empty": {
-      "title": "{{dogName}} har ikke vært involvert i noen kull ennå.",
+      "title": "{{dogName}} har ikke vært involvert i noen kull enda.",
       "sireLine": "Når denne hunden blir far til et kull, vil det vises her.",
       "damLine": "Når denne hunden får et kull, vil det vises her."
     },
@@ -282,7 +282,7 @@
       "never": "Aldri",
       "noRecords": "Ingen registreringer",
       "unknown": "Ukjent",
-      "noData": "Ingen løpesyklusdata tilgjengelig ennå",
+      "noData": "Ingen løpesyklusdata tilgjengelig enda",
       "days": "dager",
       "daysParameter": "{{days}} dager",
       "startTracking": "Start sporing av løpesykluser for å se analyser",
@@ -325,7 +325,7 @@
       "duration": "{{days}} dagers syklus",
       "logEntries": "{{count}} loggoppføringer",
       "latestEntry": "Siste Oppføring",
-      "noLogs": "Ingen temperaturlogger ennå",
+      "noLogs": "Ingen temperaturlogger enda",
       "startLogging": "Legg til din første temperaturmåling",
       "viewAllLogs": "Vis alle {{count}} logger",
       "deleteButton": "Slett Løpesyklus",
@@ -464,7 +464,7 @@
       "commonSigns": "Vanlige Tegn",
       "noSignsData": "Ingen detaljert tegnsinformasjon tilgjengelig for denne fasen.",
       "details": {
-        "proestrus": "Den tidlige fasen av løpesyklusen. I denne fasen begynner vulva å hovne og det kan være lett blødning. Tispen er ennå ikke klar til parring og vil vanligvis avvise hannhunder.",
+        "proestrus": "Den tidlige fasen av løpesyklusen. I denne fasen begynner vulva å hovne og det kan være lett blødning. Tispen er enda ikke klar til parring og vil vanligvis avvise hannhunder.",
         "estrus": "Den fruktbare fasen når parring mest sannsynlig vil resultere i drektighet. Utfloden blir lysere i farge og tispen blir mottakelig for hannhunder. Dette er det optimale parringsvinduet.",
         "metestrus": "Den sene fasen av løpesyklusen når fruktbarheten avtar. Utfloden minker og tispen blir mindre mottakelig for hannhunder. Denne fasen går over i diøstrus."
       },
@@ -578,7 +578,7 @@
       "description": "Alle sporingsoppføringer for løpesyklus startet {{date}}",
       "entryCount": "{{count}} oppføringer registrert",
       "loading": "Laster oppføringer...",
-      "noEntries": "Ingen sporingsoppføringer ennå",
+      "noEntries": "Ingen sporingsoppføringer enda",
       "startTracking": "Legg til din første sporingsoppføring ovenfor",
       "deleteSuccess": "Oppføring Slettet",
       "deleteSuccessDescription": "Løpeloggoppføringen har blitt fjernet",

@@ -47,7 +47,7 @@
   },
   "empty": { 
     "myLitters": { 
-      "title": "Ingen kull ennå", 
+      "title": "Ingen kull enda", 
       "description": "Registrerte kull vises her når du begynner å følge opp kullene dine" 
     }, 
     "noPuppies": "Ingen valper i dette kullet", 
@@ -265,7 +265,7 @@
       "deleteNote": "Slett Notat"
     },
     "empty": { 
-      "title": "Ingen valper lagt til ennå", 
+      "title": "Ingen valper lagt til enda", 
       "description": "Legg til valpene dine for å spore vekst, utviklingsmilepæler og føre detaljerte registre." 
     }, 
     "display": {
@@ -286,9 +286,9 @@
       "heightCm": "Høyde (cm)"
     },
     "messages": {
-      "noWeightRecords": "Ingen vektregistreringer ennå.",
-      "noHeightRecords": "Ingen høyderegistreringer ennå.",
-      "noNotesYet": "Ingen notater ennå.",
+      "noWeightRecords": "Ingen vektregistreringer enda.",
+      "noHeightRecords": "Ingen høyderegistreringer enda.",
+      "noNotesYet": "Ingen notater enda.",
       "viewAndManage": "Se og administrer informasjon for {{name}}.",
       "deleteConfirmation": "Vil du slette \"{{name}}\"?"
     },
@@ -537,7 +537,7 @@
       "noData": {
         "title": "Ingen Data Tilgjengelig",
         "description": {
-          "forPuppy": "Ingen {{logType}}-målinger er registrert for {{puppyName}} ennå",
+          "forPuppy": "Ingen {{logType}}-målinger er registrert for {{puppyName}} enda",
           "forLitter": "Ingen {{logType}}-data tilgjengelig for noen valper i dette kullet"
         }
       }

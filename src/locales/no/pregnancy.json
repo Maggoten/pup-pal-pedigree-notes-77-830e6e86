@@ -56,7 +56,7 @@
       "addWeight": "Legg til vekt"
     },
     "display": {
-      "noWeights": "Ingen vekter registrert ennå",
+      "noWeights": "Ingen vekter registrert enda",
       "noWeightsDescription": "Start registrering av vekt for å følge endringer under drektigheten",
       "historyTitle": "Vekthistorikk"
     },
@@ -117,7 +117,7 @@
     },
     "display": {
       "recorded": "Registrert {{date}} kl. {{time}}",
-      "noTemperatures": "Ingen temperaturmålinger registrert ennå",
+      "noTemperatures": "Ingen temperaturmålinger registrert enda",
       "trend": "Temperaturtrend viser {{trend}}"
     }
   },
@@ -150,7 +150,7 @@
     },
     "display": {
       "recorded": "Registrert {{date}} kl. {{time}}",
-      "noSymptoms": "Ingen observasjoner registrert ennå for {{femaleName}}",
+      "noSymptoms": "Ingen observasjoner registrert enda for {{femaleName}}",
       "severity": "Alvorlighetsgrad: {{level}}"
     }
   },
@@ -194,7 +194,7 @@
           "Embryoene fester seg til livmorveggen",
           "Implantasjon begynner",
           "Morkakendannelse starter",
-          "Ingen synlige tegn på drektighet ennå"
+          "Ingen synlige tegn på drektighet enda"
         ]
       },
       "week3": {

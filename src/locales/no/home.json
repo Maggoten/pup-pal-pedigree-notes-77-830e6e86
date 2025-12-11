@@ -14,7 +14,7 @@
   },
   "userStats": {
     "yourJourneyTitle": "Din reise 2025",
-    "noDataMessage": "Du har ikke registrert noen kull i {{year}} ennå – reisen din begynner snart!",
+    "noDataMessage": "Du har ikke registrert noen kull i {{year}} enda – reisen din begynner snart!",
     "yourStatsTitle": "Din statistikk {{year}}",
     "litters": "Kull",
     "puppies": "Valper",

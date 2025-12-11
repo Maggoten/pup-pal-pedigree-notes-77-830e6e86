@@ -124,7 +124,7 @@
         "active": "Aktiv"
       },
       "emptyState": {
-        "title": "Ingen delte brukere ennå",
+        "title": "Ingen delte brukere enda",
         "description": "Inviter medarbeidere til å jobbe sammen på avlsregistrene dine"
       },
       "removeDialog": {
