@@ -49,7 +49,7 @@
   "dialogs": {
     "reminders": {
       "title": "Avlspåminnelser",
-      "description": "Håndter oppgavene og påminnelsene dine",
+      "description": "Administrer oppgavene og påminnelsene dine",
       "addNewReminder": "Legg til Ny Påminnelse",
       "loadingError": "Det oppstod et problem med å laste påminnelsene dine. Vennligst oppdater siden.",
       "close": "Lukk"

@@ -69,7 +69,7 @@
   },
   "actions": {
     "addPregnancy": "Legg til Drektighet",
-    "managePregnancy": "Håndter Drektighet",
+    "managePregnancy": "Administrer Drektighet",
     "addTemperature": "Legg til Temperatur",
     "addSymptom": "Legg til Notat",
     "deleteTemperature": "Slett Temperatur",
@@ -462,7 +462,7 @@
       "noMaleDogs": "Ingen hannhunder funnet"
     },
     "managePregnancy": {
-      "title": "Håndter Drektighet",
+      "title": "Administrer Drektighet",
       "markAsCompleted": "Marker som Avsluttet",
       "deletePregnancy": "Slett Drektighet",
       "confirmDelete": "Er du sikker på at du vil slette denne drektigheten?",
@@ -542,7 +542,7 @@
   },
   "management": {
     "dialog": {
-      "title": "Håndter Drektighet",
+      "title": "Administrer Drektighet",
       "description": "Hva ønsker du å gjøre med {{femaleName}}s drektighet?",
       "actions": {
         "complete": "Avslutt Drektighet",
