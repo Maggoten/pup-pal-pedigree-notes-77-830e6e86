@@ -3,7 +3,7 @@
   "pages": { 
     "myLitters": { 
       "title": "Mine Kull", 
-      "description": "Vis og håndter kullene dine, følg opp vekt, helse og få tilgang til detaljert kullinfo" 
+      "description": "Vis og administrer kullene dine, følg opp vekt, helse og få tilgang til detaljert kullinfo" 
     }, 
     "puppies": { 
       "title": "Valper", 
@@ -289,7 +289,7 @@
       "noWeightRecords": "Ingen vektregistreringer ennå.",
       "noHeightRecords": "Ingen høyderegistreringer ennå.",
       "noNotesYet": "Ingen notater ennå.",
-      "viewAndManage": "Se og håndter informasjon for {{name}}.",
+      "viewAndManage": "Se og administrer informasjon for {{name}}.",
       "deleteConfirmation": "Vil du slette \"{{name}}\"?"
     },
     "charts": {

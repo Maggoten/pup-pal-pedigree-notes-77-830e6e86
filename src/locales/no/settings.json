@@ -39,7 +39,7 @@
   },
   "account": {
     "title": "Konto",
-    "description": "Håndter kontoinnstillingene og brukerpreferansene dine",
+    "description": "Administrer kontoinnstillingene og brukerpreferansene dine",
     "fields": {
       "email": "E-post",
       "name": "Navn",
@@ -115,8 +115,8 @@
         "viewer": "Leser"
       },
       "roleDescriptions": {
-        "admin": "Kan håndtere alle aspekter av kontoen, inkludert å legge til/fjerne brukere",
-        "editor": "Kan redigere avlsregistre og håndtere hunder, men kan ikke endre kontoinnstillinger",
+        "admin": "Kan administrere alle aspekter av kontoen, inkludert å legge til/fjerne brukere",
+        "editor": "Kan redigere avlsregistre og administrere hunder, men kan ikke endre kontoinnstillinger",
         "viewer": "Kan se all informasjon, men kan ikke gjøre endringer"
       },
       "status": {
@@ -159,7 +159,7 @@
   },
   "subscription": {
     "title": "Abonnement",
-    "description": "Håndter Breeding Journey-abonnementet ditt",
+    "description": "Administrer Breeding Journey-abonnementet ditt",
     "status": {
       "label": "Status",
       "friendAccess": "Vennskapskonto",
@@ -187,7 +187,7 @@
     "buttons": {
       "opening": "Åpner...",
       "activateSubscription": "Aktiver abonnement",
-      "manageSubscription": "Håndter abonnement",
+      "manageSubscription": "Administrer abonnement",
       "cancelling": "Sier opp...",
       "cancelSubscription": "Si opp abonnement",
       "keepSubscription": "Behold abonnement",
@@ -216,7 +216,7 @@
         "description": "Lær det grunnleggende om å bruke avlsstyringssystemet"
       },
       "managingDogs": {
-        "title": "Håndtere Hunder",
+        "title": "Administrere Hunder",
         "description": "Hvordan legge til, redigere og organisere hundeprofiler"
       },
       "trackingPregnancies": {
