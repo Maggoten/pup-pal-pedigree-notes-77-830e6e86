@@ -251,11 +251,6 @@ const PuppyProfile: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {isArchived && (
-              <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
-                Arkiverad kull
-              </Badge>
-            )}
             {getStatusBadge(selectedPuppy)}
           </div>
         </CardHeader>
