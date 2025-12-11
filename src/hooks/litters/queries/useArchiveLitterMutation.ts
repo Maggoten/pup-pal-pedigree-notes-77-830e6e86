@@ -44,8 +44,11 @@ export const useArchiveLitterMutation = () => {
       
       return { previousActiveLitters, previousArchivedLitters };
     },
-    onSuccess: (_, { archive }) => {
+    onSuccess: (_, { litterId, archive }) => {
+      // Invalidate all litter-related caches to ensure UI updates immediately
       queryClient.invalidateQueries({ queryKey: littersQueryKey });
+      queryClient.invalidateQueries({ queryKey: ['litter', litterId] });
+      queryClient.invalidateQueries({ queryKey: ['puppies', litterId] });
     },
     onError: (error, _, context) => {
       if (context?.previousActiveLitters) {
