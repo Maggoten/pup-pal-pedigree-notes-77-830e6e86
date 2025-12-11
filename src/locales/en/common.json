@@ -5,6 +5,7 @@
   "language": "Language",
   "english": "English (EN)",
   "svenska": "Svenska (SV)",
+  "norsk": "Norsk (NO)",
   "days": "days",
   "testFallback": "This text should fallback to English",
   "actions": {
