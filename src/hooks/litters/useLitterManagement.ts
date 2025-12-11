@@ -1,5 +1,5 @@
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { Litter, Puppy, PlannedLitter } from '@/types/breeding';
 import { useAuth } from '@/hooks/useAuth';
 import { useLitterState } from './useLitterState';
@@ -168,21 +168,30 @@ export function useLitterManagement() {
     setSelectedLitterId(litter.id);
   }, [selectedLitterId, setSelectedLitterDetails, setSelectedLitterId]);
   
+  // Track which litter ID was last loaded to prevent double-loading
+  const lastLoadedLitterIdRef = useRef<string | null>(null);
+  
   // Load detailed litter data when selectedLitterId changes
   useEffect(() => {
     if (selectedLitterId && user?.id) {
+      // Skip if we already loaded this litter (e.g., from archiveLitter calling loadLitterDetails)
+      if (lastLoadedLitterIdRef.current === selectedLitterId && selectedLitterDetails?.id === selectedLitterId) {
+        console.log(`Skipping reload for ${selectedLitterId}, already loaded`);
+        return;
+      }
+      
       console.log(`Selected litter changed to ${selectedLitterId}, loading details`);
+      lastLoadedLitterIdRef.current = selectedLitterId;
       
-      // Clear previous details first
-      setSelectedLitterDetails(null);
-      
-      // Load new details
+      // NOTE: Don't clear selectedLitterDetails here - let useLitterLoading handle the transition
+      // This prevents flickering UI with empty state
       loadLitterDetails(selectedLitterId);
     } else if (!selectedLitterId) {
       // Clear details if no litter is selected
+      lastLoadedLitterIdRef.current = null;
       setSelectedLitterDetails(null);
     }
-  }, [selectedLitterId, user?.id, loadLitterDetails, setSelectedLitterDetails]);
+  }, [selectedLitterId, user?.id, loadLitterDetails, setSelectedLitterDetails, selectedLitterDetails?.id]);
   
   // Auto-select first litter when activeLitters changes and none is selected
   useEffect(() => {
