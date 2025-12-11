@@ -31,10 +31,10 @@ const useChartData = (
     }))
   });
 
-  // Define puppy color scheme - moved outside of processing functions
+  // Define puppy color scheme - distinct colors for easy differentiation
   const puppyColors = {
-    male: ['#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a'],
-    female: ['#ec4899', '#db2777', '#be185d', '#9d174d', '#831843'],
+    male: ['#3b82f6', '#22c55e', '#06b6d4', '#8b5cf6', '#0ea5e9'], // Blue, Green, Turquoise, Purple, Light Blue
+    female: ['#ec4899', '#f97316', '#ef4444', '#f472b6', '#a855f7'], // Pink, Orange, Red, Light Pink, Light Purple
   };
 
   // Get color for a puppy based on gender and index - kept simple

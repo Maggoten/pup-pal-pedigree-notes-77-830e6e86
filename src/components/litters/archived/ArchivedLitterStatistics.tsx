@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, TrendingUp, Users, Activity } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import LogTypeToggle from '../charts/LogTypeToggle';
+import GrowthLineChart from '../charts/GrowthLineChart';
+import useChartData from '../charts/useChartData';
+import { Puppy } from '@/types/breeding';
 
 interface ArchivedLitterStatisticsProps {
   statistics: {
@@ -13,26 +15,28 @@ interface ArchivedLitterStatisticsProps {
     males: number;
     females: number;
     avgBirthWeight: number;
-    avgFinalWeight: number;
+    avgWeightAt8Weeks: number;
   };
-  averageWeightLog: Array<{ date: string; weight: number }>;
-  averageHeightLog: Array<{ date: string; height: number }>;
+  puppies: Puppy[];
+  litterDateOfBirth: string;
 }
 
 const ArchivedLitterStatistics: React.FC<ArchivedLitterStatisticsProps> = ({ 
   statistics, 
-  averageWeightLog,
-  averageHeightLog 
+  puppies,
+  litterDateOfBirth
 }) => {
   const { t } = useTranslation('litters');
   const [logType, setLogType] = useState<'weight' | 'height'>('weight');
 
-  const currentData = logType === 'weight' ? averageWeightLog : averageHeightLog;
-  const dataKey = logType === 'weight' ? 'weight' : 'height';
-  const yAxisLabel = logType === 'weight' ? 'Weight (kg)' : 'Height (cm)';
-  const tooltipLabel = logType === 'weight' ? t('puppies.labels.weight') : t('puppies.labels.height');
-  const tooltipFormatter = (value: number) => logType === 'weight' ? `${value.toFixed(3)} kg` : `${value.toFixed(1)} cm`;
-  const lineName = logType === 'weight' ? t('puppies.labels.averageWeight') : t('puppies.labels.averageHeight');
+  // Use the same chart data hook as active litters for individual puppy lines
+  const { chartData, chartConfig, noDataAvailable } = useChartData(
+    puppies,
+    null, // No selected puppy - show all
+    'litter', // Always litter view for archived
+    logType,
+    litterDateOfBirth
+  );
 
   return (
     <div className="space-y-6">
@@ -100,16 +104,19 @@ const ArchivedLitterStatistics: React.FC<ArchivedLitterStatisticsProps> = ({
 
             <div className="bg-secondary/5 p-4 rounded-lg">
               <p className="text-sm text-muted-foreground mb-1">
-                {t('archivedLitters.statistics.avgFinalWeight')}
+                {t('archivedLitters.statistics.avgWeightAt8Weeks')}
               </p>
               <p className="text-xl font-semibold">
-                {statistics.avgFinalWeight.toFixed(3)} kg
+                {statistics.avgWeightAt8Weeks > 0 
+                  ? `${statistics.avgWeightAt8Weeks.toFixed(3)} kg`
+                  : t('archivedLitters.statistics.noData')
+                }
               </p>
             </div>
           </div>
 
-          {/* Growth Chart with Toggle */}
-          {(averageWeightLog.length > 0 || averageHeightLog.length > 0) && (
+          {/* Growth Chart with Individual Puppy Lines */}
+          {puppies.length > 0 && (
             <div className="mt-6">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-sm font-medium">
@@ -117,33 +124,16 @@ const ArchivedLitterStatistics: React.FC<ArchivedLitterStatisticsProps> = ({
                 </h4>
                 <LogTypeToggle logType={logType} setLogType={setLogType} />
               </div>
-              {currentData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={currentData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="date" 
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => new Date(value).toLocaleDateString()}
-                    />
-                    <YAxis 
-                      label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip 
-                      labelFormatter={(value) => new Date(value).toLocaleDateString()}
-                      formatter={(value: number) => [tooltipFormatter(value), tooltipLabel]}
-                    />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey={dataKey}
-                      stroke="hsl(var(--primary))" 
-                      strokeWidth={2}
-                      name={lineName}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+              {!noDataAvailable ? (
+                <GrowthLineChart
+                  chartData={chartData}
+                  chartConfig={chartConfig}
+                  logType={logType}
+                  viewMode="litter"
+                  selectedPuppy={null}
+                  puppies={puppies}
+                  litterDateOfBirth={litterDateOfBirth}
+                />
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   {t('archivedLitters.statistics.noDataAvailable')}
