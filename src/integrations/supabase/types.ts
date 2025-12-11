@@ -131,6 +131,7 @@ export type Database = {
           owner_id: string | null
           registered_name: string | null
           registration_number: string | null
+          source_puppy_id: string | null
           sterilization_date: string | null
           updated_at: string | null
           vaccinationDate: string | null
@@ -154,6 +155,7 @@ export type Database = {
           owner_id?: string | null
           registered_name?: string | null
           registration_number?: string | null
+          source_puppy_id?: string | null
           sterilization_date?: string | null
           updated_at?: string | null
           vaccinationDate?: string | null
@@ -177,11 +179,20 @@ export type Database = {
           owner_id?: string | null
           registered_name?: string | null
           registration_number?: string | null
+          source_puppy_id?: string | null
           sterilization_date?: string | null
           updated_at?: string | null
           vaccinationDate?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "dogs_source_puppy_id_fkey"
+            columns: ["source_puppy_id"]
+            isOneToOne: false
+            referencedRelation: "puppies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       heat_cycles: {
         Row: {

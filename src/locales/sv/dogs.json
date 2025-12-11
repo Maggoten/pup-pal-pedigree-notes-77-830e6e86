@@ -179,6 +179,11 @@
       "noHeatRecords": "Inga löpregistreringar",
       "days": "dagar"
     },
+    "origin": {
+      "label": "Ursprung",
+      "fromLitter": "Från kull: {{litterName}}",
+      "viewPuppy": "Visa Valpprofil"
+    },
     "genderBadge": {
       "male": "Hane",
       "female": "Tik"

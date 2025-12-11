@@ -178,6 +178,11 @@
       "noHeatRecords": "Ingen løpetidsregistreringer",
       "days": "dager"
     },
+    "origin": {
+      "label": "Opprinnelse",
+      "fromLitter": "Fra kull: {{litterName}}",
+      "viewPuppy": "Vis Valpeprofil"
+    },
     "genderBadge": {
       "male": "Hannhund",
       "female": "Tispe"

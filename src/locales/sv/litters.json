@@ -255,6 +255,18 @@
       "saveChanges": "Spara Ändringar",
       "backToLitters": "Tillbaka till Kullar"
     },
+    "createDogProfile": {
+      "button": "Lägg till i Mina Hundar",
+      "creating": "Skapar...",
+      "success": "{{name}} har lagts till i Mina Hundar",
+      "viewProfile": "Visa Profil",
+      "errors": {
+        "notAuthenticated": "Du måste vara inloggad för att utföra denna åtgärd",
+        "notKept": "Endast valpar markerade som 'Behållen' kan läggas till i Mina Hundar",
+        "failed": "Kunde inte skapa hundprofil",
+        "alreadyExists": "En hundprofil finns redan för denna valp"
+      }
+    },
     "descriptions": {
       "addPuppy": "Lägg till en ny valp till din kull.",
       "motherBreed": "Moderns ras: {{breed}}",

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Edit, Trash2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, RefreshCw, Dog } from 'lucide-react';
 import { differenceInWeeks, parseISO } from 'date-fns';
 import { Puppy } from '@/types/breeding';
 import { usePuppyQueries } from '@/hooks/usePuppyQueries';
@@ -16,6 +16,7 @@ import PuppyMeasurementsDialog from '@/components/litters/puppies/PuppyMeasureme
 import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
 import PuppyOverviewTab from '@/components/litters/puppies/tabs/PuppyOverviewTab';
 import PuppyDevelopmentTab from '@/components/litters/puppies/tabs/PuppyDevelopmentTab';
+import { useCreateDogFromPuppy } from '@/hooks/puppies/useCreateDogFromPuppy';
 
 const PuppyProfile: React.FC = () => {
   const { litterId, puppyId } = useParams<{ litterId: string; puppyId: string }>();
@@ -39,6 +40,8 @@ const PuppyProfile: React.FC = () => {
     deletePuppy,
     refreshLitterData
   } = usePuppyQueries(litterId || '');
+
+  const { createDog, isCreating } = useCreateDogFromPuppy();
 
   // Find the puppy in the litter
   const selectedPuppy = litter?.puppies?.find(p => p.id === puppyId);
@@ -176,6 +179,13 @@ const PuppyProfile: React.FC = () => {
     }
   };
 
+  const handleCreateDogProfile = async () => {
+    if (!selectedPuppy || !litter) return;
+    await createDog(selectedPuppy, litter);
+  };
+
+  const isKeptPuppy = selectedPuppy?.status === 'Kept';
+
   const getStatusBadge = (puppy: Puppy) => {
     const status = puppy.status || 'Available';
     switch (status) {
@@ -281,7 +291,7 @@ const PuppyProfile: React.FC = () => {
         </CardContent>
 
         {activeTab === 'overview' && !isArchived && (
-          <CardFooter className="flex justify-between items-center">
+          <CardFooter className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
             <Button 
               variant="destructive" 
               onClick={() => setShowDeleteDialog(true)}
@@ -289,10 +299,25 @@ const PuppyProfile: React.FC = () => {
                <Trash2 className="h-4 w-4 mr-2" />
                {t('actions.delete')}
             </Button>
-            <Button onClick={() => setShowEditDialog(true)}>
-               <Edit className="h-4 w-4 mr-2" />
-               {t('actions.edit')}
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              {isKeptPuppy && (
+                <Button 
+                  variant="secondary" 
+                  onClick={handleCreateDogProfile}
+                  disabled={isCreating}
+                >
+                  <Dog className="h-4 w-4 mr-2" />
+                  {isCreating 
+                    ? t('puppies.createDogProfile.creating') 
+                    : t('puppies.createDogProfile.button')
+                  }
+                </Button>
+              )}
+              <Button onClick={() => setShowEditDialog(true)}>
+                 <Edit className="h-4 w-4 mr-2" />
+                 {t('actions.edit')}
+              </Button>
+            </div>
           </CardFooter>
         )}
       </Card>
