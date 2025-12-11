@@ -341,11 +341,17 @@
   },
   "labels": {
     "expectedHeat": "Expected heat",
-      "externalSire": "External Sire",
-      "nextHeat": "Next Heat",
-      "damFemale": "Dam (Female)",
-      "sire": "Sire",
-      "dam": "Dam"
+    "externalSire": "External Sire",
+    "nextHeat": "Next Heat",
+    "damFemale": "Dam (Female)",
+    "sire": "Sire",
+    "dam": "Dam"
+  },
+  "breedingTimeline": {
+    "title": "Breeding Timeline",
+    "heat": "Heat",
+    "mating": "Mating",
+    "due": "Due"
   },
   "upcomingHeat": {
     "heatRecordDeleted": "Heat record deleted",

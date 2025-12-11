@@ -13,5 +13,312 @@
   "toasts": { "warning": { "noHeatCycleTitle": "Parringsdato lagret uten løpekobling", "noHeatCycleDescription": "Ingen aktiv løpesyklus funnet. Registrer løpestart for å koble parringen til temperatur/progesteron-data." }, "success": { "title": "Suksess", "litterAdded": "Planlagt kull lagt til", "matingDateAdded": "Parringsdato lagt til", "matingDateUpdated": "Parringsdato oppdatert", "matingDateDeleted": "Parringsdato fjernet", "litterDeleted": "Kull fjernet", "plannedLitterAdded": "Planlagt Kull Lagt Til", "matingDateCreated": "Parringsdato lagt til. En drektighet er opprettet.", "matingDateUpdatedSuccess": "Parringsdato oppdatert.", "matingDateDeletedSuccess": "Parringsdatoen er fjernet.", "plannedLitterDeleted": "Det planlagte kullet er fjernet.", "litterUpdated": "Planlagt kull oppdatert" }, "error": { "title": "Feil", "failedToAddLitter": "Kunne ikke legge til planlagt kull", "failedToAddMatingDate": "Kunne ikke legge til parringsdato", "failedToUpdateMatingDate": "Kunne ikke oppdatere parringsdato", "failedToDeleteMatingDate": "Kunne ikke fjerne parringsdato", "failedToDeleteLitter": "Kunne ikke fjerne kull", "failedToLoad": "Kunne ikke laste planlagte kull", "failedToDeletePlannedLitter": "Kunne ikke fjerne planlagt kull", "failedToUpdateLitter": "Kunne ikke oppdatere planlagt kull", "failedToConfirmHeat": "Kunne ikke bekrefte løpetid", "authenticationRequired": "Du må være innlogget for å utføre denne handlingen", "pleaseWait": "Forbereder kontoen din. Prøv igjen om et øyeblikk." } },
   "loading": { "litters": "Laster planlagte kull...", "saving": "Lagrer...", "deleting": "Sletter..." },
   "buttons": { "addMatingDate": "Legg til Parringsdato", "breedingChecklist": "Avlssjekkliste", "viewDetails": "Vis Detaljer", "editDate": "Rediger dato", "deleteDate": "Slett dato", "editLitter": "Rediger kull", "deleteLitter": "Slett kull" },
-  "labels": { "expectedHeat": "Forventet løpetid", "externalSire": "Ekstern Hannhund", "nextHeat": "Neste Løpetid", "damFemale": "Tispe", "sire": "Hannhund", "dam": "Tispe" }
+  "labels": { "expectedHeat": "Forventet løpetid", "externalSire": "Ekstern Hannhund", "nextHeat": "Neste Løpetid", "damFemale": "Tispe", "sire": "Hannhund", "dam": "Tispe" },
+  "breedingTimeline": {
+    "title": "Avlstidslinje",
+    "heat": "Løpetid",
+    "mating": "Parring",
+    "due": "Fødsel"
+  },
+  "preBreeding": {
+    "checklist": {
+      "title": "Sjekkliste for Avlsforberedelser",
+      "description": "Fullfør disse viktige oppgavene før avl",
+      "progress": "{{completed}} av {{total}} fullført",
+      "allComplete": "Alle punkter fullført!",
+      "breedingPreparationChecklist": "Sjekkliste for Avlsforberedelser",
+      "completeTasks": "Fullfør disse oppgavene før parring av {{femaleName}} med {{maleName}}",
+      "overallProgress": "Total Fremgang",
+      "allPreparationsComplete": "Alle forberedelser fullført!",
+      "readyToProceed": "Du er klar til å fortsette med parringen.",
+      "loadingChecklist": "Laster sjekkliste...",
+      "completed": "Avlsforberedelser fullført!",
+      "completedDescription": "Du har fullført alle forberedelser. Du er klar for neste steg!",
+      "groups": {
+        "health": {
+          "title": "Helsekontroller",
+          "items": {
+            "health-1": {
+              "text": "Fullfør helseundersøkelse for tispe",
+              "description": "Sørg for at alle rasespesifikke helsetester er gjennomført"
+            },
+            "health-2": {
+              "text": "Fullfør helseundersøkelse for hannhund",
+              "description": "Sørg for at alle rasespesifikke helsetester er gjennomført"
+            },
+            "health-3": {
+              "text": "Sjekk vaksinasjonsstatus",
+              "description": "Sørg for at alle vaksinasjoner er oppdaterte"
+            },
+            "health-4": {
+              "text": "Bekreft at tispen har optimal vekt",
+              "description": "Verken undervektig eller overvektig for avl"
+            }
+          }
+        },
+        "genetic": {
+          "title": "Genetiske Vurderinger",
+          "items": {
+            "genetic-1": {
+              "text": "Analyser stamtavler og kompatible linjer",
+              "description": "Sørg for genetisk mangfold og komplementære egenskaper"
+            },
+            "genetic-2": {
+              "text": "Sjekk for genetiske sykdommer i slektslinjen",
+              "description": "Undersøk familiehistorikk for begge hundene"
+            }
+          }
+        },
+        "practical": {
+          "title": "Praktiske Forberedelser",
+          "items": {
+            "practical-1": {
+              "text": "Forbered valpeområde",
+              "description": "Sett opp et rent, rolig sted med passende underlag"
+            },
+            "practical-2": {
+              "text": "Sett sammen valpeutstyr",
+              "description": "Inkluder rene håndklær, varmepute, saks, tanntråd, etc."
+            },
+            "practical-3": {
+              "text": "Bestill konsultasjon med veterinær",
+              "description": "Diskuter avlsplanen med veterinæren din"
+            },
+            "practical-4": {
+              "text": "Planlegg for potensielle akutte veterinærbesøk",
+              "description": "Vet hvor du skal henvende deg for akutthjelp utenom arbeidstid"
+            }
+          }
+        },
+        "admin": {
+          "title": "Administrative Oppgaver",
+          "items": {
+            "admin-1": {
+              "text": "Sjekk raseklubbens regler",
+              "description": "Sørg for overholdelse av rasespesifikke krav"
+            },
+            "admin-2": {
+              "text": "Forbered valpekontrakter",
+              "description": "Utarbeid salgsavtaler og helsegarantier"
+            },
+            "admin-3": {
+              "text": "Undersøk potensielle kjøpere/hjem",
+              "description": "Begynn å bygge en venteliste over godkjente hjem"
+            }
+          }
+        }
+      }
+    }
+  },
+  "matingSection": {
+    "title": "Parringshåndtering",
+    "description": "Spor kommende løpetider, nylige parringer og nyttige avlstips",
+    "upcomingHeats": "Kommende Løpetider",
+    "recentMatings": "Nylige Parringer",
+    "breedingGuide": "Avlsguide",
+    "noUpcomingHeats": "Ingen kommende løpetider oppdaget."
+  },
+  "matingTips": {
+    "title": "Parringstips for Oppdrettere",
+    "description": "Fra forberedelse til perfekt timing – en steg-for-steg guide for vellykket avl",
+    "healthRequirements": {
+      "title": "Helsekrav og rasespesifikke tester",
+      "content": "Før parring, sørg for at begge hundene oppfyller helsekravene for din rase.",
+      "checklist": "Sjekkliste:",
+      "items": [
+        "Sjekk hvilke helsetester som kreves eller anbefales av din nasjonale kennelklubb eller raseklubb (f.eks. hofterøntgen, øyeundersøkelser, DNA-tester)",
+        "Sørg for at hundene er friske, i passende alder og i god form",
+        "Vaksinasjoner bør være oppdaterte",
+        "Unngå parring av hunder med kjente arvelige helseproblemer"
+      ]
+    },
+    "reviewPedigrees": {
+      "title": "Gjennomgå stamtavler og planlegg kombinasjonen",
+      "content": "Velg en kombinasjon som støtter rasens mål og langsiktige helse.",
+      "consider": "Vurder:",
+      "items": [
+        "Innavlskoeffisient (COI)",
+        "Temperament, type og struktur",
+        "Kjent helsehistorikk"
+      ],
+      "tip": "Rådfør deg med raseklubben eller en mentor hvis du er usikker."
+    },
+    "waitForHeat": {
+      "title": "Vent på ståløp",
+      "content": "Tispen er klar for parring når hun går inn i ståløp. Se etter:",
+      "items": [
+        "En myk, oppsvulmet vulva",
+        "Lysere farget utflod (stråfarget eller blekrosa)",
+        "Hun står stille og flytter halen til siden når hannhunden nærmer seg"
+      ],
+      "tip": "Dette skjer ofte rundt dag 10–14 av løpesyklusen – men det varierer!"
+    },
+    "progesteroneTesting": {
+      "title": "Bruk progesterontest",
+      "content": "En progesterontest hos veterinæren kan hjelpe med å fastslå eggløsning og finne den beste dagen for parring.",
+      "usefulFor": "Spesielt nyttig for:",
+      "items": [
+        "Timing av naturlige parringer mer presist",
+        "Planlegging av reise eller kunstig inseminasjon",
+        "Tisper med uregelmessige løpesykluser"
+      ]
+    },
+    "twoMatings": {
+      "title": "Vurder to parringer",
+      "content": "To parringer med 24–48 timers mellomrom øker ofte sjansen for drektighet.",
+      "items": [
+        "Sperm kan leve i flere dager",
+        "Hjelper med å sikre at parring overlapper med eggløsning"
+      ]
+    },
+    "calmEnvironment": {
+      "title": "Hold miljøet rolig",
+      "content": "Stress kan forstyrre parringsprosessen.",
+      "tips": "Tips:",
+      "items": [
+        "Bruk et rolig, kjent miljø",
+        "La hundene møtes på forhånd om mulig",
+        "Hold mennesker og distraksjoner til et minimum"
+      ]
+    },
+    "bonusTips": {
+      "title": "Bonustips for et Planlagt Kull",
+      "items": [
+        "Spor løpesykluser regelmessig (bruk en dagbok eller app)",
+        "Bestill veterinær på forhånd hvis du bruker testing eller inseminasjon",
+        "Forbered hannhundens dokumenter på forhånd (stamtavle, helseregister)",
+        "Les relevante avlsregler fra din kennelklubb"
+      ]
+    }
+  },
+  "dialogs": {
+    "litterDetails": {
+      "title": "Kulldetaljer",
+      "expectedHeat": "Forventet Løpetid",
+      "externalSireBreed": "Ekstern Hannhunds Rase",
+      "notes": "Notater",
+      "noNotes": "Ingen notater",
+      "matingDates": "Parringsdatoer",
+      "noMatingDates": "Ingen parringsdatoer registrert",
+      "addMatingDate": "Legg til Parringsdato:",
+      "selectDate": "Velg Dato"
+    }
+  },
+  "placeholders": {
+    "enterDogName": "Skriv inn hundens navn",
+    "enterRegistrationNumber": "Skriv inn registreringsnummer",
+    "selectFemale": "Velg tispe"
+  },
+  "upcomingHeat": {
+    "heatRecordDeleted": "Løpeoppføring slettet",
+    "heatRecordRemoved": "Løpet er fjernet fra hundens historikk.",
+    "deleteHeatRecord": "Slett denne løpeoppføringen",
+    "couldNotDelete": "Kunne ikke slette løpeoppføringen. Prøv igjen."
+  },
+  "search": {
+    "placeholder": "Søk etter hundens navn..."
+  },
+  "recent": {
+    "matedOn": "Parret den",
+    "id": "ID"
+  },
+  "heatPlanner": {
+    "title": "Kullplanlegger",
+    "description": "Oversikt over kommende løpetider for tispene dine de neste 3 årene",
+    "table": {
+      "dog": "Tispe",
+      "age": "Alder",
+      "year": "År",
+      "noHeats": "Ingen kommende løpetider",
+      "viewDetails": "Vis detaljer"
+    },
+    "status": {
+      "status": "Status",
+      "active": "Pågående løpetid",
+      "confirmed": "Bekreftet løpetid",
+      "planned": "Planlagt kull",
+      "mated": "Parret",
+      "predicted": "Forventet løpetid"
+    },
+    "badge": {
+      "active": "Pågående",
+      "confirmed": "Tidligere",
+      "planned": "Planlagt kull",
+      "mated": "Parret",
+      "predicted": "Forventet løpetid"
+    },
+    "actions": {
+      "planLitter": "Planlegg kull",
+      "viewJournal": "Vis løpedagbok",
+      "addNote": "Legg til notat",
+      "setReminder": "Sett påminnelse",
+      "confirmHeat": "Bekreft løpetid",
+      "heatConfirmed": "Løpetiden er bekreftet"
+    },
+    "tooltip": {
+      "date": "Dato",
+      "month": "Måned",
+      "age": "Alder",
+      "interval": "Intervall",
+      "months": "måneder",
+      "days": "dager",
+      "confidence": "Sikkerhet",
+      "plannedMating": "💚 Planlagt parring",
+      "ageAtHeat": "Alder ved løpetid",
+      "years": "år"
+    },
+    "confidence": {
+      "high": "Høy",
+      "medium": "Medium",
+      "low": "Lav"
+    },
+    "warning": {
+      "oldDog": "⚠️ Tispen er over 8 år – veterinærattest kan kreves i henhold til kennelklubbens regler"
+    },
+    "search": {
+      "placeholder": "Søk etter tispens navn...",
+      "results": "{{count}} tisper funnet"
+    },
+    "dialog": {
+      "title": "Administrer Løpetid",
+      "notes": "Notater",
+      "notesPlaceholder": "Legg til notater om denne løpetiden...",
+      "age": "Alder ved løpetid",
+      "interval": "Intervall siden forrige"
+    },
+    "filters": {
+      "showAll": "Vis alle",
+      "showPlannedOnly": "Vis kun planlagte",
+      "selectedDogs": "Valgte tisper",
+      "clearAll": "Nullstill filter",
+      "filterDogs": "Filtrer tisper"
+    },
+    "empty": {
+      "title": "Ingen fertile tisper",
+      "description": "Du har ingen tisper som er egnet for avl for øyeblikket.",
+      "noMatch": "Ingen tisper matcher søket",
+      "adjustFilters": "Prøv å justere søket ditt",
+      "noPlannedLitters": "Ingen planlagte kull",
+      "noPlannedLittersDescription": "Ingen tisper har planlagte kull for øyeblikket"
+    },
+    "timeline": {
+      "title": "Alle Kommende Løpetider",
+      "subtitle": "{{count}} forventede løpetider de kommende årene",
+      "age": "Alder",
+      "interval": "~{{months}} måneder siden forrige",
+      "reminderTitle": "Løpetid for {{dogName}}",
+      "reminderDescription": "{{dogName}} har forventet løpetid den {{date}}",
+      "reminderSet": "Påminnelse opprettet",
+      "reminderSetDescription": "En påminnelse er opprettet for {{date}}",
+      "reminderFailed": "Kunne ikke opprette påminnelse"
+    },
+    "legend": {
+      "title": "Forklaring",
+      "active": "Aktiv løpetid",
+      "planned": "Planlagt kull",
+      "mated": "Parret",
+      "predicted": "Forventet løpetid",
+      "confirmed": "Tidligere løpetid"
+    }
+  }
 }
