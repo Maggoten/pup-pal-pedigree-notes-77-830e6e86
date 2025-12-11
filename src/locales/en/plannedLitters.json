@@ -62,7 +62,7 @@
       "externalSirePhoto": "External Sire Photo",
       "registrationNumber": "Registration Number",
       "expectedHeatDate": "Expected Heat Date",
-      "expectedHeatDateDescription": "When do you expect the next heat cycle?",
+      "expectedHeatDateDescription": "Automatically calculated from the female's heat history. You can adjust it manually if needed.",
       "notes": "Notes",
       "notesPlaceholder": "Add any additional notes here"
     }
