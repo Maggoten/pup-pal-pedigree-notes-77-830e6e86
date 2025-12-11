@@ -566,6 +566,11 @@
       "title": "Progesteron",
       "chart": "Progesteronnivåer"
     },
+    "matingDates": {
+      "title": "Parningsdatum",
+      "dayInCycle": "Dag {{day}}",
+      "linkedToPregnancy": "Kopplad till dräktighet"
+    },
     "phase": {
       "title": "Fas"
     },

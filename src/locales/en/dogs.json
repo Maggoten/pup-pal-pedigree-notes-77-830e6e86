@@ -566,6 +566,11 @@
       "title": "Progesterone",
       "chart": "Progesterone Levels"
     },
+    "matingDates": {
+      "title": "Mating Dates",
+      "dayInCycle": "Day {{day}}",
+      "linkedToPregnancy": "Linked to pregnancy"
+    },
     "phase": {
       "title": "Phase"
     },
