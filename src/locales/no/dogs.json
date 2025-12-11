@@ -1,14 +1,634 @@
 {
-  "common": { "loading": "Laster...", "error": "Feil", "success": "Suksess", "cancel": "Avbryt", "save": "Lagre", "delete": "Slett", "edit": "Rediger", "add": "Legg til", "close": "Lukk", "confirm": "Bekreft", "yes": "Ja", "no": "Nei", "days": "dager", "imageUploader": { "uploading": "Laster opp...", "change": "Endre", "upload": "Last opp" } },
-  "page": { "title": "Mine Hunder", "description": "Håndter hundene dine", "backToList": "Tilbake" },
-  "navigation": { "addNewDog": "Legg til Ny Hund", "viewProfile": "Vis Profil" },
-  "form": { "sections": { "basicInfo": "Grunnleggende Informasjon", "physicalDetails": "Fysiske Detaljer", "birthInfo": "Fødselsinformasjon", "registration": "Registreringsopplysninger", "healthRecords": "Helseopplysninger", "notes": "Notater" }, "title": { "add": "Legg til Ny Hund", "edit": "Rediger", "details": "Detaljer" }, "fields": { "name": { "label": "Navn", "placeholder": "Bella" }, "breed": { "label": "Rase", "searchPlaceholder": "Søk raser..." }, "gender": { "label": "Kjønn", "placeholder": "Velg kjønn", "male": "Hannhund", "female": "Tispe" }, "color": { "label": "Farge", "placeholder": "Gylden" }, "dateOfBirth": { "label": "Fødselsdato", "placeholder": "Velg en dato" }, "registrationNumber": { "label": "Registreringsnummer", "placeholder": "NKK123456" }, "registeredName": { "label": "Registrert Navn", "placeholder": "Registrert navn" }, "notes": { "label": "Notater", "placeholder": "Ytterligere informasjon..." } }, "actions": { "save": "Lagre", "saveChanges": "Lagre Endringer", "cancel": "Avbryt", "edit": "Rediger", "delete": "Slett", "adding": "Legger til...", "saving": "Lagrer...", "deleting": "Sletter...", "loading": "Laster..." } },
-  "display": { "age": "Alder", "litters": "Kull", "fields": { "breed": "Rase", "gender": "Kjønn", "dateOfBirth": "Fødselsdato", "color": "Farge", "registrationNumber": "Registreringsnummer", "notes": "Notater", "days": "dager" }, "genderBadge": { "male": "Hannhund", "female": "Tispe" } },
-  "filters": { "gender": { "all": "Alle Hunder", "male": "Hannhunder", "female": "Tisper", "placeholder": "Filtrer etter kjønn" }, "search": { "placeholder": "Søk hunder etter navn eller rase..." } },
-  "list": { "headers": { "all": "Alle Hunder", "male": "Hannhunder", "female": "Tisper" }, "descriptions": { "all": "Alle hunder i avlsprogrammet ditt", "male": "Hannhunder i avlsprogrammet ditt", "female": "Tisper i avlsprogrammet ditt" }, "empty": { "noDogs": "Ingen hunder funnet.", "noResults": "Ingen hunder funnet som matcher søkekriteriene", "addFirst": "Legg til din første hund for å komme i gang!", "addFirstButton": "Legg til Din Første Hund" }, "loading": "Laster hundene dine..." },
-  "delete": { "title": "Slett Hund", "message": "Er du sikker på at du vil slette {{dogName}}? Denne handlingen kan ikke angres.", "confirm": "Slett Hund", "cancel": "Avbryt" },
-  "tabs": { "overview": "Oversikt", "heat": "Løpetid", "heatTracking": "Oppfølging løpetid" },
-  "heatTracking": { "title": "Løpesykluser", "description": "{{count}} syklus registrert", "descriptionPlural": "{{count}} sykluser registrert", "summary": { "title": "Løpesyklus Oversikt", "nextHeat": "Neste Løpetid", "daysUntil": "Dager Igjen", "predictedNext": "Forventet Neste Løpetid", "ongoing": "Pågående", "today": "Forventes i dag", "tomorrow": "Forventes i morgen", "inDays": "Om {{days}} dager" }, "analytics": { "title": "Syklusanalyse", "averageCycle": "Gjennomsnittlig Syklus", "lastHeat": "Siste Løpetid", "nextPredicted": "Neste beregnede løpetid", "days": "dager" }, "cycles": { "title": "Løpesykluser", "newHeat": "Ny Løpetid", "empty": { "title": "Ingen løpesykluser registrert", "description": "Begynn å spore ved å legge til en løpesyklus" }, "badges": { "recent": "Nylig", "latest": "Siste", "active": "Aktiv" }, "endCycle": "Avslutt Løpetid" }, "dialog": { "title": "Ny Løpetid", "description": "Registrer en løpesyklus for {{dogName}}", "startDate": "Løpetidens Startdato", "endDate": "Løpetidens Sluttdato", "notes": "Notater (Valgfritt)", "startCycle": "Opprett Løpesyklus", "success": { "created": "Løpesyklus startet" } }, "phases": { "proestrus": "Proøstrus", "estrus": "Østrus", "metestrus": "Metøstrus", "anestrus": "Anøstrus" }, "temperature": { "chartTitle": "Temperaturtrend", "noData": "Ingen temperaturdata tilgjengelig for denne løpesyklusen" }, "progesterone": { "title": "Progesteron", "chart": "Progesteronnivåer" }, "matingDates": { "title": "Parringsdatoer", "dayInCycle": "Dag {{day}}", "linkedToPregnancy": "Koblet til drektighet" } },
-  "toast": { "success": { "added": "{{dogName}} er lagt til hundene dine", "updated": "{{dogName}} er oppdatert", "deleted": "Hund fjernet" }, "error": { "add": "Kunne ikke legge til hund. Prøv igjen.", "update": "Kunne ikke oppdatere hund. Prøv igjen.", "delete": "Kunne ikke slette hund. Prøv igjen.", "load": "Kunne ikke laste hunder", "generic": "En feil oppstod" } },
-  "validation": { "nameRequired": "Navn er påkrevd", "breedRequired": "Rase er påkrevd", "dateOfBirthRequired": "Fødselsdato er påkrevd" }
+  "common": {
+    "loading": "Laster...",
+    "error": "Feil",
+    "success": "Suksess",
+    "cancel": "Avbryt",
+    "save": "Lagre",
+    "delete": "Slett",
+    "edit": "Rediger",
+    "add": "Legg til",
+    "close": "Lukk",
+    "confirm": "Bekreft",
+    "yes": "Ja",
+    "no": "Nei",
+    "days": "dager",
+    "imageUploader": {
+      "uploading": "Laster opp...",
+      "change": "Endre",
+      "upload": "Last opp"
+    }
+  },
+  "page": {
+    "title": "Mine Hunder",
+    "description": "Håndter hundene dine",
+    "backToList": "Tilbake"
+  },
+  "navigation": {
+    "addNewDog": "Legg til Ny Hund",
+    "viewProfile": "Vis Profil"
+  },
+  "form": {
+    "sections": {
+      "basicInfo": "Grunnleggende Informasjon",
+      "physicalDetails": "Fysiske Detaljer",
+      "birthInfo": "Fødselsinformasjon",
+      "registration": "Registreringsopplysninger",
+      "healthRecords": "Helseopplysninger",
+      "notes": "Notater"
+    },
+    "title": {
+      "add": "Legg til Ny Hund",
+      "edit": "Rediger",
+      "details": "Detaljer"
+    },
+    "description": {
+      "add": "Legg til en ny hund i avlsprogrammet ditt.",
+      "edit": "Oppdater informasjon om hunden din."
+    },
+    "fields": {
+      "name": {
+        "label": "Navn",
+        "placeholder": "Bella"
+      },
+      "breed": {
+        "label": "Rase",
+        "searchPlaceholder": "Søk raser...",
+        "noBreedFound": "Ingen rase funnet. Legg til egen rase:",
+        "addCustomBreed": "Legg til \"{{breed}}\" som egen rase",
+        "customBreedDialog": {
+          "title": "Legg til Egen Rase",
+          "placeholder": "Skriv inn rasenavn",
+          "cancel": "Avbryt",
+          "addBreed": "Legg til Rase"
+        }
+      },
+      "gender": {
+        "label": "Kjønn",
+        "placeholder": "Velg kjønn",
+        "male": "Hannhund",
+        "female": "Tispe"
+      },
+      "color": {
+        "label": "Farge",
+        "placeholder": "Gylden"
+      },
+      "dateOfBirth": {
+        "label": "Fødselsdato",
+        "placeholder": "Velg en dato",
+        "description": "Skriv inn hundens fødselsdato"
+      },
+      "registrationNumber": {
+        "label": "Registreringsnummer",
+        "placeholder": "NKK123456",
+        "description": "Valgfritt registrerings- eller lisensnummer"
+      },
+      "registeredName": {
+        "label": "Registrert Navn",
+        "placeholder": "Registrert navn"
+      },
+      "notes": {
+        "label": "Notater",
+        "placeholder": "Ytterligere informasjon...",
+        "description": "Helsebekymringer, temperament eller spesielle pleieinstruksjoner"
+      },
+      "photo": {
+        "label": "Hundebilde"
+      },
+      "pickADate": "Velg en dato",
+      "optional": "Valgfritt",
+      "optionalFemaleOnly": "Valgfritt - Kun for tisper"
+    },
+    "health": {
+      "title": "Helseinformasjon",
+      "deworming": {
+        "label": "Siste Ormekur",
+        "placeholder": "Velg en dato",
+        "description": "Valgfritt"
+      },
+      "vaccination": {
+        "label": "Siste Vaksinasjonsdato",
+        "placeholder": "Velg en dato",
+        "description": "Valgfritt"
+      },
+      "sterilization": {
+        "label": "Steriliseringsdato",
+        "placeholder": "Velg en dato",
+        "description": "Valgfritt"
+      }
+    },
+    "breeding": {
+      "title": "Løpetidsinformasjon",
+      "heatHistory": {
+        "label": "Løpetidshistorikk",
+        "noRecords": "Ingen løpetider registrert",
+        "addDate": "Legg til Løpetidsdato"
+      },
+      "heatInterval": {
+        "label": "Løpetidsintervall (dager)",
+        "placeholder": "180"
+      },
+      "sterilized": {
+        "label": "Sterilisert?",
+        "addDate": "Legg til Steriliseringsdato"
+      }
+    },
+    "imageUpload": {
+      "upload": "Last opp",
+      "change": "Endre",
+      "uploading": "Laster opp...",
+      "remove": "Fjern"
+    },
+    "actions": {
+      "save": "Lagre",
+      "saveChanges": "Lagre Endringer",
+      "cancel": "Avbryt",
+      "edit": "Rediger",
+      "delete": "Slett",
+      "adding": "Legger til...",
+      "saving": "Lagrer...",
+      "deleting": "Sletter...",
+      "loading": "Laster..."
+    }
+  },
+  "display": {
+    "age": "Alder",
+    "litters": "Kull",
+    "details": {
+      "basicInfo": "Grunnleggende Informasjon",
+      "healthInfo": "Helseinformasjon",
+      "breedingInfo": "Avlsinformasjon",
+      "notAvailable": "Ikke tilgjengelig",
+      "optional": "Valgfritt"
+    },
+    "fields": {
+      "photo": "Bilde",
+      "breed": "Rase",
+      "gender": "Kjønn",
+      "dateOfBirth": "Fødselsdato",
+      "color": "Farge",
+      "registrationNumber": "Registreringsnummer",
+      "dewormingDate": "Ormekurdato",
+      "vaccinationDate": "Vaksinasjonsdato",
+      "sterilizationDate": "Steriliseringsdato",
+      "heatRecords": "Løpetidsregistreringer",
+      "notes": "Notater",
+      "previousHeatDates": "Tidligere løpetidsdatoer:",
+      "heatInterval": "Løpetidsintervall:",
+      "noHeatRecords": "Ingen løpetidsregistreringer",
+      "days": "dager"
+    },
+    "genderBadge": {
+      "male": "Hannhund",
+      "female": "Tispe"
+    }
+  },
+  "filters": {
+    "gender": {
+      "all": "Alle Hunder",
+      "male": "Hannhunder",
+      "female": "Tisper",
+      "placeholder": "Filtrer etter kjønn"
+    },
+    "search": {
+      "placeholder": "Søk hunder etter navn eller rase..."
+    }
+  },
+  "list": {
+    "headers": {
+      "all": "Alle Hunder",
+      "male": "Hannhunder",
+      "female": "Tisper"
+    },
+    "descriptions": {
+      "all": "Alle hunder i avlsprogrammet ditt",
+      "male": "Hannhunder i avlsprogrammet ditt",
+      "female": "Tisper i avlsprogrammet ditt"
+    },
+    "empty": {
+      "noDogs": "Ingen hunder funnet.",
+      "noResults": "Ingen hunder funnet som matcher søkekriteriene",
+      "addFirst": "Legg til din første hund for å komme i gang!",
+      "addFirstButton": "Legg til Din Første Hund"
+    },
+    "loading": "Laster hundene dine..."
+  },
+  "delete": {
+    "title": "Slett Hund",
+    "message": "Er du sikker på at du vil slette {{dogName}}? Denne handlingen kan ikke angres.",
+    "confirm": "Slett Hund",
+    "cancel": "Avbryt"
+  },
+  "reminders": {
+    "heatTracking": {
+      "title": "Start Løpetidssporing for {{dogName}}",
+      "description": "{{dogName}} er i avlsalder men har ingen løpetidsregistreringer",
+      "suggestion": "Begynn å spore løpetider for bedre avlsstyring"
+    }
+  },
+  "litters": {
+    "title": "{{dogName}}s Kull",
+    "description": "Alle kull der {{dogName}} er involvert som {{role}}",
+    "count": "({{count}} kull)",
+    "countPlural": "({{count}} kull)",
+    "loading": "Laster kull...",
+    "error": "Feil ved lasting av kull: {{error}}",
+    "empty": {
+      "title": "{{dogName}} har ikke vært involvert i noen kull ennå.",
+      "sireLine": "Når denne hunden blir far til et kull, vil det vises her.",
+      "damLine": "Når denne hunden får et kull, vil det vises her."
+    },
+    "item": {
+      "born": "Født: {{date}}",
+      "archived": "Arkivert",
+      "viewDetails": "Vis Detaljer"
+    },
+    "roles": {
+      "sire": "far",
+      "dam": "mor"
+    }
+  },
+  "tabs": {
+    "overview": "Oversikt",
+    "heat": "Løpetid",
+    "heatTracking": "Oppfølging løpetid"
+  },
+  "heatTracking": {
+    "title": "Løpesykluser",
+    "description": "{{count}} syklus registrert",
+    "descriptionPlural": "{{count}} sykluser registrert",
+    "summary": {
+      "title": "Løpesyklus Oversikt",
+      "nextHeat": "Neste Løpetid",
+      "daysUntil": "Dager Igjen",
+      "predictedNext": "Forventet Neste Løpetid",
+      "predictedFromOngoing": "Neste Løpetid (fra pågående)",
+      "ongoing": "Pågående",
+      "today": "Forventes i dag",
+      "tomorrow": "Forventes i morgen",
+      "inDays": "Om {{days}} dager",
+      "upcomingSoon": "Løpetid forventes snart"
+    },
+    "analytics": {
+      "cycle": "syklus",
+      "title": "Syklusanalyse",
+      "description": "Analyse basert på {{count}} registrerte løpesykluser",
+      "averageCycle": "Gjennomsnittlig Syklus",
+      "lastHeat": "Siste Løpetid",
+      "nextPredicted": "Neste beregnede løpetid",
+      "basedOnHistory": "Basert på historikk",
+      "needTwoCycles": "Trenger 2+ sykluser",
+      "daysAgo": "{{days}} dager siden",
+      "never": "Aldri",
+      "noRecords": "Ingen registreringer",
+      "unknown": "Ukjent",
+      "noData": "Ingen løpesyklusdata tilgjengelig ennå",
+      "days": "dager",
+      "daysParameter": "{{days}} dager",
+      "startTracking": "Start sporing av løpesykluser for å se analyser",
+      "currentCycle": "Nåværende Løpesyklus",
+      "dayInCycle": "Dag i syklus",
+      "dayOf": "Dag {{current}} av {{total}}",
+      "predictedEnd": "Forventet slutt",
+      "avgCycleLength": "Snitt Lengde (dager)",
+      "avgInterval": "Snitt Intervall (dager)",
+      "nextHeat": "Neste Løpetid",
+      "daysUntil": "Dager Igjen",
+      "shortestCycle": "Korteste (dager)",
+      "longestCycle": "Lengste (dager)",
+      "comparison": "Syklussammenligning",
+      "lastCycleLength": "Siste sykluslengde",
+      "difference": "Forskjell fra gjennomsnittet",
+      "significantDifference": "Betydelig forskjell fra gjennomsnittlig sykluslengde. Vurder å konsultere veterinær.",
+      "proestrusDescription": "Tidlig løpetidsfase - blødning og hevelse begynner",
+      "estrusDescription": "Fruktbar fase - optimalt parringsvindu",
+      "metestrusDescription": "Sen fase - fruktbarheten avtar"
+    },
+    "cycles": {
+      "title": "Løpesykluser",
+      "newHeat": "Ny Løpetid",
+      "empty": {
+        "title": "Ingen løpesykluser registrert",
+        "description": "Begynn å spore ved å legge til en løpesyklus"
+      },
+      "noData": "Ingen løpesykluser registrert",
+      "getStarted": "Start sporing av løpesykluser for å se detaljerte analyser og få bedre innsikt i hundens reproduksjonssyklus",
+      "startTracking": "Start Sporing av Løpesykluser",
+      "noActive": "Ingen aktive løpesykluser",
+      "noActiveDescription": "Start en ny løpesyklus for å begynne å spore temperaturer og progesteronnivåer",
+      "badges": {
+        "recent": "Nylig",
+        "latest": "Siste",
+        "active": "Aktiv"
+      },
+      "daysSinceStart": "Dag {{days}} av syklus",
+      "duration": "{{days}} dagers syklus",
+      "logEntries": "{{count}} loggoppføringer",
+      "latestEntry": "Siste Oppføring",
+      "noLogs": "Ingen temperaturlogger ennå",
+      "startLogging": "Legg til din første temperaturmåling",
+      "viewAllLogs": "Vis alle {{count}} logger",
+      "deleteButton": "Slett Løpesyklus",
+      "endCycle": "Avslutt Løpetid",
+      "endCycleShort": "Avslutt"
+    },
+    "current": {
+      "title": "Aktive Løpesykluser"
+    },
+    "previous": {
+      "title": "Tidligere Løpetider",
+      "descriptionBoth": "{{completed}} fullførte sykluser og {{legacy}} eldre registreringer",
+      "descriptionCompleted": "{{count}} fullførte løpesykluser",
+      "descriptionLegacy": "{{count}} tidligere løpetidsregistreringer"
+    },
+    "details": {
+      "title": "Løpesyklusdetaljer",
+      "measurements": "målinger",
+      "tests": "tester",
+      "totalLogs": "Totalt Loggoppføringer",
+      "entries": "oppføringer",
+      "latestEntry": "Siste Oppføring"
+    },
+    "newSystem": {
+      "title": "Detaljert Løpetidssporing"
+    },
+    "legacySystem": {
+      "title": "Tidligere Løpetidsregistreringer"
+    },
+    "dialog": {
+      "title": "Ny Løpetid",
+      "description": "Registrer en løpesyklus for {{dogName}}",
+      "startDate": "Løpetidens Startdato",
+      "endDate": "Løpetidens Sluttdato",
+      "selectDate": "Velg startdato",
+      "selectEndDate": "Velg sluttdato",
+      "notes": "Notater (Valgfritt)",
+      "notesPlaceholder": "Eventuelle første observasjoner eller notater...",
+      "type": {
+        "label": "Syklustype",
+        "active": "Aktiv Løpetid",
+        "activeDescription": "Pågående løpesyklus",
+        "previous": "Tidligere Løpetid",
+        "previousDescription": "Legg til historisk løpesyklus"
+      },
+      "startCycle": "Opprett Løpesyklus",
+      "registerPrevious": "Registrer Tidligere Løpetid",
+      "validation": {
+        "dateRequired": "Vennligst velg en startdato",
+        "futureDate": "Startdato kan ikke være i fremtiden",
+        "endDateRequired": "Vennligst velg en sluttdato for tidligere løpetider",
+        "endDateAfterStart": "Sluttdato må være etter startdato"
+      },
+      "success": {
+        "created": "Løpesyklus startet",
+        "createdDescription": "Løpesyklusen har blitt registrert",
+        "createdPrevious": "Tidligere løpesyklus lagt til",
+        "createdPreviousDescription": "Tidligere løpesyklus har blitt registrert i historikken"
+      },
+      "error": {
+        "failed": "Kunne ikke starte løpesyklus",
+        "failedDescription": "Vennligst prøv igjen eller kontakt support"
+      }
+    },
+    "logging": {
+      "title": "Legg til Løpelogg",
+      "description": "Registrer daglige observasjoner og temperatur",
+      "date": "Dato",
+      "selectDate": "Velg dato",
+      "temperature": "Temperatur",
+      "phase": "Løpetidsfase",
+      "selectPhase": "Velg fase",
+      "observations": "Observasjoner",
+      "observationsPlaceholder": "Atferd, fysiske endringer, utflod, osv.",
+      "notes": "Tilleggsnotater",
+      "notesPlaceholder": "Eventuelle tilleggsnotater...",
+      "addEntry": "Legg til Oppføring",
+      "testType": "Testtype",
+      "temperatureTest": "Temperatur",
+      "progesteroneTest": "Progesterontest",
+      "validation": {
+        "dateRequired": "Vennligst velg en dato",
+        "futureDate": "Dato kan ikke være i fremtiden",
+        "beforeCycleStart": "Dato kan ikke være før løpesyklusens start",
+        "invalidTemperature": "Temperatur må være mellom 35°C og 45°C"
+      },
+      "success": {
+        "added": "Loggoppføring lagt til",
+        "addedDescription": "Løpeloggen har blitt registrert"
+      },
+      "error": {
+        "failed": "Kunne ikke legge til loggoppføring",
+        "failedDescription": "Vennligst prøv igjen eller kontakt support"
+      }
+    },
+    "editLog": {
+      "title": "Rediger Løpelogg",
+      "description": "Oppdater detaljene for denne løpeloggoppføringen",
+      "date": "Dato",
+      "selectDate": "Velg dato",
+      "pickDate": "Velg en dato",
+      "temperature": "Temperatur (°C)",
+      "temperaturePlaceholder": "f.eks. 38,5",
+      "phase": "Løpetidsfase",
+      "selectPhase": "Velg løpetidsfase",
+      "observations": "Observasjoner",
+      "observationsPlaceholder": "Atferdsendringer, fysiske tegn, osv.",
+      "notes": "Notater",
+      "notesPlaceholder": "Tilleggsnotater...",
+      "cancel": "Avbryt",
+      "updateEntry": "Oppdater Oppføring",
+      "validation": {
+        "dateRequired": "Dato Påkrevd",
+        "dateRequiredDescription": "Vennligst velg en dato for denne loggoppføringen",
+        "invalidDate": "Ugyldig Dato",
+        "futureDate": "Dato kan ikke være i fremtiden",
+        "invalidTemperature": "Ugyldig Temperatur",
+        "invalidTemperatureDescription": "Vennligst skriv inn en gyldig temperatur mellom 30°C og 45°C"
+      },
+      "success": {
+        "title": "Logg Oppdatert",
+        "description": "Løpeloggoppføringen har blitt oppdatert"
+      },
+      "error": {
+        "title": "Oppdatering Feilet",
+        "description": "Kunne ikke oppdatere løpeloggoppføringen. Vennligst prøv igjen."
+      }
+    },
+    "phases": {
+      "proestrus": "Proøstrus",
+      "estrus": "Østrus",
+      "metestrus": "Metøstrus",
+      "anestrus": "Anøstrus",
+      "days": "Dager",
+      "description": "Beskrivelse",
+      "commonSigns": "Vanlige Tegn",
+      "noSignsData": "Ingen detaljert tegnsinformasjon tilgjengelig for denne fasen.",
+      "details": {
+        "proestrus": "Den tidlige fasen av løpesyklusen. I denne fasen begynner vulva å hovne og det kan være lett blødning. Tispen er ennå ikke klar til parring og vil vanligvis avvise hannhunder.",
+        "estrus": "Den fruktbare fasen når parring mest sannsynlig vil resultere i drektighet. Utfloden blir lysere i farge og tispen blir mottakelig for hannhunder. Dette er det optimale parringsvinduet.",
+        "metestrus": "Den sene fasen av løpesyklusen når fruktbarheten avtar. Utfloden minker og tispen blir mindre mottakelig for hannhunder. Denne fasen går over i diøstrus."
+      },
+      "signs": {
+        "proestrus": "Vulvahevelse, lett blodig utflod, økt urinering, rastløshet, hannhunder viser interesse men tispen avviser",
+        "estrus": "Lysere/stråfarget utflod, mottakelig for hannhunder, 'flagging'-atferd (beveger halen til siden), redusert hevelse",
+        "metestrus": "Utflod avtar, mindre mottakelig for hannhunder, vulvahevelse reduseres, tilbake til normal atferd"
+      }
+    },
+    "deleteDialog": {
+      "title": "Slett Løpesyklus",
+      "description": "Er du sikker på at du vil slette denne løpesyklusen? Dette vil også slette alle tilknyttede loggoppføringer. Denne handlingen kan ikke angres.",
+      "confirmationMessage": "Er du sikker på at du vil slette denne løpesyklusen?",
+      "startDate": "Startdato",
+      "endDate": "Sluttdato",
+      "duration": "Varighet",
+      "warningMessage": "Dette vil også slette alle tilknyttede temperatur- og progesteronlogger. Denne handlingen kan ikke angres."
+    },
+    "deleteSuccess": {
+      "title": "Løpesyklus Slettet",
+      "description": "Løpesyklusen og alle tilknyttede data har blitt slettet."
+    },
+    "deleteError": {
+      "title": "Sletting Feilet",
+      "description": "Kunne ikke slette løpesyklusen. Vennligst prøv igjen."
+    },
+    "addPreviousHeat": {
+      "title": "Legg til Tidligere Løpetid",
+      "description": "Legg til en tidligere løpesyklus i hundens historikk",
+      "startDate": "Løpetidens Startdato",
+      "notes": "Notater (valgfritt)",
+      "placeholders": {
+        "notes": "Tilleggsinformasjon om denne løpesyklusen..."
+      },
+      "validation": {
+        "dateRequired": "Startdato er påkrevd",
+        "dateInFuture": "Løpetidsdato kan ikke være i fremtiden",
+        "duplicateDate": "En løpesyklus finnes allerede for denne datoen"
+      },
+      "buttons": {
+        "add": "Legg til Løpesyklus",
+        "cancel": "Avbryt"
+      },
+      "success": {
+        "title": "Tidligere Løpetid Lagt Til",
+        "description": "Løpesyklusen har blitt lagt til i hundens historikk"
+      },
+      "error": {
+        "title": "Kunne Ikke Legge Til Løpetid",
+        "description": "Kunne ikke legge til den tidligere løpesyklusen. Vennligst prøv igjen."
+      }
+    },
+    "editDialog": {
+      "title": "Rediger Løpesyklus",
+      "startDate": "Løpetidens Startdato",
+      "selectDate": "Velg startdato",
+      "endDate": "Løpetidens Sluttdato",
+      "selectEndDate": "Velg sluttdato"
+    },
+    "editSuccess": {
+      "title": "Løpesyklus Oppdatert",
+      "description": "Løpesyklusen har blitt oppdatert"
+    },
+    "editError": {
+      "title": "Oppdatering Feilet",
+      "description": "Kunne ikke oppdatere løpesyklusen. Vennligst prøv igjen."
+    },
+    "comingSoon": {
+      "title": "Kommer Snart",
+      "features": {
+        "detailedLogging": "Forbedrede analyser og diagrammer",
+        "temperatureCharts": "Temperaturtrendanalyse",
+        "enhancedPredictions": "AI-drevne løpetidsforutsigelser"
+      }
+    },
+    "optimalMating": "Optimalt Parringsvindu",
+    "noProgesteroneData": "Ingen progesterondata tilgjengelig for denne løpesyklusen.",
+    "progesteroneLevel": "Progesteronnivå",
+    "baseline": "Utgangsnivå (2 ng/ml)",
+    "lhSurge": "LH-stigning (5 ng/ml)",
+    "temperature": {
+      "chartTitle": "Temperaturtrend",
+      "chartDescription": "Daglig kroppstemperatursporing under løpesyklus",
+      "noData": "Ingen temperaturdata tilgjengelig for denne løpesyklusen",
+      "startTracking": "Begynn å logge temperaturer for å se trender",
+      "dayInCycle": "Dag {{day}} i syklus",
+      "averageTemp": "Gjennomsnittlig temperatur",
+      "dropDetected": "Temperaturnedgang Oppdaget",
+      "dropDescription": "Betydelig nedgang {{date}} ({{temp}}°C) - mulig ovulasjonsindikator",
+      "bodyTemperature": "Kroppstemperatur",
+      "averageLine": "Gjennomsnittlig temperaturlinje",
+      "ovulationIndicator": "Potensiell ovulasjonsindikator",
+      "overallTrend": "Temperaturtrender",
+      "title": "Temperatur",
+      "trend": "Temperaturtrender"
+    },
+    "progesterone": {
+      "title": "Progesteron",
+      "chart": "Progesteronnivåer"
+    },
+    "matingDates": {
+      "title": "Parringsdatoer",
+      "dayInCycle": "Dag {{day}}",
+      "linkedToPregnancy": "Koblet til drektighet"
+    },
+    "phase": {
+      "title": "Fase"
+    },
+    "logs": {
+      "title": "Løpesporing Logger",
+      "description": "Alle sporingsoppføringer for løpesyklus startet {{date}}",
+      "entryCount": "{{count}} oppføringer registrert",
+      "loading": "Laster oppføringer...",
+      "noEntries": "Ingen sporingsoppføringer ennå",
+      "startTracking": "Legg til din første sporingsoppføring ovenfor",
+      "deleteSuccess": "Oppføring Slettet",
+      "deleteSuccessDescription": "Løpeloggoppføringen har blitt fjernet",
+      "deleteError": "Sletting Feilet",
+      "deleteErrorDescription": "Kunne ikke slette løpeloggoppføringen",
+      "deleteConfirmTitle": "Slett Løpeloggoppføring",
+      "deleteConfirmDescription": "Dette vil permanent fjerne denne sporingsoppføringen fra registreringene dine",
+      "entryFrom": "Oppføring fra {{date}}"
+    },
+    "notes": {
+      "editTitle": "Rediger Notater",
+      "editSuccess": "Notater Oppdatert",
+      "editSuccessDescription": "Løpesyklusnotatene har blitt oppdatert",
+      "editError": "Oppdatering Feilet",
+      "editErrorDescription": "Kunne ikke oppdatere notatene",
+      "deleteSuccess": "Notater Slettet",
+      "deleteSuccessDescription": "Løpesyklusnotatene har blitt fjernet",
+      "deleteError": "Sletting Feilet",
+      "deleteErrorDescription": "Kunne ikke slette notatene",
+      "placeholder": "Legg til notater om denne løpesyklusen..."
+    }
+  },
+  "toast": {
+    "success": {
+      "added": "{{dogName}} er lagt til hundene dine",
+      "updated": "{{dogName}} er oppdatert",
+      "deleted": "Hund fjernet"
+    },
+    "error": {
+      "add": "Kunne ikke legge til hund. Prøv igjen.",
+      "update": "Kunne ikke oppdatere hund. Prøv igjen.",
+      "delete": "Kunne ikke slette hund. Prøv igjen.",
+      "load": "Kunne ikke laste hunder",
+      "generic": "En feil oppstod",
+      "cannotDelete": "Kan Ikke Slette Hund",
+      "hasDependencies": "Denne hunden kan ikke slettes fordi den har tilknyttede registreringer (kull, drektigheter, osv.)"
+    },
+    "loading": {
+      "preparing": "Forbereder tilkobling...",
+      "wait": "Vennligst vent"
+    },
+    "network": {
+      "error": "Nettverksproblem. Vennligst sjekk internettforbindelsen din.",
+      "retry": "Prøv Igjen"
+    }
+  },
+  "validation": {
+    "nameRequired": "Navn er påkrevd",
+    "breedRequired": "Rase er påkrevd",
+    "dateOfBirthRequired": "Fødselsdato er påkrevd"
+  },
+  "cycle": "syklus"
 }
