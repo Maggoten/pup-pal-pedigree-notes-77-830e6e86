@@ -16,6 +16,7 @@ export function useLitterOperations(
   // Use specialized hooks for each operation category
   const { updateLitter, deleteLitter, archiveLitter } = useLitterCore(
     loadLittersData,
+    loadLitterDetails,
     setActiveLitters,
     setArchivedLitters,
     setSelectedLitterId,
