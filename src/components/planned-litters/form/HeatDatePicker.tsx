@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -10,19 +9,22 @@ import { cn } from '@/lib/utils';
 import { UseFormReturn } from 'react-hook-form';
 import { PlannedLitterFormValues } from '@/services/PlannedLitterService';
 import { parseISODate } from '@/utils/dateUtils';
+import { useTranslation } from 'react-i18next';
 
 interface HeatDatePickerProps {
   form: UseFormReturn<PlannedLitterFormValues>;
 }
 
 const HeatDatePicker: React.FC<HeatDatePickerProps> = ({ form }) => {
+  const { t } = useTranslation('plannedLitters');
+  
   return (
     <FormField
       control={form.control}
       name="expectedHeatDate"
       render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>Expected Heat Date</FormLabel>
+          <FormLabel>{t('forms.plannedLitter.expectedHeatDate')}</FormLabel>
           <Popover>
             <PopoverTrigger asChild>
               <FormControl>
@@ -38,7 +40,7 @@ const HeatDatePicker: React.FC<HeatDatePickerProps> = ({ form }) => {
                       ? format(parseISODate(field.value) || new Date(), "PPP") 
                       : format(field.value, "PPP")
                   ) : (
-                    <span>Pick a date</span>
+                    <span>{t('dialogs.litterDetails.selectDate')}</span>
                   )}
                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button>
@@ -63,7 +65,7 @@ const HeatDatePicker: React.FC<HeatDatePickerProps> = ({ form }) => {
             </PopoverContent>
           </Popover>
           <FormDescription className="text-xs text-muted-foreground">
-            Automatically calculated from the female's heat history. You can adjust it manually if needed.
+            {t('forms.plannedLitter.expectedHeatDateDescription')}
           </FormDescription>
           <FormMessage />
         </FormItem>
