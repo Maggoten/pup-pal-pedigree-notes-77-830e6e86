@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 interface PuppyGrowthLoggerProps {
   puppy: Puppy;
@@ -14,6 +15,7 @@ interface PuppyGrowthLoggerProps {
 }
 
 const PuppyGrowthLogger: React.FC<PuppyGrowthLoggerProps> = ({ puppy, onUpdatePuppy }) => {
+  const { t } = useTranslation('litters');
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');
   const [logType, setLogType] = useState<'weight' | 'height'>('weight');
@@ -21,8 +23,8 @@ const PuppyGrowthLogger: React.FC<PuppyGrowthLoggerProps> = ({ puppy, onUpdatePu
   const handleAddLog = () => {
     if (logType === 'weight' && (!weight || isNaN(parseFloat(weight)))) {
       toast({
-        title: "Invalid Weight",
-        description: "Please enter a valid weight",
+        title: t('growthLogger.invalidWeight'),
+        description: t('growthLogger.pleaseEnterValidWeight'),
         variant: "destructive"
       });
       return;
@@ -30,8 +32,8 @@ const PuppyGrowthLogger: React.FC<PuppyGrowthLoggerProps> = ({ puppy, onUpdatePu
 
     if (logType === 'height' && (!height || isNaN(parseFloat(height)))) {
       toast({
-        title: "Invalid Height",
-        description: "Please enter a valid height",
+        title: t('growthLogger.invalidHeight'),
+        description: t('growthLogger.pleaseEnterValidHeight'),
         variant: "destructive"
       });
       return;
@@ -57,8 +59,8 @@ const PuppyGrowthLogger: React.FC<PuppyGrowthLoggerProps> = ({ puppy, onUpdatePu
     onUpdatePuppy(updatedPuppy);
     
     toast({
-      title: `${logType === 'weight' ? 'Weight' : 'Height'} Recorded`,
-      description: `${puppy.name}'s ${logType} has been recorded successfully.`
+      title: logType === 'weight' ? t('growthLogger.weightRecorded') : t('growthLogger.heightRecorded'),
+      description: t('growthLogger.recordedSuccessfully', { name: puppy.name, type: t(`puppies.labels.${logType}`).toLowerCase() })
     });
   };
 
@@ -68,7 +70,7 @@ const PuppyGrowthLogger: React.FC<PuppyGrowthLoggerProps> = ({ puppy, onUpdatePu
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return format(date, 'PPP p'); // Format with date and time
+    return format(date, 'PPP p');
   };
 
   return (
@@ -80,14 +82,14 @@ const PuppyGrowthLogger: React.FC<PuppyGrowthLoggerProps> = ({ puppy, onUpdatePu
             size="sm"
             onClick={() => setLogType('weight')}
           >
-            Weight
+            {t('puppies.labels.weight')}
           </Button>
           <Button 
             variant={logType === 'height' ? 'default' : 'outline'}
             size="sm" 
             onClick={() => setLogType('height')}
           >
-            Height
+            {t('puppies.labels.height')}
           </Button>
         </div>
       </div>
@@ -96,38 +98,38 @@ const PuppyGrowthLogger: React.FC<PuppyGrowthLoggerProps> = ({ puppy, onUpdatePu
         {logType === 'weight' ? (
           <>
             <div className="space-y-2 flex-1">
-              <Label htmlFor="weight">Weight (kg)</Label>
+              <Label htmlFor="weight">{t('puppies.labels.weightKg')}</Label>
               <Input
                 id="weight"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 type="number"
                 step="0.01"
-                placeholder="Enter weight"
+                placeholder={t('puppies.placeholders.enterWeight')}
               />
             </div>
           </>
         ) : (
           <>
             <div className="space-y-2 flex-1">
-              <Label htmlFor="height">Height (cm)</Label>
+              <Label htmlFor="height">{t('puppies.labels.heightCm')}</Label>
               <Input
                 id="height"
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
                 type="number"
                 step="0.1"
-                placeholder="Enter height"
+                placeholder={t('puppies.placeholders.enterHeight')}
               />
             </div>
           </>
         )}
-        <Button onClick={handleAddLog}>Add Log</Button>
+        <Button onClick={handleAddLog}>{t('growthLogger.addLog')}</Button>
       </div>
 
       <div className="mt-4">
         <h3 className="text-sm font-medium mb-2">
-          {logType === 'weight' ? 'Weight History' : 'Height History'}
+          {logType === 'weight' ? t('growthLogger.weightHistory') : t('growthLogger.heightHistory')}
         </h3>
         
         {getLogData().length > 0 ? (
@@ -135,8 +137,8 @@ const PuppyGrowthLogger: React.FC<PuppyGrowthLoggerProps> = ({ puppy, onUpdatePu
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date & Time</TableHead>
-                  <TableHead>{logType === 'weight' ? 'Weight (kg)' : 'Height (cm)'}</TableHead>
+                  <TableHead>{t('growthLogger.dateAndTime')}</TableHead>
+                  <TableHead>{logType === 'weight' ? t('puppies.labels.weightKg') : t('puppies.labels.heightCm')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -155,7 +157,7 @@ const PuppyGrowthLogger: React.FC<PuppyGrowthLoggerProps> = ({ puppy, onUpdatePu
           </div>
         ) : (
           <div className="text-center py-4 border rounded-md text-muted-foreground">
-            No {logType} logs recorded yet
+            {t('growthLogger.noLogsYet', { type: t(`puppies.labels.${logType}`).toLowerCase() })}
           </div>
         )}
       </div>

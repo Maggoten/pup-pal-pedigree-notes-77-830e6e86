@@ -299,7 +299,13 @@
       "heightChart": "Height Chart", 
       "units": {
         "kg": "kg",
-        "cm": "cm"
+        "cm": "cm",
+        "weightKg": "Weight (kg)",
+        "heightCm": "Height (cm)"
+      },
+      "empty": {
+        "noData": "No measurement data available",
+        "addMeasurements": "Add measurements to see growth charts"
       }
     },
     "weeklyPhotos": {
@@ -708,5 +714,28 @@
     "black": "Black",
     "gray": "Gray",
     "brown": "Brown"
+  },
+  "growthLogger": {
+    "invalidWeight": "Invalid Weight",
+    "invalidHeight": "Invalid Height",
+    "pleaseEnterValidWeight": "Please enter a valid weight",
+    "pleaseEnterValidHeight": "Please enter a valid height",
+    "weightRecorded": "Weight Recorded",
+    "heightRecorded": "Height Recorded",
+    "recordedSuccessfully": "{{name}}'s {{type}} has been recorded successfully.",
+    "addLog": "Add Log",
+    "weightHistory": "Weight History",
+    "heightHistory": "Height History",
+    "dateAndTime": "Date & Time",
+    "noLogsYet": "No {{type}} logs recorded yet"
+  },
+  "deleteConfirmation": {
+    "itemToDelete": "Item to delete:"
+  },
+  "notesHistory": {
+    "title": "{{name}}'s Notes History",
+    "description": "Complete history of all notes for this puppy.",
+    "noNotesYet": "No Notes Yet",
+    "noNotesDescription": "There are no notes recorded for this puppy."
   }
 }

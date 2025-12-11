@@ -297,7 +297,13 @@
       "heightChart": "Høydediagram",
       "units": {
         "kg": "kg",
-        "cm": "cm"
+        "cm": "cm",
+        "weightKg": "Vekt (kg)",
+        "heightCm": "Høyde (cm)"
+      },
+      "empty": {
+        "noData": "Ingen måledata tilgjengelig",
+        "addMeasurements": "Legg til målinger for å se vekstdiagrammer"
       }
     },
     "weeklyPhotos": {
@@ -706,5 +712,28 @@
     "black": "Svart", 
     "gray": "Grå", 
     "brown": "Brun" 
+  },
+  "growthLogger": {
+    "invalidWeight": "Ugyldig Vekt",
+    "invalidHeight": "Ugyldig Høyde",
+    "pleaseEnterValidWeight": "Vennligst oppgi en gyldig vekt",
+    "pleaseEnterValidHeight": "Vennligst oppgi en gyldig høyde",
+    "weightRecorded": "Vekt Registrert",
+    "heightRecorded": "Høyde Registrert",
+    "recordedSuccessfully": "{{name}}s {{type}} har blitt registrert.",
+    "addLog": "Legg til Logg",
+    "weightHistory": "Vekthistorikk",
+    "heightHistory": "Høydehistorikk",
+    "dateAndTime": "Dato & Tid",
+    "noLogsYet": "Ingen {{type}}-logger registrert enda"
+  },
+  "deleteConfirmation": {
+    "itemToDelete": "Element som skal slettes:"
+  },
+  "notesHistory": {
+    "title": "{{name}}s Notathistorikk",
+    "description": "Fullstendig historikk over alle notater for denne valpen.",
+    "noNotesYet": "Ingen Notater Enda",
+    "noNotesDescription": "Det er ingen notater registrert for denne valpen."
   }
 }

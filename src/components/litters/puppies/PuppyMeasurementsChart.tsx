@@ -44,8 +44,8 @@ const PuppyMeasurementsChart: React.FC<PuppyMeasurementsChartProps> = ({ puppy }
     return (
       <div className="flex items-center justify-center h-64 text-muted-foreground">
         <div className="text-center">
-          <p className="text-lg font-medium mb-2">No measurement data available</p>
-          <p className="text-sm">Add measurements to see growth charts</p>
+          <p className="text-lg font-medium mb-2">{t('puppies.charts.empty.noData')}</p>
+          <p className="text-sm">{t('puppies.charts.empty.addMeasurements')}</p>
         </div>
       </div>
     );
@@ -67,7 +67,7 @@ const PuppyMeasurementsChart: React.FC<PuppyMeasurementsChartProps> = ({ puppy }
               <YAxis 
                 tick={{ fontSize: 12 }}
                 tickLine={{ stroke: '#888' }}
-                label={{ value: 'Weight (kg)', angle: -90, position: 'insideLeft' }}
+                label={{ value: t('puppies.charts.units.weightKg'), angle: -90, position: 'insideLeft' }}
               />
               <Tooltip 
                 labelStyle={{ color: '#374151' }}
@@ -76,7 +76,7 @@ const PuppyMeasurementsChart: React.FC<PuppyMeasurementsChartProps> = ({ puppy }
                   border: '1px solid #E5E7EB',
                   borderRadius: '8px'
                 }}
-                formatter={(value: any) => [`${value} kg`, 'Weight']}
+                formatter={(value: any) => [`${value} kg`, t('puppies.labels.weight')]}
               />
               <Line 
                 type="monotone" 
@@ -105,7 +105,7 @@ const PuppyMeasurementsChart: React.FC<PuppyMeasurementsChartProps> = ({ puppy }
               <YAxis 
                 tick={{ fontSize: 12 }}
                 tickLine={{ stroke: '#888' }}
-                label={{ value: 'Height (cm)', angle: -90, position: 'insideLeft' }}
+                label={{ value: t('puppies.charts.units.heightCm'), angle: -90, position: 'insideLeft' }}
               />
               <Tooltip 
                 labelStyle={{ color: '#374151' }}
@@ -114,7 +114,7 @@ const PuppyMeasurementsChart: React.FC<PuppyMeasurementsChartProps> = ({ puppy }
                   border: '1px solid #E5E7EB',
                   borderRadius: '8px'
                 }}
-                formatter={(value: any) => [`${value} cm`, 'Height']}
+                formatter={(value: any) => [`${value} cm`, t('puppies.labels.height')]}
               />
               <Line 
                 type="monotone" 

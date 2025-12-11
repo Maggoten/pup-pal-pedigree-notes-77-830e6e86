@@ -79,7 +79,7 @@ const GrowthLineChart: React.FC<GrowthLineChartProps> = ({
           />
           <YAxis 
             label={{ 
-              value: logType === 'weight' ? 'Weight (kg)' : 'Height (cm)', 
+              value: logType === 'weight' ? t('puppies.charts.units.weightKg') : t('puppies.charts.units.heightCm'), 
               angle: -90, 
               position: 'insideLeft',
               style: { textAnchor: 'middle', fontSize: 12 }

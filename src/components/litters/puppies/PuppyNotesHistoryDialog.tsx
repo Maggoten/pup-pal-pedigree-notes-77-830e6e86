@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Puppy, PuppyNote } from '@/types/breeding';
 import { format } from 'date-fns';
 import { FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface PuppyNotesHistoryDialogProps {
   puppy: Puppy;
@@ -22,6 +23,7 @@ const PuppyNotesHistoryDialog: React.FC<PuppyNotesHistoryDialogProps> = ({
   puppy,
   onClose
 }) => {
+  const { t } = useTranslation('litters');
   // If no notes array or it's empty, show appropriate message
   const hasNotes = puppy.notes && puppy.notes.length > 0;
 
@@ -30,10 +32,10 @@ const PuppyNotesHistoryDialog: React.FC<PuppyNotesHistoryDialogProps> = ({
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <FileText className="h-5 w-5" />
-          {puppy.name}'s Notes History
+          {t('notesHistory.title', { name: puppy.name })}
         </DialogTitle>
         <DialogDescription>
-          Complete history of all notes for this puppy.
+          {t('notesHistory.description')}
         </DialogDescription>
       </DialogHeader>
 
@@ -59,16 +61,16 @@ const PuppyNotesHistoryDialog: React.FC<PuppyNotesHistoryDialogProps> = ({
         ) : (
           <div className="flex flex-col items-center justify-center text-center h-[200px] border rounded-md p-6">
             <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium">No Notes Yet</h3>
+            <h3 className="text-lg font-medium">{t('notesHistory.noNotesYet')}</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              There are no notes recorded for this puppy.
+              {t('notesHistory.noNotesDescription')}
             </p>
           </div>
         )}
       </div>
 
       <DialogFooter>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onClose}>{t('puppies.actions.close')}</Button>
       </DialogFooter>
     </DialogContent>
   );

@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useTranslation } from 'react-i18next';
 
 interface DeleteConfirmationDialogProps {
   open: boolean;
@@ -28,6 +29,8 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
   description,
   itemDetails
 }) => {
+  const { t } = useTranslation('litters');
+  
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -37,15 +40,15 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
             {description}
             {itemDetails && (
               <div className="mt-2 p-2 bg-muted rounded-md text-sm">
-                <strong>Item to delete:</strong> {itemDetails}
+                <strong>{t('deleteConfirmation.itemToDelete')}</strong> {itemDetails}
               </div>
             )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm} className="bg-destructive hover:bg-destructive/90">
-            Delete
+            {t('actions.delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
