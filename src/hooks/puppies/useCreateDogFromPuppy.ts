@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/providers/AuthProvider';
 import { createDogFromPuppy, CreateDogFromPuppyResult } from '@/services/puppies/createDogFromPuppy';
@@ -11,6 +12,7 @@ export const useCreateDogFromPuppy = () => {
   const navigate = useNavigate();
   const { t } = useTranslation('litters');
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const createDog = async (puppy: Puppy, litter: Litter): Promise<CreateDogFromPuppyResult> => {
     if (!user) {
@@ -37,6 +39,9 @@ export const useCreateDogFromPuppy = () => {
       const result = await createDogFromPuppy(puppy, litter, user.id);
 
       if (result.success && result.dogId) {
+        // Invalidate dogs cache so My Dogs page shows the new dog immediately
+        await queryClient.invalidateQueries({ queryKey: ['dogs', user.id] });
+        
         toast({
           title: t('toast.success'),
           description: t('puppies.createDogProfile.success', { name: puppy.name }),
