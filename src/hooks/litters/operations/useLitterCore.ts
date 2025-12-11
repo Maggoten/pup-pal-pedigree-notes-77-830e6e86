@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export function useLitterCore(
   loadLittersData,
+  loadLitterDetails: (litterId: string) => Promise<void>,
   setActiveLitters,
   setArchivedLitters,
   setSelectedLitterId,
@@ -61,6 +62,9 @@ export function useLitterCore(
     try {
       await litterService.toggleArchiveLitter(litterId, archive);
       await loadLittersData();
+      
+      // Reload litter details to ensure puppies are loaded for the updated litter
+      await loadLitterDetails(litterId);
       
       toast({
         title: archive ? "Litter Archived" : "Litter Activated",
