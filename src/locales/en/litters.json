@@ -674,9 +674,10 @@
     "statistics": {
       "title": "Statistics & Growth",
       "avgBirthWeight": "Average Birth Weight",
-      "avgFinalWeight": "Average Final Weight",
+      "avgWeightAt8Weeks": "Average Weight at 8 Weeks",
       "litterGrowthChart": "Litter Growth Chart",
-      "noDataAvailable": "No data available for this chart"
+      "noDataAvailable": "No data available for this chart",
+      "noData": "No data"
     },
     "puppies": {
       "title": "Puppies",

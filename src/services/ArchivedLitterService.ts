@@ -4,6 +4,7 @@ import { litterService } from './LitterService';
 
 export interface ArchivedLitterData {
   litter: Litter;
+  puppies: Puppy[];
   damImageUrl?: string;
   sireImageUrl?: string;
   damBreed?: string;
@@ -17,10 +18,8 @@ export interface ArchivedLitterData {
     males: number;
     females: number;
     avgBirthWeight: number;
-    avgFinalWeight: number;
+    avgWeightAt8Weeks: number;
   };
-  averageWeightLog: Array<{ date: string; weight: number }>;
-  averageHeightLog: Array<{ date: string; height: number }>;
 }
 
 export const getArchivedLitterDetails = async (litterId: string): Promise<ArchivedLitterData | null> => {
@@ -48,24 +47,36 @@ export const getArchivedLitterDetails = async (litterId: string): Promise<Archiv
       ? birthWeights.reduce((sum, w) => sum + w, 0) / birthWeights.length 
       : 0;
 
-    // Calculate average final weight (most recent weight from each puppy)
-    const finalWeights = puppies
+    // Calculate average weight at 8 weeks (56 days from birth)
+    const birthDate = new Date(litter.dateOfBirth);
+    const eightWeeksDate = new Date(birthDate.getTime() + 56 * 24 * 60 * 60 * 1000);
+    
+    const weightsAt8Weeks = puppies
       .map(p => {
         if (!p.weightLog || p.weightLog.length === 0) return null;
-        const sortedWeights = [...p.weightLog].sort((a, b) => 
-          new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
-        return sortedWeights[0].weight;
+        
+        // Find measurement closest to 8 weeks (within ±7 days)
+        let closestWeight: number | null = null;
+        let closestDiff = Infinity;
+        
+        p.weightLog.forEach(log => {
+          const logDate = new Date(log.date);
+          const diff = Math.abs(logDate.getTime() - eightWeeksDate.getTime());
+          const daysDiff = diff / (24 * 60 * 60 * 1000);
+          
+          if (daysDiff <= 7 && diff < closestDiff) {
+            closestDiff = diff;
+            closestWeight = log.weight;
+          }
+        });
+        
+        return closestWeight;
       })
       .filter(w => w !== null) as number[];
     
-    const avgFinalWeight = finalWeights.length > 0 
-      ? finalWeights.reduce((sum, w) => sum + w, 0) / finalWeights.length 
+    const avgWeightAt8Weeks = weightsAt8Weeks.length > 0 
+      ? weightsAt8Weeks.reduce((sum, w) => sum + w, 0) / weightsAt8Weeks.length 
       : 0;
-
-    // Calculate average weight/height logs for the litter
-    const averageWeightLog = calculateAverageWeightLog(puppies);
-    const averageHeightLog = calculateAverageHeightLog(puppies);
 
     // Fetch dam and sire images
     let damImageUrl: string | undefined;
@@ -100,6 +111,7 @@ export const getArchivedLitterDetails = async (litterId: string): Promise<Archiv
 
     return {
       litter,
+      puppies,
       damImageUrl,
       sireImageUrl,
       damBreed,
@@ -113,71 +125,11 @@ export const getArchivedLitterDetails = async (litterId: string): Promise<Archiv
         males,
         females,
         avgBirthWeight,
-        avgFinalWeight
-      },
-      averageWeightLog,
-      averageHeightLog
+        avgWeightAt8Weeks
+      }
     };
   } catch (error) {
     console.error('Error fetching archived litter details:', error);
     return null;
   }
-};
-
-// Helper function to calculate average weight logs
-const calculateAverageWeightLog = (puppies: Puppy[]): Array<{ date: string; weight: number }> => {
-  const logMap = new Map<string, number[]>();
-
-  // Collect all weight logs from all puppies
-  puppies.forEach(puppy => {
-    if (!puppy.weightLog) return;
-
-    puppy.weightLog.forEach(log => {
-      const dateKey = log.date;
-      const value = log.weight;
-      
-      if (!logMap.has(dateKey)) {
-        logMap.set(dateKey, []);
-      }
-      logMap.get(dateKey)!.push(value);
-    });
-  });
-
-  // Calculate averages for each date
-  const result = Array.from(logMap.entries()).map(([date, values]) => {
-    const avg = values.reduce((sum, v) => sum + v, 0) / values.length;
-    return { date, weight: avg };
-  });
-
-  // Sort by date
-  return result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-};
-
-// Helper function to calculate average height logs
-const calculateAverageHeightLog = (puppies: Puppy[]): Array<{ date: string; height: number }> => {
-  const logMap = new Map<string, number[]>();
-
-  // Collect all height logs from all puppies
-  puppies.forEach(puppy => {
-    if (!puppy.heightLog) return;
-
-    puppy.heightLog.forEach(log => {
-      const dateKey = log.date;
-      const value = log.height;
-      
-      if (!logMap.has(dateKey)) {
-        logMap.set(dateKey, []);
-      }
-      logMap.get(dateKey)!.push(value);
-    });
-  });
-
-  // Calculate averages for each date
-  const result = Array.from(logMap.entries()).map(([date, values]) => {
-    const avg = values.reduce((sum, v) => sum + v, 0) / values.length;
-    return { date, height: avg };
-  });
-
-  // Sort by date
-  return result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 };

@@ -674,9 +674,10 @@
     "statistics": {
       "title": "Statistik & Tillväxt",
       "avgBirthWeight": "Genomsnittlig födelsevikt",
-      "avgFinalWeight": "Genomsnittlig slutvikt",
+      "avgWeightAt8Weeks": "Genomsnittlig vikt vid 8 veckor",
       "litterGrowthChart": "Kullens tillväxt",
-      "noDataAvailable": "Ingen data tillgänglig för detta diagram"
+      "noDataAvailable": "Ingen data tillgänglig för detta diagram",
+      "noData": "Ingen data"
     },
     "puppies": {
       "title": "Valpar",
