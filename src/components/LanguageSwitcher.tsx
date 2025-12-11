@@ -21,7 +21,9 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className }) => {
   };
 
   const getCurrentLanguageLabel = () => {
-    return i18n.language === 'sv' ? t('svenska') : t('english');
+    if (i18n.language === 'sv') return t('svenska');
+    if (i18n.language === 'no') return t('norsk');
+    return t('english');
   };
 
   return (
@@ -34,6 +36,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className }) => {
         <SelectContent>
           <SelectItem value="en">{t('english')}</SelectItem>
           <SelectItem value="sv">{t('svenska')}</SelectItem>
+          <SelectItem value="no">{t('norsk')}</SelectItem>
         </SelectContent>
       </Select>
     </div>
