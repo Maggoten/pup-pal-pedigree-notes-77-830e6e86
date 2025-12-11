@@ -1,0 +1,75 @@
+{
+  "title": "Brukervilkår",
+  "subtitle": "Les disse vilkårene nøye",
+  "backToLogin": "Tilbake til Innlogging",
+  "lastUpdated": "Sist oppdatert: Desember 2025",
+  "sections": {
+    "acceptance": {
+      "title": "Godkjenning av vilkår",
+      "description": "Ved å opprette en konto på Breeding Journey bekrefter du at du har lest, forstått og godtar disse brukervilkårene."
+    },
+    "ageRequirement": {
+      "title": "Alderskrav",
+      "description": "Brukere må være minst 16 år gamle for å opprette en konto og bruke Breeding Journey. Ved å opprette en konto bekrefter du at du oppfyller dette alderskravet."
+    },
+    "subscription": {
+      "title": "Abonnementer og Betalinger",
+      "description": "Breeding Journey tilbyr abonnementsbasert tilgang til visse funksjoner. Ved å abonnere godtar du følgende vilkår:",
+      "items": [
+        "Fakturering: Abonnementer faktureres på gjentagende måneds- eller årsbasis gjennom Stripe.",
+        "Automatisk fornyelse: Abonnementet ditt fornyes automatisk hvis det ikke kanselleres før fornyelsesdatoen.",
+        "Kansellering: Du kan avslutte abonnementet ditt når som helst. Tilgangen din forblir aktiv til slutten av den betalte perioden.",
+        "Refusjoner: Vi tilbyr ikke refusjoner for ubrukte abonnementsperioder, bortsett fra der det kreves ved lov.",
+        "Betalingshåndtering: Alle betalinger håndteres trygt av Stripe. Vi lagrer ikke kredittkortinformasjon."
+      ]
+    },
+    "userResponsibilities": {
+      "title": "Brukeransvar",
+      "description": "Som bruker av Breeding Journey godtar du å:",
+      "items": [
+        "Oppgi korrekt informasjon ved registrering",
+        "Holde innloggingsinformasjonen din trygg",
+        "Kun bruke tjenesten til lovlige formål",
+        "Ikke dele kontoen din med andre",
+        "Respektere Breeding Journeys immaterielle rettigheter"
+      ]
+    },
+    "noVeterinaryAdvice": {
+      "title": "Ingen veterinær- eller profesjonell rådgivning",
+      "description": "Breeding Journey tilbyr verktøy og informasjonsfunksjoner for å hjelpe oppdrettere med å organisere og følge avlsarbeidet. Vi tilbyr ikke veterinær-, medisinsk-, juridisk- eller profesjonell rådgivning. Du er ansvarlig for å konsultere kvalifiserte fagpersoner når du tar beslutninger om hundenes helse eller avlsplaner. Brukere bærer alene ansvaret for beslutninger relatert til hundehelse, avl og stell."
+    },
+    "userContent": {
+      "title": "Brukergenerert innhold",
+      "description": "Du er ansvarlig for alt innhold du sender inn eller laster opp til Breeding Journey. Du bekrefter at:",
+      "items": [
+        "Du har rett til å laste opp innholdet",
+        "Innholdet ditt ikke krenker andres rettigheter",
+        "Vi kan fjerne innhold som bryter med disse vilkårene"
+      ]
+    },
+    "liability": {
+      "title": "Ansvarsbegrensning",
+      "description": "Breeding Journey leveres «som den er» uten garantier av noe slag. Vi er ikke ansvarlige for noen avlsbeslutninger tatt basert på data i plattformen vår. Du er ansvarlig for å verifisere all informasjon og konsultere veterinærer ved behov."
+    },
+    "serviceAvailability": {
+      "title": "Tjenestetilgjengelighet",
+      "description": "Vi streber etter å holde Breeding Journey tilgjengelig hele tiden, men vi garanterer ikke uavbrutt tjeneste. Vi er ikke ansvarlige for nedetid, datatap eller forsinkelser forårsaket av tredjepartsleverandører som Supabase, Vercel eller Stripe."
+    },
+    "termination": {
+      "title": "Oppsigelse",
+      "description": "Vi forbeholder oss retten til å suspendere eller avslutte kontoen din hvis du bryter med disse vilkårene. Du kan også slette kontoen din når som helst via kontoinnstillingene."
+    },
+    "privacyReference": {
+      "title": "Personvernerklæring",
+      "description": "Din bruk av Breeding Journey styres også av vår Personvernerklæring, som forklarer hvordan personopplysningene dine samles inn og behandles. Vennligst les vår Personvernerklæring for mer informasjon."
+    },
+    "changes": {
+      "title": "Endringer i vilkårene",
+      "description": "Vi kan oppdatere disse vilkårene fra tid til annen. Vi vil varsle deg om vesentlige endringer via e-post eller gjennom plattformen. Fortsatt bruk av tjenesten etter endringer innebærer godkjenning av de nye vilkårene."
+    },
+    "governingLaw": {
+      "title": "Gjeldende lov",
+      "description": "Disse vilkårene styres av svensk lov, uten hensyn til lovvalgsprinsipper. Eventuelle tvister som oppstår fra disse vilkårene skal avgjøres i svenske domstoler."
+    }
+  }
+}

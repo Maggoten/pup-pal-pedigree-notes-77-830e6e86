@@ -1,0 +1,48 @@
+{
+  "title": "Om Breeding Journey",
+  "subtitle": "Oppdretts beste venn",
+  "sections": {
+    "ourStory": {
+      "title": "Vår historie",
+      "description": "Breeding Journey vokste frem da vår grunnlegger Julia fikk sitt første valpekull og innså at et samlet verktøy manglet. Med regneark, notatbøker og forskjellige apper var det lett å gå glipp av detaljer. Vi skapte derfor en brukervennlig, digital plattform som samler hele avlsreisen – fra løpetid og parring til drektighet, kull og valpenes flytting – på ett sted. Vi håper du vil like Breeding Journey like mye som vi gjør."
+    },
+    "whatYouCanDo": {
+      "title": "Hva du kan gjøre med Breeding Journey",
+      "features": [
+        "Spore løpetid: prognoser, daglig temperatur og logg for progesterontester.",
+        "Planlegge parringer: velg parringsdag og logg dato og notater.",
+        "Følge drektigheter: beregnet fødselsdato (BF), ukentlige sjekklister, symptomer, daglig temperatur og nedtelling.",
+        "Håndtere kull og valper: profiler, vekt- og høydekurver for vekstoppfølging, notater og salgsstatus.",
+        "Påminnelser og kalender: smarte påminnelser og en samlet avlskalender så du ikke går glipp av noe.",
+        "Oversikt og statistikk: årsstatistikk og et raskt bilde av pågående avlsarbeid og trender."
+      ]
+    },
+    "howItHelps": {
+      "title": "Hvordan det hjelper oppdrettere",
+      "benefits": [
+        "Gå ikke glipp av noe kritisk: Smarte påminnelser og automatiske kalenderhendelser for løpetid, parring, BF-dato, vaksinasjoner og kontroll.",
+        "Lagre all avlshistorikk: Følg opp tidligere løpetider, parringer, drektigheter og kull – all data trygt lagret.",
+        "Rask oversikt: Nedtelling til valping, aktive drektigheter og planlagte kull direkte når du logger inn.",
+        "Bygget for valpekassen: Mobilvennlig grensesnitt for notater, vektlogger og sjekklister på stedet."
+      ]
+    },
+    "whoItsFor": {
+      "title": "Hvem det er for",
+      "description": "Breeding Journey er bygget for alle fra førstegangsoppdrettere til etablerte kenneler som håndterer flere hunder og kull. Det er også nyttig for hundeeiere som rett og slett ønsker å spore tispens løpesyklus og helse."
+    },
+    "dataSecurity": {
+      "title": "Data og Sikkerhet",
+      "description": "Breeding Journey er bygget på moderne, sikker infrastruktur med beste praksis for autentisering og rollebasert tilgang. Vi fokuserer på personvern ved design og gir deg kontroll over informasjonen din, inkludert muligheten til å oppdatere eller slette dataene dine."
+    },
+    "lookingAhead": {
+      "title": "Ser fremover",
+      "description": "Vi jobber stadig for å bli bedre. Vi utvider språkstøtte, forbedrer påminnelser og avlskalenderen og legger til flere innsikter og nyttige automatiseringer. Din tilbakemelding styrer vår veikart — fortell oss hva som ville gjøre avlsreisen din enklere."
+    }
+  },
+  "backToLogin": "Tilbake til Innlogging",
+  "getStarted": "Bli medlem",
+  "cta": {
+    "title": "Klar til å komme i gang?",
+    "description": "Gjør som flere andre oppdrettere, bli medlem i Breeding Journey i dag og forenkle avlsarbeidet ditt."
+  }
+}

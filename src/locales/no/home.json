@@ -1,0 +1,190 @@
+{
+  "welcome": {
+    "title": "Velkommen tilbake, {{username}}!",
+    "subtitle": "Her er en oversikt over oppdretts­reisen din"
+  },
+  "metrics": {
+    "reminders": "Påminnelser",
+    "plannedLitters": "Planlagte Kull",
+    "activePregnancies": "Pågående Drektigheter",
+    "recentLitters": "Nylige Kull"
+  },
+  "loading": {
+    "statistics": "Laster statistikk..."
+  },
+  "userStats": {
+    "yourJourneyTitle": "Din reise 2025",
+    "noDataMessage": "Du har ikke registrert noen kull i {{year}} ennå – reisen din begynner snart!",
+    "yourStatsTitle": "Din statistikk {{year}}",
+    "litters": "Kull",
+    "puppies": "Valper",
+    "avgSize": "Snitt Størrelse",
+    "keepUpWork": "Godt jobbet, fortsett slik!"
+  },
+  "tips": {
+    "weighPuppies": "Vei valpene dine daglig den første uken for å sikre sunn vekst.",
+    "registerLitter": "Husk å registrere kullet hos kennelklubben."
+  },
+  "reminders": {
+    "title": "Påminnelser",
+    "hasRemindersDesc": "Oppgaver og kommende hendelser",
+    "noRemindersDesc": "Alle oppgaver fullført - godt jobbet!",
+    "loading": "Laster påminnelser...",
+    "error": "Det oppstod et problem med å laste påminnelsene dine. Vennligst prøv igjen senere.",
+    "viewAll": "Vis Alle Påminnelser",
+    "empty": {
+      "title": "Alt klart!",
+      "description": "Du har ingen ventende påminnelser. Legg til mer avlsdata for å generere nye påminnelser."
+    }
+  },
+  "calendar": {
+    "loading": "Laster kalender...",
+    "error": "Det oppstod et problem med å laste hendelsene dine. Vennligst prøv igjen senere.",
+    "today": "I dag",
+    "addEvent": "Legg til Hendelse",
+    "syncCalendar": "Synkroniser Kalender",
+    "syncing": "Synkroniserer...",
+    "tapToEdit": "Trykk på hendelse for å vise/redigere"
+  },
+  "dialogs": {
+    "reminders": {
+      "title": "Avlspåminnelser",
+      "description": "Håndter oppgavene og påminnelsene dine",
+      "addNewReminder": "Legg til Ny Påminnelse",
+      "loadingError": "Det oppstod et problem med å laste påminnelsene dine. Vennligst oppdater siden.",
+      "close": "Lukk"
+    },
+    "addEvent": {
+      "title": "Legg til Hendelse"
+    },
+    "editEvent": {
+      "title": "Rediger Hendelse",
+      "updateEvent": "Oppdater Hendelse",
+      "deleteEvent": "Slett Hendelse"
+    }
+  },
+  "forms": {
+    "event": {
+      "eventTitle": "Hendelsestittel",
+      "eventTitlePlaceholder": "Skriv inn hendelsestittel",
+      "date": "Dato",
+      "pickDate": "Velg en dato",
+      "time": "Tid",
+      "associatedDog": "Hund (Valgfritt)",
+      "selectDogPlaceholder": "Velg en hund (valgfritt)",
+      "notes": "Notater (Valgfritt)",
+      "notesPlaceholder": "Legg til notater om denne hendelsen",
+      "addEvent": "Legg til Hendelse"
+    },
+    "reminder": {
+      "title": "Tittel",
+      "titlePlaceholder": "Påminnelsestittel",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "Detaljer om denne påminnelsen",
+      "dueDate": "Forfallsdato",
+      "priority": "Prioritet",
+      "selectPriority": "Velg prioritet",
+      "addReminder": "Legg til Påminnelse",
+      "priorities": {
+        "high": "Høy",
+        "medium": "Middels",
+        "low": "Lav"
+      },
+      "validation": {
+        "titleRequired": "Vennligst skriv inn en påminnelsestittel"
+      },
+      "success": {
+        "added": "Påminnelse Lagt Til",
+        "addedDesc": "Påminnelsen din er lagt til."
+      }
+    }
+  },
+  "tabs": {
+    "reminders": {
+      "all": "Alle",
+      "highPriority": "Høy Prioritet",
+      "medium": "Middels",
+      "low": "Lav"
+    }
+  },
+  "events": {
+    "mating": {
+      "title": "{{femaleName}} paret med {{maleName}}",
+      "description": "Parringsdato for {{femaleName}} og {{maleName}}"
+    },
+    "dueDate": {
+      "title": "{{femaleName}} - Forventet fødsel",
+      "description": "Fødselsdato for {{femaleName}} (paret med {{maleName}})"
+    },
+    "heatActive": {
+      "title": "{{dogName}} - Pågående løpetid",
+      "description": "Aktiv løpesyklus for {{dogName}}"
+    },
+    "ovulation": {
+      "title": "{{dogName}} - Forventet eggløsning",
+      "description": "Topp fertilitetsvindu (dag 12-14)"
+    },
+    "fertility": {
+      "title": "{{dogName}} - Fertilitetsvindu",
+      "description": "Optimalt parringstidspunkt (dag 10-16)"
+    },
+    "heat": {
+      "approaching": "{{dogName}}s Løpetid Nærmer Seg",
+      "expected": "Forventet om {{days}} dager"
+    },
+    "birthday": {
+      "title": "{{dogName}}s Bursdag",
+      "description": "{{dogName}}s Bursdag",
+      "reminder": "Bursdagspåminnelse",
+      "reminderDescription": "Påminnelse for {{dogName}}s bursdag",
+      "today": "{{dogName}} fyller {{age}} år i dag!",
+      "upcoming": "{{dogName}} fyller {{age}} år om {{days}} dager",
+      "recent": "{{dogName}} fylte {{age}} år for {{days}} dager siden"
+    },
+    "vaccination": {
+      "title": "{{dogName}} Vaksinasjon forfaller",
+      "description": "{{dogName}}s Vaksinasjon",
+      "reminder": "Vaksinasjonspåminnelse",
+      "reminderDescription": "Påminnelse for {{dogName}}s vaksinasjon",
+      "upcoming": "Vaksinasjon forfaller om {{days}} dager",
+      "overdue": "Vaksinasjon forsinket med {{days}} dager"
+    },
+    "pregnancy": {
+      "approaching": "Drektighet - Forventet Fødselsdato Nærmer Seg",
+      "todayOrPassed": "Drektighet - Forventet Fødselsdato I dag/Passert",
+      "dueInDays": "Forventet om {{days}} dager",
+      "dueTodayOrPassed": "Forventet fødselsdato er i dag eller har passert"
+    }
+  },
+  "reminderTypes": {
+    "heatTracking": {
+      "title": "Spor {{dogName}}s Løpesyklus",
+      "suggestion": "Begynn å spore løpesykluser for å få nøyaktige prognoser"
+    }
+  },
+  "statusLabels": {
+    "due": "Forfaller: ",
+    "dueSoon": "Forfaller snart: ",
+    "overdue": "Forsinket: ",
+    "upcoming": "Kommende Løpetid",
+    "dueDate": "Beregnet fødsel"
+  },
+  "upcomingHeats": {
+    "title": "Kommende Løpetider",
+    "description": "Neste forventede løpetider",
+    "viewAll": "Vis alle ({{count}})",
+    "days": "{{days}} dager",
+    "today": "I dag",
+    "overdue": "{{days}} dager forsinket",
+    "lastHeat": "Sist: {{date}}",
+    "nextHeat": "Neste løpetid: {{date}} ({{days}} dager igjen)",
+    "predicted": "(beregnet)",
+    "confirmed": "(bekreftet)",
+    "empty": {
+      "title": "Ingen kommende løpetider",
+      "description": "Legg til løpehistorikk for tispene dine for å få prognoser"
+    },
+    "loading": "Laster kommende løpetider...",
+    "error": "Kunne ikke laste kommende løpetider"
+  }
+}

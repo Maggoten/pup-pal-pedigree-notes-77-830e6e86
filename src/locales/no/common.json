@@ -1,0 +1,45 @@
+{
+  "save": "Lagre", 
+  "logout": "Logg ut",
+  "language": "Språk",
+  "english": "English (EN)",
+  "svenska": "Svenska (SV)",
+  "norsk": "Norsk (NO)",
+  "days": "dager",
+  "actions": {
+    "add": "Legg til",
+    "edit": "Rediger",
+    "delete": "Slett",
+    "cancel": "Avbryt",
+    "close": "Lukk",
+    "confirm": "Bekreft",
+    "submit": "Send",
+    "create": "Opprett",
+    "update": "Oppdater",
+    "remove": "Fjern",
+    "view": "Vis",
+    "back": "Tilbake",
+    "next": "Neste",
+    "previous": "Forrige",
+    "search": "Søk",
+    "filter": "Filtrer",
+    "sort": "Sorter",
+    "refresh": "Oppdater"
+  },
+  "status": {
+    "loading": "Laster...",
+    "saving": "Lagrer...",
+    "success": "Suksess",
+    "error": "Feil",
+    "completed": "Fullført",
+    "pending": "Venter",
+    "active": "Aktiv",
+    "inactive": "Inaktiv"
+  },
+  "validation": {
+    "required": "Dette feltet er obligatorisk",
+    "invalid": "Ugyldig verdi",
+    "tooShort": "Verdien er for kort",
+    "tooLong": "Verdien er for lang"
+  }
+}
