@@ -540,6 +540,35 @@
     "title": "Laster Drektighetsdetaljer",
     "message": "Vennligst vent..."
   },
+  "management": {
+    "dialog": {
+      "title": "Håndter Drektighet",
+      "description": "Hva ønsker du å gjøre med {{femaleName}}s drektighet?",
+      "actions": {
+        "complete": "Avslutt Drektighet",
+        "reactivate": "Reaktiver Drektighet",
+        "delete": "Slett Drektighet",
+        "cancel": "Avbryt"
+      },
+      "complete": {
+        "title": "Avslutt Drektighet",
+        "description": "Er du sikker på at du vil markere denne drektigheten som avsluttet?",
+        "birthDateInfo": "Du kan spesifisere når valpene ble født (valgfritt). Dette kan være nyttig for fremtidig referanse.",
+        "birthDateLabel": "Fødselsdato",
+        "selectBirthDate": "Velg fødselsdato",
+        "optional": "valgfritt",
+        "clearDate": "Fjern dato",
+        "processing": "Avslutter...",
+        "confirm": "Avslutt Drektighet"
+      },
+      "delete": {
+        "title": "Slett Drektighet",
+        "description": "Er du sikker på at du vil slette denne drektigheten? Denne handlingen kan ikke angres og all drektighetsdata inkludert temperaturlogger og symptomregistreringer vil bli permanent fjernet.",
+        "processing": "Sletter...",
+        "confirm": "Slett Permanent"
+      }
+    }
+  },
   "completion": {
     "dialog": {
       "title": "Avslutt Drektighet",
