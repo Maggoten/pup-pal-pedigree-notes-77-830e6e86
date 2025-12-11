@@ -33,7 +33,7 @@ const BreedingTimeline: React.FC<BreedingTimelineProps> = ({
   return (
     <div className="bg-muted/30 rounded-lg p-4 mb-4">
       <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-        <span>Breeding Timeline</span>
+        <span>{t('breedingTimeline.title')}</span>
       </div>
       
       <div className="relative">
@@ -44,7 +44,7 @@ const BreedingTimeline: React.FC<BreedingTimelineProps> = ({
           {/* Expected Heat */}
           <div className="flex flex-col items-center text-center z-10">
             <div className="w-3 h-3 rounded-full bg-pink-500 mb-2"></div>
-            <div className="text-xs text-muted-foreground mb-1">Heat</div>
+            <div className="text-xs text-muted-foreground mb-1">{t('breedingTimeline.heat')}</div>
             <div className="font-medium text-xs">{format(heatDate, 'MMM dd')}</div>
           </div>
           
@@ -53,7 +53,7 @@ const BreedingTimeline: React.FC<BreedingTimelineProps> = ({
             <div className="flex items-center justify-center w-3 h-3 mb-2">
               <Heart className="w-3 h-3 text-red-500 fill-red-500" />
             </div>
-            <div className="text-xs text-muted-foreground mb-1">Mating</div>
+            <div className="text-xs text-muted-foreground mb-1">{t('breedingTimeline.mating')}</div>
             <div className="font-medium text-xs">
               {format(optimalMatingStart, 'MMM dd')} - {format(optimalMatingEnd, 'dd')}
             </div>
@@ -62,7 +62,7 @@ const BreedingTimeline: React.FC<BreedingTimelineProps> = ({
           {/* Expected Due Date */}
           <div className="flex flex-col items-center text-center z-10">
             <div className="w-3 h-3 rounded-full bg-green-700 mb-2"></div>
-            <div className="text-xs text-muted-foreground mb-1">Due</div>
+            <div className="text-xs text-muted-foreground mb-1">{t('breedingTimeline.due')}</div>
             <div className="font-medium text-xs">{format(expectedDueDate, 'MMM dd')}</div>
           </div>
         </div>
