@@ -255,6 +255,18 @@
       "saveChanges": "Save Changes",
       "backToLitters": "Back to Litters"
     },
+    "createDogProfile": {
+      "button": "Add to My Dogs",
+      "creating": "Creating...",
+      "success": "{{name}} has been added to My Dogs",
+      "viewProfile": "View Profile",
+      "errors": {
+        "notAuthenticated": "You must be logged in to perform this action",
+        "notKept": "Only puppies marked as 'Kept' can be added to My Dogs",
+        "failed": "Failed to create dog profile",
+        "alreadyExists": "A dog profile already exists for this puppy"
+      }
+    },
     "descriptions": {
       "addPuppy": "Add a new puppy to your litter.",
       "motherBreed": "Mother's breed: {{breed}}",

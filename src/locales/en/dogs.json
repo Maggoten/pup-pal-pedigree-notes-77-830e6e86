@@ -179,6 +179,11 @@
       "noHeatRecords": "No heat records",
       "days": "days"
     },
+    "origin": {
+      "label": "Origin",
+      "fromLitter": "From litter: {{litterName}}",
+      "viewPuppy": "View Puppy Profile"
+    },
     "genderBadge": {
       "male": "Male",
       "female": "Female"

@@ -31,6 +31,9 @@ export interface Dog {
   owner_id: string;
   name: string;
   
+  // Link to original puppy (if created from a kept puppy)
+  source_puppy_id?: string;
+  
   // Basic information
   breed: string;
   gender: Gender;

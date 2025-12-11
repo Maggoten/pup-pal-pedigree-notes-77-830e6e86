@@ -251,8 +251,20 @@
       "add": "Legg til", 
       "close": "Lukk", 
       "saveChanges": "Lagre Endringer", 
-      "backToLitters": "Tilbake til Kull" 
-    }, 
+      "backToLitters": "Tilbake til Kull"
+    },
+    "createDogProfile": {
+      "button": "Legg til i Mine Hunder",
+      "creating": "Oppretter...",
+      "success": "{{name}} har blitt lagt til i Mine Hunder",
+      "viewProfile": "Vis Profil",
+      "errors": {
+        "notAuthenticated": "Du må være logget inn for å utføre denne handlingen",
+        "notKept": "Kun valper merket som 'Beholdt' kan legges til i Mine Hunder",
+        "failed": "Kunne ikke opprette hundeprofil",
+        "alreadyExists": "En hundeprofil eksisterer allerede for denne valpen"
+      }
+    },
     "descriptions": {
       "addPuppy": "Legg til en ny valp i kullet ditt.",
       "motherBreed": "Mors rase: {{breed}}",
