@@ -7,6 +7,7 @@ import useSupabaseCalendarEvents from '@/hooks/useSupabaseCalendarEvents';
 import { plannedLittersService } from '@/services/PlannedLitterService';
 import { litterService } from '@/services/LitterService';
 import { getEventColor } from '@/services/CalendarEventService';
+import { useAuth } from '@/hooks/useAuth';
 
 export const useDashboardData = () => {
   // State for data tracking
@@ -15,6 +16,9 @@ export const useDashboardData = () => {
   const [recentLittersData, setRecentLittersData] = useState({ count: 0, latest: null as Date | null });
   const [isLoadingPlannedLitters, setIsLoadingPlannedLitters] = useState<boolean>(true);
   const [isLoadingRecentLitters, setIsLoadingRecentLitters] = useState<boolean>(true);
+  
+  // Get current user
+  const { user } = useAuth();
   
   // Centralized data fetching for calendar and reminders
   const { dogs } = useDogs();
@@ -76,11 +80,16 @@ export const useDashboardData = () => {
   // Fetch recent litters data
   useEffect(() => {
     const fetchRecentLittersData = async () => {
+      if (!user?.id) {
+        setIsLoadingRecentLitters(false);
+        return;
+      }
+      
       try {
         setIsLoadingRecentLitters(true);
         // Get all litters
-        const activeLitters = await litterService.getActiveLitters();
-        const archivedLitters = await litterService.getArchivedLitters();
+        const activeLitters = await litterService.getActiveLitters(user.id);
+        const archivedLitters = await litterService.getArchivedLitters(user.id);
         const allLitters = [...activeLitters, ...archivedLitters];
         
         // Consider litters from the last 90 days as "recent"
@@ -111,7 +120,7 @@ export const useDashboardData = () => {
     };
     
     fetchRecentLittersData();
-  }, []);
+  }, [user?.id]);
   
   const remindersSummary = useMemo(() => {
     const highPriorityCount = reminders.filter(r => r.priority === 'high' && !r.isCompleted).length;
