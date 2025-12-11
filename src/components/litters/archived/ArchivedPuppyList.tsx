@@ -22,9 +22,17 @@ const ArchivedPuppyList: React.FC<ArchivedPuppyListProps> = ({ puppies, litterId
         return 'default';
       case 'Reserved':
         return 'secondary';
+      case 'Kept':
+        return 'secondary';
       default:
         return 'outline';
     }
+  };
+
+  const getStatusTranslation = (status?: string) => {
+    const statusKey = status?.toLowerCase();
+    // Map to correct translation key in puppies.statuses
+    return t(`puppies.statuses.${statusKey}`, { defaultValue: status });
   };
 
   return (
@@ -63,7 +71,7 @@ const ArchivedPuppyList: React.FC<ArchivedPuppyListProps> = ({ puppies, litterId
                       </div>
                       {puppy.status && (
                         <Badge variant={getStatusVariant(puppy.status)} className="text-xs">
-                          {t(`status.${puppy.status.toLowerCase()}`)}
+                          {getStatusTranslation(puppy.status)}
                         </Badge>
                       )}
                     </div>
