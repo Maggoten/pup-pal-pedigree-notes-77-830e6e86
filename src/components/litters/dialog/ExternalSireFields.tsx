@@ -3,6 +3,7 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import BreedDropdown from '@/components/dogs/breed-selector/BreedDropdown';
+import { useTranslation } from 'react-i18next';
 
 interface ExternalSireFieldsProps {
   externalSireName: string;
@@ -21,21 +22,23 @@ const ExternalSireFields: React.FC<ExternalSireFieldsProps> = ({
   externalSireRegistration,
   setExternalSireRegistration
 }) => {
+  const { t } = useTranslation('litters');
+  
   return (
     <div className="space-y-4">
       <div>
-        <Label htmlFor="externalSireName">External Sire Name</Label>
+        <Label htmlFor="externalSireName">{t('external.labels.sireName')}</Label>
         <Input
           id="externalSireName"
           value={externalSireName}
           onChange={(e) => setExternalSireName(e.target.value)}
-          placeholder="Enter sire's name"
+          placeholder={t('external.placeholders.enterSireName')}
           className="bg-white border-greige-300"
         />
       </div>
       
       <div>
-        <Label htmlFor="externalSireBreed">Breed</Label>
+        <Label htmlFor="externalSireBreed">{t('external.labels.sireBreed')}</Label>
         <BreedDropdown
           value={externalSireBreed}
           onChange={setExternalSireBreed}
@@ -44,12 +47,12 @@ const ExternalSireFields: React.FC<ExternalSireFieldsProps> = ({
       </div>
       
       <div>
-        <Label htmlFor="externalSireRegistration">Registration Number (optional)</Label>
+        <Label htmlFor="externalSireRegistration">{t('external.labels.registrationNumber')} ({t('puppies.placeholders.registrationNumber').toLowerCase()})</Label>
         <Input
           id="externalSireRegistration"
           value={externalSireRegistration}
           onChange={(e) => setExternalSireRegistration(e.target.value)}
-          placeholder="Enter registration number"
+          placeholder={t('external.placeholders.enterRegistrationNumber')}
           className="bg-white border-greige-300"
         />
       </div>

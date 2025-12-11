@@ -323,8 +323,8 @@ const PuppyProfile: React.FC = () => {
           open={showDeleteDialog}
           onOpenChange={setShowDeleteDialog}
           onConfirm={handleDeletePuppy}
-          title="Delete Puppy"
-          description="Are you sure you want to delete this puppy? This action cannot be undone."
+          title={t('puppies.actions.deletePuppy')}
+          description={t('puppies.confirmations.deletePuppy')}
           itemDetails={selectedPuppy.name}
         />
       )}
