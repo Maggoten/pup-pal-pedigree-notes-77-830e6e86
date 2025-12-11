@@ -104,8 +104,8 @@ export function useLitterLoading(
       setIsLoadingDetails(true);
       console.log(`Loading detailed data for litter: ${litterId}`);
       
-      // Clear previous details first to prevent data mixing
-      setSelectedLitterDetails(null);
+      // NOTE: Don't clear selectedLitterDetails here - keep showing old data until new data is ready
+      // This prevents the UI from showing empty state during reload
       
       const detailedLitter = await litterService.getLitterDetails(litterId);
       console.log("Loaded detailed litter data:", {
