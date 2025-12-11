@@ -192,7 +192,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, activeTab }) => {
     <div className="space-y-6">
       <Button variant="outline" onClick={handleBack} className="flex items-center gap-2">
         <ArrowLeft className="h-4 w-4" />
-        Back to list
+        {t('page.backToList')}
       </Button>
       
       <Tabs defaultValue={activeTab || "overview"} className="w-full">
