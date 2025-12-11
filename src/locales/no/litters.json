@@ -1,14 +1,710 @@
 {
   "navigation": { "myLitters": "Mine Kull" },
-  "pages": { "myLitters": { "title": "Mine Kull", "description": "Vis og håndter kullene dine, følg opp vekt, helse og få tilgang til detaljert kullinfo" }, "puppies": { "title": "Valper", "description": "Følg kullene og enkeltvalper" } },
-  "actions": { "viewDetails": "Detaljer", "archiveLitter": "Arkiver Kull", "unarchiveLitter": "Aktiver Kull", "addNewLitter": "Nytt Kull", "addFirstLitter": "Legg til Ditt Første Kull", "addFirstPlannedLitter": "Legg til Ditt Første Planlagte Kull", "save": "Lagre", "cancel": "Avbryt", "edit": "Rediger", "delete": "Slett", "archive": "Arkiver", "unarchive": "Reaktiver kull", "addLitter": "Legg til Kull", "refresh": "Oppdater", "tryAgain": "Prøv igjen" },
-  "display": { "litterLabel": "{{damName}} × {{sireName}}", "dateOfBirth": "Fødselsdato", "puppies": "Valper", "males": "Hannhunder", "females": "Tisper", "totalPuppies": "Antall Valper", "archived": "Arkivert", "active": "Aktiv", "completed": "Avsluttet", "parents": "Foreldre", "age": "Alder", "weekOld": "uke gammel", "weeksOld": "uker gammel", "total": "totalt", "dam": "Tispe (Mor)", "sire": "Hannhund (Far)" },
-  "empty": { "myLitters": { "title": "Ingen kull ennå", "description": "Registrerte kull vises her når du begynner å følge opp kullene dine" }, "noPuppies": "Ingen valper i dette kullet", "noLitterFound": "Kullet ble ikke funnet", "noLitterFoundDescription": "Dette kullet kunne ikke finnes, eller du har ikke tilgang til det" },
-  "filters": { "all": "Alle", "active": "Aktive", "archived": "Arkiverte", "viewMode": "Visningsmodus", "grid": "Rutenett", "list": "Liste" },
-  "status": { "born": "Født", "weaning": "Avvenning", "ready": "Klar for Nye Hjem", "available": "Tilgjengelig", "reserved": "Reservert", "sold": "Solgt", "deceased": "Død" },
-  "puppies": { "titles": { "addPuppy": "Legg til ny Valp", "editPuppy": "Rediger Valp", "puppyProfile": "Valpeprofil", "litterInformation": "Kullinformasjon", "puppyDetails": "Detaljer", "weightTracking": "Vektoppfølging", "heightTracking": "Høydeoppfølging", "notes": "Notater" }, "labels": { "age": "Alder", "name": "Navn", "gender": "Kjønn", "breed": "Rase", "color": "Farge", "weight": "Vekt", "height": "Høyde", "male": "Hannhund", "female": "Tispe" }, "statuses": { "available": "Tilgjengelig", "reserved": "Reservert", "sold": "Solgt", "kept": "Beholdt", "deceased": "Død" }, "actions": { "addPuppy": "Legg til valp", "editPuppy": "Rediger Valp", "deletePuppy": "Slett Valp", "viewProfile": "Vis Profil", "logWeight": "Logg Vekt", "logHeight": "Logg Høyde", "addNote": "Legg til Notat", "saving": "Lagrer...", "add": "Legg til", "close": "Lukk", "saveChanges": "Lagre Endringer", "backToLitters": "Tilbake til Kull" }, "empty": { "title": "Ingen valper lagt til ennå", "description": "Legg til valpene dine for å spore vekst, utviklingsmilepæler og føre detaljerte registre." }, "time": { "week": "uke", "weeks": "uker", "day": "dag", "days": "dager" } },
-  "litter": { "titles": { "addLitter": "Nytt Kull", "editLitter": "Rediger Kull", "litterDetails": "Kulldetaljer" }, "labels": { "litterName": "Kullnavn", "sireName": "Hannhundens Navn", "damName": "Tispens Navn", "dateOfBirth": "Fødselsdato", "parents": "Foreldre" }, "placeholders": { "litterName": "Skriv inn kullnavn", "searchLitters": "Søk kull..." }, "actions": { "edit": "Rediger", "archive": "Arkiver", "unarchive": "Aktiver", "delete": "Slett", "viewDetails": "Vis Detaljer", "addLitter": "Legg til Kull", "backToLitters": "Tilbake til Kull" } },
-  "tabs": { "puppies": "Valper", "development": "Sjekkliste", "charts": "Vekstdiagram", "growthCharts": "Vekstdiagram" },
-  "collarColors": { "red": "Rød", "orange": "Oransje", "yellow": "Gul", "green": "Grønn", "turquoise": "Turkis", "blue": "Blå", "purple": "Lilla", "pink": "Rosa", "white": "Hvit", "black": "Svart", "gray": "Grå", "brown": "Brun" },
-  "loading": { "litters": "Laster kull...", "saving": "Lagrer...", "deleting": "Sletter...", "archiving": "Arkiverer...", "unarchiving": "Reaktiverer...", "preparing": "Forbereder tilkobling...", "refreshing": "Oppdaterer...", "litterDetails": "Laster kulldetaljer..." }
+  "pages": { 
+    "myLitters": { 
+      "title": "Mine Kull", 
+      "description": "Vis og håndter kullene dine, følg opp vekt, helse og få tilgang til detaljert kullinfo" 
+    }, 
+    "puppies": { 
+      "title": "Valper", 
+      "description": "Følg kullene og enkeltvalper" 
+    } 
+  },
+  "actions": { 
+    "viewDetails": "Detaljer", 
+    "archiveLitter": "Arkiver Kull", 
+    "unarchiveLitter": "Aktiver Kull", 
+    "addNewLitter": "Nytt Kull", 
+    "addFirstLitter": "Legg til Ditt Første Kull", 
+    "addFirstPlannedLitter": "Legg til Ditt Første Planlagte Kull", 
+    "save": "Lagre", 
+    "cancel": "Avbryt", 
+    "edit": "Rediger", 
+    "delete": "Slett", 
+    "archive": "Arkiver", 
+    "unarchive": "Reaktiver kull", 
+    "addLitter": "Legg til Kull", 
+    "refresh": "Oppdater", 
+    "tryAgain": "Prøv igjen" 
+  },
+  "display": { 
+    "litterLabel": "{{damName}} × {{sireName}}", 
+    "dateOfBirth": "Fødselsdato", 
+    "puppies": "Valper", 
+    "males": "Hannhunder", 
+    "females": "Tisper", 
+    "totalPuppies": "Antall Valper", 
+    "archived": "Arkivert", 
+    "active": "Aktiv", 
+    "completed": "Avsluttet", 
+    "parents": "Foreldre", 
+    "age": "Alder", 
+    "weekOld": "uke gammel", 
+    "weeksOld": "uker gammel", 
+    "total": "totalt", 
+    "dam": "Tispe (Mor)", 
+    "sire": "Hannhund (Far)" 
+  },
+  "empty": { 
+    "myLitters": { 
+      "title": "Ingen kull ennå", 
+      "description": "Registrerte kull vises her når du begynner å følge opp kullene dine" 
+    }, 
+    "noPuppies": "Ingen valper i dette kullet", 
+    "noLitterFound": "Kullet ble ikke funnet", 
+    "noLitterFoundDescription": "Dette kullet kunne ikke finnes, eller du har ikke tilgang til det" 
+  },
+  "filters": { 
+    "all": "Alle", 
+    "active": "Aktive", 
+    "archived": "Arkiverte", 
+    "viewMode": "Visningsmodus", 
+    "grid": "Rutenett", 
+    "list": "Liste" 
+  },
+  "status": { 
+    "born": "Født", 
+    "weaning": "Avvenning", 
+    "ready": "Klar for Nye Hjem", 
+    "available": "Tilgjengelig", 
+    "reserved": "Reservert", 
+    "sold": "Solgt", 
+    "deceased": "Død" 
+  },
+  "validation": {
+    "damRequired": "Tispe (hunnhund) er påkrevd",
+    "sireRequired": "Hannhund er påkrevd",
+    "dateRequired": "Dato er påkrevd",
+    "invalidDate": "Vennligst oppgi en gyldig dato"
+  },
+  "toast": {
+    "success": "Suksess",
+    "error": "Feil"
+  },
+  "toasts": {
+    "success": {
+      "litterArchived": "Kullet ble arkivert",
+      "litterUnarchived": "Kullet ble reaktivert",
+      "litterAdded": "Kull lagt til",
+      "litterUpdated": "Kull oppdatert",
+      "litterDeleted": "Kull slettet",
+      "puppyAdded": "Valp lagt til",
+      "puppyUpdated": "Valp oppdatert",
+      "puppyDeleted": "Valp slettet",
+      "photoUploaded": "Bilde lastet opp",
+      "photoDeleted": "Bilde slettet",
+      "birthDateUpdated": "Fødselsdato oppdatert"
+    },
+    "error": {
+      "failedToArchiveLitter": "Kunne ikke arkivere kullet",
+      "failedToLoad": "Kunne ikke laste kull",
+      "networkConnection": "Nettverksfeil. Vennligst sjekk internettforbindelsen og prøv igjen.",
+      "failedToAddLitter": "Kunne ikke legge til kull",
+      "failedToUpdateLitter": "Kunne ikke oppdatere kull",
+      "failedToDeleteLitter": "Kunne ikke slette kull",
+      "failedToAddPuppy": "Kunne ikke legge til valp",
+      "failedToUpdatePuppy": "Kunne ikke oppdatere valp",
+      "failedToDeletePuppy": "Kunne ikke slette valp",
+      "failedToUploadPhoto": "Kunne ikke laste opp bilde",
+      "failedToDeletePhoto": "Kunne ikke slette bilde",
+      "invalidDate": "Ugyldig dato",
+      "futureDateNotAllowed": "Fremtidig dato er ikke tillatt",
+      "failedToUpdate": "Kunne ikke oppdatere"
+    }
+  },
+  "loading": { 
+    "litters": "Laster kull...", 
+    "saving": "Lagrer...", 
+    "deleting": "Sletter...", 
+    "archiving": "Arkiverer...", 
+    "unarchiving": "Reaktiverer...", 
+    "preparing": "Forbereder tilkobling...", 
+    "refreshing": "Oppdaterer...", 
+    "litterDetails": "Laster kulldetaljer..." 
+  },
+  "puppies": { 
+    "filter": {
+      "all": "Alle valper: {{count}}",
+      "alive": "Overlevende: {{count}}",
+      "dead": "Døde: {{count}}"
+    },
+    "titles": { 
+      "addPuppy": "Legg til ny Valp", 
+      "editPuppy": "Rediger Valp", 
+      "puppyProfile": "Valpeprofil", 
+      "litterInformation": "Kullinformasjon", 
+      "puppyDetails": "Detaljer", 
+      "weightTracking": "Vektoppfølging", 
+      "heightTracking": "Høydeoppfølging", 
+      "notes": "Notater",
+      "editPuppyInformation": "Rediger Valpeinformasjon",
+      "measurementsAndNotes": "Målinger og notater for {{name}}",
+      "physicalDetails": "Fysiske Detaljer",
+      "registration": "Registrering",
+      "growthCharts": "Vekstdiagram",
+      "notesAndRecords": "Notater & Registreringer",
+      "weightProgress": "Vektutvikling",
+      "heightProgress": "Høydeutvikling",
+      "buyerInformation": "Kjøperinformasjon",
+      "profilePicture": "Profilbilde",
+      "basicInformation": "Grunnleggende Informasjon",
+      "physicalMeasurements": "Fysiske Mål",
+      "identification": "Identifikasjon",
+      "statusAndOwnership": "Status & Eierskap",
+      "recentNotes": "Nylige Notater",
+      "recentHeightRecords": "Nylige Høyderegistreringer",
+      "recentWeightRecords": "Nylige Vektregistreringer",
+      "markings": "Avmerking & Identifikasjon",
+      "deceasedInformation": "Informasjon om Død"
+    }, 
+    "labels": { 
+      "age": "Alder", 
+      "unknown": "Ukjent",
+      "profile": "Profil",
+      "name": "Navn", 
+      "registeredName": "Registrert Navn",
+      "registrationNumber": "Registreringsnummer",
+      "gender": "Kjønn", 
+      "breed": "Rase", 
+      "color": "Farge", 
+      "markings": "Avmerking",
+      "birthWeight": "Fødselsvekt (kg)",
+      "currentWeight": "Nåværende Vekt (kg)",
+      "dateOfBirth": "Fødselsdato",
+      "timeOfBirth": "Fødselstidspunkt",
+      "birthDateTime": "Fødselsdato & Tid",
+      "status": "Status",
+      "buyerName": "Kjøpernavn",
+      "buyerPhone": "Kjøpertelefon",
+      "collarId": "Halsbånd-ID",
+      "collar": "Halsbåndfarge",
+      "noCollar": "Ingen farge valgt",
+      "microchip": "Mikrochip",
+      "microchipNumber": "Mikrochipnummer",
+      "newOwnerInformation": "Ny Eierinformasjon",
+      "totalPuppies": "Totalt Antall Valper",
+      "litterAge": "Kullalder",
+      "weeks": "uker",
+      "weight": "Vekt", 
+      "height": "Høyde",
+      "weightKg": "Vekt (kg)",
+      "heightCm": "Høyde (cm)",
+      "averageWeight": "Gjennomsnittlig Vekt",
+      "averageHeight": "Gjennomsnittlig Høyde",
+      "date": "Dato",
+      "time": "Tid",
+      "notSet": "Ikke satt",
+      "notRecorded": "Ikke registrert",
+      "birthDateNotSet": "Fødselsdato ikke satt",
+      "informationNotAvailable": "Informasjon ikke tilgjengelig",
+      "baseColor": "Grunnfarge",
+      "noMarkingsRecorded": "Ingen avmerking registrert",
+      "markingsGuide": "Avmerkingsguide",
+      "markingsDescription": "Beskriv eventuelle særegne avmerkinger, flekker eller fargemønstre som hjelper å identifisere denne valpen.",
+      "deceased": "Marker valp som død",
+      "deathDate": "Dødsdato",
+      "male": "Hannhund", 
+      "female": "Tispe" 
+    }, 
+    "placeholders": {
+      "puppyName": "Valpenavn",
+      "puppyColor": "Valpefarge",
+      "markings": "Valpens avmerking/identifiserende trekk",
+      "registeredName": "Valgfritt registrert navn",
+      "registrationNumber": "Valgfritt registreringsnummer",
+      "collarId": "Halsbåndidentifikator",
+      "selectCollarColor": "Velg halsbåndfarge",
+      "microchipNumber": "Mikrochipnummer",
+      "buyerName": "Kjøperens navn",
+      "buyerPhone": "Kjøperens telefonnummer",
+      "enterWeight": "Oppgi vekt",
+      "enterHeight": "Oppgi høyde",
+      "addNote": "Legg til et nytt notat om denne valpen...",
+      "enterNote": "Skriv et notat om denne valpen",
+      "selectStatus": "Velg status",
+      "selectPuppy": "Velg valp",
+      "weightPlaceholder": "0.00",
+      "enterOwnerInfo": "Oppgi eiernavn, kontaktinformasjon, osv."
+    },
+    "statuses": { 
+      "available": "Tilgjengelig", 
+      "reserved": "Reservert", 
+      "sold": "Solgt", 
+      "kept": "Beholdt", 
+      "deceased": "Død" 
+    }, 
+    "actions": { 
+      "actions": "Handlinger",
+      "addPuppy": "Legg til valp", 
+      "editPuppy": "Rediger Valp", 
+      "deletePuppy": "Slett Valp", 
+      "viewProfile": "Vis Profil", 
+      "recordData": "Registrer Data",
+      "addMeasurements": "Legg til målinger",
+      "logWeight": "Logg Vekt", 
+      "logHeight": "Logg Høyde", 
+      "addNote": "Legg til Notat", 
+      "deleteNote": "Slett Notat",
+      "adding": "Legger til...",
+      "saving": "Lagrer...", 
+      "deleting": "Sletter...",
+      "add": "Legg til", 
+      "close": "Lukk", 
+      "saveChanges": "Lagre Endringer", 
+      "backToLitters": "Tilbake til Kull" 
+    }, 
+    "descriptions": {
+      "addPuppy": "Legg til en ny valp i kullet ditt.",
+      "motherBreed": "Mors rase: {{breed}}",
+      "measurementsDialog": "Legg til vekt, høyde eller notater for å følge valpens utvikling."
+    },
+    "confirmations": {
+      "deletePuppy": "Er du sikker på at du vil slette denne valpen? Denne handlingen kan ikke angres.",
+      "deleteWeight": "Slett Vektmåling",
+      "deleteHeight": "Slett Høydemåling",
+      "deleteNote": "Slett Notat"
+    },
+    "empty": { 
+      "title": "Ingen valper lagt til ennå", 
+      "description": "Legg til valpene dine for å spore vekst, utviklingsmilepæler og føre detaljerte registre." 
+    }, 
+    "display": {
+      "puppiesCount": "Valper ({{count}})",
+      "puppiesTitle": "Valper"
+    },
+    "time": { 
+      "week": "uke", 
+      "weeks": "uker", 
+      "day": "dag", 
+      "days": "dager",
+      "weekShort": "u",
+      "dayShort": "d"
+    },
+    "table": {
+      "date": "Dato",
+      "weightKg": "Vekt (kg)",
+      "heightCm": "Høyde (cm)"
+    },
+    "messages": {
+      "noWeightRecords": "Ingen vektregistreringer ennå.",
+      "noHeightRecords": "Ingen høyderegistreringer ennå.",
+      "noNotesYet": "Ingen notater ennå.",
+      "viewAndManage": "Se og håndter informasjon for {{name}}.",
+      "deleteConfirmation": "Vil du slette \"{{name}}\"?"
+    },
+    "charts": {
+      "weightChart": "Vektdiagram",
+      "heightChart": "Høydediagram",
+      "units": {
+        "kg": "kg",
+        "cm": "cm"
+      }
+    },
+    "weeklyPhotos": {
+      "week": "Uke {{week}}",
+      "current": "Nåværende",
+      "addPhoto": "Legg til bilde",
+      "photoAlt": "Uke {{week}}",
+      "addPhotoAriaLabel": "Legg til bilde for uke {{week}}",
+      "dialog": {
+        "title": "Legg til bilde - Uke {{week}}",
+        "photoLabel": "Bilde",
+        "clickToSelect": "Klikk for å velge bilde",
+        "preview": "Forhåndsvisning",
+        "weightLabel": "Vekt (kg)",
+        "heightLabel": "Høyde (cm)",
+        "notesLabel": "Notater",
+        "notesPlaceholder": "Legg til notater om valpens utvikling denne uken...",
+        "cancel": "Avbryt",
+        "save": "Lagre",
+        "uploading": "Laster opp...",
+        "uploadSuccess": "Opplasting vellykket",
+        "uploadSuccessDescription": "Bilde for uke {{week}} er lagret",
+        "uploadFailed": "Opplasting mislyktes",
+        "uploadFailedDescription": "Kunne ikke laste opp bildet",
+        "invalidFileType": "Ugyldig filtype",
+        "onlyImagesAllowed": "Kun bildefiler er tillatt"
+      }
+    },
+    "tabs": {
+      "overview": "Oversikt",
+      "photos": "Bilder"
+    }
+  },
+  "litter": { 
+    "titles": { 
+      "addLitter": "Nytt Kull", 
+      "editLitter": "Rediger Kull", 
+      "litterDetails": "Kulldetaljer" 
+    }, 
+    "labels": { 
+      "litterName": "Kullnavn", 
+      "sireName": "Hannhundens Navn", 
+      "damName": "Tispens Navn", 
+      "dateOfBirth": "Fødselsdato", 
+      "parents": "Foreldre",
+      "bornLabel": "Født: {{date}}",
+      "totalCount": "{{count}} totalt",
+      "archivedOn": "Arkivert {{date}}",
+      "ageWeeks": "{{weeks}} uker gammel"
+    }, 
+    "placeholders": { 
+      "litterName": "Skriv inn kullnavn", 
+      "searchLitters": "Søk kull...",
+      "searchByName": "Søk etter kullnavn...",
+      "searchByNameSireDam": "Søk etter navn, far eller mor..."
+    }, 
+    "actions": { 
+      "edit": "Rediger", 
+      "archive": "Arkiver", 
+      "unarchive": "Aktiver", 
+      "delete": "Slett", 
+      "viewDetails": "Vis Detaljer", 
+      "addLitter": "Legg til Kull", 
+      "backToLitters": "Tilbake til Kull" 
+    },
+    "confirmations": {
+      "deleteLitter": "Er du sikker på at du vil slette {{name}}? Denne handlingen kan ikke angres.",
+      "deleteConfirmation": "Slett dette kullet og alle valpene?",
+      "archiveLitter": "Arkiver kull",
+      "unarchiveLitter": "Reaktiver kull"
+    },
+    "notFound": "Kull ikke funnet",
+    "edit": {
+      "description": "Oppdater informasjon for {{litterName}}",
+      "archiveButton": "Arkiver Kull",
+      "unarchiveButton": "Reaktiver Kull",
+      "saveChanges": "Lagre Endringer"
+    }
+  },
+  "tabs": { 
+    "puppies": "Valper", 
+    "development": "Sjekkliste", 
+    "developmentShort": "Sjekkliste",
+    "charts": "Vekstdiagram", 
+    "chartsShort": "Diagram",
+    "growthCharts": "Vekstdiagram" 
+  },
+  "external": {
+    "labels": {
+      "sireName": "Hannhundens Navn",
+      "sireBreed": "Hannhundens Rase",
+      "registrationNumber": "Registreringsnummer"
+    },
+    "placeholders": {
+      "enterSireName": "Oppgi hannhundens navn",
+      "enterSireBreed": "Oppgi hannhundens rase",
+      "enterRegistrationNumber": "Oppgi registreringsnummer"
+    }
+  },
+  "search": {
+    "noResults": "Ingen kull funnet",
+    "tryAdjusting": "Prøv å justere søket eller filtrene",
+    "clearFilters": "Fjern Filtre"
+  },
+  "checklist": {
+    "title": "Sjekkliste for Valpeutvikling",
+    "completed": "fullført",
+    "completedBadge": "{{completed}}/{{total}} fullført",
+    "currentAge": "Nåværende alder",
+    "progressComplete": "% fullført",
+    "units": {
+      "days": "dager",
+      "weeks": "uker",
+      "week": "Uke"
+    },
+    "empty": {
+      "title": "Ingen oppgaver funnet i denne kategorien for nåværende valpealder.",
+      "description": "Oppgaver vil vises når valpene når passende alder."
+    },
+    "timeline": {
+      "birth": "Fødsel (0-1 uker)",
+      "neonatal": "Neonatal Periode (1-2 uker)",
+      "transition": "Overgangsperiode (2-4 uker)",
+      "socialization": "Sosialiseringsperiode (4-12 uker)",
+      "juvenile": "Ungdomsperiode (12+ uker)"
+    },
+    "categories": {
+      "health": "Helse",
+      "development": "Utvikling",
+      "admin": "Administrasjon"
+    },
+    "items": {
+      "health": {
+        "firstDeworming": {
+          "title": "Første Ormekur",
+          "description": "Gi første ormekur til valpene"
+        },
+        "secondDeworming": {
+          "title": "Andre Ormekur",
+          "description": "Gi andre ormekur til valpene"
+        },
+        "thirdDeworming": {
+          "title": "Tredje Ormekur",
+          "description": "Gi tredje ormekur til valpene"
+        },
+        "finalDeworming": {
+          "title": "Siste Ormekur",
+          "description": "Gi siste ormekur før valpene drar"
+        },
+        "vetVisit": {
+          "title": "Veterinærbesøk",
+          "description": "Bestill time hos veterinær for helsesjekk og vaksinasjoner"
+        },
+        "firstVaccination": {
+          "title": "Første Vaksinasjon",
+          "description": "Valpene skal få sin første vaksinasjon"
+        },
+        "secondVaccination": {
+          "title": "Andre Vaksinasjon",
+          "description": "Planlegg andre vaksinasjon (etter at valpene har dratt)"
+        }
+      },
+      "development": {
+        "startWeaning": {
+          "title": "Start Avvenning",
+          "description": "Begynn å introdusere valpemat blandet med vann"
+        },
+        "continueWeaning": {
+          "title": "Fortsett Avvenning",
+          "description": "Gradvis reduser avhengighet av mors melk"
+        },
+        "completeWeaning": {
+          "title": "Fullfør Avvenning",
+          "description": "Valpene skal for det meste spise fast føde"
+        },
+        "beginSocialization": {
+          "title": "Start Sosialisering",
+          "description": "Begynn å introdusere valpene for ulike lyder og forsiktig håndtering"
+        },
+        "increaseSocialization": {
+          "title": "Øk Sosialisering",
+          "description": "Eksponer valpene for flere mennesker, lyder og opplevelser"
+        },
+        "temperamentTesting": {
+          "title": "Temperamentstesting",
+          "description": "Vurder valpenes temperament for å hjelpe med plassering"
+        }
+      },
+      "admin": {
+        "microchipPuppies": {
+          "title": "Mikrochip Valper",
+          "description": "Sørg for at valpene får mikrochip før de drar til nye hjem"
+        },
+        "professionalPhotos": {
+          "title": "Profesjonelle Bilder",
+          "description": "Ta profesjonelle bilder av valpene for adopsjonsprofiler"
+        },
+        "registerLitter": {
+          "title": "Registrer Kull",
+          "description": "Send inn registreringspapirer for kullet"
+        },
+        "preparePuppyPacks": {
+          "title": "Forbered Valpepakker",
+          "description": "Sammenstill dokumentasjon, pleieinstruksjoner og utstyr til nye eiere"
+        },
+        "prepareContracts": {
+          "title": "Forbered Kontrakter",
+          "description": "Ferdigstill adopsjonskontrakter for nye valpeeiere"
+        }
+      }
+    },
+    "toasts": {
+      "success": {
+        "itemCompleted": "Oppgave merket som fullført",
+        "itemUncompleted": "Oppgave merket som ufullført"
+      },
+      "error": {
+        "failedToUpdate": "Kunne ikke oppdatere oppgavestatus",
+        "loadingFailed": "Kunne ikke laste sjekklisten"
+      }
+    }
+  },
+  "charts": {
+    "toggle": {
+      "weight": "Vekt",
+      "height": "Høyde"
+    },
+    "select": {
+      "allPuppies": "Alle Valper",
+      "selectPuppy": "Velg valp"
+    },
+    "empty": {
+      "noSelection": {
+        "title": "Velg en Valp",
+        "description": "Velg en valp for å se detaljerte vekstdiagram og utviklingssporing"
+      },
+      "noData": {
+        "title": "Ingen Data Tilgjengelig",
+        "description": {
+          "forPuppy": "Ingen {{logType}}-målinger er registrert for {{puppyName}} ennå",
+          "forLitter": "Ingen {{logType}}-data tilgjengelig for noen valper i dette kullet"
+        }
+      }
+    }
+  },
+  "dialog": {
+    "addLitter": {
+      "description": "Opprett en ny kullregistrering for ditt avlsprogram",
+      "tabs": {
+        "newLitter": "Nytt Kull",
+        "fromPregnancy": "Fra Drektighet"
+      }
+    },
+    "form": {
+      "pregnancy": {
+        "linkToPregnancy": "Koble til drektighet",
+        "selectPregnancy": "Velg drektighet",
+        "noPregnancySelected": "Ingen drektighet valgt",
+        "linkDescription": "Koble dette kullet til en arkivert drektighet for å se temperaturkurve og symptomer"
+      },
+      "placeholders": {
+        "selectPregnancy": "Velg drektighet (valgfritt)"
+      }
+    },
+    "newLitterForm": {
+      "labels": {
+        "litterName": "Kullnavn",
+        "dateOfBirth": "Fødselsdato",
+        "externalSire": "Ekstern Hannhund",
+        "externalSireDescription": "Bruk en hannhund utenfor kennelen din",
+        "sire": "Hannhund",
+        "dam": "Tispe"
+      },
+      "placeholders": {
+        "litterName": "Oppgi kullnavn",
+        "selectMale": "Velg hannhund",
+        "selectFemale": "Velg tispe",
+        "sireName": "Oppgi hannhundens navn",
+        "sireBreed": "Oppgi hannhundens rase",
+        "registrationOptional": "Oppgi registreringsnummer (valgfritt)",
+        "selectPregnancy": "Velg drektighet (valgfritt)"
+      },
+      "pregnancy": {
+        "linkToPregnancy": "Koble til drektighet",
+        "selectPregnancy": "Velg drektighet",
+        "noPregnancySelected": "Ingen drektighet valgt",
+        "linkDescription": "Koble dette kullet til en arkivert drektighet for å se temperaturkurve og symptomer"
+      }
+    },
+    "pregnancyForm": {
+      "labels": {
+        "selectPregnancy": "Velg drektighet",
+        "matingDate": "Paringsdato",
+        "expectedDueDate": "Forventet fødselsdato",
+        "externalSire": "Ekstern hannhund"
+      },
+      "placeholders": {
+        "selectPregnancy": "Velg drektighet...",
+        "litterName": "F.eks. Bellas kull 2024"
+      },
+      "empty": {
+        "title": "Ingen aktive drektigheter",
+        "description": "Du har ingen aktive drektigheter å opprette kull fra."
+      },
+      "unknownDam": "Ukjent tispe",
+      "unknownSire": "Ukjent hannhund",
+      "litterNameTemplate": "{{name}}s kull"
+    },
+    "plannedLitterForm": {
+      "labels": {
+        "selectPlanned": "Velg Planlagt Kull",
+        "litterName": "Kullnavn",
+        "dateOfBirth": "Fødselsdato"
+      },
+      "placeholders": {
+        "selectPlanned": "Velg et planlagt kull",
+        "litterName": "Vårkull 2025"
+      },
+      "empty": {
+        "title": "Ingen planlagte kull funnet",
+        "description": "Opprett planlagte kull først i Planlagte Kull-seksjonen."
+      }
+    },
+    "buttons": {
+      "cancel": "Avbryt",
+      "createLitter": "Opprett Kull",
+      "createFromPlanned": "Opprett Fra Planlagt Kull",
+      "creating": "Oppretter...",
+      "close": "Lukk"
+    },
+    "toasts": {
+      "missingInfo": {
+        "title": "Manglende Informasjon",
+        "litterName": "Vennligst oppgi et kullnavn",
+        "sire": "Vennligst velg en hannhund eller aktiver ekstern hannhund",
+        "externalSireName": "Vennligst oppgi navnet på den eksterne hannhunden",
+        "dam": "Vennligst velg en tispe",
+        "plannedLitter": "Vennligst velg et planlagt kull",
+        "plannedLitterName": "Vennligst oppgi et navn for kullet"
+      },
+      "auth": {
+        "title": "Autentiseringsfeil",
+        "sessionError": "Kunne ikke verifisere påloggingsøkten din",
+        "notLoggedIn": "Du må være innlogget for å opprette et kull",
+        "pleaseWait": "Vennligst vent",
+        "preparing": "Forbereder kontoen din. Vennligst prøv igjen om et øyeblikk."
+      },
+      "success": {
+        "title": "Suksess",
+        "created": "Kull \"{{name}}\" er opprettet",
+        "createdFromPlanned": "Kull \"{{name}}\" er opprettet fra planlagt kull"
+      },
+      "error": {
+        "title": "Feil"
+      }
+    }
+  },
+  "archivedLitters": {
+    "hero": {
+      "archived": "Arkivert",
+      "bornOn": "Født",
+      "archivedOn": "Arkivert",
+      "dam": "Tispe",
+      "sire": "Hannhund"
+    },
+    "summary": {
+      "title": "Kulloversikt",
+      "totalBorn": "Totalt Født",
+      "living": "Levende",
+      "deceased": "Døde",
+      "males": "Hannhunder",
+      "females": "Tisper"
+    },
+    "statistics": {
+      "title": "Statistikk & Vekst",
+      "avgBirthWeight": "Gjennomsnittlig Fødselsvekt",
+      "avgWeightAt8Weeks": "Gjennomsnittlig Vekt ved 8 Uker",
+      "litterGrowthChart": "Kullvekstdiagram",
+      "noDataAvailable": "Ingen data tilgjengelig for dette diagrammet",
+      "noData": "Ingen data"
+    },
+    "puppies": {
+      "title": "Valper",
+      "registrationNumber": "Reg.nr.",
+      "buyerInfo": "Kjøper"
+    },
+    "actions": {
+      "viewFullDetails": "Vis Fullstendige Detaljer"
+    },
+    "checklist": {
+      "description": "Oversikt over fullførte utviklingsaktiviteter",
+      "overallProgress": "Total Fremgang",
+      "timelineProgress": "Tidslinjefremdrift"
+    }
+  },
+  "collarColors": { 
+    "red": "Rød", 
+    "orange": "Oransje", 
+    "yellow": "Gul", 
+    "green": "Grønn", 
+    "turquoise": "Turkis", 
+    "blue": "Blå", 
+    "purple": "Lilla", 
+    "pink": "Rosa", 
+    "white": "Hvit", 
+    "black": "Svart", 
+    "gray": "Grå", 
+    "brown": "Brun" 
+  }
 }
