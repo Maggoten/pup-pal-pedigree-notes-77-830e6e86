@@ -51,7 +51,7 @@ export const HeatPlanningControls: React.FC<HeatPlanningControlsProps> = ({
           className="whitespace-nowrap"
         >
           <Filter className="h-4 w-4 mr-2" />
-          Show planned
+          {t('heatPlanner.filters.showPlannedOnly')}
         </Button>
       </div>
 

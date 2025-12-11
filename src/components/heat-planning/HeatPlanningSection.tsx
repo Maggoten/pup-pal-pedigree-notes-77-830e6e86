@@ -81,7 +81,7 @@ export const HeatPlanningSection: React.FC<HeatPlanningSectionProps> = ({
             className="md:gap-2 px-2 md:px-4"
           >
             <Lightbulb className="h-4 w-4" />
-            <span className="hidden md:inline">Mating tips</span>
+            <span className="hidden md:inline">{t('mating.tips.title')}</span>
           </Button>
         </div>
         <CardDescription>
