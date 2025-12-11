@@ -179,7 +179,8 @@
       "buyerName": "Buyer Name",
       "buyerPhone": "Buyer Phone",
       "collarId": "Collar ID",
-      "collar": "Collar",
+      "collar": "Collar Color",
+      "noCollar": "No color selected",
       "microchip": "Microchip",
       "microchipNumber": "Microchip Number",
       "newOwnerInformation": "New Owner Information",
@@ -214,6 +215,7 @@
       "registeredName": "Optional registered name",
       "registrationNumber": "Optional registration number", 
       "collarId": "Collar identifier",
+      "selectCollarColor": "Select collar color",
       "microchipNumber": "Microchip number",
       "buyerName": "Buyer's name",
       "buyerPhone": "Buyer's phone number",
@@ -692,5 +694,19 @@
       "overallProgress": "Overall Progress",
       "timelineProgress": "Timeline Progress"
     }
+  },
+  "collarColors": {
+    "red": "Red",
+    "orange": "Orange",
+    "yellow": "Yellow",
+    "green": "Green",
+    "turquoise": "Turquoise",
+    "blue": "Blue",
+    "purple": "Purple",
+    "pink": "Pink",
+    "white": "White",
+    "black": "Black",
+    "gray": "Gray",
+    "brown": "Brown"
   }
 }

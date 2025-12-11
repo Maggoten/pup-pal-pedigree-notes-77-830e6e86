@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
 import { Puppy } from '@/types/breeding';
 import { GrowthLogType, ChartColorConfig } from './types';
+import { getCollarHexColor } from '@/constants/collarColors';
+
 interface UseChartDataResult {
   chartData: GrowthLogType[];
   chartConfig: ChartColorConfig;
@@ -31,15 +33,21 @@ const useChartData = (
     }))
   });
 
-  // Define puppy color scheme - distinct colors for easy differentiation
+  // Define puppy color scheme - distinct colors for easy differentiation (fallback when no collar color)
   const puppyColors = {
     male: ['#3b82f6', '#22c55e', '#06b6d4', '#8b5cf6', '#0ea5e9'], // Blue, Green, Turquoise, Purple, Light Blue
     female: ['#ec4899', '#f97316', '#ef4444', '#f472b6', '#a855f7'], // Pink, Orange, Red, Light Pink, Light Purple
   };
 
-  // Get color for a puppy based on gender and index - kept simple
-  const getPuppyColor = (index: number, gender: 'male' | 'female') => {
-    const colors = puppyColors[gender];
+  // Get color for a puppy - first check collar color, then fallback to gender-based color
+  const getPuppyColor = (puppy: Puppy, index: number): string => {
+    // First priority: collar color if set
+    const collarColor = getCollarHexColor(puppy.collar);
+    if (collarColor) {
+      return collarColor;
+    }
+    // Fallback: gender-based color
+    const colors = puppyColors[puppy.gender];
     return colors[index % colors.length];
   };
 
@@ -182,13 +190,13 @@ const useChartData = (
     if (viewMode === 'single' && selectedPuppy) {
       config[selectedPuppy.id] = {
         label: selectedPuppy.name,
-        color: getPuppyColor(0, selectedPuppy.gender),
+        color: getPuppyColor(selectedPuppy, 0),
       };
     } else {
       puppies.forEach((puppy, index) => {
         config[puppy.id] = {
           label: puppy.name,
-          color: getPuppyColor(index, puppy.gender),
+          color: getPuppyColor(puppy, index),
         };
       });
     }
