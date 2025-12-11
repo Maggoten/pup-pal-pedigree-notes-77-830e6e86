@@ -1,0 +1,60 @@
+{
+  "title": "Vanlige spørsmål",
+  "subtitle": "Finn svar på vanlige spørsmål",
+  "backToLogin": "Tilbake til Innlogging",
+  "questions": [
+    {
+      "question": "Hva er Breeding Journey?",
+      "answer": "Breeding Journey er en komplett digital plattform designet for hundeoppdrettere. Den hjelper deg med å spore løpesykluser, planlegge parringer, følge drektigheter, håndtere kull og valper, og holde alle avlsopplysningene dine organisert på ett sted."
+    },
+    {
+      "question": "Hvordan fungerer den gratis prøveperioden?",
+      "answer": "Nye brukere får 30 dagers gratis prøveperiode med full tilgang til alle funksjoner. Du må legge til en betalingsmetode ved registrering, men du belastes ikke før prøveperioden er over. Du kan avslutte når som helst i prøveperioden."
+    },
+    {
+      "question": "Hvilke abonnementsplaner finnes?",
+      "answer": "Vi tilbyr måneds- og årsabonnementer. Årsabonnementet gir en betydelig rabatt sammenlignet med å betale månedlig. Begge planene inkluderer full tilgang til alle funksjoner."
+    },
+    {
+      "question": "Kan jeg avslutte abonnementet mitt?",
+      "answer": "Ja, du kan avslutte abonnementet ditt når som helst fra kontoinnstillingene. Tilgangen din fortsetter til slutten av din nåværende faktureringsperiode."
+    },
+    {
+      "question": "Er dataene mine trygge?",
+      "answer": "Ja, vi tar datasikkerhet på alvor. All data krypteres og vi bruker bransjestandardiserte sikkerhetspraksiser. Avlsopplysningene dine er private og kun tilgjengelige for deg."
+    },
+    {
+      "question": "Hvilke enheter kan jeg bruke?",
+      "answer": "Breeding Journey fungerer på alle enheter med en nettleser - datamaskiner, nettbrett og smarttelefoner. Grensesnittet er mobilvennlig, perfekt for bruk ved valpekassen."
+    },
+    {
+      "question": "Tilbyr dere støtte?",
+      "answer": "Ja, vi tilbyr e-poststøtte for alle brukere."
+    },
+    {
+      "question": "Kan jeg spore flere hunder?",
+      "answer": "Ja! Du kan legge til så mange hunder, kull og drektigheter du trenger. Breeding Journey er bygget for både små og store avlsprogrammer."
+    },
+    {
+      "question": "Kan jeg slette dataene mine eller kontoen min?",
+      "answer": "Ja. Du kan slette kontoen din når som helst, og all tilhørende data fjernes permanent."
+    },
+    {
+      "question": "Hvordan lagres dataene mine?",
+      "answer": "Dataene dine lagres trygt i Supabase med krypterte tilkoblinger og bransjestandard-autentisering. Kun du har tilgang til avlsopplysningene dine."
+    },
+    {
+      "question": "Fungerer Breeding Journey for alle raser?",
+      "answer": "Ja! Breeding Journey fungerer for alle hunderaser. Uansett om du driver oppdrett av små eller store hunder, tilpasser appen seg etter dine behov."
+    },
+    {
+      "question": "Trenger jeg tidligere avlserfaring?",
+      "answer": "Nei, Breeding Journey er utformet for både erfarne oppdrettere og nybegynnere. Appen guider deg gjennom løpesykluser, drektigheter og valpestell steg for steg."
+    }
+  ],
+  "moreQuestions": {
+    "title": "Har du flere spørsmål?",
+    "description": "Vi er her for å hjelpe! Kontakt supportteamet vårt.",
+    "contactLink": "Kontakt Support"
+  }
+}

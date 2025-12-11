@@ -1,0 +1,295 @@
+{
+  "navigation": {
+    "settings": "Innstillinger"
+  },
+  "dialog": {
+    "title": "Innstillinger",
+    "loadingError": "Innstillinger kunne ikke lastes. Vennligst prøv igjen senere."
+  },
+  "tabs": {
+    "personal": "Personlig",
+    "account": "Konto",
+    "help": "Hjelp"
+  },
+  "personal": {
+    "title": "Personlig Informasjon",
+    "description": "Oppdater personlig informasjon og kontaktopplysninger",
+    "kennel": {
+      "title": "Kennelinfo",
+      "description": "Oppgi kennelnavn og annen kennelinformasjon"
+    },
+    "fields": {
+      "firstName": "Fornavn",
+      "lastName": "Etternavn",
+      "kennelName": "Kennelnavn",
+      "address": "Adresse",
+      "website": "Nettside",
+      "phone": "Telefon",
+      "firstNamePlaceholder": "Fornavn",
+      "lastNamePlaceholder": "Etternavn",
+      "kennelNamePlaceholder": "Kennelnavn",
+      "addressPlaceholder": "Adresse",
+      "websitePlaceholder": "https://...",
+      "phonePlaceholder": "Telefonnummer"
+    },
+    "actions": {
+      "saveChanges": "Lagre endringer",
+      "saving": "Lagrer..."
+    }
+  },
+  "account": {
+    "title": "Konto",
+    "description": "Håndter kontoinnstillingene og brukerpreferansene dine",
+    "fields": {
+      "email": "E-post",
+      "name": "Navn",
+      "language": "Språk"
+    },
+    "actions": {
+      "logout": "Logg ut"
+    },
+    "password": {
+      "title": "Bytt passord",
+      "description": "Oppdater kontopassordet ditt. Du må oppgi nåværende passord av sikkerhetsgrunner.",
+      "fields": {
+        "currentPassword": "Nåværende passord",
+        "newPassword": "Nytt passord", 
+        "confirmPassword": "Bekreft nytt passord",
+        "currentPasswordPlaceholder": "Skriv inn nåværende passord",
+        "newPasswordPlaceholder": "Skriv inn nytt passord",
+        "confirmPasswordPlaceholder": "Bekreft nytt passord"
+      },
+      "strength": {
+        "label": "Passordstyrke",
+        "requirementsMet": "Alle krav oppfylt",
+        "labels": {
+          "weak": "Svakt",
+          "fair": "OK",
+          "good": "Bra", 
+          "strong": "Sterkt"
+        },
+        "feedback": {
+          "minLength": "Bruk minst 8 tegn",
+          "addUppercase": "Legg til store bokstaver",
+          "addLowercase": "Legg til små bokstaver",
+          "addNumbers": "Legg til tall", 
+          "addSpecialChars": "Legg til spesialtegn"
+        }
+      },
+      "securityNotice": {
+        "title": "Sikkerhetsvarsel",
+        "description": "Passordet ditt vil bli oppdatert. Du forblir innlogget på denne enheten."
+      },
+      "buttons": {
+        "updating": "Oppdaterer...",
+        "updatePassword": "Oppdater Passord",
+        "cancel": "Avbryt",
+        "yesChange": "Ja, Bytt Passord"
+      },
+      "confirmDialog": {
+        "title": "Bekreft Passordbytte",
+        "description": "Er du sikker på at du vil endre passordet ditt? Det nye passordet trer i kraft umiddelbart."
+      },
+      "messages": {
+        "success": "Passord oppdatert",
+        "failed": "Kunne ikke oppdatere passord. Sjekk nåværende passord.",
+        "error": "En uventet feil oppstod ved oppdatering av passordet"
+      }
+    },
+    "sharing": {
+      "title": "Del kontoen din",
+      "description": "Inviter andre til å samarbeide med avlsarbeidet ditt",
+      "comingSoon": "Kommer Snart",
+      "comingSoonTitle": "Kontodeling kommer snart",
+      "comingSoonDescription": "Vi arbeider med en sikker måte for deg å dele avlsregistrene dine med samarbeidspartnerne dine. Denne funksjonen er for øyeblikket under utvikling og vil være tilgjengelig snart.",
+      "sharedUsersTitle": "Delte Brukere",
+      "sharedUsersDescription": "Personer som har tilgang til avlsregistrene dine",
+      "addUser": "Legg til bruker",
+      "removeUser": "Fjern bruker",
+      "email": "E-postadresse",
+      "role": "Rolle",
+      "dateAdded": "Dato Lagt Til",
+      "roles": {
+        "admin": "Admin",
+        "editor": "Redaktør",
+        "viewer": "Leser"
+      },
+      "roleDescriptions": {
+        "admin": "Kan håndtere alle aspekter av kontoen, inkludert å legge til/fjerne brukere",
+        "editor": "Kan redigere avlsregistre og håndtere hunder, men kan ikke endre kontoinnstillinger",
+        "viewer": "Kan se all informasjon, men kan ikke gjøre endringer"
+      },
+      "status": {
+        "pending": "Invitasjon sendt",
+        "active": "Aktiv"
+      },
+      "emptyState": {
+        "title": "Ingen delte brukere ennå",
+        "description": "Inviter medarbeidere til å jobbe sammen på avlsregistrene dine"
+      },
+      "removeDialog": {
+        "title": "Fjern Delt Bruker",
+        "description": "Er du sikker på at du vil fjerne {{email}} fra dine delte brukere? De vil ikke lenger ha tilgang til avlsregistrene dine.",
+        "cancel": "Avbryt",
+        "confirm": "Fjern Bruker"
+      },
+      "validation": {
+        "invalidEmail": "Vennligst oppgi en gyldig e-postadresse",
+        "roleRequired": "Vennligst velg en brukerrolle"
+      }
+    },
+    "deleteAccount": {
+      "title": "Slett Konto",
+      "description": "Slett kontoen din og alle tilknyttede data permanent. Denne handlingen kan ikke angres.",
+      "warning": "Denne handlingen kan ikke angres",
+      "button": "Slett Min Konto",
+      "confirmTitle": "Er du helt sikker?",
+      "confirmDescription": "Denne handlingen kan ikke angres. Dette vil permanent slette kontoen din og fjerne alle dataene dine fra våre servere.",
+      "emailConfirmLabel": "Skriv inn e-posten din",
+      "emailPlaceholder": "din.epost@eksempel.no",
+      "confirmButton": "Slett Min Konto",
+      "cancelButton": "Avbryt",
+      "deleting": "Sletter...",
+      "errors": {
+        "notLoggedIn": "Du må være innlogget for å slette kontoen din",
+        "emailMismatch": "E-postadressen stemmer ikke med kontoens e-post",
+        "deletionFailed": "Kunne ikke slette kontoen. Vennligst prøv igjen senere."
+      }
+    }
+  },
+  "subscription": {
+    "title": "Abonnement",
+    "description": "Håndter Breeding Journey-abonnementet ditt",
+    "status": {
+      "label": "Status",
+      "friendAccess": "Vennskapskonto",
+      "cancelledExpiresSoon": "Oppsagt - Utløper snart",
+      "activeTrial": "Aktiv prøveperiode",
+      "activeSubscription": "Aktivt abonnement",
+      "expired": "Utløpt",
+      "inactive": "Inaktiv"
+    },
+    "statusDescriptions": {
+      "friendAccess": "Du har en spesiell vennskapskonto hos Breeding Journey.",
+      "activeUntilPeriodEnd": "Abonnementet ditt er oppsagt og utløper ved slutten av nåværende faktureringsperiode. Du kan reaktivere det når som helst.",
+      "cancelledWithPaid": "Abonnementet ditt er oppsagt og utløper ved slutten av nåværende faktureringsperiode.",
+      "trialActive": "Den gratis prøveperioden din er aktiv og utløper om {{days}} {{daysText}}.",
+      "trialActiveCurrent": "Den gratis prøveperioden din er for øyeblikket aktiv.",
+      "paidActive": "Du har et aktivt abonnement på Breeding Journey.",
+      "expired": "Den gratis prøveperioden din har utløpt. Aktiver abonnementet ditt for å fortsette.",
+      "noSubscription": "Ingen aktivt abonnement funnet."
+    },
+    "dates": {
+      "importantDates": "Viktige datoer",
+      "trialEndDate": "Sluttdato for prøveperiode",
+      "subscriptionEndDate": "Sluttdato for abonnement"
+    },
+    "buttons": {
+      "opening": "Åpner...",
+      "activateSubscription": "Aktiver abonnement",
+      "manageSubscription": "Håndter abonnement",
+      "cancelling": "Sier opp...",
+      "cancelSubscription": "Si opp abonnement",
+      "keepSubscription": "Behold abonnement",
+      "yesCancel": "Ja, si opp"
+    },
+    "cancelDialog": {
+      "title": "Si opp abonnement",
+      "description": "Er du sikker på at du vil si opp abonnementet ditt? Tilgangen din fortsetter til slutten av nåværende faktureringsperiode, og du kan reaktivere når som helst før det."
+    },
+    "warnings": {
+      "trialExpiring": "Prøveperioden din utløper snart. Vurder å aktivere abonnementet for å unngå avbrudd.",
+      "subscriptionCancelled": "Abonnement oppsagt: Tilgangen din fortsetter til nåværende faktureringsperiode slutter. Du kan reaktivere når som helst før det.",
+      "cancelledActive": "Abonnementet ditt er oppsagt, men forblir aktivt til slutten av nåværende faktureringsperiode. Du kan reaktivere det når som helst."
+    },
+    "timeUnits": {
+      "day": "dag",
+      "days": "dager"
+    }
+  },
+  "help": {
+    "title": "Hjelp og Støtte",
+    "description": "Få hjelp med å bruke applikasjonen",
+    "sections": {
+      "gettingStarted": {
+        "title": "Kom I Gang",
+        "description": "Lær det grunnleggende om å bruke avlsstyringssystemet"
+      },
+      "managingDogs": {
+        "title": "Håndtere Hunder",
+        "description": "Hvordan legge til, redigere og organisere hundeprofiler"
+      },
+      "trackingPregnancies": {
+        "title": "Spore Drektigheter",
+        "description": "Overvåk drektigheter og registrer viktige milepæler"
+      },
+      "planningLitters": {
+        "title": "Planlegge Kull",
+        "description": "Planlegg fremtidige avlskombinasjoner og spor løpesykluser"
+      },
+      "recordKeeping": {
+        "title": "Føre Registre",
+        "description": "Beste praksis for å opprettholde nøyaktige avlsregistre"
+      }
+    },
+    "support": {
+      "title": "Støtte og Kontakt",
+      "description": "Få hjelp og kontaktinformasjon",
+      "needHelp": "Trenger du hjelp?",
+      "contactDescription": "Hvis du har spørsmål eller trenger hjelp, ikke nøl med å kontakte supportteamet vårt.",
+      "email": "support@breedingjourney.com"
+    },
+    "about": {
+      "title": "Om",
+      "description": "Applikasjonsinformasjon", 
+      "copyright": "© 2025 Breeding Journey. Alle rettigheter forbeholdt.",
+      "followUs": "Følg oss på sosiale medier"
+    }
+  },
+  "language": {
+    "title": "Språkinnstillinger",
+    "description": "Velg språket ditt",
+    "english": "English",
+    "swedish": "Svenska",
+    "norwegian": "Norsk",
+    "changeLanguage": "Bytt Språk"
+  },
+  "validation": {
+    "firstNameRequired": "Fornavn er påkrevd",
+    "lastNameRequired": "Etternavn er påkrevd",
+    "kennelNameRequired": "Kennelnavn er påkrevd", 
+    "websiteInvalid": "Ugyldig nettside-URL",
+    "emailRequired": "E-postadresse er påkrevd",
+    "invalidEmail": "Vennligst oppgi en gyldig e-postadresse",
+    "passwordRequired": "Passord er påkrevd",
+    "passwordMinLength": "Passord må være minst 8 tegn",
+    "passwordsDoNotMatch": "Passordene stemmer ikke overens"
+  },
+  "toasts": {
+    "success": {
+      "personalInfoUpdated": "Personlig informasjon oppdatert",
+      "kennelInfoUpdated": "Kennelinformasjon oppdatert",
+      "passwordChanged": "Passord endret",
+      "userAdded": "Bruker lagt til",
+      "userRemoved": "Bruker fjernet",
+      "languageChanged": "Språk endret"
+    },
+    "error": {
+      "failedToUpdatePersonalInfo": "Kunne ikke oppdatere personlig informasjon",
+      "failedToUpdateKennelInfo": "Kunne ikke oppdatere kennelinformasjon",
+      "failedToChangePassword": "Kunne ikke endre passord",
+      "failedToAddUser": "Kunne ikke legge til bruker",
+      "failedToRemoveUser": "Kunne ikke fjerne bruker",
+      "failedToLoadSettings": "Kunne ikke laste innstillinger",
+      "incorrectCurrentPassword": "Nåværende passord er feil"
+    }
+  },
+  "loading": {
+    "settings": "Laster innstillinger...",
+    "saving": "Lagrer...",
+    "updating": "Oppdaterer...",
+    "adding": "Legger til...",
+    "removing": "Fjerner...",
+    "changingPassword": "Bytter passord..."
+  }
+}

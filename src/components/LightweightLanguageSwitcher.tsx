@@ -14,7 +14,9 @@ const LightweightLanguageSwitcher: React.FC<LightweightLanguageSwitcherProps> = 
   };
 
   const getCurrentLanguageLabel = () => {
-    return i18n.language === 'sv' ? 'Svenska' : 'English';
+    if (i18n.language === 'sv') return 'Svenska';
+    if (i18n.language === 'no') return 'Norsk';
+    return 'English';
   };
 
   return (
@@ -27,6 +29,7 @@ const LightweightLanguageSwitcher: React.FC<LightweightLanguageSwitcherProps> = 
       >
         <option value="en">English</option>
         <option value="sv">Svenska</option>
+        <option value="no">Norsk</option>
       </select>
     </div>
   );

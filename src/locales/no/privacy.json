@@ -1,0 +1,74 @@
+{
+  "title": "Personvernerklæring",
+  "subtitle": "Ditt personvern er viktig for oss",
+  "backToLogin": "Tilbake til Innlogging",
+  "lastUpdated": "Sist oppdatert: Desember 2025",
+  "sections": {
+    "dataController": {
+      "title": "Behandlingsansvarlig",
+      "description": "Breeding Journey er behandlingsansvarlig for alle personopplysninger som behandles innen tjenesten."
+    },
+    "dataCollection": {
+      "title": "Data vi samler inn",
+      "description": "Vi samler inn informasjon som du gir oss direkte:",
+      "items": [
+        "Kontoinformasjon (e-post, navn, passord)",
+        "Hunde- og avlsopplysninger du registrerer",
+        "Betalingsinformasjon (håndteres trygt av Stripe)",
+        "Bruksdata for å forbedre tjenesten vår"
+      ]
+    },
+    "legalBasis": {
+      "title": "Rettslig grunnlag (GDPR)",
+      "description": "Vi behandler dataene dine basert på følgende rettslige grunnlag:",
+      "items": [
+        "Avtale – for å levere Breeding Journey-tjenesten du har registrert deg for",
+        "Samtykke – når du frivillig legger til avlsdata, mottar e-post eller bruker valgfrie funksjoner",
+        "Berettiget interesse – for å forbedre sikkerheten, forhindre misbruk og forbedre brukeropplevelsen",
+        "Rettslig forpliktelse – når regnskaps- eller skatteregler krever begrenset datalagring"
+      ]
+    },
+    "dataUsage": {
+      "title": "Hvordan vi bruker dataene dine",
+      "description": "Vi bruker informasjonen din til å:",
+      "items": [
+        "Levere og vedlikeholde Breeding Journey-tjenesten",
+        "Håndtere betalinger og abonnementer",
+        "Sende viktige oppdateringer om kontoen din",
+        "Forbedre plattformen vår basert på bruksmønstre"
+      ]
+    },
+    "dataSecurity": {
+      "title": "Datasikkerhet",
+      "description": "Vi implementerer bransjestandardiserte sikkerhetstiltak for å beskytte dataene dine. Breeding Journey bruker kryptering under overføring (HTTPS) og ved lagring for å beskytte personopplysningene dine. Vi lagrer aldri passord i klartekst – all autentisering håndteres trygt av Supabase med bransjestandard for hashing. Vi bruker rollebaserte tilgangskontroller for å sikre at kun du kan få tilgang til avlsopplysningene dine."
+    },
+    "dataTransfers": {
+      "title": "Internasjonal dataoverføring",
+      "description": "Noen av våre tjenesteleverandører (som Supabase, Stripe og Resend) kan behandle data utenfor EU/EØS. Når dette skjer, sikrer vi at passende beskyttelsestiltak er på plass, som standardkontraktsklausuler (SCCs) og GDPR-kompatible databehandleravtaler."
+    },
+    "dataRetention": {
+      "title": "Datalagring",
+      "description": "Vi beholder dataene dine kun så lenge kontoen din er aktiv. Hvis du sletter kontoen din, fjernes alle personlige og hundrelaterte data permanent. Enkelte betalingsopplysninger kan beholdes i opptil 7 år i henhold til regnskapsloven."
+    },
+    "yourRights": {
+      "title": "Dine rettigheter (GDPR)",
+      "description": "I henhold til GDPR har du følgende rettigheter:",
+      "items": [
+        "Rett til å få tilgang til personopplysningene dine",
+        "Rett til å korrigere feilaktige opplysninger",
+        "Rett til å slette dataene dine",
+        "Rett til dataportabilitet",
+        "Rett til å trekke tilbake samtykke"
+      ]
+    },
+    "cookies": {
+      "title": "Informasjonskapsler",
+      "description": "Vi bruker kun nødvendige informasjonskapsler som kreves for innlogging og sikker autentisering. Vi bruker ikke sporings-, reklame- eller analyseinformasjonskapsler."
+    },
+    "contact": {
+      "title": "Kontakt oss",
+      "description": "Breeding Journey er behandlingsansvarlig for behandlingen av personopplysningene dine innen tjenesten.",
+      "subDescription": "Hvis du har spørsmål om denne personvernerklæringen, kontakt oss på support@breedingjourney.com"
+    }
+  }
+}

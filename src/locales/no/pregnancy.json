@@ -1,0 +1,19 @@
+{
+  "navigation": { "pregnancies": "Drektigheter" },
+  "metrics": { "activePregnancies": "Aktive Drektigheter" },
+  "pages": { "pregnancy": { "title": "Drektigheter", "description": "Overvåk og følg opp drektigheter" } },
+  "tabs": { "active": "Aktive", "completed": "Avsluttede", "journey": "Utvikling", "health": "Helse", "temperature": "Temperatur", "symptoms": "Notater", "notes": "Notater" },
+  "health": { "title": "Helse og Målinger", "description": "Følg {{femaleName}}s temperatur og vekt", "segments": { "temperature": "Temperatur", "weight": "Vekt" } },
+  "weight": { "log": { "title": "Vektlogg", "description": "Følg {{femaleName}}s vekt" }, "form": { "weightLabel": "Vekt (kg)", "notesLabel": "Notater (valgfritt)" }, "actions": { "addWeight": "Legg til vekt" }, "display": { "noWeights": "Ingen vekter registrert ennå" } },
+  "actions": { "addPregnancy": "Legg til Drektighet", "managePregnancy": "Håndter Drektighet", "addTemperature": "Legg til Temperatur", "addSymptom": "Legg til Notat", "save": "Lagre", "cancel": "Avbryt" },
+  "display": { "matingDate": "Parringsdato", "dueDate": "Fødselsdato", "expectedDueDate": "Forventet Fødselsdato", "daysLeft": "Dager Igjen", "daysRemaining": "Dager Igjen", "currentWeek": "Uke {{week}}", "femaleName": "Tispe", "maleName": "Hannhund", "breedingPair": "{{femaleName}} × {{maleName}}" },
+  "temperature": { "log": { "title": "Temperaturlogg", "description": "Følg opp {{femaleName}}s kroppstemperatur" }, "form": { "temperatureLabel": "Temperatur (°C)", "dateLabel": "Dato", "notesLabel": "Notater (valgfritt)" } },
+  "symptoms": { "log": { "title": "Notater og Symptomer", "description": "Registrer observasjoner under {{femaleName}}s drektighet" } },
+  "journey": { "title": "{{femaleName}}s Drektighet", "description": "Følg utvikling og symptomer uke for uke", "weeklyDevelopment": "Ukentlig Utvikling", "currentPhase": "Nåværende Fase", "keyPoints": "Viktige Punkter", "checklist": "Uke {{week}} Sjekkliste", "progress": { "currentWeek": "Nåværende uke", "week": "Uke {{weekNumber}}" }, "development": { "week1": { "title": "Befruktning og Tidlig Utvikling", "description": "Eggene befruktes og begynner reisen til livmoren." }, "week9": { "title": "Forberedelser til Fødsel", "description": "Endelige forberedelser til fødsel. Fødselen kan begynne når som helst nå." } } },
+  "forms": { "addPregnancy": { "title": "Legg til Ny Drektighet", "femaleLabel": "Tispe (Mor)", "maleLabel": "Hannhund (Far)", "matingDateLabel": "Parringsdato", "expectedDueDateLabel": "Forventet Fødselsdato (63 dager fra parring)", "femalePlaceholder": "Velg tispe", "malePlaceholder": "Velg hannhund", "description": "Opprett en ny drektighetspost for en hund som allerede er paret." } },
+  "empty": { "activePregnancies": { "title": "Ingen Aktive Drektigheter", "description": "Legg til en drektighet for å begynne å spore" }, "completedPregnancies": { "title": "Ingen Avsluttede Drektigheter", "description": "Avsluttede drektigheter vises her" } },
+  "status": { "active": "Aktiv", "completed": "Avsluttet", "overdue": "Forsinket" },
+  "validation": { "femaleRequired": "Tispe er påkrevd", "maleRequired": "Hannhund er påkrevd", "matingDateRequired": "Parringsdato er påkrevd" },
+  "toasts": { "success": { "pregnancyAdded": "Drektighet lagt til", "pregnancyUpdated": "Drektighet oppdatert", "pregnancyDeleted": "Drektighet fjernet", "temperatureAdded": "Temperatur registrert", "symptomAdded": "Notat lagt til" }, "error": { "failedToAddPregnancy": "Feil", "failedToLoad": "Kunne ikke laste drektighetsdata" } },
+  "loading": { "pregnancies": "Laster drektigheter...", "saving": "Lagrer...", "deleting": "Sletter..." }
+}
