@@ -1,19 +1,621 @@
 {
   "navigation": { "pregnancies": "Drektigheter" },
   "metrics": { "activePregnancies": "Aktive Drektigheter" },
-  "pages": { "pregnancy": { "title": "Drektigheter", "description": "Overvåk og følg opp drektigheter" } },
-  "tabs": { "active": "Aktive", "completed": "Avsluttede", "journey": "Utvikling", "health": "Helse", "temperature": "Temperatur", "symptoms": "Notater", "notes": "Notater" },
-  "health": { "title": "Helse og Målinger", "description": "Følg {{femaleName}}s temperatur og vekt", "segments": { "temperature": "Temperatur", "weight": "Vekt" } },
-  "weight": { "log": { "title": "Vektlogg", "description": "Følg {{femaleName}}s vekt" }, "form": { "weightLabel": "Vekt (kg)", "notesLabel": "Notater (valgfritt)" }, "actions": { "addWeight": "Legg til vekt" }, "display": { "noWeights": "Ingen vekter registrert ennå" } },
-  "actions": { "addPregnancy": "Legg til Drektighet", "managePregnancy": "Håndter Drektighet", "addTemperature": "Legg til Temperatur", "addSymptom": "Legg til Notat", "save": "Lagre", "cancel": "Avbryt" },
-  "display": { "matingDate": "Parringsdato", "dueDate": "Fødselsdato", "expectedDueDate": "Forventet Fødselsdato", "daysLeft": "Dager Igjen", "daysRemaining": "Dager Igjen", "currentWeek": "Uke {{week}}", "femaleName": "Tispe", "maleName": "Hannhund", "breedingPair": "{{femaleName}} × {{maleName}}" },
-  "temperature": { "log": { "title": "Temperaturlogg", "description": "Følg opp {{femaleName}}s kroppstemperatur" }, "form": { "temperatureLabel": "Temperatur (°C)", "dateLabel": "Dato", "notesLabel": "Notater (valgfritt)" } },
-  "symptoms": { "log": { "title": "Notater og Symptomer", "description": "Registrer observasjoner under {{femaleName}}s drektighet" } },
-  "journey": { "title": "{{femaleName}}s Drektighet", "description": "Følg utvikling og symptomer uke for uke", "weeklyDevelopment": "Ukentlig Utvikling", "currentPhase": "Nåværende Fase", "keyPoints": "Viktige Punkter", "checklist": "Uke {{week}} Sjekkliste", "progress": { "currentWeek": "Nåværende uke", "week": "Uke {{weekNumber}}" }, "development": { "week1": { "title": "Befruktning og Tidlig Utvikling", "description": "Eggene befruktes og begynner reisen til livmoren." }, "week9": { "title": "Forberedelser til Fødsel", "description": "Endelige forberedelser til fødsel. Fødselen kan begynne når som helst nå." } } },
-  "forms": { "addPregnancy": { "title": "Legg til Ny Drektighet", "femaleLabel": "Tispe (Mor)", "maleLabel": "Hannhund (Far)", "matingDateLabel": "Parringsdato", "expectedDueDateLabel": "Forventet Fødselsdato (63 dager fra parring)", "femalePlaceholder": "Velg tispe", "malePlaceholder": "Velg hannhund", "description": "Opprett en ny drektighetspost for en hund som allerede er paret." } },
-  "empty": { "activePregnancies": { "title": "Ingen Aktive Drektigheter", "description": "Legg til en drektighet for å begynne å spore" }, "completedPregnancies": { "title": "Ingen Avsluttede Drektigheter", "description": "Avsluttede drektigheter vises her" } },
-  "status": { "active": "Aktiv", "completed": "Avsluttet", "overdue": "Forsinket" },
-  "validation": { "femaleRequired": "Tispe er påkrevd", "maleRequired": "Hannhund er påkrevd", "matingDateRequired": "Parringsdato er påkrevd" },
-  "toasts": { "success": { "pregnancyAdded": "Drektighet lagt til", "pregnancyUpdated": "Drektighet oppdatert", "pregnancyDeleted": "Drektighet fjernet", "temperatureAdded": "Temperatur registrert", "symptomAdded": "Notat lagt til" }, "error": { "failedToAddPregnancy": "Feil", "failedToLoad": "Kunne ikke laste drektighetsdata" } },
-  "loading": { "pregnancies": "Laster drektigheter...", "saving": "Lagrer...", "deleting": "Sletter..." }
+  "pages": {
+    "pregnancy": {
+      "title": "Drektigheter",
+      "description": "Overvåk og følg opp drektigheter"
+    },
+    "pregnancyDetails": {
+      "title": "Drektighetsdetaljer",
+      "description": "Detaljert drektighetssporing og håndtering"
+    },
+    "details": {
+      "title": "Drektighetsdetaljer",
+      "description": "Følg drektighetens utvikling og fremgang",
+      "loadingDescription": "Laster drektighetsdetaljer...",
+      "notFound": {
+        "title": "Drektighet Ikke Funnet",
+        "description": "Den forespurte drektigheten ble ikke funnet",
+        "message": "Drektigheten du leter etter finnes ikke eller er arkivert."
+      }
+    }
+  },
+  "tabs": {
+    "active": "Aktive",
+    "completed": "Avsluttede",
+    "journey": "Utvikling",
+    "health": "Helse",
+    "temperature": "Temperatur",
+    "symptoms": "Notater",
+    "notes": "Notater",
+    "sectionTitle": "Drektighetshåndtering"
+  },
+  "health": {
+    "title": "Helse og Målinger",
+    "description": "Følg {{femaleName}}s temperatur og vekt",
+    "segments": {
+      "temperature": "Temperatur",
+      "weight": "Vekt"
+    },
+    "showAll": "Vis alle",
+    "showLess": "Vis mindre"
+  },
+  "weight": {
+    "log": {
+      "title": "Vektlogg",
+      "description": "Følg {{femaleName}}s vekt"
+    },
+    "form": {
+      "weightLabel": "Vekt (kg)",
+      "weightPlaceholder": "12,5",
+      "notesLabel": "Notater (valgfritt)",
+      "notesPlaceholder": "Eventuelle observasjoner..."
+    },
+    "actions": {
+      "addWeight": "Legg til vekt"
+    },
+    "display": {
+      "noWeights": "Ingen vekter registrert ennå",
+      "noWeightsDescription": "Start registrering av vekt for å følge endringer under drektigheten",
+      "historyTitle": "Vekthistorikk"
+    },
+    "validation": {
+      "weightRequired": "Vekt påkrevd",
+      "weightRequiredDescription": "Vennligst skriv inn en vektverdi.",
+      "invalidWeight": "Ugyldig vekt",
+      "invalidWeightDescription": "Vennligst skriv inn en gyldig vektverdi."
+    }
+  },
+  "actions": {
+    "addPregnancy": "Legg til Drektighet",
+    "managePregnancy": "Håndter Drektighet",
+    "addTemperature": "Legg til Temperatur",
+    "addSymptom": "Legg til Notat",
+    "deleteTemperature": "Slett Temperatur",
+    "deleteSymptom": "Slett Notat",
+    "save": "Lagre",
+    "cancel": "Avbryt",
+    "showAllCompleted": "Vis Alle Avsluttede"
+  },
+  "display": {
+    "matingDate": "Parringsdato",
+    "dueDate": "Fødselsdato",
+    "expectedDueDate": "Forventet Fødselsdato",
+    "daysLeft": "Dager Igjen",
+    "daysRemaining": "Dager Igjen",
+    "currentWeek": "Uke {{week}}",
+    "weekOf": "Uke {{week}} av {{total}}",
+    "progressComplete": "Dag {{currentDay}} av {{totalDays}}",
+    "femaleName": "Tispe",
+    "maleName": "Hannhund",
+    "breedingPair": "{{femaleName}} × {{maleName}}",
+    "unknownMale": "Ukjent Hannhund",
+    "unknownFemale": "Ukjent Tispe"
+  },
+  "summary": {
+    "cards": {
+      "matingDate": "Parringsdato",
+      "dueDate": "Fødselsdato",
+      "daysRemaining": "Dager Igjen"
+    }
+  },
+  "temperature": {
+    "log": {
+      "title": "Temperaturlogg",
+      "description": "Følg opp {{femaleName}}s kroppstemperatur",
+      "addTitle": "Registrer Temperatur",
+      "historyTitle": "Temperaturhistorikk"
+    },
+    "form": {
+      "temperatureLabel": "Temperatur (°C)",
+      "temperaturePlaceholder": "38,5",
+      "dateLabel": "Dato",
+      "timeLabel": "Tidspunkt",
+      "notesLabel": "Notater (valgfritt)",
+      "notesPlaceholder": "Eventuelle observasjoner..."
+    },
+    "display": {
+      "recorded": "Registrert {{date}} kl. {{time}}",
+      "noTemperatures": "Ingen temperaturmålinger registrert ennå",
+      "trend": "Temperaturtrend viser {{trend}}"
+    }
+  },
+  "symptoms": {
+    "log": {
+      "title": "Notater og Symptomer",
+      "description": "Registrer observasjoner under {{femaleName}}s drektighet",
+      "addTitle": "Legg til Notat",
+      "historyTitle": "Drektighetsnotater"
+    },
+    "checklist": {
+      "title": "Symptomsporing for Drektighet",
+      "description": "Kryss av symptomer etter hvert som du observerer dem i {{femaleName}}s drektighet",
+      "progressTitle": "Observerte Symptomer",
+      "errorTitle": "Feil ved Lasting av Symptomsporing",
+      "errorMessage": "Prøv å oppdatere siden eller kontakt support hvis problemet vedvarer.",
+      "noData": "Kunne ikke laste symptomsporing. Vennligst prøv igjen."
+    },
+    "form": {
+      "symptomLabel": "Observasjon",
+      "symptomPlaceholder": "Beskriv hva du observerte...",
+      "dateLabel": "Dato",
+      "timeLabel": "Tidspunkt",
+      "severityLabel": "Alvorlighetsgrad",
+      "severityOptions": {
+        "mild": "Mild",
+        "moderate": "Moderat",
+        "severe": "Alvorlig"
+      }
+    },
+    "display": {
+      "recorded": "Registrert {{date}} kl. {{time}}",
+      "noSymptoms": "Ingen observasjoner registrert ennå for {{femaleName}}",
+      "severity": "Alvorlighetsgrad: {{level}}"
+    }
+  },
+  "journey": {
+    "title": "{{femaleName}}s Drektighet",
+    "description": "Følg utvikling og symptomer uke for uke",
+    "matingInfo": "Paret med {{maleName}} den {{matingDate}}",
+    "weeklyDevelopment": "Ukentlig Utvikling",
+    "currentPhase": "Nåværende Fase",
+    "keyPoints": "Viktige Punkter",
+    "checklist": "Uke {{week}} Sjekkliste",
+    "noChecklist": "Ingen sjekklistepunkter for denne uken",
+    "progress": {
+      "currentWeek": "Nåværende uke",
+      "week": "Uke {{weekNumber}}",
+      "weekOf": "Uke {{currentWeek}} av {{totalWeeks}}"
+    },
+    "alert": {
+      "signIn": "Logg inn for å lagre sjekklisten din på tvers av enheter"
+    },
+    "weekSelector": {
+      "week": "Uke"
+    },
+    "development": {
+      "progressLabel": "Utviklingsframgang",
+      "keyPointsTitle": "Viktige Utviklingspunkter:",
+      "week1": {
+        "title": "Befruktning og Tidlig Utvikling",
+        "description": "Eggene befruktes og begynner reisen til livmoren.",
+        "keyPoints": [
+          "Parring har funnet sted",
+          "Eggene befruktes innen 24-48 timer",
+          "Befruktede egg begynner celledeling",
+          "Zygotene reiser til livmoren"
+        ]
+      },
+      "week2": {
+        "title": "Implantasjon",
+        "description": "Embryoene fester seg i livmorveggen og begynner å utvikle seg.",
+        "keyPoints": [
+          "Embryoene fester seg til livmorveggen",
+          "Implantasjon begynner",
+          "Morkakendannelse starter",
+          "Ingen synlige tegn på drektighet ennå"
+        ]
+      },
+      "week3": {
+        "title": "Organutvikling Begynner",
+        "description": "Grunnleggende organsystemer begynner å dannes i de utviklende valpene.",
+        "keyPoints": [
+          "Organer begynner å dannes i embryoene",
+          "Lett forstørrede brystvorter kan være merkbare",
+          "Mulige atferdsendringer hos moren",
+          "Embryoene er omtrent 1cm lange"
+        ]
+      },
+      "week4": {
+        "title": "Hjerteslaging Utvikles",
+        "description": "Valpenes hjerter begynner å slå og kan oppdages via ultralyd.",
+        "keyPoints": [
+          "Hjerteslag kan oppdages via ultralyd",
+          "Embryoene vokser til 1,5-2cm",
+          "Moren kan oppleve morgenkvalme",
+          "Mulige endringer i spisevaner"
+        ]
+      },
+      "week5": {
+        "title": "Lemutvikling",
+        "description": "Lemmer og ansiktstrekk begynner å utvikle seg mer tydelig.",
+        "keyPoints": [
+          "Valpene er omtrent 3-4cm lange",
+          "Øyne, ører og lemmer dannes",
+          "Morens mage begynner å forstørres",
+          "Økt appetitt hos moren"
+        ]
+      },
+      "week6": {
+        "title": "Rask Vekstfase",
+        "description": "Valpene går inn i en periode med rask vekst og utvikling.",
+        "keyPoints": [
+          "Valpenes skjeletter begynner å forkalkes",
+          "Valpene er omtrent 6cm lange",
+          "Utvikling av klør og værhår",
+          "Valpene blir mer aktive"
+        ]
+      },
+      "week7": {
+        "title": "Pelsutvikling",
+        "description": "Valpenes pels begynner å utvikle seg og ta sine karakteristiske farger.",
+        "keyPoints": [
+          "Valpene har pels som begynner å vokse",
+          "Moren begynner reirbyggingsatferd",
+          "Melkeproduksjon starter",
+          "Valpene kan føles bevege seg i magen"
+        ]
+      },
+      "week8": {
+        "title": "Endelig Utvikling",
+        "description": "Valpene er nesten fullt utviklet og forbereder seg på fødsel.",
+        "keyPoints": [
+          "Valpene er fullt utviklet",
+          "Morens temperatur bør overvåkes",
+          "Moren viser reirbyggingsatferd",
+          "Melkeproduksjonen øker"
+        ]
+      },
+      "week9": {
+        "title": "Forberedelser til Fødsel",
+        "description": "Endelige forberedelser til fødsel. Fødselen kan begynne når som helst nå.",
+        "keyPoints": [
+          "Temperaturen faller under 37,8°C 12-24 timer før fødsel",
+          "Sammentrekninger begynner",
+          "Moren kan bli rastløs",
+          "Valpene fødes!"
+        ]
+      }
+    }
+  },
+  "checklist": {
+    "weekBadge": "Uke {{weekNumber}}",
+    "items": {
+      "week1": {
+        "item1": {
+          "text": "Lett endring i appetitt",
+          "description": "Kan spise mindre eller bli litt kresen når hormonnivåene begynner å endre seg."
+        },
+        "item2": {
+          "text": "Muligens mer trøtt enn vanlig",
+          "description": "Kan virke noe mer trøtt eller rolig på grunn av tidlige hormonelle endringer."
+        }
+      },
+      "week2": {
+        "item1": {
+          "text": "Lett kvalme (morgenkvalme)",
+          "description": "Lett kvalme eller oppkast på grunn av hormonelle endringer, vanligvis om morgenen."
+        },
+        "item2": {
+          "text": "Lett atferdsendring",
+          "description": "Mer kjærlig eller fjern, kan søke eller unngå kontakt mer enn vanlig."
+        }
+      },
+      "week3": {
+        "item1": {
+          "text": "Vaginal utflod (klar/hvitlig)",
+          "description": "Liten mengde klar eller hvitlig utflod kan oppstå når embryoene implanteres."
+        },
+        "item2": {
+          "text": "Tispens kropp begynner å tilpasse seg drektigheten",
+          "description": "Kroppen gjennomgår tidlige tilpasninger for å støtte den voksende drektigheten."
+        }
+      },
+      "week4": {
+        "item1": {
+          "text": "Forstørrede brystvorter",
+          "description": "Brystvorter blir større, rundere og mørkere i farge."
+        },
+        "item2": {
+          "text": "Merkbar vektøkning",
+          "description": "Lett økning i kroppsvekt etter hvert som drektigheten utvikler seg."
+        },
+        "item3": {
+          "text": "Drektighetsultralyd",
+          "description": "Ultralydsundersøkelse for å bekrefte drektighet, telle fostre og sjekke hjerteslag (dag 25-35)."
+        }
+      },
+      "week5": {
+        "item1": {
+          "text": "Økt appetitt",
+          "description": "Appetitten øker etter hvert som hormonnivåene stabiliseres og fosterveksten akselererer."
+        },
+        "item2": {
+          "text": "Begynn gradvis å øke matmengden",
+          "description": "Øk matmengden med omtrent 10-15% per uke fremover, basert på tispens behov og tilstand."
+        }
+      },
+      "week6": {
+        "item1": {
+          "text": "Synlig magevekst",
+          "description": "Magen begynner å utvide seg synlig."
+        },
+        "item2": {
+          "text": "Mulig fosterbevegelse",
+          "description": "Noen kan føle lett bevegelse ved forsiktig palpering, men mer vanlig i uke 7-8."
+        },
+        "item3": {
+          "text": "Fortsett gradvis å øke matmengden",
+          "description": "Fortsett å justere matmengden i henhold til tispens behov og utvikling."
+        },
+        "item4": {
+          "text": "Forbered valpekasse på et rolig sted",
+          "description": "Plasser valpekassen på et rolig, trygt sted og la tispen bli kjent med den nå."
+        }
+      },
+      "week7": {
+        "item1": {
+          "text": "Betydelig mageforstørrelse",
+          "description": "Magen er tydelig utvidet; drektigheten veldig synlig."
+        },
+        "item2": {
+          "text": "Reirbyggingsatferd starter",
+          "description": "Kan begynne å ordne sengeklær, grave eller søke rolige steder."
+        }
+      },
+      "week8": {
+        "item1": {
+          "text": "Mulig økt vaginal utflod",
+          "description": "Klar utflod kan øke litt etter hvert som kroppen forbereder seg på fødsel."
+        },
+        "item2": {
+          "text": "Ha termometer og vekt klar",
+          "description": "Forbered utstyr for temperaturovervåking og veiing av valper."
+        },
+        "item3": {
+          "text": "Forbered varmekilde",
+          "description": "Forbered varmepute eller varmelampe med beskyttelse for valpene."
+        },
+        "item4": {
+          "text": "Forbered fødselsutstyr",
+          "description": "Samle hansker, saks, steril navlesnortråd, håndklær og desinfeksjonsmiddel."
+        },
+        "item5": {
+          "text": "Dobbeltsjekk veterinærens nødnummer",
+          "description": "Sørg for at du har veterinærens kontaktinformasjon lett tilgjengelig."
+        },
+        "item6": {
+          "text": "Vask og forbered rene tepper/laken",
+          "description": "Forbered rene, vaskede tekstiler til valpekassen og fødselen."
+        },
+        "item7": {
+          "text": "Drektighetsrøntgen",
+          "description": "Røntgenundersøkelse for å telle antall valper og vurdere størrelse (dag 55-58)."
+        }
+      },
+      "week9": {
+        "item1": {
+          "text": "Temperaturfall",
+          "description": "Rektaltemperaturen faller under 37,8°C 12-24 timer før fødsel."
+        },
+        "item2": {
+          "text": "Rastløshet og peser",
+          "description": "Vanskeligheter med å slå seg til ro, økt pesing og vandring."
+        },
+        "item3": {
+          "text": "Nedsatt appetitt",
+          "description": "Appetitten kan forsvinne kort før fødselen begynner."
+        },
+        "item4": {
+          "text": "Aktiv fødsel begynner",
+          "description": "Sterke sammentrekninger etterfulgt av levering av valper."
+        },
+        "item5": {
+          "text": "Ha transportbur klart for nødtransport",
+          "description": "Forbered transportmulighet til veterinær hvis nødvendig."
+        },
+        "item6": {
+          "text": "Forbered energi- og væsketilskudd for tispen",
+          "description": "Ha næringsrike tilskudd klare for tispen under og etter fødsel."
+        },
+        "item7": {
+          "text": "Sørg for at du har hjelp tilgjengelig",
+          "description": "Familiemedlem, venn eller mentor bør være tilgjengelig hvis nødvendig."
+        }
+      }
+    },
+    "groups": {
+      "week1": {
+        "title": "Uke 1 – Befruktning og Hormonendring"
+      },
+      "week2": {
+        "title": "Uke 2 – Tidlige Endringer"
+      },
+      "week3": {
+        "title": "Uke 3 – Implantasjon"
+      },
+      "week4": {
+        "title": "Uke 4 – Fysiske Tegn Begynner"
+      },
+      "week5": {
+        "title": "Uke 5 – Appetitten Kommer Tilbake"
+      },
+      "week6": {
+        "title": "Uke 6 – Synlig Vekst"
+      },
+      "week7": {
+        "title": "Uke 7 – Forberedelser til Fødsel"
+      },
+      "week8": {
+        "title": "Uke 8 – Nærmer Seg Fødsel"
+      },
+      "week9": {
+        "title": "Uke 9 – Fødselsstart og Fødsel"
+      }
+    }
+  },
+  "forms": {
+    "addPregnancy": {
+      "title": "Legg til Ny Drektighet",
+      "femaleLabel": "Tispe (Mor)",
+      "maleLabel": "Hannhund (Far)",
+      "matingDateLabel": "Parringsdato",
+      "expectedDueDateLabel": "Forventet Fødselsdato (63 dager fra parring)",
+      "femalePlaceholder": "Velg tispe",
+      "malePlaceholder": "Velg hannhund",
+      "description": "Opprett en ny drektighetspost for en hund som allerede er paret.",
+      "externalMaleToggle": "Ekstern Hannhund",
+      "externalMaleNameLabel": "Ekstern Hannhunds Navn",
+      "externalMaleNamePlaceholder": "Skriv inn ekstern hannhunds navn",
+      "noFemaleDogs": "Ingen tisper funnet",
+      "noMaleDogs": "Ingen hannhunder funnet"
+    },
+    "managePregnancy": {
+      "title": "Håndter Drektighet",
+      "markAsCompleted": "Marker som Avsluttet",
+      "deletePregnancy": "Slett Drektighet",
+      "confirmDelete": "Er du sikker på at du vil slette denne drektigheten?",
+      "confirmComplete": "Markere denne drektigheten som avsluttet?"
+    },
+    "completedPregnancies": {
+      "reactivate": "Reaktiver",
+      "reactivating": "Reaktiverer...",
+      "reactivatedToast": "{{femaleName}}s drektighet har blitt reaktivert og flyttet til aktive drektigheter.",
+      "reactivationFailedToast": "Det oppstod et problem med å reaktivere drektigheten.",
+      "unexpectedErrorToast": "En uventet feil oppstod under reaktivering av drektigheten.",
+      "inactiveDescription": "Denne drektigheten ble avsluttet og er ikke lenger aktiv. Du kan reaktivere den hvis nødvendig."
+    }
+  },
+  "empty": {
+    "activePregnancies": {
+      "title": "Ingen Aktive Drektigheter",
+      "description": "Legg til en drektighet for å begynne å spore"
+    },
+    "completedPregnancies": {
+      "title": "Ingen Avsluttede Drektigheter",
+      "description": "Avsluttede drektigheter vises her"
+    }
+  },
+  "status": {
+    "active": "Aktiv",
+    "completed": "Avsluttet",
+    "overdue": "Forsinket"
+  },
+  "validation": {
+    "femaleRequired": "Tispe er påkrevd",
+    "maleRequired": "Hannhund er påkrevd",
+    "matingDateRequired": "Parringsdato er påkrevd"
+  },
+  "toasts": {
+    "success": {
+      "pregnancyAdded": "Drektighet lagt til",
+      "pregnancyAddedDescription": "Drektigheten har blitt lagt til",
+      "pregnancyUpdated": "Drektighet oppdatert",
+      "pregnancyDeleted": "Drektighet fjernet",
+      "pregnancyCompleted": "Drektighet markert som avsluttet",
+      "pregnancyCompletedWithDate": "Drektighet avsluttet. Fødselsdato: {{date}}",
+      "pregnancyReactivated": "Drektigheten har blitt reaktivert",
+      "pregnancyReactivatedDescription": "Du kan nå fortsette å spore denne drektigheten",
+      "temperatureAdded": "Temperatur registrert",
+      "temperatureDeleted": "Temperatur fjernet",
+      "symptomAdded": "Notat lagt til",
+      "symptomDeleted": "Notat fjernet"
+    },
+    "error": {
+      "failedToAddPregnancy": "Feil",
+      "failedToAddPregnancyDescription": "Det oppstod et problem med å legge til drektigheten",
+      "missingInformation": "Mangler informasjon",
+      "selectFemaleDog": "Velg en tispe",
+      "selectMaleDog": "Velg en hannhund",
+      "enterExternalMaleName": "Skriv inn et navn for den eksterne hannhunden",
+      "failedToUpdatePregnancy": "Kunne ikke oppdatere drektighet",
+      "failedToDeletePregnancy": "Kunne ikke slette drektighet",
+      "failedToCompletePregnancy": "Kunne ikke avslutte drektighet",
+      "failedToReactivatePregnancy": "Kunne ikke reaktivere drektigheten",
+      "failedToAddTemperature": "Kunne ikke registrere temperatur",
+      "failedToDeleteTemperature": "Kunne ikke slette temperatur",
+      "failedToAddSymptom": "Kunne ikke legge til notat",
+      "failedToDeleteSymptom": "Kunne ikke slette notat",
+      "failedToLoad": "Kunne ikke laste drektighetsdata",
+      "pregnancyNotFound": "Drektighet ikke funnet"
+    }
+  },
+  "loading": {
+    "pregnancies": "Laster drektigheter...",
+    "saving": "Lagrer...",
+    "deleting": "Sletter...",
+    "completing": "Avslutter...",
+    "pregnancyDetails": "Laster drektighetsdetaljer...",
+    "title": "Laster Drektighetsdetaljer",
+    "message": "Vennligst vent..."
+  },
+  "completion": {
+    "dialog": {
+      "title": "Avslutt Drektighet",
+      "description": "Registrer fødselsdatoen for å avslutte denne drektigheten. Drektigheten vil bli arkivert og du kan opprette et kull fra den.",
+      "birthDateLabel": "Fødselsdato",
+      "birthDatePlaceholder": "Velg fødselsdato",
+      "complete": "Avslutt Drektighet",
+      "completing": "Avslutter..."
+    }
+  },
+  "dialogs": {
+    "complete": {
+      "title": "Avslutt Drektighet",
+      "description": "Registrer fødselsdatoen for å avslutte denne drektigheten. Drektigheten vil bli arkivert og du kan opprette et kull fra den.",
+      "birthDateLabel": "Fødselsdato",
+      "birthDatePlaceholder": "Velg fødselsdato",
+      "processing": "Avslutter...",
+      "confirm": "Avslutt Drektighet"
+    },
+    "delete": {
+      "title": "Slett Drektighet",
+      "description": "Er du sikker på at du vil slette denne drektigheten? Denne handlingen kan ikke angres og all drektighetsdata inkludert temperaturlogger og symptomregistreringer vil bli permanent fjernet.",
+      "processing": "Sletter...",
+      "confirm": "Slett Permanent"
+    }
+  },
+  "dropdown": {
+    "pregnancyName": "{{femaleName}}s Drektighet",
+    "completedPregnancies": "Avsluttede Drektigheter",
+    "viewAllCompleted": "Vis Alle Avsluttede Drektigheter"
+  },
+  "archived": {
+    "title": "Arkivert Drektighet",
+    "hero": {
+      "title": "{{femaleName}} × {{maleName}}",
+      "matingDate": "Parringsdato",
+      "birthDate": "Fødselsdato",
+      "editBirthDate": "Rediger Fødselsdato",
+      "noBirthDate": "Ingen fødselsdato registrert",
+      "gestationLength": "Drektighetslengde",
+      "days": "dager",
+      "puppies": "Valper",
+      "puppiesCount": "Født: {{total}} ({{alive}} overlevende, {{dead}} døde)",
+      "noPuppies": "Ingen valper registrert"
+    },
+    "temperature": {
+      "title": "Temperaturkurve",
+      "lowestDrop": "Laveste temperaturfall"
+    },
+    "weight": {
+      "title": "Vektutvikling",
+      "highest": "Høyeste vekt",
+      "noData": "Ingen vektdata registrert"
+    },
+    "litter": {
+      "title": "Kull",
+      "linked": "Koblet kull",
+      "notLinked": "Ingen kull registrert for denne drektigheten",
+      "viewLitter": "Vis kull",
+      "total": "Totalt",
+      "alive": "Overlevende",
+      "dead": "Døde",
+      "createLitter": "Opprett Kull",
+      "createLitterDescription": "Opprett et kull fra denne arkiverte drektigheten for å begynne å registrere valper."
+    },
+    "timeline": {
+      "title": "Symptomer og Notater",
+      "viewEntries": "Vis {{count}} oppføringer"
+    },
+    "checklist": {
+      "title": "Drektighetssjekkliste",
+      "description": "Oversikt over fullførte aktiviteter under drektigheten",
+      "weekProgress": "Uke {{week}} Fremgang",
+      "completedItems": "{{completed}} av {{total}} fullført",
+      "overallProgress": "Total Fremgang",
+      "noData": "Ingen sjekklistedata tilgjengelig for denne drektigheten"
+    }
+  }
 }
