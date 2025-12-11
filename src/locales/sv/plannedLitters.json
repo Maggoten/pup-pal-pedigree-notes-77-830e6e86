@@ -62,7 +62,7 @@
       "externalSirePhoto": "Extern Hanhunds Foto",
       "registrationNumber": "Registreringsnummer",
       "expectedHeatDate": "Förväntat Löpdatum",
-      "expectedHeatDateDescription": "När förväntar du dig nästa löpcykel?",
+      "expectedHeatDateDescription": "Automatiskt beräknat från tikens löphistorik. Du kan justera datumet manuellt vid behov.",
       "notes": "Anteckningar",
       "notesPlaceholder": "Lägg till ytterligare anteckningar här"
     }
