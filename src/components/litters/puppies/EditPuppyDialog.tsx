@@ -10,6 +10,7 @@ import { Puppy } from '@/types/breeding';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import PuppyImageUploader from './PuppyImageUploader';
+import { COLLAR_COLORS } from '@/constants/collarColors';
 interface EditPuppyDialogProps {
   puppy: Puppy;
   open: boolean;
@@ -195,10 +196,30 @@ const EditPuppyDialog: React.FC<EditPuppyDialogProps> = ({
               
               <div className="space-y-2">
                 <Label htmlFor="collar">{t('puppies.labels.collar')}</Label>
-                <Input id="collar" value={formData.collar} onChange={e => setFormData({
-                ...formData,
-                collar: e.target.value
-              })} />
+                <Select value={formData.collar || 'none'} onValueChange={(value) => setFormData({
+                  ...formData,
+                  collar: value === 'none' ? '' : value
+                })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('puppies.placeholders.selectCollarColor')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">
+                      <span className="text-muted-foreground">{t('puppies.labels.noCollar')}</span>
+                    </SelectItem>
+                    {COLLAR_COLORS.map((color) => (
+                      <SelectItem key={color.id} value={color.id}>
+                        <div className="flex items-center gap-2">
+                          <span 
+                            className="w-4 h-4 rounded-full border border-border" 
+                            style={{ backgroundColor: color.hex }}
+                          />
+                          <span>{t(color.translationKey)}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>

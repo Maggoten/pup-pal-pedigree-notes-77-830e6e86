@@ -179,7 +179,8 @@
       "buyerName": "Köparens Namn",
       "buyerPhone": "Köparens Telefon",
       "collarId": "Halsband ID",
-      "collar": "Halsband",
+      "collar": "Halsbandsfärg",
+      "noCollar": "Ingen färg vald",
       "microchip": "Mikrochip",
       "microchipNumber": "Mikrochipnummer",
       "newOwnerInformation": "Ny Ägarinformation",
@@ -214,6 +215,7 @@
       "registeredName": "Registrerat namn",
       "registrationNumber": "Registreringsnummer", 
       "collarId": "Halsbandsidentifierare",
+      "selectCollarColor": "Välj halsbandsfärg",
       "microchipNumber": "Mikrochipnummer",
       "buyerName": "Köparens namn",
       "buyerPhone": "Köparens telefonnummer",
@@ -692,5 +694,19 @@
       "overallProgress": "Övergripande Framsteg",
       "timelineProgress": "Tidslinjeframsteg"
     }
+  },
+  "collarColors": {
+    "red": "Röd",
+    "orange": "Orange",
+    "yellow": "Gul",
+    "green": "Grön",
+    "turquoise": "Turkos",
+    "blue": "Blå",
+    "purple": "Lila",
+    "pink": "Rosa",
+    "white": "Vit",
+    "black": "Svart",
+    "gray": "Grå",
+    "brown": "Brun"
   }
 }
