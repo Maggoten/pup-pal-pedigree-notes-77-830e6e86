@@ -16,23 +16,17 @@ const ArchivedPuppyList: React.FC<ArchivedPuppyListProps> = ({ puppies, litterId
   const { t } = useTranslation('litters');
   const navigate = useNavigate();
 
-  const getStatusVariant = (status?: string) => {
+  const getStatusBadge = (status?: string) => {
     switch (status) {
-      case 'Sold':
-        return 'default';
       case 'Reserved':
-        return 'secondary';
+        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200 text-xs">{t('puppies.statuses.reserved')}</Badge>;
+      case 'Sold':
+        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 text-xs">{t('puppies.statuses.sold')}</Badge>;
       case 'Kept':
-        return 'secondary';
+        return <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200 text-xs">{t('puppies.statuses.kept')}</Badge>;
       default:
-        return 'outline';
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200 text-xs">{t('puppies.statuses.available')}</Badge>;
     }
-  };
-
-  const getStatusTranslation = (status?: string) => {
-    const statusKey = status?.toLowerCase();
-    // Map to correct translation key in puppies.statuses
-    return t(`puppies.statuses.${statusKey}`, { defaultValue: status });
   };
 
   return (
@@ -69,11 +63,7 @@ const ArchivedPuppyList: React.FC<ArchivedPuppyListProps> = ({ puppies, litterId
                           {t(`puppies.labels.${puppy.gender}`)}
                         </p>
                       </div>
-                      {puppy.status && (
-                        <Badge variant={getStatusVariant(puppy.status)} className="text-xs">
-                          {getStatusTranslation(puppy.status)}
-                        </Badge>
-                      )}
+                      {puppy.status && getStatusBadge(puppy.status)}
                     </div>
 
                     <div className="mt-3 space-y-1 text-xs">
