@@ -410,12 +410,19 @@ export class HeatService {
           
           // Import and use HeatCalendarSyncService
           const { HeatCalendarSyncService } = await import('./HeatCalendarSyncService');
-          const syncSuccess = await HeatCalendarSyncService.syncHeatCycleToCalendar(data, dogName);
+          let syncSuccess = await HeatCalendarSyncService.syncHeatCycleToCalendar(data, dogName);
+          
+          // Retry once if first attempt fails
+          if (!syncSuccess) {
+            console.log(`Retrying calendar sync for ${dogName}...`);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            syncSuccess = await HeatCalendarSyncService.syncHeatCycleToCalendar(data, dogName);
+          }
           
           if (syncSuccess) {
             console.log(`Successfully synced heat cycle to calendar for ${dogName}`);
           } else {
-            console.warn(`Failed to sync heat cycle to calendar for ${dogName}, but heat cycle was created`);
+            console.warn(`Calendar sync failed after retry for ${dogName}, but heat cycle was created`);
           }
         } catch (syncError) {
           console.error('Error syncing heat cycle to calendar:', syncError);
