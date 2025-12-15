@@ -117,19 +117,28 @@ export function useLitterManagement() {
     try {
       console.log("Manually refreshing all litters");
       
+      // Store the current selected litter ID before refreshing
+      const currentSelectedId = selectedLitterId;
+      
       // First invalidate React Query cache
       queryClient.invalidateQueries({ queryKey: littersQueryKey });
       
-      // Clear selected litter details to prevent stale data
-      setSelectedLitterDetails(null);
-      
-      // Then do a manual refresh
+      // Then do a manual refresh of the litters list
       const result = await loadLittersData();
+      
+      // If we had a selected litter, reload its details to get fresh data
+      if (currentSelectedId) {
+        console.log(`Reloading details for litter ${currentSelectedId} after refresh`);
+        // Reset the ref to force a reload
+        lastLoadedLitterIdRef.current = null;
+        await loadLitterDetails(currentSelectedId);
+      }
+      
       return result;
     } catch (error) {
       console.error("Error refreshing litters:", error);
     }
-  }, [queryClient, loadLittersData, setSelectedLitterDetails]);
+  }, [queryClient, loadLittersData, loadLitterDetails, selectedLitterId]);
   
   // Initial data load
   useEffect(() => {

@@ -140,9 +140,9 @@ const MyLittersContent: React.FC = () => {
           {selectedLitter.archived ? (
             <ArchivedLitterSummary 
               litterId={selectedLitter.id}
-              onUnarchive={() => {
-                // After unarchiving, refresh the litters data
-                refreshLitters();
+              onUnarchive={async () => {
+                // After unarchiving, refresh the litters data and reload details
+                await refreshLitters();
               }}
             />
           ) : (
