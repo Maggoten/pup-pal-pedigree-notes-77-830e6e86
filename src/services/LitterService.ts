@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Litter, Puppy, PlannedLitter, PuppyNote } from '@/types/breeding';
+import { cleanupPuppyImage } from '@/utils/storage/cleanup';
 
 export class LitterService {
   private transformLitterFromDB(dbLitter: any, puppies?: Puppy[]): Litter {
@@ -951,6 +952,31 @@ export class LitterService {
 
   async deletePuppy(puppyId: string): Promise<boolean> {
     try {
+      // First, fetch the puppy's image_url and litter_id before deleting
+      const { data: puppyData, error: fetchError } = await supabase
+        .from('puppies')
+        .select('image_url, litter_id')
+        .eq('id', puppyId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching puppy data before deletion:', fetchError);
+        // Continue with deletion even if we can't get image info
+      }
+
+      // Get the user_id from the litter to verify ownership for cleanup
+      let userId: string | null = null;
+      if (puppyData?.litter_id) {
+        const { data: litterData } = await supabase
+          .from('litters')
+          .select('user_id')
+          .eq('id', puppyData.litter_id)
+          .single();
+        
+        userId = litterData?.user_id || null;
+      }
+
+      // Delete the puppy
       const { error } = await supabase
         .from('puppies')
         .delete()
@@ -959,6 +985,13 @@ export class LitterService {
       if (error) {
         console.error('Error deleting puppy:', error);
         return false;
+      }
+
+      // Clean up the image if it exists and we have the user_id
+      if (puppyData?.image_url && userId) {
+        console.log('Cleaning up puppy image after deletion:', puppyData.image_url);
+        // The cleanup function will check if dogs or other puppies use this image
+        await cleanupPuppyImage(puppyData.image_url, userId, puppyId);
       }
 
       return true;
