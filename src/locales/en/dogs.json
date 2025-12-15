@@ -155,6 +155,9 @@
   "display": {
     "age": "Age",
     "litters": "Litters",
+    "origin": {
+      "label": "Origin"
+    },
     "details": {
       "basicInfo": "Basic Information",
       "healthInfo": "Health Information",
