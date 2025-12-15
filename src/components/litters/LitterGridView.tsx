@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Litter } from '@/types/breeding';
@@ -28,26 +28,33 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
   const [dogImages, setDogImages] = useState<Record<string, string | null>>({});
   const [loadingImages, setLoadingImages] = useState(false);
 
-  // Fetch dog images when litters change
+  // Fetch dog images when litters change - only fetch new ones
   useEffect(() => {
     const fetchDogImages = async () => {
       if (!litters.length) return;
       
-      setLoadingImages(true);
-      
       // Extract unique dam IDs from litters
-      const damIds = [...new Set(litters.map(litter => litter.damId).filter(Boolean))];
+      const allDamIds = [...new Set(litters.map(litter => litter.damId).filter(Boolean))];
       
-      if (damIds.length > 0) {
-        const images = await dogImageService.getDogImages(damIds);
-        setDogImages(images);
-      }
+      // Only fetch images we don't already have in local state
+      const newDamIds = allDamIds.filter(id => !(id in dogImages));
       
+      if (newDamIds.length === 0) return;
+      
+      setLoadingImages(true);
+      const images = await dogImageService.getDogImages(newDamIds);
+      setDogImages(prev => ({ ...prev, ...images }));
       setLoadingImages(false);
     };
 
     fetchDogImages();
+    // Intentionally exclude dogImages from deps to avoid infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [litters]);
+
+  const handleLoadMore = useCallback(() => {
+    onLoadMore?.();
+  }, [onLoadMore]);
 
   if (litters.length === 0) {
     return (
@@ -76,7 +83,7 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
         <div className="flex justify-center mt-6">
           <Button
             variant="outline"
-            onClick={onLoadMore}
+            onClick={handleLoadMore}
             disabled={loadingMore}
             className="flex items-center gap-2"
           >
@@ -95,4 +102,4 @@ const LitterGridView: React.FC<LitterGridViewProps> = ({
   );
 };
 
-export default LitterGridView;
+export default memo(LitterGridView);

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { Dog } from '@/types/dogs';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,35 +13,48 @@ interface DogCardProps {
   onClick: (dog: Dog) => void;
 }
 
+const PLACEHOLDER_IMAGE_PATH = '/placeholder.svg';
+
 const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
   const { t } = useTranslation('dogs');
   
-  const calculateAge = (dateOfBirth: string) => {
-    const birth = new Date(dateOfBirth);
-    const now = new Date();
-    const diffInMilliseconds = now.getTime() - birth.getTime();
+  // Memoize age calculation
+  const age = useMemo(() => {
+    const birth = new Date(dog.dateOfBirth);
+    const now = Date.now();
+    const diffInMilliseconds = now - birth.getTime();
     const years = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24 * 365));
     const months = Math.floor((diffInMilliseconds % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
     return `${years}y ${months}m`;
-  };
+  }, [dog.dateOfBirth]);
 
-  // Define this as a constant to ensure we're not accidentally modifying the file path
-  const PLACEHOLDER_IMAGE_PATH = '/placeholder.svg';
-  
-  // Determine which image to show (dog's image or placeholder)
-  const imageSrc = dog.image || PLACEHOLDER_IMAGE_PATH;
-  const isPlaceholder = !dog.image || dog.image === PLACEHOLDER_IMAGE_PATH;
+  // Memoize image properties
+  const { imageSrc, isPlaceholder } = useMemo(() => ({
+    imageSrc: dog.image || PLACEHOLDER_IMAGE_PATH,
+    isPlaceholder: !dog.image || dog.image === PLACEHOLDER_IMAGE_PATH
+  }), [dog.image]);
 
-  // Handle image loading error
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  // Memoize event handlers
+  const handleCardClick = useCallback(() => {
+    onClick(dog);
+  }, [dog, onClick]);
+
+  const handleViewProfile = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onClick(dog);
+  }, [dog, onClick]);
+
+  const handleImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const target = e.target as HTMLImageElement;
     if (target.src !== PLACEHOLDER_IMAGE_PATH) {
       target.src = PLACEHOLDER_IMAGE_PATH;
     }
-  };
+  }, []);
+
+  const litterCount = dog.breedingHistory?.litters?.length || 0;
 
   return (
-    <Card className="dog-card w-full h-full flex flex-col overflow-hidden" onClick={() => onClick(dog)}>
+    <Card className="dog-card w-full h-full flex flex-col overflow-hidden" onClick={handleCardClick}>
       <CardHeader className="p-0">
         <div className="relative w-full">
           <AspectRatio ratio={1/1}>
@@ -73,20 +86,17 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
         )}
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Calendar className="h-3 w-3" />
-          <span>{t('display.age')}: {calculateAge(dog.dateOfBirth)}</span>
+          <span>{t('display.age')}: {age}</span>
         </div>
-        {dog.breedingHistory?.litters && dog.breedingHistory.litters.length > 0 && (
+        {litterCount > 0 && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
             <Heart className="h-3 w-3" />
-            <span>{t('display.litters')}: {dog.breedingHistory.litters.length}</span>
+            <span>{t('display.litters')}: {litterCount}</span>
           </div>
         )}
       </CardContent>
       <CardFooter className="p-4 mt-auto">
-        <Button variant="outline" className="w-full text-sm" onClick={(e) => {
-          e.stopPropagation();
-          onClick(dog);
-        }}>
+        <Button variant="outline" className="w-full text-sm" onClick={handleViewProfile}>
           {t('navigation.viewProfile')}
         </Button>
       </CardFooter>
@@ -94,4 +104,4 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
   );
 };
 
-export default DogCard;
+export default memo(DogCard);
