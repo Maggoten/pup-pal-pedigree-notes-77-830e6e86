@@ -1,12 +1,12 @@
 
-import React, { useState } from 'react';
-import { format, parseISO } from 'date-fns';
+import React, { useState, useMemo, useCallback } from 'react';
+import { parseISO } from 'date-fns';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Edit, Archive, Trash2 } from 'lucide-react';
-import { Litter, Puppy } from '@/types/breeding';
+import { Litter } from '@/types/breeding';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslation } from 'react-i18next';
 import { formatDateWithLocale } from '@/utils/localizedDateFormat';
@@ -30,23 +30,37 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
   const [showEditLitterDialog, setShowEditLitterDialog] = useState(false);
   const isMobile = useIsMobile();
   const { t, i18n } = useTranslation('litters');
-  const birthDate = parseISO(litter.dateOfBirth);
-  const ageInWeeks = Math.floor((new Date().getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
-  const isRecent = ageInWeeks < 12;
-  
-  const puppyCount = litter.puppies?.length || 0;
-  const maleCount = litter.puppies?.filter(p => p.gender === 'male').length || 0;
-  const femaleCount = litter.puppies?.filter(p => p.gender === 'female').length || 0;
 
-  const handleArchiveToggle = () => {
+  // Memoize all date calculations and puppy stats
+  const { birthDate, ageInWeeks, isRecent, puppyStats } = useMemo(() => {
+    const birthDate = parseISO(litter.dateOfBirth);
+    const ageInWeeks = Math.floor((Date.now() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
+    
+    return {
+      birthDate,
+      ageInWeeks,
+      isRecent: ageInWeeks < 12,
+      puppyStats: {
+        total: litter.puppies?.length || 0,
+        male: litter.puppies?.filter(p => p.gender === 'male').length || 0,
+        female: litter.puppies?.filter(p => p.gender === 'female').length || 0
+      }
+    };
+  }, [litter.dateOfBirth, litter.puppies]);
+
+  const handleArchiveToggle = useCallback(() => {
     onArchiveLitter(litter.id, !litter.archived);
-  };
+  }, [litter.id, litter.archived, onArchiveLitter]);
   
-  const handleDeleteLitter = () => {
+  const handleDeleteLitter = useCallback(() => {
     if (confirm(t('litter.confirmations.deleteLitter', { name: litter.name }))) {
       onDeleteLitter(litter.id);
     }
-  };
+  }, [litter.id, litter.name, onDeleteLitter, t]);
+
+  const handleCloseDialog = useCallback(() => {
+    setShowEditLitterDialog(false);
+  }, []);
 
   return (
     <div className="bg-white border border-warmbeige-200 rounded-lg shadow-sm p-6 mb-6">
@@ -90,13 +104,13 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
               <p className="font-medium">{ageInWeeks} {t('display.weeksOld')}</p>
             </div>
             
-            {puppyCount > 0 && (
+            {puppyStats.total > 0 && (
               <div>
                 <p className="text-muted-foreground">{t('display.puppies')}</p>
                 <p className="font-medium">
-                  {puppyCount} {t('display.total')} 
-                  <span className="text-blue-500 ml-2">{maleCount} ♂</span>
-                  <span className="text-pink-500 ml-2">{femaleCount} ♀</span>
+                  {puppyStats.total} {t('display.total')} 
+                  <span className="text-blue-500 ml-2">{puppyStats.male} ♂</span>
+                  <span className="text-pink-500 ml-2">{puppyStats.female} ♀</span>
                 </p>
               </div>
             )}
@@ -118,7 +132,7 @@ const SelectedLitterHeader: React.FC<SelectedLitterHeaderProps> = ({
               {showEditLitterDialog && (
                 <LitterEditDialog 
                   litter={litter} 
-                  onClose={() => setShowEditLitterDialog(false)} 
+                  onClose={handleCloseDialog} 
                   onUpdate={onUpdateLitter}
                   onUpdateLitter={onUpdateLitter}
                   onDelete={onDeleteLitter}
