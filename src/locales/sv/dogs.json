@@ -155,6 +155,9 @@
   "display": {
     "age": "Ålder",
     "litters": "Kullar",
+    "origin": {
+      "label": "Ursprung"
+    },
     "details": {
       "basicInfo": "Grundläggande Information",
       "healthInfo": "Hälsoinformation",
