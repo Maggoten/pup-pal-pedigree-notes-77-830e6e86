@@ -42,19 +42,36 @@ export class HeatCalendarSyncService {
         'heat', 'heat-active', 'ovulation-predicted', 'fertility-window'
       ]);
 
-      // Create heat cycle event
-      const heatEventData = {
+      // Create heat cycle event - build object dynamically to avoid undefined values
+      const heatEventData: {
+        title: string;
+        date: string;
+        end_date: string;
+        type: string;
+        dog_id: string;
+        dog_name: string;
+        user_id: string;
+        status: string;
+        notes?: string;
+        heat_phase?: string;
+      } = {
         title: `${dogName} - ${isActive ? 'Active Heat Cycle' : 'Heat Cycle'}`,
         date: startDate.toISOString(),
         end_date: heatCycle.end_date || addDays(startDate, 21).toISOString(),
         type: isActive ? 'heat-active' : 'heat',
         dog_id: heatCycle.dog_id,
         dog_name: dogName,
-        notes: heatCycle.notes || undefined,
         user_id: user.id,
         status: isActive ? 'active' : 'ended',
-        heat_phase: isActive ? 'proestrus' : undefined
       };
+
+      // Only add optional fields if they have values (avoid undefined)
+      if (heatCycle.notes) {
+        heatEventData.notes = heatCycle.notes;
+      }
+      if (isActive) {
+        heatEventData.heat_phase = 'proestrus';
+      }
 
       console.log(`📅 Creating calendar event for ${dogName}:`, {
         type: heatEventData.type,
@@ -160,15 +177,26 @@ export class HeatCalendarSyncService {
         return await this.syncHeatCycleToCalendar(heatCycle, dogName);
       }
 
-      // Otherwise, just update existing heat event
+      // Otherwise, just update existing heat event - build update object dynamically
+      const updateData: {
+        title: string;
+        status: string;
+        end_date: string;
+        notes?: string;
+      } = {
+        title: `${dogName} - ${heatCycle.end_date ? 'Heat Cycle' : 'Active Heat Cycle'}`,
+        status: heatCycle.end_date ? 'ended' : 'active',
+        end_date: heatCycle.end_date || addDays(new Date(heatCycle.start_date), 21).toISOString()
+      };
+
+      // Only add notes if it has a value (avoid undefined)
+      if (heatCycle.notes) {
+        updateData.notes = heatCycle.notes;
+      }
+
       const { error: updateError } = await supabase
         .from('calendar_events')
-        .update({
-          title: `${dogName} - ${heatCycle.end_date ? 'Heat Cycle' : 'Active Heat Cycle'}`,
-          notes: heatCycle.notes || undefined,
-          status: heatCycle.end_date ? 'ended' : 'active',
-          end_date: heatCycle.end_date || addDays(new Date(heatCycle.start_date), 21).toISOString()
-        })
+        .update(updateData)
         .eq('dog_id', heatCycle.dog_id)
         .eq('user_id', user.id)
         .in('type', ['heat', 'heat-active']);
