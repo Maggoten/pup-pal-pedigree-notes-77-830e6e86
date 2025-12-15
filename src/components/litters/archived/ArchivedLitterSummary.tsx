@@ -39,9 +39,13 @@ const ArchivedLitterSummary: React.FC<ArchivedLitterSummaryProps> = ({ litterId,
     
     setIsUnarchiving(true);
     try {
+      // Call the archive mutation and wait for it to complete
       archiveLitter(litterId, false);
       
-      // Call parent callback if provided
+      // Give time for the mutation to complete before triggering parent callback
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Call parent callback if provided - this should reload litter details
       if (onUnarchive) {
         onUnarchive();
       }
