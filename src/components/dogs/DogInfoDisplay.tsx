@@ -88,20 +88,6 @@ const DogInfoDisplay: React.FC<DogInfoDisplayProps> = ({
             <p>{dog.registrationNumber || t('display.details.notAvailable')}</p>
           </div>
           
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">{t('display.fields.dewormingDate')}</h3>
-            <p>{dog.dewormingDate ? format(new Date(dog.dewormingDate), 'PPP') : t('display.details.notAvailable')}</p>
-          </div>
-          
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">{t('display.fields.vaccinationDate')}</h3>
-            <p>{dog.vaccinationDate ? format(new Date(dog.vaccinationDate), 'PPP') : t('display.details.notAvailable')}</p>
-          </div>
-          
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">{t('display.fields.sterilizationDate')}</h3>
-            <p>{dog.sterilizationDate ? format(new Date(dog.sterilizationDate), 'PPP') : t('display.details.notAvailable')}</p>
-          </div>
         </div>
         
         {dog.notes && <div>

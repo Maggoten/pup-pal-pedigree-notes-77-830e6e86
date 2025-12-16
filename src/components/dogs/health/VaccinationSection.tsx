@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dog } from '@/types/dogs';
 import { useTranslation } from 'react-i18next';
 import { format, addYears, addMonths, differenceInDays, parseISO } from 'date-fns';
-import { Syringe, Bug, Shield, Calendar, AlertCircle } from 'lucide-react';
+import { Syringe, Bug, Shield, Calendar, AlertCircle, Pencil } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import EditVaccinationDialog from './EditVaccinationDialog';
 
 interface VaccinationSectionProps {
   dog: Dog;
+  userId: string | undefined;
 }
 
-const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog }) => {
+const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog, userId }) => {
   const { t } = useTranslation('dogs');
+  const [editOpen, setEditOpen] = useState(false);
 
   const calculateNextDue = (date: string | undefined, intervalYears: number = 1) => {
     if (!date) return null;
@@ -22,7 +26,7 @@ const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog }) => {
   const calculateNextDeworming = (date: string | undefined) => {
     if (!date) return null;
     const lastDate = parseISO(date);
-    return addMonths(lastDate, 3); // Every 3 months
+    return addMonths(lastDate, 3);
   };
 
   const getDaysUntil = (nextDate: Date | null) => {
@@ -77,10 +81,16 @@ const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog }) => {
 
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold text-base flex items-center gap-2">
-        <Calendar className="h-4 w-4 text-muted-foreground" />
-        {t('health.vaccinations.title', 'Vaccinations & Deworming')}
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-base flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          {t('health.vaccinations.title', 'Vaccinations & Deworming')}
+        </h3>
+        <Button variant="ghost" size="sm" onClick={() => setEditOpen(true)}>
+          <Pencil className="h-4 w-4 mr-1" />
+          {t('common.edit', 'Edit')}
+        </Button>
+      </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {vaccinations.map((item, index) => {
@@ -140,6 +150,13 @@ const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog }) => {
           </div>
         </div>
       )}
+
+      <EditVaccinationDialog
+        dog={dog}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        userId={userId}
+      />
     </div>
   );
 };

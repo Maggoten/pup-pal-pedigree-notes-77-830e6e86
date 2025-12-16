@@ -3,6 +3,7 @@ import { Dog } from '@/types/dogs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 import { Stethoscope } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import VaccinationSection from './VaccinationSection';
 import HealthTestsSection from './HealthTestsSection';
 import DogMeasurementsSection from './DogMeasurementsSection';
@@ -15,6 +16,7 @@ interface DogHealthTabProps {
 
 const DogHealthTab: React.FC<DogHealthTabProps> = ({ dog, onDogUpdate }) => {
   const { t } = useTranslation('dogs');
+  const { user } = useAuth();
 
   return (
     <div className="space-y-6">
@@ -27,7 +29,7 @@ const DogHealthTab: React.FC<DogHealthTabProps> = ({ dog, onDogUpdate }) => {
         </CardHeader>
         <CardContent className="space-y-8">
           {/* Vaccinations & Deworming */}
-          <VaccinationSection dog={dog} />
+          <VaccinationSection dog={dog} userId={user?.id} />
           
           {/* Health Tests */}
           <HealthTestsSection dog={dog} onUpdate={onDogUpdate} />

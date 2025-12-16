@@ -10,7 +10,7 @@
     --background: 30 15% 94%; /* Warm background #efebe7 */
     --foreground: 28 12% 23%; /* Dark chocolate gray #3F3B36 for text */
 
-    --card: 33 15% 86%; /* Light sand greige #E3DDD4 */
+    --card: 33 15% 92%; /* Lighter sand greige */
     --card-foreground: 28 12% 23%; /* Dark chocolate gray #3F3B36 */
 
     --popover: 0 0% 100%;
@@ -19,10 +19,10 @@
     --primary: 118 45% 21%; /* Rich forest green #1F4C1D */
     --primary-foreground: 0 0% 100%; /* White text on primary */
 
-    --secondary: 33 15% 86%; /* Light sand greige #E3DDD4 */
+    --secondary: 33 15% 90%; /* Lighter sand greige */
     --secondary-foreground: 28 12% 23%; /* Dark chocolate gray text on secondary */
 
-    --muted: 33 15% 86%; /* Light sand */
+    --muted: 33 15% 90%; /* Lighter sand */
     --muted-foreground: 28 12% 36%; /* Lighter dark gray */
 
     --accent: 18 48% 44%; /* Rust brown #A65A3A */
