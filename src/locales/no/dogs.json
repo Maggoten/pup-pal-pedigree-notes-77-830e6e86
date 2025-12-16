@@ -334,7 +334,8 @@
       },
       "validation": {
         "required": "Dato og gyldig verdi er påkrevd"
-      }
+      },
+      "manage": "Administrer"
     },
     "notes": {
       "title": "Helsenotater",
