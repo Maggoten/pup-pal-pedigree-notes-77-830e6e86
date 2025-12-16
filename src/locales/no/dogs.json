@@ -258,8 +258,92 @@
   },
   "tabs": {
     "overview": "Oversikt",
+    "health": "Helse",
     "heat": "Løpetid",
     "heatTracking": "Oppfølging løpetid"
+  },
+  "health": {
+    "title": "Helse",
+    "vaccinations": {
+      "title": "Vaksinasjoner & Ormekur",
+      "vaccination": "Vaksinasjon",
+      "rabies": "Rabies",
+      "deworming": "Ormekur",
+      "sterilization": "Sterilisering",
+      "lastDate": "Sist",
+      "nextDue": "Neste",
+      "overdue": "Forsinket",
+      "dueSoon": "Snart",
+      "notRecorded": "Ikke registrert",
+      "notSterilized": "Ikke sterilisert"
+    },
+    "tests": {
+      "title": "Helsetester",
+      "type": "Type",
+      "date": "Dato",
+      "result": "Resultat",
+      "vet": "Veterinær/Klinikk",
+      "notes": "Notater",
+      "addTest": "Legg til test",
+      "noTests": "Ingen helsetester registrert",
+      "addFirstTest": "Legg til din første helsetest for å spore resultater",
+      "deleteTitle": "Slett helsetest",
+      "deleteConfirm": "Er du sikker på at du vil slette denne helsetesten? Denne handlingen kan ikke angres.",
+      "deleteSuccess": "Test slettet",
+      "deleteSuccessDesc": "Helsetesten har blitt fjernet",
+      "deleteError": "Kunne ikke slette test",
+      "addSuccess": "Test lagt til",
+      "addSuccessDesc": "Helsetesten har blitt registrert",
+      "addError": "Kunne ikke legge til helsetest",
+      "types": {
+        "hd": "HD-røntgen",
+        "ed": "ED-røntgen",
+        "eye": "Øyeundersøkelse",
+        "other": "Annet"
+      },
+      "addDialog": {
+        "title": "Legg til helsetest",
+        "description": "Registrer et helsetestresultat for hunden din"
+      },
+      "selectType": "Velg type",
+      "selectDate": "Velg dato",
+      "resultPlaceholder": "f.eks. A/A, 0/0, UA",
+      "vetPlaceholder": "Valgfritt",
+      "notesPlaceholder": "Tilleggsnotater...",
+      "validation": {
+        "required": "Dato og resultat er påkrevd"
+      }
+    },
+    "measurements": {
+      "title": "Vekt & Høyde",
+      "weight": "Vekt",
+      "height": "Høyde",
+      "logMeasurement": "Logg måling",
+      "noData": "Ingen data",
+      "date": "Dato",
+      "notes": "Notater",
+      "notesPlaceholder": "Valgfrie notater...",
+      "selectDate": "Velg dato",
+      "save": "Lagre",
+      "addSuccess": "Måling logget",
+      "addSuccessDesc": "Målingen har blitt registrert",
+      "addError": "Kunne ikke logge måling",
+      "dialog": {
+        "title": "Logg måling",
+        "description": "Registrer vekt eller høyde for hunden din"
+      },
+      "validation": {
+        "required": "Dato og gyldig verdi er påkrevd"
+      }
+    },
+    "notes": {
+      "title": "Helsenotater",
+      "placeholder": "Allergier, medisiner, spesielle behov...",
+      "empty": "Ingen helsenotater registrert. Klikk på rediger for å legge til notater om allergier, medisiner eller spesielle behov.",
+      "saveSuccess": "Notater lagret",
+      "saveSuccessDesc": "Helsenotatene har blitt oppdatert",
+      "saveError": "Kunne ikke lagre notater"
+    }
   },
   "heatTracking": {
     "title": "Løpesykluser",
