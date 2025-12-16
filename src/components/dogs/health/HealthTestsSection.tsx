@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import { FlaskConical, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+
 import {
   Table,
   TableBody,
@@ -112,9 +112,9 @@ const HealthTestsSection: React.FC<HealthTestsSectionProps> = ({ dog, onUpdate }
                 {healthTests.map((test, index) => (
                   <TableRow key={test.id || index}>
                     <TableCell>
-                      <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                      <span className="font-semibold text-foreground">
                         {getTestTypeLabel(test)}
-                      </Badge>
+                      </span>
                     </TableCell>
                     <TableCell>{format(parseISO(test.date), 'yyyy-MM-dd')}</TableCell>
                     <TableCell className="font-medium">{test.result}</TableCell>
