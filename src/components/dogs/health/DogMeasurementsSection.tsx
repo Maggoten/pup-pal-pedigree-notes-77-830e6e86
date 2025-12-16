@@ -47,7 +47,7 @@ const DogMeasurementsSection: React.FC<DogMeasurementsSectionProps> = ({ dog }) 
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h3 className="font-semibold text-base flex items-center gap-2">
-          <Scale className="h-4 w-4 text-muted-foreground" />
+          <Scale className="h-4 w-4 text-rose-400" />
           {t('health.measurements.title', 'Weight & Height')}
         </h3>
         <div className="flex gap-2">
@@ -76,9 +76,9 @@ const DogMeasurementsSection: React.FC<DogMeasurementsSectionProps> = ({ dog }) 
 
       {/* Latest measurements summary */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="p-4 rounded-lg border bg-card">
+        <div className="p-4 rounded-lg border border-warmbeige-200 bg-white">
           <div className="flex items-center gap-2 mb-2">
-            <Scale className="h-4 w-4 text-muted-foreground" />
+            <Scale className="h-4 w-4 text-rose-400" />
             <span className="font-medium text-sm">{t('health.measurements.weight', 'Weight')}</span>
           </div>
           {latestWeight ? (
@@ -95,9 +95,9 @@ const DogMeasurementsSection: React.FC<DogMeasurementsSectionProps> = ({ dog }) 
           )}
         </div>
 
-        <div className="p-4 rounded-lg border bg-card">
+        <div className="p-4 rounded-lg border border-warmbeige-200 bg-white">
           <div className="flex items-center gap-2 mb-2">
-            <Ruler className="h-4 w-4 text-muted-foreground" />
+            <Ruler className="h-4 w-4 text-rose-400" />
             <span className="font-medium text-sm">{t('health.measurements.height', 'Height')}</span>
           </div>
           {latestHeight ? (

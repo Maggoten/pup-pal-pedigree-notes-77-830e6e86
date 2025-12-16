@@ -110,10 +110,10 @@ const MeasurementHistoryDialog: React.FC<MeasurementHistoryDialogProps> = ({
                     {sortedWeightLogs.map((log) => (
                       <div 
                         key={log.id}
-                        className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                        className="flex items-center justify-between p-3 rounded-lg border border-warmbeige-200 bg-white"
                       >
                         <div className="flex items-center gap-3">
-                          <Scale className="h-4 w-4 text-muted-foreground" />
+                          <Scale className="h-4 w-4 text-rose-400" />
                           <div>
                             <p className="font-medium">{log.weight} kg</p>
                             <p className="text-xs text-muted-foreground">
@@ -147,10 +147,10 @@ const MeasurementHistoryDialog: React.FC<MeasurementHistoryDialogProps> = ({
                     {sortedHeightLogs.map((log) => (
                       <div 
                         key={log.id}
-                        className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                        className="flex items-center justify-between p-3 rounded-lg border border-warmbeige-200 bg-white"
                       >
                         <div className="flex items-center gap-3">
-                          <Ruler className="h-4 w-4 text-muted-foreground" />
+                          <Ruler className="h-4 w-4 text-rose-400" />
                           <div>
                             <p className="font-medium">{log.height} cm</p>
                             <p className="text-xs text-muted-foreground">
