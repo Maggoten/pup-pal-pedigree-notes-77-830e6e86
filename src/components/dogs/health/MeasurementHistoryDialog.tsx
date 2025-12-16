@@ -113,7 +113,7 @@ const MeasurementHistoryDialog: React.FC<MeasurementHistoryDialogProps> = ({
                         className="flex items-center justify-between p-3 rounded-lg border border-warmbeige-200 bg-white"
                       >
                         <div className="flex items-center gap-3">
-                          <Scale className="h-4 w-4 text-rose-400" />
+                          <Scale className="h-4 w-4 text-primary" />
                           <div>
                             <p className="font-medium">{log.weight} kg</p>
                             <p className="text-xs text-muted-foreground">
@@ -150,7 +150,7 @@ const MeasurementHistoryDialog: React.FC<MeasurementHistoryDialogProps> = ({
                         className="flex items-center justify-between p-3 rounded-lg border border-warmbeige-200 bg-white"
                       >
                         <div className="flex items-center gap-3">
-                          <Ruler className="h-4 w-4 text-rose-400" />
+                          <Ruler className="h-4 w-4 text-primary" />
                           <div>
                             <p className="font-medium">{log.height} cm</p>
                             <p className="text-xs text-muted-foreground">

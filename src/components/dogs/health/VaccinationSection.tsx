@@ -84,7 +84,7 @@ const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog, userId, on
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h3 className="font-semibold text-base flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-rose-400" />
+          <Calendar className="h-4 w-4 text-primary" />
           {t('health.vaccinations.title', 'Vaccinations & Deworming')}
         </h3>
         <Button variant="outline" size="sm" onClick={() => setEditOpen(true)} className="w-full sm:w-auto">
@@ -106,7 +106,7 @@ const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog, userId, on
               )}
             >
               <div className="flex items-center gap-2 mb-2">
-                <Icon className="h-4 w-4 text-rose-400" />
+                <Icon className="h-4 w-4 text-primary" />
                 <span className="font-medium text-sm">{item.label}</span>
               </div>
               

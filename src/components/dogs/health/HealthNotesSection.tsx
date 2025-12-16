@@ -48,7 +48,7 @@ const HealthNotesSection: React.FC<HealthNotesSectionProps> = ({ dog, onUpdate }
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-base flex items-center gap-2">
-          <FileText className="h-4 w-4 text-rose-400" />
+          <FileText className="h-4 w-4 text-primary" />
           {t('health.notes.title', 'Health Notes')}
         </h3>
         {!isEditing && (

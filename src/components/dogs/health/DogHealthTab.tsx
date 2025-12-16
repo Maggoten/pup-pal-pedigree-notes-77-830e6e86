@@ -22,8 +22,8 @@ const DogHealthTab: React.FC<DogHealthTabProps> = ({ dog, onDogUpdate }) => {
     <div className="space-y-6">
       <Card className="border-warmbeige-200 bg-white">
         <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <Stethoscope className="h-5 w-5 text-rose-500" />
+        <CardTitle className="flex items-center gap-2 text-xl">
+            <Stethoscope className="h-5 w-5 text-primary" />
             {t('health.title', 'Health')}
           </CardTitle>
         </CardHeader>
