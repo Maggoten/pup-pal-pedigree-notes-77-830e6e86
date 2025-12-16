@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Dog } from '@/types/dogs';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import { Scale, Ruler, Plus, History } from 'lucide-react';
+import { Scale, Ruler, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DogHealthService, DogWeightLog, DogHeightLog } from '@/services/dogs/dogHealthService';
-import DogMeasurementsDialog from './DogMeasurementsDialog';
+import CombinedDogMeasurementsDialog from './CombinedDogMeasurementsDialog';
 import DogMeasurementsChart from './DogMeasurementsChart';
-import MeasurementHistoryDialog from './MeasurementHistoryDialog';
 
 interface DogMeasurementsSectionProps {
   dog: Dog;
@@ -16,7 +15,6 @@ interface DogMeasurementsSectionProps {
 const DogMeasurementsSection: React.FC<DogMeasurementsSectionProps> = ({ dog }) => {
   const { t } = useTranslation('dogs');
   const [showDialog, setShowDialog] = useState(false);
-  const [showHistoryDialog, setShowHistoryDialog] = useState(false);
   const [weightLogs, setWeightLogs] = useState<DogWeightLog[]>([]);
   const [heightLogs, setHeightLogs] = useState<DogHeightLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,33 +48,19 @@ const DogMeasurementsSection: React.FC<DogMeasurementsSectionProps> = ({ dog }) 
           <Scale className="h-4 w-4 text-primary" />
           {t('health.measurements.title', 'Weight & Height')}
         </h3>
-        <div className="flex gap-2">
-          {(weightLogs.length > 0 || heightLogs.length > 0) && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setShowHistoryDialog(true)}
-              className="flex-1 sm:flex-none"
-            >
-              <History className="h-4 w-4 mr-1" />
-              {t('health.measurements.history', 'History')}
-            </Button>
-          )}
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setShowDialog(true)}
-            className="flex-1 sm:flex-none"
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            {t('health.measurements.logMeasurement', 'Log Measurement')}
-          </Button>
-        </div>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => setShowDialog(true)}
+        >
+          <Settings2 className="h-4 w-4 mr-1" />
+          {t('health.measurements.manage', 'Manage')}
+        </Button>
       </div>
 
       {/* Latest measurements summary */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="p-4 rounded-lg border border-warmbeige-200 bg-white">
+        <div className="p-4 rounded-lg border border-border bg-background">
           <div className="flex items-center gap-2 mb-2">
             <Scale className="h-4 w-4 text-primary" />
             <span className="font-medium text-sm">{t('health.measurements.weight', 'Weight')}</span>
@@ -95,7 +79,7 @@ const DogMeasurementsSection: React.FC<DogMeasurementsSectionProps> = ({ dog }) 
           )}
         </div>
 
-        <div className="p-4 rounded-lg border border-warmbeige-200 bg-white">
+        <div className="p-4 rounded-lg border border-border bg-background">
           <div className="flex items-center gap-2 mb-2">
             <Ruler className="h-4 w-4 text-primary" />
             <span className="font-medium text-sm">{t('health.measurements.height', 'Height')}</span>
@@ -143,16 +127,10 @@ const DogMeasurementsSection: React.FC<DogMeasurementsSectionProps> = ({ dog }) 
         </div>
       )}
 
-      <DogMeasurementsDialog
+      <CombinedDogMeasurementsDialog
         dogId={dog.id}
         open={showDialog}
         onOpenChange={setShowDialog}
-        onSuccess={fetchLogs}
-      />
-
-      <MeasurementHistoryDialog
-        open={showHistoryDialog}
-        onOpenChange={setShowHistoryDialog}
         weightLogs={weightLogs}
         heightLogs={heightLogs}
         onUpdate={fetchLogs}
