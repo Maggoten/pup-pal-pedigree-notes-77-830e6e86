@@ -145,9 +145,14 @@ const HealthTestsSection: React.FC<HealthTestsSectionProps> = ({ dog, onUpdate }
                 className="p-4 rounded-lg border border-warmbeige-200 bg-white space-y-2"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
-                    {getTestTypeLabel(test)}
-                  </Badge>
+                  <div>
+                    <h4 className="font-semibold text-base text-foreground">
+                      {getTestTypeLabel(test)}
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      {format(parseISO(test.date), 'yyyy-MM-dd')}
+                    </p>
+                  </div>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -157,22 +162,18 @@ const HealthTestsSection: React.FC<HealthTestsSectionProps> = ({ dog, onUpdate }
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="grid grid-cols-2 gap-2 text-sm mt-2">
                   <div>
-                    <span className="text-muted-foreground">{t('health.tests.date', 'Date')}:</span>
-                    <p>{format(parseISO(test.date), 'yyyy-MM-dd')}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">{t('health.tests.result', 'Result')}:</span>
+                    <span className="text-muted-foreground text-xs">{t('health.tests.result', 'Result')}:</span>
                     <p className="font-medium">{test.result}</p>
                   </div>
+                  {test.vet && (
+                    <div>
+                      <span className="text-muted-foreground text-xs">{t('health.tests.vet', 'Vet/Clinic')}:</span>
+                      <p>{test.vet}</p>
+                    </div>
+                  )}
                 </div>
-                {test.vet && (
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">{t('health.tests.vet', 'Vet/Clinic')}:</span>
-                    <p>{test.vet}</p>
-                  </div>
-                )}
               </div>
             ))}
           </div>
