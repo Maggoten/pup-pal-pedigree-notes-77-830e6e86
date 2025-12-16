@@ -22,7 +22,7 @@ const MetricCardGrid: React.FC<MetricCardGridProps> = ({
   const { t } = useTranslation('home');
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 auto-rows-fr">
       <MetricCard 
         title={t('metrics.reminders')} 
         value={reminderCount} 
