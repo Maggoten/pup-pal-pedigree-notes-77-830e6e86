@@ -335,7 +335,8 @@
       },
       "validation": {
         "required": "Datum och giltigt värde krävs"
-      }
+      },
+      "manage": "Hantera"
     },
     "notes": {
       "title": "Hälsoanteckningar",

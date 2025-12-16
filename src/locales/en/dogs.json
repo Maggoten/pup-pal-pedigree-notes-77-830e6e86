@@ -335,7 +335,8 @@
       },
       "validation": {
         "required": "Date and valid value are required"
-      }
+      },
+      "manage": "Manage"
     },
     "notes": {
       "title": "Health Notes",
