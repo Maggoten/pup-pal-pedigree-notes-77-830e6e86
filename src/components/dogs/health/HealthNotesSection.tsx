@@ -89,7 +89,7 @@ const HealthNotesSection: React.FC<HealthNotesSectionProps> = ({ dog, onUpdate }
             <p className="text-sm whitespace-pre-wrap">{notes}</p>
           ) : (
             <p className="text-sm text-muted-foreground italic">
-              {t('health.notes.empty', 'No health notes recorded. Click edit to add notes about allergies, medications, or special needs.')}
+              {t('health.notes.empty', 'No health notes recorded.')}
             </p>
           )}
         </div>
