@@ -210,6 +210,16 @@ export const sanitizeDogForDb = (dog: Partial<Dog>): Partial<DbDog> => {
     console.log('[Dogs Debug] Mapped sterilizationDate to sterilization_date:', dbDog.sterilization_date);
   }
   
+  // Handle rabies date - MAP rabiesDate to rabies_date
+  if ('rabiesDate' in dog && dog.rabiesDate !== undefined) {
+    dbDog.rabies_date = typeof dog.rabiesDate === 'string' 
+      ? dog.rabiesDate.split('T')[0]
+      : Object.prototype.toString.call(dog.rabiesDate) === '[object Date]'
+        ? dateToISOString(dog.rabiesDate as unknown as Date)
+        : (dog.rabiesDate === null ? null : dog.rabiesDate as string);
+    console.log('[Dogs Debug] Mapped rabiesDate to rabies_date:', dbDog.rabies_date);
+  }
+  
   // Process heat history - CRITICAL: Handle both Date objects and Heat objects
   if ('heatHistory' in dog && dog.heatHistory !== undefined) {
     console.log('[Dogs Debug] Processing heat history for DB save:', dog.heatHistory);
