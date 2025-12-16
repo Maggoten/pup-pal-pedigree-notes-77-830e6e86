@@ -202,18 +202,18 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, activeTab }) => {
       
       <Tabs defaultValue={activeTab || "overview"} className="w-full">
         <TabsList className={`grid w-full ${dog.gender === 'female' ? 'grid-cols-3' : 'grid-cols-2'}`}>
-          <TabsTrigger value="overview" className="flex items-center gap-2">
-            <PawPrint className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('tabs.overview')}</span>
+          <TabsTrigger value="overview" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 px-1 sm:px-3">
+            <PawPrint className="h-4 w-4 flex-shrink-0" />
+            <span className="text-xs sm:text-sm font-medium truncate">{t('tabs.overview')}</span>
           </TabsTrigger>
-          <TabsTrigger value="health" className="flex items-center gap-2">
-            <Stethoscope className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('tabs.health', 'Health')}</span>
+          <TabsTrigger value="health" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 px-1 sm:px-3">
+            <Stethoscope className="h-4 w-4 flex-shrink-0" />
+            <span className="text-xs sm:text-sm font-medium truncate">{t('tabs.health', 'Health')}</span>
           </TabsTrigger>
           {dog.gender === 'female' && (
-            <TabsTrigger value="heat-tracking" className="flex items-center gap-2">
-              <Heart className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('tabs.heat')}</span>
+            <TabsTrigger value="heat-tracking" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 px-1 sm:px-3">
+              <Heart className="h-4 w-4 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium truncate">{t('tabs.heat')}</span>
             </TabsTrigger>
           )}
         </TabsList>

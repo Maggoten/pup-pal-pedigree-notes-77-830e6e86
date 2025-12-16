@@ -40,14 +40,17 @@ const HealthTestsSection: React.FC<HealthTestsSectionProps> = ({ dog, onUpdate }
 
   const healthTests = dog.healthTests || dog.health_tests || [];
 
-  const getTestTypeLabel = (type: string) => {
+  const getTestTypeLabel = (test: HealthTest) => {
+    if (test.type === 'other' && test.customType) {
+      return test.customType;
+    }
     const labels: Record<string, string> = {
       hd: t('health.tests.types.hd', 'HD X-ray'),
       ed: t('health.tests.types.ed', 'ED X-ray'),
       eye: t('health.tests.types.eye', 'Eye Examination'),
       other: t('health.tests.types.other', 'Other')
     };
-    return labels[type] || type;
+    return labels[test.type] || test.type;
   };
 
   const handleDelete = async () => {
@@ -75,7 +78,7 @@ const HealthTestsSection: React.FC<HealthTestsSectionProps> = ({ dog, onUpdate }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h3 className="font-semibold text-base flex items-center gap-2">
           <FlaskConical className="h-4 w-4 text-muted-foreground" />
           {t('health.tests.title', 'Health Tests')}
@@ -84,6 +87,7 @@ const HealthTestsSection: React.FC<HealthTestsSectionProps> = ({ dog, onUpdate }
           variant="outline" 
           size="sm"
           onClick={() => setShowAddDialog(true)}
+          className="w-full sm:w-auto"
         >
           <Plus className="h-4 w-4 mr-1" />
           {t('health.tests.addTest', 'Add Test')}
@@ -91,45 +95,88 @@ const HealthTestsSection: React.FC<HealthTestsSectionProps> = ({ dog, onUpdate }
       </div>
 
       {healthTests.length > 0 ? (
-        <div className="border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('health.tests.type', 'Type')}</TableHead>
-                <TableHead>{t('health.tests.date', 'Date')}</TableHead>
-                <TableHead>{t('health.tests.result', 'Result')}</TableHead>
-                <TableHead>{t('health.tests.vet', 'Vet/Clinic')}</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {healthTests.map((test, index) => (
-                <TableRow key={test.id || index}>
-                  <TableCell>
-                    <Badge variant="secondary">
-                      {getTestTypeLabel(test.type)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{format(parseISO(test.date), 'yyyy-MM-dd')}</TableCell>
-                  <TableCell className="font-medium">{test.result}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {test.vet || '-'}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={() => setDeleteTest(test)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
+        <>
+          {/* Desktop Table */}
+          <div className="hidden md:block border rounded-lg overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('health.tests.type', 'Type')}</TableHead>
+                  <TableHead>{t('health.tests.date', 'Date')}</TableHead>
+                  <TableHead>{t('health.tests.result', 'Result')}</TableHead>
+                  <TableHead>{t('health.tests.vet', 'Vet/Clinic')}</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {healthTests.map((test, index) => (
+                  <TableRow key={test.id || index}>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {getTestTypeLabel(test)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{format(parseISO(test.date), 'yyyy-MM-dd')}</TableCell>
+                    <TableCell className="font-medium">{test.result}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {test.vet || '-'}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => setDeleteTest(test)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-3">
+            {healthTests.map((test, index) => (
+              <div 
+                key={test.id || index}
+                className="p-4 rounded-lg border bg-card space-y-2"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <Badge variant="secondary" className="text-xs">
+                    {getTestTypeLabel(test)}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive -mt-1 -mr-2"
+                    onClick={() => setDeleteTest(test)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">{t('health.tests.date', 'Date')}:</span>
+                    <p>{format(parseISO(test.date), 'yyyy-MM-dd')}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t('health.tests.result', 'Result')}:</span>
+                    <p className="font-medium">{test.result}</p>
+                  </div>
+                </div>
+                {test.vet && (
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">{t('health.tests.vet', 'Vet/Clinic')}:</span>
+                    <p>{test.vet}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
       ) : (
         <div className="text-center py-8 border rounded-lg bg-muted/20">
           <FlaskConical className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
