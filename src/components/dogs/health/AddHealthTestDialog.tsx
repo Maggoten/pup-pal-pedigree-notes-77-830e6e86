@@ -20,7 +20,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
@@ -48,10 +47,10 @@ const AddHealthTestDialog: React.FC<AddHealthTestDialogProps> = ({
   const { t } = useTranslation('dogs');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [testType, setTestType] = useState<HealthTestType>('hd');
+  const [customType, setCustomType] = useState('');
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [result, setResult] = useState('');
   const [vet, setVet] = useState('');
-  const [notes, setNotes] = useState('');
 
   const testTypes = [
     { value: 'hd', label: t('health.tests.types.hd', 'HD X-ray') },
@@ -72,14 +71,23 @@ const AddHealthTestDialog: React.FC<AddHealthTestDialogProps> = ({
       return;
     }
 
+    if (testType === 'other' && !customType.trim()) {
+      toast({
+        title: t('common.error', 'Error'),
+        description: t('health.tests.validation.customTypeRequired', 'Please specify the test type'),
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await DogHealthService.addHealthTest(dogId, {
         type: testType,
+        customType: testType === 'other' ? customType.trim() : undefined,
         date: date.toISOString().split('T')[0],
         result: result.trim(),
-        vet: vet.trim() || undefined,
-        notes: notes.trim() || undefined
+        vet: vet.trim() || undefined
       });
 
       toast({
@@ -89,10 +97,10 @@ const AddHealthTestDialog: React.FC<AddHealthTestDialogProps> = ({
 
       // Reset form
       setTestType('hd');
+      setCustomType('');
       setDate(new Date());
       setResult('');
       setVet('');
-      setNotes('');
       
       onOpenChange(false);
       onSuccess?.();
@@ -135,6 +143,19 @@ const AddHealthTestDialog: React.FC<AddHealthTestDialogProps> = ({
               </Select>
             </div>
 
+            {testType === 'other' && (
+              <div className="space-y-2">
+                <Label htmlFor="customType">{t('health.tests.customType', 'Specify Test Type')} *</Label>
+                <Input
+                  id="customType"
+                  value={customType}
+                  onChange={(e) => setCustomType(e.target.value)}
+                  placeholder={t('health.tests.customTypePlaceholder', 'e.g., DNA test, Heart examination')}
+                  required
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label>{t('health.tests.date', 'Date')}</Label>
               <Popover>
@@ -156,6 +177,7 @@ const AddHealthTestDialog: React.FC<AddHealthTestDialogProps> = ({
                     selected={date}
                     onSelect={setDate}
                     initialFocus
+                    className={cn("p-3 pointer-events-auto")}
                   />
                 </PopoverContent>
               </Popover>
@@ -179,17 +201,6 @@ const AddHealthTestDialog: React.FC<AddHealthTestDialogProps> = ({
                 value={vet}
                 onChange={(e) => setVet(e.target.value)}
                 placeholder={t('health.tests.vetPlaceholder', 'Optional')}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="notes">{t('health.tests.notes', 'Notes')}</Label>
-              <Textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder={t('health.tests.notesPlaceholder', 'Additional notes...')}
-                rows={2}
               />
             </div>
           </div>

@@ -82,12 +82,12 @@ const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog, userId, on
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h3 className="font-semibold text-base flex items-center gap-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />
           {t('health.vaccinations.title', 'Vaccinations & Deworming')}
         </h3>
-        <Button variant="ghost" size="sm" onClick={() => setEditOpen(true)}>
+        <Button variant="outline" size="sm" onClick={() => setEditOpen(true)} className="w-full sm:w-auto">
           <Pencil className="h-4 w-4 mr-1" />
           {t('common.edit', 'Edit')}
         </Button>

@@ -13,7 +13,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
@@ -43,7 +42,6 @@ const DogMeasurementsDialog: React.FC<DogMeasurementsDialogProps> = ({
   const [measurementType, setMeasurementType] = useState<'weight' | 'height'>('weight');
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [value, setValue] = useState('');
-  const [notes, setNotes] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,9 +59,9 @@ const DogMeasurementsDialog: React.FC<DogMeasurementsDialogProps> = ({
     setIsSubmitting(true);
     try {
       if (measurementType === 'weight') {
-        await DogHealthService.addWeightLog(dogId, numValue, date, notes.trim() || undefined);
+        await DogHealthService.addWeightLog(dogId, numValue, date);
       } else {
-        await DogHealthService.addHeightLog(dogId, numValue, date, notes.trim() || undefined);
+        await DogHealthService.addHeightLog(dogId, numValue, date);
       }
 
       toast({
@@ -73,7 +71,6 @@ const DogMeasurementsDialog: React.FC<DogMeasurementsDialogProps> = ({
 
       // Reset form
       setValue('');
-      setNotes('');
       setDate(new Date());
       
       onOpenChange(false);
@@ -135,6 +132,7 @@ const DogMeasurementsDialog: React.FC<DogMeasurementsDialogProps> = ({
                         selected={date}
                         onSelect={setDate}
                         initialFocus
+                        className={cn("p-3 pointer-events-auto")}
                       />
                     </PopoverContent>
                   </Popover>
@@ -171,17 +169,6 @@ const DogMeasurementsDialog: React.FC<DogMeasurementsDialogProps> = ({
                     />
                   </div>
                 </TabsContent>
-
-                <div className="space-y-2">
-                  <Label htmlFor="notes">{t('health.measurements.notes', 'Notes')}</Label>
-                  <Textarea
-                    id="notes"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder={t('health.measurements.notesPlaceholder', 'Optional notes...')}
-                    rows={2}
-                  />
-                </div>
               </div>
             </Tabs>
           </div>

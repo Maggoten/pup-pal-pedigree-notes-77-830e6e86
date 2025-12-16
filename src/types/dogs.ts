@@ -30,6 +30,7 @@ export type HealthTestType = 'hd' | 'ed' | 'eye' | 'other';
 export type HealthTest = {
   id?: string;
   type: HealthTestType;
+  customType?: string; // Used when type is 'other'
   date: string;
   result: string;
   vet?: string;
