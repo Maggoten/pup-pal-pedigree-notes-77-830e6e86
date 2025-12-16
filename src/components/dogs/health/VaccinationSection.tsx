@@ -84,7 +84,7 @@ const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog, userId, on
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h3 className="font-semibold text-base flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Calendar className="h-4 w-4 text-rose-400" />
           {t('health.vaccinations.title', 'Vaccinations & Deworming')}
         </h3>
         <Button variant="outline" size="sm" onClick={() => setEditOpen(true)} className="w-full sm:w-auto">
@@ -100,13 +100,13 @@ const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog, userId, on
             <div 
               key={index}
               className={cn(
-                "p-4 rounded-lg border bg-card",
+                "p-4 rounded-lg border border-warmbeige-200 bg-white",
                 item.daysUntil !== null && item.daysUntil < 0 && "border-destructive/50 bg-destructive/5",
                 item.daysUntil !== null && item.daysUntil >= 0 && item.daysUntil <= 14 && "border-amber-500/50 bg-amber-500/5"
               )}
             >
               <div className="flex items-center gap-2 mb-2">
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <Icon className="h-4 w-4 text-rose-400" />
                 <span className="font-medium text-sm">{item.label}</span>
               </div>
               
@@ -135,7 +135,7 @@ const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog, userId, on
       {/* Sterilization for females */}
       {dog.gender === 'female' && (
         <div className="pt-2">
-          <div className="p-4 rounded-lg border bg-card">
+          <div className="p-4 rounded-lg border border-warmbeige-200 bg-white">
             <div className="flex items-center gap-2 mb-2">
               <span className="font-medium text-sm">{t('health.vaccinations.sterilization', 'Sterilization')}</span>
             </div>
