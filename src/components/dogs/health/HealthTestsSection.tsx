@@ -80,7 +80,7 @@ const HealthTestsSection: React.FC<HealthTestsSectionProps> = ({ dog, onUpdate }
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h3 className="font-semibold text-base flex items-center gap-2">
-          <FlaskConical className="h-4 w-4 text-rose-400" />
+          <FlaskConical className="h-4 w-4 text-primary" />
           {t('health.tests.title', 'Health Tests')}
         </h3>
         <Button 
@@ -100,7 +100,7 @@ const HealthTestsSection: React.FC<HealthTestsSectionProps> = ({ dog, onUpdate }
           <div className="hidden md:block border border-warmbeige-200 rounded-lg overflow-hidden bg-white">
             <Table>
               <TableHeader>
-                <TableRow className="bg-rose-50/50">
+                <TableRow className="bg-primary/5">
                   <TableHead>{t('health.tests.type', 'Type')}</TableHead>
                   <TableHead>{t('health.tests.date', 'Date')}</TableHead>
                   <TableHead>{t('health.tests.result', 'Result')}</TableHead>
@@ -112,7 +112,7 @@ const HealthTestsSection: React.FC<HealthTestsSectionProps> = ({ dog, onUpdate }
                 {healthTests.map((test, index) => (
                   <TableRow key={test.id || index}>
                     <TableCell>
-                      <Badge variant="secondary" className="bg-rose-50 text-rose-700 border-rose-200">
+                      <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
                         {getTestTypeLabel(test)}
                       </Badge>
                     </TableCell>
@@ -145,7 +145,7 @@ const HealthTestsSection: React.FC<HealthTestsSectionProps> = ({ dog, onUpdate }
                 className="p-4 rounded-lg border border-warmbeige-200 bg-white space-y-2"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <Badge variant="secondary" className="text-xs bg-rose-50 text-rose-700 border-rose-200">
+                  <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
                     {getTestTypeLabel(test)}
                   </Badge>
                   <Button
@@ -178,8 +178,8 @@ const HealthTestsSection: React.FC<HealthTestsSectionProps> = ({ dog, onUpdate }
           </div>
         </>
       ) : (
-        <div className="text-center py-8 border border-warmbeige-200 rounded-lg bg-rose-50/30">
-          <FlaskConical className="h-8 w-8 mx-auto text-rose-300 mb-2" />
+        <div className="text-center py-8 border border-warmbeige-200 rounded-lg bg-primary/5">
+          <FlaskConical className="h-8 w-8 mx-auto text-primary/40 mb-2" />
           <p className="text-sm text-muted-foreground">
             {t('health.tests.noTests', 'No health tests recorded')}
           </p>
