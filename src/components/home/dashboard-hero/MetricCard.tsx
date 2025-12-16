@@ -17,7 +17,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   onClick,
 }) => {
   const content = (
-    <div className="bg-white/70 hover:bg-white/90 transition-colors rounded-lg p-4 flex flex-col items-center justify-center shadow-sm h-[110px] w-full">
+    <div className="bg-white/70 hover:bg-white/90 transition-colors rounded-lg p-4 flex flex-col items-center justify-center shadow-sm min-h-[120px] h-full w-full">
       <div className="rounded-full bg-warmbeige-100 p-2 mb-2">
         {icon}
       </div>
