@@ -22,7 +22,7 @@ interface DogDetailsProps {
 }
 
 const DogDetails: React.FC<DogDetailsProps> = ({ dog, activeTab }) => {
-  const { setActiveDog, updateDog, removeDog, loading } = useDogs();
+  const { setActiveDog, updateDog, removeDog, loading, fetchDogs } = useDogs();
   const { t } = useTranslation('dogs');
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -189,6 +189,10 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, activeTab }) => {
     }
   };
 
+  const handleDogHealthUpdate = async () => {
+    await fetchDogs(true); // skipCache = true för att tvinga ny fetch
+  };
+
   return (
     <div className="space-y-6">
       <Button variant="outline" onClick={handleBack} className="flex items-center gap-2">
@@ -231,7 +235,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, activeTab }) => {
         </TabsContent>
 
         <TabsContent value="health" className="mt-6">
-          <DogHealthTab dog={dog} />
+          <DogHealthTab dog={dog} onDogUpdate={handleDogHealthUpdate} />
         </TabsContent>
 
         {dog.gender === 'female' && (

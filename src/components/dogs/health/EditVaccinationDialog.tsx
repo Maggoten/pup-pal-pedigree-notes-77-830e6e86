@@ -26,6 +26,7 @@ interface EditVaccinationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: string | undefined;
+  onSuccess?: () => void;
 }
 
 const EditVaccinationDialog: React.FC<EditVaccinationDialogProps> = ({
@@ -33,6 +34,7 @@ const EditVaccinationDialog: React.FC<EditVaccinationDialogProps> = ({
   open,
   onOpenChange,
   userId,
+  onSuccess,
 }) => {
   const { t } = useTranslation('dogs');
   const updateDog = useUpdateDog(userId);
@@ -63,6 +65,7 @@ const EditVaccinationDialog: React.FC<EditVaccinationDialogProps> = ({
       },
     });
     onOpenChange(false);
+    onSuccess?.();
   };
 
   const DatePickerField = ({
