@@ -25,6 +25,17 @@ export type BreedingHistory = {
   matings?: Breeding[]; // Adding matings for compatibility with ReminderService.ts
 };
 
+export type HealthTestType = 'hd' | 'ed' | 'eye' | 'other';
+
+export type HealthTest = {
+  id?: string;
+  type: HealthTestType;
+  date: string;
+  result: string;
+  vet?: string;
+  notes?: string;
+};
+
 export interface Dog {
   // Primary fields
   id: string;
@@ -69,4 +80,12 @@ export interface Dog {
   
   // Additional information
   notes?: string;
+  
+  // Health tab fields
+  rabies_date?: string;
+  rabiesDate?: string;  // UI alias
+  health_tests?: HealthTest[];
+  healthTests?: HealthTest[];  // UI alias
+  health_notes?: string;
+  healthNotes?: string;  // UI alias
 }

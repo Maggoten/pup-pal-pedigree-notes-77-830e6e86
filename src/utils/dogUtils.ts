@@ -118,6 +118,11 @@ export const enrichDog = (dog: any): Dog => {
       registeredName: dog.registered_name || '',
       sterilizationDate: dog.sterilization_date ? dog.sterilization_date.split('T')[0] : undefined,
 
+      // Health tab aliases
+      rabiesDate: dog.rabies_date ? dog.rabies_date.split('T')[0] : undefined,
+      healthTests: dog.health_tests || [],
+      healthNotes: dog.health_notes || '',
+
       // Processed fields
       heatHistory: processedHeatHistory,
       breedingHistory: dog.breedingHistory || defaultBreedingHistory,

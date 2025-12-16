@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, PawPrint, Heart } from 'lucide-react';
+import { ArrowLeft, PawPrint, Heart, Stethoscope } from 'lucide-react';
 import { Dog } from '@/types/dogs';
 import { useDogs } from '@/context/DogsContext';
 import { DogFormValues } from './DogFormFields';
@@ -12,6 +12,7 @@ import DogDetailsCard from './details/DogDetailsCard';
 import DogActions from './actions/DogActions';
 import DogLittersSection from './litters/DogLittersSection';
 import HeatTrackingTab from './heat-tracking/HeatTrackingTab';
+import DogHealthTab from './health/DogHealthTab';
 import { checkDogDependencies } from '@/utils/dogDependencyCheck';
 import { useTranslation } from 'react-i18next';
 
@@ -196,15 +197,19 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, activeTab }) => {
       </Button>
       
       <Tabs defaultValue={activeTab || "overview"} className="w-full">
-        <TabsList className={`grid w-full ${dog.gender === 'female' ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        <TabsList className={`grid w-full ${dog.gender === 'female' ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <PawPrint className="h-4 w-4" />
-            {t('tabs.overview')}
+            <span className="hidden sm:inline">{t('tabs.overview')}</span>
+          </TabsTrigger>
+          <TabsTrigger value="health" className="flex items-center gap-2">
+            <Stethoscope className="h-4 w-4" />
+            <span className="hidden sm:inline">{t('tabs.health', 'Health')}</span>
           </TabsTrigger>
           {dog.gender === 'female' && (
             <TabsTrigger value="heat-tracking" className="flex items-center gap-2">
               <Heart className="h-4 w-4" />
-              {t('tabs.heat')}
+              <span className="hidden sm:inline">{t('tabs.heat')}</span>
             </TabsTrigger>
           )}
         </TabsList>
@@ -223,6 +228,10 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, activeTab }) => {
           />
           
           <DogLittersSection dog={dog} />
+        </TabsContent>
+
+        <TabsContent value="health" className="mt-6">
+          <DogHealthTab dog={dog} />
         </TabsContent>
 
         {dog.gender === 'female' && (

@@ -111,6 +111,82 @@ export type Database = {
           },
         ]
       }
+      dog_height_logs: {
+        Row: {
+          created_at: string | null
+          date: string
+          dog_id: string
+          height: number
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          dog_id: string
+          height: number
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          dog_id?: string
+          height?: number
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dog_height_logs_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dog_weight_logs: {
+        Row: {
+          created_at: string | null
+          date: string
+          dog_id: string
+          id: string
+          notes: string | null
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          dog_id: string
+          id?: string
+          notes?: string | null
+          user_id: string
+          weight: number
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          dog_id?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dog_weight_logs_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dogs: {
         Row: {
           birthdate: string | null
@@ -122,6 +198,8 @@ export type Database = {
           deleted_at: string | null
           dewormingDate: string | null
           gender: string | null
+          health_notes: string | null
+          health_tests: Json | null
           heatHistory: Json | null
           heatInterval: number | null
           id: string
@@ -129,6 +207,7 @@ export type Database = {
           name: string
           notes: string | null
           owner_id: string | null
+          rabies_date: string | null
           registered_name: string | null
           registration_number: string | null
           source_puppy_id: string | null
@@ -146,6 +225,8 @@ export type Database = {
           deleted_at?: string | null
           dewormingDate?: string | null
           gender?: string | null
+          health_notes?: string | null
+          health_tests?: Json | null
           heatHistory?: Json | null
           heatInterval?: number | null
           id?: string
@@ -153,6 +234,7 @@ export type Database = {
           name: string
           notes?: string | null
           owner_id?: string | null
+          rabies_date?: string | null
           registered_name?: string | null
           registration_number?: string | null
           source_puppy_id?: string | null
@@ -170,6 +252,8 @@ export type Database = {
           deleted_at?: string | null
           dewormingDate?: string | null
           gender?: string | null
+          health_notes?: string | null
+          health_tests?: Json | null
           heatHistory?: Json | null
           heatInterval?: number | null
           id?: string
@@ -177,6 +261,7 @@ export type Database = {
           name?: string
           notes?: string | null
           owner_id?: string | null
+          rabies_date?: string | null
           registered_name?: string | null
           registration_number?: string | null
           source_puppy_id?: string | null

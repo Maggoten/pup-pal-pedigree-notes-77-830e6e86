@@ -259,8 +259,92 @@
   },
   "tabs": {
     "overview": "Översikt",
+    "health": "Hälsa",
     "heat": "Löp",
     "heatTracking": "Uppföljning löp"
+  },
+  "health": {
+    "title": "Hälsa",
+    "vaccinations": {
+      "title": "Vaccinationer & Avmaskning",
+      "vaccination": "Vaccination",
+      "rabies": "Rabies",
+      "deworming": "Avmaskning",
+      "sterilization": "Sterilisering",
+      "lastDate": "Senast",
+      "nextDue": "Nästa",
+      "overdue": "Försenad",
+      "dueSoon": "Snart",
+      "notRecorded": "Ej registrerad",
+      "notSterilized": "Ej steriliserad"
+    },
+    "tests": {
+      "title": "Hälsotester",
+      "type": "Typ",
+      "date": "Datum",
+      "result": "Resultat",
+      "vet": "Veterinär/Klinik",
+      "notes": "Anteckningar",
+      "addTest": "Lägg till test",
+      "noTests": "Inga hälsotester registrerade",
+      "addFirstTest": "Lägg till ditt första hälsotest för att spåra resultat",
+      "deleteTitle": "Ta bort hälsotest",
+      "deleteConfirm": "Är du säker på att du vill ta bort detta hälsotest? Denna åtgärd kan inte ångras.",
+      "deleteSuccess": "Test borttaget",
+      "deleteSuccessDesc": "Hälsotestet har tagits bort",
+      "deleteError": "Kunde inte ta bort test",
+      "addSuccess": "Test tillagt",
+      "addSuccessDesc": "Hälsotestet har registrerats",
+      "addError": "Kunde inte lägga till hälsotest",
+      "types": {
+        "hd": "HD-röntgen",
+        "ed": "ED-röntgen",
+        "eye": "Ögonlysning",
+        "other": "Annat"
+      },
+      "addDialog": {
+        "title": "Lägg till hälsotest",
+        "description": "Registrera ett hälsotestresultat för din hund"
+      },
+      "selectType": "Välj typ",
+      "selectDate": "Välj datum",
+      "resultPlaceholder": "t.ex. A/A, 0/0, UA",
+      "vetPlaceholder": "Valfritt",
+      "notesPlaceholder": "Ytterligare anteckningar...",
+      "validation": {
+        "required": "Datum och resultat krävs"
+      }
+    },
+    "measurements": {
+      "title": "Vikt & Höjd",
+      "weight": "Vikt",
+      "height": "Höjd",
+      "logMeasurement": "Logga mätning",
+      "noData": "Ingen data",
+      "date": "Datum",
+      "notes": "Anteckningar",
+      "notesPlaceholder": "Valfria anteckningar...",
+      "selectDate": "Välj datum",
+      "save": "Spara",
+      "addSuccess": "Mätning loggad",
+      "addSuccessDesc": "Mätningen har registrerats",
+      "addError": "Kunde inte logga mätning",
+      "dialog": {
+        "title": "Logga mätning",
+        "description": "Registrera vikt eller höjd för din hund"
+      },
+      "validation": {
+        "required": "Datum och giltigt värde krävs"
+      }
+    },
+    "notes": {
+      "title": "Hälsoanteckningar",
+      "placeholder": "Allergier, mediciner, specialbehov...",
+      "empty": "Inga hälsoanteckningar registrerade. Klicka på redigera för att lägga till anteckningar om allergier, mediciner eller specialbehov.",
+      "saveSuccess": "Anteckningar sparade",
+      "saveSuccessDesc": "Hälsoanteckningarna har uppdaterats",
+      "saveError": "Kunde inte spara anteckningar"
+    }
   },
   "heatTracking": {
     "title": "Löpcykler",
