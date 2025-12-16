@@ -17,12 +17,12 @@ const MetricCard: React.FC<MetricCardProps> = ({
   onClick,
 }) => {
   const content = (
-    <div className="bg-white/70 hover:bg-white/90 transition-colors rounded-lg p-4 flex flex-col items-center justify-center shadow-sm min-h-[100px] w-full">
+    <div className="bg-white/70 hover:bg-white/90 transition-colors rounded-lg p-4 flex flex-col items-center justify-center shadow-sm h-[110px] w-full">
       <div className="rounded-full bg-warmbeige-100 p-2 mb-2">
         {icon}
       </div>
       <span className="text-xl font-bold text-warmgreen-700 mb-1">{value}</span>
-      <span className="text-xs text-warmgreen-600 text-center">{title}</span>
+      <span className="text-xs text-warmgreen-600 text-center line-clamp-2">{title}</span>
     </div>
   );
 
@@ -31,7 +31,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
     return (
       <button 
         onClick={onClick} 
-        className="w-full text-left cursor-pointer"
+        className="w-full h-full text-left cursor-pointer"
         aria-label={`View ${title}`}
       >
         {content}
@@ -41,7 +41,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   
   // If linkTo is provided, wrap in a Link
   if (linkTo) {
-    return <Link to={linkTo}>{content}</Link>;
+    return <Link to={linkTo} className="h-full">{content}</Link>;
   }
 
   // Otherwise, just render the content
