@@ -29,7 +29,7 @@ const DogHealthTab: React.FC<DogHealthTabProps> = ({ dog, onDogUpdate }) => {
         </CardHeader>
         <CardContent className="space-y-8">
           {/* Vaccinations & Deworming */}
-          <VaccinationSection dog={dog} userId={user?.id} />
+          <VaccinationSection dog={dog} userId={user?.id} onUpdate={onDogUpdate} />
           
           {/* Health Tests */}
           <HealthTestsSection dog={dog} onUpdate={onDogUpdate} />

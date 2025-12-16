@@ -11,9 +11,10 @@ import EditVaccinationDialog from './EditVaccinationDialog';
 interface VaccinationSectionProps {
   dog: Dog;
   userId: string | undefined;
+  onUpdate?: () => void;
 }
 
-const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog, userId }) => {
+const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog, userId, onUpdate }) => {
   const { t } = useTranslation('dogs');
   const [editOpen, setEditOpen] = useState(false);
 
@@ -156,6 +157,7 @@ const VaccinationSection: React.FC<VaccinationSectionProps> = ({ dog, userId }) 
         open={editOpen}
         onOpenChange={setEditOpen}
         userId={userId}
+        onSuccess={onUpdate}
       />
     </div>
   );
