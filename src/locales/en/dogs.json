@@ -684,6 +684,25 @@
         "medium": "medium",
         "low": "low",
         "insufficient_data": "insufficient data"
+      },
+      "recommendationTexts": {
+        "insufficientTests": "Need at least 2 progesterone tests to calculate optimal mating window",
+        "lhSurgeIdentified": "LH surge detected - optimal mating window identified",
+        "monitorBehavior": "Monitor for behavioral signs (receptivity, flagging)",
+        "multipleMatings": "Consider multiple matings within the window for best success rate",
+        "veryHighProgesterone": "Very high progesterone levels - peak fertility period",
+        "veryLowLevels": "Progesterone levels still very low",
+        "continueTestingDaily": "Continue testing every 1-2 days",
+        "noLhSurge": "LH surge has not occurred yet",
+        "risingButLow": "Progesterone levels rising but still low",
+        "testDailySoon": "Test daily - LH surge may occur soon",
+        "watchBehavior": "Watch for behavioral changes",
+        "approachingSurge": "Progesterone levels moderate - approaching surge range",
+        "testEvery12Hours": "Test every 12-24 hours",
+        "surgeImminent": "LH surge may be imminent",
+        "mayHaveMissedSurge": "Progesterone elevated - may have missed LH surge",
+        "considerMatingNow": "Consider mating now if not already done",
+        "windowClosing": "Continue monitoring but window may be closing"
       }
     },
     "matingDates": {

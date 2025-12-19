@@ -684,6 +684,25 @@
         "medium": "medel",
         "low": "låg",
         "insufficient_data": "otillräcklig data"
+      },
+      "recommendationTexts": {
+        "insufficientTests": "Behöver minst 2 progesterontester för att beräkna optimalt parningsfönster",
+        "lhSurgeIdentified": "LH-skov detekterat - optimalt parningsfönster identifierat",
+        "monitorBehavior": "Övervaka beteendetecken (receptivitet, flaggning)",
+        "multipleMatings": "Överväg flera parningar inom fönstret för bästa resultat",
+        "veryHighProgesterone": "Mycket höga progesteronnivåer - högsta fertilitetsperiod",
+        "veryLowLevels": "Progesteronnivåerna är fortfarande mycket låga",
+        "continueTestingDaily": "Fortsätt testa var 1-2 dag",
+        "noLhSurge": "LH-skov har inte inträffat ännu",
+        "risingButLow": "Progesteronnivåerna stiger men är fortfarande låga",
+        "testDailySoon": "Testa dagligen - LH-skov kan inträffa snart",
+        "watchBehavior": "Var uppmärksam på beteendeförändringar",
+        "approachingSurge": "Progesteronnivåerna måttliga - närmar sig skov-nivå",
+        "testEvery12Hours": "Testa var 12-24 timme",
+        "surgeImminent": "LH-skov kan vara nära förestående",
+        "mayHaveMissedSurge": "Progesteron förhöjt - kan ha missat LH-skov",
+        "considerMatingNow": "Överväg parning nu om inte redan gjort",
+        "windowClosing": "Fortsätt övervaka men fönstret kan stängas"
       }
     },
     "matingDates": {
