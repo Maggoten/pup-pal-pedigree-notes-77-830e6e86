@@ -656,7 +656,34 @@
     },
     "progesterone": {
       "title": "Progesteron",
-      "chart": "Progesteronnivåer"
+      "chart": "Progesteronnivåer",
+      "chartTitle": "Progesteronnivåer",
+      "chartDescription": "Følg progesteronnivåer gjennom løpesyklusen. LH-stigning skjer typisk når nivåene stiger fra <2 til >5 ng/ml.",
+      "baseline": "2 ng/ml - Utgangsnivå",
+      "lhSurge": "5 ng/ml - LH-stigning indikator"
+    },
+    "mating": {
+      "optimalWindow": "Optimalt Parringsvindu",
+      "windowDescription": "Basert på progesteronnivåer og LH-stigning deteksjon",
+      "windowNotDetermined": "Vindu ikke fastslått ennå",
+      "lhSurgeDetected": "LH-stigning oppdaget",
+      "lhSurgeNotDetected": "LH-stigning ikke oppdaget ennå",
+      "peakProgesterone": "Høyeste progesteron",
+      "activeWindow": "Optimalt parringsvindu er NÅ! Dette er den høyeste fertilitetsperioden.",
+      "windowToday": "Optimalt vindu starter i dag",
+      "windowTomorrow": "Optimalt vindu starter i morgen",
+      "windowUpcoming": "Optimalt vindu starter snart",
+      "windowPast": "Vinduet har passert",
+      "nextTest": "Neste progesterontest anbefales",
+      "testToday": "I dag",
+      "recommendations": "Anbefalinger",
+      "insufficientData": "Trenger minst 2 progesterontester for å beregne optimalt parringsvindu",
+      "confidence": {
+        "high": "høy",
+        "medium": "middels",
+        "low": "lav",
+        "insufficient_data": "utilstrekkelige data"
+      }
     },
     "matingDates": {
       "title": "Parringsdatoer",

@@ -657,7 +657,34 @@
     },
     "progesterone": {
       "title": "Progesterone",
-      "chart": "Progesterone Levels"
+      "chart": "Progesterone Levels",
+      "chartTitle": "Progesterone Levels",
+      "chartDescription": "Track progesterone levels throughout the heat cycle. LH surge typically occurs when levels rise from <2 to >5 ng/ml.",
+      "baseline": "2 ng/ml - Baseline level",
+      "lhSurge": "5 ng/ml - LH surge indicator"
+    },
+    "mating": {
+      "optimalWindow": "Optimal Mating Window",
+      "windowDescription": "Based on progesterone levels and LH surge detection",
+      "windowNotDetermined": "Window not yet determined",
+      "lhSurgeDetected": "LH surge detected",
+      "lhSurgeNotDetected": "LH surge not yet detected",
+      "peakProgesterone": "Peak progesterone",
+      "activeWindow": "Optimal mating window is NOW! This is the peak fertility period.",
+      "windowToday": "Optimal window starts today",
+      "windowTomorrow": "Optimal window starts tomorrow",
+      "windowUpcoming": "Optimal window starting soon",
+      "windowPast": "Window has passed",
+      "nextTest": "Next progesterone test recommended",
+      "testToday": "Today",
+      "recommendations": "Recommendations",
+      "insufficientData": "Need at least 2 progesterone tests to calculate optimal mating window",
+      "confidence": {
+        "high": "high",
+        "medium": "medium",
+        "low": "low",
+        "insufficient_data": "insufficient data"
+      }
     },
     "matingDates": {
       "title": "Mating Dates",

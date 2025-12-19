@@ -657,7 +657,34 @@
     },
     "progesterone": {
       "title": "Progesteron",
-      "chart": "Progesteronnivåer"
+      "chart": "Progesteronnivåer",
+      "chartTitle": "Progesteronnivåer",
+      "chartDescription": "Följ progesteronnivåer under löpcykeln. LH-skov inträffar typiskt när nivåerna stiger från <2 till >5 ng/ml.",
+      "baseline": "2 ng/ml - Basnivå",
+      "lhSurge": "5 ng/ml - LH-skov indikator"
+    },
+    "mating": {
+      "optimalWindow": "Optimalt Parningsfönster",
+      "windowDescription": "Baserat på progesteronnivåer och LH-skov detektering",
+      "windowNotDetermined": "Fönster ännu inte fastställt",
+      "lhSurgeDetected": "LH-skov detekterat",
+      "lhSurgeNotDetected": "LH-skov ännu inte detekterat",
+      "peakProgesterone": "Högsta progesteron",
+      "activeWindow": "Optimalt parningsfönster är NU! Detta är den högsta fertilitetsperioden.",
+      "windowToday": "Optimalt fönster startar idag",
+      "windowTomorrow": "Optimalt fönster startar imorgon",
+      "windowUpcoming": "Optimalt fönster startar snart",
+      "windowPast": "Fönstret har passerat",
+      "nextTest": "Nästa progesterontest rekommenderas",
+      "testToday": "Idag",
+      "recommendations": "Rekommendationer",
+      "insufficientData": "Behöver minst 2 progesterontester för att beräkna optimalt parningsfönster",
+      "confidence": {
+        "high": "hög",
+        "medium": "medel",
+        "low": "låg",
+        "insufficient_data": "otillräcklig data"
+      }
     },
     "matingDates": {
       "title": "Parningsdatum",
