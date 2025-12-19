@@ -29,7 +29,7 @@ export function calculateOptimalMatingDays(heatLogs: HeatLog[]): OptimalMatingWi
       confidence: 'insufficient_data',
       lhSurgeDetected: false,
       peakProgesteroneValue: null,
-      recommendations: ['Need at least 2 progesterone tests to calculate optimal mating window']
+      recommendations: ['insufficientTests']
     };
   }
 
@@ -72,13 +72,13 @@ export function calculateOptimalMatingDays(heatLogs: HeatLog[]): OptimalMatingWi
     const confidence = peakProgesteroneValue > 10 ? 'high' : peakProgesteroneValue > 5 ? 'medium' : 'low';
 
     recommendations.push(
-      'LH surge detected - optimal mating window identified',
-      'Monitor for behavioral signs (receptivity, flagging)',
-      'Consider multiple matings within the window for best success rate'
+      'lhSurgeIdentified',
+      'monitorBehavior',
+      'multipleMatings'
     );
 
     if (peakProgesteroneValue > 15) {
-      recommendations.push('Very high progesterone levels - peak fertility period');
+      recommendations.push('veryHighProgesterone');
     }
 
     return {
@@ -97,27 +97,27 @@ export function calculateOptimalMatingDays(heatLogs: HeatLog[]): OptimalMatingWi
 
   if (latestValue < 1) {
     recommendations.push(
-      'Progesterone levels still very low',
-      'Continue testing every 1-2 days',
-      'LH surge has not occurred yet'
+      'veryLowLevels',
+      'continueTestingDaily',
+      'noLhSurge'
     );
   } else if (latestValue < 2) {
     recommendations.push(
-      'Progesterone levels rising but still low',
-      'Test daily - LH surge may occur soon',
-      'Watch for behavioral changes'
+      'risingButLow',
+      'testDailySoon',
+      'watchBehavior'
     );
   } else if (latestValue < 5) {
     recommendations.push(
-      'Progesterone levels moderate - approaching surge range',
-      'Test every 12-24 hours',
-      'LH surge may be imminent'
+      'approachingSurge',
+      'testEvery12Hours',
+      'surgeImminent'
     );
   } else {
     recommendations.push(
-      'Progesterone elevated - may have missed LH surge',
-      'Consider mating now if not already done',
-      'Continue monitoring but window may be closing'
+      'mayHaveMissedSurge',
+      'considerMatingNow',
+      'windowClosing'
     );
   }
 

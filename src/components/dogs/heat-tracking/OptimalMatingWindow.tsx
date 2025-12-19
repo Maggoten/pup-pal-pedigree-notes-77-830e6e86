@@ -179,7 +179,7 @@ const OptimalMatingWindowComponent: React.FC<OptimalMatingWindowProps> = ({
               {matingWindow.recommendations.map((recommendation, index) => (
                 <li key={index} className="flex items-start gap-2">
                   <span className="text-primary mt-0.5">•</span>
-                  <span>{recommendation}</span>
+                  <span>{t(`heatTracking.mating.recommendationTexts.${recommendation}`, { defaultValue: recommendation })}</span>
                 </li>
               ))}
             </ul>

@@ -683,6 +683,25 @@
         "medium": "middels",
         "low": "lav",
         "insufficient_data": "utilstrekkelige data"
+      },
+      "recommendationTexts": {
+        "insufficientTests": "Trenger minst 2 progesterontester for å beregne optimalt parringsvindu",
+        "lhSurgeIdentified": "LH-stigning oppdaget - optimalt parringsvindu identifisert",
+        "monitorBehavior": "Overvåk atferdstegn (mottakelighet, flagging)",
+        "multipleMatings": "Vurder flere parringer innenfor vinduet for best resultat",
+        "veryHighProgesterone": "Svært høye progesteronnivåer - høyeste fertilitetsperiode",
+        "veryLowLevels": "Progesteronnivåene er fortsatt svært lave",
+        "continueTestingDaily": "Fortsett å teste hver 1-2 dag",
+        "noLhSurge": "LH-stigning har ikke skjedd ennå",
+        "risingButLow": "Progesteronnivåene stiger men er fortsatt lave",
+        "testDailySoon": "Test daglig - LH-stigning kan skje snart",
+        "watchBehavior": "Se etter atferdsendringer",
+        "approachingSurge": "Progesteronnivåene moderate - nærmer seg stigning",
+        "testEvery12Hours": "Test hver 12-24 time",
+        "surgeImminent": "LH-stigning kan være nært forestående",
+        "mayHaveMissedSurge": "Progesteron forhøyet - kan ha gått glipp av LH-stigning",
+        "considerMatingNow": "Vurder parring nå hvis ikke allerede gjort",
+        "windowClosing": "Fortsett å overvåke men vinduet kan lukkes"
       }
     },
     "matingDates": {
