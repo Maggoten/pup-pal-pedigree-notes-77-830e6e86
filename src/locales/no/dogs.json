@@ -551,6 +551,7 @@
       "proestrus": "Proøstrus",
       "estrus": "Østrus",
       "metestrus": "Metøstrus",
+      "diestrus": "Diøstrus",
       "anestrus": "Anøstrus",
       "days": "Dager",
       "description": "Beskrivelse",
@@ -559,12 +560,14 @@
       "details": {
         "proestrus": "Den tidlige fasen av løpesyklusen. I denne fasen begynner vulva å hovne og det kan være lett blødning. Tispen er enda ikke klar til parring og vil vanligvis avvise hannhunder.",
         "estrus": "Den fruktbare fasen når parring mest sannsynlig vil resultere i drektighet. Utfloden blir lysere i farge og tispen blir mottakelig for hannhunder. Dette er det optimale parringsvinduet.",
-        "metestrus": "Den sene fasen av løpesyklusen når fruktbarheten avtar. Utfloden minker og tispen blir mindre mottakelig for hannhunder. Denne fasen går over i diøstrus."
+        "metestrus": "Den sene fasen av løpesyklusen når fruktbarheten avtar. Utfloden minker og tispen blir mindre mottakelig for hannhunder. Denne fasen går over i diøstrus.",
+        "diestrus": "Fasen etter østrus når kroppen enten forbereder seg på drektighet eller går tilbake til normal tilstand. Hormonproduksjonen stabiliseres."
       },
       "signs": {
         "proestrus": "Vulvahevelse, lett blodig utflod, økt urinering, rastløshet, hannhunder viser interesse men tispen avviser",
         "estrus": "Lysere/stråfarget utflod, mottakelig for hannhunder, 'flagging'-atferd (beveger halen til siden), redusert hevelse",
-        "metestrus": "Utflod avtar, mindre mottakelig for hannhunder, vulvahevelse reduseres, tilbake til normal atferd"
+        "metestrus": "Utflod avtar, mindre mottakelig for hannhunder, vulvahevelse reduseres, tilbake til normal atferd",
+        "diestrus": "Utflod avtar, mindre mottakelig for hannhunder, vulvahevelse reduseres, tilbake til normal atferd"
       }
     },
     "deleteDialog": {
