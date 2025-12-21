@@ -10,11 +10,11 @@ import HeatLoggingDialog from './HeatLoggingDialog';
 import HeatLogsDialog from './HeatLogsDialog';
 import EndHeatCycleDialog from './EndHeatCycleDialog';
 import EditHeatCycleDialog from './EditHeatCycleDialog';
-import OptimalMatingWindow from './OptimalMatingWindow';
+
 import MatingDatesSection from './MatingDatesSection';
 import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
 import { toast } from '@/hooks/use-toast';
-import { calculateOptimalMatingDays, getNextTestRecommendation } from '@/utils/progesteroneCalculator';
+
 import { getStoredUnit, formatProgesteroneValue } from '@/utils/progesteroneUnits';
 import type { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -207,19 +207,6 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
   const latestLog = heatLogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
   // Calculate progesterone-based mating window
-  const matingWindow = calculateOptimalMatingDays(heatLogs);
-  const lastProgesteroneTest = heatLogs
-    .filter(log => log.test_type === 'progesterone')
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
-  const nextTestDate = lastProgesteroneTest 
-    ? getNextTestRecommendation(matingWindow, new Date(lastProgesteroneTest.date))
-    : null;
-
-  // Check if there are any progesterone tests
-  const hasProgesteroneData = heatLogs.some(log => log.test_type === 'progesterone' && log.progesterone_value !== null);
-
-  // Check if we have progesterone data for mating window
-  const showMatingWindow = hasProgesteroneData && isActive;
 
   return (
     <>
@@ -453,13 +440,6 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
             />
           )}
 
-          {/* Optimal Mating Window */}
-          {showMatingWindow && (
-            <OptimalMatingWindow 
-              matingWindow={matingWindow}
-              nextTestDate={nextTestDate}
-            />
-          )}
 
           {/* End cycle button at bottom for active cycles */}
           {isActive && (

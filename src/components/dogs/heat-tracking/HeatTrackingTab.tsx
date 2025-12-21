@@ -17,6 +17,7 @@ import TemperatureTrendChart from './TemperatureTrendChart';
 import PreviousHeatsList from './PreviousHeatsList';
 import UnifiedHeatOverview from './UnifiedHeatOverview';
 import { useUnifiedHeatDataQuery } from '@/hooks/heat/useUnifiedHeatDataQuery';
+import { calculateOptimalMatingDays, getNextTestRecommendation } from '@/utils/progesteroneCalculator';
 import type { Database } from '@/integrations/supabase/types';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
@@ -68,6 +69,14 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
   const temperatureLogs = allHeatLogs.filter(log => log.temperature !== null && log.temperature !== undefined);
   const progesteroneLogs = allHeatLogs.filter(log => log.progesterone_value !== null && log.progesterone_value !== undefined);
   const hasAnalysisData = temperatureLogs.length > 0 || progesteroneLogs.length > 0;
+
+  // Calculate mating window from progesterone data
+  const matingWindow = calculateOptimalMatingDays(allHeatLogs);
+  const lastProgesteroneTest = progesteroneLogs
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  const nextTestDate = lastProgesteroneTest 
+    ? getNextTestRecommendation(matingWindow, new Date(lastProgesteroneTest.date))
+    : null;
 
   const handleStartCycleSuccess = () => {
     refresh();
@@ -128,7 +137,13 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
           <h2 className="text-lg font-semibold">{t('heatTracking.analytics.title')}</h2>
           
           {progesteroneLogs.length > 0 && (
-            <ProgesteroneChart heatLogs={allHeatLogs} />
+            <>
+              <ProgesteroneChart heatLogs={allHeatLogs} />
+              <OptimalMatingWindow 
+                matingWindow={matingWindow}
+                nextTestDate={nextTestDate}
+              />
+            </>
           )}
           
           {temperatureLogs.length > 0 && (
