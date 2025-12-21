@@ -12,7 +12,6 @@ import HeatCycleCard from './HeatCycleCard';
 import { EditLegacyHeatDialog } from './EditLegacyHeatDialog';
 import { DeleteLegacyHeatDialog } from './DeleteLegacyHeatDialog';
 import ProgesteroneChart from './ProgesteroneChart';
-import OptimalMatingWindow from './OptimalMatingWindow';
 import TemperatureTrendChart from './TemperatureTrendChart';
 import PreviousHeatsList from './PreviousHeatsList';
 import UnifiedHeatOverview from './UnifiedHeatOverview';
@@ -137,13 +136,11 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
           <h2 className="text-lg font-semibold">{t('heatTracking.analytics.title')}</h2>
           
           {progesteroneLogs.length > 0 && (
-            <>
-              <ProgesteroneChart heatLogs={allHeatLogs} />
-              <OptimalMatingWindow 
-                matingWindow={matingWindow}
-                nextTestDate={nextTestDate}
-              />
-            </>
+            <ProgesteroneChart 
+              heatLogs={allHeatLogs} 
+              matingWindow={matingWindow}
+              nextTestDate={nextTestDate}
+            />
           )}
           
           {temperatureLogs.length > 0 && (
