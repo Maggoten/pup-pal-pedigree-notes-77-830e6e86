@@ -36,7 +36,7 @@ interface HeatLoggingDialogProps {
 const HEAT_PHASES = [
   { value: 'proestrus', key: 'proestrus' },
   { value: 'estrus', key: 'estrus' },
-  { value: 'metestrus', key: 'metestrus' },
+  { value: 'diestrus', key: 'diestrus' },
   { value: 'anestrus', key: 'anestrus' }
 ];
 
@@ -49,7 +49,7 @@ const calculatePhaseFromStartDate = (startDate: string): string => {
   
   if (dayInCycle <= 9) return 'proestrus';
   if (dayInCycle <= 16) return 'estrus';
-  return 'metestrus';
+  return 'diestrus';
 };
 
 const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
