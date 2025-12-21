@@ -130,12 +130,12 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
       };
     } else {
       return {
-        phase: t('heatTracking.phases.metestrus'),
+        phase: t('heatTracking.phases.diestrus'),
         color: 'bg-orange-100 text-orange-800',
-        description: t('heatTracking.analytics.metestrusDescription'),
+        description: t('heatTracking.phases.details.diestrus'),
         days: '17-21',
-        details: t('heatTracking.phases.details.metestrus'),
-        signs: t('heatTracking.phases.signs.metestrus')
+        details: t('heatTracking.phases.details.diestrus'),
+        signs: t('heatTracking.phases.signs.diestrus')
       };
     }
   };
