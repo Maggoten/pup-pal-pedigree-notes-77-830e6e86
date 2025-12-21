@@ -14,6 +14,15 @@ import { useTranslation } from 'react-i18next';
 import { HeatService } from '@/services/HeatService';
 import { toast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
+import {
+  ProgesteroneUnit,
+  getStoredUnit,
+  setStoredUnit,
+  convertToNgForStorage,
+  convertFromNgForDisplay,
+  getValidationRange,
+  getUnitLabel
+} from '@/utils/progesteroneUnits';
 
 type HeatLog = Database['public']['Tables']['heat_logs']['Row'];
 
@@ -40,6 +49,8 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
   const { t } = useTranslation('dogs');
   const [date, setDate] = useState<Date>();
   const [temperature, setTemperature] = useState('');
+  const [progesteroneValue, setProgesteroneValue] = useState('');
+  const [progesteroneUnit, setProgesteroneUnit] = useState<ProgesteroneUnit>(() => getStoredUnit());
   const [phase, setPhase] = useState<string>('');
   const [observations, setObservations] = useState('');
   const [notes, setNotes] = useState('');
@@ -50,6 +61,15 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
     if (open && heatLog) {
       setDate(parseISO(heatLog.date));
       setTemperature(heatLog.temperature ? heatLog.temperature.toString() : '');
+      // Convert stored ng/ml value to user's preferred unit for display
+      const unit = getStoredUnit();
+      setProgesteroneUnit(unit);
+      if (heatLog.progesterone_value !== null && heatLog.progesterone_value !== undefined) {
+        const displayValue = convertFromNgForDisplay(heatLog.progesterone_value, unit);
+        setProgesteroneValue(displayValue.toString());
+      } else {
+        setProgesteroneValue('');
+      }
       setPhase(heatLog.phase || '');
       setObservations(heatLog.observations || '');
       setNotes(heatLog.notes || '');
@@ -89,9 +109,21 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
 
     setIsLoading(true);
     try {
+      // Handle progesterone conversion if value is provided
+      let progesteroneForStorage: number | undefined = undefined;
+      if (progesteroneValue) {
+        const progesteroneInput = parseFloat(progesteroneValue);
+        const validationRange = getValidationRange(progesteroneUnit);
+        if (!isNaN(progesteroneInput) && progesteroneInput >= validationRange.min && progesteroneInput <= validationRange.max) {
+          progesteroneForStorage = convertToNgForStorage(progesteroneInput, progesteroneUnit);
+          setStoredUnit(progesteroneUnit);
+        }
+      }
+
       const updatedLog = await HeatService.updateHeatLog(heatLog.id, {
         date: date.toISOString(),
         temperature: tempValue,
+        progesterone_value: progesteroneForStorage,
         phase: phase || undefined,
         observations: observations || undefined,
         notes: notes || undefined
@@ -168,6 +200,49 @@ const EditHeatLogDialog: React.FC<EditHeatLogDialogProps> = ({
               onChange={(e) => setTemperature(e.target.value)}
               placeholder={t('heatTracking.editLog.temperaturePlaceholder')}
             />
+          </div>
+
+          {/* Progesterone field with unit selector */}
+          <div className="space-y-2">
+            <Label htmlFor="progesterone">{t('heatTracking.logging.progesteroneValue', { defaultValue: 'Progesterone Value' })}</Label>
+            <div className="flex gap-2">
+              <Input
+                id="progesterone"
+                type="number"
+                step="0.1"
+                min="0"
+                max={getValidationRange(progesteroneUnit).max}
+                value={progesteroneValue}
+                onChange={(e) => setProgesteroneValue(e.target.value)}
+                placeholder={progesteroneUnit === 'nmol' ? '8.0' : '2.5'}
+                className="flex-1"
+              />
+              <Select 
+                value={progesteroneUnit} 
+                onValueChange={(value: ProgesteroneUnit) => {
+                  // Convert current value when switching units
+                  if (progesteroneValue) {
+                    const currentValue = parseFloat(progesteroneValue);
+                    if (!isNaN(currentValue)) {
+                      if (value === 'nmol' && progesteroneUnit === 'ng') {
+                        setProgesteroneValue((currentValue * 3.18).toFixed(1));
+                      } else if (value === 'ng' && progesteroneUnit === 'nmol') {
+                        setProgesteroneValue((currentValue / 3.18).toFixed(1));
+                      }
+                    }
+                  }
+                  setProgesteroneUnit(value);
+                }}
+              >
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ng">ng/ml</SelectItem>
+                  <SelectItem value="nmol">nmol/L</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">

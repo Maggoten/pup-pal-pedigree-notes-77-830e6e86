@@ -3,6 +3,7 @@ import { Heart, Thermometer, TestTube, Calendar } from 'lucide-react';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
+import { getStoredUnit, formatProgesteroneValue } from '@/utils/progesteroneUnits';
 
 interface MatingDate {
   id: string;
@@ -30,6 +31,7 @@ const MatingDatesSection: React.FC<MatingDatesSectionProps> = ({
   cycleStartDate
 }) => {
   const { t } = useTranslation('dogs');
+  const unit = getStoredUnit();
 
   if (!matingDates || matingDates.length === 0) {
     return null;
@@ -104,7 +106,7 @@ const MatingDatesSection: React.FC<MatingDatesSectionProps> = ({
                   {closestLog.test_type === 'progesterone' && closestLog.progesterone_value && (
                     <span className="flex items-center gap-1">
                       <TestTube className="h-3 w-3" />
-                      {closestLog.progesterone_value} ng/ml
+                      {formatProgesteroneValue(closestLog.progesterone_value, unit)}
                     </span>
                   )}
                 </div>

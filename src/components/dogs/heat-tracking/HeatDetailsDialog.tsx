@@ -19,6 +19,7 @@ import TemperatureTrendChart from './TemperatureTrendChart';
 import OptimalMatingWindow from './OptimalMatingWindow';
 import MatingDatesSection from './MatingDatesSection';
 import { calculateOptimalMatingDays, getNextTestRecommendation } from '@/utils/progesteroneCalculator';
+import { getStoredUnit, formatProgesteroneValue } from '@/utils/progesteroneUnits';
 import type { Database } from '@/integrations/supabase/types';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
@@ -42,6 +43,7 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
   heatCycle
 }) => {
   const { t } = useTranslation('dogs');
+  const unit = getStoredUnit();
   const [heatLogs, setHeatLogs] = useState<HeatLog[]>([]);
   const [matingDates, setMatingDates] = useState<MatingDateData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -218,7 +220,7 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
                       {t('heatTracking.progesterone.title')}:
                     </span>
                     <span className="text-sm font-medium">
-                      {latestLog.progesterone_value} ng/mL
+                      {formatProgesteroneValue(latestLog.progesterone_value, unit)}
                     </span>
                   </div>
                 )}

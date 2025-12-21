@@ -5,6 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { TestTube } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Database } from '@/integrations/supabase/types';
+import { 
+  getStoredUnit, 
+  convertFromNgForDisplay, 
+  getUnitLabel,
+  PROGESTERONE_THRESHOLDS 
+} from '@/utils/progesteroneUnits';
 
 type HeatLog = Database['public']['Tables']['heat_logs']['Row'];
 
@@ -20,13 +26,16 @@ interface ChartData {
 
 const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs }) => {
   const { t } = useTranslation('dogs');
+  const unit = getStoredUnit();
+  const thresholds = PROGESTERONE_THRESHOLDS[unit];
+  const unitLabel = getUnitLabel(unit);
 
-  // Filter and process progesterone test data
+  // Filter and process progesterone test data, converting to display unit
   const progesteroneData: ChartData[] = heatLogs
     .filter(log => log.test_type === 'progesterone' && log.progesterone_value !== null)
     .map(log => ({
       date: log.date,
-      value: log.progesterone_value!,
+      value: convertFromNgForDisplay(log.progesterone_value!, unit),
       formattedDate: format(new Date(log.date), 'MMM dd')
     }))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -41,7 +50,7 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs }) => {
         <div className="bg-card border rounded-lg p-3 shadow-lg">
           <p className="font-medium">{label}</p>
           <p className="text-primary">
-            {`${t('heatTracking.logging.progesteroneValue', { defaultValue: 'Progesterone' })}: ${payload[0].value} ng/ml`}
+            {`${t('heatTracking.logging.progesteroneValue', { defaultValue: 'Progesterone' })}: ${payload[0].value} ${unitLabel}`}
           </p>
         </div>
       );
@@ -83,7 +92,7 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs }) => {
               />
               <YAxis 
                 label={{ 
-                  value: 'ng/ml', 
+                  value: unitLabel, 
                   angle: -90, 
                   position: 'insideLeft',
                   className: 'fill-muted-foreground text-xs'
@@ -93,18 +102,18 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs }) => {
               />
               <Tooltip content={<CustomTooltip />} />
               
-              {/* Reference lines for important thresholds */}
+              {/* Reference lines for important thresholds - dynamic based on unit */}
               <ReferenceLine 
-                y={2} 
+                y={thresholds.baseline} 
                 stroke="hsl(var(--warning))" 
                 strokeDasharray="5 5"
-                label={{ value: "2 ng/ml", position: "top" }}
+                label={{ value: `${thresholds.baseline} ${unitLabel}`, position: "top" }}
               />
               <ReferenceLine 
-                y={5} 
+                y={thresholds.lhSurge} 
                 stroke="hsl(var(--destructive))" 
                 strokeDasharray="5 5"
-                label={{ value: "5 ng/ml", position: "top" }}
+                label={{ value: `${thresholds.lhSurge} ${unitLabel}`, position: "top" }}
               />
               
               <Line 
@@ -120,15 +129,15 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs }) => {
           </ResponsiveContainer>
         </div>
         
-        {/* Legend */}
+        {/* Legend - dynamic based on unit */}
         <div className="mt-4 text-xs text-muted-foreground space-y-1">
           <div className="flex items-center gap-2">
             <div className="w-3 h-0.5 bg-warning"></div>
-            <span>{t('heatTracking.progesterone.baseline', { defaultValue: '2 ng/ml - Baseline level' })}</span>
+            <span>{t('heatTracking.progesterone.baseline', { defaultValue: `${thresholds.baseline} ${unitLabel} - Baseline level` })}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-0.5 bg-destructive"></div>
-            <span>{t('heatTracking.progesterone.lhSurge', { defaultValue: '5 ng/ml - LH surge indicator' })}</span>
+            <span>{t('heatTracking.progesterone.lhSurge', { defaultValue: `${thresholds.lhSurge} ${unitLabel} - LH surge indicator` })}</span>
           </div>
         </div>
       </CardContent>

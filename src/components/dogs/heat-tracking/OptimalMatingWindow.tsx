@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Heart, Calendar, AlertTriangle, CheckCircle, Clock, TestTube } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { OptimalMatingWindow } from '@/utils/progesteroneCalculator';
+import { getStoredUnit, formatProgesteroneValue } from '@/utils/progesteroneUnits';
 
 interface OptimalMatingWindowProps {
   matingWindow: OptimalMatingWindow;
@@ -17,6 +18,7 @@ const OptimalMatingWindowComponent: React.FC<OptimalMatingWindowProps> = ({
   nextTestDate 
 }) => {
   const { t } = useTranslation('dogs');
+  const unit = getStoredUnit();
 
   const getConfidenceBadge = (confidence: OptimalMatingWindow['confidence']) => {
     const variants = {
@@ -110,14 +112,14 @@ const OptimalMatingWindowComponent: React.FC<OptimalMatingWindowProps> = ({
             </span>
           </div>
 
-          {/* Peak Progesterone Value */}
+          {/* Peak Progesterone Value - display in user's preferred unit */}
           {matingWindow.peakProgesteroneValue && (
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
                 {t('heatTracking.mating.peakProgesterone', { defaultValue: 'Peak progesterone' })}:
               </span>
               <Badge variant="outline">
-                {matingWindow.peakProgesteroneValue.toFixed(1)} ng/ml
+                {formatProgesteroneValue(matingWindow.peakProgesteroneValue, unit)}
               </Badge>
             </div>
           )}

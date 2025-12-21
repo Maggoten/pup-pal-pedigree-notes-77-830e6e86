@@ -16,6 +16,7 @@ import MatingDatesSection from './MatingDatesSection';
 import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
 import { toast } from '@/hooks/use-toast';
 import { calculateOptimalMatingDays, getNextTestRecommendation } from '@/utils/progesteroneCalculator';
+import { getStoredUnit, formatProgesteroneValue } from '@/utils/progesteroneUnits';
 import type { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -29,6 +30,7 @@ interface HeatCycleCardProps {
 
 const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) => {
   const { t } = useTranslation('dogs');
+  const unit = getStoredUnit();
   const [heatLogs, setHeatLogs] = useState<HeatLog[]>([]);
   const [matingDates, setMatingDates] = useState<any[]>([]);
   const [showLoggingDialog, setShowLoggingDialog] = useState(false);
@@ -325,7 +327,7 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
                 {latestLog.test_type === 'progesterone' && latestLog.progesterone_value && (
                   <div className="flex items-center gap-2">
                     <TestTube className="h-4 w-4" />
-                    <span className="font-medium">{latestLog.progesterone_value} ng/ml</span>
+                    <span className="font-medium">{formatProgesteroneValue(latestLog.progesterone_value, unit)}</span>
                   </div>
                 )}
                 {latestLog.phase && (

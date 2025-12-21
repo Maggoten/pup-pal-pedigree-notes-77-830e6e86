@@ -15,6 +15,14 @@ import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
 import { HeatService } from '@/services/HeatService';
 import type { Database } from '@/integrations/supabase/types';
+import { 
+  ProgesteroneUnit, 
+  getStoredUnit, 
+  setStoredUnit, 
+  convertToNgForStorage,
+  getValidationRange,
+  getUnitLabel 
+} from '@/utils/progesteroneUnits';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 
@@ -56,6 +64,7 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
   const [testType, setTestType] = useState<'temperature' | 'progesterone'>('temperature');
   const [temperature, setTemperature] = useState('');
   const [progesteroneValue, setProgesteroneValue] = useState('');
+  const [progesteroneUnit, setProgesteroneUnit] = useState<ProgesteroneUnit>(() => getStoredUnit());
   const [phase, setPhase] = useState(() => calculatePhaseFromStartDate(heatCycle.start_date));
   const [observations, setObservations] = useState('');
   const [notes, setNotes] = useState('');
@@ -100,7 +109,7 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
 
     try {
       const temp = temperature ? parseFloat(temperature) : undefined;
-      const progesterone = progesteroneValue ? parseFloat(progesteroneValue) : undefined;
+      const progesteroneInput = progesteroneValue ? parseFloat(progesteroneValue) : undefined;
       
       if (testType === 'temperature' && temperature && (isNaN(temp!) || temp! < 35 || temp! > 45)) {
         toast({
@@ -111,21 +120,33 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
         return;
       }
 
-      if (testType === 'progesterone' && progesteroneValue && (isNaN(progesterone!) || progesterone! < 0 || progesterone! > 50)) {
+      // Validate progesterone based on selected unit
+      const validationRange = getValidationRange(progesteroneUnit);
+      if (testType === 'progesterone' && progesteroneValue && (isNaN(progesteroneInput!) || progesteroneInput! < validationRange.min || progesteroneInput! > validationRange.max)) {
         toast({
-          title: t('heatTracking.logging.validation.invalidProgesterone', { defaultValue: 'Invalid progesterone value. Must be between 0-50 ng/ml' }),
+          title: t('heatTracking.logging.validation.invalidProgesterone', { 
+            defaultValue: `Invalid progesterone value. Must be between 0-${validationRange.max} ${getUnitLabel(progesteroneUnit)}` 
+          }),
           variant: 'destructive'
         });
         setIsLoading(false);
         return;
       }
 
+      // Convert to ng/ml for storage if entered in nmol/L
+      const progesteroneForStorage = progesteroneInput !== undefined 
+        ? convertToNgForStorage(progesteroneInput, progesteroneUnit) 
+        : undefined;
+
+      // Save the user's unit preference
+      setStoredUnit(progesteroneUnit);
+
       const result = await HeatService.createHeatLog(
         heatCycle.id,
         date,
         notes || undefined,
         testType === 'temperature' ? temp : undefined,
-        testType === 'progesterone' ? progesterone : undefined,
+        testType === 'progesterone' ? progesteroneForStorage : undefined,
         testType,
         observations || undefined,
         phase || undefined
@@ -255,20 +276,31 @@ const HeatLoggingDialog: React.FC<HeatLoggingDialogProps> = ({
             ) : (
               <div className="space-y-2">
                 <Label htmlFor="progesterone">{t('heatTracking.logging.progesteroneValue', { defaultValue: 'Progesterone Value' })}</Label>
-                <div className="relative">
-                  <Input
-                    id="progesterone"
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="50"
-                    placeholder="2.5"
-                    value={progesteroneValue}
-                    onChange={(e) => setProgesteroneValue(e.target.value)}
-                  />
-                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm">
-                    ng/ml
-                  </span>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Input
+                      id="progesterone"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max={getValidationRange(progesteroneUnit).max}
+                      placeholder={progesteroneUnit === 'nmol' ? '8.0' : '2.5'}
+                      value={progesteroneValue}
+                      onChange={(e) => setProgesteroneValue(e.target.value)}
+                    />
+                  </div>
+                  <Select 
+                    value={progesteroneUnit} 
+                    onValueChange={(value: ProgesteroneUnit) => setProgesteroneUnit(value)}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ng">ng/ml</SelectItem>
+                      <SelectItem value="nmol">nmol/L</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             )}
