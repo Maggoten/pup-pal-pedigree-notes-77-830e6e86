@@ -191,10 +191,10 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs, matingW
         {/* Mating Window Insights - Compact */}
         {matingWindow && (
           <div className="border-t pt-4 space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium">
+            <h4 className="flex items-center gap-2 text-base font-semibold text-foreground">
               <Heart className="h-4 w-4 text-primary" />
-              {t('heatTracking.mating.optimalWindow', { defaultValue: 'Mating Window' })}
-            </div>
+              {t('heatTracking.mating.optimalWindow', { defaultValue: 'Optimal Mating Window' })}
+            </h4>
 
             {/* Window timing + LH status in compact row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
