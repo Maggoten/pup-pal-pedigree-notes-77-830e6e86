@@ -33,19 +33,19 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
     isLoading, 
     refresh 
   } = useUnifiedHeatDataQuery(dog.id);
-  const [allTemperatureLogs, setAllTemperatureLogs] = useState<HeatLog[]>([]);
+  const [allHeatLogs, setAllHeatLogs] = useState<HeatLog[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   useEffect(() => {
-    loadTemperatureLogs();
+    loadHeatLogs();
   }, [heatCycles]);
 
-  const loadTemperatureLogs = async () => {
-    // Only load temperature logs from active (ongoing) heat cycles
+  const loadHeatLogs = async () => {
+    // Only load logs from active (ongoing) heat cycles
     const activeCycles = heatCycles.filter(cycle => !cycle.end_date);
     
     if (!activeCycles.length) {
-      setAllTemperatureLogs([]);
+      setAllHeatLogs([]);
       return;
     }
 
@@ -53,17 +53,21 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
       const allLogs: HeatLog[] = [];
       for (const cycle of activeCycles) {
         const logs = await HeatService.getHeatLogs(cycle.id);
-        const temperatureLogs = logs.filter(log => log.temperature !== null && log.temperature !== undefined);
-        allLogs.push(...temperatureLogs);
+        allLogs.push(...logs);
       }
       
       // Sort by date (oldest first for chart display)
       allLogs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      setAllTemperatureLogs(allLogs);
+      setAllHeatLogs(allLogs);
     } catch (error) {
-      console.error('Error loading temperature logs:', error);
+      console.error('Error loading heat logs:', error);
     }
   };
+
+  // Filter for chart data
+  const temperatureLogs = allHeatLogs.filter(log => log.temperature !== null && log.temperature !== undefined);
+  const progesteroneLogs = allHeatLogs.filter(log => log.progesterone_value !== null && log.progesterone_value !== undefined);
+  const hasAnalysisData = temperatureLogs.length > 0 || progesteroneLogs.length > 0;
 
   const handleStartCycleSuccess = () => {
     refresh();
@@ -118,13 +122,18 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
         </Card>
       )}
 
-      {/* Temperature Trend Chart - Show before previous heats for continuity */}
-      {allTemperatureLogs.length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold mb-4">{t('heatTracking.temperature.overallTrend')}</h2>
-          <TemperatureTrendChart 
-            heatLogs={allTemperatureLogs}
-          />
+      {/* Test Results Analysis Section - Charts together */}
+      {hasAnalysisData && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">{t('heatTracking.analytics.title')}</h2>
+          
+          {progesteroneLogs.length > 0 && (
+            <ProgesteroneChart heatLogs={allHeatLogs} />
+          )}
+          
+          {temperatureLogs.length > 0 && (
+            <TemperatureTrendChart heatLogs={temperatureLogs} />
+          )}
         </div>
       )}
 
