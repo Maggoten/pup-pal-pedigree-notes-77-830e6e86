@@ -16,7 +16,6 @@ import { HeatService } from '@/services/HeatService';
 import { supabase } from '@/integrations/supabase/client';
 import ProgesteroneChart from './ProgesteroneChart';
 import TemperatureTrendChart from './TemperatureTrendChart';
-import OptimalMatingWindow from './OptimalMatingWindow';
 import MatingDatesSection from './MatingDatesSection';
 import { calculateOptimalMatingDays, getNextTestRecommendation } from '@/utils/progesteroneCalculator';
 import { getStoredUnit, formatProgesteroneValue } from '@/utils/progesteroneUnits';
@@ -42,7 +41,7 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
   onOpenChange,
   heatCycle
 }) => {
-  const { t } = useTranslation('dogs');
+  const { t } = useTranslation(['dogs', 'common']);
   const unit = getStoredUnit();
   const [heatLogs, setHeatLogs] = useState<HeatLog[]>([]);
   const [matingDates, setMatingDates] = useState<MatingDateData[]>([]);
@@ -118,7 +117,7 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
           <DialogDescription>
             {format(startDate, 'MMMM dd, yyyy')}
             {endDate && ` - ${format(endDate, 'MMMM dd, yyyy')}`}
-            {duration && ` (${duration} ${t('common.days')})`}
+            {duration && ` (${duration} ${t('common:days')})`}
           </DialogDescription>
         </DialogHeader>
 
@@ -196,7 +195,7 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
               <CardContent className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
-                    {t('common.date')}:
+                    {t('common:date')}:
                   </span>
                   <span className="text-sm font-medium">
                     {format(parseISO(latestLog.date), 'MMM dd, yyyy')}
@@ -239,14 +238,6 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
             </Card>
           )}
 
-          {/* Optimal Mating Window */}
-          {matingWindow && (
-            <OptimalMatingWindow 
-              matingWindow={matingWindow}
-              nextTestDate={nextTestDate}
-            />
-          )}
-
           {/* Mating Dates Section */}
           {matingDates.length > 0 && (
             <MatingDatesSection
@@ -266,16 +257,13 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
             </div>
           )}
 
-          {/* Progesterone Chart */}
+          {/* Progesterone Chart with integrated mating info */}
           {progesteroneLogs.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4">
-                {t('heatTracking.progesterone.chart')}
-              </h3>
-              <ProgesteroneChart 
-                heatLogs={progesteroneLogs}
-              />
-            </div>
+            <ProgesteroneChart 
+              heatLogs={progesteroneLogs}
+              matingWindow={matingWindow}
+              nextTestDate={nextTestDate}
+            />
           )}
         </div>
       </DialogContent>
