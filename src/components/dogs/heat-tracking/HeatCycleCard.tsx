@@ -10,7 +10,6 @@ import HeatLoggingDialog from './HeatLoggingDialog';
 import HeatLogsDialog from './HeatLogsDialog';
 import EndHeatCycleDialog from './EndHeatCycleDialog';
 import EditHeatCycleDialog from './EditHeatCycleDialog';
-import ProgesteroneChart from './ProgesteroneChart';
 import OptimalMatingWindow from './OptimalMatingWindow';
 import MatingDatesSection from './MatingDatesSection';
 import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
@@ -218,6 +217,9 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
 
   // Check if there are any progesterone tests
   const hasProgesteroneData = heatLogs.some(log => log.test_type === 'progesterone' && log.progesterone_value !== null);
+
+  // Check if we have progesterone data for mating window
+  const showMatingWindow = hasProgesteroneData && isActive;
 
   return (
     <>
@@ -451,13 +453,8 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
             />
           )}
 
-          {/* Progesterone Chart */}
-          {hasProgesteroneData && (
-            <ProgesteroneChart heatLogs={heatLogs} />
-          )}
-
           {/* Optimal Mating Window */}
-          {hasProgesteroneData && isActive && (
+          {showMatingWindow && (
             <OptimalMatingWindow 
               matingWindow={matingWindow}
               nextTestDate={nextTestDate}
