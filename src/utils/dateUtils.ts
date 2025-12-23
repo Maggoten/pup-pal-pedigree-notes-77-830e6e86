@@ -26,8 +26,18 @@ export const parseISODate = (dateString: string): Date => {
     return new Date();
   }
   
+  // If the string contains timezone/time info (e.g., "2025-12-12 23:00:00+00"), 
+  // use Date constructor for proper UTC to local conversion
+  if (dateString.includes('T') || dateString.includes(' ')) {
+    const date = new Date(dateString);
+    if (!isNaN(date.getTime())) {
+      // Return a Date object with only the date part in local timezone
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+  }
+  
   // For YYYY-MM-DD format, create date without timezone issues
-  const dateParts = dateString.split('T')[0].split('-');
+  const dateParts = dateString.split('-');
   if (dateParts.length !== 3) {
     return new Date();
   }
