@@ -19,44 +19,42 @@ interface ProgesteroneStatusCardProps {
   matingWindow?: OptimalMatingWindow;
 }
 
-const LEVEL_COLORS: Record<ProgesteroneLevelKey, { bg: string; border: string; text: string; progress: string }> = {
+// All cards now use a consistent green background, with dynamic border/progress colors for status indication
+const LEVEL_COLORS: Record<ProgesteroneLevelKey, { border: string; text: string; progress: string }> = {
   baseline: { 
-    bg: 'bg-slate-50 dark:bg-slate-900/30', 
-    border: 'border-slate-200 dark:border-slate-700', 
+    border: 'border-slate-300 dark:border-slate-600', 
     text: 'text-slate-700 dark:text-slate-300',
     progress: 'bg-slate-400'
   },
   rising: { 
-    bg: 'bg-blue-50 dark:bg-blue-900/30', 
-    border: 'border-blue-200 dark:border-blue-700', 
+    border: 'border-blue-300 dark:border-blue-600', 
     text: 'text-blue-700 dark:text-blue-300',
     progress: 'bg-blue-500'
   },
   ovulation: { 
-    bg: 'bg-amber-50 dark:bg-amber-900/30', 
-    border: 'border-amber-200 dark:border-amber-700', 
+    border: 'border-amber-300 dark:border-amber-600', 
     text: 'text-amber-700 dark:text-amber-300',
     progress: 'bg-amber-500'
   },
   fertile: { 
-    bg: 'bg-orange-50 dark:bg-orange-900/30', 
-    border: 'border-orange-200 dark:border-orange-700', 
+    border: 'border-orange-300 dark:border-orange-600', 
     text: 'text-orange-700 dark:text-orange-300',
     progress: 'bg-orange-500'
   },
   optimal: { 
-    bg: 'bg-green-50 dark:bg-green-900/30', 
-    border: 'border-green-200 dark:border-green-700', 
+    border: 'border-green-400 dark:border-green-500', 
     text: 'text-green-700 dark:text-green-300',
     progress: 'bg-green-500'
   },
   urgent: { 
-    bg: 'bg-red-50 dark:bg-red-900/30', 
-    border: 'border-red-200 dark:border-red-700', 
+    border: 'border-red-300 dark:border-red-600', 
     text: 'text-red-700 dark:text-red-300',
     progress: 'bg-red-500'
   }
 };
+
+// Consistent card background
+const CARD_BG = 'bg-green-50 dark:bg-green-900/20';
 
 // Calculate progress percentage (0-100) based on progesterone value
 // Maps 0-20 ng/ml to 0-100%
@@ -90,7 +88,7 @@ const ProgesteroneStatusCard: React.FC<ProgesteroneStatusCardProps> = ({ status,
   };
 
   return (
-    <Card className={`${colors.bg} ${colors.border} border-2`}>
+    <Card className={`${CARD_BG} ${colors.border} border-2`}>
       <CardContent className="p-4 space-y-3">
         {/* Header with level and value */}
         <div className="flex items-center justify-between">
@@ -120,7 +118,7 @@ const ProgesteroneStatusCard: React.FC<ProgesteroneStatusCardProps> = ({ status,
         </p>
 
         {/* Mating recommendation */}
-        <div className={`p-2 rounded-md ${colors.bg} border ${colors.border}`}>
+        <div className={`p-2 rounded-md bg-green-100/50 dark:bg-green-800/20 border ${colors.border}`}>
           <p className={`text-sm font-medium ${colors.text}`}>
             <Heart className="h-3.5 w-3.5 inline mr-1.5" />
             {t(`heatTracking.progesterone.levels.${status.level}.mating`)}
