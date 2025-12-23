@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import { Puppy } from '@/types/breeding';
 import PuppyGenderSelector from './puppies/PuppyGenderSelector';
 import PuppyImageUploader from './puppies/PuppyImageUploader';
 import { useTranslation } from 'react-i18next';
+import { dateToISOString } from '@/utils/dateUtils';
 
 interface AddPuppyDialogProps {
   onClose: () => void;
@@ -78,9 +78,9 @@ const AddPuppyDialog: React.FC<AddPuppyDialogProps> = ({
       
       const weightValue = birthWeight ? parseFloat(birthWeight) : 0;
       
-      // Create a weight log entry for birth weight
+      // Create a weight log entry for birth weight (timezone-safe)
       const initialWeightLog = weightValue ? [{
-        date: dateOfBirth.toISOString().split('T')[0],
+        date: dateToISOString(dateOfBirth),
         weight: weightValue
       }] : [];
 
