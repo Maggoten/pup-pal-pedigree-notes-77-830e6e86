@@ -416,6 +416,7 @@
         "active": "Active"
       },
       "daysSinceStart": "Day {{days}} of cycle",
+      "dayInCycle": "Day {{day}} in cycle",
       "duration": "{{days}} day cycle",
       "logEntries": "{{count}} log entries",
       "latestEntry": "Latest Entry",

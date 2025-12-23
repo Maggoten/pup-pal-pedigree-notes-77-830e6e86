@@ -416,6 +416,7 @@
         "active": "Aktiv"
       },
       "daysSinceStart": "Dag {{days}} av cykel",
+      "dayInCycle": "Dag {{day}} i löpet",
       "duration": "{{days}} dagars cykel",
       "logEntries": "{{count}} loggposter",
       "latestEntry": "Senaste Post",
