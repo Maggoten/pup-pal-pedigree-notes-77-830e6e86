@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Calendar, Thermometer, TestTube, FileText } from 'lucide-react';
-import { format, parseISO, differenceInDays } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
+import { parseISODate } from '@/utils/dateUtils';
 import { useTranslation } from 'react-i18next';
 import { HeatService } from '@/services/HeatService';
 import { supabase } from '@/integrations/supabase/client';
@@ -79,8 +80,8 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
 
   if (!heatCycle) return null;
 
-  const startDate = parseISO(heatCycle.start_date);
-  const endDate = heatCycle.end_date ? parseISO(heatCycle.end_date) : null;
+  const startDate = parseISODate(heatCycle.start_date);
+  const endDate = heatCycle.end_date ? parseISODate(heatCycle.end_date) : null;
   const duration = endDate ? differenceInDays(endDate, startDate) : null;
   
   // Get progesterone logs for calculations
@@ -198,7 +199,7 @@ const HeatDetailsDialog: React.FC<HeatDetailsDialogProps> = ({
                     {t('common:date')}:
                   </span>
                   <span className="text-sm font-medium">
-                    {format(parseISO(latestLog.date), 'MMM dd, yyyy')}
+                    {format(parseISODate(latestLog.date), 'MMM dd, yyyy')}
                   </span>
                 </div>
                 

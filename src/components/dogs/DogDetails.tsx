@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { dateToISOString } from '@/utils/dateUtils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, PawPrint, Heart, Stethoscope } from 'lucide-react';
 import { Dog } from '@/types/dogs';
@@ -55,13 +56,13 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, activeTab }) => {
       if (values.image !== dog.image) updates.image = values.image;
       
       // Update the date of birth if changed
-      const newDateOfBirth = values.dateOfBirth.toISOString().split('T')[0];
+      const newDateOfBirth = dateToISOString(values.dateOfBirth);
       if (newDateOfBirth !== dog.dateOfBirth) {
         updates.dateOfBirth = newDateOfBirth;
       }
       
       if (values.dewormingDate) {
-        const newDewormingDate = values.dewormingDate.toISOString().split('T')[0];
+        const newDewormingDate = dateToISOString(values.dewormingDate);
         if (newDewormingDate !== dog.dewormingDate) {
           updates.dewormingDate = newDewormingDate;
         }
@@ -70,7 +71,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, activeTab }) => {
       }
       
       if (values.vaccinationDate) {
-        const newVaccinationDate = values.vaccinationDate.toISOString().split('T')[0];
+        const newVaccinationDate = dateToISOString(values.vaccinationDate);
         if (newVaccinationDate !== dog.vaccinationDate) {
           updates.vaccinationDate = newVaccinationDate;
         }
@@ -79,7 +80,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, activeTab }) => {
       }
       
       if (values.sterilizationDate) {
-        const newSterilizationDate = values.sterilizationDate.toISOString().split('T')[0];
+        const newSterilizationDate = dateToISOString(values.sterilizationDate);
         if (newSterilizationDate !== dog.sterilizationDate) {
           updates.sterilizationDate = newSterilizationDate;
           console.log('[Dogs Debug] Sterilization date updated:', newSterilizationDate);
@@ -98,7 +99,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({ dog, activeTab }) => {
         if (values.heatHistory) {
           // Convert form heat history to database format
           const convertedHeatHistory = values.heatHistory.map(heat => ({
-            date: heat.date ? heat.date.toISOString().split('T')[0] : ''
+            date: heat.date ? dateToISOString(heat.date) : ''
           }));
           
           console.log('[Dogs Debug] Converted heat history:', convertedHeatHistory);

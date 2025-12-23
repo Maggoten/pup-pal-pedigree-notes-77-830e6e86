@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
+import { parseISODate } from '@/utils/dateUtils';
 import { Calendar as CalendarIcon, Scale, Ruler, Trash2, Plus } from 'lucide-react';
 import {
   Dialog,
@@ -246,7 +247,7 @@ const CombinedDogMeasurementsDialog: React.FC<CombinedDogMeasurementsDialogProps
                           <div>
                             <p className="font-medium">{log.weight} kg</p>
                             <p className="text-xs text-muted-foreground">
-                              {format(parseISO(log.date), 'yyyy-MM-dd')}
+                              {format(parseISODate(log.date), 'yyyy-MM-dd')}
                             </p>
                           </div>
                         </div>
@@ -287,7 +288,7 @@ const CombinedDogMeasurementsDialog: React.FC<CombinedDogMeasurementsDialogProps
                           <div>
                             <p className="font-medium">{log.height} cm</p>
                             <p className="text-xs text-muted-foreground">
-                              {format(parseISO(log.date), 'yyyy-MM-dd')}
+                              {format(parseISODate(log.date), 'yyyy-MM-dd')}
                             </p>
                           </div>
                         </div>

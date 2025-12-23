@@ -56,7 +56,7 @@ const LitterEditDialog: React.FC<LitterEditDialogProps> = ({
       name: litterName,
       sireName: sireName,
       damName: damName,
-      dateOfBirth: safeBirthDate.toISOString().split('T')[0],
+      dateOfBirth: `${safeBirthDate.getFullYear()}-${String(safeBirthDate.getMonth() + 1).padStart(2, '0')}-${String(safeBirthDate.getDate()).padStart(2, '0')}`,
       pregnancyId: pregnancyId || undefined
     };
     

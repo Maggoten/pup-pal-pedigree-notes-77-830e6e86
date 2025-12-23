@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { dateToISOString } from '@/utils/dateUtils';
 import { 
   Dialog,
   DialogContent,
@@ -75,16 +76,16 @@ const AddDogDialog: React.FC<AddDogDialogProps> = ({
         name: data.name,
         breed: data.breed,
         gender: data.gender,
-        dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
+        dateOfBirth: dateToISOString(data.dateOfBirth),
         color: data.color,
         registrationNumber: data.registrationNumber,
-        dewormingDate: data.dewormingDate ? data.dewormingDate.toISOString().split('T')[0] : undefined,
-        vaccinationDate: data.vaccinationDate ? data.vaccinationDate.toISOString().split('T')[0] : undefined,
-        sterilization_date: data.sterilizationDate ? data.sterilizationDate.toISOString().split('T')[0] : undefined,
+        dewormingDate: data.dewormingDate ? dateToISOString(data.dewormingDate) : undefined,
+        vaccinationDate: data.vaccinationDate ? dateToISOString(data.vaccinationDate) : undefined,
+        sterilization_date: data.sterilizationDate ? dateToISOString(data.sterilizationDate) : undefined,
         notes: data.notes || '',
         image: imageUrl, // Use the image URL from state
         heatHistory: data.heatHistory?.map(heat => ({ 
-          date: heat.date.toISOString().split('T')[0] 
+          date: dateToISOString(heat.date)
         })) || [],
         owner_id: '', // Will be set by backend
         breedingHistory: { litters: [], breedings: [] }

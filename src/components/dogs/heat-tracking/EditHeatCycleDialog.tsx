@@ -5,7 +5,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, Pencil } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
+import { parseISODate } from '@/utils/dateUtils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -67,8 +68,8 @@ export const EditHeatCycleDialog: React.FC<EditHeatCycleDialogProps> = ({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      start_date: parseISO(heatCycle.start_date),
-      end_date: heatCycle.end_date ? parseISO(heatCycle.end_date) : undefined,
+      start_date: parseISODate(heatCycle.start_date),
+      end_date: heatCycle.end_date ? parseISODate(heatCycle.end_date) : undefined,
     },
   });
 
