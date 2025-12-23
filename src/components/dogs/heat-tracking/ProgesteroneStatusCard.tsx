@@ -19,38 +19,48 @@ interface ProgesteroneStatusCardProps {
   matingWindow?: OptimalMatingWindow;
 }
 
-// All cards now use a consistent green background, with dynamic border/progress colors for status indication
-const LEVEL_COLORS: Record<ProgesteroneLevelKey, { border: string; text: string; progress: string }> = {
+// Badge colors for each progesterone level
+const LEVEL_BADGE_COLORS: Record<ProgesteroneLevelKey, { bg: string; text: string; border: string }> = {
   baseline: { 
-    border: 'border-slate-300 dark:border-slate-600', 
+    bg: 'bg-slate-100 dark:bg-slate-800', 
     text: 'text-slate-700 dark:text-slate-300',
-    progress: 'bg-slate-400'
+    border: 'border-slate-300 dark:border-slate-600'
   },
   rising: { 
-    border: 'border-blue-300 dark:border-blue-600', 
+    bg: 'bg-blue-100 dark:bg-blue-900/50', 
     text: 'text-blue-700 dark:text-blue-300',
-    progress: 'bg-blue-500'
+    border: 'border-blue-300 dark:border-blue-500'
   },
   ovulation: { 
-    border: 'border-amber-300 dark:border-amber-600', 
+    bg: 'bg-amber-100 dark:bg-amber-900/50', 
     text: 'text-amber-700 dark:text-amber-300',
-    progress: 'bg-amber-500'
+    border: 'border-amber-300 dark:border-amber-500'
   },
   fertile: { 
-    border: 'border-orange-300 dark:border-orange-600', 
+    bg: 'bg-orange-100 dark:bg-orange-900/50', 
     text: 'text-orange-700 dark:text-orange-300',
-    progress: 'bg-orange-500'
+    border: 'border-orange-300 dark:border-orange-500'
   },
   optimal: { 
-    border: 'border-green-400 dark:border-green-500', 
+    bg: 'bg-green-100 dark:bg-green-900/50', 
     text: 'text-green-700 dark:text-green-300',
-    progress: 'bg-green-500'
+    border: 'border-green-400 dark:border-green-500'
   },
   urgent: { 
-    border: 'border-red-300 dark:border-red-600', 
+    bg: 'bg-red-100 dark:bg-red-900/50', 
     text: 'text-red-700 dark:text-red-300',
-    progress: 'bg-red-500'
+    border: 'border-red-300 dark:border-red-500'
   }
+};
+
+// Progress bar colors for each level
+const LEVEL_PROGRESS_COLORS: Record<ProgesteroneLevelKey, string> = {
+  baseline: 'bg-slate-400',
+  rising: 'bg-blue-500',
+  ovulation: 'bg-amber-500',
+  fertile: 'bg-orange-500',
+  optimal: 'bg-green-500',
+  urgent: 'bg-red-500'
 };
 
 // Consistent card background - matches the heat cycle card
@@ -66,7 +76,8 @@ function calculateProgress(valueInNg: number): number {
 const ProgesteroneStatusCard: React.FC<ProgesteroneStatusCardProps> = ({ status, lastTestDate, matingWindow }) => {
   const { t } = useTranslation('dogs');
   const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const colors = LEVEL_COLORS[status.level];
+  const badgeColors = LEVEL_BADGE_COLORS[status.level];
+  const progressColor = LEVEL_PROGRESS_COLORS[status.level];
   const unitLabel = getUnitLabel(status.unit);
   const progress = calculateProgress(status.valueInNg);
 
@@ -88,24 +99,27 @@ const ProgesteroneStatusCard: React.FC<ProgesteroneStatusCardProps> = ({ status,
   };
 
   return (
-    <Card className={`${CARD_BG} ${colors.border} border-2`}>
+    <Card className={`${CARD_BG} border border-primary/20`}>
       <CardContent className="p-4 space-y-3">
-        {/* Header with level and value */}
+        {/* Prominent status badge */}
+        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${badgeColors.bg} ${badgeColors.border}`}>
+          {getUrgencyIcon()}
+          <span className={`font-semibold ${badgeColors.text}`}>
+            {t(`heatTracking.progesterone.levels.${status.level}.title`)}
+          </span>
+        </div>
+
+        {/* Value display */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {getUrgencyIcon()}
-            <span className={`font-semibold ${colors.text}`}>
-              {t(`heatTracking.progesterone.levels.${status.level}.title`)}
-            </span>
-          </div>
-          <Badge variant="outline" className={`${colors.text} ${colors.border}`}>
+          <span className="text-sm text-muted-foreground">{t('heatTracking.progesterone.currentLevel', { defaultValue: 'Current level' })}</span>
+          <span className={`text-lg font-bold ${badgeColors.text}`}>
             {status.displayValue.toFixed(1)} {unitLabel}
-          </Badge>
+          </span>
         </div>
 
         {/* Progress bar */}
         <div className="space-y-1">
-          <Progress value={progress} className="h-2" indicatorClassName={colors.progress} />
+          <Progress value={progress} className="h-2" indicatorClassName={progressColor} />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>0</span>
             <span>{status.unit === 'nmol' ? '63.6 nmol/L' : '20 ng/ml'}</span>
@@ -118,8 +132,8 @@ const ProgesteroneStatusCard: React.FC<ProgesteroneStatusCardProps> = ({ status,
         </p>
 
         {/* Mating recommendation */}
-        <div className={`p-2 rounded-md bg-primary/10 border ${colors.border}`}>
-          <p className={`text-sm font-medium ${colors.text}`}>
+        <div className={`p-2 rounded-md bg-primary/10 border border-primary/20`}>
+          <p className="text-sm font-medium text-foreground">
             <Heart className="h-3.5 w-3.5 inline mr-1.5" />
             {t(`heatTracking.progesterone.levels.${status.level}.mating`)}
           </p>
