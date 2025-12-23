@@ -1,12 +1,11 @@
-
 import { Dog, Heat } from '@/types/dogs';
 import { UpcomingHeat } from '@/types/reminders';
-import { addDays, parseISO, differenceInDays, startOfYear } from 'date-fns';
+import { addDays, differenceInDays, startOfYear } from 'date-fns';
 import { HeatService } from '@/services/HeatService';
 import { HeatBatchService } from '@/services/HeatService.batch';
 import { calculateOptimalHeatInterval } from '@/utils/heatIntervalCalculator';
+import { parseISODate, dateToISOString } from '@/utils/dateUtils';
 import type { Database } from '@/integrations/supabase/types';
-
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 
 interface NextHeatResult {
@@ -24,10 +23,10 @@ interface NextHeatResult {
 const deduplicateHeatDates = (heatCycles: HeatCycle[], heatHistory: Heat[]): Date[] => {
   const normalizedDates = new Set<string>();
   
-  // Helper function to normalize dates to YYYY-MM-DD format
+  // Helper function to normalize dates to YYYY-MM-DD format (timezone-safe)
   const normalizeDate = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    return date.toISOString().split('T')[0];
+    const date = parseISODate(dateStr);
+    return dateToISOString(date);
   };
   
   // Add heat cycle start dates
@@ -126,9 +125,9 @@ export const calculateUpcomingHeats = (dogs: Dog[]): UpcomingHeat[] => {
     );
     
     if (sortedHeatDates.length > 0) {
-      const lastHeatDate = parseISO(sortedHeatDates[0].date);
+      const lastHeatDate = parseISODate(sortedHeatDates[0].date);
       // Calculate optimal interval from heat history, default to 365 days (1 year)
-      const heatDates = dog.heatHistory?.map(h => parseISO(h.date)) || [];
+      const heatDates = dog.heatHistory?.map(h => parseISODate(h.date)) || [];
       const intervalDays = calculateOptimalHeatInterval(heatDates);
       let nextHeatDate = addDays(lastHeatDate, intervalDays);
       
@@ -192,8 +191,8 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
               new Date(b.date).getTime() - new Date(a.date).getTime()
             );
             
-            const lastHeatDate = parseISO(sortedHeatDates[0].date);
-            const heatDatesForLegacy = dog.heatHistory?.map(h => parseISO(h.date)) || [];
+            const lastHeatDate = parseISODate(sortedHeatDates[0].date);
+            const heatDatesForLegacy = dog.heatHistory?.map(h => parseISODate(h.date)) || [];
             const intervalDays = calculateOptimalHeatInterval(heatDatesForLegacy);
             let nextHeatDate = addDays(lastHeatDate, intervalDays);
             
@@ -259,8 +258,8 @@ export const calculateUpcomingHeatsUnified = async (dogs: Dog[]): Promise<Upcomi
               new Date(b.date).getTime() - new Date(a.date).getTime()
             );
             
-            const lastHeatDate = parseISO(sortedHeatDates[0].date);
-            const heatDatesForLegacy = dog.heatHistory?.map(h => parseISO(h.date)) || [];
+            const lastHeatDate = parseISODate(sortedHeatDates[0].date);
+            const heatDatesForLegacy = dog.heatHistory?.map(h => parseISODate(h.date)) || [];
             const intervalDays = calculateOptimalHeatInterval(heatDatesForLegacy);
             let nextHeatDate = addDays(lastHeatDate, intervalDays);
             

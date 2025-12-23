@@ -11,6 +11,7 @@ import { HeatService } from '@/services/HeatService';
 import { HeatCalendarSyncService } from '@/services/HeatCalendarSyncService';
 import EndHeatCycleDialog from '@/components/dogs/heat-tracking/EndHeatCycleDialog';
 import DeleteConfirmationDialog from '@/components/litters/puppies/DeleteConfirmationDialog';
+import { getDayInCycle } from '@/utils/heatDateUtils';
 import type { Database } from '@/integrations/supabase/types';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
@@ -69,9 +70,10 @@ const HeatEventControl: React.FC<HeatEventControlProps> = ({
   const getHeatPhaseInfo = () => {
     if (!isHeatActive) return null;
     
-    const startDate = new Date(event.startDate || event.date);
-    const today = new Date();
-    const dayInCycle = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const startDateStr = typeof event.startDate === 'string' 
+      ? event.startDate 
+      : (event.startDate || event.date).toString();
+    const dayInCycle = getDayInCycle(startDateStr);
     
     let phase = 'Proestrus';
     let description = 'Early heat phase - not yet fertile';
