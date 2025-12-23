@@ -664,7 +664,48 @@
       "chartTitle": "Progesteronnivåer",
       "chartDescription": "Følg progesteronnivåer gjennom løpesyklusen. LH-stigning skjer typisk når nivåene stiger fra <2 til >5 ng/ml.",
       "baseline": "2 ng/ml - Utgangsnivå",
-      "lhSurge": "5 ng/ml - LH-stigning indikator"
+      "lhSurge": "5 ng/ml - LH-stigning indikator",
+      "nextTest": "Neste test",
+      "daysLabel": "dager",
+      "noRetestNeeded": "I parringsvinduet - ingen ny test nødvendig",
+      "levels": {
+        "baseline": {
+          "title": "Utgangsnivå",
+          "short": "0-1: Utgangsnivå",
+          "ovulation": "Eggløsning har ikke startet. Eggceller modnes.",
+          "mating": "Vent med parring. Test om 3 dager."
+        },
+        "rising": {
+          "title": "Stigende",
+          "short": "1-4: Stigende",
+          "ovulation": "1-2 dager til eggløsning. LH-stigning nærmer seg.",
+          "mating": "Vent med parring. Test om 2 dager."
+        },
+        "ovulation": {
+          "title": "Eggløsning",
+          "short": "4-7: Eggløsning",
+          "ovulation": "Eggløsning pågår nå eller innen 24 timer.",
+          "mating": "Parring om 1-2 dager. Fersk sæd eller AI."
+        },
+        "fertile": {
+          "title": "Fruktbar",
+          "short": "7-11: Fruktbar",
+          "ovulation": "1-2 dager etter eggløsning. Eggene modnes.",
+          "mating": "Parring i dag eller i morgen for best resultat."
+        },
+        "optimal": {
+          "title": "Optimal",
+          "short": "11-19: Optimal",
+          "ovulation": "2-3 dager etter eggløsning. Høyeste fertilitetsvindu.",
+          "mating": "Parring I DAG! Dette er det optimale vinduet."
+        },
+        "urgent": {
+          "title": "Haster",
+          "short": "19+: Haster",
+          "ovulation": "3+ dager etter eggløsning. Vinduet lukkes.",
+          "mating": "Par UMIDDELBART hvis ikke allerede gjort."
+        }
+      }
     },
     "mating": {
       "optimalWindow": "Optimalt Parringsvindu",

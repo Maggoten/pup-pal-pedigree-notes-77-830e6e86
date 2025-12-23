@@ -665,7 +665,48 @@
       "chartTitle": "Progesterone Levels",
       "chartDescription": "Track progesterone levels throughout the heat cycle. LH surge typically occurs when levels rise from <2 to >5 ng/ml.",
       "baseline": "2 ng/ml - Baseline level",
-      "lhSurge": "5 ng/ml - LH surge indicator"
+      "lhSurge": "5 ng/ml - LH surge indicator",
+      "nextTest": "Next test",
+      "daysLabel": "days",
+      "noRetestNeeded": "In mating window - no retest needed",
+      "levels": {
+        "baseline": {
+          "title": "Baseline",
+          "short": "0-1: Baseline",
+          "ovulation": "Ovulation not yet started. Egg cells are maturing.",
+          "mating": "Wait with mating. Retest in 3 days."
+        },
+        "rising": {
+          "title": "Rising",
+          "short": "1-4: Rising",
+          "ovulation": "1-2 days until ovulation. LH surge is approaching.",
+          "mating": "Wait with mating. Retest in 2 days."
+        },
+        "ovulation": {
+          "title": "Ovulation",
+          "short": "4-7: Ovulation",
+          "ovulation": "Ovulation occurring now or within 24 hours.",
+          "mating": "Mating in 1-2 days. Fresh semen or AI."
+        },
+        "fertile": {
+          "title": "Fertile",
+          "short": "7-11: Fertile",
+          "ovulation": "1-2 days after ovulation. Eggs are maturing.",
+          "mating": "Mating today or tomorrow for best results."
+        },
+        "optimal": {
+          "title": "Optimal",
+          "short": "11-19: Optimal",
+          "ovulation": "2-3 days after ovulation. Peak fertility window.",
+          "mating": "Mating TODAY! This is the optimal window."
+        },
+        "urgent": {
+          "title": "Urgent",
+          "short": "19+: Urgent",
+          "ovulation": "3+ days after ovulation. Window is closing.",
+          "mating": "Mate IMMEDIATELY if not already done."
+        }
+      }
     },
     "mating": {
       "optimalWindow": "Optimal Mating Window",

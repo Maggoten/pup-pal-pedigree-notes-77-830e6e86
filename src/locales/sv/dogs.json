@@ -665,7 +665,48 @@
       "chartTitle": "Progesteronnivåer",
       "chartDescription": "Följ progesteronnivåer under löpcykeln. LH-skov inträffar typiskt när nivåerna stiger från <2 till >5 ng/ml.",
       "baseline": "2 ng/ml - Basnivå",
-      "lhSurge": "5 ng/ml - LH-skov indikator"
+      "lhSurge": "5 ng/ml - LH-skov indikator",
+      "nextTest": "Nästa test",
+      "daysLabel": "dagar",
+      "noRetestNeeded": "I parningsfönstret - inget nytt test behövs",
+      "levels": {
+        "baseline": {
+          "title": "Basnivå",
+          "short": "0-1: Basnivå",
+          "ovulation": "Ägglossning har inte startat. Äggceller mognar.",
+          "mating": "Vänta med parning. Testa om 3 dagar."
+        },
+        "rising": {
+          "title": "Stigande",
+          "short": "1-4: Stigande",
+          "ovulation": "1-2 dagar till ägglossning. LH-skov närmar sig.",
+          "mating": "Vänta med parning. Testa om 2 dagar."
+        },
+        "ovulation": {
+          "title": "Ägglossning",
+          "short": "4-7: Ägglossning",
+          "ovulation": "Ägglossning pågår nu eller inom 24 timmar.",
+          "mating": "Parning om 1-2 dagar. Färsk sperma eller AI."
+        },
+        "fertile": {
+          "title": "Fertil",
+          "short": "7-11: Fertil",
+          "ovulation": "1-2 dagar efter ägglossning. Äggen mognar.",
+          "mating": "Parning idag eller imorgon för bästa resultat."
+        },
+        "optimal": {
+          "title": "Optimal",
+          "short": "11-19: Optimal",
+          "ovulation": "2-3 dagar efter ägglossning. Högsta fertilitetsfönster.",
+          "mating": "Parning IDAG! Detta är det optimala fönstret."
+        },
+        "urgent": {
+          "title": "Brådskande",
+          "short": "19+: Brådskande",
+          "ovulation": "3+ dagar efter ägglossning. Fönstret stängs.",
+          "mating": "Para OMEDELBART om inte redan gjort."
+        }
+      }
     },
     "mating": {
       "optimalWindow": "Optimalt Parningsfönster",

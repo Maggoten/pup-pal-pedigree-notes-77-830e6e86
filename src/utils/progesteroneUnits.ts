@@ -31,6 +31,74 @@ export const PROGESTERONE_THRESHOLDS = {
 } as const;
 
 /**
+ * Clinical progesterone level definitions based on veterinary guidelines
+ * Each level includes: range, ovulation status, mating recommendation, and retest interval
+ */
+export type ProgesteroneLevelKey = 'baseline' | 'rising' | 'ovulation' | 'fertile' | 'optimal' | 'urgent';
+export type UrgencyLevel = 'low' | 'medium' | 'high' | 'critical';
+
+export interface ProgesteroneLevelConfig {
+  range: { min: number; max: number };
+  level: ProgesteroneLevelKey;
+  retestDays: number | null; // null means no retest needed
+  urgency: UrgencyLevel;
+}
+
+export const PROGESTERONE_LEVELS: { ng: ProgesteroneLevelConfig[]; nmol: ProgesteroneLevelConfig[] } = {
+  ng: [
+    { range: { min: 0, max: 1 }, level: 'baseline', retestDays: 3, urgency: 'low' },
+    { range: { min: 1, max: 4 }, level: 'rising', retestDays: 2, urgency: 'low' },
+    { range: { min: 4, max: 7 }, level: 'ovulation', retestDays: 1, urgency: 'medium' },
+    { range: { min: 7, max: 11 }, level: 'fertile', retestDays: null, urgency: 'high' },
+    { range: { min: 11, max: 19 }, level: 'optimal', retestDays: null, urgency: 'high' },
+    { range: { min: 19, max: Infinity }, level: 'urgent', retestDays: null, urgency: 'critical' }
+  ],
+  nmol: [
+    { range: { min: 0, max: 3.2 }, level: 'baseline', retestDays: 3, urgency: 'low' },
+    { range: { min: 3.2, max: 12.7 }, level: 'rising', retestDays: 2, urgency: 'low' },
+    { range: { min: 12.7, max: 22.3 }, level: 'ovulation', retestDays: 1, urgency: 'medium' },
+    { range: { min: 22.3, max: 35 }, level: 'fertile', retestDays: null, urgency: 'high' },
+    { range: { min: 35, max: 60.4 }, level: 'optimal', retestDays: null, urgency: 'high' },
+    { range: { min: 60.4, max: Infinity }, level: 'urgent', retestDays: null, urgency: 'critical' }
+  ]
+};
+
+export interface ProgesteroneStatus {
+  level: ProgesteroneLevelKey;
+  config: ProgesteroneLevelConfig;
+  valueInNg: number;
+  displayValue: number;
+  unit: ProgesteroneUnit;
+}
+
+/**
+ * Get the progesterone status based on value in ng/ml
+ */
+export function getProgesteroneStatus(valueInNg: number, unit: ProgesteroneUnit = 'ng'): ProgesteroneStatus {
+  const levels = PROGESTERONE_LEVELS.ng;
+  const config = levels.find(l => valueInNg >= l.range.min && valueInNg < l.range.max) || levels[levels.length - 1];
+  
+  return {
+    level: config.level,
+    config,
+    valueInNg,
+    displayValue: unit === 'nmol' ? ngToNmol(valueInNg) : valueInNg,
+    unit
+  };
+}
+
+/**
+ * Get next recommended test date based on progesterone level
+ */
+export function getNextTestDate(status: ProgesteroneStatus, lastTestDate: Date): Date | null {
+  if (status.config.retestDays === null) return null;
+  
+  const nextDate = new Date(lastTestDate);
+  nextDate.setDate(nextDate.getDate() + status.config.retestDays);
+  return nextDate;
+}
+
+/**
  * Convert ng/ml to nmol/L
  */
 export function ngToNmol(value: number): number {
