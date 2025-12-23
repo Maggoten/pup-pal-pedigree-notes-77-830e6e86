@@ -380,7 +380,7 @@
       "daysParameter": "{{days}} dager",
       "startTracking": "Start sporing av løpesykluser for å se analyser",
       "currentCycle": "Nåværende Løpesyklus",
-      "dayInCycle": "Dag i syklus",
+      "dayInCycle": "Dag {{day}} i løpet",
       "dayOf": "Dag {{current}} av {{total}}",
       "predictedEnd": "Forventet slutt",
       "avgCycleLength": "Snitt Lengde (dager)",

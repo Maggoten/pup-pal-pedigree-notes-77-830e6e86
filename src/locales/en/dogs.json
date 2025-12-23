@@ -381,7 +381,7 @@
       "daysParameter": "{{days}} days",
       "startTracking": "Start tracking heat cycles to see analytics",
       "currentCycle": "Current Heat Cycle",
-      "dayInCycle": "Day in cycle",
+      "dayInCycle": "Day {{day}} in cycle",
       "dayOf": "Day {{current}} of {{total}}",
       "predictedEnd": "Predicted end",
       "avgCycleLength": "Avg Length (days)",
