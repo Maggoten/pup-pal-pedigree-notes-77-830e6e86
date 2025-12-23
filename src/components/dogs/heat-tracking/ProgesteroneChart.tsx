@@ -81,21 +81,24 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs, matingW
   // Helper functions for mating window display
   const getConfidenceBadge = (confidence: OptimalMatingWindow['confidence']) => {
     const variants = {
-      high: { variant: 'default' as const, icon: CheckCircle },
-      medium: { variant: 'secondary' as const, icon: Clock },
-      low: { variant: 'outline' as const, icon: AlertTriangle },
-      insufficient_data: { variant: 'destructive' as const, icon: TestTube }
+      high: { variant: 'default' as const, icon: CheckCircle, label: t('heatTracking.mating.confidence.high', { defaultValue: 'High confidence' }) },
+      medium: { variant: 'secondary' as const, icon: Clock, label: t('heatTracking.mating.confidence.medium', { defaultValue: 'Medium confidence' }) },
+      low: { variant: 'outline' as const, icon: AlertTriangle, label: t('heatTracking.mating.confidence.low', { defaultValue: 'Low confidence' }) },
+      insufficient_data: { variant: 'secondary' as const, icon: TestTube, label: t('heatTracking.mating.confidence.insufficient_data', { defaultValue: 'Needs more data' }) }
     };
 
     const config = variants[confidence];
     const Icon = config.icon;
 
+    // Orange styling for insufficient_data
+    const insufficientDataClass = confidence === 'insufficient_data' 
+      ? 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700' 
+      : '';
+
     return (
-      <Badge variant={config.variant} className="flex items-center gap-1 text-xs">
+      <Badge variant={config.variant} className={`flex items-center gap-1 text-xs ${insufficientDataClass}`}>
         <Icon className="h-3 w-3" />
-        {t(`heatTracking.mating.confidence.${confidence}`, { 
-          defaultValue: confidence.replace('_', ' ') 
-        })}
+        {config.label}
       </Badge>
     );
   };
