@@ -203,7 +203,7 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
-                  {t('heatTracking.analytics.dayInCycle')}:
+                  {t('heatTracking.analytics.dayInCycle', { day: stats.currentDayInCycle })}
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">
