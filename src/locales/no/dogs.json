@@ -415,6 +415,7 @@
         "active": "Aktiv"
       },
       "daysSinceStart": "Dag {{days}} av syklus",
+      "dayInCycle": "Dag {{day}} i løpet",
       "duration": "{{days}} dagers syklus",
       "logEntries": "{{count}} loggoppføringer",
       "latestEntry": "Siste Oppføring",
