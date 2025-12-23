@@ -1,6 +1,7 @@
 import React from 'react';
 import { Heart, Thermometer, TestTube, Calendar } from 'lucide-react';
-import { format, differenceInDays, parseISO } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
+import { parseISODate } from '@/utils/dateUtils';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { getStoredUnit, formatProgesteroneValue } from '@/utils/progesteroneUnits';
@@ -37,7 +38,7 @@ const MatingDatesSection: React.FC<MatingDatesSectionProps> = ({
     return null;
   }
 
-  const startDate = parseISO(cycleStartDate);
+  const startDate = parseISODate(cycleStartDate);
 
   // Find closest heat log to a given date for temp/progesterone
   const findClosestLog = (targetDate: Date): HeatLog | null => {
@@ -47,7 +48,7 @@ const MatingDatesSection: React.FC<MatingDatesSectionProps> = ({
     let minDiff = Infinity;
 
     for (const log of heatLogs) {
-      const logDate = parseISO(log.date);
+      const logDate = parseISODate(log.date);
       const diff = Math.abs(differenceInDays(logDate, targetDate));
       
       // Only consider logs within 2 days of mating
@@ -74,7 +75,7 @@ const MatingDatesSection: React.FC<MatingDatesSectionProps> = ({
 
       <div className="space-y-3">
         {matingDates.map((mating, index) => {
-          const matingDate = parseISO(mating.mating_date);
+          const matingDate = parseISODate(mating.mating_date);
           const dayInCycle = differenceInDays(matingDate, startDate) + 1;
           const closestLog = findClosestLog(matingDate);
 

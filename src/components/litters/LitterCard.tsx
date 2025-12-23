@@ -1,5 +1,6 @@
 import React, { memo, useMemo } from 'react';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
+import { parseISODate } from '@/utils/dateUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Users, ChevronRight } from 'lucide-react';
@@ -26,7 +27,7 @@ const LitterCard: React.FC<LitterCardProps> = ({
 
   // Memoize all calculations
   const { birthDate, formattedDate, puppyStats } = useMemo(() => {
-    const birthDate = parseISO(litter.dateOfBirth);
+    const birthDate = parseISODate(litter.dateOfBirth);
     const puppyCount = litter.puppies?.length || 0;
     const deadCount = litter.puppies?.filter(p => p.deathDate).length || 0;
     

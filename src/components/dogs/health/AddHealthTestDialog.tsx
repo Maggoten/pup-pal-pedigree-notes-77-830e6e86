@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
+import { dateToISOString } from '@/utils/dateUtils';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import {
   Dialog,
@@ -85,7 +86,7 @@ const AddHealthTestDialog: React.FC<AddHealthTestDialogProps> = ({
       await DogHealthService.addHealthTest(dogId, {
         type: testType,
         customType: testType === 'other' ? customType.trim() : undefined,
-        date: date.toISOString().split('T')[0],
+        date: dateToISOString(date),
         result: result.trim(),
         vet: vet.trim() || undefined
       });

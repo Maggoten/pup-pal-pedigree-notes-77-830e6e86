@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { dateToISOString } from '@/utils/dateUtils';
 
 interface PartnerOffer {
   id: string;
@@ -22,7 +23,7 @@ export const usePartnerOffers = () => {
         setIsLoading(true);
         setHasError(false);
 
-        const today = new Date().toISOString().split('T')[0];
+        const today = dateToISOString(new Date());
 
         const { data, error } = await supabase
           .from('partner_offers')

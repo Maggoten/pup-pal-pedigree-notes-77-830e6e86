@@ -5,7 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Archive } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
+import { parseISODate } from '@/utils/dateUtils';
 
 interface LitterListViewProps {
   litters: Litter[];
@@ -36,7 +37,7 @@ const LitterListView: React.FC<LitterListViewProps> = ({
         <TableBody>
           {litters.map(litter => {
             const puppyCount = litter.puppies?.length || 0;
-            const birthDate = parseISO(litter.dateOfBirth);
+            const birthDate = parseISODate(litter.dateOfBirth);
             const isSelected = selectedLitterId === litter.id;
             
             return (
