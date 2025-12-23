@@ -53,8 +53,8 @@ const LEVEL_COLORS: Record<ProgesteroneLevelKey, { border: string; text: string;
   }
 };
 
-// Consistent card background
-const CARD_BG = 'bg-green-50 dark:bg-green-900/20';
+// Consistent card background - matches the heat cycle card
+const CARD_BG = 'bg-primary/5';
 
 // Calculate progress percentage (0-100) based on progesterone value
 // Maps 0-20 ng/ml to 0-100%
@@ -118,7 +118,7 @@ const ProgesteroneStatusCard: React.FC<ProgesteroneStatusCardProps> = ({ status,
         </p>
 
         {/* Mating recommendation */}
-        <div className={`p-2 rounded-md bg-green-100/50 dark:bg-green-800/20 border ${colors.border}`}>
+        <div className={`p-2 rounded-md bg-primary/10 border ${colors.border}`}>
           <p className={`text-sm font-medium ${colors.text}`}>
             <Heart className="h-3.5 w-3.5 inline mr-1.5" />
             {t(`heatTracking.progesterone.levels.${status.level}.mating`)}
