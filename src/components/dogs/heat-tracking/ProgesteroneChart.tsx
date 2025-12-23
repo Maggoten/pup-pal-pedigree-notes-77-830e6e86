@@ -199,113 +199,11 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs, matingW
         </div>
         
         {/* Status Card - Shows current level and recommendations */}
-        <ProgesteroneStatusCard status={latestStatus} lastTestDate={latestTestDate} />
-        
-        {/* Legend for zones */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-slate-400/30"></div>
-            <span>{t('heatTracking.progesterone.levels.baseline.short')}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-blue-500/30"></div>
-            <span>{t('heatTracking.progesterone.levels.rising.short')}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-amber-500/30"></div>
-            <span>{t('heatTracking.progesterone.levels.ovulation.short')}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-orange-500/30"></div>
-            <span>{t('heatTracking.progesterone.levels.fertile.short')}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-green-500/30"></div>
-            <span>{t('heatTracking.progesterone.levels.optimal.short')}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-red-500/30"></div>
-            <span>{t('heatTracking.progesterone.levels.urgent.short')}</span>
-          </div>
-        </div>
-
-        {/* Mating Window Insights - Compact */}
-        {matingWindow && (
-          <div className="border-t pt-4 space-y-3">
-            <h4 className="flex items-center gap-2 text-base font-semibold text-foreground">
-              <Heart className="h-4 w-4 text-primary" />
-              {t('heatTracking.mating.optimalWindow', { defaultValue: 'Optimal Mating Window' })}
-            </h4>
-
-            {/* Window timing + LH status in compact row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className={windowStatus?.color}>{formatTimeWindow()}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <TestTube className="h-4 w-4 text-muted-foreground" />
-                <span className={matingWindow.lhSurgeDetected ? 'text-green-600' : 'text-muted-foreground'}>
-                  {matingWindow.lhSurgeDetected 
-                    ? t('heatTracking.mating.lhSurgeDetected', { defaultValue: 'LH surge detected' })
-                    : t('heatTracking.mating.lhSurgeNotDetected', { defaultValue: 'LH surge not detected' })
-                  }
-                </span>
-              </div>
-            </div>
-
-            {/* Peak progesterone if available */}
-            {matingWindow.peakProgesteroneValue && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">{t('heatTracking.mating.peakProgesterone', { defaultValue: 'Peak' })}:</span>
-                <Badge variant="outline" className="text-xs">
-                  {formatProgesteroneValue(matingWindow.peakProgesteroneValue, unit)}
-                </Badge>
-              </div>
-            )}
-
-            {/* Single most important alert */}
-            {windowStatus?.status === 'active' && (
-              <Alert className="border-green-200 bg-green-50 py-2">
-                <Heart className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-800 text-sm">
-                  {t('heatTracking.mating.activeWindow', { defaultValue: 'Optimal mating window is NOW!' })}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {windowStatus?.status === 'upcoming' && matingWindow.startDate && (
-              <Alert className="border-blue-200 bg-blue-50 py-2">
-                <Clock className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-blue-800 text-sm">
-                  {isToday(matingWindow.startDate) 
-                    ? t('heatTracking.mating.windowToday', { defaultValue: 'Window starts today' })
-                    : isTomorrow(matingWindow.startDate)
-                    ? t('heatTracking.mating.windowTomorrow', { defaultValue: 'Window starts tomorrow' })
-                    : t('heatTracking.mating.windowUpcoming', { defaultValue: 'Window starting soon' })
-                  }
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {nextTestDate && windowStatus?.status !== 'active' && (
-              <Alert className="py-2">
-                <TestTube className="h-4 w-4" />
-                <AlertDescription className="text-sm">
-                  {t('heatTracking.mating.nextTest', { defaultValue: 'Next test' })}: {' '}
-                  <strong>{isToday(nextTestDate) ? t('heatTracking.mating.testToday', { defaultValue: 'Today' }) : format(nextTestDate, 'MMM dd')}</strong>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* First recommendation only */}
-            {matingWindow.recommendations.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                💡 {t(`heatTracking.mating.recommendationTexts.${matingWindow.recommendations[0]}`, { defaultValue: matingWindow.recommendations[0] })}
-              </p>
-            )}
-          </div>
-        )}
+        <ProgesteroneStatusCard 
+          status={latestStatus} 
+          lastTestDate={latestTestDate}
+          matingWindow={matingWindow}
+        />
       </CardContent>
     </Card>
   );

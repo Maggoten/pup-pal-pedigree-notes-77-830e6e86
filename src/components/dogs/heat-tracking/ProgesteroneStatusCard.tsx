@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { TestTube, Heart, Calendar, AlertTriangle, Clock } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { TestTube, Heart, Calendar, AlertTriangle, Clock, ChevronDown, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { format, addDays } from 'date-fns';
 import { 
@@ -10,10 +11,12 @@ import {
   type ProgesteroneLevelKey,
   getUnitLabel 
 } from '@/utils/progesteroneUnits';
+import type { OptimalMatingWindow } from '@/utils/progesteroneCalculator';
 
 interface ProgesteroneStatusCardProps {
   status: ProgesteroneStatus;
   lastTestDate: Date;
+  matingWindow?: OptimalMatingWindow;
 }
 
 const LEVEL_COLORS: Record<ProgesteroneLevelKey, { bg: string; border: string; text: string; progress: string }> = {
@@ -62,8 +65,9 @@ function calculateProgress(valueInNg: number): number {
   return Math.min(Math.round((valueInNg / maxValue) * 100), 100);
 }
 
-const ProgesteroneStatusCard: React.FC<ProgesteroneStatusCardProps> = ({ status, lastTestDate }) => {
+const ProgesteroneStatusCard: React.FC<ProgesteroneStatusCardProps> = ({ status, lastTestDate, matingWindow }) => {
   const { t } = useTranslation('dogs');
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const colors = LEVEL_COLORS[status.level];
   const unitLabel = getUnitLabel(status.unit);
   const progress = calculateProgress(status.valueInNg);
@@ -123,6 +127,19 @@ const ProgesteroneStatusCard: React.FC<ProgesteroneStatusCardProps> = ({ status,
           </p>
         </div>
 
+        {/* LH Surge Status - if matingWindow provided */}
+        {matingWindow && (
+          <div className="flex items-center gap-2 text-sm">
+            <Zap className={`h-4 w-4 ${matingWindow.lhSurgeDetected ? 'text-green-500' : 'text-muted-foreground'}`} />
+            <span className={matingWindow.lhSurgeDetected ? 'text-green-600 dark:text-green-400 font-medium' : 'text-muted-foreground'}>
+              {matingWindow.lhSurgeDetected 
+                ? t('heatTracking.mating.lhSurgeDetected', { defaultValue: 'LH surge detected' })
+                : t('heatTracking.mating.lhSurgeNotDetected', { defaultValue: 'LH surge not detected' })
+              }
+            </span>
+          </div>
+        )}
+
         {/* Next test date */}
         {nextTestDate && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -143,6 +160,42 @@ const ProgesteroneStatusCard: React.FC<ProgesteroneStatusCardProps> = ({ status,
             </span>
           </div>
         )}
+
+        {/* Collapsible Level Guide */}
+        <Collapsible open={isGuideOpen} onOpenChange={setIsGuideOpen}>
+          <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors w-full justify-center pt-2 border-t">
+            <span>ℹ️ {t('heatTracking.progesterone.levelGuide', { defaultValue: 'Level Guide' })}</span>
+            <ChevronDown className={`h-3 w-3 transition-transform ${isGuideOpen ? 'rotate-180' : ''}`} />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-2">
+            <div className="grid grid-cols-2 gap-1.5 text-xs">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded bg-slate-400/50"></div>
+                <span className="text-muted-foreground">{t('heatTracking.progesterone.levels.baseline.short')}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded bg-blue-500/50"></div>
+                <span className="text-muted-foreground">{t('heatTracking.progesterone.levels.rising.short')}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded bg-amber-500/50"></div>
+                <span className="text-muted-foreground">{t('heatTracking.progesterone.levels.ovulation.short')}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded bg-orange-500/50"></div>
+                <span className="text-muted-foreground">{t('heatTracking.progesterone.levels.fertile.short')}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded bg-green-500/50"></div>
+                <span className="text-muted-foreground">{t('heatTracking.progesterone.levels.optimal.short')}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded bg-red-500/50"></div>
+                <span className="text-muted-foreground">{t('heatTracking.progesterone.levels.urgent.short')}</span>
+              </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </CardContent>
     </Card>
   );
