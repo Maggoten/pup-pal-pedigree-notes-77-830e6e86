@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Thermometer, Edit, Trash2, Plus } from 'lucide-react';
+import { Thermometer, Edit, Trash2, Plus, TestTube } from 'lucide-react';
+import { formatProgesteroneValue, getStoredUnit } from '@/utils/progesteroneUnits';
 import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { HeatService } from '@/services/HeatService';
@@ -193,6 +194,12 @@ const HeatLogsDialog: React.FC<HeatLogsDialogProps> = ({
                         <div className="flex items-center gap-1">
                           <Thermometer className="h-3 w-3" />
                           <span>{log.temperature}°C</span>
+                        </div>
+                      )}
+                      {log.progesterone_value && (
+                        <div className="flex items-center gap-1">
+                          <TestTube className="h-3 w-3" />
+                          <span>{formatProgesteroneValue(log.progesterone_value, getStoredUnit())}</span>
                         </div>
                       )}
                     </div>
