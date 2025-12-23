@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,10 +35,11 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
   } = useUnifiedHeatDataQuery(dog.id);
   const [allHeatLogs, setAllHeatLogs] = useState<HeatLog[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [logsRefreshTrigger, setLogsRefreshTrigger] = useState(0);
 
   useEffect(() => {
     loadHeatLogs();
-  }, [heatCycles]);
+  }, [heatCycles, logsRefreshTrigger]);
 
   const loadHeatLogs = async () => {
     // Only load logs from active (ongoing) heat cycles
@@ -77,6 +78,12 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
     ? getNextTestRecommendation(matingWindow, new Date(lastProgesteroneTest.date))
     : null;
 
+  // Callback that triggers log refresh when logs are updated in HeatCycleCard
+  const handleLogsUpdated = useCallback(() => {
+    setLogsRefreshTrigger(prev => prev + 1);
+    refresh();
+  }, [refresh]);
+
   const handleStartCycleSuccess = () => {
     refresh();
   };
@@ -112,7 +119,7 @@ const HeatTrackingTab: React.FC<HeatTrackingTabProps> = ({ dog }) => {
               <HeatCycleCard 
                 key={cycle.id} 
                 heatCycle={cycle} 
-                onUpdate={refresh}
+                onUpdate={handleLogsUpdated}
               />
             ))}
         </div>
