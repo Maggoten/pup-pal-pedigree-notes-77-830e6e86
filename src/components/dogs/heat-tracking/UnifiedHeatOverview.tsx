@@ -5,6 +5,8 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Calendar, TrendingUp, Clock, Heart, AlertCircle, Info } from 'lucide-react';
 import { format, differenceInDays, parseISO, addDays } from 'date-fns';
+import { getDayInCycle } from '@/utils/heatDateUtils';
+import { parseISODate } from '@/utils/dateUtils';
 import { useTranslation } from 'react-i18next';
 import type { Database } from '@/integrations/supabase/types';
 import { Dog } from '@/types/dogs';
@@ -84,8 +86,8 @@ const UnifiedHeatOverview: React.FC<UnifiedHeatOverviewProps> = ({
     let predictedEndDate = null;
     
     if (activeCycle) {
-      const startDate = parseISO(activeCycle.start_date);
-      currentDayInCycle = differenceInDays(new Date(), startDate) + 1;
+      currentDayInCycle = getDayInCycle(activeCycle.start_date);
+      const startDate = parseISODate(activeCycle.start_date);
       predictedEndDate = addDays(startDate, averageCycleLength);
     }
     

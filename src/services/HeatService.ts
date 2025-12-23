@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
+import { dateToISOString } from '@/utils/dateUtils';
 
 type HeatCycle = Database['public']['Tables']['heat_cycles']['Row'];
 type HeatCycleInsert = Database['public']['Tables']['heat_cycles']['Insert'];
@@ -385,7 +386,7 @@ export class HeatService {
         .insert({
           dog_id: dogId,
           user_id: (await supabase.auth.getUser()).data.user?.id!,
-          start_date: startDate.toISOString(),
+          start_date: dateToISOString(startDate),
           notes
         })
         .select()

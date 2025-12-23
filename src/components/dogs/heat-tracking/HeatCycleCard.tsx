@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Thermometer, Plus, Eye, Calendar, Clock, Trash2, StopCircle, TestTube, Edit } from 'lucide-react';
 import { format, differenceInDays, parseISO } from 'date-fns';
+import { getDayInCycle } from '@/utils/heatDateUtils';
 import { useTranslation } from 'react-i18next';
 import { HeatService } from '@/services/HeatService';
 import HeatLoggingDialog from './HeatLoggingDialog';
@@ -47,8 +48,8 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
   const isActive = !heatCycle.end_date;
   const startDate = parseISO(heatCycle.start_date);
   const endDate = heatCycle.end_date ? parseISO(heatCycle.end_date) : null;
-  const daysFromStart = differenceInDays(new Date(), startDate);
-  const cycleDuration = endDate ? differenceInDays(endDate, startDate) : daysFromStart;
+  const dayInCycle = getDayInCycle(heatCycle.start_date);
+  const cycleDuration = endDate ? differenceInDays(endDate, startDate) : dayInCycle;
 
   useEffect(() => {
     loadHeatLogs();
@@ -273,7 +274,7 @@ const HeatCycleCard: React.FC<HeatCycleCardProps> = ({ heatCycle, onUpdate }) =>
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {isActive 
-                ? t('heatTracking.cycles.daysSinceStart', { days: daysFromStart })
+                ? t('heatTracking.cycles.dayInCycle', { day: dayInCycle })
                 : t('heatTracking.cycles.duration', { days: cycleDuration })
               }
             </span>
