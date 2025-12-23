@@ -1,5 +1,5 @@
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceArea } from 'recharts';
 import { format, isToday, isTomorrow, isBefore, isAfter } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,8 +13,12 @@ import {
   convertFromNgForDisplay, 
   getUnitLabel,
   formatProgesteroneValue,
-  PROGESTERONE_THRESHOLDS 
+  PROGESTERONE_THRESHOLDS,
+  PROGESTERONE_LEVELS,
+  getProgesteroneStatus,
+  type ProgesteroneUnit
 } from '@/utils/progesteroneUnits';
+import ProgesteroneStatusCard from './ProgesteroneStatusCard';
 
 type HeatLog = Database['public']['Tables']['heat_logs']['Row'];
 
@@ -27,6 +31,7 @@ interface ProgesteroneChartProps {
 interface ChartData {
   date: string;
   value: number;
+  valueInNg: number;
   formattedDate: string;
 }
 
@@ -42,6 +47,7 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs, matingW
     .map(log => ({
       date: log.date,
       value: convertFromNgForDisplay(log.progesterone_value!, unit),
+      valueInNg: log.progesterone_value!,
       formattedDate: format(new Date(log.date), 'MMM dd')
     }))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -49,6 +55,14 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs, matingW
   if (progesteroneData.length === 0) {
     return null;
   }
+
+  // Get latest progesterone status for the status card
+  const latestTest = progesteroneData[progesteroneData.length - 1];
+  const latestStatus = getProgesteroneStatus(latestTest.valueInNg, unit);
+  const latestTestDate = new Date(latestTest.date);
+
+  // Get zone boundaries for the colored areas (convert to display unit)
+  const getLevelBoundary = (level: number) => convertFromNgForDisplay(level, unit);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -133,6 +147,15 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs, matingW
               margin={{ top: 5, right: 15, left: 10, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              
+              {/* Colored zones for progesterone levels */}
+              <ReferenceArea y1={0} y2={getLevelBoundary(1)} fill="#94a3b8" fillOpacity={0.15} />
+              <ReferenceArea y1={getLevelBoundary(1)} y2={getLevelBoundary(4)} fill="#3b82f6" fillOpacity={0.15} />
+              <ReferenceArea y1={getLevelBoundary(4)} y2={getLevelBoundary(7)} fill="#f59e0b" fillOpacity={0.15} />
+              <ReferenceArea y1={getLevelBoundary(7)} y2={getLevelBoundary(11)} fill="#f97316" fillOpacity={0.15} />
+              <ReferenceArea y1={getLevelBoundary(11)} y2={getLevelBoundary(19)} fill="#22c55e" fillOpacity={0.15} />
+              <ReferenceArea y1={getLevelBoundary(19)} y2={getLevelBoundary(25)} fill="#ef4444" fillOpacity={0.15} />
+              
               <XAxis 
                 dataKey="formattedDate" 
                 className="text-xs fill-muted-foreground"
@@ -147,6 +170,7 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs, matingW
                 }}
                 className="text-xs fill-muted-foreground"
                 tick={{ fontSize: 12 }}
+                domain={[0, 'auto']}
               />
               <Tooltip content={<CustomTooltip />} />
               
@@ -154,13 +178,11 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs, matingW
                 y={thresholds.baseline} 
                 stroke="hsl(var(--warning))" 
                 strokeDasharray="5 5"
-                label={{ value: `${thresholds.baseline} ${unitLabel}`, position: "top" }}
               />
               <ReferenceLine 
                 y={thresholds.lhSurge} 
                 stroke="hsl(var(--destructive))" 
                 strokeDasharray="5 5"
-                label={{ value: `${thresholds.lhSurge} ${unitLabel}`, position: "top" }}
               />
               
               <Line 
@@ -176,15 +198,34 @@ const ProgesteroneChart: React.FC<ProgesteroneChartProps> = ({ heatLogs, matingW
           </ResponsiveContainer>
         </div>
         
-        {/* Legend */}
-        <div className="text-xs text-muted-foreground space-y-1">
+        {/* Status Card - Shows current level and recommendations */}
+        <ProgesteroneStatusCard status={latestStatus} lastTestDate={latestTestDate} />
+        
+        {/* Legend for zones */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 bg-warning"></div>
-            <span>{t('heatTracking.progesterone.baseline', { defaultValue: `${thresholds.baseline} ${unitLabel} - Baseline` })}</span>
+            <div className="w-3 h-3 rounded bg-slate-400/30"></div>
+            <span>{t('heatTracking.progesterone.levels.baseline.short')}</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 bg-destructive"></div>
-            <span>{t('heatTracking.progesterone.lhSurge', { defaultValue: `${thresholds.lhSurge} ${unitLabel} - LH surge` })}</span>
+            <div className="w-3 h-3 rounded bg-blue-500/30"></div>
+            <span>{t('heatTracking.progesterone.levels.rising.short')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-amber-500/30"></div>
+            <span>{t('heatTracking.progesterone.levels.ovulation.short')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-orange-500/30"></div>
+            <span>{t('heatTracking.progesterone.levels.fertile.short')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-green-500/30"></div>
+            <span>{t('heatTracking.progesterone.levels.optimal.short')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-red-500/30"></div>
+            <span>{t('heatTracking.progesterone.levels.urgent.short')}</span>
           </div>
         </div>
 
